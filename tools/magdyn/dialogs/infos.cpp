@@ -44,7 +44,7 @@ namespace algo = boost::algorithm;
 InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 	: QDialog{parent}, m_sett(sett)
 {
-	setWindowTitle("About");
+	setWindowTitle("About Magpie");
 	setSizeGripEnabled(true);
 
 	auto infopanel = new QWidget(this);
@@ -55,7 +55,7 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 	std::string strBoost = BOOST_LIB_VERSION;
 	algo::replace_all(strBoost, "_", ".");
 
-	auto labelTitle = new QLabel("Takin / Magnetic Dynamics Calculator", infopanel);
+	auto labelTitle = new QLabel("Magpie -- Magnetic Dynamics Calculator", infopanel);
 	auto fontTitle = labelTitle->font();
 	fontTitle.setBold(true);
 	labelTitle->setFont(fontTitle);

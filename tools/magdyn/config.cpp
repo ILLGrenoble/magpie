@@ -109,7 +109,7 @@ void MagDynDlg::SetCurrentFile(const QString& filename)
 {
 	m_recent.SetCurFile(filename);
 
-	QString title = "Magnetic Dynamics";
+	QString title = "Magpie";
 	if(filename != "")
 		title += " - " + filename;
 	setWindowTitle(title);

@@ -23,7 +23,7 @@
 #
 
 cmake_minimum_required(VERSION 3.5)
-project(magdyn)
+project(magpie)
 enable_language(CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -154,7 +154,7 @@ if(USE_QT)
 	find_package(QCP)
 	include_directories("${QCP_INCLUDE_DIRS}")
 
-	add_executable(takin_magdyn
+	add_executable(magpie
 		# main program
 		main.cpp main_gui.cpp
 		magdyn.cpp magdyn.h
@@ -188,7 +188,7 @@ if(USE_QT)
 #		../../ext/qcp/qcustomplot.cpp
 	)
 
-	target_link_libraries(takin_magdyn
+	target_link_libraries(magpie
 		Threads::Threads
 		${QCP_LIBRARIES}
 		${QtLibraries}
@@ -205,13 +205,13 @@ else()
 	message("Compiling without Qt.")
 	add_definitions(-DDONT_USE_QT)
 
-	add_executable(takin_magdyn
+	add_executable(magpie
 		main.cpp
 		defs.cpp defs.h
 		../../tlibs2/libs/magdyn.h
 	)
 
-	target_link_libraries(takin_magdyn
+	target_link_libraries(magpie
 		Threads::Threads
 		${Boost_LIBRARIES}
 		${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES}
@@ -227,13 +227,13 @@ endif()
 # rpath
 # -----------------------------------------------------------------------------
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	target_link_options(takin_magdyn
+	target_link_options(magpie
 		# create an __info_plist section in the binary
-		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../../setup/build_mac/plists/InfoMagDyn.plist
+		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../cmake/plists/InfoMagDyn.plist
 	)
 
-	add_custom_command(TARGET takin_magdyn POST_BUILD
-		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:takin_magdyn>
+	add_custom_command(TARGET magpie POST_BUILD
+		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:magpie>
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	)
 endif()
