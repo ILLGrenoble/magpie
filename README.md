@@ -2,7 +2,7 @@
 
 This project comprises:
   - A linear-spin wave library and graphical user interface.
-  - *Takin* extension modules concerning mainly magnetic and polarised scattering.
+  - [Takin](https://github.com/illgrenoble/takin) extension modules concerning mainly magnetic and polarised scattering.
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4117437.svg)](https://doi.org/10.5281/zenodo.4117437)
 
