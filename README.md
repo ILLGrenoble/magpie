@@ -1,4 +1,4 @@
-# Magpie -- a magnon calculator.
+# Magpie - a magnon calculator.
 
 This project comprises:
   - A linear-spin wave library and graphical user interface.
