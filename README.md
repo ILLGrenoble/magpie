@@ -11,4 +11,4 @@ This project comprises:
 
   - Forked from *Takin* https://github.com/ILLGrenoble/takin on 28 February 2025.
   - Forked from https://code.ill.fr/tweber/in20tools on 20 June 2019.
-  - Forked project from https://github.com/t-weber/magtools on 8 November 2018.
+  - Initially forked from https://github.com/t-weber/magtools on 8 November 2018.

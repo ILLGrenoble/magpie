@@ -35,6 +35,18 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 
+# magnetic dynamics tool
+message("\n================================================================================")
+message("Configuring magdyn...")
+message("================================================================================")
+add_subdirectory(tools/magdyn)
+
+# Brillouin zone tool
+message("\n================================================================================")
+message("Configuring bz...")
+message("================================================================================")
+add_subdirectory(tools/bz)
+
 # cif converter
 message("\n================================================================================")
 message("Configuring cif2xml...")
@@ -52,24 +64,6 @@ message("\n=====================================================================
 message("Configuring magstructfact...")
 message("================================================================================")
 add_subdirectory(tools/magstructfact)
-
-# Brillouin zone tool
-message("\n================================================================================")
-message("Configuring bz...")
-message("================================================================================")
-add_subdirectory(tools/bz)
-
-# magnetic dynamics tool
-message("\n================================================================================")
-message("Configuring magdyn...")
-message("================================================================================")
-add_subdirectory(tools/magdyn)
-
-# molecular dynamics tool
-message("\n================================================================================")
-message("Configuring moldyn...")
-message("================================================================================")
-add_subdirectory(tools/moldyn)
 
 
 if(NOT ONLY_BUILD_FINISHED)
@@ -90,6 +84,18 @@ if(NOT ONLY_BUILD_FINISHED)
 	message("Configuring magsgbrowser...")
 	message("================================================================================")
 	add_subdirectory(tools/magsgbrowser)
+
+	# molecular dynamics tool
+	message("\n================================================================================")
+	message("Configuring moldyn...")
+	message("================================================================================")
+	add_subdirectory(tools/moldyn)
+
+	# tlibs2 script compiler
+	message("\n================================================================================")
+	message("Configuring mcalc...")
+	message("================================================================================")
+	add_subdirectory(tlibs2/script)
 endif()
 
 
