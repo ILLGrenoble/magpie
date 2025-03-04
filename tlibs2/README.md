@@ -9,7 +9,8 @@ A physical-mathematical C++ template library.
 
 |Date        |URL                                                          |Description                                     |
 |------------|-------------------------------------------------------------|------------------------------------------------|
-|2023 - now  |https://github.com/illgrenoble/takin                         |Main development repository for tlibs 2 and 1.       |
+|2025 - now  |https://github.com/illgrenoble/magpie                        |Main development repository for tlibs 2.        |
+|2023 - 2025 |https://github.com/illgrenoble/takin                         |Main development repository for tlibs 2 and 1.  |
 |2019 - 2023 |https://code.ill.fr/scientific-software/takin/tlibs2         |Former main development repository for tlibs 2. |
 |2019 - 2023 |https://code.ill.fr/scientific-software/takin/tlibs          |Former main development repository for tlibs 1. |
 |2016 - 2019 |https://github.com/t-weber/tlibs                             |Old private repository for tlibs 1.             |
