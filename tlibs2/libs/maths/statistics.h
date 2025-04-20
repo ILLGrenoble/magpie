@@ -226,7 +226,7 @@ requires is_mat<t_mat> && is_vec<t_vec>
 	T tSum = T{0};
 	const std::size_t N = vecVals.size();
 
-	for(std::size_t i=0; i<N; ++i)
+	for(std::size_t i = 0; i < N; ++i)
 	{
 		T tprob = T{1};
 
@@ -284,7 +284,7 @@ T chi2(const t_func& func, std::size_t N,
 	for(std::size_t i=0; i<N; ++i)
 	{
 		T td = T(y[i]) - func(T(x[i]));
-		T tdy = dy ? T(dy[i]) : T(0.1*td);	// 10% error if none given
+		T tdy = dy ? T(dy[i]) : T(0.1*td);  // 10% error if none given
 
 		if(std::abs(tdy) < std::numeric_limits<t_dat>::min())
 			tdy = std::numeric_limits<t_dat>::min();

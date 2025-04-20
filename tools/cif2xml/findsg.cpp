@@ -28,7 +28,6 @@
 #include "tlibs2/libs/str.h"
 #include "libs/defs.h"
 
-#include <gemmi/version.hpp>
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <memory>

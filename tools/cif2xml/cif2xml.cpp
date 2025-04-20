@@ -26,7 +26,6 @@
 #include "libs/loadcif.h"
 #include "tlibs2/libs/maths.h"
 
-#include <gemmi/version.hpp>
 #include <iostream>
 #include <memory>
 
@@ -187,7 +186,7 @@ static void show_infos(const char* pcProg)
 		"You should have received a copy of the GNU General Public License "
 		"along with this program. If not, see <http://www.gnu.org/licenses/>.\n\n";
 
-	std::cout << "This program uses the Gemmi library (version " << GEMMI_VERSION << "), "
+	std::cout << "This program uses the Gemmi library (version " << get_gemmi_version() << "), "
 		<< "which is available under: https://github.com/project-gemmi/gemmi.\n";
 	std::cout << std::endl;
 
