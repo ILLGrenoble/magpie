@@ -7,7 +7,7 @@ This project comprises:
 
 
 ## Documentation
-- *Magpie* is documented in the [Takin Wiki](https://github.com/ILLGrenoble/takin/wiki).
+- *Magpie* is documented [here](https://github.com/ILLGrenoble/magpie/wiki) and in the [Takin Wiki](https://github.com/ILLGrenoble/takin/wiki).
 
 
 ## Project history
