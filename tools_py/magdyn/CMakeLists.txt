@@ -79,6 +79,15 @@ message("Using Python version ${Python3_VERSION}. Dist packages: ${Python3_SITEA
 # -----------------------------------------------------------------------------
 
 
+# -----------------------------------------------------------------------------
+# Java
+#find_package(Java REQUIRED COMPONENTS Runtime Development REQUIRED)
+#find_package(JNI)
+#
+#message("Using Java version ${Java_VERSION}.")
+# -----------------------------------------------------------------------------
+
+
 
 include_directories(
 	"${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/libs"
@@ -86,6 +95,7 @@ include_directories(
 	"${Boost_INCLUDE_DIRS}" "${Boost_INCLUDE_DIRS}/.."
 	"${Lapacke_INCLUDE_DIRS}"
 	"${Python3_INCLUDE_DIRS}"
+#	"${JNI_INCLUDE_DIRS}"
 	gemmi::headers
 )
 
@@ -112,4 +122,22 @@ target_link_libraries(magdyn_py
 get_property(MAGDYN_AUX_FILES TARGET magdyn_py PROPERTY SWIG_SUPPORT_FILES)
 install(FILES ${MAGDYN_AUX_FILES} DESTINATION "${Python3_SITEARCH}")
 install(TARGETS magdyn_py LIBRARY DESTINATION "${Python3_SITEARCH}")
+# -----------------------------------------------------------------------------
+
+
+# -----------------------------------------------------------------------------
+# Java module
+#find_package(SWIG REQUIRED)
+#set(UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
+#include(${SWIG_USE_FILE})
+#
+#set_source_files_properties(magdyn.i PROPERTIES CPLUSPLUS TRUE)
+#set_source_files_properties(magdyn.i PROPERTIES SWIG_FLAGS "-I ${PROJECT_SOURCE_DIR}/libs")
+#
+#swig_add_library(magdyn_java LANGUAGE java SOURCES magdyn.i)
+#target_link_libraries(magdyn_java
+#	${JNI_LIBRARIES}
+#	${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES}
+#	gemmi::gemmi_cpp
+#)
 # -----------------------------------------------------------------------------
