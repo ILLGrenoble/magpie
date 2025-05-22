@@ -210,7 +210,7 @@ std::tuple<bool, t_str> load_file(const t_str& file)
  */
 template <class T, class t_char = char>
 std::pair<bool, std::shared_ptr<T[]>>
-get_file_mem(std::basic_istream<t_char>& istr, std::size_t offs, std::size_t len=1)
+get_file_mem(std::basic_istream<t_char>& istr, std::size_t offs, std::size_t len = 1)
 {
 	bool ok = true;
 
@@ -264,7 +264,7 @@ bool file_exists(const std::basic_string<t_char>& strDir)
 /**
  * iterates over all files in a directory
  */
-template<bool bRecursive=0, class t_char = char,
+template<bool bRecursive = false, class t_char = char,
 	template<class...> class t_cont = std::vector>
 t_cont<std::basic_string<t_char>> get_all_files(const std::basic_string<t_char>& strPath)
 {
@@ -555,7 +555,7 @@ public:
 
 
 	template<typename T>
-	T Query(const t_str& strAddr, const T* pDef=nullptr, bool *pbOk=nullptr) const
+	T Query(const t_str& strAddr, const T* pDef = nullptr, bool *pbOk = nullptr) const
 	{
 		T tOut;
 		try
@@ -567,7 +567,7 @@ public:
 		}
 		catch(const std::exception& ex)
 		{
-			if(pbOk) *pbOk = 0;
+			if(pbOk) *pbOk = false;
 			if(pDef) return *pDef;
 			return T();
 		}
@@ -576,13 +576,13 @@ public:
 		if(std::is_same<t_str, T>::value)
 			trim(*reinterpret_cast<t_str*>(&tOut));
 
-		if(pbOk) *pbOk = 1;
+		if(pbOk) *pbOk = true;
 		return tOut;
 	}
 
 
 	template<typename T>
-	T Query(const t_str& _strAddr, const T def, bool *pbOk=nullptr) const
+	T Query(const t_str& _strAddr, const T def, bool *pbOk = nullptr) const
 	{
 		return Query<T>(_strAddr, &def, pbOk);
 	}
@@ -591,16 +591,16 @@ public:
 	template<typename T>
 	std::optional<T> QueryOpt(const t_str& strAddr) const
 	{
-		bool bOk = 0;
+		bool bOk = false;
 		T tVal = Query<T>(strAddr, nullptr, &bOk);
 		return bOk ? std::optional<T>(std::move(tVal)) : std::nullopt;
 	}
 
 
 	template<typename T>
-	T QueryAndParse(const t_str& _strAddr, const T* pDef=nullptr, bool *pbOk=nullptr) const
+	T QueryAndParse(const t_str& _strAddr, const T* pDef = nullptr, bool *pbOk = nullptr) const
 	{
-		bool bOk = 0;
+		bool bOk = false;
 		T def = pDef ? * pDef : T();
 		t_str strExpr = Query<t_str>(_strAddr, nullptr, &bOk);
 
@@ -610,7 +610,7 @@ public:
 		std::pair<bool, T> pairRes = eval_expr<t_str, T>(strExpr);
 		if(!pairRes.first)
 		{
-			if(pbOk) *pbOk = 0;
+			if(pbOk) *pbOk = false;
 			return def;
 		}
 
@@ -619,7 +619,7 @@ public:
 
 
 	template<typename T>
-	T QueryAndParse(const t_str& _strAddr, const T def, bool *pbOk=nullptr) const
+	T QueryAndParse(const t_str& _strAddr, const T def, bool *pbOk = nullptr) const
 	{
 		return QueryAndParse<T>(_strAddr, &def, pbOk);
 	}
@@ -688,10 +688,10 @@ public:
 
 	bool Exists(const t_str& strAddr) const
 	{
-		bool bOk = 0;
+		bool bOk = false;
 		t_str strQuery = Query<t_str>(strAddr, nullptr, &bOk);
 		if(strQuery.length() == 0)
-			bOk = 0;
+			bOk = false;
 
 		return bOk;
 	}
@@ -746,7 +746,7 @@ public:
 };
 
 
-template<class t_str = std::string, bool bCaseSens = 0>
+template<class t_str = std::string, bool bCaseSens = false>
 std::ostream& operator<<(std::ostream& ostr,
 	const prop::basic_ptree<t_str, t_str, StringComparer<t_str, bCaseSens>>& prop)
 {
