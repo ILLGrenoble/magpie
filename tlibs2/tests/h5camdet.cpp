@@ -28,11 +28,13 @@
 // g++ -std=c++20 -I.. -I /usr/include/hdf5/serial -o h5camdet h5camdet.cpp -L /usr/lib/x86_64-linux-gnu/hdf5/serial/ -lhdf5_cpp -lhdf5 -lpng
 
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include <filesystem>
 namespace fs = std::filesystem;
 
+#include <boost/algorithm/string.hpp>
 #include <boost/gil/image.hpp>
 #include <boost/gil/extension/io/png.hpp>
 namespace gil = boost::gil;
@@ -92,7 +94,15 @@ bool extract_image(const std::string& file)
 
 	h5file.close();
 
+	// add angle infos and replace commas with underscores
+	std::ostringstream ostr_angle_infos;
+	ostr_angle_infos.precision(4);
+	ostr_angle_infos << "_omega" << omega << "_tilta" << tilt1 << "_tiltb" << tilt2;
+	std::string angle_infos = ostr_angle_infos.str();
+	boost::replace_all(angle_infos, ".", "_");
+
 	fs::path file_png = file;
+	file_png.replace_filename(file_png.stem().string() + angle_infos);
 	file_png.replace_extension("png");
 	gil::write_view(file_png.filename(), png_view, gil::png_tag());
 
