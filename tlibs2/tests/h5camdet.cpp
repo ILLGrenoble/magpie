@@ -30,6 +30,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cmath>
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -43,8 +44,13 @@ namespace gil = boost::gil;
 #include "libs/file.h"
 
 
+template<class t_img = gil::gray16_image_t>
 bool extract_image(const std::string& file)
 {
+	using t_img_val = typename t_img::value_type;
+	//const std::uint32_t max_img_val = std::numeric_limits<t_img_val>::max();
+	const std::uint32_t max_img_val = (1 << (sizeof(t_img_val)*8)) - 1;
+
 	// load the scan file
 	H5::H5File h5file(file, H5F_ACC_RDONLY);
 
@@ -81,7 +87,7 @@ bool extract_image(const std::string& file)
 
 
 	// save it as png image
-	gil::gray16_image_t png(dims[0], dims[1]);
+	t_img png(dims[0], dims[1]);
 	auto png_view = gil::view(png);
 
 	for(hsize_t y = 0; y < dims[1]; ++y)
@@ -89,7 +95,11 @@ bool extract_image(const std::string& file)
 		auto png_row = png_view.row_begin(y);
 
 		for(hsize_t x = 0; x < dims[0]; ++x)
-			*(png_row + x) = data[x * dims[1] + y];
+		{
+			t_img_val val = static_cast<t_img_val>(
+				std::min<std::uint32_t>(max_img_val, data[x * dims[1] + y]));
+			*(png_row + x) = val;
+		}
 	}
 
 	h5file.close();
@@ -124,6 +134,7 @@ bool extract_image(const std::string& file)
 }
 
 
+template<class t_img = gil::gray16_image_t>
 void extract_images(const std::string& dir)
 {
 	for(const std::string& file : tl2::get_all_files(dir))
@@ -132,7 +143,7 @@ void extract_images(const std::string& dir)
 		if(ext != "nxs" && ext != "h5")
 			continue;
 
-		extract_image(file);
+		extract_image<t_img>(file);
 		std::cout << std::endl;
 	}
 }
@@ -140,6 +151,9 @@ void extract_images(const std::string& dir)
 
 int main(int argc, char **argv)
 {
+	using t_img = gil::gray16_image_t;
+	//using t_img = gil::gray8_image_t;
+
 	if(argc < 2)
 	{
 		std::cerr << "Please give a h5 file or a directory." << std::endl;
@@ -152,9 +166,9 @@ int main(int argc, char **argv)
 
 		std::string file(argv[1]);
 		if(tl2::dir_exists(file))
-			extract_images(file);
+			extract_images<t_img>(file);
 		else if(tl2::file_exists(file))
-			extract_image(file);
+			extract_image<t_img>(file);
 		else
 		{
 			std::cerr << "File or directory \"" << file
