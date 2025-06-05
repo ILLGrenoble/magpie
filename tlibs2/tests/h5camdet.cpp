@@ -25,7 +25,7 @@
  * ----------------------------------------------------------------------------
  */
 
-// g++ -std=c++20 -I.. -I /usr/include/hdf5/serial -o h5camdet h5camdet.cpp -L /usr/lib/x86_64-linux-gnu/hdf5/serial/ -lhdf5_cpp -lhdf5 -lpng
+// g++ -std=c++20 -O2 -I.. -I /usr/include/hdf5/serial -o h5camdet h5camdet.cpp -L /usr/lib/x86_64-linux-gnu/hdf5/serial/ -lhdf5_cpp -lhdf5 -lpng
 
 #include <iostream>
 #include <sstream>
@@ -44,17 +44,19 @@ namespace gil = boost::gil;
 #include "libs/file.h"
 
 
-template<class t_img = gil::gray16_image_t>
-bool extract_image(const std::string& file)
+template<class t_img = gil::gray16_image_t, class t_real = double>
+bool extract_image(const std::string& file, bool add_angle_infos = true,
+	t_real scale = 1., t_real offs = 0.)
 {
+	using t_pix_val = std::uint32_t;
 	using t_img_val = typename t_img::value_type;
-	//const std::uint32_t max_img_val = std::numeric_limits<t_img_val>::max();
-	const std::uint32_t max_img_val = (1 << (sizeof(t_img_val)*8)) - 1;
+	//const t_pix_val max_img_val = std::numeric_limits<t_img_val>::max();
+	const t_pix_val max_img_val = (1 << (sizeof(t_img_val)*8)) - 1;
 
 	// load the scan file
 	H5::H5File h5file(file, H5F_ACC_RDONLY);
 
-	std::vector<std::uint32_t> data;
+	std::vector<t_pix_val> data;
 	hsize_t rank = 0;
 	std::vector<hsize_t> dims;
 	if(bool ok = tl2::get_h5_multidim(h5file, "/entry0/data/CameraDetector_data", rank, dims, data); !ok)
@@ -90,26 +92,45 @@ bool extract_image(const std::string& file)
 	t_img png(dims[0], dims[1]);
 	auto png_view = gil::view(png);
 
+	t_pix_val min_counts = std::numeric_limits<t_pix_val>::max();
+	t_pix_val max_counts = 0;
+
 	for(hsize_t y = 0; y < dims[1]; ++y)
 	{
 		auto png_row = png_view.row_begin(y);
 
 		for(hsize_t x = 0; x < dims[0]; ++x)
 		{
+			t_pix_val pixel = data[x * dims[1] + y];
+			min_counts = std::min(pixel, min_counts);
+			max_counts = std::max(pixel, max_counts);
+
+			// scale
+			t_real scaled = (static_cast<t_real>(pixel) + offs) * scale;
+			if(scaled < 0.)
+				scaled = 0.;
+
+			// clamp value to data range
 			t_img_val val = static_cast<t_img_val>(
-				std::min<std::uint32_t>(max_img_val, data[x * dims[1] + y]));
-			*(png_row + x) = val;
+				std::min<t_real>(max_img_val, scaled));
+			*(png_row + x) = static_cast<t_img_val>(val);
 		}
 	}
 
 	h5file.close();
 
-	// add angle infos and replace commas with underscores
-	std::ostringstream ostr_angle_infos;
-	ostr_angle_infos.precision(4);
-	ostr_angle_infos << "_omega" << omega << "_tilta" << tilt1 << "_tiltb" << tilt2;
-	std::string angle_infos = ostr_angle_infos.str();
-	boost::replace_all(angle_infos, ".", "_");
+
+	std::string angle_infos;
+
+	if(add_angle_infos)
+	{
+		// add angle infos and replace commas with underscores
+		std::ostringstream ostr_angle_infos;
+		ostr_angle_infos.precision(4);
+		ostr_angle_infos << "_omega" << omega << "_tilta" << tilt1 << "_tiltb" << tilt2;
+		angle_infos = ostr_angle_infos.str();
+		boost::replace_all(angle_infos, ".", "_");
+	}
 
 	fs::path file_png = file;
 	file_png.replace_filename(file_png.stem().string() + angle_infos);
@@ -127,15 +148,17 @@ bool extract_image(const std::string& file)
 	std::cout << "\tω = " << omega << ", tilts = " << tilt1 << ", " << tilt2 << ",\n";
 	std::cout << "\tuser = " << user << ", local_contact = " << local << ", instrument = " << instr << ",\n";
 	std::cout << "\tproposal = " << prop << ", title = " << title << ",\n";
-	std::cout << "\ttime = " << time << ", duration = " << dur << " s.\n";
+	std::cout << "\ttime = " << time << ", duration = " << dur << " s,\n";
+	std::cout << "\tcount_range = [ " << min_counts << ", " << max_counts << " ].\n";
 	std::cout.flush();
 
 	return true;
 }
 
 
-template<class t_img = gil::gray16_image_t>
-void extract_images(const std::string& dir)
+template<class t_img = gil::gray16_image_t, class t_real = double>
+void extract_images(const std::string& dir, bool add_angle_infos = true,
+	t_real scale = 1., t_real offs = 0.)
 {
 	for(const std::string& file : tl2::get_all_files(dir))
 	{
@@ -143,7 +166,7 @@ void extract_images(const std::string& dir)
 		if(ext != "nxs" && ext != "h5")
 			continue;
 
-		extract_image<t_img>(file);
+		extract_image<t_img, t_real>(file, add_angle_infos, scale, offs);
 		std::cout << std::endl;
 	}
 }
@@ -151,8 +174,17 @@ void extract_images(const std::string& dir)
 
 int main(int argc, char **argv)
 {
+	// types
 	using t_img = gil::gray16_image_t;
 	//using t_img = gil::gray8_image_t;
+	using t_real = double;
+
+	// options
+	bool add_angle_infos = true;
+	t_real scale = 1.;
+	t_real offs = 0.;
+	//t_real scale = 255. / 1000. * 2.5;
+	//t_real offs = -75.;
 
 	if(argc < 2)
 	{
@@ -166,9 +198,9 @@ int main(int argc, char **argv)
 
 		std::string file(argv[1]);
 		if(tl2::dir_exists(file))
-			extract_images<t_img>(file);
+			extract_images<t_img, t_real>(file, add_angle_infos, scale, offs);
 		else if(tl2::file_exists(file))
-			extract_image<t_img>(file);
+			extract_image<t_img, t_real>(file, add_angle_infos, scale, offs);
 		else
 		{
 			std::cerr << "File or directory \"" << file
