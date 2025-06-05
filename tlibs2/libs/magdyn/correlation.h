@@ -127,7 +127,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		S.E_and_S[i].S_perp = tl2::zero<t_mat>(3, 3);
 	}
 
-	const auto [chol_inv, inv_ok] = tl2::inv(S.H_chol);
+	const auto [H_chol_inv, inv_ok] = tl2::inv(S.H_chol);
 	if(!inv_ok)
 	{
 		CERR_OPT << "Magdyn error: Cholesky inversion failed"
@@ -136,11 +136,11 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	}
 
 	// equation (34) from (Toth 2015)
-	const t_mat trafo = chol_inv * S.evec_mat * E_sqrt;
-	const t_mat trafo_herm = tl2::herm(trafo);
+	const t_mat boson_ops = H_chol_inv * S.evec_mat * E_sqrt;
+	const t_mat boson_ops_herm = tl2::herm(boson_ops);
 
 #ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
-	t_mat D_mat = trafo_herm * S.H_comm * trafo;
+	t_mat D_mat = boson_ops_herm * S.H_comm * boson_ops;
 	std::cout << "D =\n";
 	tl2::niceprint(std::cout, D_mat, 1e-4, 4);
 	std::cout << "E_sqrt =\n";
@@ -175,24 +175,22 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 				tl2::inner<t_vec_real>(s_j.pos_calc - s_i.pos_calc, S.Q_rlu));
 
 			// matrix elements of equation (44) from (Toth 2015)
-			M(    i,     j) = phase * S_mag * u_i[x_idx]  * uc_j[y_idx];
-			M(    i, N + j) = phase * S_mag * u_i[x_idx]  * u_j[y_idx];
-			M(N + i,     j) = phase * S_mag * uc_i[x_idx] * uc_j[y_idx];
-			M(N + i, N + j) = phase * S_mag * uc_i[x_idx] * u_j[y_idx];
+			M(    i,     j) = phase * S_mag * u_i[x_idx]  * uc_j[y_idx];  // b_i+ b_j terms
+			M(    i, N + j) = phase * S_mag * u_i[x_idx]  * u_j[y_idx];   // b_i+ b_j+ terms
+			M(N + i,     j) = phase * S_mag * uc_i[x_idx] * uc_j[y_idx];  // b_i b_j terms
+			M(N + i, N + j) = phase * S_mag * uc_i[x_idx] * u_j[y_idx];   // b_i b_j+ terms
 		} // end of site iteration
 
-		const t_mat M_trafo = trafo_herm * M * trafo;
+		// multiply with boson operators
+		const t_mat M_xy = boson_ops_herm * M * boson_ops;
 
 #ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
-		std::cout << "M_trafo for x=" << int(x_idx) << ", y=" << int(y_idx) << ":\n";
-		tl2::niceprint(std::cout, M_trafo, 1e-4, 4);
+		std::cout << "M_{" << int(x_idx) << ", " << int(y_idx) << "}:\n";
+		tl2::niceprint(std::cout, M_xy, 1e-4, 4);
 #endif
 
 		for(t_size i = 0; i < S.E_and_S.size(); ++i)
-		{
-			S.E_and_S[i].S(x_idx, y_idx) +=
-				M_trafo(i, i) / t_real(M.size1());
-		}
+			S.E_and_S[i].S(x_idx, y_idx) += M_xy(i, i) / t_real(M.size1());
 	} // end of coordinate iteration
 
 	return true;

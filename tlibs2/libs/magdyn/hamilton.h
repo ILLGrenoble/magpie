@@ -184,9 +184,7 @@ t_mat MAGDYN_INST::CalcHamiltonian(const t_vec_real& Qvec) const
 
 	// create the hamiltonian of equation (25) and (26) from (Toth 2015)
 	t_mat H = tl2::create<t_mat>(2*N, 2*N);
-
-	bool use_field = !tl2::equals_0<t_real>(m_field.mag, m_eps)
-		&& m_field.dir.size() == 3;
+	bool use_field = !tl2::equals_0<t_real>(m_field.mag, m_eps) && m_field.dir.size() == 3;
 
 	// iterate magnetic sites
 	for(t_size i = 0; i < N; ++i)
@@ -221,9 +219,9 @@ t_mat MAGDYN_INST::CalcHamiltonian(const t_vec_real& Qvec) const
 				// equation (26) from (Toth 2015)
 				const t_real S_mag = 0.5 * std::sqrt(s_i.spin_mag_calc * s_j.spin_mag_calc);
 
-				H(    i,     j) += S_mag * tl2::inner<t_vec>(uc_i, (*J_Q33) * uc_j);
-				H(N + i, N + j) += S_mag * tl2::inner<t_vec>(u_i,  (*J_Q33) * u_j);
-				H(    i, N + j) += S_mag * tl2::inner<t_vec>(uc_i, (*J_Q33) * u_j);
+				H(    i,     j) += S_mag * tl2::inner<t_vec>(uc_i, (*J_Q33) * uc_j);  // b_i+ b_j terms
+				H(N + i, N + j) += S_mag * tl2::inner<t_vec>(u_i,  (*J_Q33) * u_j);   // b_i b_j+ terms
+				H(    i, N + j) += S_mag * tl2::inner<t_vec>(uc_i, (*J_Q33) * u_j);   // b_i+ b_j+ terms
 			}
 
 			if(J_Q033)
