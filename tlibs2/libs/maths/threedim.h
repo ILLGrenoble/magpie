@@ -926,6 +926,11 @@ requires is_mat<t_mat>
  * reciprocal crystallographic B matrix, B = 2pi * A^(-T)
  * Q [1/A] = B * Q [rlu]
  * @see https://en.wikipedia.org/wiki/Fractional_coordinates
+ *
+ * the metric G is the "square" of B, G = B^t B,
+ * e.g. 2-norm of reciprocal vector Q:
+ *   |Q| = sqrt( (B Q)^t (B Q) ) = sqrt( Q^t B^t B Q ) = sqrt( Q^t G Q )
+ * @see (Arens 2015), p. 808
  */
 template<class t_mat, class t_real = typename t_mat::value_type>
 t_mat B_matrix(t_real a, t_real b, t_real c, t_real _aa, t_real _bb, t_real _cc)
