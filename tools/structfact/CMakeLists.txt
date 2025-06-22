@@ -106,7 +106,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	)
 
 	add_custom_command(TARGET takin_structfact POST_BUILD
-		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:takin_structfact>
+		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:takin_structfact> || true
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	)
 endif()

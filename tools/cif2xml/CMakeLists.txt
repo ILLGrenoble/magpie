@@ -74,12 +74,12 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	)
 
 	add_custom_command(TARGET takin_cif2xml POST_BUILD
-		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:takin_cif2xml>
+		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:takin_cif2xml> || true
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	)
 
 	add_custom_command(TARGET takin_findsg POST_BUILD
-		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:takin_findsg>
+		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:takin_findsg> || true
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	)
 endif()

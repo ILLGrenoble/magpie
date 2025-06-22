@@ -233,7 +233,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	)
 
 	add_custom_command(TARGET magpie POST_BUILD
-		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:magpie>
+		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:magpie> || true
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	)
 endif()

@@ -101,7 +101,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	)
 
 	add_custom_command(TARGET takin_magstructfact POST_BUILD
-		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:takin_magstructfact>
+		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:takin_magstructfact> || true
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	)
 endif()
