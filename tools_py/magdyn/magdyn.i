@@ -37,10 +37,9 @@
 %include "std_shared_ptr.i"
 
 
-%template(CplxD) std::complex<double>;
-
+//%template(CplxD) std::complex<double>;
 %template(VecD) std::vector<double>;
-%template(VecCplx) std::vector<std::complex<double>>;
+%template(VecCplxD) std::vector<std::complex<double>>;
 
 %template(LstStr) std::list<std::string>;
 
