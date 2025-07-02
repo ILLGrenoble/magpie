@@ -15,6 +15,9 @@
  * @desc The magdyn library implements the formalism given by (Toth 2015).
  * @desc For further references, see the 'LITERATURE' file.
  *
+ * Note that in the code "exchange terms" and "couplings" are use synonymously,
+ * as are "magnetic sites" and "atoms".
+ *
  * ----------------------------------------------------------------------------
  * tlibs
  * Copyright (C) 2017-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
