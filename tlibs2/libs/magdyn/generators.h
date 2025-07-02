@@ -230,9 +230,6 @@ void MAGDYN_INST::GeneratePossibleExchangeTerms(
 	t_real dist_max, t_size _sc_max,
 	std::optional<t_size> couplings_max)
 {
-	if(GetMagneticSitesCount() == 0)
-		return;
-
 	// helper struct for finding possible couplings
 	struct PossibleCoupling
 	{
@@ -253,12 +250,14 @@ void MAGDYN_INST::GeneratePossibleExchangeTerms(
 		t_size idx2_uc{};
 
 		// distance between the two magnetic sites
-		t_real dist{};
+		t_real length{};
 	};
 
 	CalcExternalField();
 	CalcMagneticSites();
 	CalcExchangeTerms();
+
+	const t_size num_sites = GetMagneticSitesCount();
 
 	ExchangeTerms newterms;
 	std::vector<PossibleCoupling> couplings;
@@ -272,9 +271,13 @@ void MAGDYN_INST::GeneratePossibleExchangeTerms(
 		// super cell vector
 		const t_vec_real sc_vec = tl2::create<t_vec_real>({ sc_h, sc_k, sc_l });
 
-		for(t_size idx1 = 0; idx1 < GetMagneticSitesCount() - 1; ++idx1)
-		for(t_size idx2 = idx1 + 1; idx2 < GetMagneticSitesCount(); ++idx2)
+		for(t_size idx1 = 0; idx1 < num_sites; ++idx1)
+		for(t_size idx2 = idx1; idx2 < num_sites; ++idx2)
 		{
+			// no self-coupling
+			if(idx1 == idx2 && tl2::equals_0<t_vec_real>(sc_vec, m_eps))
+				continue;
+
 			PossibleCoupling coupling;
 
 			coupling.idx1_uc = idx1;
@@ -290,9 +293,9 @@ void MAGDYN_INST::GeneratePossibleExchangeTerms(
 			coupling.pos1_uc_lab = m_xtalA * coupling.pos1_uc;
 			coupling.pos2_sc_lab = m_xtalA * coupling.pos2_sc;
 
-			coupling.dist = tl2::norm<t_vec_real>(
+			coupling.length = tl2::norm<t_vec_real>(
 				coupling.pos2_sc_lab - coupling.pos1_uc_lab);
-			if(coupling.dist <= dist_max && coupling.dist > m_eps)
+			if(coupling.length <= dist_max && coupling.length > m_eps)
 				couplings.emplace_back(std::move(coupling));
 		}
 	}
@@ -301,7 +304,7 @@ void MAGDYN_INST::GeneratePossibleExchangeTerms(
 	std::stable_sort(couplings.begin(), couplings.end(),
 		[](const PossibleCoupling& coupling1, const PossibleCoupling& coupling2) -> bool
 	{
-		return coupling1.dist < coupling2.dist;
+		return coupling1.length < coupling2.length;
 	});
 
 	// add couplings to list
@@ -320,7 +323,7 @@ void MAGDYN_INST::GeneratePossibleExchangeTerms(
 		newterm.dist[0] = tl2::var_to_str(newterm.dist_calc[0], m_prec);
 		newterm.dist[1] = tl2::var_to_str(newterm.dist_calc[1], m_prec);
 		newterm.dist[2] = tl2::var_to_str(newterm.dist_calc[2], m_prec);
-		newterm.length_calc = coupling.dist;
+		newterm.length_calc = coupling.length;
 		newterm.J = "0";
 		newterm.name += "coupling_" + tl2::var_to_str(coupling_idx + 1, m_prec);
 		newterms.emplace_back(std::move(newterm));
@@ -332,6 +335,23 @@ void MAGDYN_INST::GeneratePossibleExchangeTerms(
 	RemoveDuplicateExchangeTerms();
 	//CalcSymmetryIndices(symops);
 	CalcExchangeTerms();
+}
+
+
+
+/**
+ * sort couplings by their lengths
+ */
+MAGDYN_TEMPL
+void MAGDYN_INST::SortExchangeTerms()
+{
+	ExchangeTerms& couplings = GetExchangeTerms();
+
+	std::stable_sort(couplings.begin(), couplings.end(),
+		[](const ExchangeTerm& coupling1, const ExchangeTerm& coupling2) -> bool
+	{
+		return coupling1.length_calc < coupling2.length_calc;
+	});
 }
 
 

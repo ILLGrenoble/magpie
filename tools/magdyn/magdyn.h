@@ -368,6 +368,7 @@ protected:
 	void SyncSymmetryIndicesFromKernel();
 	void SyncToKernel();         // transfer all data to the kernel
 	void CalcSymmetryIndices();  // assign symmetry groups to sites and couplings
+	void SortTerms();            // sort couplings by their lengths
 	void CalcAll();              // syncs sites and terms and calculates all dynamics
 	void SetKernel(const t_magdyn* dyn, bool sync_sites = true, bool sync_terms = true, bool sync_idx = true);
 

@@ -247,6 +247,7 @@ void MagDynDlg::CreateMenuBar()
 	// structure menu
 	QMenu *menuStruct = new QMenu("Structure", m_menu);
 	QAction *acStructSymIdx = new QAction("Assign Symmetry Indices", menuStruct);
+	QAction *acStructSortCouplings = new QAction("Sort Couplings by Length", menuStruct);
 	QAction *acStructImport = new QAction("Import From Table...", menuStruct);
 	QAction *acStructExportSun = new QAction("Export To Sunny Code...");
 	QAction *acStructExportSW = new QAction("Export To SpinW Code...");
@@ -447,6 +448,7 @@ void MagDynDlg::CreateMenuBar()
 	menuFile->addAction(acExit);
 
 	menuStruct->addAction(acStructSymIdx);
+	menuStruct->addAction(acStructSortCouplings);
 	menuStruct->addSeparator();
 	menuStruct->addAction(acStructNotes);
 	menuStruct->addSeparator();
@@ -553,6 +555,7 @@ void MagDynDlg::CreateMenuBar()
 
 	connect(acStructNotes, &QAction::triggered, this, &MagDynDlg::ShowNotesDlg);
 	connect(acStructSymIdx, &QAction::triggered, this, &MagDynDlg::CalcSymmetryIndices);
+	connect(acStructSortCouplings, &QAction::triggered, this, &MagDynDlg::SortTerms);
 	connect(acStructView, &QAction::triggered, this, &MagDynDlg::ShowStructPlotDlg);
 	connect(acGroundState, &QAction::triggered, this, &MagDynDlg::ShowGroundStateDlg);
 	connect(acDisp3D, &QAction::triggered, this, &MagDynDlg::ShowDispersion3DDlg);

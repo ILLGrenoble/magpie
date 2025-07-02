@@ -361,6 +361,11 @@ public:
 	 * assign symmetry group indices to sites and couplings
 	 */
 	void CalcSymmetryIndices(const std::vector<t_mat_real>& symops);
+
+	/**
+	 * sort couplings by their lengths
+	 */
+	void SortExchangeTerms();
 	// --------------------------------------------------------------------
 
 

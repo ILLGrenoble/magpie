@@ -400,3 +400,14 @@ void MagDynDlg::CalcSymmetryIndices()
 	m_dyn.CalcSymmetryIndices(symops);
 	SyncSymmetryIndicesFromKernel();
 }
+
+
+
+/**
+ * sort couplings by their lengths
+ */
+void MagDynDlg::SortTerms()
+{
+	m_dyn.SortExchangeTerms();
+	SyncTermsFromKernel();
+}
