@@ -859,9 +859,23 @@ void BZDlg::ShowBZPlot()
 {
 	if(!m_dlgPlot)
 	{
-		m_dlgPlot = new BZPlotDlg(this, m_sett, m_labelGlInfos);
+		m_dlgPlot = new BZPlotDlg(this, m_sett);
+
 		connect(m_dlgPlot, &BZPlotDlg::NeedRecalc,
 			[this]() { this->CalcB(); } );
+		connect(m_dlgPlot, &BZPlotDlg::GlDeviceInfos,
+			[this](const std::string& ver, const std::string& shader_ver,
+				const std::string& vendor, const std::string& renderer)
+		{
+			if(!m_labelGlInfos[0] || !m_labelGlInfos[1] ||
+				!m_labelGlInfos[2] || !m_labelGlInfos[3])
+				return;
+
+			m_labelGlInfos[0]->setText(QString("GL Version: %1.").arg(ver.c_str()));
+			m_labelGlInfos[1]->setText(QString("GL Shader Version: %1.").arg(shader_ver.c_str()));
+			m_labelGlInfos[2]->setText(QString("GL Vendor: %1.").arg(vendor.c_str()));
+			m_labelGlInfos[3]->setText(QString("GL Device: %1.").arg(renderer.c_str()));
+		});
 	}
 
 	m_dlgPlot->show();

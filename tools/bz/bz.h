@@ -99,7 +99,7 @@ private:
 	void CreateInfoDialog();
 
 
-protected:
+private:
 	QSettings *m_sett = nullptr;
 	QDialog *m_dlgInfo = nullptr;
 	QMenuBar *m_menu = nullptr;
@@ -237,9 +237,9 @@ public:
 private:
 	int m_symOpCursorRow = -1;                   // current sg row
 	int m_formulaCursorRow = -1;                 // current sg row
-	bool m_symOpIgnoreChanges = 1;               // ignore sg changes
-	bool m_formulaIgnoreChanges = 1;             // ignore sg changes
-	bool m_ignoreCalc = 0;                       // ignore bz calculation
+	bool m_symOpIgnoreChanges = true;            // ignore sg changes
+	bool m_formulaIgnoreChanges = true;          // ignore sg changes
+	bool m_ignoreCalc = false;                   // ignore bz calculation
 };
 
 

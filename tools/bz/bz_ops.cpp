@@ -286,7 +286,7 @@ void BZDlg::ShowSymOpTableContextMenu(const QPoint& _pt)
  */
 void BZDlg::GetSymOpsFromSG()
 {
-	m_ignoreCalc = 1;
+	m_ignoreCalc = true;
 
 	try
 	{
@@ -296,7 +296,7 @@ void BZDlg::GetSymOpsFromSG()
 		{
 			QMessageBox::critical(this, "Space Group Conversion",
 				"Invalid space group selected.");
-			m_ignoreCalc = 0;
+			m_ignoreCalc = false;
 			return;
 		}
 
@@ -315,7 +315,7 @@ void BZDlg::GetSymOpsFromSG()
 	}
 
 
-	m_ignoreCalc = 0;
+	m_ignoreCalc = false;
 	CalcB(true);
 }
 

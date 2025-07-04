@@ -47,8 +47,7 @@
 class BZPlotDlg : public QDialog
 { Q_OBJECT
 public:
-	BZPlotDlg(QWidget* pParent = nullptr, QSettings *sett = nullptr,
-		QLabel **infos = nullptr);
+	BZPlotDlg(QWidget* pParent = nullptr, QSettings *sett = nullptr);
 	~BZPlotDlg() = default;
 
 	void Clear();
@@ -91,7 +90,6 @@ private:
 	std::shared_ptr<tl2::GlPlot> m_plot;
 	std::size_t m_sphere = 0, m_plane = 0;
 
-	QLabel **m_labelGlInfos = nullptr;
 	QLabel *m_status = nullptr;
 	QCheckBox *m_show_coordcross_lab = nullptr;
 	QCheckBox *m_show_coordcross_xtal = nullptr;
@@ -112,6 +110,9 @@ private:
 
 signals:
 	void NeedRecalc();
+
+	void GlDeviceInfos(const std::string& ver, const std::string& shader_ver,
+		const std::string& vendor, const std::string& renderer);
 };
 
 

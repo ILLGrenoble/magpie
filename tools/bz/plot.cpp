@@ -40,8 +40,8 @@
 using namespace tl2_ops;
 
 
-BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett, QLabel **infos)
-	: QDialog{parent}, m_sett{sett}, m_labelGlInfos{infos}
+BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett)
+	: QDialog{parent}, m_sett{sett}
 {
 	setWindowTitle("Brillouin Zone - 3D View");
 	setFont(parent->font());
@@ -508,15 +508,9 @@ void BZPlotDlg::AfterGLInitialisation()
 	emit NeedRecalc();
 
 	// GL device info
-	if(m_labelGlInfos)
-	{
-		auto [strGlVer, strGlShaderVer, strGlVendor, strGlRenderer]
-			= m_plot->GetRenderer()->GetGlDescr();
-		m_labelGlInfos[0]->setText(QString("GL Version: ") + strGlVer.c_str() + QString("."));
-		m_labelGlInfos[1]->setText(QString("GL Shader Version: ") + strGlShaderVer.c_str() + QString("."));
-		m_labelGlInfos[2]->setText(QString("GL Vendor: ") + strGlVendor.c_str() + QString("."));
-		m_labelGlInfos[3]->setText(QString("GL Device: ") + strGlRenderer.c_str() + QString("."));
-	}
+	auto [ver, shader_ver, vendor, renderer]
+		= m_plot->GetRenderer()->GetGlDescr();
+	emit GlDeviceInfos(ver, shader_ver, vendor, renderer);
 }
 
 
