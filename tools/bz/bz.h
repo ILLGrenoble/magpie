@@ -51,6 +51,7 @@
 #include "globals.h"
 #include "plot_cut.h"
 #include "plot.h"
+#include "bz_lib.h"
 
 #include "tlibs2/libs/qt/recent.h"
 #include "tlibs2/libs/qt/glplot.h"
@@ -169,15 +170,9 @@ private:
 
 	t_mat m_crystA = tl2::unit<t_mat>(3);        // crystal A matrix
 	t_mat m_crystB = tl2::unit<t_mat>(3);        // crystal B matrix
-	t_mat m_cut_plane = tl2::unit<t_mat>(3);     // cutting plane
-	t_mat m_cut_plane_inv = tl2::unit<t_mat>(3); // and its inverse
-	t_real m_cut_norm_scale = 1.;                // convert 1/A to rlu lengths along the normal
 
 	std::vector<std::vector<t_mat>> m_sg_ops{};  // symops per space group
-	std::vector<std::vector<t_vec>> m_bz_polys{};// polygons of the 3d bz
-
-	t_real m_min_x = 1., m_max_x = -1.;          // plot ranges for curves
-	t_real m_min_y = 1., m_max_y = -1.;          // plot ranges for curves
+	BZCalc<t_mat, t_vec, t_real> m_bzcalc;       // calculation kernel
 
 
 protected:

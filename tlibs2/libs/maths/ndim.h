@@ -203,8 +203,8 @@ void unit(t_mat& mat, std::size_t rows_begin, std::size_t cols_begin,
 	std::size_t rows_end, std::size_t cols_end)
 requires is_basic_mat<t_mat>
 {
-	for(std::size_t i=rows_begin; i < rows_end; ++i)
-		for(std::size_t j=cols_begin; j < cols_end; ++j)
+	for(std::size_t i = rows_begin; i < rows_end; ++i)
+		for(std::size_t j = cols_begin; j < cols_end; ++j)
 			mat(i, j) = (i==j ? 1 : 0);
 }
 
@@ -1036,10 +1036,10 @@ requires is_mat<t_mat>
 	t_mat mat = unit<t_mat>(iRows, iCols);
 
 	auto iterCol = lst.begin();
-	for(std::size_t iCol=0; iCol<iCols; ++iCol)
+	for(std::size_t iCol = 0; iCol < iCols; ++iCol)
 	{
 		auto iterRow = iterCol->begin();
-		for(std::size_t iRow=0; iRow<iRows; ++iRow)
+		for(std::size_t iRow = 0; iRow < iRows; ++iRow)
 		{
 			mat(iRow, iCol) = *iterRow;
 			std::advance(iterRow, 1);

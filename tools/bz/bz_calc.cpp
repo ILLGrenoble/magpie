@@ -26,7 +26,6 @@
  */
 
 #include "bz.h"
-#include "bz_lib.h"
 
 #include <QtWidgets/QMessageBox>
 
@@ -153,21 +152,17 @@ bool BZDlg::CalcBZ(bool full_recalc)
 	if(m_ignoreCalc || !m_peaks.size())
 		return false;
 
-	const auto ops_centr = GetSymOps(true);
-
 	// set up bz calculator
-	BZCalc<t_mat, t_vec, t_real> bzcalc;
-	bzcalc.SetEps(g_eps);
-	bzcalc.SetSymOps(ops_centr, true);
-	bzcalc.SetCrystalB(m_crystB);
-	bzcalc.SetPeaks(m_peaks);
-	bzcalc.CalcPeaksInvA();
+	m_bzcalc.Clear();
+	m_bzcalc.SetEps(g_eps);
+	m_bzcalc.SetSymOps(GetSymOps(true), true);
+	m_bzcalc.SetCrystalA(m_crystA);
+	m_bzcalc.SetCrystalB(m_crystB);
+	m_bzcalc.SetPeaks(m_peaks);
+	m_bzcalc.CalcPeaksInvA();
 
 	// calculate bz
-	bzcalc.CalcBZ();
-
-	// set bz triangles
-	m_bz_polys = bzcalc.GetTriangles();
+	m_bzcalc.CalcBZ();
 
 	if(m_dlgPlot)
 	{
@@ -175,23 +170,23 @@ bool BZDlg::CalcBZ(bool full_recalc)
 		m_dlgPlot->Clear();
 
 		// add gamma point
-		std::size_t idx000 = bzcalc.Get000Peak();
-		const std::vector<t_vec>& Qs_invA = bzcalc.GetPeaksInvA();
+		std::size_t idx000 = m_bzcalc.Get000Peak();
+		const std::vector<t_vec>& Qs_invA = m_bzcalc.GetPeaksInvA();
 		if(idx000 < Qs_invA.size())
 			m_dlgPlot->AddBraggPeak(Qs_invA[idx000]);
 
 		// add voronoi vertices forming the vertices of the BZ
-		for(const t_vec& voro : bzcalc.GetVertices())
+		for(const t_vec& voro : m_bzcalc.GetVertices())
 			m_dlgPlot->AddVoronoiVertex(voro);
 
 		// add voronoi bisectors
-		m_dlgPlot->AddTriangles(bzcalc.GetAllTriangles(),
-			&bzcalc.GetAllTrianglesFaceIndices());
+		m_dlgPlot->AddTriangles(m_bzcalc.GetAllTriangles(),
+			&m_bzcalc.GetAllTrianglesFaceIndices());
 	}
 
 	// set bz description string
-	m_descrBZ = bzcalc.Print(g_prec);
-	m_descrBZJSON = bzcalc.PrintJSON(g_prec);
+	m_descrBZ = m_bzcalc.Print(g_prec);
+	m_descrBZJSON = m_bzcalc.PrintJSON(g_prec);
 
 	m_status->setText((std::string("<font color=\"green\">")
 		+ "Brillouin zone calculated successfully."
@@ -210,227 +205,53 @@ bool BZDlg::CalcBZ(bool full_recalc)
 
 /**
  * calculate brillouin zone cut
- * TODO: move calculation into bzlib.h
  */
 bool BZDlg::CalcBZCut()
 {
-	if(m_ignoreCalc || !m_bz_polys.size() || !m_drawingPeaks.size())
+	if(m_ignoreCalc || !m_bzcalc.GetTriangles().size() || !m_drawingPeaks.size())
 		return false;
 
-	std::ostringstream ostr;
-	ostr.precision(g_prec);
+	// get plane coordinate system
+	t_vec vec1_rlu = tl2::create<t_vec>({
+		m_cutX->value(),
+		m_cutY->value(),
+		m_cutZ->value()
+	});
+	t_vec norm_rlu = tl2::create<t_vec>({
+		m_cutNX->value(),
+		m_cutNY->value(),
+		m_cutNZ->value()
+	});
 
-	t_real x = m_cutX->value();
-	t_real y = m_cutY->value();
-	t_real z = m_cutZ->value();
-	t_real nx = m_cutNX->value();
-	t_real ny = m_cutNY->value();
-	t_real nz = m_cutNZ->value();
 	t_real d_rlu = m_cutD->value();
 	bool calc_bzcut_hull = m_acCutHull->isChecked();
 
-	// get plane coordinate system
-	t_vec vec1_rlu = tl2::create<t_vec>({ x, y, z });
-	t_vec norm_rlu = tl2::create<t_vec>({ nx, ny, nz });
-	vec1_rlu /= tl2::norm<t_vec>(vec1_rlu);
-	norm_rlu /= tl2::norm<t_vec>(norm_rlu);
-
-	t_vec vec1_invA = m_crystB * vec1_rlu;
-	t_vec norm_invA = m_crystB * norm_rlu;
-	m_cut_norm_scale = tl2::norm<t_vec>(norm_invA);
-	norm_invA /= m_cut_norm_scale;
-	t_real d_invA = d_rlu*m_cut_norm_scale;
-
-	t_vec vec2_invA = tl2::cross<t_vec>(norm_invA, vec1_invA);
-	vec1_invA = tl2::cross<t_vec>(vec2_invA, norm_invA);
-
-	vec1_invA /= tl2::norm<t_vec>(vec1_invA);
-	vec2_invA /= tl2::norm<t_vec>(vec2_invA);
-
-	t_mat B_inv = m_crystA / (t_real(2)*tl2::pi<t_real>);
-	t_vec vec2_rlu = B_inv * vec2_invA;
-	vec2_rlu /= tl2::norm<t_vec>(vec2_rlu);
-
-
-	m_cut_plane = tl2::create<t_mat, t_vec>({ vec1_invA, vec2_invA, norm_invA }, false);
-	m_cut_plane_inv = tl2::trans<t_mat>(m_cut_plane);
-
-	// [x, y, Q]
-	std::vector<std::tuple<t_vec, t_vec, std::array<t_real, 3>>>
-		cut_lines, cut_lines000;
-
-	const auto ops = GetSymOps(true);
-
-	for(const t_vec& Q : m_drawingPeaks)
-	{
-		if(!is_reflection_allowed<t_mat, t_vec, t_real>(
-			Q, ops, g_eps).first)
-			continue;
-
-		// (000) peak?
-		bool is_000 = tl2::equals_0(Q, g_eps);
-		t_vec Q_invA = m_crystB * Q;
-
-		std::vector<t_vec> cut_verts;
-		std::optional<t_real> z_comp;
-
-		for(const auto& _bz_poly : m_bz_polys)
-		{
-			// centre bz around bragg peak
-			auto bz_poly = _bz_poly;
-			for(t_vec& vec : bz_poly)
-				vec += Q_invA;
-
-			auto vecs = tl2::intersect_plane_poly<t_vec>(
-				norm_invA, d_invA, bz_poly, g_eps);
-			vecs = tl2::remove_duplicates(vecs, g_eps);
-
-			// calculate the hull of the bz cut
-			if(calc_bzcut_hull)
-			{
-				for(const t_vec& vec : vecs)
-				{
-					t_vec vec_rot = m_cut_plane_inv * vec;
-					tl2::set_eps_0(vec_rot, g_eps);
-
-					cut_verts.emplace_back(
-						tl2::create<t_vec>({
-							vec_rot[0],
-							vec_rot[1] }));
-
-					// z component is the same for every vector
-					if(!z_comp)
-						z_comp = vec_rot[2];
-				}
-			}
-			// alternatively use the lines directly
-			else if(vecs.size() >= 2)
-			{
-				t_vec pt1 = m_cut_plane_inv * vecs[0];
-				t_vec pt2 = m_cut_plane_inv * vecs[1];
-				tl2::set_eps_0(pt1, g_eps);
-				tl2::set_eps_0(pt2, g_eps);
-
-				cut_lines.emplace_back(std::make_tuple(
-					pt1, pt2,
-					std::array<t_real,3>{Q[0], Q[1], Q[2]}));
-				if(is_000)
-				{
-					cut_lines000.emplace_back(std::make_tuple(
-						pt1, pt2,
-						std::array<t_real,3>{Q[0], Q[1], Q[2]}));
-				}
-			}
-		}
-
-		// calculate the hull of the bz cut
-		if(calc_bzcut_hull)
-		{
-			cut_verts = tl2::remove_duplicates(cut_verts, g_eps);
-			if(cut_verts.size() < 3)
-				continue;
-
-			// calculate the faces of the BZ
-			auto [bz_verts, bz_triags, bz_neighbours] =
-				geo::calc_delaunay(2, cut_verts, true, false);
-
-			for(std::size_t bz_idx = 0; bz_idx < bz_verts.size(); ++bz_idx)
-			{
-				std::size_t bz_idx2 = (bz_idx+1) % bz_verts.size();
-				t_vec pt1 = tl2::create<t_vec>({
-					bz_verts[bz_idx][0],
-					bz_verts[bz_idx][1],
-					z_comp ? *z_comp : t_real(0.) });
-				t_vec pt2 = tl2::create<t_vec>({
-					bz_verts[bz_idx2][0],
-					bz_verts[bz_idx2][1],
-					z_comp ? *z_comp : t_real(0.) });
-				tl2::set_eps_0(pt1, g_eps);
-				tl2::set_eps_0(pt2, g_eps);
-
-				cut_lines.emplace_back(std::make_tuple(
-					pt1, pt2,
-					std::array<t_real,3>{Q[0], Q[1], Q[2]}));
-				if(is_000)
-				{
-					cut_lines000.emplace_back(std::make_tuple(
-						pt1, pt2,
-						std::array<t_real,3>{Q[0], Q[1], Q[2]}));
-				}
-			}
-		}
-	}
-
-
-	// get ranges
-	m_min_x = std::numeric_limits<t_real>::max();
-	m_max_x = -m_min_x;
-	m_min_y = std::numeric_limits<t_real>::max();
-	m_max_y = -m_min_y;
-
-	for(const auto& tup : cut_lines)
-	{
-		const auto& pt1 = std::get<0>(tup);
-		const auto& pt2 = std::get<1>(tup);
-
-		m_min_x = std::min(m_min_x, pt1[0]);
-		m_min_x = std::min(m_min_x, pt2[0]);
-		m_max_x = std::max(m_max_x, pt1[0]);
-		m_max_x = std::max(m_max_x, pt2[0]);
-
-		m_min_y = std::min(m_min_y, pt1[1]);
-		m_min_y = std::min(m_min_y, pt2[1]);
-		m_max_y = std::max(m_max_y, pt1[1]);
-		m_max_y = std::max(m_max_y, pt2[1]);
-	}
+	m_bzcalc.CalcBZCut(vec1_rlu, norm_rlu, d_rlu, m_drawingPeaks,
+		calc_bzcut_hull);
 
 
 	// draw cut
 	m_bzscene->ClearAll();
-	m_bzscene->AddCut(cut_lines);
+	m_bzscene->AddCut(m_bzcalc.GetCutLines(false));
 	m_bzview->Centre();
 
 
-	// get description of the cut plane
-	tl2::set_eps_0(norm_invA, g_eps); tl2::set_eps_0(norm_rlu, g_eps);
-	tl2::set_eps_0(vec1_invA, g_eps); tl2::set_eps_0(vec1_rlu, g_eps);
-	tl2::set_eps_0(vec2_invA, g_eps); tl2::set_eps_0(vec2_rlu, g_eps);
-
-	ostr << "# Cutting plane";
-	ostr << "\nin relative lattice units:";
-	ostr << "\n\tnormal: [" << norm_rlu << "] rlu";
-	ostr << "\n\tin-plane vector 1: [" << vec1_rlu << "] rlu";
-	ostr << "\n\tin-plane vector 2: [" << vec2_rlu << "] rlu";
-	ostr << "\n\tplane offset: " << d_rlu << " rlu";
-
-	ostr << "\nin lab units:";
-	ostr << "\n\tnormal: [" << norm_invA << "] Å⁻¹";
-	ostr << "\n\tin-plane vector 1: [" << vec1_invA << "] Å⁻¹";
-	ostr << "\n\tin-plane vector 2: [" << vec2_invA << "] Å⁻¹";
-	ostr << "\n\tplane offset: " << d_invA << " Å⁻¹";
-	ostr << "\n" << std::endl;
-
-
-	// get description of bz cut
-	ostr << "# Brillouin zone cut (Å⁻¹)" << std::endl;
-	for(std::size_t i = 0; i < cut_lines000.size(); ++i)
-	{
-		const auto& line = cut_lines000[i];
-
-		ostr << "line " << i << ":\n\tvertex 0: (" << std::get<0>(line) << ")"
-			<< "\n\tvertex 1: (" << std::get<1>(line) << ")" << std::endl;
-	}
-	m_descrBZCut = ostr.str();
+	// get description of the cutting plane
+	m_descrBZCut = m_bzcalc.PrintCut(g_prec);
 
 
 	// update calculation results
 	if(m_dlgPlot)
-		m_dlgPlot->SetPlane(norm_invA, d_invA);
+	{
+		m_dlgPlot->SetPlane(
+			tl2::col<t_mat, t_vec>(m_bzcalc.GetCutPlane(), 2),  // normal
+			m_bzcalc.GetCutPlaneD());                           // distance
+	}
 
 	UpdateBZDescription();
 	bool formulas_ok = CalcFormulas();
 
-	if(/*ok &&*/ formulas_ok)
+	if(formulas_ok)
 	{
 		m_status->setText((std::string("<font color=\"green\">")
 			+ "Brillouin zone cut calculated successfully."
@@ -446,11 +267,13 @@ bool BZDlg::CalcBZCut()
  */
 bool BZDlg::CalcFormulas()
 {
+	auto [ min_x, min_y, max_x, max_y ] = m_bzcalc.GetCutMinMax();
+
 	m_bzscene->ClearCurves();
-	if(m_max_x < m_min_x)
+	if(max_x < min_x)
 		return false;
 
-	t_real plane_d = m_cutD->value() * m_cut_norm_scale;
+	t_real plane_d = m_cutD->value() * m_bzcalc.GetCutNormScale();
 
 	bool all_ok = true;
 	std::vector<std::string> formulas = GetFormulas();
@@ -471,14 +294,14 @@ bool BZDlg::CalcFormulas()
 				continue;
 
 			int num_pts = 512;
-			t_real x_delta = (m_max_x - m_min_x) / t_real(num_pts);
+			t_real x_delta = (max_x - min_x) / t_real(num_pts);
 
 			std::vector<t_vec> curve;
 			curve.reserve(num_pts);
 
-			for(t_real x = m_min_x; x <= m_max_x; x += x_delta)
+			for(t_real x = min_x; x <= max_x; x += x_delta)
 			{
-				t_vec QinvA = m_cut_plane * tl2::create<t_vec>({ x, 0., plane_d });
+				t_vec QinvA = m_bzcalc.GetCutPlane() * tl2::create<t_vec>({ x, 0., plane_d });
 				//std::cout << x << ": " << QinvA << std::endl;
 
 				parser.register_var("x", x);
@@ -488,7 +311,7 @@ bool BZDlg::CalcFormulas()
 				t_real y = parser.eval();
 				if(std::isnan(y) || std::isinf(y))
 					continue;
-				if(y < m_min_y || y > m_max_y)
+				if(y < min_y || y > max_y)
 					continue;
 
 				curve.emplace_back(tl2::create<t_vec>({ x, y }));
@@ -521,9 +344,9 @@ bool BZDlg::CalcFormulas()
  */
 void BZDlg::BZCutMouseMoved(t_real x, t_real y)
 {
-	t_real plane_d = m_cutD->value() * m_cut_norm_scale;
+	t_real plane_d = m_cutD->value() * m_bzcalc.GetCutNormScale();
 
-	t_vec QinvA = m_cut_plane * tl2::create<t_vec>({ x, y, plane_d });
+	t_vec QinvA = m_bzcalc.GetCutPlane() * tl2::create<t_vec>({ x, y, plane_d });
 	t_mat B_inv = m_crystA / (t_real(2)*tl2::pi<t_real>);
 	t_vec Qrlu = B_inv * QinvA;
 
