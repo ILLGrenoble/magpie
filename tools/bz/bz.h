@@ -163,11 +163,6 @@ private:
 		return this->Load(filename);
 	};
 
-	int m_calcOrder{};                           // max. peak order
-	int m_drawOrder{};                           // max. peak order for BZ cuts
-	std::vector<t_vec> m_peaks{};                // peaks for BZ calculation
-	std::vector<t_vec> m_drawingPeaks{};         // peaks for BZ cut calculation
-
 	t_mat m_crystA = tl2::unit<t_mat>(3);        // crystal A matrix
 	t_mat m_crystB = tl2::unit<t_mat>(3);        // crystal B matrix
 

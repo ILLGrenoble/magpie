@@ -305,9 +305,7 @@ void BZDlg::GetSymOpsFromSG()
 
 		// add symops
 		for(const auto& op : m_sg_ops[sgidx])
-		{
 			AddSymOpTabItem(-1, op);
-		}
 	}
 	catch(const std::exception& ex)
 	{
@@ -326,6 +324,7 @@ void BZDlg::GetSymOpsFromSG()
 std::vector<t_mat> BZDlg::GetSymOps(bool only_centring) const
 {
 	std::vector<t_mat> ops;
+	ops.reserve(m_symops->rowCount());
 
 	for(int row = 0; row < m_symops->rowCount(); ++row)
 	{

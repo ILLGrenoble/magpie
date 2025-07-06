@@ -105,6 +105,16 @@ public:
 
 
 	/**
+	 * clear old peaks
+	 */
+	void ClearPeaksCut()
+	{
+		m_peaks_cut.clear();
+		m_peaks_cut_invA.clear();
+	}
+
+
+	/**
 	 * clear all
 	 */
 	void Clear()
@@ -113,6 +123,7 @@ public:
 		ClearBZCut();
 		ClearSymOps();
 		ClearPeaks();
+		ClearPeaksCut();
 	}
 
 
@@ -155,27 +166,33 @@ public:
 	}
 
 
-	void SetPeaks(const std::vector<t_vec>& peaks)
+	void SetPeaks(const std::vector<t_vec>& peaks, bool for_cut = false)
 	{
-		m_peaks = peaks;
+		if(for_cut)
+			m_peaks_cut = peaks;
+		else
+			m_peaks = peaks;
 	}
 
 
-	const std::vector<t_vec>& GetPeaks() const
+	const std::vector<t_vec>& GetPeaks(bool for_cut = false) const
 	{
-		return m_peaks;
+		return for_cut ? m_peaks_cut : m_peaks;
 	}
 
 
-	void SetPeaksInvA(const std::vector<t_vec>& peaks)
+	void SetPeaksInvA(const std::vector<t_vec>& peaks, bool for_cut = false)
 	{
-		m_peaks_invA = peaks;
+		if(for_cut)
+			m_peaks_cut_invA = peaks;
+		else
+			m_peaks_invA = peaks;
 	}
 
 
-	const std::vector<t_vec>& GetPeaksInvA() const
+	const std::vector<t_vec>& GetPeaksInvA(bool for_cut = false) const
 	{
-		return m_peaks_invA;
+		return for_cut ? m_peaks_cut_invA : m_peaks_invA;
 	}
 
 
@@ -286,10 +303,13 @@ public:
 	/**
 	 * get the index of the (000) bragg peak
 	 */
-	std::size_t Get000Peak() const
+	std::size_t Get000Peak(bool for_cut = false) const
 	{
-		if(m_idx000)
-			return *m_idx000;
+		const std::optional<std::size_t>& idx000 =
+			for_cut ? m_idx000_cut : m_idx000;
+
+		if(idx000)
+			return *idx000;
 		return s_erridx;
 	}
 
@@ -318,6 +338,8 @@ public:
 	 */
 	std::size_t SetSymOps(const std::vector<t_mat>& ops, bool are_centring = false)
 	{
+		ClearSymOps();
+
 		if(are_centring)
 		{
 			// symops are already purely centring, add all
@@ -357,25 +379,29 @@ public:
 	 * calculate the nuclear bragg peaks in lab coordinates
 	 * @returns number of created peaks
 	 */
-	std::size_t CalcPeaksInvA()
+	std::size_t CalcPeaksInvA(bool for_cut = false)
 	{
-		// calculate the peaks in lab coordinates
-		m_peaks_invA.clear();
-		m_peaks_invA.reserve(m_peaks.size());
+		const std::vector<t_vec>& peaks = for_cut ? m_peaks_cut : m_peaks;
+		std::vector<t_vec>& peaks_invA = for_cut ? m_peaks_cut_invA : m_peaks_invA;
+		std::optional<std::size_t>& idx000 = for_cut ? m_idx000_cut : m_idx000;
 
-		for(const t_vec& Q : m_peaks)
+		// calculate the peaks in lab coordinates
+		peaks_invA.clear();
+		peaks_invA.reserve(peaks.size());
+
+		for(const t_vec& Q : peaks)
 		{
 			if(!is_reflection_allowed<t_mat, t_vec, t_real>(Q, m_symops, m_eps).first)
 				continue;
 
 			// also get the index of the (000) peak
 			if(tl2::equals_0(Q, m_eps))
-				m_idx000 = m_peaks_invA.size();
+				idx000 = peaks_invA.size();
 
-			m_peaks_invA.emplace_back(m_crystB * Q);
+			peaks_invA.emplace_back(m_crystB * Q);
 		}
 
-		return m_peaks_invA.size();
+		return peaks_invA.size();
 	}
 
 
@@ -383,37 +409,43 @@ public:
 	 * create nuclear bragg peaks up to the given order
 	 * @returns number of created peaks
 	 */
-	std::size_t CalcPeaks(int order, bool cleate_invA = false)
+	std::size_t CalcPeaks(int order, bool calc_invA = false, bool for_cut = false)
 	{
-		m_peaks.clear();
-		m_peaks.reserve((2*order+1)*(2*order+1)*(2*order+1));
+		std::vector<t_vec>& peaks = for_cut ? m_peaks_cut : m_peaks;
+
+		peaks.clear();
+		peaks.reserve((2*order+1)*(2*order+1)*(2*order+1));
 
 		for(int h = -order; h <= order; ++h)
 		for(int k = -order; k <= order; ++k)
 		for(int l = -order; l <= order; ++l)
 		{
-			m_peaks.emplace_back(
+			peaks.emplace_back(
 				tl2::create<t_vec>(
 					{ t_real(h), t_real(k), t_real(l) }));
 		}
 
-		if(cleate_invA)
-			CalcPeaksInvA();
+		if(calc_invA)
+			CalcPeaksInvA(for_cut);
 
-		return m_peaks.size();
+		return peaks.size();
 	}
 
 
 	/**
 	 * calculate the index of the nuclear (000) peak
 	 */
-	void Calc000Peak()
+	void Calc000Peak(bool for_cut = false)
 	{
-		for(const t_vec& Q : m_peaks)
+		const std::vector<t_vec>& peaks = for_cut ? m_peaks_cut : m_peaks;
+		std::optional<std::size_t>& idx000 = for_cut ? m_idx000_cut : m_idx000;
+
+		for(std::size_t idx = 0; idx < peaks.size(); ++idx)
 		{
+			const t_vec& Q = peaks[idx];
 			if(!tl2::equals_0(Q, m_eps))
 				continue;
-			m_idx000 = m_peaks_invA.size();
+			idx000 = idx;
 			break;
 		}
 	}
@@ -426,6 +458,8 @@ public:
 	{
 		ClearBZ();
 
+		if(!m_peaks.size())
+			return false;
 		if(!m_idx000)
 			Calc000Peak();
 
@@ -530,12 +564,21 @@ public:
 
 
 	/**
-	 * calculate the brillouin zone cut
+	 * calculate the 2d brillouin zone cut
 	 */
 	bool CalcBZCut(const t_vec& vec1_rlu, const t_vec& norm_rlu, t_real d_rlu,
-		const std::vector<t_vec>& Qs, bool calc_bzcut_hull = true)
+		bool calc_bzcut_hull = true)
 	{
 		ClearBZCut();
+
+		// calculate the 3d bz if not yet done beforehand
+		if(!GetTriangles().size())
+			CalcBZ();
+
+		if(!m_peaks_cut.size())
+			return false;
+		if(!m_idx000_cut)
+			Calc000Peak(true);
 
 		m_vec1_rlu = vec1_rlu;
 		m_norm_rlu = norm_rlu;
@@ -562,14 +605,20 @@ public:
 		m_cut_plane = tl2::create<t_mat, t_vec>({ vec1_invA, vec2_invA, norm_invA }, false);
 		m_cut_plane_inv = tl2::trans<t_mat>(m_cut_plane);
 
-		for(const t_vec& Q : Qs)
+		for(std::size_t idx = 0; idx < m_peaks_cut.size(); ++idx)
 		{
+			const t_vec& Q = m_peaks_cut[idx];
+
 			if(!is_reflection_allowed<t_mat, t_vec, t_real>(
 				Q, m_symops, g_eps).first)
-			continue;
+				continue;
 
 			// (000) peak?
-			bool is_000 = tl2::equals_0(Q, g_eps);
+			bool is_000 = false;
+			if(m_idx000_cut)
+				is_000 = (idx == *m_idx000_cut);
+			else
+				is_000 = tl2::equals_0(Q, g_eps);
 			t_vec Q_invA = m_crystB * Q;
 
 			std::vector<t_vec> cut_verts;
@@ -1022,8 +1071,11 @@ private:
 
 	std::vector<t_mat> m_symops{ };                // space group centring symmetry operations
 	std::vector<t_vec> m_peaks{ };                 // nuclear bragg peaks
+	std::vector<t_vec> m_peaks_cut{ };             // nuclear bragg peaks for zone cut
 	std::vector<t_vec> m_peaks_invA { };           // nuclear bragg peaks in lab coordinates
+	std::vector<t_vec> m_peaks_cut_invA{ };        // nuclear bragg peaks for zone cut in lab coordinates
 	std::optional<std::size_t> m_idx000{};         // index of the (000) peak
+	std::optional<std::size_t> m_idx000_cut{};     // index of the (000) peak for zone cut
 	// --------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------

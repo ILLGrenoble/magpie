@@ -45,19 +45,7 @@ using namespace tl2_ops;
  */
 void BZDlg::SetDrawOrder(int order, bool recalc)
 {
-	// already calculated?
-	if(order != m_drawOrder)
-	{
-		m_drawingPeaks.clear();
-		m_drawingPeaks.reserve((2*order+1)*(2*order+1)*(2*order+1));
-
-		for(t_real h = -order; h <= order; ++h)
-		for(t_real k = -order; k <= order; ++k)
-		for(t_real l = -order; l <= order; ++l)
-			m_drawingPeaks.emplace_back(tl2::create<t_vec>({ h, k, l }));
-
-		m_drawOrder = order;
-	}
+	m_bzcalc.CalcPeaks(order, false /*invA*/, true /*cut*/);
 
 	if(recalc)
 		CalcBZCut();
@@ -69,19 +57,7 @@ void BZDlg::SetDrawOrder(int order, bool recalc)
  */
 void BZDlg::SetCalcOrder(int order, bool recalc)
 {
-	// already calculated?
-	if(order != m_calcOrder)
-	{
-		m_peaks.clear();
-		m_peaks.reserve((2*order+1)*(2*order+1)*(2*order+1));
-
-		for(t_real h = -order; h <= order; ++h)
-		for(t_real k = -order; k <= order; ++k)
-		for(t_real l = -order; l <= order; ++l)
-			m_peaks.emplace_back(tl2::create<t_vec>({ h, k, l }));
-
-		m_calcOrder = order;
-	}
+	m_bzcalc.CalcPeaks(order, false /*invA*/, false /*cut*/);
 
 	if(recalc)
 		CalcBZ();
@@ -149,20 +125,18 @@ bool BZDlg::CalcB(bool full_recalc)
  */
 bool BZDlg::CalcBZ(bool full_recalc)
 {
-	if(m_ignoreCalc || !m_peaks.size())
+	if(m_ignoreCalc)
 		return false;
 
 	// set up bz calculator
-	m_bzcalc.Clear();
 	m_bzcalc.SetEps(g_eps);
 	m_bzcalc.SetSymOps(GetSymOps(true), true);
 	m_bzcalc.SetCrystalA(m_crystA);
 	m_bzcalc.SetCrystalB(m_crystB);
-	m_bzcalc.SetPeaks(m_peaks);
 	m_bzcalc.CalcPeaksInvA();
 
 	// calculate bz
-	m_bzcalc.CalcBZ();
+	bool ok = m_bzcalc.CalcBZ();
 
 	if(m_dlgPlot)
 	{
@@ -192,14 +166,13 @@ bool BZDlg::CalcBZ(bool full_recalc)
 		+ "Brillouin zone calculated successfully."
 		+ std::string("</font>")).c_str());
 
-	bool ok = true;
-
+	bool cut_ok = true;
 	if(full_recalc)
-		ok = CalcBZCut();
+		cut_ok = CalcBZCut();
 	else
 		UpdateBZDescription();
 
-	return ok;
+	return ok && cut_ok;
 }
 
 
@@ -208,7 +181,7 @@ bool BZDlg::CalcBZ(bool full_recalc)
  */
 bool BZDlg::CalcBZCut()
 {
-	if(m_ignoreCalc || !m_bzcalc.GetTriangles().size() || !m_drawingPeaks.size())
+	if(m_ignoreCalc || !m_bzcalc.GetTriangles().size())
 		return false;
 
 	// get plane coordinate system
@@ -224,21 +197,17 @@ bool BZDlg::CalcBZCut()
 	});
 
 	t_real d_rlu = m_cutD->value();
-	bool calc_bzcut_hull = m_acCutHull->isChecked();
 
-	m_bzcalc.CalcBZCut(vec1_rlu, norm_rlu, d_rlu, m_drawingPeaks,
-		calc_bzcut_hull);
-
+	// calculate cut
+	bool ok = m_bzcalc.CalcBZCut(vec1_rlu, norm_rlu, d_rlu, m_acCutHull->isChecked());
 
 	// draw cut
 	m_bzscene->ClearAll();
 	m_bzscene->AddCut(m_bzcalc.GetCutLines(false));
 	m_bzview->Centre();
 
-
 	// get description of the cutting plane
 	m_descrBZCut = m_bzcalc.PrintCut(g_prec);
-
 
 	// update calculation results
 	if(m_dlgPlot)
@@ -258,7 +227,7 @@ bool BZDlg::CalcBZCut()
 			+ std::string("</font>")).c_str());
 	}
 
-	return true;
+	return ok;
 }
 
 
