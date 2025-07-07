@@ -98,6 +98,35 @@ void BZCutScene::AddCut(
 
 
 /**
+ * adds bragg peaks
+ */
+void BZCutScene::AddPeaks(const std::vector<t_vec>& peaks)
+{
+	QColor col(0x00, 0x99, 0x00);
+
+	QPen pen;
+	pen.setCosmetic(true);
+	pen.setColor(col);
+
+	QBrush brush;
+	brush.setStyle(Qt::SolidPattern);
+	brush.setColor(col);
+
+	m_peaks.reserve(peaks.size());
+
+	for(const t_vec& Q : peaks)
+	{
+		QGraphicsEllipseItem *ell = addEllipse(
+			Q[0]*m_scale, Q[1]*m_scale, 6., 6.,
+			pen, brush
+		);
+
+		m_peaks.push_back(ell);
+	}
+}
+
+
+/**
  * adds a plot curve from a set of points
  */
 void BZCutScene::AddCurve(const std::vector<t_vec>& points)
@@ -127,6 +156,7 @@ void BZCutScene::AddCurve(const std::vector<t_vec>& points)
 void BZCutScene::ClearAll()
 {
 	ClearCut();
+	ClearPeaks();
 	ClearCurves();
 	clear();
 }
@@ -137,6 +167,14 @@ void BZCutScene::ClearCut()
 	for(QGraphicsItem *item : m_bzcut)
 		delete item;
 	m_bzcut.clear();
+}
+
+
+void BZCutScene::ClearPeaks()
+{
+	for(QGraphicsItem *item : m_peaks)
+		delete item;
+	m_peaks.clear();
 }
 
 

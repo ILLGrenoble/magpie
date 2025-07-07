@@ -81,6 +81,7 @@ void BZDlg::NewFile()
 	m_cutNY->setValue(0);
 	m_cutNZ->setValue(1);
 	m_cutD->setValue(0);
+
 	m_BZDrawOrder->setValue(4);
 	m_BZCalcOrder->setValue(4);
 }
@@ -150,7 +151,6 @@ bool BZDlg::Load(const QString& filename, bool use_stdin)
 		m_ignoreCalc = false;
 		return false;
 	}
-
 
 	return true;
 }

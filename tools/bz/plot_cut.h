@@ -50,12 +50,14 @@ public:
 	void AddCut(const std::vector<
 		// [x, y, Q]
 		std::tuple<t_vec, t_vec, std::array<t_real, 3>>>& lines);
+	void AddPeaks(const std::vector<t_vec>& peaks);
 	void AddCurve(const std::vector<t_vec>& points);
 
 	t_real GetScale() const { return m_scale; }
 
 	void ClearAll();
 	void ClearCut();
+	void ClearPeaks();
 	void ClearCurves();
 
 	QPointF GetCentre() const;
@@ -65,6 +67,7 @@ protected:
 	t_real m_scale = 100.;
 
 	std::vector<QGraphicsItem*> m_bzcut{};
+	std::vector<QGraphicsItem*> m_peaks{};
 	std::vector<QGraphicsItem*> m_curves{};
 };
 

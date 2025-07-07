@@ -360,14 +360,13 @@ void BZDlg::CreateBZPanel()
 	m_cutD->setToolTip("Distance of the cutting plane along its normal vector from the origin.");
 
 	int draw_order = 4;
-	int calc_order = 4;
-
 	m_BZDrawOrder = new QSpinBox(bzpanel);
 	m_BZDrawOrder->setMinimum(0);
 	m_BZDrawOrder->setMaximum(99);
 	m_BZDrawOrder->setValue(draw_order);
 	m_BZDrawOrder->setToolTip("The maximum order of Brillouin zones to draw.");
 
+	int calc_order = 4;
 	m_BZCalcOrder = new QSpinBox(bzpanel);
 	m_BZCalcOrder->setMinimum(1);
 	m_BZCalcOrder->setMaximum(99);

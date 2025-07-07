@@ -82,6 +82,8 @@ public:
 	{
 		m_cut_lines.clear();
 		m_cut_lines000.clear();
+
+		m_peaks_cut_in_plane.clear();
 	}
 
 
@@ -369,6 +371,12 @@ public:
 		std::vector<t_mat> ops = get_sg_ops<t_mat, t_real>(sgname);
 		return SetSymOps(ops, false);
 	}
+
+
+	const std::vector<t_vec>& GetPeaksOnPlane() const
+	{
+		return m_peaks_cut_in_plane;
+	}
 	// --------------------------------------------------------------------------------
 
 
@@ -619,7 +627,12 @@ public:
 				is_000 = (idx == *m_idx000_cut);
 			else
 				is_000 = tl2::equals_0(Q, g_eps);
+
 			t_vec Q_invA = m_crystB * Q;
+
+			// Q on cutting plane?
+			if(tl2::equals(tl2::inner(norm_invA, Q_invA), m_d_invA, g_eps))
+				m_peaks_cut_in_plane.push_back(m_cut_plane_inv * Q_invA);
 
 			std::vector<t_vec> cut_verts;
 			std::optional<t_real> z_comp;
@@ -1101,7 +1114,7 @@ private:
 	t_vec m_vec1_rlu{}, m_vec2_rlu{}, m_norm_rlu{};  // cutting plane in rlu
 	t_real m_cut_norm_scale = 1.;                // convert 1/A to rlu lengths along the normal
 	t_mat m_cut_plane = tl2::unit<t_mat>(3);     // cutting plane in inverse angstroms
-	t_mat m_cut_plane_inv = tl2::unit<t_mat>(3); // and its inverse
+	t_mat m_cut_plane_inv = tl2::unit<t_mat>(3); // ...and its inverse
 	t_real m_d_rlu = 0., m_d_invA = 0.;          // cutting plane distance
 
 	// [x, y, Q]
@@ -1109,6 +1122,8 @@ private:
 
 	t_real m_min_x = 1., m_max_x = -1.;          // plot ranges for curves
 	t_real m_min_y = 1., m_max_y = -1.;          // plot ranges for curves
+
+	std::vector<t_vec> m_peaks_cut_in_plane;     // bragg peaks on the cutting plane
 	// --------------------------------------------------------------------------------
 
 	static const std::size_t s_erridx{0xffffffff}; // index for reporting errors

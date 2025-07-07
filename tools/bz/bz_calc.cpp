@@ -204,6 +204,7 @@ bool BZDlg::CalcBZCut()
 	// draw cut
 	m_bzscene->ClearAll();
 	m_bzscene->AddCut(m_bzcalc.GetCutLines(false));
+	m_bzscene->AddPeaks(m_bzcalc.GetPeaksOnPlane());
 	m_bzview->Centre();
 
 	// get description of the cutting plane
