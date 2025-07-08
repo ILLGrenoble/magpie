@@ -26,7 +26,9 @@
  */
 
 #include "plot_cut.h"
+
 #include <QtWidgets/QApplication>
+#include <sstream>
 
 
 // --------------------------------------------------------------------------------
@@ -100,7 +102,7 @@ void BZCutScene::AddCut(
 /**
  * adds bragg peaks
  */
-void BZCutScene::AddPeaks(const std::vector<t_vec>& peaks)
+void BZCutScene::AddPeaks(const std::vector<t_vec>& peaks, const std::vector<t_vec>* peaks_rlu)
 {
 	QColor col(0x00, 0x99, 0x00);
 
@@ -113,13 +115,27 @@ void BZCutScene::AddPeaks(const std::vector<t_vec>& peaks)
 	brush.setColor(col);
 
 	m_peaks.reserve(peaks.size());
+	const t_real w = 6.;
 
-	for(const t_vec& Q : peaks)
+	for(std::size_t Q_idx = 0; Q_idx < peaks.size(); ++Q_idx)
 	{
+		const t_vec& Q = peaks[Q_idx];
+
 		QGraphicsEllipseItem *ell = addEllipse(
-			Q[0]*m_scale, Q[1]*m_scale, 6., 6.,
+			Q[0]*m_scale - w/2., Q[1]*m_scale - w/2., w, w,
 			pen, brush
 		);
+
+		if(peaks_rlu)
+		{
+			const t_vec& Q_rlu = (*peaks_rlu)[Q_idx];
+
+			std::ostringstream ostr;
+			ostr.precision(g_eps);
+
+			ostr << "(" << Q_rlu[0] << " " << Q_rlu[1] << " " << Q_rlu[2] << ")";
+			ell->setToolTip(ostr.str().c_str());
+		}
 
 		m_peaks.push_back(ell);
 	}

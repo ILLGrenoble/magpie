@@ -50,7 +50,7 @@ public:
 	void AddCut(const std::vector<
 		// [x, y, Q]
 		std::tuple<t_vec, t_vec, std::array<t_real, 3>>>& lines);
-	void AddPeaks(const std::vector<t_vec>& peaks);
+	void AddPeaks(const std::vector<t_vec>& peaks, const std::vector<t_vec>* peaks_rlu = nullptr);
 	void AddCurve(const std::vector<t_vec>& points);
 
 	t_real GetScale() const { return m_scale; }

@@ -84,6 +84,7 @@ public:
 		m_cut_lines000.clear();
 
 		m_peaks_cut_in_plane.clear();
+		m_peaks_cut_in_plane_invA.clear();
 	}
 
 
@@ -168,33 +169,37 @@ public:
 	}
 
 
-	void SetPeaks(const std::vector<t_vec>& peaks, bool for_cut = false)
+	void SetPeaks(const std::vector<t_vec>& peaks, bool inv_A = false, bool for_cut = false)
 	{
-		if(for_cut)
-			m_peaks_cut = peaks;
+		if(inv_A)
+		{
+			if(for_cut)
+				m_peaks_cut_invA = peaks;
+			else
+				m_peaks_invA = peaks;
+		}
 		else
-			m_peaks = peaks;
+		{
+			if(for_cut)
+				m_peaks_cut = peaks;
+			else
+				m_peaks = peaks;
+		}
 	}
 
 
-	const std::vector<t_vec>& GetPeaks(bool for_cut = false) const
+	const std::vector<t_vec>& GetPeaks(bool inv_A = false, bool for_cut = false) const
 	{
-		return for_cut ? m_peaks_cut : m_peaks;
-	}
-
-
-	void SetPeaksInvA(const std::vector<t_vec>& peaks, bool for_cut = false)
-	{
-		if(for_cut)
-			m_peaks_cut_invA = peaks;
+		if(inv_A)
+			return for_cut ? m_peaks_cut_invA : m_peaks_invA;
 		else
-			m_peaks_invA = peaks;
+			return for_cut ? m_peaks_cut : m_peaks;
 	}
 
 
-	const std::vector<t_vec>& GetPeaksInvA(bool for_cut = false) const
+	const std::vector<t_vec>& GetPeaksOnPlane(bool inv_A = false) const
 	{
-		return for_cut ? m_peaks_cut_invA : m_peaks_invA;
+		return inv_A ? m_peaks_cut_in_plane_invA : m_peaks_cut_in_plane;
 	}
 
 
@@ -370,12 +375,6 @@ public:
 	{
 		std::vector<t_mat> ops = get_sg_ops<t_mat, t_real>(sgname);
 		return SetSymOps(ops, false);
-	}
-
-
-	const std::vector<t_vec>& GetPeaksOnPlane() const
-	{
-		return m_peaks_cut_in_plane;
 	}
 	// --------------------------------------------------------------------------------
 
@@ -632,7 +631,10 @@ public:
 
 			// Q on cutting plane?
 			if(tl2::equals(tl2::inner(norm_invA, Q_invA), m_d_invA, g_eps))
-				m_peaks_cut_in_plane.push_back(m_cut_plane_inv * Q_invA);
+			{
+				m_peaks_cut_in_plane.push_back(Q);
+				m_peaks_cut_in_plane_invA.push_back(m_cut_plane_inv * Q_invA);
+			}
 
 			std::vector<t_vec> cut_verts;
 			std::optional<t_real> z_comp;
@@ -1123,7 +1125,8 @@ private:
 	t_real m_min_x = 1., m_max_x = -1.;          // plot ranges for curves
 	t_real m_min_y = 1., m_max_y = -1.;          // plot ranges for curves
 
-	std::vector<t_vec> m_peaks_cut_in_plane;     // bragg peaks on the cutting plane
+	std::vector<t_vec> m_peaks_cut_in_plane;     // bragg peaks on the cutting plane in rlu
+	std::vector<t_vec> m_peaks_cut_in_plane_invA;  // ... and in 1/A and transformed into the plane system
 	// --------------------------------------------------------------------------------
 
 	static const std::size_t s_erridx{0xffffffff}; // index for reporting errors

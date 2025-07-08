@@ -145,7 +145,7 @@ bool BZDlg::CalcBZ(bool full_recalc)
 
 		// add gamma point
 		std::size_t idx000 = m_bzcalc.Get000Peak();
-		const std::vector<t_vec>& Qs_invA = m_bzcalc.GetPeaksInvA();
+		const std::vector<t_vec>& Qs_invA = m_bzcalc.GetPeaks(true);
 		if(idx000 < Qs_invA.size())
 			m_dlgPlot->AddBraggPeak(Qs_invA[idx000]);
 
@@ -204,7 +204,7 @@ bool BZDlg::CalcBZCut()
 	// draw cut
 	m_bzscene->ClearAll();
 	m_bzscene->AddCut(m_bzcalc.GetCutLines(false));
-	m_bzscene->AddPeaks(m_bzcalc.GetPeaksOnPlane());
+	m_bzscene->AddPeaks(m_bzcalc.GetPeaksOnPlane(true), &m_bzcalc.GetPeaksOnPlane(false));
 	m_bzview->Centre();
 
 	// get description of the cutting plane
