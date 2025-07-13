@@ -382,8 +382,7 @@ get_evec_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
 MAGDYN_TEMPL
 std::tuple<std::vector<t_vec>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryConnections(
 	const t_vec_real& Q, t_real delta,
-	const std::vector<t_size>* perm,
-	bool evecs_ortho) const
+	const std::vector<t_size>* perm, bool evecs_ortho) const
 {
 	//SetUniteDegenerateEnergies(false);
 
