@@ -106,8 +106,8 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 		user = "";
 
 	ofstr	<< "#\n"
-		<< "# Created by Takin/Magdyn\n"
-		<< "# URL: https://github.com/ILLGrenoble/takin\n"
+		<< "# Created by Magpie\n"
+		<< "# URL: https://github.com/ILLGrenoble/magpie\n"
 		<< "# DOI: https://doi.org/10.5281/zenodo.4117437\n"
 		<< "# User: " << user << "\n"
 		<< "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n"
@@ -393,8 +393,8 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 		user = "";
 
 	ofstr	<< "%\n"
-		<< "% Created by Takin/Magdyn\n"
-		<< "% URL: https://github.com/ILLGrenoble/takin\n"
+		<< "% Created by Magpie\n"
+		<< "% URL: https://github.com/ILLGrenoble/magpie\n"
 		<< "% DOI: https://doi.org/10.5281/zenodo.4117437\n"
 		<< "% User: " << user << "\n"
 		<< "% Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n"

@@ -219,13 +219,13 @@ int main(int argc, char** argv)
 		t_size num_Q_pts = 0;
 		std::string model_file, results_file;
 
-		args::options_description arg_descr("Takin/Magdyn arguments");
+		args::options_description arg_descr("Magpie arguments");
 		arg_descr.add_options()
 			("help,h", args::bool_switch(&show_help), "show help")
 #ifndef DONT_USE_QT
 			("cli,c", args::bool_switch(&use_cli), "use command-line interface")
 #endif
-			("input,i", args::value(&model_file), "input magnetic model file (.magdyn)")
+			("input,i", args::value(&model_file), "input magnetic model file (.magpie)")
 			("output,o", args::value(&results_file), "output results file (in cli mode)")
 			("timing", args::bool_switch(&show_timing), "show time needed for calculation")
 			("threads,t", args::value(&g_num_threads), "number of threads for calculation")
@@ -252,7 +252,7 @@ int main(int argc, char** argv)
 
 		if(show_help)
 		{
-			std::cout << "This is Takin/Magdyn by Tobias Weber <tweber@ill.fr>.\n\n"
+			std::cout << "This is Magpie by Tobias Weber <tweber@ill.fr>.\n\n"
 				<< arg_descr
 				<< R"BLOCK(
 This program is free software: you can redistribute it and/or modify
@@ -318,8 +318,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 		{
 			stopwatch->stop();
 			std::cout << "\n================================================================================\n"
-				<< "Magdyn start time: " << stopwatch->GetStartTimeStr() << ".\n"
-				<< "Magdyn stop time:  " << stopwatch->GetStopTimeStr() << ".\n"
+				<< "Magpie start time: " << stopwatch->GetStartTimeStr() << ".\n"
+				<< "Magpie stop time:  " << stopwatch->GetStopTimeStr() << ".\n"
 				<< "Elapsed time:      " << stopwatch->GetDur() << " s.\n"
 				<< "================================================================================"
 				<< std::endl;

@@ -104,7 +104,8 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 		if(file_opened && format == EXPORT_TEXT)
 		{
 			// write header
-			(*ofstr) << "#\n# Created with Takin/Magdyn.\n";
+			(*ofstr) << "#\n# Created with Magpie.\n";
+			(*ofstr) << "# URL: https://github.com/ILLGrenoble/magpie\n";
 			(*ofstr) << "# DOI: https://doi.org/10.5281/zenodo.4117437\n";
 			(*ofstr) << "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n";
 			(*ofstr) << "#\n\n";
@@ -288,7 +289,7 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 			ofstr->write(reinterpret_cast<const char*>(&Qstep[i]), sizeof(Qstep[i]));
 		}
 
-		(*ofstr) << "Takin/Magdyn Grid File Version 2 (doi: https://doi.org/10.5281/zenodo.4117437).";
+		(*ofstr) << "Takin/Magpie Grid File Version 2 (doi: https://doi.org/10.5281/zenodo.4117437).";
 	}
 
 #ifdef USE_HDF5
@@ -418,7 +419,7 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 		if(!user)
 			user = "";
 		tl2::set_h5_string<std::string>(*h5file, "meta_infos/type", "takin_grid");
-		tl2::set_h5_string<std::string>(*h5file, "meta_infos/description", "Takin/Magdyn grid format");
+		tl2::set_h5_string<std::string>(*h5file, "meta_infos/description", "Takin/Magpie grid format");
 		tl2::set_h5_string<std::string>(*h5file, "meta_infos/user", user);
 		tl2::set_h5_string<std::string>(*h5file, "meta_infos/date", tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()));
 		tl2::set_h5_string<std::string>(*h5file, "meta_infos/url", "https://github.com/ILLGrenoble/takin");

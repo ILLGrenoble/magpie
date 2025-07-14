@@ -225,9 +225,12 @@ MAGDYN_INST::CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 			h_end, k_end, l_end]() -> SofQE
 		{
 			// get Q
-			const t_real h = std::lerp(h_start, h_end, t_real(i) / t_real(num_Qs - 1));
-			const t_real k = std::lerp(k_start, k_end, t_real(i) / t_real(num_Qs - 1));
-			const t_real l = std::lerp(l_start, l_end, t_real(i) / t_real(num_Qs - 1));
+			const t_real h = num_Qs == 1 ? h_start :
+				std::lerp(h_start, h_end, t_real(i) / t_real(num_Qs - 1));
+			const t_real k = num_Qs == 1 ? k_start :
+				std::lerp(k_start, k_end, t_real(i) / t_real(num_Qs - 1));
+			const t_real l = num_Qs == 1 ? l_start :
+				std::lerp(l_start, l_end, t_real(i) / t_real(num_Qs - 1));
 			const t_vec_real Q = tl2::create<t_vec_real>({ h, k, l });
 
 			// get E and S(Q, E) for this Q
@@ -296,13 +299,13 @@ MAGDYN_INST::CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 			h_end2, k_end2, l_end2]() -> SofQE
 		{
 			// get Q
-			const t_real h =
+			const t_real h = num_Qs_sqrt == 1 ? h_start :
 				std::lerp(h_start, h_end1, t_real(i) / t_real(num_Qs_sqrt - 1)) +
 				std::lerp(h_start, h_end2, t_real(j) / t_real(num_Qs_sqrt - 1)) - h_start;
-			const t_real k =
+			const t_real k = num_Qs_sqrt == 1 ? k_start :
 				std::lerp(k_start, k_end1, t_real(i) / t_real(num_Qs_sqrt - 1)) +
 				std::lerp(k_start, k_end2, t_real(j) / t_real(num_Qs_sqrt - 1)) - k_start;
-			const t_real l =
+			const t_real l = num_Qs_sqrt == 1 ? l_start :
 				std::lerp(l_start, l_end1, t_real(i) / t_real(num_Qs_sqrt - 1)) +
 				std::lerp(l_start, l_end2, t_real(j) / t_real(num_Qs_sqrt - 1)) - l_start;
 			const t_vec_real Q = tl2::create<t_vec_real>({ h, k, l });

@@ -1445,8 +1445,8 @@ void Dispersion3DDlg::WriteHeader(std::ostream& ostr) const
 	auto [Q_origin, Q_dir_1, Q_dir_2] = GetQVectors();
 
 	ostr << "#\n"
-		<< "# Created by Takin/Magdyn\n"
-		<< "# URL: https://github.com/ILLGrenoble/takin\n"
+		<< "# Created by Magpie\n"
+		<< "# URL: https://github.com/ILLGrenoble/magpie\n"
 		<< "# DOI: https://doi.org/10.5281/zenodo.4117437\n"
 		<< "# User: " << user << "\n"
 		<< "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n"
