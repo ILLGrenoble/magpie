@@ -43,6 +43,7 @@
 #include "tlibs2/libs/qt/gl.h"
 
 #include "libs/defs.h"
+#include "../bz/bz_lib.h"
 
 
 
@@ -61,10 +62,13 @@ using t_vec3_gl = tl2::t_vec3_gl;
 using t_vec_gl = tl2::t_vec_gl;
 using t_mat_gl = tl2::t_mat_gl;
 
-// magnon calculation core
+// magnon calculation kernel
 using t_magdyn = tl2_mag::MagDyn<t_mat, t_vec, t_mat_real, t_vec_real, t_cplx, t_real, t_size>;
 using t_site = typename t_magdyn::MagneticSite;
 using t_term = typename t_magdyn::ExchangeTerm;;
+
+// brillouin zone calculation kernel
+using t_bz = BZCalc<t_mat_real, t_vec_real, t_real>;
 // ----------------------------------------------------------------------------
 
 

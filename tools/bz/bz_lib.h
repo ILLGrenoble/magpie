@@ -617,7 +617,7 @@ public:
 			const t_vec& Q = m_peaks_cut[idx];
 
 			if(!is_reflection_allowed<t_mat, t_vec, t_real>(
-				Q, m_symops, g_eps).first)
+				Q, m_symops, m_eps).first)
 				continue;
 
 			// (000) peak?
@@ -625,12 +625,12 @@ public:
 			if(m_idx000_cut)
 				is_000 = (idx == *m_idx000_cut);
 			else
-				is_000 = tl2::equals_0(Q, g_eps);
+				is_000 = tl2::equals_0(Q, m_eps);
 
 			t_vec Q_invA = m_crystB * Q;
 
 			// Q on cutting plane?
-			if(tl2::equals(tl2::inner(norm_invA, Q_invA), m_d_invA, g_eps))
+			if(tl2::equals(tl2::inner(norm_invA, Q_invA), m_d_invA, m_eps))
 			{
 				m_peaks_cut_in_plane.push_back(Q);
 				m_peaks_cut_in_plane_invA.push_back(m_cut_plane_inv * Q_invA);
@@ -647,8 +647,8 @@ public:
 					vec += Q_invA;
 
 				auto vecs = tl2::intersect_plane_poly<t_vec>(
-					norm_invA, m_d_invA, bz_poly, g_eps);
-				vecs = tl2::remove_duplicates(vecs, g_eps);
+					norm_invA, m_d_invA, bz_poly, m_eps);
+				vecs = tl2::remove_duplicates(vecs, m_eps);
 
 				// calculate the hull of the bz cut
 				if(calc_bzcut_hull)
@@ -656,7 +656,7 @@ public:
 					for(const t_vec& vec : vecs)
 					{
 						t_vec vec_rot = m_cut_plane_inv * vec;
-						tl2::set_eps_0(vec_rot, g_eps);
+						tl2::set_eps_0(vec_rot, m_eps);
 
 						cut_verts.emplace_back(
 							tl2::create<t_vec>({
@@ -673,8 +673,8 @@ public:
 				{
 					t_vec pt1 = m_cut_plane_inv * vecs[0];
 					t_vec pt2 = m_cut_plane_inv * vecs[1];
-					tl2::set_eps_0(pt1, g_eps);
-					tl2::set_eps_0(pt2, g_eps);
+					tl2::set_eps_0(pt1, m_eps);
+					tl2::set_eps_0(pt2, m_eps);
 
 					m_cut_lines.emplace_back(std::make_tuple(
 						pt1, pt2,
@@ -691,7 +691,7 @@ public:
 			// calculate the hull of the bz cut
 			if(calc_bzcut_hull)
 			{
-				cut_verts = tl2::remove_duplicates(cut_verts, g_eps);
+				cut_verts = tl2::remove_duplicates(cut_verts, m_eps);
 				if(cut_verts.size() < 3)
 					continue;
 
@@ -710,8 +710,8 @@ public:
 						bz_verts[bz_idx2][0],
 						bz_verts[bz_idx2][1],
 						z_comp ? *z_comp : t_real(0.) });
-					tl2::set_eps_0(pt1, g_eps);
-					tl2::set_eps_0(pt2, g_eps);
+					tl2::set_eps_0(pt1, m_eps);
+					tl2::set_eps_0(pt2, m_eps);
 
 					m_cut_lines.emplace_back(std::make_tuple(
 						pt1, pt2,
@@ -1035,9 +1035,9 @@ public:
 		t_vec vec1_rlu = m_vec1_rlu, vec2_rlu = m_vec2_rlu, norm_rlu = m_norm_rlu;
 		t_real d_rlu = m_d_rlu, d_invA = m_d_invA;
 
-		tl2::set_eps_0(norm_invA, g_eps); tl2::set_eps_0(norm_rlu, g_eps);
-		tl2::set_eps_0(vec1_invA, g_eps); tl2::set_eps_0(vec1_rlu, g_eps);
-		tl2::set_eps_0(vec2_invA, g_eps); tl2::set_eps_0(vec2_rlu, g_eps);
+		tl2::set_eps_0(norm_invA, m_eps); tl2::set_eps_0(norm_rlu, m_eps);
+		tl2::set_eps_0(vec1_invA, m_eps); tl2::set_eps_0(vec1_rlu, m_eps);
+		tl2::set_eps_0(vec2_invA, m_eps); tl2::set_eps_0(vec2_rlu, m_eps);
 
 		std::ostringstream ostr;
 		ostr.precision(prec);
@@ -1080,9 +1080,9 @@ private:
 	// --------------------------------------------------------------------------------
 	t_real m_eps{ 1e-7 };                          // calculation epsilon
 
-	t_mat m_crystA{tl2::unit<t_mat>(3)};           // crystal A matrix
-	t_mat m_crystB{tl2::unit<t_mat>(3)};           // crystal B matrix
-	t_mat m_crystB_ortho{tl2::unit<t_mat>(3)};     // orthonormal part of crystal B matrix
+	t_mat m_crystA{ tl2::unit<t_mat>(3) };         // crystal A matrix
+	t_mat m_crystB{ tl2::unit<t_mat>(3) };         // crystal B matrix
+	t_mat m_crystB_ortho{ tl2::unit<t_mat>(3) };   // orthonormal part of crystal B matrix
 
 	std::vector<t_mat> m_symops{ };                // space group centring symmetry operations
 	std::vector<t_vec> m_peaks{ };                 // nuclear bragg peaks
@@ -1096,37 +1096,37 @@ private:
 	// --------------------------------------------------------------------------------
 	// calculated brillouin zone infos
 	// --------------------------------------------------------------------------------
-	std::vector<t_vec> m_vertices{};               // voronoi vertices
+	std::vector<t_vec> m_vertices{ };              // voronoi vertices
 
 	std::vector<std::vector<t_vec>> m_triags{};    // bz triangles
 	std::vector<std::vector<std::size_t>> m_triags_voroidx{}; // voronoi vertex indices
 
-	std::vector<t_vec> m_all_triags {};            // all brillouin zone triangles
-	std::vector<std::size_t> m_all_triags_voroidx {};  // voronoi vertex indices
-	std::vector<std::size_t> m_all_triags_faceidx {};  // face indices
+	std::vector<t_vec> m_all_triags{ };                // all brillouin zone triangles
+	std::vector<std::size_t> m_all_triags_voroidx{ };  // voronoi vertex indices
+	std::vector<std::size_t> m_all_triags_faceidx{ };  // face indices
 
-	std::vector<std::vector<std::size_t>> m_face_polygons{};
-	std::vector<t_vec> m_face_norms{};
-	std::vector<t_real> m_face_dists{};
+	std::vector<std::vector<std::size_t>> m_face_polygons{ };
+	std::vector<t_vec> m_face_norms{ };
+	std::vector<t_real> m_face_dists{ };
 	// --------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------
 	// calculated brillouin zone cut infos
 	// --------------------------------------------------------------------------------
 	t_vec m_vec1_rlu{}, m_vec2_rlu{}, m_norm_rlu{};  // cutting plane in rlu
-	t_real m_cut_norm_scale = 1.;                // convert 1/A to rlu lengths along the normal
+	t_real m_cut_norm_scale { 1. };              // convert 1/A to rlu lengths along the normal
 	t_mat m_cut_plane = tl2::unit<t_mat>(3);     // cutting plane in inverse angstroms
 	t_mat m_cut_plane_inv = tl2::unit<t_mat>(3); // ...and its inverse
-	t_real m_d_rlu = 0., m_d_invA = 0.;          // cutting plane distance
+	t_real m_d_rlu{ 0. }, m_d_invA{ 0. };        // cutting plane distance
 
 	// [x, y, Q]
-	std::vector<std::tuple<t_vec, t_vec, std::array<t_real, 3>>> m_cut_lines, m_cut_lines000;
+	std::vector<std::tuple<t_vec, t_vec, std::array<t_real, 3>>> m_cut_lines{}, m_cut_lines000{};
 
-	t_real m_min_x = 1., m_max_x = -1.;          // plot ranges for curves
-	t_real m_min_y = 1., m_max_y = -1.;          // plot ranges for curves
+	t_real m_min_x{ 1. }, m_max_x{ -1. };          // plot ranges for curves
+	t_real m_min_y{ 1. }, m_max_y{ -1. };          // plot ranges for curves
 
-	std::vector<t_vec> m_peaks_cut_in_plane;     // bragg peaks on the cutting plane in rlu
-	std::vector<t_vec> m_peaks_cut_in_plane_invA;  // ... and in 1/A and transformed into the plane system
+	std::vector<t_vec> m_peaks_cut_in_plane{ };      // bragg peaks on the cutting plane in rlu
+	std::vector<t_vec> m_peaks_cut_in_plane_invA{ }; // ... and in 1/A and transformed into the plane system
 	// --------------------------------------------------------------------------------
 
 	static const std::size_t s_erridx{0xffffffff}; // index for reporting errors

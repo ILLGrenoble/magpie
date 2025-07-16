@@ -221,7 +221,8 @@ protected:
 	QSpinBox *m_exportNumPoints[3]{nullptr, nullptr, nullptr};
 	QComboBox *m_exportFormat{nullptr};
 
-	t_magdyn m_dyn{};                      // magnon dynamics calculator
+	t_magdyn m_dyn{};                      // magnon dynamics calculation kernel
+	t_bz m_bz{};                           // brillouin zone calculation kernel
 
 	// dialogs
 	QDialog *m_settings_dlg{};             // settings dialog
