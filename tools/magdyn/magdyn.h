@@ -161,6 +161,7 @@ protected:
 
 	// tabs
 	QTabWidget *m_tabs_in{}, *m_tabs_out{};
+	QTabWidget *m_tabs_recip{}, *m_tabs_setup{};
 
 	// panels
 	QWidget *m_sitespanel{}, *m_termspanel{};
@@ -371,6 +372,7 @@ protected:
 	void CalcSymmetryIndices();  // assign symmetry groups to sites and couplings
 	void SortTerms();            // sort couplings by their lengths
 	void CalcAll();              // syncs sites and terms and calculates all dynamics
+	void CalcBZ();               // calculate brillouin zone and cut
 	void SetKernel(const t_magdyn* dyn, bool sync_sites = true, bool sync_terms = true, bool sync_idx = true);
 
 	// plotter functions
@@ -426,7 +428,7 @@ private:
 	int m_fields_cursor_row { -1 };
 	int m_coordinates_cursor_row { -1 };
 
-	bool m_ignoreCalc { false };
+	bool m_ignoreCalc { true };
 	bool m_ignoreSitesCalc { false };
 	bool m_stopRequested { false };
 	bool m_startEnabled { true };     // "calc" behaves as start or stop button?

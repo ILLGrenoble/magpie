@@ -327,8 +327,8 @@ void BZDlg::CreateBZPanel()
 	grid->setSpacing(4);
 	grid->setContentsMargins(4,4,4,4);
 
-	m_bzscene = new BZCutScene(bzpanel);
-	m_bzview = new BZCutView(m_bzscene);
+	m_bzscene = new BZCutScene<t_vec, t_real>(bzpanel);
+	m_bzview = new BZCutView<t_vec, t_real>(m_bzscene);
 
 	for(QDoubleSpinBox** const cut : {
 		&m_cutNX, &m_cutNY, &m_cutNZ,
@@ -401,8 +401,13 @@ void BZDlg::CreateBZPanel()
 	connect(m_BZDrawOrder,
 		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
 		[this](int order) { this->SetDrawOrder(order); });
-	connect(m_bzview, &BZCutView::SignalMouseCoordinates,
-		this, &BZDlg::BZCutMouseMoved);
+	//connect(m_bzview, &BZCutView<t_vec, t_real>::SignalMouseCoordinates,
+	//	this, &BZDlg::BZCutMouseMoved);
+	m_bzview->AddMouseCoordinatesSlot([this](t_real x, t_real y)
+	{
+		this->BZCutMouseMoved(x, y);
+	});
+
 	connect(m_BZCalcOrder,
 		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
 		[this](int order) { this->SetCalcOrder(order); });

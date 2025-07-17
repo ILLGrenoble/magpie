@@ -101,8 +101,7 @@ if(USE_QT)
 		globals.cpp globals.h
 		bz_formulas.cpp
 		plot.cpp plot.h
-		plot_cut.cpp plot_cut.h
-		bz_lib.h
+		plot_cut.h bz_lib.h
 		../../tlibs2/libs/qt/recent.cpp ../../tlibs2/libs/qt/recent.h
 		../../tlibs2/libs/qt/gl.cpp ../../tlibs2/libs/qt/gl.h
 		../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h

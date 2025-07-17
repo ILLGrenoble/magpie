@@ -202,6 +202,7 @@ bool BZDlg::CalcBZCut()
 	bool ok = m_bzcalc.CalcBZCut(vec1_rlu, norm_rlu, d_rlu, m_acCutHull->isChecked());
 
 	// draw cut
+	m_bzscene->SetEps(g_eps);
 	m_bzscene->ClearAll();
 	m_bzscene->AddCut(m_bzcalc.GetCutLines(false));
 	m_bzscene->AddPeaks(m_bzcalc.GetPeaksOnPlane(true), &m_bzcalc.GetPeaksOnPlane(false));

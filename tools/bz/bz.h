@@ -127,8 +127,8 @@ private:
 	QMenu *m_symOpContextMenuNoItem = nullptr;   // menu if nothing is selected
 
 	// brillouin zone and cuts panel
-	BZCutScene *m_bzscene = nullptr;
-	BZCutView *m_bzview = nullptr;
+	BZCutScene<t_vec, t_real> *m_bzscene = nullptr;
+	BZCutView<t_vec, t_real> *m_bzview = nullptr;
 	QDoubleSpinBox *m_cutX = nullptr;
 	QDoubleSpinBox *m_cutY = nullptr;
 	QDoubleSpinBox *m_cutZ = nullptr;

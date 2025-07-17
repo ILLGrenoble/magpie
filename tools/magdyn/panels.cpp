@@ -254,7 +254,7 @@ void MagDynDlg::CreateSitesPanel()
 	});
 
 
-	m_tabs_in->addTab(m_sitespanel, "Sites");
+	m_tabs_setup->addTab(m_sitespanel, "Sites");
 }
 
 
@@ -568,7 +568,7 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	}
 
 
-	m_tabs_in->addTab(m_termspanel, "Couplings");
+	m_tabs_setup->addTab(m_termspanel, "Couplings");
 }
 
 
@@ -641,17 +641,17 @@ void MagDynDlg::CreateSamplePanel()
 	int y = 0;
 
 	// crystal
-	grid->addWidget(new QLabel("Crystal Definition", m_samplepanel), y++,0,1,4);
-	grid->addWidget(new QLabel("Lattice (\xe2\x84\xab):", m_samplepanel), y,0,1,1);
-	grid->addWidget(m_xtallattice[0], y,1,1,1);
-	grid->addWidget(m_xtallattice[1], y,2,1,1);
-	grid->addWidget(m_xtallattice[2], y++,3,1,1);
-	grid->addWidget(new QLabel("Angles (\xc2\xb0):", m_samplepanel), y,0,1,1);
-	grid->addWidget(m_xtalangles[0], y,1,1,1);
-	grid->addWidget(m_xtalangles[1], y,2,1,1);
-	grid->addWidget(m_xtalangles[2], y++,3,1,1);
-	grid->addWidget(new QLabel("Space Group:", m_samplepanel), y,0,1,1);
-	grid->addWidget(m_comboSG, y++,1,1,3);
+	grid->addWidget(new QLabel("Crystal Definition", m_samplepanel), y++, 0, 1, 4);
+	grid->addWidget(new QLabel("Lattice (\xe2\x84\xab):", m_samplepanel), y, 0, 1, 1);
+	grid->addWidget(m_xtallattice[0], y, 1, 1, 1);
+	grid->addWidget(m_xtallattice[1], y, 2, 1, 1);
+	grid->addWidget(m_xtallattice[2], y++, 3, 1, 1);
+	grid->addWidget(new QLabel("Angles (\xc2\xb0):", m_samplepanel), y, 0, 1, 1);
+	grid->addWidget(m_xtalangles[0], y, 1, 1, 1);
+	grid->addWidget(m_xtalangles[1], y, 2, 1, 1);
+	grid->addWidget(m_xtalangles[2], y++, 3, 1, 1);
+	grid->addWidget(new QLabel("Space Group:", m_samplepanel), y, 0, 1, 1);
+	grid->addWidget(m_comboSG, y++, 1, 1, 3);
 
 	// separator
 	QFrame *sep1 = new QFrame(m_sampleenviropanel);
@@ -659,22 +659,22 @@ void MagDynDlg::CreateSamplePanel()
 
 	grid->addItem(new QSpacerItem(8, 8,
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
-		y++,0, 1,1);
-	grid->addWidget(sep1, y++,0, 1,4);
+		y++,0, 1, 1);
+	grid->addWidget(sep1, y++,0, 1, 4);
 	grid->addItem(new QSpacerItem(8, 8,
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
-		y++,0, 1,1);
+		y++,0, 1, 1);
 
 	// scattering plane
-	grid->addWidget(new QLabel("Scattering plane", m_samplepanel), y++,0,1,4);
-	grid->addWidget(new QLabel("Vector 1 (rlu):", m_samplepanel), y,0,1,1);
-	grid->addWidget(m_scatteringplane[0], y,1,1,1);
-	grid->addWidget(m_scatteringplane[1], y,2,1,1);
-	grid->addWidget(m_scatteringplane[2], y++,3,1,1);
-	grid->addWidget(new QLabel("Vector 2 (rlu):", m_samplepanel), y,0,1,1);
-	grid->addWidget(m_scatteringplane[3], y,1,1,1);
-	grid->addWidget(m_scatteringplane[4], y,2,1,1);
-	grid->addWidget(m_scatteringplane[5], y++,3,1,1);
+	grid->addWidget(new QLabel("Scattering plane", m_samplepanel), y++, 0, 1, 4);
+	grid->addWidget(new QLabel("Vector 1 (rlu):", m_samplepanel), y, 0, 1, 1);
+	grid->addWidget(m_scatteringplane[0], y, 1, 1, 1);
+	grid->addWidget(m_scatteringplane[1], y, 2, 1, 1);
+	grid->addWidget(m_scatteringplane[2], y++, 3, 1, 1);
+	grid->addWidget(new QLabel("Vector 2 (rlu):", m_samplepanel), y, 0, 1, 1);
+	grid->addWidget(m_scatteringplane[3], y, 1, 1, 1);
+	grid->addWidget(m_scatteringplane[4], y, 2, 1, 1);
+	grid->addWidget(m_scatteringplane[5], y++, 3, 1, 1);
 
 	// separator
 	QFrame *sep2 = new QFrame(m_sampleenviropanel);
@@ -682,29 +682,33 @@ void MagDynDlg::CreateSamplePanel()
 
 	grid->addItem(new QSpacerItem(8, 8,
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
-		y++,0, 1,1);
-	grid->addWidget(sep2, y++,0, 1,4);
+		y++, 0, 1, 1);
+	grid->addWidget(sep2, y++, 0, 1, 4);
 	grid->addItem(new QSpacerItem(8, 8,
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
-		y++,0, 1,1);
+		y++, 0, 1, 1);
 
 	// form factor formula
-	grid->addWidget(new QLabel("Magnetic Form Factor", m_samplepanel), y++,0,1,4);
-	grid->addWidget(new QLabel("Enter Formula, f_M(Q) = ", m_samplepanel), y++,0,1,1);
-	grid->addWidget(m_ffact, y++,0,1,4);
+	grid->addWidget(new QLabel("Magnetic Form Factor", m_samplepanel), y++, 0, 1, 4);
+	grid->addWidget(new QLabel("Enter Formula, f_M(Q) = ", m_samplepanel), y++, 0, 1, 1);
+	grid->addWidget(m_ffact, y++, 0, 1, 4);
 
 	grid->addItem(new QSpacerItem(8, 8,
 		QSizePolicy::Minimum, QSizePolicy::Expanding),
-		y++,0, 1,1);
+		y++, 0, 1, 1);
 
 
 	auto calc_all = [this]()
 	{
+		this->CalcBZ();
 		if(this->m_autocalc->isChecked())
 			this->CalcAll();
 	};
 
 	connect(m_ffact, &QPlainTextEdit::textChanged, calc_all);
+	connect(m_comboSG,
+		static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+		this, &MagDynDlg::CalcBZ);
 
 	for(int i = 0; i < 2*3; ++i)
 	{
@@ -723,7 +727,7 @@ void MagDynDlg::CreateSamplePanel()
 			calc_all);
 	}
 
-	m_tabs_in->addTab(m_samplepanel, "Sample");
+	m_tabs_setup->addTab(m_samplepanel, "Sample");
 }
 
 
@@ -857,7 +861,7 @@ void MagDynDlg::CreateVariablesPanel()
 	});
 
 
-	m_tabs_in->addTab(m_varspanel, "Variables");
+	m_tabs_setup->addTab(m_varspanel, "Variables");
 }
 
 
@@ -1169,7 +1173,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 	});
 
 
-	m_tabs_in->addTab(m_sampleenviropanel, "Environment");
+	m_tabs_setup->addTab(m_sampleenviropanel, "Environment");
 }
 
 
@@ -1540,7 +1544,7 @@ void MagDynDlg::CreateCoordinatesPanel()
 	});
 
 
-	m_tabs_out->addTab(m_coordinatespanel, "Coordinates");
+	m_tabs_recip->addTab(m_coordinatespanel, "Coordinates");
 }
 
 

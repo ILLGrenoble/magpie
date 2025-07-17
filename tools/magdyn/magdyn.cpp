@@ -26,6 +26,8 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <boost/scope_exit.hpp>
+
 #include "magdyn.h"
 #include "libs/loadcif.h"
 
@@ -43,6 +45,12 @@
 MagDynDlg::MagDynDlg(QWidget* pParent) : QDialog{pParent},
 	m_sett{new QSettings{"takin", "magdyn", this}}
 {
+	BOOST_SCOPE_EXIT(this_)
+	{
+		this_->m_ignoreCalc = false;
+	} BOOST_SCOPE_EXIT_END
+
+
 	// restore settings done from takin main settings dialog
 	get_settings_from_takin_core();
 	if(g_font != "")
@@ -162,7 +170,12 @@ void MagDynDlg::CreateMainWindow()
 	setSizeGripEnabled(true);
 
 	m_tabs_in = new QTabWidget(this);
+	m_tabs_setup = new QTabWidget(this);
+	m_tabs_recip = new QTabWidget(this);
 	m_tabs_out = new QTabWidget(this);
+
+	m_tabs_in->addTab(m_tabs_setup, "Structure");
+	m_tabs_in->addTab(m_tabs_recip, "Reciprocal Space");
 
 	// fixed status
 	m_statusFixed = new QLabel(this);

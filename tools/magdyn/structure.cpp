@@ -396,8 +396,7 @@ void MagDynDlg::ImportCouplings(const std::vector<TableImportCoupling>& coupling
  */
 void MagDynDlg::CalcSymmetryIndices()
 {
-	const auto& symops = GetSymOpsForCurrentSG();
-	m_dyn.CalcSymmetryIndices(symops);
+	m_dyn.CalcSymmetryIndices(GetSymOpsForCurrentSG());
 	SyncSymmetryIndicesFromKernel();
 }
 
@@ -410,4 +409,18 @@ void MagDynDlg::SortTerms()
 {
 	m_dyn.SortExchangeTerms();
 	SyncTermsFromKernel();
+}
+
+
+
+/**
+ * calculate brillouin zone and cut
+ */
+void MagDynDlg::CalcBZ()
+{
+	if(m_ignoreCalc)
+		return;
+
+	m_bz.SetEps(g_eps);
+	m_bz.SetSymOps(GetSymOpsForCurrentSG(), false);
 }
