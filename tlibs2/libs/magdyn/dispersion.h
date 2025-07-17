@@ -263,6 +263,66 @@ MAGDYN_INST::CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 
 
 /**
+ * generates the dispersion for the given q points
+ */
+MAGDYN_TEMPL
+MAGDYN_TYPE::SofQEs
+MAGDYN_INST::CalcDispersion(const std::vector<t_vec_real>& Qs,
+	t_size num_threads, std::function<bool(int, int)> *progress_fkt) const
+{
+	const t_size num_Qs = num_Qs;
+
+	// determine number of threads
+	if(num_threads == 0)
+		num_threads = std::max<t_size>(1, std::thread::hardware_concurrency() / 2);
+
+	// thread pool and tasks
+	using t_pool = boost::asio::thread_pool;
+	using t_task = std::packaged_task<SofQE()>;
+	using t_taskptr = std::shared_ptr<t_task>;
+
+	t_pool pool{num_threads};
+	std::vector<t_taskptr> tasks;
+	tasks.reserve(num_Qs);
+
+	// calculate dispersion
+	for(const t_vec_real& Q : Qs)
+	{
+		if(progress_fkt && !(*progress_fkt)(0, num_Qs))
+			break;
+
+		auto task = [this, Q]() -> SofQE
+		{
+			// get Q
+			return CalcEnergies(Q, false);
+		};
+
+		t_taskptr taskptr = std::make_shared<t_task>(task);
+		tasks.push_back(taskptr);
+		boost::asio::post(pool, [taskptr]() { (*taskptr)(); });
+	}
+
+	// collect results
+	SofQEs results;
+	results.reserve(tasks.size());
+
+	t_size Qs_finished = 0;
+	for(auto& task : tasks)
+	{
+		if(progress_fkt && !(*progress_fkt)(Qs_finished + 1, num_Qs))
+			break;
+
+		const SofQE& result = task->get_future().get();
+		results.push_back(result);
+		++Qs_finished;
+	}
+
+	return results;
+}
+
+
+
+/**
  * generates the dispersion plot along the given 2d Q surface
  */
 MAGDYN_TEMPL

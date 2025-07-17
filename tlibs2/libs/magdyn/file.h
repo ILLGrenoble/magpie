@@ -357,6 +357,107 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 
 
 /**
+ * generates the dispersion plot along the given Q path
+ */
+MAGDYN_TEMPL
+bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
+	const std::vector<t_vec_real>& Qs,
+	t_size num_threads, bool as_py,
+	std::function<bool(int, int)> *progress_fkt,
+	bool write_header) const
+{
+	ostr.precision(m_prec);
+	int field_len = m_prec * 2.5;
+
+	// data for script export
+	std::ostringstream all_data;
+	all_data.precision(m_prec);
+
+	if(write_header)
+	{
+		ostr << "#\n# Created with Magpie.\n";
+		ostr << "# URL: https://github.com/ILLGrenoble/magpie\n";
+		ostr << "# DOI: https://doi.org/10.5281/zenodo.4117437\n";
+		ostr << "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n";
+		ostr << "#\n\n";
+	}
+
+	if(!as_py)  // save as text file
+	{
+		ostr
+			<< std::setw(field_len) << std::left << "# h" << " "
+			<< std::setw(field_len) << std::left << "k" << " "
+			<< std::setw(field_len) << std::left << "l" << " "
+			<< std::setw(field_len) << std::left << "E" << " "
+			<< std::setw(field_len) << std::left << "S(Q,E)" << " "
+			<< std::setw(field_len) << std::left << "S_xx" << " "
+			<< std::setw(field_len) << std::left << "S_yy" << " "
+			<< std::setw(field_len) << std::left << "S_zz" << " "
+			<< std::setw(field_len) << std::left << "branch" << " "
+			<< std::setw(field_len) << std::left << "degen" << "\n";
+	}
+
+	SofQEs results = CalcDispersion(Qs, num_threads, progress_fkt);
+
+	// print results
+	for(const auto& result : results)
+	{
+		if(progress_fkt && !(*progress_fkt)(-1, -1))
+			return false;
+
+		// get results
+		for(t_size branch_idx = 0; branch_idx < result.E_and_S.size(); ++branch_idx)
+		{
+			const EnergyAndWeight& E_and_S = result.E_and_S[branch_idx];
+
+			if(!as_py)  // save as text file
+			{
+				ostr
+					<< std::setw(field_len) << std::left << result.Q_rlu[0] << " "
+					<< std::setw(field_len) << std::left << result.Q_rlu[1] << " "
+					<< std::setw(field_len) << std::left << result.Q_rlu[2] << " "
+					<< std::setw(field_len) << E_and_S.E << " "
+					<< std::setw(field_len) << E_and_S.weight << " "
+					<< std::setw(field_len) << E_and_S.S_perp(0, 0).real() << " "
+					<< std::setw(field_len) << E_and_S.S_perp(1, 1).real() << " "
+					<< std::setw(field_len) << E_and_S.S_perp(2, 2).real() << " "
+					<< std::setw(field_len) << branch_idx << " "
+					<< std::setw(field_len) << E_and_S.degeneracy << "\n";
+			}
+			else        // save as py script
+			{
+				all_data << "\t"
+					<< "[ " << result.Q_rlu[0]
+					<< ", " << result.Q_rlu[1]
+					<< ", " << result.Q_rlu[2]
+					<< ", " << E_and_S.E
+					<< ", " << E_and_S.weight
+					<< ", " << branch_idx
+					<< ", " << E_and_S.degeneracy
+					<< " ],\n";
+			}
+		}
+	}
+
+	if(as_py)  // save as py script
+	{
+		std::string pyscr = g_pyscr<std::string>;
+
+		namespace algo = boost::algorithm;
+		algo::replace_all(pyscr, "%%LABELS%%", "None");
+		algo::replace_all(pyscr, "%%RATIOS%%", "None");
+		algo::replace_all(pyscr, "%%DATA%%", "[[\n" + all_data.str() + "\n]]");
+
+		ostr << pyscr << "\n";
+	}
+
+	ostr.flush();
+	return true;
+}
+
+
+
+/**
  * generates the dispersion plot along multiple Q paths
  */
 MAGDYN_TEMPL

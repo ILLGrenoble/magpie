@@ -467,7 +467,7 @@ public:
 		bool only_energies = false) const;
 
 	/**
-	 * generates the dispersion plot along the given Q path
+	 * generates the dispersion along the given Q path
 	 */
 	SofQEs CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 		t_real h_end, t_real k_end, t_real l_end,
@@ -475,7 +475,14 @@ public:
 		std::function<bool(int, int)> *progress_fkt = nullptr) const;
 
 	/**
-	 * generates the dispersion plot along the given 2d Q surface
+	 * generates the dispersion for the given q points
+	 */
+	SofQEs CalcDispersion(const std::vector<t_vec_real>& Qs,
+		t_size num_threads = 4,
+		std::function<bool(int, int)> *progress_fkt = nullptr) const;
+
+	/**
+	 * generates the dispersion along the given 2d Q surface
 	 */
 	SofQEs CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 		t_real h_end1, t_real k_end1, t_real l_end1,
@@ -541,6 +548,15 @@ public:
 		t_real h_end, t_real k_end, t_real l_end,
 		t_size num_Qs = 128, t_size num_threads = 4,
 		bool as_py = false,
+		std::function<bool(int, int)> *progress_fkt = nullptr,
+		bool write_header = true) const;
+
+	/**
+	 * generates the dispersion plot for the given Q values
+	 */
+	bool SaveDispersion(std::ostream& ostr,
+		const std::vector<t_vec_real>& Qs,
+		t_size num_threads = 4, bool as_py = false,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		bool write_header = true) const;
 

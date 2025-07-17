@@ -62,7 +62,8 @@ extern int gui_main(int argc, char** argv, const std::string& model_file,
  * starts the cli program
  */
 static int cli_main(const std::string& model_file, const std::string& results_file,
-	const t_vec_real& Qi, const t_vec_real& Qf, t_size num_Q_pts)
+	const t_vec_real& Qi, const t_vec_real& Qf, t_size num_Q_pts,
+	const std::string& Qlist_file)
 {
 	using namespace tl2_ops;
 
@@ -143,43 +144,88 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 	pt::read_xml(ifstr, root_node);
 	const auto &magdyn_node = root_node.get_child("magdyn");
 
-	t_real h_start =  magdyn_node.get<t_real>("config.h_start", 0.);
-	t_real k_start = magdyn_node.get<t_real>("config.k_start", 0.);
-	t_real l_start = magdyn_node.get<t_real>("config.l_start", 0.);
-	t_real h_end = magdyn_node.get<t_real>("config.h_end", 1.);
-	t_real k_end = magdyn_node.get<t_real>("config.k_end", 0.);
-	t_real l_end = magdyn_node.get<t_real>("config.l_end", 0.);
 
-	if(num_Q_pts == 0)
-		num_Q_pts = magdyn_node.get<t_size>("config.num_Q_points", 128);
-
-	// get the override options
-	if(Qi.size() == 3)
+	if(Qlist_file != "")
 	{
-		h_start = Qi[0];
-		k_start = Qi[1];
-		l_start = Qi[2];
+		std::ifstream ifstr_Qs(Qlist_file);
+		if(!ifstr_Qs)
+		{
+			std::cerr << "Error: Cannot open Q list file \"" << Qlist_file << "\"." << std::endl;
+			return -1;
+		}
+
+		// calculate the dispersion for the given Q points
+		std::vector<t_vec_real> Qs;
+
+		// read one h k l triplet per line
+		std::string line;
+		std::size_t lineno = 0;
+		while(std::getline(ifstr_Qs, line))
+		{
+			++lineno;
+			tl2::trim(line);
+			if(line == "")
+				continue;  // ignore empty lines
+			if(line.size() > 0 && line[0] == '#')
+				continue;  // ignore comments
+
+			t_vec_real Q;
+			tl2::get_tokens<t_real, std::string, t_vec_real>(line, std::string(" \t;,"), Q);
+			if(Q.size() != 3)
+			{
+				std::cerr << "Error: Invalid Q vector length in line " << lineno
+					<< " of \"" << Qlist_file << "\", three components, h, k, and l, are required."
+					<< std::endl;
+				continue;
+			}
+			Qs.emplace_back(std::move(Q));
+		}
+
+		std::cout << "\nCalculating dispersion in " << g_num_threads << " threads..."
+			<< std::endl;
+
+		magdyn.SaveDispersion(*postr, Qs, g_num_threads);
 	}
-	// get the override options
-	if(Qf.size() == 3)
+	else
 	{
-		h_end = Qf[0];
-		k_end = Qf[1];
-		l_end = Qf[2];
+		// calculate the dispersion along the given Q_i and Q_f positions
+
+		t_real h_start =  magdyn_node.get<t_real>("config.h_start", 0.);
+		t_real k_start = magdyn_node.get<t_real>("config.k_start", 0.);
+		t_real l_start = magdyn_node.get<t_real>("config.l_start", 0.);
+		t_real h_end = magdyn_node.get<t_real>("config.h_end", 1.);
+		t_real k_end = magdyn_node.get<t_real>("config.k_end", 0.);
+		t_real l_end = magdyn_node.get<t_real>("config.l_end", 0.);
+
+		if(num_Q_pts == 0)
+			num_Q_pts = magdyn_node.get<t_size>("config.num_Q_points", 128);
+
+		// get the override options
+		if(Qi.size() == 3)
+		{
+			h_start = Qi[0];
+			k_start = Qi[1];
+			l_start = Qi[2];
+		}
+		// get the override options
+		if(Qf.size() == 3)
+		{
+			h_end = Qf[0];
+			k_end = Qf[1];
+			l_end = Qf[2];
+		}
+
+		std::cout << "\nCalculating dispersion from"
+			<< " Q_i = (" << h_start << ", " << k_start << ", " << l_start << ") to"
+			<< " Q_f = (" << h_end << ", " << k_end << ", " << l_end << ")"
+			<< " in " << num_Q_pts << " steps and " << g_num_threads << " threads..."
+			<< std::endl;
+
+		magdyn.SaveDispersion(*postr,
+			h_start, k_start, l_start,
+			h_end, k_end, l_end,
+			num_Q_pts, g_num_threads);
 	}
-
-
-	// calculate the dispersion
-	std::cout << "\nCalculating dispersion from"
-		<< " Q_i = (" << h_start << ", " << k_start << ", " << l_start << ") to"
-		<< " Q_f = (" << h_end << ", " << k_end << ", " << l_end << ")"
-		<< " in " << num_Q_pts << " steps and " << g_num_threads << " threads..."
-		<< std::endl;
-
-	magdyn.SaveDispersion(*postr,
-		h_start, k_start, l_start,
-		h_end, k_end, l_end,
-		num_Q_pts, g_num_threads);
 
 	if(results_file != "")
 		std::cout << "Wrote results to \"" << results_file << "\"." << std::endl;
@@ -218,6 +264,7 @@ int main(int argc, char** argv)
 
 		t_size num_Q_pts = 0;
 		std::string model_file, results_file;
+		std::string Qlist_file;
 
 		args::options_description arg_descr("Magpie arguments");
 		arg_descr.add_options()
@@ -227,6 +274,7 @@ int main(int argc, char** argv)
 #endif
 			("input,i", args::value(&model_file), "input magnetic model file (.magpie)")
 			("output,o", args::value(&results_file), "output results file (in cli mode)")
+			("qlist", args::value(&Qlist_file), "input file containing Q points")
 			("timing", args::bool_switch(&show_timing), "show time needed for calculation")
 			("threads,t", args::value(&g_num_threads), "number of threads for calculation")
 			("points,p", args::value(&num_Q_pts), "number of Q points")
@@ -310,7 +358,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 		int ret = 0;
 		if(use_cli)
-			ret = cli_main(model_file, results_file, Qi, Qf, num_Q_pts);
+			ret = cli_main(model_file, results_file, Qi, Qf, num_Q_pts, Qlist_file);
 		else
 			ret = gui_main(argc, argv, model_file, Qi, Qf, num_Q_pts);
 
