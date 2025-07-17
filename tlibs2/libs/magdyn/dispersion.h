@@ -286,7 +286,7 @@ MAGDYN_INST::CalcDispersion(const std::vector<t_vec_real>& Qs,
 	tasks.reserve(num_Qs);
 
 	// calculate dispersion
-	for(const t_vec_real& Q : Qs)
+	for(const t_vec_real/*&*/ Q : Qs)
 	{
 		if(progress_fkt && !(*progress_fkt)(0, num_Qs))
 			break;
