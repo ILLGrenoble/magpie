@@ -88,6 +88,8 @@ void MagDynDlg::Clear()
 		m_groundstate_dlg->SyncFromKernel();
 	if(m_notes_dlg)
 		m_notes_dlg->ClearNotes();
+	if(m_bzscene)
+		m_bzscene->ClearAll();
 
 	// reset some options
 	for(int i = 0; i < 3; ++i)
@@ -168,6 +170,8 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 					this_->CalcAll();
 				else
 					this_->SyncToKernel();
+
+				this_->CalcBZ();
 			}
 		} BOOST_SCOPE_EXIT_END
 		m_ignoreCalc = true;
@@ -482,6 +486,7 @@ bool MagDynDlg::ImportStructure(const QString& filename)
 			if(this_->m_autocalc->isChecked())
 			{
 				this_->SyncToKernel();
+				this_->CalcBZ();
 			}
 		} BOOST_SCOPE_EXIT_END
 		m_ignoreCalc = true;

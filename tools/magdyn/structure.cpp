@@ -423,4 +423,35 @@ void MagDynDlg::CalcBZ()
 
 	m_bz.SetEps(g_eps);
 	m_bz.SetSymOps(GetSymOpsForCurrentSG(), false);
+	m_bz.SetCrystalA(m_dyn.GetCrystalATrafo());
+	m_bz.SetCrystalB(m_dyn.GetCrystalBTrafo());
+
+	m_bz.CalcPeaks(4, false /*invA*/, false /*cut*/);
+	m_bz.CalcPeaks(4, false /*invA*/, true /*cut*/);
+	m_bz.CalcPeaksInvA();
+
+	// get plane coordinate system
+	const t_vec_real* plane = m_dyn.GetScatteringPlane();
+	t_real plane_d = 0.;
+
+	// calculate brillouin zone
+	if(!m_bz.CalcBZ())
+	{
+		std::cerr << "Error calculating Brillouin zone." << std::endl;
+		return;
+	}
+
+	// calculate brillouin zone cut
+	if(!m_bz.CalcBZCut(plane[0], plane[2], plane_d, true))
+	{
+		std::cerr << "Error calculating Brillouin zone cut." << std::endl;
+		return;
+	}
+
+	// draw cut
+	m_bzscene->SetEps(g_eps);
+	m_bzscene->ClearAll();
+	m_bzscene->AddCut(m_bz.GetCutLines(false));
+	m_bzscene->AddPeaks(m_bz.GetPeaksOnPlane(true), &m_bz.GetPeaksOnPlane(false));
+	m_bzview->Centre();
 }

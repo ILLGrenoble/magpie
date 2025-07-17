@@ -96,6 +96,12 @@ find_package(Lapacke REQUIRED)
 add_definitions(-DUSE_LAPACK=1)
 include_directories("${Lapacke_INCLUDE_DIRS}")
 
+find_package(Qhull REQUIRED)
+if(Qhull_FOUND)
+	add_definitions(-DUSE_QHULL)
+	include_directories("${Qhull_INCLUDE_DIRS}")
+endif()
+
 if(USE_MINUIT)
 	find_package(Minuit2)
 endif()
@@ -201,6 +207,7 @@ if(USE_QT)
 		${HDF5_CXX_LIBRARIES}
 		${Minuit2_LIBRARIES}
 		${MINGW_EXTRALIBS}
+		${Qhull_LIBRARIES}
 		gemmi::gemmi_cpp
 
 #		/usr/local/lib/liblapack.a /usr/local/lib/libblas.a libgfortran.so    # for static lapack(e)
@@ -222,6 +229,7 @@ else()
 		${HDF5_CXX_LIBRARIES}
 		${Minuit2_LIBRARIES}
 		${MINGW_EXTRALIBS}
+		${Qhull_LIBRARIES}
 		gemmi::gemmi_cpp
 	)
 endif()

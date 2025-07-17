@@ -62,6 +62,8 @@
 #include "tlibs2/libs/qt/numerictablewidgetitem.h"
 #include "tlibs2/libs/qt/recent.h"
 
+#include "../bz/plot_cut.h"
+
 #include "gui_defs.h"
 #include "graph.h"
 
@@ -167,14 +169,14 @@ protected:
 	QWidget *m_sitespanel{}, *m_termspanel{};
 	QWidget *m_samplepanel{}, *m_sampleenviropanel{};
 	QWidget *m_disppanel{}, *m_hamiltonianpanel{};
-	QWidget *m_coordinatespanel{}, *m_exportpanel{};
-	QWidget *m_varspanel{};
+	QWidget *m_coordinatespanel{}, *m_reciprocalpanel{};
+	QWidget *m_varspanel{}, *m_exportpanel{};
 
-	// sites
+	// sites panel
 	QTableWidget *m_sitestab{};
 	QSpinBox *m_extCell[3]{nullptr, nullptr, nullptr};
 
-	// terms, ordering vector, and rotation axis
+	// terms panel, ordering vector, and rotation axis
 	QTableWidget *m_termstab{};
 	QDoubleSpinBox *m_maxdist{};
 	QSpinBox *m_maxSC{};
@@ -182,7 +184,7 @@ protected:
 	QDoubleSpinBox *m_ordering[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_normaxis[3]{nullptr, nullptr, nullptr};
 
-	// sample
+	// sample panel
 	QDoubleSpinBox *m_xtallattice[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_xtalangles[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_scatteringplane[2*3]{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
@@ -190,9 +192,27 @@ protected:
 	QComboBox *m_comboSG{};
 	QPlainTextEdit *m_ffact{};             // magnetic form factor formula
 
-	QTableWidget *m_varstab{};             // variables
+	// sample environment panel
+	// external magnetic field
+	QDoubleSpinBox *m_field_dir[3]{nullptr, nullptr, nullptr};
+	QDoubleSpinBox *m_field_mag{};
+	QCheckBox *m_align_spins{};
+	QDoubleSpinBox *m_rot_axis[3]{nullptr, nullptr, nullptr};
+	QDoubleSpinBox *m_rot_angle{};
+	QTableWidget *m_fieldstab{};
+	QDoubleSpinBox *m_temperature{};       // temperature
 
-	// dispersion
+	// scattering plane panel
+	BZCutScene<t_vec_real, t_real> *m_bzscene{};
+	BZCutView<t_vec_real, t_real> *m_bzview{};
+
+	// coordinates panel
+	QTableWidget *m_coordinatestab{};
+
+	// variables panel
+	QTableWidget *m_varstab{};
+
+	// dispersion panel
 	QCustomPlot *m_plot{};
 	std::vector<GraphWithWeights*> m_graphs{};
 	QMenu *m_menuDisp{};
@@ -201,27 +221,17 @@ protected:
 	QSpinBox *m_num_points{};
 	QDoubleSpinBox *m_weight_scale{}, *m_weight_min{}, *m_weight_max{};
 
-	// hamiltonian
+	// hamiltonian panel
 	QTextEdit *m_hamiltonian{};
 	QDoubleSpinBox *m_Q[3]{nullptr, nullptr, nullptr};
 
-	// external magnetic field
-	QDoubleSpinBox *m_field_dir[3]{nullptr, nullptr, nullptr};
-	QDoubleSpinBox *m_field_mag{};
-	QCheckBox *m_align_spins{};
-	QDoubleSpinBox *m_rot_axis[3]{nullptr, nullptr, nullptr};
-	QDoubleSpinBox *m_rot_angle{};
-	QTableWidget *m_fieldstab{};
-
-	QDoubleSpinBox *m_temperature{};       // temperature
-	QTableWidget *m_coordinatestab{};      // coordinates
-
-	// export
+	// export panel
 	QDoubleSpinBox *m_exportStartQ[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_exportEndQ[3]{nullptr, nullptr, nullptr};
 	QSpinBox *m_exportNumPoints[3]{nullptr, nullptr, nullptr};
 	QComboBox *m_exportFormat{nullptr};
 
+	// calculation kerneln
 	t_magdyn m_dyn{};                      // magnon dynamics calculation kernel
 	t_bz m_bz{};                           // brillouin zone calculation kernel
 
@@ -261,11 +271,13 @@ protected:
 	void CreateVariablesPanel();
 	void CreateSampleEnvPanel();
 
+	void CreateReciprocalPanel();
+	void CreateCoordinatesPanel();
+
 	// set up output panels
 	void CreateDispersionPanel();
 	void CreateHamiltonPanel();
 	void CreateExportPanel();
-	void CreateCoordinatesPanel();
 
 	// general table operations
 	void MoveTabItemUp(QTableWidget *pTab);

@@ -700,9 +700,9 @@ void MagDynDlg::CreateSamplePanel()
 
 	auto calc_all = [this]()
 	{
-		this->CalcBZ();
 		if(this->m_autocalc->isChecked())
 			this->CalcAll();
+		this->CalcBZ();
 	};
 
 	connect(m_ffact, &QPlainTextEdit::textChanged, calc_all);
@@ -1545,6 +1545,27 @@ void MagDynDlg::CreateCoordinatesPanel()
 
 
 	m_tabs_recip->addTab(m_coordinatespanel, "Coordinates");
+}
+
+
+
+/**
+ * panel for visualising the scattering plane
+ */
+void MagDynDlg::CreateReciprocalPanel()
+{
+	m_reciprocalpanel = new QWidget(this);
+
+	m_bzscene = new BZCutScene<t_vec_real, t_real>(m_reciprocalpanel);
+	m_bzview = new BZCutView<t_vec_real, t_real>(m_bzscene);
+
+	QGridLayout *grid = new QGridLayout(m_reciprocalpanel);
+	grid->setSpacing(4);
+	grid->setContentsMargins(6, 6, 6, 6);
+
+	grid->addWidget(m_bzview, 0, 0, 1, 4);
+
+	m_tabs_recip->addTab(m_reciprocalpanel, "Scattering Plane");
 }
 
 

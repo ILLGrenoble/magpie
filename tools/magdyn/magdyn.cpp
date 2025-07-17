@@ -81,10 +81,12 @@ MagDynDlg::MagDynDlg(QWidget* pParent) : QDialog{pParent},
 	CreateSampleEnvPanel();
 	CreateVariablesPanel();
 
+	CreateReciprocalPanel();
+	CreateCoordinatesPanel();
+
 	// create output panels
 	CreateDispersionPanel();
 	CreateHamiltonPanel();
-	CreateCoordinatesPanel();
 	CreateExportPanel();
 
 
