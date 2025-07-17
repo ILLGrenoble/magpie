@@ -270,7 +270,7 @@ MAGDYN_TYPE::SofQEs
 MAGDYN_INST::CalcDispersion(const std::vector<t_vec_real>& Qs,
 	t_size num_threads, std::function<bool(int, int)> *progress_fkt) const
 {
-	const t_size num_Qs = num_Qs;
+	const t_size num_Qs = Qs.size();
 
 	// determine number of threads
 	if(num_threads == 0)
@@ -286,14 +286,13 @@ MAGDYN_INST::CalcDispersion(const std::vector<t_vec_real>& Qs,
 	tasks.reserve(num_Qs);
 
 	// calculate dispersion
-	for(const t_vec_real/*&*/ Q : Qs)
+	for(const t_vec_real& Q : Qs)
 	{
 		if(progress_fkt && !(*progress_fkt)(0, num_Qs))
 			break;
 
 		auto task = [this, Q]() -> SofQE
 		{
-			// get Q
 			return CalcEnergies(Q, false);
 		};
 
