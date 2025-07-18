@@ -98,6 +98,10 @@ extern t_real g_bose_cutoff;
 extern unsigned int g_cholesky_maxtries;
 extern t_real g_cholesky_delta;
 
+// brillouin zone calculation settings
+extern unsigned int g_bz_calc_order;
+extern unsigned int g_bz_draw_order;
+
 // optional features
 extern int g_allow_ortho_spin, g_allow_general_J;
 extern int g_evecs_ortho;
@@ -138,7 +142,7 @@ extern unsigned int g_stop_check_fraction;
 // ----------------------------------------------------------------------------
 #include "dialogs/settings.h"
 
-constexpr std::array<SettingsVariable, 22> g_settingsvariables
+constexpr std::array<SettingsVariable, 24> g_settingsvariables
 {{
 	// threads
 	{
@@ -185,6 +189,18 @@ constexpr std::array<SettingsVariable, 22> g_settingsvariables
 		.description = "Cholesky delta per trial.",
 		.key = "cholesky_delta",
 		.value = &g_cholesky_delta,
+	},
+
+	// settings for brillouin zone calculation
+	{
+		.description = "BZ calculation order.",
+		.key = "bz_calc_order",
+		.value = &g_bz_calc_order,
+	},
+	{
+		.description = "BZ drawing order.",
+		.key = "bz_draw_order",
+		.value = &g_bz_draw_order,
 	},
 
 	// file options

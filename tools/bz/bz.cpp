@@ -401,12 +401,16 @@ void BZDlg::CreateBZPanel()
 	connect(m_BZDrawOrder,
 		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
 		[this](int order) { this->SetDrawOrder(order); });
-	//connect(m_bzview, &BZCutView<t_vec, t_real>::SignalMouseCoordinates,
-	//	this, &BZDlg::BZCutMouseMoved);
+
+#ifdef BZ_USE_QT_SIGNALS
+	connect(m_bzview, &BZCutView<t_vec, t_real>::SignalMouseCoordinates,
+		this, &BZDlg::BZCutMouseMoved);
+#else
 	m_bzview->AddMouseCoordinatesSlot([this](t_real x, t_real y)
 	{
 		this->BZCutMouseMoved(x, y);
 	});
+#endif
 
 	connect(m_BZCalcOrder,
 		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),

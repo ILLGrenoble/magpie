@@ -288,6 +288,10 @@ public:
 	}
 
 
+	BZCutView(const BZCutView<t_vec, t_real>&) = delete;
+	BZCutView<t_vec, t_real>& operator=(const BZCutView<t_vec, t_real>&) = delete;
+
+
 	virtual ~BZCutView()
 	{
 	}

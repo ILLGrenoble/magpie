@@ -61,6 +61,10 @@ t_real g_bose_cutoff = 0.025;
 unsigned int g_cholesky_maxtries = 50;
 t_real g_cholesky_delta = 0.0025;
 
+// brillouin zone calculation settings
+unsigned int g_bz_calc_order = 4;
+unsigned int g_bz_draw_order = 4;
+
 // optional features
 int g_allow_ortho_spin = 0;
 int g_allow_general_J = 1;

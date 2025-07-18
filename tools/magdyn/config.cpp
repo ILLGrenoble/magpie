@@ -44,15 +44,20 @@ extern int g_prec;
 
 
 
-void MagDynDlg::Clear()
+void MagDynDlg::Clear(bool recalc)
 {
-	BOOST_SCOPE_EXIT(this_)
+	BOOST_SCOPE_EXIT(this_, recalc)
 	{
 		this_->m_ignoreCalc = false;
-		//this_->SyncToKernel();
 
-		if(this_->m_structplot_dlg)
-			this_->m_structplot_dlg->Sync();
+		if(recalc)
+		{
+			this_->SyncToKernel();
+			this_->CalcBZ();
+
+			if(this_->m_structplot_dlg)
+				this_->m_structplot_dlg->Sync();
+		}
 	} BOOST_SCOPE_EXIT_END
 	m_ignoreCalc = true;
 
@@ -70,6 +75,20 @@ void MagDynDlg::Clear()
 	SetCurrentFile("");
 
 	// reset some defaults
+	for(int i = 0; i < 3; ++i)
+	{
+		m_xtallattice[i]->setValue(5);
+		m_xtalangles[i]->setValue(90);
+	}
+
+	m_scatteringplane[0]->setValue(1);
+	m_scatteringplane[1]->setValue(0);
+	m_scatteringplane[2]->setValue(0);
+
+	m_scatteringplane[3]->setValue(0);
+	m_scatteringplane[4]->setValue(1);
+	m_scatteringplane[5]->setValue(0);
+
 	m_comboSG->setCurrentIndex(0);
 
 	m_ordering[0]->setValue(0.);
@@ -146,10 +165,12 @@ void MagDynDlg::Load()
 	if(filename == "" || !QFile::exists(filename))
 		return;
 
-	Clear();
+	Clear(false);
 
 	if(Load(filename))
 		SetCurrentFileAndDir(filename);
+	else
+		Clear(true);
 }
 
 
@@ -462,12 +483,16 @@ void MagDynDlg::ImportStructure()
 	if(filename == "" || !QFile::exists(filename))
 		return;
 
-	Clear();
+	Clear(false);
 
 	if(ImportStructure(filename))
 	{
 		m_sett->setValue("dir_struct", QFileInfo(filename).path());
 		m_recent_struct.AddRecentFile(filename);
+	}
+	else
+	{
+		Clear(true);
 	}
 }
 

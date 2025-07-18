@@ -1565,6 +1565,16 @@ void MagDynDlg::CreateReciprocalPanel()
 
 	grid->addWidget(m_bzview, 0, 0, 1, 4);
 
+#ifdef BZ_USE_QT_SIGNALS
+	connect(m_bzview, &BZCutView<t_vec, t_real>::SignalMouseCoordinates,
+		this, &MagDynDlg::BZCutMouseMoved);
+#else
+	m_bzview->AddMouseCoordinatesSlot([this](t_real x, t_real y)
+	{
+		this->BZCutMouseMoved(x, y);
+	});
+#endif
+
 	m_tabs_recip->addTab(m_reciprocalpanel, "Scattering Plane");
 }
 

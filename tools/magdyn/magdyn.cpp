@@ -125,6 +125,7 @@ MagDynDlg::MagDynDlg(QWidget* pParent) : QDialog{pParent},
 	}
 
 	setAcceptDrops(true);
+	Clear();
 }
 
 
@@ -523,7 +524,7 @@ void MagDynDlg::CreateMenuBar()
 	menuHelp->addAction(acAbout);
 
 	// signals
-	connect(acNew, &QAction::triggered, this, &MagDynDlg::Clear);
+	connect(acNew, &QAction::triggered, [this]() { Clear(true); } );
 	connect(acLoad, &QAction::triggered,
 		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::Load));
 	connect(acImportStructure, &QAction::triggered,

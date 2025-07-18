@@ -96,7 +96,7 @@ void MagDynDlg::RotateField(bool ccw)
 	B = R*B;
 	tl2::set_eps_0(B, g_eps);
 
-	for(int i=0; i<3; ++i)
+	for(int i = 0; i < 3; ++i)
 	{
 		m_field_dir[i]->blockSignals(true);
 		m_field_dir[i]->setValue(B[i]);
@@ -426,8 +426,8 @@ void MagDynDlg::CalcBZ()
 	m_bz.SetCrystalA(m_dyn.GetCrystalATrafo());
 	m_bz.SetCrystalB(m_dyn.GetCrystalBTrafo());
 
-	m_bz.CalcPeaks(4, false /*invA*/, false /*cut*/);
-	m_bz.CalcPeaks(4, false /*invA*/, true /*cut*/);
+	m_bz.CalcPeaks(g_bz_calc_order, false /*invA*/, false /*cut*/);
+	m_bz.CalcPeaks(g_bz_draw_order, false /*invA*/, true /*cut*/);
 	m_bz.CalcPeaksInvA();
 
 	// get plane coordinate system
@@ -454,4 +454,28 @@ void MagDynDlg::CalcBZ()
 	m_bzscene->AddCut(m_bz.GetCutLines(false));
 	m_bzscene->AddPeaks(m_bz.GetPeaksOnPlane(true), &m_bz.GetPeaksOnPlane(false));
 	m_bzview->Centre();
+}
+
+
+
+/**
+ * calculate reciprocal coordinates of the cursor position
+ */
+void MagDynDlg::BZCutMouseMoved(t_real x, t_real y)
+{
+	t_real plane_d = 0. * m_bz.GetCutNormScale();  // plane always goes through Gamma point
+
+	t_vec_real QinvA = m_bz.GetCutPlane() * tl2::create<t_vec_real>({ x, y, plane_d });
+	t_mat_real B_inv = m_dyn.GetCrystalATrafo() / (t_real(2)*tl2::pi<t_real>);
+	t_vec_real Qrlu = B_inv * QinvA;
+
+	tl2::set_eps_0(QinvA, g_eps);
+	tl2::set_eps_0(Qrlu, g_eps);
+
+	std::ostringstream ostr;
+	ostr.precision(g_prec_gui);
+
+	ostr << "Q = (" << QinvA[0] << ", " << QinvA[1] << ", " << QinvA[2] << ") Å⁻¹";
+	ostr << " = (" << Qrlu[0] << ", " << Qrlu[1] << ", " << Qrlu[2] << ") rlu.";
+	m_status->setText(ostr.str().c_str());
 }

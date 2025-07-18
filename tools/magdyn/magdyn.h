@@ -146,7 +146,7 @@ protected:
 	std::function<bool(const QString& filename)> m_open_func
 		= [this](const QString& filename) -> bool
 	{
-		this->Clear();
+		this->Clear(false);
 		this->SetCurrentFile(filename);
 		return this->Load(filename);
 	};
@@ -155,7 +155,7 @@ protected:
 	std::function<bool(const QString& filename)> m_import_struct_func
 		= [this](const QString& filename) -> bool
 	{
-		this->Clear();
+		this->Clear(false);
 		return this->ImportStructure(filename);
 	};
 
@@ -353,7 +353,7 @@ protected:
 
 	std::pair<t_vec_real, t_vec_real> GetDispersionQ() const;
 	void ClearDispersion(bool replot = false);
-	void Clear();
+	void Clear(bool recalc = true);
 
 	void Load();
 	void Save();
@@ -386,6 +386,9 @@ protected:
 	void CalcAll();              // syncs sites and terms and calculates all dynamics
 	void CalcBZ();               // calculate brillouin zone and cut
 	void SetKernel(const t_magdyn* dyn, bool sync_sites = true, bool sync_terms = true, bool sync_idx = true);
+
+	// reciprocal space plot
+	void BZCutMouseMoved(t_real x, t_real y);
 
 	// plotter functions
 	void PlotDispersion();
