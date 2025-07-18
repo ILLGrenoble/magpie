@@ -26,6 +26,9 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <boost/functional/hash.hpp>
+#include <boost/scope_exit.hpp>
+
 #include "struct_plot.h"
 #include "helper.h"
 
@@ -36,9 +39,6 @@
 
 #include <unordered_set>
 #include <functional>
-
-#include <boost/functional/hash.hpp>
-#include <boost/scope_exit.hpp>
 
 using namespace tl2_ops;
 
@@ -113,6 +113,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	m_status->setFrameShadow(QFrame::Sunken);
 
 	QPushButton *btnOk = new QPushButton("OK", this);
+	btnOk->setIcon(style()->standardIcon(QStyle::SP_DialogOkButton));
 
 	// general context menu
 	m_context = new QMenu(this);
@@ -150,6 +151,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	auto grid = new QGridLayout(this);
 	grid->setSpacing(4);
 	grid->setContentsMargins(8, 8, 8, 8);
+
 	grid->addWidget(m_structplot, y++, 0, 1, 6);
 	grid->addWidget(m_coordcross, y, 0, 1, 2);
 	grid->addWidget(m_labels, y, 2, 1, 2);

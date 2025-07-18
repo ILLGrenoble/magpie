@@ -25,6 +25,8 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <boost/scope_exit.hpp>
+
 #include "plot.h"
 
 #include <QtWidgets/QGridLayout>
@@ -43,7 +45,7 @@ using namespace tl2_ops;
 BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett)
 	: QDialog{parent}, m_sett{sett}
 {
-	setWindowTitle("Brillouin Zone - 3D View");
+	setWindowTitle("Brillouin Zone");
 	setFont(parent->font());
 	setSizeGripEnabled(true);
 
@@ -55,7 +57,11 @@ BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett)
 	m_plot->GetRenderer()->SetLight(1, tl2::create<t_vec3_gl>({ -5, -5, -5 }));
 	m_plot->GetRenderer()->SetCoordMax(1.);
 	m_plot->GetRenderer()->GetCamera().SetDist(2.);
+	m_plot->GetRenderer()->GetCamera().SetParalellRange(4.);
+	//m_plot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real>(g_structplot_fov));
 	m_plot->GetRenderer()->GetCamera().UpdateTransformation();
+	m_plot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
+
 
 	//auto labCoordSys = new QLabel("Coordinate System:", this);
 	//auto comboCoordSys = new QComboBox(this);
@@ -65,7 +71,7 @@ BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett)
 	m_show_coordcross_lab = new QCheckBox("Lab Basis", this);
 	m_show_coordcross_xtal = new QCheckBox("Crystal Basis", this);
 	//m_show_labels = new QCheckBox("Labels", this);
-	m_show_plane = new QCheckBox("Cutting Plane", this);
+	m_show_plane = new QCheckBox("Scattering Plane", this);
 	m_show_Qs = new QCheckBox("Q Vertices", this);
 	m_show_coordcross_lab->setToolTip("Show or hide the basis vectors of the orthogonal lab system (in units of Å⁻¹).");
 	m_show_coordcross_xtal->setToolTip("Show or hide the basis vectors of the generally non-orthogonal crystal system (in units of rlu, expressed in the lab basis).");
@@ -77,6 +83,35 @@ BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett)
 	//m_show_labels->setChecked(true);
 	m_show_plane->setChecked(true);
 	m_show_Qs->setChecked(true);
+
+	m_perspective = new QCheckBox("Perspective Projection", this);
+	m_perspective->setToolTip("Switch between perspective and parallel projection.");
+	m_perspective->setChecked(true);
+
+	QPushButton *btn_100 = new QPushButton("[100] View", this);
+	QPushButton *btn_010 = new QPushButton("[010] View", this);
+	QPushButton *btn_001 = new QPushButton("[001] View", this);
+	QPushButton *btn_110 = new QPushButton("[110] View", this);
+	btn_100->setToolTip("View along [100] axis.");
+	btn_010->setToolTip("View along [010] axis.");
+	btn_001->setToolTip("View along [001] axis.");
+	btn_110->setToolTip("View along [110] axis.");
+
+	m_cam_phi = new QDoubleSpinBox(this);
+	m_cam_phi->setRange(0., 360.);
+	m_cam_phi->setSingleStep(1.);
+	m_cam_phi->setDecimals(std::max(m_prec_gui - 2, 2));
+	m_cam_phi->setPrefix("φ = ");
+	m_cam_phi->setSuffix("°");
+	m_cam_phi->setToolTip("Camera polar rotation angle φ.");
+
+	m_cam_theta = new QDoubleSpinBox(this);
+	m_cam_theta->setRange(-180., 180.);
+	m_cam_theta->setSingleStep(1.);
+	m_cam_theta->setDecimals(std::max(m_prec_gui - 2, 2));
+	m_cam_theta->setPrefix("θ = ");
+	m_cam_theta->setSuffix("°");
+	m_cam_theta->setToolTip("Camera azimuthal rotation angle θ.");
 
 	// status bar
 	m_status = new QLabel(this);
@@ -97,21 +132,38 @@ BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett)
 	m_context->addAction(acSaveImage);
 
 	auto grid = new QGridLayout(this);
-	grid->setSpacing(2);
-	grid->setContentsMargins(4, 4, 4, 4);
-	grid->addWidget(m_plot.get(), 0, 0, 1, 4);
-	//grid->addWidget(labCoordSys, 1, 0, 1, 1);
-	//grid->addWidget(comboCoordSys, 1, 1, 1, 1);
-	grid->addWidget(m_show_coordcross_lab, 1, 0, 1, 1);
-	grid->addWidget(m_show_coordcross_xtal, 1, 1, 1, 1);
-	//grid->addWidget(m_show_labels, 1, 1, 1, 1);
-	grid->addWidget(m_show_plane, 1, 2, 1, 1);
-	grid->addWidget(m_show_Qs, 1, 3, 1, 1);
-	grid->addWidget(m_status, 2, 0, 1, 3);
-	grid->addWidget(okbtn, 2, 3, 1, 1);
+	grid->setSpacing(4);
+	grid->setContentsMargins(8, 8, 8, 8);
 
+	int y = 0;
+	grid->addWidget(m_plot.get(), y++, 0, 1, 4);
+
+	//grid->addWidget(labCoordSys, y, 0, 1, 1);
+	//grid->addWidget(comboCoordSys, y, 1, 1, 1);
+	grid->addWidget(m_show_coordcross_lab, y, 0, 1, 1);
+	grid->addWidget(m_show_coordcross_xtal, y, 1, 1, 1);
+	//grid->addWidget(m_show_labels, y, 1, 1, 1);
+	grid->addWidget(m_show_plane, y, 2, 1, 1);
+	grid->addWidget(m_show_Qs, y++, 3, 1, 1);
+
+	grid->addWidget(btn_100, y, 0, 1, 1);
+	grid->addWidget(btn_010, y, 1, 1, 1);
+	grid->addWidget(btn_001, y, 2, 1, 1);
+	grid->addWidget(btn_110, y++, 3, 1, 1);
+
+	grid->addWidget(new QLabel("Camera Angles:", this), y, 0, 1, 1);
+	grid->addWidget(m_cam_phi, y, 1, 1, 1);
+	grid->addWidget(m_cam_theta, y, 2, 1, 1);
+	grid->addWidget(m_perspective, y++, 3, 1, 1);
+
+	grid->addWidget(m_status, y, 0, 1, 3);
+	grid->addWidget(okbtn, y++, 3, 1, 1);
+
+	// signals
 	connect(m_plot.get(), &tl2::GlPlot::AfterGLInitialisation,
 		this, &BZPlotDlg::AfterGLInitialisation);
+	connect(m_plot->GetRenderer(), &tl2::GlPlotRenderer::CameraHasUpdated,
+		this, &BZPlotDlg::CameraHasUpdated);
 	connect(m_plot->GetRenderer(), &tl2::GlPlotRenderer::PickerIntersection,
 		this, &BZPlotDlg::PickerIntersection);
 	connect(m_plot.get(), &tl2::GlPlot::MouseClick, this, &BZPlotDlg::PlotMouseClick);
@@ -131,6 +183,39 @@ BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett)
 	});*/
 	connect(acSaveImage, &QAction::triggered, this, &BZPlotDlg::SaveImage);
 	connect(okbtn, &QAbstractButton::clicked, this, &QDialog::accept);
+
+	connect(btn_100, &QAbstractButton::clicked, [this]
+	{
+		this->SetCameraRotation(t_real_gl(90.), -t_real_gl(90.));
+	});
+	connect(btn_010, &QAbstractButton::clicked, [this]
+	{
+		this->SetCameraRotation(0., -t_real_gl(90.));
+	});
+	connect(btn_001, &QAbstractButton::clicked, [this]
+	{
+		this->SetCameraRotation(0., t_real_gl(180.));
+	});
+	connect(btn_110, &QAbstractButton::clicked, [this]
+	{
+		this->SetCameraRotation(t_real_gl(45.), -t_real_gl(90.));
+	});
+
+	connect(m_perspective, &QCheckBox::toggled, this, &BZPlotDlg::SetPerspectiveProjection);
+
+	connect(m_cam_phi,
+		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		[this](t_real_gl phi) -> void
+	{
+		this->SetCameraRotation(phi, m_cam_theta->value());
+	});
+
+	connect(m_cam_theta,
+		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		[this](t_real_gl theta) -> void
+	{
+		this->SetCameraRotation(m_cam_phi->value(), theta);
+	});
 
 	if(m_sett && m_sett->contains("bz3d/geo"))
 		restoreGeometry(m_sett->value("bz3d/geo").toByteArray());
@@ -514,7 +599,64 @@ void BZPlotDlg::AfterGLInitialisation()
 	auto [ver, shader_ver, vendor, renderer]
 		= m_plot->GetRenderer()->GetGlDescr();
 	emit GlDeviceInfos(ver, shader_ver, vendor, renderer);
+
+	ShowCoordCrossLab(m_show_coordcross_lab->isChecked());
+	ShowCoordCrossXtal(m_show_coordcross_xtal->isChecked());
+	//ShowLabels(m_labels->isChecked());
+	SetPerspectiveProjection(m_perspective->isChecked());
+	CameraHasUpdated();
 }
+
+
+/**
+ * choose between perspective or parallel projection
+ */
+void BZPlotDlg::SetPerspectiveProjection(bool proj)
+{
+	m_plot->GetRenderer()->GetCamera().SetPerspectiveProjection(proj);
+	m_plot->GetRenderer()->RequestViewportUpdate();
+	m_plot->GetRenderer()->GetCamera().UpdateTransformation();
+	m_plot->update();
+}
+
+
+/**
+ * sets the camera's rotation angles
+ */
+void BZPlotDlg::SetCameraRotation(t_real_gl phi, t_real_gl theta)
+{
+	phi = tl2::d2r<t_real>(phi);
+	theta = tl2::d2r<t_real>(theta);
+
+	m_plot->GetRenderer()->GetCamera().SetRotation(phi, theta);
+	m_plot->GetRenderer()->GetCamera().UpdateTransformation();
+	CameraHasUpdated();
+	m_plot->update();
+}
+
+
+/**
+ * the camera's properties have been updated
+ */
+void BZPlotDlg::CameraHasUpdated()
+{
+	auto [phi, theta] = m_plot->GetRenderer()->GetCamera().GetRotation();
+
+	phi = tl2::r2d<t_real>(phi);
+	theta = tl2::r2d<t_real>(theta);
+
+	BOOST_SCOPE_EXIT(this_)
+	{
+		this_->m_cam_phi->blockSignals(false);
+		this_->m_cam_theta->blockSignals(false);
+	} BOOST_SCOPE_EXIT_END
+	m_cam_phi->blockSignals(true);
+	m_cam_theta->blockSignals(true);
+
+	m_cam_phi->setValue(phi);
+	m_cam_theta->setValue(theta);
+}
+
 
 
 /**

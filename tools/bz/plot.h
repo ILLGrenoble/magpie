@@ -31,6 +31,7 @@
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QMenu>
 #include <QtCore/QSettings>
 
@@ -73,6 +74,10 @@ protected:
 	void ShowLabels(bool show);
 	void ShowPlane(bool show);
 	void ShowQVertices(bool show);
+	void SetCameraRotation(t_real_gl phi, t_real_gl theta);
+	void SetPerspectiveProjection(bool proj);
+
+	void CameraHasUpdated();
 
 	void PlotMouseClick(bool left, bool mid, bool right);
 	void PlotMouseDown(bool left, bool mid, bool right);
@@ -100,11 +105,10 @@ private:
 	std::size_t m_sphere{ 0 }, m_plane{ 0 };
 
 	QLabel *m_status{};
-	QCheckBox *m_show_coordcross_lab{};
-	QCheckBox *m_show_coordcross_xtal{};
-	QCheckBox *m_show_labels{};
-	QCheckBox *m_show_plane{};
-	QCheckBox *m_show_Qs{};
+	QCheckBox *m_show_coordcross_lab{}, *m_show_coordcross_xtal{};
+	QCheckBox *m_show_labels{}, *m_show_plane{}, *m_show_Qs{};
+	QCheckBox *m_perspective{};
+	QDoubleSpinBox *m_cam_phi{}, *m_cam_theta{};
 
 	QMenu *m_context{};                       // plot context menu
 
