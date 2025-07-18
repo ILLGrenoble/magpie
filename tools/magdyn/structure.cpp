@@ -421,10 +421,13 @@ void MagDynDlg::CalcBZ()
 	if(m_ignoreCalc)
 		return;
 
+	const t_mat_real& xtalA = m_dyn.GetCrystalATrafo();
+	const t_mat_real& xtalB = m_dyn.GetCrystalBTrafo();
+
 	m_bz.SetEps(g_eps);
 	m_bz.SetSymOps(GetSymOpsForCurrentSG(), false);
-	m_bz.SetCrystalA(m_dyn.GetCrystalATrafo());
-	m_bz.SetCrystalB(m_dyn.GetCrystalBTrafo());
+	m_bz.SetCrystalA(xtalA);
+	m_bz.SetCrystalB(xtalB);
 
 	m_bz.CalcPeaks(g_bz_calc_order, false /*invA*/, false /*cut*/);
 	m_bz.CalcPeaks(g_bz_draw_order, false /*invA*/, true /*cut*/);
@@ -448,12 +451,45 @@ void MagDynDlg::CalcBZ()
 		return;
 	}
 
-	// draw cut
-	m_bzscene->SetEps(g_eps);
-	m_bzscene->ClearAll();
-	m_bzscene->AddCut(m_bz.GetCutLines(false));
-	m_bzscene->AddPeaks(m_bz.GetPeaksOnPlane(true), &m_bz.GetPeaksOnPlane(false));
-	m_bzview->Centre();
+	// draw brillouin zone
+	if(m_bz_dlg)
+	{
+		m_bz_dlg->SetABTrafo(xtalA, xtalB);
+		m_bz_dlg->SetEps(g_eps);
+		m_bz_dlg->SetPrecGui(g_prec_gui);
+
+		// clear old plot
+		m_bz_dlg->Clear();
+
+		// add gamma point
+		std::size_t idx000 = m_bz.Get000Peak();
+		const std::vector<t_vec_bz>& Qs_invA = m_bz.GetPeaks(true);
+		if(idx000 < Qs_invA.size())
+			m_bz_dlg->AddBraggPeak(Qs_invA[idx000]);
+
+		// add voronoi vertices forming the vertices of the BZ
+		for(const t_vec_bz& voro : m_bz.GetVertices())
+			m_bz_dlg->AddVoronoiVertex(voro);
+
+		// add voronoi bisectors
+		m_bz_dlg->AddTriangles(m_bz.GetAllTriangles(), &m_bz.GetAllTrianglesFaceIndices());
+
+		// scattering plane
+		m_bz_dlg->SetPlane(
+			tl2::col<t_mat_real, t_vec_real>(m_bz.GetCutPlane(), 2),  // normal
+			m_bz.GetCutPlaneD());                                     // distance, here: 0
+	}
+
+	// draw brillouin zone cut
+	if(m_bzscene)
+	{
+		m_bzscene->SetEps(g_eps);
+		m_bzscene->SetPrecGui(g_prec_gui);
+		m_bzscene->ClearAll();
+		m_bzscene->AddCut(m_bz.GetCutLines(false));
+		m_bzscene->AddPeaks(m_bz.GetPeaksOnPlane(true), &m_bz.GetPeaksOnPlane(false));
+		m_bzview->Centre();
+	}
 }
 
 

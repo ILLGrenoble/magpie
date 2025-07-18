@@ -229,7 +229,7 @@ void BZPlotDlg::ShowQVertices(bool show)
 /**
  * set the crystal matrices
  */
-void BZPlotDlg::SetABTrafo(const t_mat& crystA, const t_mat& crystB)
+void BZPlotDlg::SetABTrafo(const t_mat_bz& crystA, const t_mat_bz& crystB)
 {
 	m_crystA = crystA;
 	m_crystB = crystB;
@@ -245,7 +245,7 @@ void BZPlotDlg::SetABTrafo(const t_mat& crystA, const t_mat& crystB)
 /**
  * add a voronoi vertex to the plot
  */
-void BZPlotDlg::AddVoronoiVertex(const t_vec& pos)
+void BZPlotDlg::AddVoronoiVertex(const t_vec_bz& pos)
 {
 	if(!m_plot)
 		return;
@@ -271,7 +271,7 @@ void BZPlotDlg::AddVoronoiVertex(const t_vec& pos)
 /**
  * add a bragg peak to the plot
  */
-void BZPlotDlg::AddBraggPeak(const t_vec& pos)
+void BZPlotDlg::AddBraggPeak(const t_vec_bz& pos)
 {
 	if(!m_plot)
 		return;
@@ -297,10 +297,12 @@ void BZPlotDlg::AddBraggPeak(const t_vec& pos)
 /**
  * add polygons to the plot
  */
-void BZPlotDlg::AddTriangles(const std::vector<t_vec>& _vecs,
+void BZPlotDlg::AddTriangles(const std::vector<t_vec_bz>& _vecs,
 	const std::vector<std::size_t> *faceindices)
 {
 	if(!m_plot || _vecs.size() < 3)
+		return;
+	if(!m_plot->GetRenderer())
 		return;
 
 	t_real_gl r = 1, g = 0, b = 0;
@@ -358,7 +360,7 @@ void BZPlotDlg::AddTriangles(const std::vector<t_vec>& _vecs,
 /**
  * set the brillouin zone cut plane
  */
-void BZPlotDlg::SetPlane(const t_vec& _norm, t_real d)
+void BZPlotDlg::SetPlane(const t_vec_bz& _norm, t_real d)
 {
 	if(!m_plot)
 		return;
@@ -414,15 +416,15 @@ void BZPlotDlg::PickerIntersection(
 		return;
 	}
 
-	t_vec QinvA = tl2::convert<t_vec>(*pos);
-	t_mat Binv = m_crystA / (t_real(2)*tl2::pi<t_real>);
-	t_vec Qrlu = Binv * QinvA;
+	t_vec_bz QinvA = tl2::convert<t_vec_bz>(*pos);
+	t_mat_bz Binv = m_crystA / (t_real(2)*tl2::pi<t_real>);
+	t_vec_bz Qrlu = Binv * QinvA;
 
-	tl2::set_eps_0<t_vec>(QinvA, g_eps);
-	tl2::set_eps_0<t_vec>(Qrlu, g_eps);
+	tl2::set_eps_0<t_vec_bz>(QinvA, m_eps);
+	tl2::set_eps_0<t_vec_bz>(Qrlu, m_eps);
 
 	std::ostringstream ostr;
-	ostr.precision(g_prec_gui);
+	ostr.precision(m_prec_gui);
 
 	// see if this object has stored face indices
 	if(auto iter = m_objFaceIndices.find(objIdx); iter != m_objFaceIndices.end())
@@ -534,4 +536,16 @@ void BZPlotDlg::SaveImage()
 		m_sett->setValue("3dview/dir", QFileInfo(filename).path());
 
 	m_plot->grabFramebuffer().save(filename, nullptr, 90);
+}
+
+
+void BZPlotDlg::SetEps(t_real eps)
+{
+	m_eps = eps;
+}
+
+
+void BZPlotDlg::SetPrecGui(int prec)
+{
+	m_prec_gui = prec;
 }

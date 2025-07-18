@@ -1556,15 +1556,24 @@ void MagDynDlg::CreateReciprocalPanel()
 {
 	m_reciprocalpanel = new QWidget(this);
 
+	// 2d brillouin zone cut
 	m_bzscene = new BZCutScene<t_vec_real, t_real>(m_reciprocalpanel);
 	m_bzview = new BZCutView<t_vec_real, t_real>(m_bzscene);
+
+	// show 3d brillouin zone
+	QPushButton *btnShowBZ = new QPushButton("View Brillouin Zone...", this);
+	btnShowBZ->setIcon(QIcon::fromTheme("applications-graphics"));
+	btnShowBZ->setToolTip("Show a 3D view of the first nuclear Brillouin zone.");
+	btnShowBZ->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
 	QGridLayout *grid = new QGridLayout(m_reciprocalpanel);
 	grid->setSpacing(4);
 	grid->setContentsMargins(6, 6, 6, 6);
 
 	grid->addWidget(m_bzview, 0, 0, 1, 4);
+	grid->addWidget(btnShowBZ, 1, 3, 1, 1);
 
+	// signals
 #ifdef BZ_USE_QT_SIGNALS
 	connect(m_bzview, &BZCutView<t_vec, t_real>::SignalMouseCoordinates,
 		this, &MagDynDlg::BZCutMouseMoved);
@@ -1574,6 +1583,8 @@ void MagDynDlg::CreateReciprocalPanel()
 		this->BZCutMouseMoved(x, y);
 	});
 #endif
+
+	connect(btnShowBZ, &QAbstractButton::clicked, this, &MagDynDlg::ShowBZ3DDlg);
 
 	m_tabs_recip->addTab(m_reciprocalpanel, "Scattering Plane");
 }

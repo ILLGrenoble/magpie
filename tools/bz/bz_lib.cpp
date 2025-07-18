@@ -29,4 +29,4 @@
 #include "globals.h"
 
 
-template class BZCalc<t_mat, t_vec, t_real>;
+template class BZCalc<t_mat_bz, t_vec_bz, t_real>;

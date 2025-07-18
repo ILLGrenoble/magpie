@@ -62,6 +62,7 @@
 #include "tlibs2/libs/qt/numerictablewidgetitem.h"
 #include "tlibs2/libs/qt/recent.h"
 
+#include "../bz/plot.h"
 #include "../bz/plot_cut.h"
 
 #include "gui_defs.h"
@@ -231,7 +232,7 @@ protected:
 	QSpinBox *m_exportNumPoints[3]{nullptr, nullptr, nullptr};
 	QComboBox *m_exportFormat{nullptr};
 
-	// calculation kerneln
+	// calculation kernel
 	t_magdyn m_dyn{};                      // magnon dynamics calculation kernel
 	t_bz m_bz{};                           // brillouin zone calculation kernel
 
@@ -246,6 +247,7 @@ protected:
 	GroundStateDlg *m_groundstate_dlg{};   // ground state minimiser
 	TopologyDlg *m_topo_dlg{};             // topological calculations
 	Dispersion3DDlg *m_disp3d_dlg{};       // 3d dispersion calculations
+	BZPlotDlg *m_bz_dlg{};                 // 3d brillouin zone plotter
 
 
 protected:
@@ -260,6 +262,7 @@ protected:
 	void ShowGroundStateDlg(bool only_create = false);
 	void ShowTopologyDlg(bool only_create = false);
 	void ShowDispersion3DDlg(bool only_create = false);
+	void ShowBZ3DDlg(bool only_create = false);
 	void ShowSettingsDlg();
 	void InitSettingsDlg();
 	void InitSettings();

@@ -52,7 +52,7 @@ struct BZConfig
 
 	boost::optional<int> sg_idx;
 
-	std::vector<t_mat> symops;
+	std::vector<t_mat_bz> symops;
 	std::vector<std::string> formulas;
 };
 

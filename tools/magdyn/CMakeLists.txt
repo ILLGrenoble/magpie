@@ -174,8 +174,8 @@ if(USE_QT)
 		gui_defs.h
 
 		# bz calculator
-		../bz/bz_lib.h
-		../bz/plot_cut.h
+		../bz/bz_lib.h ../bz/plot_cut.h
+		../bz/plot.cpp ../bz/plot.h
 
 		# dialogs
 		dialogs/struct_plot.cpp dialogs/struct_plot.h

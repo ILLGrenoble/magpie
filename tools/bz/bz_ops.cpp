@@ -46,7 +46,7 @@
 using namespace tl2_ops;
 
 
-void BZDlg::AddSymOpTabItem(int row, const t_mat& op)
+void BZDlg::AddSymOpTabItem(int row, const t_mat_bz& op)
 {
 	m_symOpIgnoreChanges = true;
 	BOOST_SCOPE_EXIT(this_)
@@ -81,12 +81,12 @@ void BZDlg::AddSymOpTabItem(int row, const t_mat& op)
 	}
 	else
 	{
-		std::string prop = get_op_properties<t_mat, t_vec>(op, g_eps);
+		std::string prop = get_op_properties<t_mat_bz, t_vec_bz>(op, g_eps_bz);
 		t_real det = tl2::det(op);
 		//t_real det_rot = tl2::det(tl2::submat(op, 3, 3));
 
 		m_symops->setItem(row, COL_OP,
-			new QTableWidgetItem(op_to_str<t_mat>(op, g_prec, g_eps).c_str()));
+			new QTableWidgetItem(op_to_str<t_mat_bz>(op, g_prec_bz, g_eps_bz).c_str()));
 		m_symops->setItem(row, COL_PROP,
 			new QTableWidgetItem(prop.c_str()));
 		m_symops->setItem(row, COL_DET,
@@ -237,8 +237,8 @@ void BZDlg::SymOpTableItemChanged(QTableWidgetItem *item)
 	// update properties
 	if(item->column() == COL_OP)
 	{
-		t_mat op = str_to_op<t_mat>(item->text().toStdString());
-		std::string prop = get_op_properties<t_mat, t_vec>(op, g_eps);
+		t_mat_bz op = str_to_op<t_mat_bz>(item->text().toStdString());
+		std::string prop = get_op_properties<t_mat_bz, t_vec_bz>(op, g_eps_bz);
 		t_real det = tl2::det(op);
 		//t_real det_rot = tl2::det(tl2::submat(op, 3, 3));
 
@@ -321,9 +321,9 @@ void BZDlg::GetSymOpsFromSG()
 /**
  * reads symmetry operations from table
  */
-std::vector<t_mat> BZDlg::GetSymOps(bool only_centring) const
+std::vector<t_mat_bz> BZDlg::GetSymOps(bool only_centring) const
 {
-	std::vector<t_mat> ops;
+	std::vector<t_mat_bz> ops;
 	ops.reserve(m_symops->rowCount());
 
 	for(int row = 0; row < m_symops->rowCount(); ++row)
@@ -335,11 +335,11 @@ std::vector<t_mat> BZDlg::GetSymOps(bool only_centring) const
 			continue;
 		}
 
-		t_mat op = str_to_op<t_mat>(op_item->text().toStdString());
+		t_mat_bz op = str_to_op<t_mat_bz>(op_item->text().toStdString());
 
 		bool add_op = true;
 		if(only_centring)
-			add_op = tl2::hom_is_centring<t_mat>(op, g_eps);
+			add_op = tl2::hom_is_centring<t_mat_bz>(op, g_eps_bz);
 
 		if(add_op)
 			ops.emplace_back(std::move(op));

@@ -63,12 +63,12 @@ BZDlg::BZDlg(QWidget* pParent) : QDialog{pParent},
 	}
 	if(sett_core.contains("main/prec"))
 	{
-		g_prec = sett_core.value("main/prec").toInt();
-		g_eps = std::pow(t_real(10), -t_real(g_prec));
+		g_prec_bz = sett_core.value("main/prec").toInt();
+		g_eps_bz = std::pow(t_real(10), -t_real(g_prec_bz));
 	}
 	if(sett_core.contains("main/prec_gfx"))
 	{
-		g_prec_gui = sett_core.value("main/prec_gfx").toInt();
+		g_prec_gui_bz = sett_core.value("main/prec_gfx").toInt();
 	}
 
 	// create gui
@@ -223,7 +223,7 @@ void BZDlg::CreateSymopsPanel()
 
 
 	// get space groups and symops
-	auto spacegroups = get_sgs<t_mat>();
+	auto spacegroups = get_sgs<t_mat_bz>();
 	m_sg_ops.reserve(spacegroups.size());
 	for(auto [sgnum, descr, ops] : spacegroups)
 	{
@@ -327,8 +327,8 @@ void BZDlg::CreateBZPanel()
 	grid->setSpacing(4);
 	grid->setContentsMargins(4,4,4,4);
 
-	m_bzscene = new BZCutScene<t_vec, t_real>(bzpanel);
-	m_bzview = new BZCutView<t_vec, t_real>(m_bzscene);
+	m_bzscene = new BZCutScene<t_vec_bz, t_real>(bzpanel);
+	m_bzview = new BZCutView<t_vec_bz, t_real>(m_bzscene);
 
 	for(QDoubleSpinBox** const cut : {
 		&m_cutNX, &m_cutNY, &m_cutNZ,
@@ -403,7 +403,7 @@ void BZDlg::CreateBZPanel()
 		[this](int order) { this->SetDrawOrder(order); });
 
 #ifdef BZ_USE_QT_SIGNALS
-	connect(m_bzview, &BZCutView<t_vec, t_real>::SignalMouseCoordinates,
+	connect(m_bzview, &BZCutView<t_vec_bz, t_real>::SignalMouseCoordinates,
 		this, &BZDlg::BZCutMouseMoved);
 #else
 	m_bzview->AddMouseCoordinatesSlot([this](t_real x, t_real y)

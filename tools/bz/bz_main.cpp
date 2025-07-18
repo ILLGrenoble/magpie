@@ -70,8 +70,8 @@ static int cli_main(const std::string& cfg_file, const std::string& results_file
 	{
 		BZConfig cfg = load_bz_config(cfg_file, use_stdin);
 
-		BZCalc<t_mat, t_vec, t_real> bzcalc;
-		bzcalc.SetEps(g_eps);
+		BZCalc<t_mat_bz, t_vec_bz, t_real> bzcalc;
+		bzcalc.SetEps(g_eps_bz);
 		bzcalc.SetSymOps(cfg.symops, false);
 		if(cfg.xtal_a && cfg.xtal_b && cfg.xtal_c &&
 			cfg.xtal_alpha && cfg.xtal_beta && cfg.xtal_gamma)
@@ -88,7 +88,7 @@ static int cli_main(const std::string& cfg_file, const std::string& results_file
 		}
 
 		// get calculated bz
-		std::string results = bzcalc.PrintJSON(g_prec);
+		std::string results = bzcalc.PrintJSON(g_prec_bz);
 
 		if(results_file == "")
 		{
@@ -186,7 +186,7 @@ int main(int argc, char** argv)
 	}
 
 	if(eps >= 0.)
-		set_eps(eps);
+		set_eps_bz(eps);
 
 #ifndef DONT_USE_QT
 	// either start the cli or the gui program

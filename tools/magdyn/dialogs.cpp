@@ -265,3 +265,29 @@ void MagDynDlg::ShowDispersion3DDlg(bool only_create)
 		m_disp3d_dlg->activateWindow();
 	}
 }
+
+
+
+/**
+ * show the 3d brillouin zone plotter
+ */
+void MagDynDlg::ShowBZ3DDlg(bool only_create)
+{
+	if(!m_bz_dlg)
+	{
+		m_bz_dlg = new BZPlotDlg(this, m_sett);
+
+		connect(m_bz_dlg, &BZPlotDlg::NeedRecalc,
+			[this]() { this->CalcBZ(); } );
+		connect(m_bz_dlg, &BZPlotDlg::GlDeviceInfos,
+			m_info_dlg, &InfoDlg::SetGlDeviceInfos);
+	}
+
+	if(!only_create)
+	{
+		m_bz_dlg->show();
+		m_bz_dlg->raise();
+		m_bz_dlg->activateWindow();
+		m_bz_dlg->focusWidget();
+	}
+}

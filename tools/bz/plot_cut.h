@@ -152,7 +152,7 @@ public:
 				const t_vec& Q_rlu = (*peaks_rlu)[Q_idx];
 
 				std::ostringstream ostr;
-				ostr.precision(m_eps);
+				ostr.precision(m_prec_gui);
 
 				ostr << "(" << Q_rlu[0] << " " << Q_rlu[1] << " " << Q_rlu[2] << ")";
 				ell->setToolTip(ostr.str().c_str());
@@ -244,6 +244,12 @@ public:
 	}
 
 
+	void SetPrecGui(int prec)
+	{
+		m_prec_gui = prec;
+	}
+
+
 	void SetScale(t_real scale)
 	{
 		m_scale = scale;
@@ -257,7 +263,9 @@ public:
 
 
 protected:
-	t_real m_eps { 1e-7 };
+	t_real m_eps{ 1e-7 };
+	int m_prec_gui{ 4 };
+
 	t_real m_scale{ 100. };
 
 	std::vector<QGraphicsItem*> m_bzcut{};

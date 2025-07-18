@@ -50,14 +50,20 @@ public:
 	BZPlotDlg(QWidget* pParent = nullptr, QSettings *sett = nullptr);
 	~BZPlotDlg() = default;
 
+	BZPlotDlg(const BZPlotDlg&) = delete;
+	BZPlotDlg& operator=(const BZPlotDlg&) = delete;
+
 	void Clear();
 
-	void SetABTrafo(const t_mat& crystA, const t_mat& crystB);
-	void AddVoronoiVertex(const t_vec& pos);
-	void AddBraggPeak(const t_vec& pos);
-	void AddTriangles(const std::vector<t_vec>& vecs,
+	void SetABTrafo(const t_mat_bz& crystA, const t_mat_bz& crystB);
+	void AddVoronoiVertex(const t_vec_bz& pos);
+	void AddBraggPeak(const t_vec_bz& pos);
+	void AddTriangles(const std::vector<t_vec_bz>& vecs,
 		const std::vector<std::size_t> *faceindices = nullptr);
-	void SetPlane(const t_vec& norm, t_real d);
+	void SetPlane(const t_vec_bz& norm, t_real d);
+
+	void SetEps(t_real eps);
+	void SetPrecGui(int prec);
 
 
 protected:
@@ -82,24 +88,27 @@ protected:
 
 
 private:
-	t_mat m_crystA = tl2::unit<t_mat>(3);   // crystal A matrix
-	t_mat m_crystB = tl2::unit<t_mat>(3);   // crystal B matrix
+	t_real m_eps{ 1e-7 };
+	int m_prec_gui{ 4 };
 
-	QSettings *m_sett = nullptr;
+	t_mat_bz m_crystA{ tl2::unit<t_mat_bz>(3) };  // crystal A matrix
+	t_mat_bz m_crystB{ tl2::unit<t_mat_bz>(3) };  // crystal B matrix
 
-	std::shared_ptr<tl2::GlPlot> m_plot;
-	std::size_t m_sphere = 0, m_plane = 0;
+	QSettings *m_sett{};
 
-	QLabel *m_status = nullptr;
-	QCheckBox *m_show_coordcross_lab = nullptr;
-	QCheckBox *m_show_coordcross_xtal = nullptr;
-	QCheckBox *m_show_labels = nullptr;
-	QCheckBox *m_show_plane = nullptr;
-	QCheckBox *m_show_Qs = nullptr;
+	std::shared_ptr<tl2::GlPlot> m_plot{};
+	std::size_t m_sphere{ 0 }, m_plane{ 0 };
+
+	QLabel *m_status{};
+	QCheckBox *m_show_coordcross_lab{};
+	QCheckBox *m_show_coordcross_xtal{};
+	QCheckBox *m_show_labels{};
+	QCheckBox *m_show_plane{};
+	QCheckBox *m_show_Qs{};
 
 	QMenu *m_context{};                       // plot context menu
 
-	long m_curPickedObj = -1;                 // current 3d bz object
+	long m_curPickedObj{ -1 };                // current 3d bz object
 	std::vector<std::size_t> m_objsBragg{};   // Bragg peak plot objects
 	std::vector<std::size_t> m_objsVoronoi{}; // Voronoi vertex plot objects
 	std::vector<std::size_t> m_objsBZ{};      // BZ triangle plot objects

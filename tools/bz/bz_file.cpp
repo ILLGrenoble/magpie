@@ -138,7 +138,7 @@ bool BZDlg::Load(const QString& filename, bool use_stdin)
 			m_comboSG->setCurrentIndex(*cfg.sg_idx);
 
 		// symops
-		for(const t_mat& symop : cfg.symops)
+		for(const t_mat_bz& symop : cfg.symops)
 			AddSymOpTabItem(-1, symop);
 
 		// formulas
@@ -221,7 +221,7 @@ bool BZDlg::Save(const QString& filename)
 		QMessageBox::critical(this, "Brillouin Zones", "Cannot open file for writing.");
 		return false;
 	}
-	ofstr.precision(g_prec);
+	ofstr.precision(g_prec_bz);
 	pt::write_xml(ofstr, node, pt::xml_writer_make_settings('\t', 1, std::string{"utf-8"}));
 
 	return true;
@@ -282,7 +282,7 @@ void BZDlg::ImportCIF()
 		m_sett->setValue("dir_cif", QFileInfo(filename).path());
 
 		auto [errstr, atoms, generatedatoms, atomnames, lattice, symops] =
-			load_cif<t_vec, t_mat>(filename.toStdString(), g_eps);
+			load_cif<t_vec_bz, t_mat_bz>(filename.toStdString(), g_eps_bz);
 		if(errstr != "")
 		{
 			QMessageBox::critical(this, "CIF Importer", errstr.c_str());

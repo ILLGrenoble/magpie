@@ -268,7 +268,8 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acStructExportSun = new QAction("Export To Sunny Code...");
 	QAction *acStructExportSW = new QAction("Export To SpinW Code...");
 	QAction *acStructNotes = new QAction("Notes...", menuStruct);
-	QAction *acStructView = new QAction("View...", menuStruct);
+	QAction *acStructView = new QAction("View Structure...", menuStruct);
+	QAction *acBZView = new QAction("View Brillouin Zone...", menuStruct);
 	QAction *acGroundState = new QAction("Minimise Ground State...", menuStruct);
 
 	// dispersion menu
@@ -352,6 +353,7 @@ void MagDynDlg::CreateMenuBar()
 	acStructExportSW->setIcon(QIcon::fromTheme("text-x-script"));
 	acStructNotes->setIcon(QIcon::fromTheme("accessories-text-editor"));
 	acStructView->setIcon(QIcon::fromTheme("applications-graphics"));
+	acBZView->setIcon(QIcon::fromTheme("applications-graphics"));
 
 	// calculation menu
 	QMenu *menuCalc = new QMenu("Calculation", m_menu);
@@ -469,7 +471,9 @@ void MagDynDlg::CreateMenuBar()
 	menuStruct->addAction(acStructNotes);
 	menuStruct->addSeparator();
 	menuStruct->addAction(acStructView);
+	menuStruct->addAction(acBZView);
 #ifdef __TLIBS2_MAGDYN_USE_MINUIT__
+	menuStruct->addSeparator();
 	menuStruct->addAction(acGroundState);
 #endif
 	menuStruct->addSeparator();
@@ -573,6 +577,7 @@ void MagDynDlg::CreateMenuBar()
 	connect(acStructSymIdx, &QAction::triggered, this, &MagDynDlg::CalcSymmetryIndices);
 	connect(acStructSortCouplings, &QAction::triggered, this, &MagDynDlg::SortTerms);
 	connect(acStructView, &QAction::triggered, this, &MagDynDlg::ShowStructPlotDlg);
+	connect(acBZView, &QAction::triggered, this, &MagDynDlg::ShowBZ3DDlg);
 	connect(acGroundState, &QAction::triggered, this, &MagDynDlg::ShowGroundStateDlg);
 	connect(acDisp3D, &QAction::triggered, this, &MagDynDlg::ShowDispersion3DDlg);
 	connect(acTopo, &QAction::triggered, this, &MagDynDlg::ShowTopologyDlg);

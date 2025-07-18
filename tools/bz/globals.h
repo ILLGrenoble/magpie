@@ -36,15 +36,15 @@ namespace math = boost::math;
 #include "libs/defs.h"
 
 
-using t_vec = tl2::vec<t_real, std::vector>;
-using t_mat = tl2::mat<t_real, std::vector>;
-using t_quat = math::quaternion<t_real>;
+using t_vec_bz = tl2::vec<t_real, std::vector>;
+using t_mat_bz = tl2::mat<t_real, std::vector>;
+using t_quat_bz = math::quaternion<t_real>;
 
-extern t_real g_eps;
-extern int g_prec;
-extern int g_prec_gui;
+extern t_real g_eps_bz;
+extern int g_prec_bz;
+extern int g_prec_gui_bz;
 
-extern void set_eps(t_real eps, int prec = -1);
+extern void set_eps_bz(t_real eps, int prec = -1);
 
 
 #ifndef DONT_USE_QT

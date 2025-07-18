@@ -110,7 +110,7 @@ private:
 	// tabs
 	QTabWidget *m_tabs_in{}, *m_tabs_out{};
 
-	// 3d plotter
+	// 3d brillouin zone plotter
 	BZPlotDlg *m_dlgPlot = nullptr;
 	QLabel *m_labelGlInfos[4] = { nullptr, nullptr, nullptr, nullptr };
 
@@ -127,8 +127,8 @@ private:
 	QMenu *m_symOpContextMenuNoItem = nullptr;   // menu if nothing is selected
 
 	// brillouin zone and cuts panel
-	BZCutScene<t_vec, t_real> *m_bzscene = nullptr;
-	BZCutView<t_vec, t_real> *m_bzview = nullptr;
+	BZCutScene<t_vec_bz, t_real> *m_bzscene = nullptr;
+	BZCutView<t_vec_bz, t_real> *m_bzview = nullptr;
 	QDoubleSpinBox *m_cutX = nullptr;
 	QDoubleSpinBox *m_cutY = nullptr;
 	QDoubleSpinBox *m_cutZ = nullptr;
@@ -163,22 +163,22 @@ private:
 		return this->Load(filename);
 	};
 
-	t_mat m_crystA = tl2::unit<t_mat>(3);        // crystal A matrix
-	t_mat m_crystB = tl2::unit<t_mat>(3);        // crystal B matrix
+	t_mat_bz m_crystA = tl2::unit<t_mat_bz>(3);     // crystal A matrix
+	t_mat_bz m_crystB = tl2::unit<t_mat_bz>(3);     // crystal B matrix
 
-	std::vector<std::vector<t_mat>> m_sg_ops{};  // symops per space group
-	BZCalc<t_mat, t_vec, t_real> m_bzcalc;       // calculation kernel
+	std::vector<std::vector<t_mat_bz>> m_sg_ops{};  // symops per space group
+	BZCalc<t_mat_bz, t_vec_bz, t_real> m_bzcalc;    // calculation kernel
 
 
 protected:
 	// space group / symops tab
-	void AddSymOpTabItem(int row = -1, const t_mat& op = tl2::unit<t_mat>(4));
+	void AddSymOpTabItem(int row = -1, const t_mat_bz& op = tl2::unit<t_mat_bz>(4));
 	void DelSymOpTabItem(int begin=-2, int end=-2);
 	void MoveSymOpTabItemUp();
 	void MoveSymOpTabItemDown();
 	void SymOpTableItemChanged(QTableWidgetItem *item);
 	void ShowSymOpTableContextMenu(const QPoint& pt);
-	std::vector<t_mat> GetSymOps(bool only_centring = false) const;
+	std::vector<t_mat_bz> GetSymOps(bool only_centring = false) const;
 	std::vector<int> GetSelectedSymOpRows(bool sort_reversed = false) const;
 
 	// formulas tab
