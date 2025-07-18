@@ -132,8 +132,8 @@ BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett)
 	connect(acSaveImage, &QAction::triggered, this, &BZPlotDlg::SaveImage);
 	connect(okbtn, &QAbstractButton::clicked, this, &QDialog::accept);
 
-	if(m_sett && m_sett->contains("3dview/geo"))
-		restoreGeometry(m_sett->value("3dview/geo").toByteArray());
+	if(m_sett && m_sett->contains("bz3d/geo"))
+		restoreGeometry(m_sett->value("bz3d/geo").toByteArray());
 	else
 		resize(640, 640);
 }
@@ -142,12 +142,13 @@ BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett)
 /**
  * dialog is closing
  */
-void BZPlotDlg::closeEvent(QCloseEvent *)
+void BZPlotDlg::accept()
 {
 	if(!m_sett)
 		return;
 
-	m_sett->setValue("3dview/geo", saveGeometry());
+	m_sett->setValue("bz3d/geo", saveGeometry());
+	QDialog::accept();
 }
 
 

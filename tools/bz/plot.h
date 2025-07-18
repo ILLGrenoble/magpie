@@ -84,7 +84,7 @@ protected:
 
 	void SaveImage();
 
-	virtual void closeEvent(QCloseEvent *evt) override;
+	virtual void accept() override;
 
 
 private:
