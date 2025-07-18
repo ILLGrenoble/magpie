@@ -191,7 +191,7 @@ void MagDynDlg::CreateMainWindow()
 	// expanding status
 	m_status = new QLabel(this);
 	m_status->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-	m_status->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+	m_status->setSizePolicy(QSizePolicy::/*Expanding*/Ignored, QSizePolicy::Preferred);
 	m_status->setFrameShape(QFrame::Panel);
 	m_status->setFrameShadow(QFrame::Sunken);
 
