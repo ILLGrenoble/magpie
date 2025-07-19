@@ -80,6 +80,13 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 	labelPaper->setWordWrap(true);
 	labelPaper->setOpenExternalLinks(true);
 
+	auto labelDoi = new QLabel(
+		"Source Code DOI: "
+		"<a href=\"https://doi.org/10.5281/zenodo.16180814\">10.5281/zenodo.16180814</a>.",
+		infopanel);
+	labelDoi->setWordWrap(true);
+	labelDoi->setOpenExternalLinks(true);
+
 	auto labelLicense = new QLabel(
 		"<p>This program is free software: you can redistribute it and/or modify "
 		"it under the terms of the <u>GNU General Public License</u> as published by "
@@ -158,6 +165,7 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 
 	grid->addWidget(sep3, y++,0, 1,1);
 	grid->addWidget(labelPaper, y++,0, 1,1);
+	grid->addWidget(labelDoi, y++,0, 1,1);
 	grid->addWidget(sep4, y++,0, 1,1);
 	grid->addWidget(labelLicense, y++,0, 1,1);
 	grid->addWidget(sep5, y++,0, 1,1);
