@@ -275,7 +275,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 	{
 		ostr << "#\n# Created with Magpie.\n";
 		ostr << "# URL: https://github.com/ILLGrenoble/magpie\n";
-		ostr << "# DOI: https://doi.org/10.5281/zenodo.4117437\n";
+		ostr << "# DOI: https://doi.org/10.5281/zenodo.16180814\n";
 		ostr << "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n";
 		ostr << "#\n\n";
 	}
@@ -377,7 +377,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 	{
 		ostr << "#\n# Created with Magpie.\n";
 		ostr << "# URL: https://github.com/ILLGrenoble/magpie\n";
-		ostr << "# DOI: https://doi.org/10.5281/zenodo.4117437\n";
+		ostr << "# DOI: https://doi.org/10.5281/zenodo.16180814\n";
 		ostr << "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n";
 		ostr << "#\n\n";
 	}
@@ -474,7 +474,7 @@ bool MAGDYN_INST::SaveMultiDispersion(std::ostream& ostr,
 
 	ostr << "#\n# Created with Magpie.\n";
 	ostr << "# URL: https://github.com/ILLGrenoble/magpie\n";
-	ostr << "# DOI: https://doi.org/10.5281/zenodo.4117437\n";
+	ostr << "# DOI: https://doi.org/10.5281/zenodo.16180814\n";
 	ostr << "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n";
 	ostr << "#\n\n";
 
