@@ -300,7 +300,8 @@ int main(int argc, char** argv)
 
 		if(show_help)
 		{
-			std::cout << "This is Magpie by Tobias Weber <tweber@ill.fr>.\n\n"
+			std::cout << "This is Magpie " << MAGPIE_VER
+				<< " by Tobias Weber <tweber@ill.fr>.\n\n"
 				<< arg_descr
 				<< R"BLOCK(
 This program is free software: you can redistribute it and/or modify

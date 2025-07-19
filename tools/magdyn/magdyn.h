@@ -453,6 +453,7 @@ private:
 	bool m_ignoreSitesCalc { false };
 	bool m_stopRequested { false };
 	bool m_startEnabled { true };     // "calc" behaves as start or stop button?
+	bool m_needsBZCalc { true };      // brillouin zone needs to be recalculated
 
 	// optional features
 	bool m_allow_ortho_spin { false };
@@ -470,7 +471,7 @@ private:
 
 
 protected slots:
-	void DispersionQChanged();
+	void DispersionQChanged(bool calc_dyn = true);
 
 
 public slots:

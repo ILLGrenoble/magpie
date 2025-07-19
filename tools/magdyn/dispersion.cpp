@@ -103,9 +103,9 @@ std::pair<t_vec_real, t_vec_real> MagDynDlg::GetDispersionQ() const
 /**
  * a new start or end Q coordinate has been entered
  */
-void MagDynDlg::DispersionQChanged()
+void MagDynDlg::DispersionQChanged(bool calc_dyn)
 {
-	if(this->m_autocalc->isChecked())
+	if(this->m_autocalc->isChecked() && calc_dyn)
 		this->CalcDispersion();
 
 	t_vec_real Q_start, Q_end;

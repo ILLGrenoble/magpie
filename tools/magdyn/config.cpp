@@ -54,13 +54,14 @@ void MagDynDlg::Clear(bool recalc)
 		{
 			this_->SyncToKernel();
 			this_->CalcBZ();
-			this_->DispersionQChanged();
+			this_->DispersionQChanged(recalc);
 
 			if(this_->m_structplot_dlg)
 				this_->m_structplot_dlg->Sync();
 		}
 	} BOOST_SCOPE_EXIT_END
 	m_ignoreCalc = true;
+	m_needsBZCalc = true;
 
 	// clear old tables
 	DelTabItem(m_sitestab, -1);
@@ -195,10 +196,11 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 					this_->SyncToKernel();
 
 				this_->CalcBZ();
-				this_->DispersionQChanged();
+				this_->DispersionQChanged(false);
 			}
 		} BOOST_SCOPE_EXIT_END
 		m_ignoreCalc = true;
+		m_needsBZCalc = true;
 
 		// properties tree
 		pt::ptree node;
@@ -209,7 +211,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 
 		// check signature
 		if(auto optInfo = node.get_optional<std::string>("magdyn.meta.info");
-			!optInfo || !(*optInfo==std::string{"magdyn_tool"}))
+			!optInfo || !(*optInfo == std::string{"magdyn_tool"}))
 		{
 			ShowError("Unrecognised file format.");
 			return false;
@@ -516,10 +518,11 @@ bool MagDynDlg::ImportStructure(const QString& filename)
 			{
 				this_->SyncToKernel();
 				this_->CalcBZ();
-				this_->DispersionQChanged();
+				this_->DispersionQChanged(false);
 			}
 		} BOOST_SCOPE_EXIT_END
 		m_ignoreCalc = true;
+		m_needsBZCalc = true;
 
 		// properties tree
 		pt::ptree node;

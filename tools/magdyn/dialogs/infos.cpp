@@ -6,7 +6,7 @@
  *
  * ----------------------------------------------------------------------------
  * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2018-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -61,13 +61,13 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 	labelTitle->setFont(fontTitle);
 	labelTitle->setAlignment(Qt::AlignHCenter);
 
-	auto labelVersion = new QLabel("Version " MAGCORE_VER ".", infopanel);
+	auto labelVersion = new QLabel("Version " MAGPIE_VER " (for Takin " MAGCORE_VER ").", infopanel);
 	labelVersion->setAlignment(Qt::AlignHCenter);
 
 	auto labelAuthor = new QLabel("Written by Tobias Weber <tweber@ill.fr>.", infopanel);
 	labelAuthor->setAlignment(Qt::AlignHCenter);
 
-	auto labelDate = new QLabel("2022 - 2024.", infopanel);
+	auto labelDate = new QLabel("2022 - 2025.", infopanel);
 	labelDate->setAlignment(Qt::AlignHCenter);
 
 	auto labelPaper = new QLabel(

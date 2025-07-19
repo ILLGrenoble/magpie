@@ -767,6 +767,13 @@ void MagDynDlg::CalcAll()
 	if(m_structplot_dlg)
 		m_structplot_dlg->Sync();
 
+	// calculate brillouin zone if needed
+	if(m_needsBZCalc)
+	{
+		CalcBZ();
+		DispersionQChanged(false);
+	}
+
 	// calculate dynamics
 	CalcDispersion();
 	CalcHamiltonian();

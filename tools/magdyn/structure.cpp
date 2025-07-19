@@ -490,6 +490,8 @@ void MagDynDlg::CalcBZ()
 		m_bzscene->AddPeaks(m_bz.GetPeaksOnPlane(true), &m_bz.GetPeaksOnPlane(false));
 		m_bzview->Centre();
 	}
+
+	m_needsBZCalc = false;
 }
 
 

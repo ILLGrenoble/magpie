@@ -700,9 +700,14 @@ void MagDynDlg::CreateSamplePanel()
 
 	auto calc_all = [this]()
 	{
+		m_needsBZCalc = true;
+
 		if(this->m_autocalc->isChecked())
+		{
 			this->CalcAll();
-		this->CalcBZ();
+			this->CalcBZ();
+			this->DispersionQChanged(false);
+		}
 	};
 
 	connect(m_ffact, &QPlainTextEdit::textChanged, calc_all);
@@ -1463,11 +1468,19 @@ void MagDynDlg::CreateCoordinatesPanel()
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
 		"Add Coordinate Before", this,
-		[this]() { this->AddCoordinateTabItem(-2); });
+		[this]()
+	{
+		this->AddCoordinateTabItem(-2, "",
+			m_Q_start[0]->value(), m_Q_start[1]->value(), m_Q_start[2]->value());
+	});
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
 		"Add Coordinate After", this,
-		[this]() { this->AddCoordinateTabItem(-3); });
+		[this]()
+	{
+		this->AddCoordinateTabItem(-3, "",
+			m_Q_start[0]->value(), m_Q_start[1]->value(), m_Q_start[2]->value());
+	});
 	menuTableContext->addAction(
 		QIcon::fromTheme("edit-copy"),
 		"Clone Coordinate", this,
@@ -1491,8 +1504,21 @@ void MagDynDlg::CreateCoordinatesPanel()
 	QMenu *menuTableContextNoItem = new QMenu(m_coordinatestab);
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-add"),
-		"Add Coordinate", this,
-		[this]() { this->AddCoordinateTabItem(-1, "", 1.,0.,0.); });
+		"Add Start Q Coordinate", this,
+		[this]()
+	{
+		this->AddCoordinateTabItem(-1, "",
+			m_Q_start[0]->value(), m_Q_start[1]->value(), m_Q_start[2]->value());
+	});
+	menuTableContextNoItem->addAction(
+		QIcon::fromTheme("list-add"),
+		"Add End Q Coordinate", this,
+		[this]()
+	{
+		this->AddCoordinateTabItem(-1, "",
+			m_Q_end[0]->value(), m_Q_end[1]->value(), m_Q_end[2]->value());
+	});
+	menuTableContextNoItem->addSeparator();
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-remove"),
 		"Delete Coordinate", this,
@@ -1517,7 +1543,11 @@ void MagDynDlg::CreateCoordinatesPanel()
 
 	// signals
 	connect(btnAddCoord, &QAbstractButton::clicked,
-		[this]() { this->AddCoordinateTabItem(-1, "", 1.,0.,0.); });
+		[this]()
+	{
+		this->AddCoordinateTabItem(-1, "",
+			m_Q_start[0]->value(), m_Q_start[1]->value(), m_Q_start[2]->value());
+	});
 	connect(btnDelCoord, &QAbstractButton::clicked,
 		[this]() { this->DelTabItem(m_coordinatestab); });
 	connect(btnCoordUp, &QAbstractButton::clicked,

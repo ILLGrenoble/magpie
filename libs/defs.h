@@ -45,6 +45,7 @@ using t_cplx = std::complex<t_real>;
 // ----------------------------------------------------------------------------
 
 
+// corresponds to takin version
 #define MAGCORE_VER "2.8.5"
 
 
