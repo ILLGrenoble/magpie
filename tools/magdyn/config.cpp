@@ -662,7 +662,7 @@ bool MagDynDlg::Save(const QString& filename)
 
 		magdyn.put<std::string>("meta.user", user);
 		magdyn.put<std::string>("meta.url", "https://github.com/ILLGrenoble/takin");
-		magdyn.put<std::string>("meta.doi", "https://doi.org/10.5281/zenodo.4117437");
+		magdyn.put<std::string>("meta.doi", "https://doi.org/10.5281/zenodo.16180814");
 
 		// save user comment as utf8 to avoid collisions with possible xml tags
 		magdyn.put<std::string>("meta.notes", m_notes_dlg->GetNotes());
