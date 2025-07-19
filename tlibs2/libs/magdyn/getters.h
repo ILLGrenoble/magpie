@@ -215,9 +215,9 @@ MAGDYN_TEMPL const t_mat_real& MAGDYN_INST::GetCrystalBTrafo() const
 }
 
 
-MAGDYN_TEMPL const t_mat_real& MAGDYN_INST::GetCrystalUBTrafo() const
+MAGDYN_TEMPL const t_mat_real& MAGDYN_INST::GetCrystalUBTrafo(bool inv) const
 {
-	return m_xtalUB;
+	return inv ? m_xtalUBinv : m_xtalUB;
 }
 
 

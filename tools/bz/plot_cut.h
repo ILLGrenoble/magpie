@@ -323,6 +323,7 @@ protected:
 	{
 		QPointF pos = mapToScene(evt->pos());
 		t_real scale = m_scene->GetScale();
+
 #ifdef BZ_USE_QT_SIGNALS
 		emit SignalMouseCoordinates(pos.x()/scale, pos.y()/scale);
 #else
@@ -330,6 +331,29 @@ protected:
 #endif
 
 		QGraphicsView::mouseMoveEvent(evt);
+	}
+
+
+	virtual void mousePressEvent(QMouseEvent *evt) override
+	{
+		QPointF pos = mapToScene(evt->pos());
+		t_real scale = m_scene->GetScale();
+
+		int buttons = 0;
+		if(evt->buttons() & Qt::LeftButton)
+			buttons |= 1;
+		if(evt->buttons() & Qt::MiddleButton)
+			buttons |= 2;
+		if(evt->buttons() & Qt::RightButton)
+			buttons |= 4;
+
+#ifdef BZ_USE_QT_SIGNALS
+		emit SignalClickCoordinates(buttons, pos.x()/scale, pos.y()/scale);
+#else
+		m_sigClickCoordinates(buttons, pos.x()/scale, pos.y()/scale);
+#endif
+
+		QGraphicsView::mousePressEvent(evt);
 	}
 
 
@@ -343,14 +367,23 @@ protected:
 #ifdef BZ_USE_QT_SIGNALS
 signals:
 	void SignalMouseCoordinates(t_real x, t_real y);
+	void SignalClickCoordinates(int buttons, t_real x, t_real y);
 #else
 	boost::signals2::signal<void(t_real, t_real)> m_sigMouseCoordinates{ };
+	boost::signals2::signal<void(int, t_real, t_real)> m_sigClickCoordinates{ };
 
 public:
 	template<class t_slot>
 	boost::signals2::connection AddMouseCoordinatesSlot(const t_slot& slot)
 	{
 		return m_sigMouseCoordinates.connect(slot);
+	}
+
+
+	template<class t_slot>
+	boost::signals2::connection AddClickCoordinatesSlot(const t_slot& slot)
+	{
+		return m_sigClickCoordinates.connect(slot);
 	}
 #endif
 

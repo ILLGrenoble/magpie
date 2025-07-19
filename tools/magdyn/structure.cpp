@@ -497,16 +497,30 @@ void MagDynDlg::CalcBZ()
 /**
  * calculate reciprocal coordinates of the cursor position
  */
-void MagDynDlg::BZCutMouseMoved(t_real x, t_real y)
+std::pair<t_vec_real, t_vec_real> MagDynDlg::GetBZCutQ(t_real x, t_real y) const
 {
 	t_real plane_d = 0. * m_bz.GetCutNormScale();  // plane always goes through Gamma point
 
 	t_vec_real QinvA = m_bz.GetCutPlane() * tl2::create<t_vec_real>({ x, y, plane_d });
-	t_mat_real B_inv = m_dyn.GetCrystalATrafo() / (t_real(2)*tl2::pi<t_real>);
+	t_mat_real B_inv = tl2::trans(m_dyn.GetCrystalATrafo()) / (t_real(2)*tl2::pi<t_real>);
+	//auto [B_inv, ok] = tl2::inv(m_dyn.GetCrystalBTrafo());
+	//t_mat_real UB_inv = m_dyn.GetCrystalUBTrafo(true);
 	t_vec_real Qrlu = B_inv * QinvA;
 
 	tl2::set_eps_0(QinvA, g_eps);
 	tl2::set_eps_0(Qrlu, g_eps);
+
+	return std::make_pair(QinvA, Qrlu);
+}
+
+
+
+/**
+ * mouse cursor moved
+ */
+void MagDynDlg::BZCutMouseMoved(t_real x, t_real y)
+{
+	auto [QinvA, Qrlu] = GetBZCutQ(x, y);
 
 	std::ostringstream ostr;
 	ostr.precision(g_prec_gui);
@@ -514,4 +528,23 @@ void MagDynDlg::BZCutMouseMoved(t_real x, t_real y)
 	ostr << "Q = (" << QinvA[0] << ", " << QinvA[1] << ", " << QinvA[2] << ") Å⁻¹";
 	ostr << " = (" << Qrlu[0] << ", " << Qrlu[1] << ", " << Qrlu[2] << ") rlu.";
 	m_status->setText(ostr.str().c_str());
+}
+
+
+
+/**
+ * mouse clicked
+ */
+void MagDynDlg::BZCutMouseClicked(int buttons, t_real x, t_real y)
+{
+	if(buttons & 4)  // right button
+	{
+		auto [QinvA, Qrlu] = GetBZCutQ(x, y);
+		m_bz_cur_pos = std::move(Qrlu);
+
+		QPointF _pt{x*m_bzscene->GetScale(), y*m_bzscene->GetScale()};
+		QPoint pt = m_bzview->mapToGlobal(m_bzview->mapFromScene(_pt));
+
+		m_bzcontext->popup(pt);
+	}
 }

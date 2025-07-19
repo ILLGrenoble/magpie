@@ -220,7 +220,7 @@ bool BZDlg::CalcBZCut()
 	{
 		m_dlgPlot->SetPlane(
 			tl2::col<t_mat_bz, t_vec_bz>(m_bzcalc.GetCutPlane(), 2),  // normal
-			m_bzcalc.GetCutPlaneD());                           // distance
+			m_bzcalc.GetCutPlaneD());                                 // distance
 	}
 
 	UpdateBZDescription();

@@ -183,7 +183,7 @@ public:
 
 	const t_mat_real& GetCrystalATrafo() const;
 	const t_mat_real& GetCrystalBTrafo() const;
-	const t_mat_real& GetCrystalUBTrafo() const;
+	const t_mat_real& GetCrystalUBTrafo(bool inv = false) const;
 
 	const MagneticSite& GetMagneticSite(t_size idx) const;
 	const ExchangeTerm& GetExchangeTerm(t_size idx) const;

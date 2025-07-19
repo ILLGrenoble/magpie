@@ -150,11 +150,13 @@ public:
 		m_crystA = A;
 	}
 
+
 	void SetCrystalB(const t_mat& B)
 	{
 		m_crystB = B;
 		m_crystB_ortho = orthonorm_sys<t_mat, t_vec>(m_crystB);
 	}
+
 
 	/**
 	 * sets up a crystal lattice and angles

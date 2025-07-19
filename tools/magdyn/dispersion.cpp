@@ -880,18 +880,28 @@ void MagDynDlg::SetCoordinates(const t_vec_real& Qi, const t_vec_real& Qf, bool 
 		}
 	} BOOST_SCOPE_EXIT_END
 
-	// calculate the dispersion from Qi to Qf
-	m_Q_start[0]->setValue(Qi[0]);
-	m_Q_start[1]->setValue(Qi[1]);
-	m_Q_start[2]->setValue(Qi[2]);
-	m_Q_end[0]->setValue(Qf[0]);
-	m_Q_end[1]->setValue(Qf[1]);
-	m_Q_end[2]->setValue(Qf[2]);
+	const bool set_Qi = (Qi.size() >= 3);
+	const bool set_Qf = (Qf.size() >= 3);
 
-	// calculate the hamiltonian for Qi
-	m_Q[0]->setValue(Qi[0]);
-	m_Q[1]->setValue(Qi[1]);
-	m_Q[2]->setValue(Qi[2]);
+	// calculate the dispersion from Qi to Qf
+	if(set_Qi)
+	{
+		m_Q_start[0]->setValue(Qi[0]);
+		m_Q_start[1]->setValue(Qi[1]);
+		m_Q_start[2]->setValue(Qi[2]);
+
+		// calculate the hamiltonian for Qi
+		m_Q[0]->setValue(Qi[0]);
+		m_Q[1]->setValue(Qi[1]);
+		m_Q[2]->setValue(Qi[2]);
+	}
+
+	if(set_Qf)
+	{
+		m_Q_end[0]->setValue(Qf[0]);
+		m_Q_end[1]->setValue(Qf[1]);
+		m_Q_end[2]->setValue(Qf[2]);
+	}
 }
 
 

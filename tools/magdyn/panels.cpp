@@ -1566,6 +1566,18 @@ void MagDynDlg::CreateReciprocalPanel()
 	btnShowBZ->setToolTip("Show a 3D view of the first nuclear Brillouin zone.");
 	btnShowBZ->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
+	// plot context menu
+	m_bzcontext = new QMenu(this);
+	QAction *acSetQi = new QAction("Set Start Q", m_bzcontext);
+	QAction *acSetQf = new QAction("Set End Q", m_bzcontext);
+	//QAction *acSaveImage = new QAction("Save Image...", m_bzcontext);
+	//acSaveImage->setIcon(QIcon::fromTheme("image-x-generic"));
+
+	m_bzcontext->addAction(acSetQi);
+	m_bzcontext->addAction(acSetQf);
+	//m_bzcontext->addSeparator();
+	//m_bzcontext->addAction(acSaveImage);
+
 	QGridLayout *grid = new QGridLayout(m_reciprocalpanel);
 	grid->setSpacing(4);
 	grid->setContentsMargins(6, 6, 6, 6);
@@ -1577,14 +1589,36 @@ void MagDynDlg::CreateReciprocalPanel()
 #ifdef BZ_USE_QT_SIGNALS
 	connect(m_bzview, &BZCutView<t_vec, t_real>::SignalMouseCoordinates,
 		this, &MagDynDlg::BZCutMouseMoved);
+	connect(m_bzview, &BZCutView<t_vec, t_real>::SignalClickCoordinates,
+		this, &MagDynDlg::BZCutMouseClicked);
 #else
 	m_bzview->AddMouseCoordinatesSlot([this](t_real x, t_real y)
 	{
 		this->BZCutMouseMoved(x, y);
 	});
+	m_bzview->AddClickCoordinatesSlot([this](int buttons, t_real x, t_real y)
+	{
+		this->BZCutMouseClicked(buttons, x, y);
+	});
 #endif
 
 	connect(btnShowBZ, &QAbstractButton::clicked, this, &MagDynDlg::ShowBZ3DDlg);
+
+	connect(acSetQi, &QAction::triggered, [this]()
+	{
+		if(m_bz_cur_pos.size() != 3)
+			return;
+
+		SetCoordinates(m_bz_cur_pos, t_vec_real{}, true);
+	});
+
+	connect(acSetQf, &QAction::triggered, [this]()
+	{
+		if(m_bz_cur_pos.size() != 3)
+			return;
+
+		SetCoordinates(t_vec_real{}, m_bz_cur_pos, true);
+	});
 
 	m_tabs_recip->addTab(m_reciprocalpanel, "Scattering Plane");
 }
