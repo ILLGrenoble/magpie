@@ -9,8 +9,8 @@ authors:
     email: tweber@ill.fr
     affiliation: "Institut Laue-Langevin (ILL), Grenoble, France"
 abstract: "A graphical linear spin-wave calculator."
-message: "Please cite using the DOI 10.5281/zenodo.4117437."
-doi: 10.5281/zenodo.4117437
+message: "Please cite using the DOI 10.5281/zenodo.16180814."
+doi: 10.5281/zenodo.16180814
 type: software
 license: GPL-3.0-only
 repository-code: "https://github.com/ILLGrenoble/magpie"

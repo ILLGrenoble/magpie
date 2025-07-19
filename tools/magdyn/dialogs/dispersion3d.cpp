@@ -1447,7 +1447,7 @@ void Dispersion3DDlg::WriteHeader(std::ostream& ostr) const
 	ostr << "#\n"
 		<< "# Created by Magpie\n"
 		<< "# URL: https://github.com/ILLGrenoble/magpie\n"
-		<< "# DOI: https://doi.org/10.5281/zenodo.4117437\n"
+		<< "# DOI: https://doi.org/10.5281/zenodo.16180814\n"
 		<< "# User: " << user << "\n"
 		<< "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n"
 		<< "#\n# branch_count: " << num_bands << "\n"

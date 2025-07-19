@@ -402,7 +402,7 @@ bool MAGDYN_INST::Save(boost::property_tree::ptree& node) const
 	// write signature
 	node.put<std::string>("meta.info", "magdyn_tool");
 	node.put<std::string>("meta.date", tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()));
-	node.put<std::string>("meta.doi_tlibs", "https://doi.org/10.5281/zenodo.5717779");
+	node.put<std::string>("meta.doi", "https://doi.org/10.5281/zenodo.16180814");
 
 	// external field
 	if(m_field.dir.size() == 3)
