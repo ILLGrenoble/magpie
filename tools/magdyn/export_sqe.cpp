@@ -106,7 +106,7 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 			// write header
 			(*ofstr) << "#\n# Created with Magpie.\n";
 			(*ofstr) << "# URL: https://github.com/ILLGrenoble/magpie\n";
-			(*ofstr) << "# DOI: https://doi.org/10.5281/zenodo.4117437\n";
+			(*ofstr) << "# DOI: https://doi.org/10.5281/zenodo.16180814\n";
 			(*ofstr) << "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n";
 			(*ofstr) << "#\n\n";
 
@@ -423,7 +423,9 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 		tl2::set_h5_string<std::string>(*h5file, "meta_infos/user", user);
 		tl2::set_h5_string<std::string>(*h5file, "meta_infos/date", tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()));
 		tl2::set_h5_string<std::string>(*h5file, "meta_infos/url", "https://github.com/ILLGrenoble/takin");
+		tl2::set_h5_string<std::string>(*h5file, "meta_infos/url_magpie", "https://github.com/ILLGrenoble/magpie");
 		tl2::set_h5_string<std::string>(*h5file, "meta_infos/doi", "https://doi.org/10.5281/zenodo.4117437");
+		tl2::set_h5_string<std::string>(*h5file, "meta_infos/doi_magpie", "https://doi.org/10.5281/zenodo.16180814");
 		tl2::set_h5_string<std::string>(*h5file, "meta_infos/doi_tlibs", "https://doi.org/10.5281/zenodo.5717779");
 
 		tl2::set_h5_string<std::string>(*h5file, "infos/shape", "cuboid");
