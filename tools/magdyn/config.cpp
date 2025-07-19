@@ -54,6 +54,7 @@ void MagDynDlg::Clear(bool recalc)
 		{
 			this_->SyncToKernel();
 			this_->CalcBZ();
+			this_->DispersionQChanged();
 
 			if(this_->m_structplot_dlg)
 				this_->m_structplot_dlg->Sync();
@@ -185,6 +186,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 		BOOST_SCOPE_EXIT(this_, calc_dynamics)
 		{
 			this_->m_ignoreCalc = false;
+
 			if(this_->m_autocalc->isChecked())
 			{
 				if(calc_dynamics)
@@ -193,6 +195,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 					this_->SyncToKernel();
 
 				this_->CalcBZ();
+				this_->DispersionQChanged();
 			}
 		} BOOST_SCOPE_EXIT_END
 		m_ignoreCalc = true;
@@ -508,10 +511,12 @@ bool MagDynDlg::ImportStructure(const QString& filename)
 		BOOST_SCOPE_EXIT(this_)
 		{
 			this_->m_ignoreCalc = false;
+
 			if(this_->m_autocalc->isChecked())
 			{
 				this_->SyncToKernel();
 				this_->CalcBZ();
+				this_->DispersionQChanged();
 			}
 		} BOOST_SCOPE_EXIT_END
 		m_ignoreCalc = true;

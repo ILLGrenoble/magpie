@@ -276,7 +276,8 @@ bool BZDlg::CalcFormulas()
 
 			for(t_real x = min_x; x <= max_x; x += x_delta)
 			{
-				t_vec_bz QinvA = m_bzcalc.GetCutPlane() * tl2::create<t_vec_bz>({ x, 0., plane_d });
+				t_vec_bz QinvA = m_bzcalc.GetCutPlane() *
+					tl2::create<t_vec_bz>({ x, 0., plane_d });
 				//std::cout << x << ": " << QinvA << std::endl;
 
 				parser.register_var("x", x);

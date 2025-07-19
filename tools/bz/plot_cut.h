@@ -79,7 +79,7 @@ public:
 		pen.setColor(qApp->palette().color(QPalette::WindowText));
 		pen.setWidthF(1.);
 
-		m_bzcut.reserve(lines.size() * 2);
+		m_bzcut.reserve(m_bzcut.size() + lines.size() * 2);
 
 		// draw brillouin zones
 		for(const auto& line : lines)
@@ -135,7 +135,7 @@ public:
 		brush.setStyle(Qt::SolidPattern);
 		brush.setColor(col);
 
-		m_peaks.reserve(peaks.size());
+		m_peaks.reserve(m_peaks.size() + peaks.size());
 		const t_real w = 6.;
 
 		for(std::size_t Q_idx = 0; Q_idx < peaks.size(); ++Q_idx)
@@ -144,8 +144,7 @@ public:
 
 			QGraphicsEllipseItem *ell = addEllipse(
 				Q[0]*m_scale - w/2., Q[1]*m_scale - w/2., w, w,
-				pen, brush
-			);
+				pen, brush);
 
 			if(peaks_rlu)
 			{
@@ -176,6 +175,8 @@ public:
 		pen.setColor(QColor(0x00, 0x00, 0xff));
 		pen.setWidthF(2.);
 
+		m_curves.reserve(m_curves.size() + points.size() - 1);
+
 		for(std::size_t i = 0; i < points.size() - 1; ++i)
 		{
 			std::size_t j = i + 1;
@@ -190,11 +191,72 @@ public:
 	}
 
 
+	/**
+	 * adds a line from a start to an end point
+	 */
+	void AddLine(const t_vec& start, const t_vec& end,
+		bool add_verts = false,
+		const std::string& line_tooltip = "",
+		const std::string& start_tooltip = "",
+		const std::string& end_tooltip = "")
+	{
+		// draw line
+		QPen pen;
+		pen.setCosmetic(true);
+		pen.setColor(QColor(0x00, 0x00, 0xff));
+		pen.setWidthF(2.);
+
+		QGraphicsLineItem *plot_line = addLine(QLineF(
+			start[0]*m_scale, start[1]*m_scale,
+			end[0]*m_scale, end[1]*m_scale),
+			pen);
+		plot_line->setToolTip(line_tooltip.c_str());
+
+		m_lines.reserve(m_lines.size() + 1);
+		m_lines.push_back(plot_line);
+
+		// draw vertices
+		const t_real w = 6.;
+		if(add_verts)
+		{
+			QColor colStart(0xff, 0x00, 0x00);
+			QColor colEnd(0x00, 0x00, 0xff);
+
+			QPen penStart, penEnd;
+			penStart.setCosmetic(true);
+			penStart.setColor(colStart);
+			penEnd.setCosmetic(true);
+			penEnd.setColor(colEnd);
+
+			QBrush brushStart, brushEnd;
+			brushStart.setStyle(Qt::SolidPattern);
+			brushStart.setColor(colStart);
+			brushEnd.setStyle(Qt::SolidPattern);
+			brushEnd.setColor(colEnd);
+
+			QGraphicsEllipseItem *ellStart = addEllipse(
+				start[0]*m_scale - w/2., start[1]*m_scale - w/2., w, w,
+				penStart, brushStart);
+			QGraphicsEllipseItem *ellEnd = addEllipse(
+				end[0]*m_scale - w/2., end[1]*m_scale - w/2., w, w,
+				penEnd, brushEnd);
+
+			ellStart->setToolTip(start_tooltip.c_str());
+			ellEnd->setToolTip(end_tooltip.c_str());
+
+			m_line_verts.reserve(m_line_verts.size() + 2);
+			m_line_verts.push_back(ellStart);
+			m_line_verts.push_back(ellEnd);
+		}
+	}
+
+
 	void ClearAll()
 	{
 		ClearCut();
 		ClearPeaks();
 		ClearCurves();
+		ClearLines();
 		clear();
 	}
 
@@ -220,6 +282,17 @@ public:
 		for(QGraphicsItem *item : m_curves)
 			delete item;
 		m_curves.clear();
+	}
+
+
+	void ClearLines()
+	{
+		for(QGraphicsItem *item : m_lines)
+			delete item;
+		for(QGraphicsItem *item : m_line_verts)
+			delete item;
+		m_lines.clear();
+		m_line_verts.clear();
 	}
 
 
@@ -268,9 +341,9 @@ protected:
 
 	t_real m_scale{ 100. };
 
-	std::vector<QGraphicsItem*> m_bzcut{};
-	std::vector<QGraphicsItem*> m_peaks{};
+	std::vector<QGraphicsItem*> m_bzcut{}, m_peaks{};
 	std::vector<QGraphicsItem*> m_curves{};
+	std::vector<QGraphicsItem*> m_lines{}, m_line_verts{};
 };
 // --------------------------------------------------------------------------------
 
