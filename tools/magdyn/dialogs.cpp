@@ -278,7 +278,11 @@ void MagDynDlg::ShowBZ3DDlg(bool only_create)
 		m_bz_dlg = new BZPlotDlg(this, m_sett);
 
 		connect(m_bz_dlg, &BZPlotDlg::NeedRecalc,
-			[this]() { this->CalcBZ(); } );
+			[this]()
+		{
+			this->CalcBZ();
+			this->DispersionQChanged(false);
+		});
 		connect(m_bz_dlg, &BZPlotDlg::GlDeviceInfos,
 			m_info_dlg, &InfoDlg::SetGlDeviceInfos);
 	}
