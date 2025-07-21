@@ -1588,7 +1588,7 @@ void MagDynDlg::CreateReciprocalPanel()
 
 	// 2d brillouin zone cut
 	m_bzscene = new BZCutScene<t_vec_real, t_real>(m_reciprocalpanel);
-	m_bzview = new BZCutView<t_vec_real, t_real>(m_bzscene);
+	m_bzview = new BZCutView<t_vec_real, t_real>(m_bzscene, m_sett);
 
 	// show 3d brillouin zone
 	QPushButton *btnShowBZ = new QPushButton("View Brillouin Zone...", this);
@@ -1596,24 +1596,22 @@ void MagDynDlg::CreateReciprocalPanel()
 	btnShowBZ->setToolTip("Show a 3D view of the first nuclear Brillouin zone.");
 	btnShowBZ->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-	// plot context menu
-	m_bzcontext = new QMenu(this);
-	QAction *acSetQi = new QAction("Set Start Q", m_bzcontext);
-	QAction *acSetQf = new QAction("Set End Q", m_bzcontext);
-	//QAction *acSaveImage = new QAction("Save Image...", m_bzcontext);
-	//acSaveImage->setIcon(QIcon::fromTheme("image-x-generic"));
-
-	m_bzcontext->addAction(acSetQi);
-	m_bzcontext->addAction(acSetQf);
-	//m_bzcontext->addSeparator();
-	//m_bzcontext->addAction(acSaveImage);
-
 	QGridLayout *grid = new QGridLayout(m_reciprocalpanel);
 	grid->setSpacing(4);
 	grid->setContentsMargins(6, 6, 6, 6);
 
 	grid->addWidget(m_bzview, 0, 0, 1, 4);
 	grid->addWidget(btnShowBZ, 1, 3, 1, 1);
+
+	// context menu
+	QMenu* context = m_bzview->GetContextMenu();
+	QAction *acSetQi = new QAction("Set Start Q", context);
+	QAction *acSetQf = new QAction("Set End Q", context);
+
+	QAction* acFirst = context->actions().first();
+	context->insertAction(acFirst, acSetQi);
+	context->insertAction(acFirst, acSetQf);
+	context->insertSeparator(acFirst);
 
 	// signals
 #ifdef BZ_USE_QT_SIGNALS
@@ -1636,18 +1634,20 @@ void MagDynDlg::CreateReciprocalPanel()
 
 	connect(acSetQi, &QAction::triggered, [this]()
 	{
-		if(m_bz_cur_pos.size() != 3)
+		auto [QinvA, Qrlu] = GetBZCutQ(m_bzview->GetClickedPosition(true));
+		if(Qrlu.size() != 3)
 			return;
 
-		SetCoordinates(m_bz_cur_pos, t_vec_real{}, true);
+		SetCoordinates(Qrlu, t_vec_real{}, true);
 	});
 
 	connect(acSetQf, &QAction::triggered, [this]()
 	{
-		if(m_bz_cur_pos.size() != 3)
+		auto [QinvA, Qrlu] = GetBZCutQ(m_bzview->GetClickedPosition(true));
+		if(Qrlu.size() != 3)
 			return;
 
-		SetCoordinates(t_vec_real{}, m_bz_cur_pos, true);
+		SetCoordinates(t_vec_real{}, Qrlu, true);
 	});
 
 	m_tabs_recip->addTab(m_reciprocalpanel, "Scattering Plane");

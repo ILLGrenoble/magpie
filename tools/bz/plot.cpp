@@ -669,14 +669,14 @@ void BZPlotDlg::SaveImage()
 
 	QString dirLast;
 	if(m_sett)
-		dirLast = m_sett->value("3dview/dir", "").toString();
+		dirLast = m_sett->value("bz3d/dir", "").toString();
 	QString filename = QFileDialog::getSaveFileName(
 		this, "Save Brillouin Zone Image",
 		dirLast, "PNG Files (*.png)");
 	if(filename == "")
 		return;
 	if(m_sett)
-		m_sett->setValue("3dview/dir", QFileInfo(filename).path());
+		m_sett->setValue("bz3d/dir", QFileInfo(filename).path());
 
 	m_plot->grabFramebuffer().save(filename, nullptr, 90);
 }

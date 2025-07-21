@@ -328,7 +328,7 @@ void BZDlg::CreateBZPanel()
 	grid->setContentsMargins(4,4,4,4);
 
 	m_bzscene = new BZCutScene<t_vec_bz, t_real>(bzpanel);
-	m_bzview = new BZCutView<t_vec_bz, t_real>(m_bzscene);
+	m_bzview = new BZCutView<t_vec_bz, t_real>(m_bzscene, m_sett);
 
 	for(QDoubleSpinBox** const cut : {
 		&m_cutNX, &m_cutNY, &m_cutNZ,

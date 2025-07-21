@@ -34,12 +34,16 @@
 	#include <boost/signals2/signal.hpp>
 #endif
 
+#include <QtCore/QSettings>
+#include <QtWidgets/QApplication>
 #include <QtWidgets/QGraphicsScene>
 #include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QGraphicsItem>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMenu>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QWheelEvent>
-#include <QtWidgets/QApplication>
+#include <QtSvg/QSvgGenerator>
 
 #include <sstream>
 #include <tuple>
@@ -335,7 +339,31 @@ public:
 	}
 
 
-protected:
+	/**
+	 * save the current plot as image
+	 */
+	bool SaveImage(const QString& filename)
+	{
+		if(filename == "")
+			return false;
+
+		QSvgGenerator svg;
+		//svg.setViewBox(sceneRect());
+		svg.setSize(QSize{ int(sceneRect().width()), int(sceneRect().height()) });
+		svg.setFileName(filename);
+		svg.setTitle("Brillouin zone cut.");
+		svg.setDescription("Created with Magpie (https://doi.org/10.5281/zenodo.16180814).");
+
+		QPainter painter;
+		painter.begin(&svg);
+		render(&painter);
+		painter.end();
+
+		return true;
+	}
+
+
+private:
 	t_real m_eps{ 1e-7 };
 	int m_prec_gui{ 4 };
 
@@ -357,10 +385,19 @@ class BZCutView : public QGraphicsView
 	Q_OBJECT
 #endif
 public:
-	BZCutView(BZCutScene<t_vec, t_real>* scene)
+	BZCutView(BZCutScene<t_vec, t_real>* scene, QSettings *sett = nullptr)
 		: QGraphicsView(scene, static_cast<QWidget*>(scene->parent())),
-		  m_scene(scene)
+		  m_scene{scene}, m_sett{sett}
 	{
+		// context menu
+		m_context = new QMenu(this);
+		QAction *acSaveImage = new QAction("Save Image...", m_context);
+		acSaveImage->setIcon(QIcon::fromTheme("image-x-generic"));
+		m_context->addAction(acSaveImage);
+
+		// connections
+		connect(acSaveImage, &QAction::triggered, this, &BZCutView::SaveImage);
+
 		setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 		setDragMode(QGraphicsView::ScrollHandDrag);
 		setInteractive(true);
@@ -391,11 +428,49 @@ public:
 	}
 
 
+	QMenu* GetContextMenu()
+	{
+		return m_context;
+	}
+
+
+	const t_vec& GetClickedPosition(bool right_button = false) const
+	{
+		return right_button ? m_cur_pos[1] : m_cur_pos[0];
+	}
+
+
+	/**
+	 * save the current plot as image
+	 */
+	bool SaveImage()
+	{
+		if(!m_scene)
+			return false;
+
+		QString dirLast;
+		if(m_sett)
+			dirLast = m_sett->value("bz2d/dir", "").toString();
+		QString filename = QFileDialog::getSaveFileName(
+			this, "Save Reciprocal Space Image",
+			dirLast, "SVG Files (*.svg)");
+		if(filename == "")
+			return false;
+
+		if(!m_scene->SaveImage(filename))
+			return false;
+
+		if(m_sett)
+			m_sett->setValue("bz2d/dir", QFileInfo(filename).path());
+		return true;
+	}
+
+
 protected:
 	virtual void mouseMoveEvent(QMouseEvent *evt) override
 	{
 		QPointF pos = mapToScene(evt->pos());
-		t_real scale = m_scene->GetScale();
+		t_real scale = m_scene ? m_scene->GetScale() : 1.;
 
 #ifdef BZ_USE_QT_SIGNALS
 		emit SignalMouseCoordinates(pos.x()/scale, pos.y()/scale);
@@ -410,7 +485,7 @@ protected:
 	virtual void mousePressEvent(QMouseEvent *evt) override
 	{
 		QPointF pos = mapToScene(evt->pos());
-		t_real scale = m_scene->GetScale();
+		t_real scale = m_scene ? m_scene->GetScale() : 1.;
 
 		int buttons = 0;
 		if(evt->buttons() & Qt::LeftButton)
@@ -419,6 +494,22 @@ protected:
 			buttons |= 2;
 		if(evt->buttons() & Qt::RightButton)
 			buttons |= 4;
+
+		// show context menu
+		if(buttons & 1)  // left button
+		{
+			m_cur_pos[0] = tl2::create<t_vec>({ pos.x() / scale, pos.y() / scale });
+		}
+
+		if(buttons & 4)  // right button
+		{
+			m_cur_pos[1] = tl2::create<t_vec>({ pos.x() / scale, pos.y() / scale });
+
+			QPointF _pt{ pos.x(), pos.y() };
+			QPoint pt = mapToGlobal(mapFromScene(_pt));
+
+			m_context->popup(pt);
+		}
 
 #ifdef BZ_USE_QT_SIGNALS
 		emit SignalClickCoordinates(buttons, pos.x()/scale, pos.y()/scale);
@@ -437,15 +528,17 @@ protected:
 	}
 
 
+public:
 #ifdef BZ_USE_QT_SIGNALS
 signals:
 	void SignalMouseCoordinates(t_real x, t_real y);
 	void SignalClickCoordinates(int buttons, t_real x, t_real y);
+
 #else
+
 	boost::signals2::signal<void(t_real, t_real)> m_sigMouseCoordinates{ };
 	boost::signals2::signal<void(int, t_real, t_real)> m_sigClickCoordinates{ };
 
-public:
 	template<class t_slot>
 	boost::signals2::connection AddMouseCoordinatesSlot(const t_slot& slot)
 	{
@@ -461,8 +554,12 @@ public:
 #endif
 
 
-protected:
+private:
 	BZCutScene<t_vec, t_real>* m_scene{ };
+	QSettings *m_sett{};
+
+	QMenu *m_context{};     // right-click context menu
+	t_vec m_cur_pos[2]{};   // current position when clicking on plot
 };
 // --------------------------------------------------------------------------------
 

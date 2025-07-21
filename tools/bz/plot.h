@@ -28,12 +28,12 @@
 #ifndef __BZTOOL_PLOTTER_H__
 #define __BZTOOL_PLOTTER_H__
 
+#include <QtCore/QSettings>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QMenu>
-#include <QtCore/QSettings>
 
 #include <memory>
 #include <vector>

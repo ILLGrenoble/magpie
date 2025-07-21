@@ -206,7 +206,6 @@ protected:
 	// scattering plane panel
 	BZCutScene<t_vec_real, t_real> *m_bzscene{};
 	BZCutView<t_vec_real, t_real> *m_bzview{};
-	QMenu *m_bzcontext{};
 
 	// coordinates panel
 	QTableWidget *m_coordinatestab{};
@@ -394,7 +393,7 @@ protected:
 	// reciprocal space plot
 	void BZCutMouseMoved(t_real x, t_real y);
 	void BZCutMouseClicked(int buttons, t_real x, t_real y);
-	std::pair<t_vec_real, t_vec_real> GetBZCutQ(t_real x, t_real y) const;
+	std::pair<t_vec_real, t_vec_real> GetBZCutQ(const t_vec_real& pos) const;
 
 	// plotter functions
 	void PlotDispersion();
@@ -465,9 +464,6 @@ private:
 	QVector<int> m_degen_data{};
 	t_size m_Q_idx{};                 // plot x axis
 	t_real m_Q_min{}, m_Q_max{};      // plot x axis range
-
-	// data for reciprocal space plot
-	t_vec_real m_bz_cur_pos{};        // clicked position
 
 
 protected slots:
