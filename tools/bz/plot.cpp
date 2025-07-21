@@ -503,11 +503,11 @@ void BZPlotDlg::PickerIntersection(
 	}
 
 	t_vec_bz QinvA = tl2::convert<t_vec_bz>(*pos);
-	t_mat_bz Binv = m_crystA / (t_real(2)*tl2::pi<t_real>);
-	t_vec_bz Qrlu = Binv * QinvA;
+	t_mat_bz Binv =  tl2::trans(m_crystA) / (t_real(2)*tl2::pi<t_real>);
+	m_cur_Qrlu = Binv * QinvA;
 
 	tl2::set_eps_0<t_vec_bz>(QinvA, m_eps);
-	tl2::set_eps_0<t_vec_bz>(Qrlu, m_eps);
+	tl2::set_eps_0<t_vec_bz>(m_cur_Qrlu, m_eps);
 
 	std::ostringstream ostr;
 	ostr.precision(m_prec_gui);
@@ -524,11 +524,10 @@ void BZPlotDlg::PickerIntersection(
 	}
 
 	ostr << "Q = (" << QinvA[0] << ", " << QinvA[1] << ", " << QinvA[2] << ") Å⁻¹";
-	ostr << " = (" << Qrlu[0] << ", " << Qrlu[1] << ", " << Qrlu[2] << ") rlu.";
+	ostr << " = (" << m_cur_Qrlu[0] << ", " << m_cur_Qrlu[1] << ", " << m_cur_Qrlu[2] << ") rlu.";
 
 	SetStatusMsg(ostr.str());
 }
-
 
 
 /**
@@ -548,8 +547,15 @@ void BZPlotDlg::PlotMouseClick(
 	[[maybe_unused]] bool mid,
 	[[maybe_unused]] bool right)
 {
+	if(left)
+	{
+		m_clicked_Q_rlu[0] = m_cur_Qrlu;
+	}
+
 	if(right)
 	{
+		m_clicked_Q_rlu[1] = m_cur_Qrlu;
+
 		const QPointF& _pt = m_plot->GetRenderer()->GetMousePosition();
 		QPoint pt = m_plot->mapToGlobal(_pt.toPoint());
 
@@ -596,8 +602,7 @@ void BZPlotDlg::AfterGLInitialisation()
 	emit NeedRecalc();
 
 	// GL device info
-	auto [ver, shader_ver, vendor, renderer]
-		= m_plot->GetRenderer()->GetGlDescr();
+	auto [ver, shader_ver, vendor, renderer] = m_plot->GetRenderer()->GetGlDescr();
 	emit GlDeviceInfos(ver, shader_ver, vendor, renderer);
 
 	ShowCoordCrossLab(m_show_coordcross_lab->isChecked());
@@ -658,7 +663,6 @@ void BZPlotDlg::CameraHasUpdated()
 }
 
 
-
 /**
  * save an image of the brillouin zone
  */
@@ -691,4 +695,16 @@ void BZPlotDlg::SetEps(t_real eps)
 void BZPlotDlg::SetPrecGui(int prec)
 {
 	m_prec_gui = prec;
+}
+
+
+QMenu* BZPlotDlg::GetContextMenu()
+{
+	return m_context;
+}
+
+
+const t_vec_bz& BZPlotDlg::GetClickedPosition(bool right_button) const
+{
+	return right_button ? m_clicked_Q_rlu[1] : m_clicked_Q_rlu[0];
 }

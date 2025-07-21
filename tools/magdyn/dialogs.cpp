@@ -277,6 +277,17 @@ void MagDynDlg::ShowBZ3DDlg(bool only_create)
 	{
 		m_bz_dlg = new BZPlotDlg(this, m_sett);
 
+		// context menu
+		QMenu* context = m_bz_dlg->GetContextMenu();
+		QAction *acSetQi = new QAction("Set Start Q", context);
+		QAction *acSetQf = new QAction("Set End Q", context);
+
+		QAction* acFirst = context->actions().first();
+		context->insertAction(acFirst, acSetQi);
+		context->insertAction(acFirst, acSetQf);
+		context->insertSeparator(acFirst);
+
+		// connections
 		connect(m_bz_dlg, &BZPlotDlg::NeedRecalc,
 			[this]()
 		{
@@ -285,6 +296,24 @@ void MagDynDlg::ShowBZ3DDlg(bool only_create)
 		});
 		connect(m_bz_dlg, &BZPlotDlg::GlDeviceInfos,
 			m_info_dlg, &InfoDlg::SetGlDeviceInfos);
+
+		connect(acSetQi, &QAction::triggered, [this]()
+		{
+			const t_vec_real& Qrlu = m_bz_dlg->GetClickedPosition(true);
+			if(Qrlu.size() != 3)
+				return;
+
+			SetCoordinates(Qrlu, t_vec_real{}, true);
+		});
+
+		connect(acSetQf, &QAction::triggered, [this]()
+		{
+			const t_vec_real& Qrlu = m_bz_dlg->GetClickedPosition(true);
+			if(Qrlu.size() != 3)
+				return;
+
+			SetCoordinates(t_vec_real{}, Qrlu, true);
+		});
 	}
 
 	if(!only_create)

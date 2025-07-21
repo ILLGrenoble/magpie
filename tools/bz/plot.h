@@ -66,6 +66,9 @@ public:
 	void SetEps(t_real eps);
 	void SetPrecGui(int prec);
 
+	QMenu* GetContextMenu();
+	const t_vec_bz& GetClickedPosition(bool right_button = false) const;
+
 
 protected:
 	void SetStatusMsg(const std::string& msg);
@@ -116,6 +119,9 @@ private:
 	std::vector<std::size_t> m_objsBragg{};   // Bragg peak plot objects
 	std::vector<std::size_t> m_objsVoronoi{}; // Voronoi vertex plot objects
 	std::vector<std::size_t> m_objsBZ{};      // BZ triangle plot objects
+
+	t_vec_bz m_cur_Qrlu{};                    // current cursor position
+	t_vec_bz m_clicked_Q_rlu[2]{};            // clicked position
 
 	// maps an object to its triangles' BZ face indices
 	std::unordered_map<std::size_t, std::vector<std::size_t>> m_objFaceIndices{};
