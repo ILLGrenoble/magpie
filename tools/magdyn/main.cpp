@@ -1,7 +1,7 @@
 /**
  * magnetic dynamics -- entry point
  * @author Tobias Weber <tweber@ill.fr>
- * @date 2022 - 2024
+ * @date 2022 - 2025
  * @license GPLv3, see 'LICENSE' file
  * @desc The present version was forked on 28-Dec-2018 from my privately developed "misc" project (https://github.com/t-weber/misc).
  *
@@ -45,8 +45,7 @@ namespace pt = boost::property_tree;
 
 
 #ifdef DONT_USE_QT
-static int gui_main(int argc, char** argv, const std::string& model_file,
-	const t_vec_real& Qi, const t_vec_real& Qf, t_size num_Q_pts)
+static int gui_main(int, char**, const std::string&, const t_vec_real&, const t_vec_real&, t_size)
 {
 	std::cerr << "Error: The GUI is not available in this version." << std::endl;
 	return -1;
@@ -301,7 +300,7 @@ int main(int argc, char** argv)
 		if(show_help)
 		{
 			std::cout << "This is Magpie " << MAGPIE_VER
-				<< " by Tobias Weber <tweber@ill.fr>.\n\n"
+				<< ", written 2022-2025 by Tobias Weber <tweber@ill.fr>.\n\n"
 				<< arg_descr
 				<< R"BLOCK(
 This program is free software: you can redistribute it and/or modify

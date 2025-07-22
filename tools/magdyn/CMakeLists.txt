@@ -229,7 +229,6 @@ else()
 		${HDF5_CXX_LIBRARIES}
 		${Minuit2_LIBRARIES}
 		${MINGW_EXTRALIBS}
-		${Qhull_LIBRARIES}
 		gemmi::gemmi_cpp
 	)
 endif()

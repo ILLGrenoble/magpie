@@ -40,7 +40,9 @@
 
 #include "tlibs2/libs/maths.h"
 #include "tlibs2/libs/magdyn.h"
-#include "tlibs2/libs/qt/gl.h"
+#ifndef DONT_USE_QT
+	#include "tlibs2/libs/qt/gl.h"
+#endif
 
 #include "libs/defs.h"
 #include "../bz/bz_lib.h"
@@ -59,11 +61,13 @@ using t_mat_real = tl2::mat<t_real, std::vector>;
 using t_vec = tl2::vec<t_cplx, std::vector>;
 using t_mat = tl2::mat<t_cplx, std::vector>;
 
+#ifndef DONT_USE_QT
 using t_real_gl = tl2::t_real_gl;
 using t_vec2_gl = tl2::t_vec2_gl;
 using t_vec3_gl = tl2::t_vec3_gl;
 using t_vec_gl = tl2::t_vec_gl;
 using t_mat_gl = tl2::t_mat_gl;
+#endif
 
 // magnon calculation kernel
 using t_magdyn = tl2_mag::MagDyn<t_mat, t_vec, t_mat_real, t_vec_real, t_cplx, t_real, t_size>;
@@ -135,7 +139,6 @@ extern unsigned int g_stop_check_fraction;
 
 	// transfer the setting from the takin core program
 	void get_settings_from_takin_core();
-#endif
 // ----------------------------------------------------------------------------
 
 
@@ -292,6 +295,7 @@ constexpr std::array<SettingsVariable, 24> g_settingsvariables
 	},
 }};
 // ----------------------------------------------------------------------------
+#endif
 
 
 #endif
