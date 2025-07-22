@@ -25,8 +25,11 @@
 cmake_minimum_required(VERSION 3.5)
 project(magpie)
 
-option(BUILD_PY_MODULES "build py modules" TRUE)
-option(ONLY_BUILD_FINISHED "only build finished tools" TRUE)
+
+option(BUILD_MAGPIE        "build main program"         TRUE)
+option(BUILD_MODULES       "build tool programs"        TRUE)
+option(BUILD_PY_MODULES    "build py scripting modules" TRUE)
+option(ONLY_BUILD_FINISHED "only build finished tools"  TRUE)
 
 
 # mingw settings
@@ -35,70 +38,78 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 
-# magnetic dynamics tool
-message("\n================================================================================")
-message("Configuring magdyn...")
-message("================================================================================")
-add_subdirectory(tools/magdyn)
-
-# Brillouin zone tool
-message("\n================================================================================")
-message("Configuring bz...")
-message("================================================================================")
-add_subdirectory(tools/bz)
-
-# cif converter
-message("\n================================================================================")
-message("Configuring cif2xml...")
-message("================================================================================")
-add_subdirectory(tools/cif2xml)
-
-# nuclear structure factor tool
-message("\n================================================================================")
-message("Configuring structfact...")
-message("================================================================================")
-add_subdirectory(tools/structfact)
-
-# magnetic structure factor tool
-message("\n================================================================================")
-message("Configuring magstructfact...")
-message("================================================================================")
-add_subdirectory(tools/magstructfact)
-
-
-if(NOT ONLY_BUILD_FINISHED)
-	# scan browser tool
+# main program
+if(BUILD_MAGPIE)
+	# magpie -- magnetic dynamics tool
 	message("\n================================================================================")
-	message("Configuring scanbrowser...")
+	message("Configuring magpie...")
 	message("================================================================================")
-	add_subdirectory(tools/scanbrowser)
-
-	# setup tools for magnetic space groups
-	message("\n================================================================================")
-	message("Configuring setup...")
-	message("================================================================================")
-	add_subdirectory(tools/magsgbrowser/setup)
-
-	# magnetic space group browser
-	message("\n================================================================================")
-	message("Configuring magsgbrowser...")
-	message("================================================================================")
-	add_subdirectory(tools/magsgbrowser)
-
-	# molecular dynamics tool
-	message("\n================================================================================")
-	message("Configuring moldyn...")
-	message("================================================================================")
-	add_subdirectory(tools/moldyn)
-
-	# tlibs2 script compiler
-	message("\n================================================================================")
-	message("Configuring mcalc...")
-	message("================================================================================")
-	add_subdirectory(tlibs2/script)
+	add_subdirectory(tools/magdyn magpie)
 endif()
 
 
+# additional modules (used by takin)
+if(BUILD_MODULES)
+	# Brillouin zone tool
+	message("\n================================================================================")
+	message("Configuring bz...")
+	message("================================================================================")
+	add_subdirectory(tools/bz)
+
+	# cif converter
+	message("\n================================================================================")
+	message("Configuring cif2xml...")
+	message("================================================================================")
+	add_subdirectory(tools/cif2xml)
+
+	# nuclear structure factor tool
+	message("\n================================================================================")
+	message("Configuring structfact...")
+	message("================================================================================")
+	add_subdirectory(tools/structfact)
+
+	# magnetic structure factor tool
+	message("\n================================================================================")
+	message("Configuring magstructfact...")
+	message("================================================================================")
+	add_subdirectory(tools/magstructfact)
+
+
+	if(NOT ONLY_BUILD_FINISHED)
+		# scan browser tool
+		message("\n================================================================================")
+		message("Configuring scanbrowser...")
+		message("================================================================================")
+		add_subdirectory(tools/scanbrowser)
+
+		# setup tools for magnetic space groups
+		message("\n================================================================================")
+		message("Configuring setup...")
+		message("================================================================================")
+		add_subdirectory(tools/magsgbrowser/setup)
+
+		# magnetic space group browser
+		message("\n================================================================================")
+		message("Configuring magsgbrowser...")
+		message("================================================================================")
+		add_subdirectory(tools/magsgbrowser)
+
+		# molecular dynamics tool
+		message("\n================================================================================")
+		message("Configuring moldyn...")
+		message("================================================================================")
+		add_subdirectory(tools/moldyn)
+
+		# tlibs2 script compiler
+		message("\n================================================================================")
+		message("Configuring mcalc...")
+		message("================================================================================")
+		add_subdirectory(tlibs2/script)
+	endif()
+endif()
+
+
+# scripting modules
 if(BUILD_PY_MODULES)
 	# magnetic dynamics
 	message("\n================================================================================")
