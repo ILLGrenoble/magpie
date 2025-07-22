@@ -1115,17 +1115,22 @@ private:
 	// --------------------------------------------------------------------------------
 	// calculated brillouin zone cut infos
 	// --------------------------------------------------------------------------------
-	t_vec m_vec1_rlu{}, m_vec2_rlu{}, m_norm_rlu{};  // cutting plane in rlu
-	t_real m_cut_norm_scale { 1. };              // convert 1/A to rlu lengths along the normal
-	t_mat m_cut_plane = tl2::unit<t_mat>(3);     // cutting plane in inverse angstroms
-	t_mat m_cut_plane_inv = tl2::unit<t_mat>(3); // ...and its inverse
-	t_real m_d_rlu{ 0. }, m_d_invA{ 0. };        // cutting plane distance
+	t_vec m_vec1_rlu{ };                          // first cutting plane vector in rlu
+	t_vec m_vec2_rlu{ };                          // second cutting plane vector in rlu
+	t_vec m_norm_rlu{ };                          // cutting plane normal in rlu
+	t_real m_cut_norm_scale { 1. };               // convert 1/A to rlu lengths along the normal
+	t_mat m_cut_plane{ tl2::unit<t_mat>(3) };     // cutting plane in inverse angstroms
+	t_mat m_cut_plane_inv{ tl2::unit<t_mat>(3) }; // ...and its inverse
+	t_real m_d_rlu = 0., m_d_invA = 0.;           // cutting plane distance
 
 	// [x, y, Q]
-	std::vector<std::tuple<t_vec, t_vec, std::array<t_real, 3>>> m_cut_lines{}, m_cut_lines000{};
+	std::vector<std::tuple<t_vec, t_vec, std::array<t_real, 3>>> m_cut_lines{};
+	std::vector<std::tuple<t_vec, t_vec, std::array<t_real, 3>>> m_cut_lines000{};
 
-	t_real m_min_x{ 1. }, m_max_x{ -1. };          // plot ranges for curves
-	t_real m_min_y{ 1. }, m_max_y{ -1. };          // plot ranges for curves
+	t_real m_min_x{ 1. };   // x plot range for curves
+	t_real m_max_x{ -1. };  // x plot range for curves
+	t_real m_min_y{ 1. };   // y plot range for curves
+	t_real m_max_y{ -1. };  // y plot range for curves
 
 	std::vector<t_vec> m_peaks_cut_in_plane{ };      // bragg peaks on the cutting plane in rlu
 	std::vector<t_vec> m_peaks_cut_in_plane_invA{ }; // ... and in 1/A and transformed into the plane system
