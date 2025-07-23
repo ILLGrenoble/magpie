@@ -129,7 +129,7 @@ void MagDynDlg::SaveDispersion(bool as_scr)
 	bool ok = m_dyn.SaveDispersion(filename.toStdString(),
 		Q_start[0], Q_start[1], Q_start[2],
 		Q_end[0], Q_end[1], Q_end[2],
-		num_pts, g_num_threads, as_scr,
+		num_pts, g_num_threads, as_scr, false,
 		&progress_fkt);
 
 	// print timing information

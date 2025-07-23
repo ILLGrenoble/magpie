@@ -537,7 +537,7 @@ public:
 		t_real h_start, t_real k_start, t_real l_start,
 		t_real h_end, t_real k_end, t_real l_end,
 		t_size num_Qs = 128, t_size num_threads = 4,
-		bool as_py = false,
+		bool as_py = false, bool as_binary = false,
 		std::function<bool(int, int)> *progress_fkt = nullptr) const;
 
 	/**
@@ -547,7 +547,7 @@ public:
 		t_real h_start, t_real k_start, t_real l_start,
 		t_real h_end, t_real k_end, t_real l_end,
 		t_size num_Qs = 128, t_size num_threads = 4,
-		bool as_py = false,
+		bool as_py = false, bool as_binary = false,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		bool write_header = true) const;
 

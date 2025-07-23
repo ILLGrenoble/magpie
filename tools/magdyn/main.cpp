@@ -224,7 +224,7 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 			h_start, k_start, l_start,
 			h_end, k_end, l_end,
 			num_Q_pts, g_num_threads,
-			as_py/*, as_bin*/);
+			as_py, as_bin);
 	}
 
 	if(results_file != "")
