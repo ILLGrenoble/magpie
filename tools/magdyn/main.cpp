@@ -62,7 +62,7 @@ extern int gui_main(int argc, char** argv, const std::string& model_file,
  */
 static int cli_main(const std::string& model_file, const std::string& results_file,
 	const t_vec_real& Qi, const t_vec_real& Qf, t_size num_Q_pts,
-	const std::string& Qlist_file)
+	const std::string& Qlist_file, bool as_py = false, bool as_bin = false)
 {
 	using namespace tl2_ops;
 
@@ -183,7 +183,7 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 		std::cout << "\nCalculating dispersion in " << g_num_threads << " threads..."
 			<< std::endl;
 
-		magdyn.SaveDispersion(*postr, Qs, g_num_threads);
+		magdyn.SaveDispersion(*postr, Qs, g_num_threads, as_py, as_bin);
 	}
 	else
 	{
@@ -223,7 +223,8 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 		magdyn.SaveDispersion(*postr,
 			h_start, k_start, l_start,
 			h_end, k_end, l_end,
-			num_Q_pts, g_num_threads);
+			num_Q_pts, g_num_threads,
+			as_py/*, as_bin*/);
 	}
 
 	if(results_file != "")
@@ -256,6 +257,8 @@ int main(int argc, char** argv)
 		bool show_help = false;
 		bool use_cli = false;
 		bool show_timing = false;
+		bool as_py = false;
+		bool as_bin = false;
 
 #ifdef DONT_USE_QT
 		use_cli = true;
@@ -274,6 +277,8 @@ int main(int argc, char** argv)
 			("input,i", args::value(&model_file), "input magnetic model file (.magpie)")
 			("output,o", args::value(&results_file), "output results file (in cli mode)")
 			("qlist", args::value(&Qlist_file), "input file containing Q points")
+			("py", args::bool_switch(&as_py), "create py script")
+			("bin", args::bool_switch(&as_bin), "create binary output")
 			("timing", args::bool_switch(&show_timing), "show time needed for calculation")
 			("threads,t", args::value(&g_num_threads), "number of threads for calculation")
 			("points,p", args::value(&num_Q_pts), "number of Q points")
@@ -358,7 +363,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 		int ret = 0;
 		if(use_cli)
-			ret = cli_main(model_file, results_file, Qi, Qf, num_Q_pts, Qlist_file);
+			ret = cli_main(model_file, results_file, Qi, Qf, num_Q_pts,
+				Qlist_file, as_py, as_bin);
 		else
 			ret = gui_main(argc, argv, model_file, Qi, Qf, num_Q_pts);
 

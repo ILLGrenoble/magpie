@@ -362,10 +362,15 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 MAGDYN_TEMPL
 bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 	const std::vector<t_vec_real>& Qs,
-	t_size num_threads, bool as_py,
+	t_size num_threads, bool as_py, bool as_binary,
 	std::function<bool(int, int)> *progress_fkt,
 	bool write_header) const
 {
+	// data types for binary output file
+	using t_num_Q = std::uint64_t;
+	using t_num_E = std::uint32_t;
+	using t_E = float;
+
 	ostr.precision(m_prec);
 	int field_len = m_prec * 2.5;
 
@@ -373,7 +378,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 	std::ostringstream all_data;
 	all_data.precision(m_prec);
 
-	if(write_header)
+	if(write_header && !as_binary)
 	{
 		ostr << "#\n# Created with Magpie.\n";
 		ostr << "# URL: https://github.com/ILLGrenoble/magpie\n";
@@ -382,7 +387,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 		ostr << "#\n\n";
 	}
 
-	if(!as_py)  // save as text file
+	if(!as_py && !as_binary)  // save as text file
 	{
 		ostr
 			<< std::setw(field_len) << std::left << "# h" << " "
@@ -399,18 +404,30 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 
 	SofQEs results = CalcDispersion(Qs, num_threads, progress_fkt);
 
+	if(!as_py && as_binary)   // save number of Q points in binary file
+	{
+		t_num_Q num_Q = static_cast<t_num_Q>(results.size());
+		ostr.write(reinterpret_cast<const char*>(&num_Q), sizeof(num_Q));
+	}
+
 	// print results
 	for(const auto& result : results)
 	{
 		if(progress_fkt && !(*progress_fkt)(-1, -1))
 			return false;
 
+		if(!as_py && as_binary)   // save number of energies in binary file
+		{
+			t_num_E num_E = static_cast<t_num_E>(result.E_and_S.size());
+			ostr.write(reinterpret_cast<const char*>(&num_E), sizeof(num_E));
+		}
+
 		// get results
 		for(t_size branch_idx = 0; branch_idx < result.E_and_S.size(); ++branch_idx)
 		{
 			const EnergyAndWeight& E_and_S = result.E_and_S[branch_idx];
 
-			if(!as_py)  // save as text file
+			if(!as_py & !as_binary)  // save as text file
 			{
 				ostr
 					<< std::setw(field_len) << std::left << result.Q_rlu[0] << " "
@@ -424,7 +441,15 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 					<< std::setw(field_len) << branch_idx << " "
 					<< std::setw(field_len) << E_and_S.degeneracy << "\n";
 			}
-			else        // save as py script
+			if(!as_py && as_binary)  // save (E, S) tuples in binary file
+			{
+				t_E E = static_cast<t_E>(E_and_S.E);
+				t_E S = static_cast<t_E>(E_and_S.weight);
+
+				ostr.write(reinterpret_cast<const char*>(&E), sizeof(E));
+				ostr.write(reinterpret_cast<const char*>(&S), sizeof(S));
+			}
+			if(as_py)   // save as py script
 			{
 				all_data << "\t"
 					<< "[ " << result.Q_rlu[0]

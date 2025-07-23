@@ -556,7 +556,8 @@ public:
 	 */
 	bool SaveDispersion(std::ostream& ostr,
 		const std::vector<t_vec_real>& Qs,
-		t_size num_threads = 4, bool as_py = false,
+		t_size num_threads = 4,
+		bool as_py = false, bool as_binary = false,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		bool write_header = true) const;
 
