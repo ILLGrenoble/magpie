@@ -253,7 +253,7 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 		m_Q_start_bc[i]->setMaximum(+99.9999);
 		m_Q_start_bc[i]->setSingleStep(0.01);
 		m_Q_start_bc[i]->setValue(i == 0 ? -1. : 0.);
-		m_Q_start_bc[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_Q_start_bc[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 		m_Q_start_bc[i]->setPrefix(hklPrefix[i]);
 
 		m_Q_end_bc[i]->setDecimals(4);
@@ -261,7 +261,7 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 		m_Q_end_bc[i]->setMaximum(+99.9999);
 		m_Q_end_bc[i]->setSingleStep(0.01);
 		m_Q_end_bc[i]->setValue(i == 0 ? 1. : 0.);
-		m_Q_end_bc[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_Q_end_bc[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 		m_Q_end_bc[i]->setPrefix(hklPrefix[i]);
 	}
 
@@ -270,7 +270,7 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	m_num_Q_bc->setMinimum(1);
 	m_num_Q_bc->setMaximum(99999);
 	m_num_Q_bc->setValue(128);
-	m_num_Q_bc->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	m_num_Q_bc->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_num_Q_bc->setToolTip("Number of Q points to calculate.");
 
 	// dispersion Q button
@@ -283,7 +283,7 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	m_coords_bc[0]->setMaximum(2);
 	m_coords_bc[0]->setValue(0);
 	m_coords_bc[0]->setPrefix("i = ");
-	m_coords_bc[0]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	m_coords_bc[0]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_coords_bc[0]->setToolTip("First component index of B_ij matrix.");
 
 	m_coords_bc[1] = new QSpinBox(panelBerryCurvature);
@@ -291,7 +291,7 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	m_coords_bc[1]->setMaximum(2);
 	m_coords_bc[1]->setValue(1);
 	m_coords_bc[1]->setPrefix("j = ");
-	m_coords_bc[1]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	m_coords_bc[1]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_coords_bc[1]->setToolTip("Second component index of B_ij matrix.");
 
 	// maximum cutoff for filtering numerical artefacts in berry curvature
@@ -305,7 +305,7 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	m_B_filter_bc->setMaximum(999999.99);
 	m_B_filter_bc->setSingleStep(1.);
 	m_B_filter_bc->setValue(m_B_filter_bc->maximum());
-	m_B_filter_bc->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	m_B_filter_bc->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_B_filter_bc->setToolTip("Maximum cutoff Berry curvature for filtering numerical artefacts.");
 
 	// minimum cutoff for filtering S(Q, E)
@@ -319,12 +319,12 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	m_S_filter_bc->setMaximum(9999.99999);
 	m_S_filter_bc->setSingleStep(0.01);
 	m_S_filter_bc->setValue(0.01);
-	m_S_filter_bc->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	m_S_filter_bc->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_S_filter_bc->setToolTip("Minimum S(Q, E) to keep.");
 
 	// progress bar
 	m_progress_bc = new QProgressBar(panelBerryCurvature);
-	m_progress_bc->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	m_progress_bc->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
 	// start/stop button
 	m_btnStartStop_bc = new QPushButton("Calculate", panelBerryCurvature);

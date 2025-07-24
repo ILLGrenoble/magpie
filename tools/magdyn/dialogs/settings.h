@@ -195,8 +195,8 @@ public:
 		QLabel *labelSearch = new QLabel("Search:", panelGeneral);
 		QLineEdit *editSearch = new QLineEdit(panelGeneral);
 
-		labelSearch->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-		editSearch->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+		labelSearch->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+		editSearch->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
 		gridGeneral->addWidget(m_table, 0, 0, 1, 2);
 		gridGeneral->addWidget(labelSearch, 1, 0, 1, 1);

@@ -171,11 +171,11 @@ void BZDlg::CreateSymopsPanel()
 	QPushButton *btnSG = new QPushButton(symopspanel);
 
 	m_symops->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
-	btnAdd->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
-	btnDel->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
-	btnUp->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
-	btnDown->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
-	btnSG->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	btnAdd->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+	btnDel->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+	btnUp->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+	btnDown->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+	btnSG->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 	btnAdd->setText("Add");
 	btnDel->setText("Delete");
@@ -454,10 +454,10 @@ void BZDlg::CreateFormulasPanel()
 	QToolButton *btnDown = new QToolButton(formulaspanel);
 
 	m_formulas->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
-	btnAdd->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
-	btnDel->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
-	btnUp->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
-	btnDown->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	btnAdd->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+	btnDel->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+	btnUp->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+	btnDown->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 	btnAdd->setText("Add");
 	btnDel->setText("Delete");
@@ -539,8 +539,7 @@ void BZDlg::CreateResultsPanel()
 
 	m_bzresults = new QPlainTextEdit(resultspanel);
 	m_bzresults->setReadOnly(true);
-	m_bzresults->setFont(
-		QFontDatabase::systemFont(QFontDatabase::FixedFont));
+	m_bzresults->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
 
 	grid->addWidget(m_bzresults, 0,0, 1,4);
 
@@ -564,8 +563,7 @@ void BZDlg::CreateJsonResultsPanel()
 
 	m_bzresultsJSON = new QPlainTextEdit(resultspanel);
 	m_bzresultsJSON->setReadOnly(true);
-	m_bzresultsJSON->setFont(
-		QFontDatabase::systemFont(QFontDatabase::FixedFont));
+	m_bzresultsJSON->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
 
 	grid->addWidget(m_bzresultsJSON, 0,0, 1,4);
 

@@ -197,19 +197,19 @@ void MagDynDlg::CreateMainWindow()
 
 	// progress bar
 	m_progress = new QProgressBar(this);
-	m_progress->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	m_progress->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
 	// start/stop button
 	m_btnStartStop = new QPushButton("Calculate", this);
 	m_btnStartStop->setIcon(QIcon::fromTheme("media-playback-start"));
 	m_btnStartStop->setToolTip("Start calculation.");
-	m_btnStartStop->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	m_btnStartStop->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
 	// show structure
 	QPushButton *btnShowStruct = new QPushButton("View Structure...", this);
 	btnShowStruct->setIcon(QIcon::fromTheme("applications-graphics"));
 	btnShowStruct->setToolTip("Show a 3D view of the magnetic sites and couplings.");
-	btnShowStruct->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	btnShowStruct->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
 	// splitter for input and output tabs
 	m_split_inout = new QSplitter(this);

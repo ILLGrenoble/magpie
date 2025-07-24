@@ -51,7 +51,7 @@ void MagDynDlg::CreateSitesPanel()
 	m_sitestab->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	m_sitestab->verticalHeader()->setDefaultSectionSize(
-		fontMetrics().lineSpacing() + 4);
+		fontMetrics().lineSpacing()*1.25 + 4);
 	m_sitestab->verticalHeader()->setVisible(true);
 
 	m_sitestab->setColumnCount(NUM_SITE_COLS);
@@ -138,7 +138,7 @@ void MagDynDlg::CreateSitesPanel()
 		m_extCell[cell_idx]->setValue(cell_idx == 2 ? 2 : 1);
 		m_extCell[cell_idx]->setPrefix(idx_names[cell_idx]);
 		m_extCell[cell_idx]->setToolTip("Order of supercell.");
-		m_extCell[cell_idx]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_extCell[cell_idx]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
 	QPushButton *btnExtCell = new QPushButton(
@@ -152,10 +152,11 @@ void MagDynDlg::CreateSitesPanel()
 	btnGenBySG->setToolTip("Create site positions from space group"
 		" symmetry operators and existing positions.");
 
-	for(QPushButton *btn : { btnAdd, btnDel, btnUp, btnDown, btnGenBySG, btnExtCell })
+	for(QPushButton *btn : { btnAdd, btnDel, btnUp, btnDown, btnGenBySG, btnExtCell,
+		btnGroundState, btnMirrorAtoms, btnShowNotes })
 	{
 		btn->setFocusPolicy(Qt::StrongFocus);
-		btn->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		btn->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
 
@@ -276,7 +277,7 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	m_termstab->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	m_termstab->verticalHeader()->setDefaultSectionSize(
-		fontMetrics().lineSpacing() + 4);
+		fontMetrics().lineSpacing()*1.25 + 4);
 	m_termstab->verticalHeader()->setVisible(true);
 
 	m_termstab->setColumnCount(NUM_XCH_COLS);
@@ -359,7 +360,7 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	for(QPushButton *btn : { btnAdd, btnDel, btnUp, btnDown })
 	{
 		btn->setFocusPolicy(Qt::StrongFocus);
-		btn->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		btn->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
 
@@ -372,7 +373,7 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	m_maxdist->setValue(5);
 	m_maxdist->setPrefix("d = ");
 	m_maxdist->setToolTip("Maximum distance between sites.");
-	m_maxdist->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	m_maxdist->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 	m_maxSC = new QSpinBox(m_termspanel);
 	m_maxSC->setMinimum(1);
@@ -380,7 +381,7 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	m_maxSC->setValue(4);
 	m_maxSC->setPrefix("order = ");
 	m_maxSC->setToolTip("Maximum order of supercell to consider.");
-	m_maxSC->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	m_maxSC->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 	m_maxcouplings = new QSpinBox(m_termspanel);
 	m_maxcouplings->setMinimum(-1);
@@ -388,14 +389,14 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	m_maxcouplings->setValue(100);
 	m_maxcouplings->setPrefix("n = ");
 	m_maxcouplings->setToolTip("Maximum number of couplings to generate (-1: no limit).");
-	m_maxcouplings->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	m_maxcouplings->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 	QPushButton *btnGenByDist = new QPushButton(
 		QIcon::fromTheme("insert-object"),
 		"Generate", m_termspanel);
 	btnGenByDist->setToolTip("Create possible couplings by distances between sites.");
 	btnGenByDist->setFocusPolicy(Qt::StrongFocus);
-	btnGenByDist->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	btnGenByDist->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 
 	// couplings from space group
@@ -406,7 +407,7 @@ void MagDynDlg::CreateExchangeTermsPanel()
 		" symmetry operators and existing couplings.");
 
 	btnGenBySG->setFocusPolicy(Qt::StrongFocus);
-	btnGenBySG->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	btnGenBySG->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 	// ordering vector
 	m_ordering[0] = new QDoubleSpinBox(m_termspanel);
@@ -425,14 +426,14 @@ void MagDynDlg::CreateExchangeTermsPanel()
 		m_ordering[i]->setMaximum(+9.9999);
 		m_ordering[i]->setSingleStep(0.01);
 		m_ordering[i]->setValue(0.);
-		m_ordering[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_ordering[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 		m_normaxis[i]->setDecimals(4);
 		m_normaxis[i]->setMinimum(-9.9999);
 		m_normaxis[i]->setMaximum(+9.9999);
 		m_normaxis[i]->setSingleStep(0.01);
 		m_normaxis[i]->setValue(i==0 ? 1. : 0.);
-		m_normaxis[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_normaxis[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
 	m_ordering[0]->setPrefix("Oh = ");
@@ -592,7 +593,7 @@ void MagDynDlg::CreateSamplePanel()
 		m_xtallattice[i]->setValue(5);
 		m_xtallattice[i]->setPrefix(latticestr[i]);
 		//m_xtallattice[i]->setSuffix(" \xe2\x84\xab");
-		m_xtallattice[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_xtallattice[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
 	const char* anlesstr[] = { "α = ", "β = ", "γ = " };
@@ -606,7 +607,7 @@ void MagDynDlg::CreateSamplePanel()
 		m_xtalangles[i]->setValue(90);
 		m_xtalangles[i]->setPrefix(anlesstr[i]);
 		//m_xtalangles[i]->setSuffix("\xc2\xb0");
-		m_xtalangles[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_xtalangles[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
 	// space groups
@@ -625,7 +626,7 @@ void MagDynDlg::CreateSamplePanel()
 		m_scatteringplane[i]->setValue(0);
 		m_scatteringplane[i]->setPrefix(recipstr[i % 3]);
 		//m_scatteringplane[i]->setSuffix(" rlu");
-		m_scatteringplane[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_scatteringplane[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 	m_scatteringplane[0]->setValue(1);
 	m_scatteringplane[4]->setValue(1);
@@ -754,7 +755,7 @@ void MagDynDlg::CreateVariablesPanel()
 	m_varstab->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	m_varstab->verticalHeader()->setDefaultSectionSize(
-		fontMetrics().lineSpacing() + 4);
+		fontMetrics().lineSpacing()*1.25 + 4);
 	m_varstab->verticalHeader()->setVisible(true);
 
 	m_varstab->setColumnCount(NUM_VARS_COLS);
@@ -795,7 +796,7 @@ void MagDynDlg::CreateVariablesPanel()
 	for(QPushButton *btn : { btnAdd, btnDel, btnUp, btnDown, btnReplace })
 	{
 		btn->setFocusPolicy(Qt::StrongFocus);
-		btn->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		btn->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
 
@@ -887,7 +888,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 	m_field_mag->setValue(0.);
 	m_field_mag->setPrefix("|B| = ");
 	m_field_mag->setSuffix(" T");
-	m_field_mag->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	m_field_mag->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 	// field direction
 	m_field_dir[0] = new QDoubleSpinBox(m_sampleenviropanel);
@@ -913,7 +914,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 	m_rot_angle->setSingleStep(0.1);
 	m_rot_angle->setValue(90.);
 	//m_rot_angle->setSuffix("\xc2\xb0");
-	m_rot_angle->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	m_rot_angle->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 	QPushButton *btn_rotate_ccw = new QPushButton(
 		QIcon::fromTheme("object-rotate-left"),
@@ -938,7 +939,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 	m_fieldstab->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	m_fieldstab->verticalHeader()->setDefaultSectionSize(
-		fontMetrics().lineSpacing() + 4);
+		fontMetrics().lineSpacing()*1.25 + 4);
 	m_fieldstab->verticalHeader()->setVisible(true);
 
 	m_fieldstab->setColumnCount(NUM_FIELD_COLS);
@@ -974,10 +975,10 @@ void MagDynDlg::CreateSampleEnvPanel()
 	QPushButton *btnSetField = new QPushButton("Set Field", m_sampleenviropanel);
 	btnSetField->setToolTip("Set the selected field as the currently active one.");
 
-	for(QPushButton *btn : { btnAddField, btnDelField, btnFieldUp, btnFieldDown })
+	for(QPushButton *btn : { btnAddField, btnDelField, btnFieldUp, btnFieldDown, btnSetField })
 	{
 		btn->setFocusPolicy(Qt::StrongFocus);
-		btn->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		btn->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
 
@@ -1031,7 +1032,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 	m_temperature->setValue(300.);
 	m_temperature->setPrefix("T = ");
 	m_temperature->setSuffix(" K");
-	m_temperature->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	m_temperature->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 	for(int i = 0; i < 3; ++i)
 	{
@@ -1040,14 +1041,14 @@ void MagDynDlg::CreateSampleEnvPanel()
 		m_field_dir[i]->setMaximum(+99.9999);
 		m_field_dir[i]->setSingleStep(0.1);
 		m_field_dir[i]->setValue(i == 2 ? 1. : 0.);
-		m_field_dir[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_field_dir[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 		m_rot_axis[i]->setDecimals(4);
 		m_rot_axis[i]->setMinimum(-99.9999);
 		m_rot_axis[i]->setMaximum(+99.9999);
 		m_rot_axis[i]->setSingleStep(0.1);
 		m_rot_axis[i]->setValue(i == 2 ? 1. : 0.);
-		m_rot_axis[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_rot_axis[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
 	m_field_dir[0]->setPrefix("Bh = ");
@@ -1220,7 +1221,7 @@ void MagDynDlg::CreateDispersionPanel()
 	m_num_points->setMinimum(1);
 	m_num_points->setMaximum(99999);
 	m_num_points->setValue(512);
-	m_num_points->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+	m_num_points->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_num_points->setToolTip("Number of Q points in the plot.");
 
 	// scaling factor for weights
@@ -1231,7 +1232,7 @@ void MagDynDlg::CreateDispersionPanel()
 		(*comp)->setMinimum(0.);
 		(*comp)->setMaximum(+9999.9999);
 		(*comp)->setSingleStep(0.1);
-		(*comp)->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		(*comp)->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
 	m_weight_scale->setValue(1.);
@@ -1252,7 +1253,7 @@ void MagDynDlg::CreateDispersionPanel()
 		m_Q_start[i]->setSingleStep(0.01);
 		m_Q_start[i]->setValue(i == 0 ? -1. : 0.);
 		//m_Q_start[i]->setSuffix(" rlu");
-		m_Q_start[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_Q_start[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 		m_Q_start[i]->setPrefix(hklPrefix[i]);
 
 		m_Q_end[i]->setDecimals(4);
@@ -1261,7 +1262,7 @@ void MagDynDlg::CreateDispersionPanel()
 		m_Q_end[i]->setSingleStep(0.01);
 		m_Q_end[i]->setValue(i == 0 ? 1. : 0.);
 		//m_Q_end[i]->setSuffix(" rlu");
-		m_Q_end[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_Q_end[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 		m_Q_end[i]->setPrefix(hklPrefix[i]);
 	}
 
@@ -1358,7 +1359,7 @@ void MagDynDlg::CreateHamiltonPanel()
 		m_Q[i]->setSingleStep(0.01);
 		m_Q[i]->setValue(0.);
 		m_Q[i]->setSuffix(" rlu");
-		m_Q[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_Q[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 		m_Q[i]->setPrefix(hklPrefix[i]);
 	}
 
@@ -1409,7 +1410,7 @@ void MagDynDlg::CreateCoordinatesPanel()
 	m_coordinatestab->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	m_coordinatestab->verticalHeader()->setDefaultSectionSize(
-		fontMetrics().lineSpacing() + 4);
+		fontMetrics().lineSpacing()*1.25 + 4);
 	m_coordinatestab->verticalHeader()->setVisible(true);
 
 	m_coordinatestab->setColumnCount(NUM_COORD_COLS);
@@ -1459,7 +1460,7 @@ void MagDynDlg::CreateCoordinatesPanel()
 	for(QPushButton *btn : { btnAddCoord, btnDelCoord, btnCoordUp, btnCoordDown })
 	{
 		btn->setFocusPolicy(Qt::StrongFocus);
-		btn->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		btn->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
 
@@ -1594,7 +1595,7 @@ void MagDynDlg::CreateReciprocalPanel()
 	QPushButton *btnShowBZ = new QPushButton("View Brillouin Zone...", this);
 	btnShowBZ->setIcon(QIcon::fromTheme("applications-graphics"));
 	btnShowBZ->setToolTip("Show a 3D view of the first nuclear Brillouin zone.");
-	btnShowBZ->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	btnShowBZ->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
 	QGridLayout *grid = new QGridLayout(m_reciprocalpanel);
 	grid->setSpacing(4);
@@ -1678,7 +1679,7 @@ void MagDynDlg::CreateExportPanel()
 		m_exportNumPoints[i]->setMinimum(1);
 		m_exportNumPoints[i]->setMaximum(99999);
 		m_exportNumPoints[i]->setValue(128);
-		m_exportNumPoints[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_exportNumPoints[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
 	// export
@@ -1702,7 +1703,7 @@ void MagDynDlg::CreateExportPanel()
 		m_exportStartQ[i]->setSingleStep(0.01);
 		m_exportStartQ[i]->setValue(-1.);
 		m_exportStartQ[i]->setSuffix(" rlu");
-		m_exportStartQ[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_exportStartQ[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 		m_exportStartQ[i]->setPrefix(hklPrefix[i]);
 
 		m_exportEndQ[i]->setDecimals(4);
@@ -1711,7 +1712,7 @@ void MagDynDlg::CreateExportPanel()
 		m_exportEndQ[i]->setSingleStep(0.01);
 		m_exportEndQ[i]->setValue(1.);
 		m_exportEndQ[i]->setSuffix(" rlu");
-		m_exportEndQ[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Fixed});
+		m_exportEndQ[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 		m_exportEndQ[i]->setPrefix(hklPrefix[i]);
 	}
 
