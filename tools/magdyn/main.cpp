@@ -62,8 +62,8 @@ extern int gui_main(int argc, char** argv, const std::string& model_file,
  */
 static int cli_main(const std::string& model_file, const std::string& results_file,
 	const t_vec_real& Qi, const t_vec_real& Qf, const t_vec_real& Qf2,
-	t_size num_Q_pts, t_size num_Q_pts2,
-	const std::string& Qlist_file, bool as_py = false, bool as_bin = false)
+	t_size num_Q_pts, t_size num_Q_pts2, const std::string& Qlist_file,
+	bool as_py = false, bool as_bin = false, bool calc_weights = true)
 {
 	using namespace tl2_ops;
 
@@ -187,7 +187,8 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 			<< g_num_threads << " threads..."
 			<< std::endl;
 
-		magdyn.SaveDispersion(*postr, Qs, g_num_threads, as_py, as_bin);
+		magdyn.SaveDispersion(*postr, Qs, g_num_threads,
+			as_py, as_bin, calc_weights);
 	}
 	else
 	{
@@ -234,7 +235,7 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 				h_start, k_start, l_start,
 				h_end, k_end, l_end,
 				num_Q_pts, g_num_threads,
-				as_py, as_bin);
+				as_py, as_bin, calc_weights);
 		}
 		else
 		{
@@ -269,7 +270,8 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 				<< g_num_threads << " threads..."
 				<< std::endl;
 
-			magdyn.SaveDispersion(*postr, Qs, g_num_threads, as_py, as_bin);
+			magdyn.SaveDispersion(*postr, Qs, g_num_threads,
+				as_py, as_bin, calc_weights);
 		}
 	}
 
@@ -305,6 +307,7 @@ int main(int argc, char** argv)
 		bool show_timing = false;
 		bool as_py = false;
 		bool as_bin = false;
+		bool no_weights = false;
 
 #ifdef DONT_USE_QT
 		use_cli = true;
@@ -325,6 +328,7 @@ int main(int argc, char** argv)
 			("qlist", args::value(&Qlist_file), "input file containing Q points")
 			("py", args::bool_switch(&as_py), "create py script")
 			("bin", args::bool_switch(&as_bin), "create binary output")
+			("no_weights", args::bool_switch(&no_weights), "don't calculate spectral weights")
 			("timing", args::bool_switch(&show_timing), "show time needed for calculation")
 			("threads,t", args::value(&g_num_threads), "number of threads for calculation")
 			("points,p", args::value(&num_Q_pts), "number of Q points")
@@ -425,7 +429,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 		int ret = 0;
 		if(use_cli)
 			ret = cli_main(model_file, results_file, Qi, Qf, Qf2,
-				num_Q_pts, num_Q_pts2, Qlist_file, as_py, as_bin);
+				num_Q_pts, num_Q_pts2, Qlist_file,
+				as_py, as_bin, !no_weights);
 		else
 			ret = gui_main(argc, argv, model_file, Qi, Qf, num_Q_pts);
 

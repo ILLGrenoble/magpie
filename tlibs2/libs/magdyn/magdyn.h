@@ -472,14 +472,17 @@ public:
 	SofQEs CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 		t_real h_end, t_real k_end, t_real l_end,
 		t_size num_Qs = 128, t_size num_threads = 4,
-		std::function<bool(int, int)> *progress_fkt = nullptr) const;
+		bool calc_weights = true,
+		std::function<bool(int, int)> *progress_fkt = nullptr,
+		std::function<void(const SofQE*)> *result_fkt = nullptr) const;
 
 	/**
-	 * generates the dispersion for the given q points
+	 * generates the dispersion for the given Q points
 	 */
 	SofQEs CalcDispersion(const std::vector<t_vec_real>& Qs,
-		t_size num_threads = 4,
-		std::function<bool(int, int)> *progress_fkt = nullptr) const;
+		t_size num_threads = 4, bool calc_weights = true,
+		std::function<bool(int, int)> *progress_fkt = nullptr,
+		std::function<void(const SofQE*)> *result_fkt = nullptr) const;
 
 	/**
 	 * generates the dispersion along the given 2d Q surface
@@ -488,7 +491,9 @@ public:
 		t_real h_end1, t_real k_end1, t_real l_end1,
 		t_real h_end2, t_real k_end2, t_real l_end2,
 		t_size num_Qs_sqrt = 128, t_size num_threads = 4,
-		std::function<bool(int, int)> *progress_fkt = nullptr) const;
+		bool calc_weights = true,
+		std::function<bool(int, int)> *progress_fkt = nullptr,
+		std::function<void(const SofQE*)> *result_fkt = nullptr) const;
 
 	/**
 	 * get the energy minimum
@@ -537,7 +542,7 @@ public:
 		t_real h_start, t_real k_start, t_real l_start,
 		t_real h_end, t_real k_end, t_real l_end,
 		t_size num_Qs = 128, t_size num_threads = 4,
-		bool as_py = false, bool as_binary = false,
+		bool as_py = false, bool as_binary = false, bool calc_weights = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr) const;
 
 	/**
@@ -547,7 +552,7 @@ public:
 		t_real h_start, t_real k_start, t_real l_start,
 		t_real h_end, t_real k_end, t_real l_end,
 		t_size num_Qs = 128, t_size num_threads = 4,
-		bool as_py = false, bool as_binary = false,
+		bool as_py = false, bool as_binary = false, bool calc_weights = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		bool write_header = true) const;
 
@@ -557,7 +562,7 @@ public:
 	bool SaveDispersion(std::ostream& ostr,
 		const std::vector<t_vec_real>& Qs,
 		t_size num_threads = 4,
-		bool as_py = false, bool as_binary = false,
+		bool as_py = false, bool as_binary = false, bool calc_weights = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		bool write_header = true) const;
 
@@ -567,7 +572,7 @@ public:
 	bool SaveMultiDispersion(const std::string& filename,
 		const std::vector<t_vec_real>& Qs,
 		t_size num_Qs = 128, t_size num_threads = 4,
-		bool as_py = false,
+		bool as_py = false, bool calc_weights = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		const std::vector<std::string>* Q_names = nullptr) const;
 
@@ -577,7 +582,7 @@ public:
 	bool SaveMultiDispersion(std::ostream& ostr,
 		const std::vector<t_vec_real>& Qs,
 		t_size num_Qs = 128, t_size num_threads = 4,
-		bool as_py = false,
+		bool as_py = false, bool calc_weights = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		const std::vector<std::string>* Q_names = nullptr) const;
 

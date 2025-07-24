@@ -126,10 +126,12 @@ void MagDynDlg::SaveDispersion(bool as_scr)
 	tl2::Stopwatch<t_real> stopwatch;
 	stopwatch.start();
 
+	const bool use_weights = m_use_weights->isChecked();
 	bool ok = m_dyn.SaveDispersion(filename.toStdString(),
 		Q_start[0], Q_start[1], Q_start[2],
 		Q_end[0], Q_end[1], Q_end[2],
-		num_pts, g_num_threads, as_scr, false,
+		num_pts, g_num_threads,
+		as_scr, false, use_weights,
 		&progress_fkt);
 
 	// print timing information
@@ -253,8 +255,10 @@ void MagDynDlg::SaveMultiDispersion(bool as_scr)
 	tl2::Stopwatch<t_real> stopwatch;
 	stopwatch.start();
 
+	const bool use_weights = m_use_weights->isChecked();
 	bool ok = m_dyn.SaveMultiDispersion(filename.toStdString(),
-		Qs, num_pts, g_num_threads, as_scr,
+		Qs, num_pts, g_num_threads,
+		as_scr, use_weights,
 		&progress_fkt, &Q_names);
 
 	// print timing information
