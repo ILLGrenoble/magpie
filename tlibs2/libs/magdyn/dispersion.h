@@ -263,7 +263,7 @@ MAGDYN_INST::CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 
 
 /**
- * generates the dispersion for the given q points
+ * generates the dispersion for the given Q points
  */
 MAGDYN_TEMPL
 MAGDYN_TYPE::SofQEs
@@ -291,7 +291,7 @@ MAGDYN_INST::CalcDispersion(const std::vector<t_vec_real>& Qs,
 		if(progress_fkt && !(*progress_fkt)(0, num_Qs))
 			break;
 
-		auto task = [this, Q]() -> SofQE
+		auto task = [this, /*&*/Q]() -> SofQE
 		{
 			return CalcEnergies(Q, false);
 		};
