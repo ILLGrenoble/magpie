@@ -319,6 +319,13 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 
 		if(!as_py && as_binary)   // save number of energies in binary file
 		{
+			t_num_E num_h = static_cast<t_num_E>(result.Q_rlu[0]);
+			t_num_E num_k = static_cast<t_num_E>(result.Q_rlu[1]);
+			t_num_E num_l = static_cast<t_num_E>(result.Q_rlu[2]);
+			ostr.write(reinterpret_cast<const char*>(&num_h), sizeof(num_h));
+			ostr.write(reinterpret_cast<const char*>(&num_k), sizeof(num_k));
+			ostr.write(reinterpret_cast<const char*>(&num_l), sizeof(num_l));
+
 			t_num_E num_E = static_cast<t_num_E>(result.E_and_S.size());
 			ostr.write(reinterpret_cast<const char*>(&num_E), sizeof(num_E));
 		}
@@ -445,6 +452,13 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 
 		if(!as_py && as_binary)   // save number of energies in binary file
 		{
+			t_num_E num_h = static_cast<t_num_E>(result.Q_rlu[0]);
+			t_num_E num_k = static_cast<t_num_E>(result.Q_rlu[1]);
+			t_num_E num_l = static_cast<t_num_E>(result.Q_rlu[2]);
+			ostr.write(reinterpret_cast<const char*>(&num_h), sizeof(num_h));
+			ostr.write(reinterpret_cast<const char*>(&num_k), sizeof(num_k));
+			ostr.write(reinterpret_cast<const char*>(&num_l), sizeof(num_l));
+
 			t_num_E num_E = static_cast<t_num_E>(result.E_and_S.size());
 			ostr.write(reinterpret_cast<const char*>(&num_E), sizeof(num_E));
 		}
