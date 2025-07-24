@@ -874,7 +874,8 @@ void MagDynDlg::SelectSite(const std::string& site)
 	   idx < m_dyn.GetMagneticSitesCount())
 	{
 		// select current site in table
-		m_tabs_in->setCurrentWidget(m_sitespanel);
+		m_tabs_in->setCurrentWidget(m_tabs_setup);
+		m_tabs_setup->setCurrentWidget(m_sitespanel);
 		m_sitestab->setCurrentCell(idx, 0);
 	}
 }
@@ -924,7 +925,8 @@ void MagDynDlg::SelectTerm(const std::string& term)
 	   idx < m_dyn.GetExchangeTermsCount())
 	{
 		// select current term in table
-		m_tabs_in->setCurrentWidget(m_termspanel);
+		m_tabs_in->setCurrentWidget(m_tabs_setup);
+		m_tabs_setup->setCurrentWidget(m_termspanel);
 		m_termstab->setCurrentCell(idx, 0);
 	}
 }

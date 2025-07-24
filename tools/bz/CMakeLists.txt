@@ -42,6 +42,7 @@ set(CMAKE_VERBOSE_MAKEFILE TRUE)
 option(USE_QT "use Qt" TRUE)
 option(MAKE_LIB "create a library" FALSE)
 option(USE_BOOST_PROGOPTS "use Boost.program_options" TRUE)
+set(QT_VER 6)
 
 
 # system specific settings
@@ -61,7 +62,7 @@ add_compile_options(${Boost_CXX_FLAGS})
 find_package(Gemmi REQUIRED)
 
 include_directories(
-	"${PROJECT_SOURCE_DIR}"
+	"${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/../.."
 	"${Boost_INCLUDE_DIRS}" "${Boost_INCLUDE_DIRS}/.." "../.."
 	gemmi::headers
 )
@@ -74,8 +75,6 @@ if(Qhull_FOUND)
 endif()
 
 if(USE_QT)
-	set(QT_VER 5)
-
 	message("Trying to select Qt version ${QT_VER}.")
 	if(QT_VER EQUAL 6)
 		find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGLWidgets Svg)

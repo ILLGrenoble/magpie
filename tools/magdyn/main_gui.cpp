@@ -50,6 +50,9 @@ int gui_main(int argc, char** argv, const std::string& model_file,
 	QApplication::addLibraryPath(QString(".") + QDir::separator() + "qtplugins");
 	auto app = std::make_unique<QApplication>(argc, argv);
 
+	// re-set locales
+	tl2::set_locales();
+
 	// main window
 	auto magdyn = std::make_unique<MagDynDlg>(nullptr);
 	magdyn->show();

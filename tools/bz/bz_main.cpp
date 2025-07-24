@@ -114,6 +114,7 @@ static int cli_main(const std::string& cfg_file, const std::string& results_file
 
 
 #ifndef DONT_USE_QT
+
 /**
  * starts the gui program
  */
@@ -124,6 +125,9 @@ static int gui_main(int argc, char** argv, const std::string& cfg_file, bool use
 	// application
 	QApplication::addLibraryPath(QString(".") + QDir::separator() + "qtplugins");
 	auto app = std::make_unique<QApplication>(argc, argv);
+
+	// re-set locales
+	set_locales();
 
 	// main window
 	auto dlg = std::make_unique<BZDlg>(nullptr);
@@ -200,6 +204,7 @@ int main(int argc, char** argv)
 		std::cout << arg_descr << std::endl;
 		return -1;
 	}
+
 	return cli_main(cfg_file, results_file, use_stdin);
 #endif
 }
@@ -207,6 +212,7 @@ int main(int argc, char** argv)
 
 
 #else   // DONT_USE_BOOTS_PROGOPTS
+
 /**
  * starts the cli program using a minimal interface
  */
@@ -217,7 +223,7 @@ int main(int argc, char** argv)
 	bool has_cfg_file = false;
 
 	// find input and output file names
-	for(int arg=1; arg<argc; ++arg)
+	for(int arg = 1; arg < argc; ++arg)
 	{
 		// ignore switches
 		if(argv[arg][0] == '-')
@@ -243,4 +249,5 @@ int main(int argc, char** argv)
 
 	return cli_main(cfg_file, results_file, false);
 }
+
 #endif  // DONT_USE_BOOTS_PROGOPTS

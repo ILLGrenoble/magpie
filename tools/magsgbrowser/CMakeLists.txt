@@ -35,7 +35,7 @@ set(CMAKE_AUTOMOC ON)
 
 set(CMAKE_CXX_STANDARD 20)
 add_definitions(-std=c++20)
-include_directories("${PROJECT_SOURCE_DIR}")
+include_directories("${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/../..")
 
 
 # -----------------------------------------------------------------------------

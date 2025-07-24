@@ -25,12 +25,11 @@
 cmake_minimum_required(VERSION 3.5)
 project(magstructfact)
 
-set(QT_VER 5)
+set(QT_VER 6)
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_CXX_STANDARD 20)
 add_definitions(-std=c++20)
-option(BUILD_LIB "build as dynamic library" FALSE)
 add_compile_options(-Wall -Wextra)
 
 list(APPEND CMAKE_MODULE_PATH
@@ -75,24 +74,12 @@ include_directories(
 	gemmi::headers
 )
 
-if(BUILD_LIB)
-	set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
-
-	add_definitions(-DBUILD_LIB)
-	add_library(takin_magstructfact SHARED
-		magstructfact.cpp magstructfact_file.cpp
-		magstructfact_plot.cpp magstructfact_main.cpp
-		magstructfact_nuclei.cpp magstructfact.h
-		../../tlibs2/libs/qt/gl.cpp ../../tlibs2/libs/qt/gl.h
-		../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h)
-else()
-	add_executable(takin_magstructfact
-		magstructfact.cpp magstructfact_file.cpp
-		magstructfact_plot.cpp magstructfact_main.cpp
-		magstructfact_nuclei.cpp magstructfact.h
-		../../tlibs2/libs/qt/gl.cpp ../../tlibs2/libs/qt/gl.h
-		../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h)
-endif()
+add_executable(takin_magstructfact
+	magstructfact.cpp magstructfact_file.cpp
+	magstructfact_plot.cpp magstructfact_main.cpp
+	magstructfact_nuclei.cpp magstructfact.h
+	../../tlibs2/libs/qt/gl.cpp ../../tlibs2/libs/qt/gl.h
+	../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	target_link_options(takin_magstructfact

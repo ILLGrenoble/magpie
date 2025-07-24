@@ -32,10 +32,10 @@
 
 int main(int argc, char** argv)
 {
+	QApplication app(argc, argv);
 	tl2::set_locales();
 
-	QApplication app(argc, argv);
-	QSettings sett("tobis_stuff", "scanbrowser");
+	QSettings sett("takin", "scanbrowser");
 
 	// set GUI style
 	//sett.setValue("mainwnd/theme", "fusion");

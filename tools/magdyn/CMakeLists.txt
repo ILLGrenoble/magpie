@@ -37,6 +37,8 @@ add_compile_options(-Wall -Wextra -Weffc++)
 option(USE_QT     "use Qt"     TRUE)
 option(USE_HDF    "use HDF"    TRUE)
 option(USE_MINUIT "use Minuit" TRUE)
+
+set(QT_VER 6)
 # -----------------------------------------------------------------------------
 
 
@@ -129,7 +131,7 @@ endif()
 # -----------------------------------------------------------------------------
 
 
-include_directories("${PROJECT_SOURCE_DIR}")
+include_directories("${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/../..")
 
 include_directories(
 	SYSTEM "${Boost_INCLUDE_DIRS}" "${Boost_INCLUDE_DIRS}/.." "../.."
@@ -139,7 +141,6 @@ include_directories(
 
 
 if(USE_QT)
-	set(QT_VER 5)
 	message("Trying to select Qt version ${QT_VER}.")
 
 	if(QT_VER EQUAL 6)

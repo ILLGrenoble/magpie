@@ -1223,7 +1223,7 @@ T structure_factor(const t_cont<T>& Ms_or_bs, const t_cont<t_vec>& Rs,
 requires is_basic_vec<t_vec>
 {
 	using t_real = typename t_cplx::value_type;
-	constexpr t_cplx cI{0,1};
+	constexpr t_cplx cI{0, 1};
 	constexpr t_real twopi = pi<t_real> * t_real{2};
 	constexpr t_real expsign = -1;
 
@@ -1238,7 +1238,8 @@ requires is_basic_vec<t_vec>
 	auto iterM_or_b = Ms_or_bs.begin();
 	auto iterR = Rs.begin();
 	typename t_vec::const_iterator iterf;
-	if(fs) iterf = fs->begin();
+	if(fs)
+		iterf = fs->begin();
 
 	while(iterM_or_b != Ms_or_bs.end() && iterR != Rs.end())
 	{

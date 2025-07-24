@@ -36,77 +36,15 @@
 #include "tlibs2/libs/qt/helper.h"
 
 
-#ifndef BUILD_LIB	// build application
-
-
 int main(int argc, char** argv)
 {
 	tl2::set_gl_format(1, _GL_MAJ_VER, _GL_MIN_VER, 8);
-	tl2::set_locales();
-
 	QApplication::addLibraryPath(QString(".") + QDir::separator() + "qtplugins");
 	auto app = std::make_unique<QApplication>(argc, argv);
+
+	tl2::set_locales();
 	auto dlg = std::make_unique<StructFactDlg>(nullptr);
 	dlg->show();
 
 	return app->exec();
 }
-
-
-#else	// build library
-
-
-#include <boost/dll/alias.hpp>
-
-
-/**
- * initialise plugin
- */
-bool init()
-{
-	tl2::set_gl_format(1, _GL_MAJ_VER, _GL_MIN_VER, 8);
-	tl2::set_locales();
-
-	return true;
-}
-
-
-/**
- * plugin descriptor
- * type; title; description
- */
-const char* descr()
-{
-	return "dlg;Structure Factors;Calculates nuclear structure factors.";
-}
-
-
-/**
- * create the plugin main dialog
- */
-//std::shared_ptr<QDialog> create(QWidget *pParent)
-QDialog* create(QWidget *pParent)
-{
-	//std::cout << "In " << __FUNCTION__ << std::endl;
-	//return std::make_shared<StructFactDlg>(pParent);
-	return new StructFactDlg(pParent);
-}
-
-
-/**
- * destroy the plugin main dialog
- */
-void destroy(QDialog* dlg)
-{
-	//std::cout << "In " << __FUNCTION__ << std::endl;
-	if(dlg) delete dlg;
-}
-
-
-BOOST_DLL_ALIAS(init, tl_init);
-BOOST_DLL_ALIAS(descr, tl_descr);
-BOOST_DLL_ALIAS(create, tl_create);
-BOOST_DLL_ALIAS(destroy, tl_destroy);
-
-
-#endif

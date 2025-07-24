@@ -26,7 +26,7 @@ cmake_minimum_required(VERSION 3.5)
 project(structfact)
 enable_language(CXX)
 
-set(QT_VER 5)
+set(QT_VER 6)
 
 set(CMAKE_CXX_STANDARD 20)
 add_compile_options(-std=c++20)
@@ -38,7 +38,6 @@ list(APPEND CMAKE_MODULE_PATH
 )
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
-option(BUILD_LIB "build as dynamic library" FALSE)
 
 # system specific settings
 message("Building for ${CMAKE_SYSTEM_NAME} systems.")
@@ -78,26 +77,13 @@ include_directories(
 )
 
 
-if(BUILD_LIB)
-	set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
-
-	add_definitions(-DBUILD_LIB)
-	add_library(takin_structfact SHARED
-		structfact.cpp structfact_file.cpp
-		structfact_plot.cpp structfact_main.cpp
-		structfact_findsg.cpp structfact_nuclei.cpp
-		structfact.h
-		../../tlibs2/libs/qt/gl.cpp ../../tlibs2/libs/qt/gl.h
-		../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h)
-else()
-	add_executable(takin_structfact
-		structfact.cpp structfact_file.cpp
-		structfact_plot.cpp structfact_main.cpp
-		structfact_findsg.cpp structfact_nuclei.cpp
-		structfact.h
-		../../tlibs2/libs/qt/gl.cpp ../../tlibs2/libs/qt/gl.h
-		../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h)
-endif()
+add_executable(takin_structfact
+	structfact.cpp structfact_file.cpp
+	structfact_plot.cpp structfact_main.cpp
+	structfact_findsg.cpp structfact_nuclei.cpp
+	structfact.h
+	../../tlibs2/libs/qt/gl.cpp ../../tlibs2/libs/qt/gl.h
+	../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	target_link_options(takin_structfact

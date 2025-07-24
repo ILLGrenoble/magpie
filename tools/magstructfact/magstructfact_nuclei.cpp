@@ -54,8 +54,8 @@ void MagStructFactDlg::AddTabItem(int row,
 	t_real ReMx, t_real ReMy, t_real ReMz, t_real ImMx, t_real ImMy, t_real ImMz,
 	t_real scale, const std::string& col)
 {
-	bool bclone = 0;
-	m_ignoreChanges = 1;
+	bool bclone = false;
+	m_ignoreChanges = true;
 
 	if(row == -1)	// append to end of table
 		row = m_nuclei->rowCount();
@@ -66,7 +66,7 @@ void MagStructFactDlg::AddTabItem(int row,
 	else if(row == -4 && m_iCursorRow >= 0)	// use row from member variable +1
 	{
 		row = m_iCursorRow + 1;
-		bclone = 1;
+		bclone = true;
 	}
 
 	//bool sorting = m_nuclei->isSortingEnabled();
@@ -102,14 +102,14 @@ void MagStructFactDlg::AddTabItem(int row,
 
 	m_nuclei->setSortingEnabled(/*sorting*/ true);
 
-	m_ignoreChanges = 0;
+	m_ignoreChanges = false;
 	Calc();
 }
 
 
 void MagStructFactDlg::DelTabItem(int begin, int end)
 {
-	m_ignoreChanges = 1;
+	m_ignoreChanges = true;
 
 	// if nothing is selected, clear all items
 	if(begin == -1 || m_nuclei->selectedItems().count() == 0)
@@ -170,14 +170,14 @@ void MagStructFactDlg::DelTabItem(int begin, int end)
 		}
 	}
 
-	m_ignoreChanges = 0;
+	m_ignoreChanges = false;
 	Calc();
 }
 
 
 void MagStructFactDlg::MoveTabItemUp(QTableWidget *pTab)
 {
-	m_ignoreChanges = 1;
+	m_ignoreChanges = true;
 	pTab->setSortingEnabled(false);
 
 	auto selected = GetSelectedRows(pTab, false);
@@ -206,13 +206,13 @@ void MagStructFactDlg::MoveTabItemUp(QTableWidget *pTab)
 		}
 	}
 
-	m_ignoreChanges = 0;
+	m_ignoreChanges = false;
 }
 
 
 void MagStructFactDlg::MoveTabItemDown(QTableWidget *pTab)
 {
-	m_ignoreChanges = 1;
+	m_ignoreChanges = true;
 	pTab->setSortingEnabled(false);
 
 	auto selected = GetSelectedRows(pTab, true);
@@ -241,7 +241,7 @@ void MagStructFactDlg::MoveTabItemDown(QTableWidget *pTab)
 		}
 	}
 
-	m_ignoreChanges = 0;
+	m_ignoreChanges = false;
 }
 // ----------------------------------------------------------------------------
 
@@ -321,11 +321,10 @@ void MagStructFactDlg::ShowTableContextMenu(QTableWidget *pTab, QMenu *pMenu, QM
 
 
 // ----------------------------------------------------------------------------
-void MagStructFactDlg::AddPropItem(int row,
-	const std::string& name, t_real x, t_real y, t_real z, bool bConjFC)
+void MagStructFactDlg::AddPropItem(int row, const std::string& name, t_real x, t_real y, t_real z, bool bConjFC)
 {
-	bool bclone = 0;
-	m_ignoreChanges = 1;
+	bool bclone = false;
+	m_ignoreChanges = true;
 
 	if(row == -1)	// append to end of table
 		row = m_propvecs->rowCount();
@@ -336,7 +335,7 @@ void MagStructFactDlg::AddPropItem(int row,
 	else if(row == -4 && m_iCursorRow >= 0)	// use row from member variable +1
 	{
 		row = m_iCursorRow + 1;
-		bclone = 1;
+		bclone = true;
 	}
 
 	//bool sorting = m_propvecs->isSortingEnabled();
@@ -364,14 +363,14 @@ void MagStructFactDlg::AddPropItem(int row,
 
 	m_propvecs->setSortingEnabled(/*sorting*/ true);
 
-	m_ignoreChanges = 0;
+	m_ignoreChanges = false;
 	Calc();
 }
 
 
 void MagStructFactDlg::DelPropItem(int begin, int end)
 {
-	m_ignoreChanges = 1;
+	m_ignoreChanges = true;
 
 	// if nothing is selected, clear all items
 	if(begin == -1 || m_propvecs->selectedItems().count() == 0)
@@ -390,7 +389,7 @@ void MagStructFactDlg::DelPropItem(int begin, int end)
 			m_propvecs->removeRow(row);
 	}
 
-	m_ignoreChanges = 0;
+	m_ignoreChanges = false;
 	Calc();
 }
 
@@ -415,7 +414,7 @@ void MagStructFactDlg::PropItemChanged(QTableWidgetItem *)
  */
 void MagStructFactDlg::GenerateFromSG()
 {
-	m_ignoreCalc = 1;
+	m_ignoreCalc = true;
 
 	try
 	{
@@ -474,7 +473,7 @@ void MagStructFactDlg::GenerateFromSG()
 		QMessageBox::critical(this, "Structure Factors", ex.what());
 	}
 
-	m_ignoreCalc = 0;
+	m_ignoreCalc = false;
 	Calc();
 }
 
@@ -488,7 +487,7 @@ std::vector<NuclPos> MagStructFactDlg::GetNuclei() const
 {
 	std::vector<NuclPos> vec;
 
-	for(int row=0; row<m_nuclei->rowCount(); ++row)
+	for(int row = 0; row < m_nuclei->rowCount(); ++row)
 	{
 		auto *name = m_nuclei->item(row, COL_NAME);
 		auto *MMag = m_nuclei->item(row, COL_M_MAG);
@@ -586,7 +585,7 @@ void MagStructFactDlg::Calc()
 	if(m_ignoreCalc)
 		return;
 
-	const t_real p = -t_real(consts::codata::mu_n/consts::codata::mu_N*consts::codata::r_e/si::meters)*0.5e15;
+	constexpr const t_real p = -t_real(consts::codata::mu_n/consts::codata::mu_N*consts::codata::r_e/si::meters)*0.5e15;
 	const auto maxBZ = m_maxBZ->value();
 	const auto maxSCx = m_maxSC[0]->value();
 	const auto maxSCy = m_maxSC[1]->value();
@@ -597,22 +596,24 @@ void MagStructFactDlg::Calc()
 	// propagation vectors
 	std::vector<t_vec> propvecs;
 	std::vector<bool> conjFCs;
-	for(int row=0; row<m_propvecs->rowCount(); ++row)
+	propvecs.reserve(m_propvecs->rowCount());
+	conjFCs.reserve(m_propvecs->rowCount());
+
+	for(int row = 0; row < m_propvecs->rowCount(); ++row)
 	{
 		t_real x = tl2::stoval<t_real>(m_propvecs->item(row, PROP_COL_X)->text().toStdString());
 		t_real y = tl2::stoval<t_real>(m_propvecs->item(row, PROP_COL_Y)->text().toStdString());
 		t_real z = tl2::stoval<t_real>(m_propvecs->item(row, PROP_COL_Z)->text().toStdString());
 		int iConj = tl2::stoval<int>(m_propvecs->item(row, PROP_COL_CONJ)->text().toStdString());
 
-		propvecs.emplace_back(tl2::create<t_vec>({x, y, z}));
+		propvecs.emplace_back(tl2::create<t_vec>({ x, y, z }));
 		conjFCs.push_back(iConj != 0);
 	}
 
 
 	// powder lines
 	std::vector<PowderLine> powderlines;
-	auto add_powderline = [&powderlines](t_real Q, t_real I,
-		t_real h, t_real k, t_real l)
+	auto add_powderline = [&powderlines](t_real Q, t_real I, t_real h, t_real k, t_real l)
 	{
 		std::ostringstream ostrPeak; ostrPeak.precision(g_prec);
 		ostrPeak << "(" << h << "," << k << "," << l << "); ";
@@ -644,14 +645,20 @@ void MagStructFactDlg::Calc()
 	};
 
 
-	std::vector<t_cplx> bs;
 	std::vector<t_vec> pos;
 	std::vector<t_vec_cplx> Ms;
+	std::vector<std::string> names, cols;
 	std::vector<t_real> scales;
-	std::vector<std::string> names;
-	std::vector<std::string> cols;
+	std::vector<t_cplx> bs;
 
-	for(const auto& nucl : GetNuclei())
+	const std::vector<NuclPos> nuclei = GetNuclei();
+	pos.reserve(nuclei.size());
+	Ms.reserve(nuclei.size());
+	names.reserve(nuclei.size());
+	cols.reserve(nuclei.size());
+	scales.reserve(nuclei.size());
+
+	for(const auto& nucl : nuclei)
 	{
 		pos.emplace_back(tl2::create<t_vec>({ nucl.pos[0], nucl.pos[1], nucl.pos[2] }));
 		Ms.emplace_back(nucl.MAbs * tl2::create<t_vec_cplx>({
@@ -692,21 +699,21 @@ void MagStructFactDlg::Calc()
 
 
 	// iterate brillouin zones
-	for(t_real h=-maxBZ; h<=maxBZ; ++h)
-	for(t_real k=-maxBZ; k<=maxBZ; ++k)
-	for(t_real l=-maxBZ; l<=maxBZ; ++l)
+	for(t_real h = -maxBZ; h <= maxBZ; ++h)
+	for(t_real k = -maxBZ; k <= maxBZ; ++k)
+	for(t_real l = -maxBZ; l <= maxBZ; ++l)
 	{
 		// iterate propagation vectors
 		for(const auto& prop : propvecs)
 		{
-			auto Q = tl2::create<t_vec>({ h,k,l }) + prop;
+			auto Q = tl2::create<t_vec>({ h, k, l }) + prop;
 			auto Q_invA = m_crystB * Q;
 			auto Qabs_invA = tl2::norm(Q_invA);
 			auto Q_cplx = tl2::create<t_vec_cplx>({ Q[0], Q[1], Q[2] });
 
 			// magnetic structure factor
 			auto Fm = p * tl2::structure_factor<t_vec, t_vec_cplx>(Ms, pos, Q, nullptr);
-			bool Fm_is_zero = 1;
+			bool Fm_is_zero = true;
 
 			// set small value to zero
 			for(auto &comp : Fm)
@@ -714,11 +721,11 @@ void MagStructFactDlg::Calc()
 				if(tl2::equals<t_real>(comp.real(), t_real(0), g_eps))
 					comp.real(0.);
 				else
-					Fm_is_zero = 0;
+					Fm_is_zero = false;
 				if(tl2::equals<t_real>(comp.imag(), t_real(0), g_eps))
 					comp.imag(0.);
 				else
-					Fm_is_zero = 0;
+					Fm_is_zero = false;
 			}
 			if(Fm.size() == 0)
 				Fm = tl2::zero<t_vec_cplx>(3);
@@ -809,17 +816,17 @@ void MagStructFactDlg::Calc()
 
 	ostrMoments << "# Magnetic moments:" << "\n";
 	ostrMoments << "# "
-		<< std::setw(g_prec*2-2) << std::right << "Name" << " "		// name of nucleus
-		<< std::setw(g_prec*2) << std::right << "x" << " "			// position of nucleus in supercell
+		<< std::setw(g_prec*2-2) << std::right << "Name" << " "   // name of nucleus
+		<< std::setw(g_prec*2) << std::right << "x" << " "        // position of nucleus in supercell
 		<< std::setw(g_prec*2) << std::right << "y" << " "
 		<< std::setw(g_prec*2) << std::right << "z" << " "
-		<< std::setw(g_prec*2) << std::right << "Re{M_x}" << " "	// magnetic moment
+		<< std::setw(g_prec*2) << std::right << "Re{M_x}" << " "  // magnetic moment
 		<< std::setw(g_prec*2) << std::right << "Re{M_y}" << " "
 		<< std::setw(g_prec*2) << std::right << "Re{M_z}" << " "
 		<< std::setw(g_prec*2) << std::right << "Im{M_x}" << " "
 		<< std::setw(g_prec*2) << std::right << "Im{M_y}" << " "
 		<< std::setw(g_prec*2) << std::right << "Im{M_z}" << " "
-		<< std::setw(g_prec*1.2) << std::right << "sc_x" << " "		// centring of supercell origin
+		<< std::setw(g_prec*1.2) << std::right << "sc_x" << " "   // centring of supercell origin
 		<< std::setw(g_prec*1.2) << std::right << "sc_y" << " "
 		<< std::setw(g_prec*1.2) << std::right << "sc_z" << "\n";
 
@@ -830,15 +837,14 @@ void MagStructFactDlg::Calc()
 	const t_real twopi = tl2::pi<t_real>*t_real{2};
 
 	// iterate over supercell
-	for(t_real sc_x=-maxSCx; sc_x<=maxSCx; ++sc_x)
-	for(t_real sc_y=-maxSCy; sc_y<=maxSCy; ++sc_y)
-	for(t_real sc_z=-maxSCz; sc_z<=maxSCz; ++sc_z)
+	for(t_real sc_x = -maxSCx; sc_x <= maxSCx; ++sc_x)
+	for(t_real sc_y = -maxSCy; sc_y <= maxSCy; ++sc_y)
+	for(t_real sc_z = -maxSCz; sc_z <= maxSCz; ++sc_z)
 	{
-		auto vecCellCentre = tl2::create<t_vec>({ sc_x, sc_y, sc_z })
-			+ vecCentring;
+		auto vecCellCentre = tl2::create<t_vec>({ sc_x, sc_y, sc_z }) + vecCentring;
 
 		// iterate magnetic atoms
-		for(std::size_t nuclidx=0; nuclidx<Ms.size(); ++nuclidx)
+		for(std::size_t nuclidx = 0; nuclidx < Ms.size(); ++nuclidx)
 		{
 			const t_vec_cplx& fourier = Ms[nuclidx];
 			const std::string& name = names[nuclidx];
@@ -851,22 +857,20 @@ void MagStructFactDlg::Calc()
 			auto fourier_conj = tl2::conj(fourier);
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-			qreal r=1, g=1, b=1;
+			qreal r = 1, g = 1, b = 1;
 #else
-			float r=1, g=1, b=1;
+			float r = 1, g = 1, b = 1;
 #endif
 			QColor col{colstr.c_str()};
 			col.getRgbF(&r, &g, &b);
 
 			// iterate propagation vectors
-			for(std::size_t propidx=0; propidx<propvecs.size(); ++propidx)
+			for(std::size_t propidx = 0; propidx < propvecs.size(); ++propidx)
 			{
 				const auto& propvec = propvecs[propidx];
 				auto *pfourier = conjFCs[propidx] ? &fourier_conj : &fourier;
 				moment += *pfourier *
-					std::exp(imag*twopi *
-						tl2::inner<t_vec>(
-							propvec, vecCellCentre));
+					std::exp(imag*twopi * tl2::inner<t_vec>(propvec, vecCellCentre));
 			}
 
 			// set small values to zero
@@ -885,8 +889,7 @@ void MagStructFactDlg::Calc()
 				auto objArrowRe = m_plotSC->GetRenderer()->AddLinkedObject(m_arrowSC, 0,0,0, 1,1,1,1);
 				auto objArrowIm = m_plotSC->GetRenderer()->AddLinkedObject(m_arrowSC, 0,0,0, 1,1,1,1);
 
-				auto [_vecReM, _vecImM] =
-					tl2::split_cplx<t_vec_cplx, t_vec>(moment);
+				auto [_vecReM, _vecImM] = tl2::split_cplx<t_vec_cplx, t_vec>(moment);
 				auto vecReM = tl2::convert<t_vec_gl>(_vecReM);
 				auto vecImM = tl2::convert<t_vec_gl>(_vecImM);
 
@@ -894,21 +897,21 @@ void MagStructFactDlg::Calc()
 				auto normImM = tl2::norm<t_vec_gl>(vecImM);
 
 				t_mat_gl matArrowRe = tl2::get_arrow_matrix<t_vec_gl, t_mat_gl, t_real_gl>(
-					vecReM, 									// to
-					1, 											// post-scale
-					tl2::create<t_vec_gl>({0, 0, 0}),				// post-translate
-					tl2::create<t_vec_gl>({0, 0, 1}),				// from
-					normReM*scale,							// pre-scale
-					posGL										// pre-translate
+					vecReM,                             // to
+					1,                                  // post-scale
+					tl2::create<t_vec_gl>({0, 0, 0}),   // post-translate
+					tl2::create<t_vec_gl>({0, 0, 1}),   // from
+					normReM*scale,                      // pre-scale
+					posGL                               // pre-translate
 				);
 
 				t_mat_gl matArrowIm = tl2::get_arrow_matrix<t_vec_gl, t_mat_gl, t_real_gl>(
-					vecImM, 									// to
-					1, 											// post-scale
-					tl2::create<t_vec_gl>({0, 0, 0}),				// post-translate
-					tl2::create<t_vec_gl>({0, 0, 1}),				// from
-					normImM*scale,								// pre-scale
-					posGL										// pre-translate
+					vecImM,                             // to
+					1,                                  // post-scale
+					tl2::create<t_vec_gl>({0, 0, 0}),   // post-translate
+					tl2::create<t_vec_gl>({0, 0, 1}),   // from
+					normImM*scale,                      // pre-scale
+					posGL                               // pre-translate
 				);
 
 				// labels
@@ -953,7 +956,8 @@ void MagStructFactDlg::Calc()
 		}
 	}
 
-	if(m_plotSC) m_plotSC->update();
+	if(m_plotSC)
+		m_plotSC->update();
 	m_moments->setPlainText(ostrMoments.str().c_str());
 }
 // ----------------------------------------------------------------------------
