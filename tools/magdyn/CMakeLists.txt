@@ -5,7 +5,7 @@
 #
 # ----------------------------------------------------------------------------
 # mag-core (part of the Takin software suite)
-# Copyright (C) 2018-2022  Tobias WEBER (Institut Laue-Langevin (ILL),
+# Copyright (C) 2018-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
 #                          Grenoble, France).
 #
 # This program is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@ option(USE_QT     "use Qt"     TRUE)
 option(USE_HDF    "use HDF"    TRUE)
 option(USE_MINUIT "use Minuit" TRUE)
 
-set(QT_VER 6)
+set(QT_VER 5)
 # -----------------------------------------------------------------------------
 
 
