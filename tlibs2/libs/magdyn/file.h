@@ -303,47 +303,49 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 			<< std::setw(field_len) << std::left << "degen" << "\n";
 	}
 
-	SofQEs results = CalcDispersion(h_start, k_start, l_start,
-		h_end, k_end, l_end, num_Qs, num_threads,
-		calc_weights, progress_fkt);
-
 	if(!as_py && as_binary)   // save number of Q points in binary file
 	{
-		t_num_Q num_Q = static_cast<t_num_Q>(results.size());
+		t_num_Q num_Q = static_cast<t_num_Q>(num_Qs);
 		ostr.write(reinterpret_cast<const char*>(&num_Q), sizeof(num_Q));
 	}
 
-	// iterate Qs
-	for(const auto& result : results)
+	// save result at a specific Q
+	bool ok = true;
+	std::function<void(const SofQE*)> result_fkt =
+		[&ok, &ostr, &all_data, progress_fkt,
+		as_py, as_binary, field_len](const SofQE* result)
 	{
-		if(progress_fkt && !(*progress_fkt)(-1, -1))
-			return false;
+		if(progress_fkt && !(*progress_fkt)(-1, -1)  || !result)
+		{
+			ok = false;
+			return;
+		}
 
 		// save the miller index and its number of energies in binary file
-		if(!as_py && as_binary && result.E_and_S.size())
+		if(!as_py && as_binary && result->E_and_S.size())
 		{
-			t_E h = static_cast<t_E>(result.Q_rlu[0]);
-			t_E k = static_cast<t_E>(result.Q_rlu[1]);
-			t_E l = static_cast<t_E>(result.Q_rlu[2]);
+			t_E h = static_cast<t_E>(result->Q_rlu[0]);
+			t_E k = static_cast<t_E>(result->Q_rlu[1]);
+			t_E l = static_cast<t_E>(result->Q_rlu[2]);
 			ostr.write(reinterpret_cast<const char*>(&h), sizeof(h));
 			ostr.write(reinterpret_cast<const char*>(&k), sizeof(k));
 			ostr.write(reinterpret_cast<const char*>(&l), sizeof(l));
 
-			t_num_E num_E = static_cast<t_num_E>(result.E_and_S.size());
+			t_num_E num_E = static_cast<t_num_E>(result->E_and_S.size());
 			ostr.write(reinterpret_cast<const char*>(&num_E), sizeof(num_E));
 		}
 
 		// iterate Es
-		for(t_size branch_idx = 0; branch_idx < result.E_and_S.size(); ++branch_idx)
+		for(t_size branch_idx = 0; branch_idx < result->E_and_S.size(); ++branch_idx)
 		{
-			const EnergyAndWeight& E_and_S = result.E_and_S[branch_idx];
+			const EnergyAndWeight& E_and_S = result->E_and_S[branch_idx];
 
 			if(!as_py & !as_binary)  // save as text file
 			{
 				ostr
-					<< std::setw(field_len) << std::left << result.Q_rlu[0] << " "
-					<< std::setw(field_len) << std::left << result.Q_rlu[1] << " "
-					<< std::setw(field_len) << std::left << result.Q_rlu[2] << " "
+					<< std::setw(field_len) << std::left << result->Q_rlu[0] << " "
+					<< std::setw(field_len) << std::left << result->Q_rlu[1] << " "
+					<< std::setw(field_len) << std::left << result->Q_rlu[2] << " "
 					<< std::setw(field_len) << E_and_S.E << " "
 					<< std::setw(field_len) << E_and_S.weight << " "
 					<< std::setw(field_len) << E_and_S.S_perp(0, 0).real() << " "
@@ -363,9 +365,9 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 			if(as_py)                // save as py script
 			{
 				all_data << "\t"
-					<< "[ " << result.Q_rlu[0]
-					<< ", " << result.Q_rlu[1]
-					<< ", " << result.Q_rlu[2]
+					<< "[ " << result->Q_rlu[0]
+					<< ", " << result->Q_rlu[1]
+					<< ", " << result->Q_rlu[2]
 					<< ", " << E_and_S.E
 					<< ", " << E_and_S.weight
 					<< ", " << branch_idx
@@ -373,7 +375,11 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 					<< " ],\n";
 			}
 		}
-	}
+	};
+
+	CalcDispersion(h_start, k_start, l_start,
+		h_end, k_end, l_end, num_Qs, num_threads,
+		calc_weights, progress_fkt, &result_fkt);
 
 	if(as_py)  // save as py script
 	{
@@ -388,7 +394,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 	}
 
 	ostr.flush();
-	return true;
+	return ok;
 }
 
 
