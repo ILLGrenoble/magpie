@@ -34,11 +34,16 @@ add_compile_options(-Wall -Wextra -Weffc++)
 # -----------------------------------------------------------------------------
 #options
 # -----------------------------------------------------------------------------
-option(USE_QT     "use Qt"     TRUE)
-option(USE_HDF    "use HDF"    TRUE)
-option(USE_MINUIT "use Minuit" TRUE)
+option(USE_QT      "use Qt"            TRUE)
+option(USE_QT6     "use Qt version 6"  TRUE)
+option(USE_HDF     "use HDF"           TRUE)
+option(USE_MINUIT  "use Minuit"        TRUE)
 
-set(QT_VER 5)
+if(USE_QT6)
+	set(QT_VER 6)
+else()
+	set(QT_VER 5)
+endif()
 # -----------------------------------------------------------------------------
 
 

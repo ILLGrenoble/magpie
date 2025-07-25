@@ -276,6 +276,12 @@ public:
 	 */
 	void SetScatteringPlane(t_real ah, t_real ak, t_real al,
 		t_real bh, t_real bk, t_real bl);
+
+	/**
+	 * restrict energies to given range,
+	 * deactivate by setting Emax smaller than Emin
+	 */
+	//void SetFilterEnergies(t_real Emin, t_real Emax);
 	// --------------------------------------------------------------------
 
 
@@ -689,6 +695,7 @@ private:
 	bool m_unite_degenerate_energies{ true };
 	bool m_perform_checks{ true };
 	bool m_silent { false };
+	t_real m_E_minmax[2] { 1., -1. };             // filter energies
 
 	// settings for cholesky decomposition
 	t_size m_tries_chol{ 50 };

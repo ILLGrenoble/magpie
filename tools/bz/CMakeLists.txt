@@ -39,10 +39,16 @@ set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 
 # options
-option(USE_QT "use Qt" TRUE)
-option(MAKE_LIB "create a library" FALSE)
-option(USE_BOOST_PROGOPTS "use Boost.program_options" TRUE)
-set(QT_VER 6)
+option(USE_QT              "use Qt"                     TRUE)
+option(USE_QT6             "use Qt version 6"           TRUE)
+option(MAKE_LIB            "create a library"           FALSE)
+option(USE_BOOST_PROGOPTS  "use Boost.program_options"  TRUE)
+
+if(USE_QT6)
+	set(QT_VER 6)
+else()
+	set(QT_VER 5)
+endif()
 
 
 # system specific settings

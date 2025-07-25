@@ -63,7 +63,8 @@ extern int gui_main(int argc, char** argv, const std::string& model_file,
 static int cli_main(const std::string& model_file, const std::string& results_file,
 	const t_vec_real& Qi, const t_vec_real& Qf, const t_vec_real& Qf2,
 	t_size num_Q_pts, t_size num_Q_pts2, const std::string& Qlist_file,
-	bool as_py = false, bool as_bin = false, bool calc_weights = true)
+	bool as_py = false, bool as_bin = false, bool calc_weights = true/*,
+	t_real Emin = 1., t_real Emax = -1*/)
 {
 	using namespace tl2_ops;
 
@@ -88,6 +89,9 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 		return -1;
 	}
 
+	// calculation options
+	//if(Emax >= Emin)
+	//	magdyn.SetFilterEnergies(Emin, Emax);
 
 	// print some infos about the model
 	std::cout << "Model infos:" << std::endl;
@@ -308,6 +312,7 @@ int main(int argc, char** argv)
 		bool as_py = false;
 		bool as_bin = false;
 		bool no_weights = false;
+		//t_real Emin = 1., Emax = -1.;
 
 #ifdef DONT_USE_QT
 		use_cli = true;
@@ -341,7 +346,9 @@ int main(int argc, char** argv)
 			("lf", args::value<t_real>(), "final l coordinate")
 			("hf2", args::value<t_real>(), "second final h coordinate")
 			("kf2", args::value<t_real>(), "second final k coordinate")
-			("lf2", args::value<t_real>(), "second final l coordinate");
+			("lf2", args::value<t_real>(), "second final l coordinate")
+			/*("Emin", args::value<t_real>(&Emin), "minimum energy to calculate")
+			("Emax", args::value<t_real>(&Emax), "maximum energy to calculate")*/;
 
 		args::positional_options_description posarg_descr;
 		posarg_descr.add("input", 1);
@@ -430,7 +437,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 		if(use_cli)
 			ret = cli_main(model_file, results_file, Qi, Qf, Qf2,
 				num_Q_pts, num_Q_pts2, Qlist_file,
-				as_py, as_bin, !no_weights);
+				as_py, as_bin, !no_weights/*,
+				Emin, Emax*/);
 		else
 			ret = gui_main(argc, argv, model_file, Qi, Qf, num_Q_pts);
 

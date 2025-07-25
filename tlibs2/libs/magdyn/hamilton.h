@@ -366,6 +366,15 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 				<< "." << std::endl;
 		}
 
+		// limit energies?
+		/*if(m_E_minmax[1] >= m_E_minmax[0])
+		{
+			// filter out energies outside the limits
+			t_real E = eval.real();
+			if(E > m_E_minmax[1] || E < m_E_minmax[0])
+				continue;
+		}*/
+
 		EnergyAndWeight EandS
 		{
 			.E = eval.real(),
