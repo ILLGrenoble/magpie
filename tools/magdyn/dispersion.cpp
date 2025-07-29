@@ -109,7 +109,7 @@ void MagDynDlg::DispersionQChanged(bool calc_dyn)
 		this->CalcDispersion();
 
 	t_vec_real Q_start, Q_end;
-	if(m_topo_dlg || m_disp3d_dlg || m_bzscene)
+	if(m_topo_dlg || m_disp3d_dlg || m_bzscene || m_bz_dlg)
 		std::tie(Q_start, Q_end) = GetDispersionQ();
 
 	if(m_topo_dlg)
@@ -118,6 +118,7 @@ void MagDynDlg::DispersionQChanged(bool calc_dyn)
 	if(m_disp3d_dlg)
 		m_disp3d_dlg->SetDispersionQ(Q_start, Q_end);
 
+	// show current scan in scattering plane plot
 	if(m_bzscene)
 	{
 		// draw scan line if inside scattering plane
@@ -132,6 +133,19 @@ void MagDynDlg::DispersionQChanged(bool calc_dyn)
 			tl2::equals_0<t_real>(pt_end[2], g_eps))
 			m_bzscene->AddLine(pt_start, pt_end, true,
 			"Scan Direction", "Start Q", "End Q");
+	}
+
+	// show current scan in bz plot
+	if(m_bz_dlg)
+	{
+		// draw scan line
+		m_bz_dlg->ClearLines(false);
+
+		t_mat_real UB = m_dyn.GetCrystalUBTrafo();
+		t_vec_real pt_start = UB*Q_start;
+		t_vec_real pt_end = UB*Q_end;
+
+		m_bz_dlg->AddLine(pt_start, pt_end, false);
 	}
 }
 

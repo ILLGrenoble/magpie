@@ -60,7 +60,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	m_structplot->GetRenderer()->SetLight(1, tl2::create<t_vec3_gl>({ -5, -5, -5 }));
 	m_structplot->GetRenderer()->SetCoordMax(1.);
 	m_structplot->GetRenderer()->GetCamera().SetParalellRange(4.);
-	m_structplot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real>(g_structplot_fov));
+	m_structplot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real_gl>(g_structplot_fov));
 	m_structplot->GetRenderer()->GetCamera().SetDist(1.5);
 	m_structplot->GetRenderer()->GetCamera().UpdateTransformation();
 	m_structplot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
@@ -407,8 +407,8 @@ void StructPlotDlg::SetPerspectiveProjection(bool proj)
  */
 void StructPlotDlg::SetCameraRotation(t_real_gl phi, t_real_gl theta)
 {
-	phi = tl2::d2r<t_real>(phi);
-	theta = tl2::d2r<t_real>(theta);
+	phi = tl2::d2r<t_real_gl>(phi);
+	theta = tl2::d2r<t_real_gl>(theta);
 
 	m_structplot->GetRenderer()->GetCamera().SetRotation(phi, theta);
 	m_structplot->GetRenderer()->GetCamera().UpdateTransformation();
@@ -425,8 +425,8 @@ void StructPlotDlg::CameraHasUpdated()
 {
 	auto [phi, theta] = m_structplot->GetRenderer()->GetCamera().GetRotation();
 
-	phi = tl2::r2d<t_real>(phi);
-	theta = tl2::r2d<t_real>(theta);
+	phi = tl2::r2d<t_real_gl>(phi);
+	theta = tl2::r2d<t_real_gl>(theta);
 
 	BOOST_SCOPE_EXIT(this_)
 	{

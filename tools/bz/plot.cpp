@@ -307,6 +307,8 @@ void BZPlotDlg::ShowQVertices(bool show)
 		m_plot->GetRenderer()->SetObjectVisible(obj, show);
 	for(std::size_t obj : m_objsBragg)
 		m_plot->GetRenderer()->SetObjectVisible(obj, show);
+	for(std::size_t obj : m_objsLines)
+		m_plot->GetRenderer()->SetObjectVisible(obj, show);
 
 	m_plot->update();
 }
@@ -329,15 +331,15 @@ void BZPlotDlg::SetABTrafo(const t_mat_bz& crystA, const t_mat_bz& crystB)
 
 
 /**
- * add a voronoi vertex to the plot
+ * add a vertex to the plot
  */
-void BZPlotDlg::AddVoronoiVertex(const t_vec_bz& pos)
+void BZPlotDlg::AddVertex(const t_vec_bz& pos,
+	std::vector<std::size_t>* cont, t_real_gl scale,
+	t_real_gl r, t_real_gl g, t_real_gl b)
 {
 	if(!m_plot)
 		return;
 
-	t_real_gl r = 0, g = 0, b = 1;
-	t_real_gl scale = 1;
 	t_real_gl posx = static_cast<t_real_gl>(pos[0]);
 	t_real_gl posy = static_cast<t_real_gl>(pos[1]);
 	t_real_gl posz = static_cast<t_real_gl>(pos[2]);
@@ -349,8 +351,19 @@ void BZPlotDlg::AddVoronoiVertex(const t_vec_bz& pos)
 		tl2::hom_scaling<t_mat_gl>(scale, scale, scale));
 	m_plot->GetRenderer()->SetObjectIntersectable(obj, false);
 
-	m_objsVoronoi.push_back(obj);
-	m_plot->update();
+	if(cont)
+		cont->push_back(obj);
+	m_plot->update();	
+}
+
+
+
+/**
+ * add a voronoi vertex to the plot
+ */
+void BZPlotDlg::AddVoronoiVertex(const t_vec_bz& pos)
+{
+	AddVertex(pos, &m_objsVoronoi, 1., 0., 0., 1.);
 }
 
 
@@ -359,24 +372,38 @@ void BZPlotDlg::AddVoronoiVertex(const t_vec_bz& pos)
  */
 void BZPlotDlg::AddBraggPeak(const t_vec_bz& pos)
 {
-	if(!m_plot)
-		return;
+	AddVertex(pos, &m_objsBragg, 1., 1., 0., 0.);
+}
 
-	t_real_gl r = 1, g = 0, b = 0;
-	t_real_gl scale = 1;
-	t_real_gl posx = static_cast<t_real_gl>(pos[0]);
-	t_real_gl posy = static_cast<t_real_gl>(pos[1]);
-	t_real_gl posz = static_cast<t_real_gl>(pos[2]);
 
-	auto obj = m_plot->GetRenderer()->AddLinkedObject(m_sphere, 0,0,0, r,g,b,1);
-	//auto obj = m_plot->GetRenderer()->AddSphere(0.05, 0,0,0, r,g,b,1);
-	m_plot->GetRenderer()->SetObjectMatrix(obj,
-		tl2::hom_translation<t_mat_gl>(posx, posy, posz) *
-		tl2::hom_scaling<t_mat_gl>(scale, scale, scale));
-	m_plot->GetRenderer()->SetObjectIntersectable(obj, false);
+/**
+ * add a line from a start to an end point
+ */
+void BZPlotDlg::AddLine(const t_vec_bz& start, const t_vec_bz& end, bool add_vertices)
+{
+	if(add_vertices)
+	{
+		AddVertex(start, &m_objsLines, 0.5,  1., 0., 0.);
+		AddVertex(end, &m_objsLines, 0.5,  0., 0., 1.);
+	}
 
-	m_objsBragg.push_back(obj);
-	m_plot->update();
+	t_vec3_gl dir = tl2::convert<t_vec3_gl>(end - start);
+	t_vec3_gl mid = tl2::convert<t_vec3_gl>(start + (end - start)*0.5);
+	t_real_gl len = tl2::norm(dir);
+
+	auto arrow = m_plot->GetRenderer()->AddArrow(
+		0.025, len,  0., 0., 0.5,  1., 1., 1., 1.);
+	m_plot->GetRenderer()->SetObjectMatrix(arrow,
+		tl2::get_arrow_matrix<t_vec3_gl, t_mat_gl, t_real_gl>(
+			dir,                                 // to
+			1.,                                  // post-scale
+			tl2::create<t_vec3_gl>({ 0, 0, 0 }), // post-translate
+			tl2::create<t_vec3_gl>({ 0, 0, 1 }), // from
+			1.,                                  // pre-scale
+			tl2::convert<t_vec3_gl>(mid)));    // pre-translate
+
+	m_plot->GetRenderer()->SetObjectIntersectable(arrow, false);
+	m_objsLines.push_back(arrow);
 }
 
 
@@ -464,6 +491,21 @@ void BZPlotDlg::SetPlane(const t_vec_bz& _norm, t_real d)
 }
 
 
+void BZPlotDlg::ClearLines(bool update)
+{
+	if(!m_plot)
+		return;
+
+	for(std::size_t obj : m_objsLines)
+		m_plot->GetRenderer()->RemoveObject(obj);
+
+	m_objsLines.clear();
+
+	if(update)
+		m_plot->update();
+}
+
+
 void BZPlotDlg::Clear()
 {
 	if(!m_plot)
@@ -476,9 +518,12 @@ void BZPlotDlg::Clear()
 	for(std::size_t obj : m_objsVoronoi)
 		m_plot->GetRenderer()->RemoveObject(obj);
 
+	m_objsBZ.clear();
 	m_objsBragg.clear();
 	m_objsVoronoi.clear();
 	m_objFaceIndices.clear();
+
+	ClearLines(false);
 
 	m_plot->update();
 }
@@ -630,8 +675,8 @@ void BZPlotDlg::SetPerspectiveProjection(bool proj)
  */
 void BZPlotDlg::SetCameraRotation(t_real_gl phi, t_real_gl theta)
 {
-	phi = tl2::d2r<t_real>(phi);
-	theta = tl2::d2r<t_real>(theta);
+	phi = tl2::d2r<t_real_gl>(phi);
+	theta = tl2::d2r<t_real_gl>(theta);
 
 	m_plot->GetRenderer()->GetCamera().SetRotation(phi, theta);
 	m_plot->GetRenderer()->GetCamera().UpdateTransformation();
@@ -647,8 +692,8 @@ void BZPlotDlg::CameraHasUpdated()
 {
 	auto [phi, theta] = m_plot->GetRenderer()->GetCamera().GetRotation();
 
-	phi = tl2::r2d<t_real>(phi);
-	theta = tl2::r2d<t_real>(theta);
+	phi = tl2::r2d<t_real_gl>(phi);
+	theta = tl2::r2d<t_real_gl>(theta);
 
 	BOOST_SCOPE_EXIT(this_)
 	{

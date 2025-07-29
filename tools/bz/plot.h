@@ -55,16 +55,20 @@ public:
 	BZPlotDlg& operator=(const BZPlotDlg&) = delete;
 
 	void Clear();
+	void ClearLines(bool update = true);
 
 	void SetABTrafo(const t_mat_bz& crystA, const t_mat_bz& crystB);
+	void SetPlane(const t_vec_bz& norm, t_real d);
+	void SetEps(t_real eps);
+	void SetPrecGui(int prec);
+
 	void AddVoronoiVertex(const t_vec_bz& pos);
 	void AddBraggPeak(const t_vec_bz& pos);
 	void AddTriangles(const std::vector<t_vec_bz>& vecs,
 		const std::vector<std::size_t> *faceindices = nullptr);
-	void SetPlane(const t_vec_bz& norm, t_real d);
-
-	void SetEps(t_real eps);
-	void SetPrecGui(int prec);
+	void AddLine(const t_vec_bz& start, const t_vec_bz& end, bool add_vertices = true);
+	void AddVertex(const t_vec_bz& pos, std::vector<std::size_t>* cont = nullptr,
+		t_real_gl scale = 1., t_real_gl r = 1., t_real_gl g = 0., t_real_gl b = 0.);
 
 	QMenu* GetContextMenu();
 	const t_vec_bz& GetClickedPosition(bool right_button = false) const;
@@ -119,6 +123,7 @@ private:
 	std::vector<std::size_t> m_objsBragg{};   // Bragg peak plot objects
 	std::vector<std::size_t> m_objsVoronoi{}; // Voronoi vertex plot objects
 	std::vector<std::size_t> m_objsBZ{};      // BZ triangle plot objects
+	std::vector<std::size_t> m_objsLines{};   // line plot objects
 
 	t_vec_bz m_cur_Qrlu{};                    // current cursor position
 	t_vec_bz m_clicked_Q_rlu[2]{};            // clicked position

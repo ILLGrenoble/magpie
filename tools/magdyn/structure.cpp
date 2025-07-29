@@ -47,7 +47,7 @@ void MagDynDlg::MirrorAtoms()
 	m_ignoreCalc = true;
 
 	// iterate the magnetic sites
-	for(int row=0; row<m_sitestab->rowCount(); ++row)
+	for(int row = 0; row < m_sitestab->rowCount(); ++row)
 	{
 		auto *pos_x = static_cast<t_numitem*>(m_sitestab->item(row, COL_SITE_POS_X));
 		auto *pos_y = static_cast<t_numitem*>(m_sitestab->item(row, COL_SITE_POS_Y));
