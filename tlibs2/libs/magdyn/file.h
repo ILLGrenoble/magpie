@@ -315,7 +315,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 		[&ok, &ostr, &all_data, progress_fkt,
 		as_py, as_binary, field_len](const SofQE* result)
 	{
-		if(progress_fkt && !(*progress_fkt)(-1, -1)  || !result)
+		if((progress_fkt && !(*progress_fkt)(-1, -1))  || !result)
 		{
 			ok = false;
 			return;

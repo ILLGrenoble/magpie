@@ -1,7 +1,7 @@
 /**
- * basic type definitions
+ * version numbers
  * @author Tobias Weber <tweber@ill.fr>
- * @date Jan-2023
+ * @date jul-2025
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
@@ -25,26 +25,13 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __MAGCORE_DEFS__
-#define __MAGCORE_DEFS__
-
-#include "vers.h"
+#ifndef __MAGCORE_VERS__
+#define __MAGCORE_VERS__
 
 
-#include <cstddef>
-#include <complex>
-
-
-// ----------------------------------------------------------------------------
-// basic type definitions
-// ----------------------------------------------------------------------------
-using t_size = std::size_t;
-
-//using t_real = float;
-using t_real = double;
-
-using t_cplx = std::complex<t_real>;
-// ----------------------------------------------------------------------------
+// tool version numbers
+#define MAGCORE_VER "2.8.5"   // corresponds to takin version
+#define MAGPIE_VER  "0.9"
 
 
 #endif

@@ -6,7 +6,7 @@
  *
  * ----------------------------------------------------------------------------
  * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2018-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,6 +27,7 @@
 %{
 	#include "../../tlibs2/libs/instr.h"
 %}
+
 
 %include "std_vector.i"
 %include "std_array.i"
@@ -58,3 +59,29 @@
 %include "../../tlibs2/libs/instr/raw.h"
 
 %template(FileInstrBaseD) tl2::FileInstrBase<double>;
+
+
+// ----------------------------------------------------------------------------
+// additional functions
+// ----------------------------------------------------------------------------
+%inline
+%{
+	#include "../../libs/loadcif.h"
+	#include "../../libs/vers.h"
+
+
+	/**
+	 * types
+	 */
+	using t_str = std::string;
+
+
+	/**
+	 * takin/magcore version number
+	 */
+	t_str get_version()
+	{
+		return MAGCORE_VER;
+	}
+%}
+// ----------------------------------------------------------------------------

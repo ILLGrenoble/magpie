@@ -45,3 +45,28 @@
 %include "../../tools/bz/bz_lib.h"
 
 %template(BZCalcD) BZCalc<t_matD, t_vecD, double>;
+
+
+// ----------------------------------------------------------------------------
+// additional functions
+// ----------------------------------------------------------------------------
+%inline
+%{
+	#include "../../libs/vers.h"
+
+
+	/**
+	 * types
+	 */
+	using t_str = std::string;
+
+
+	/**
+	 * takin/magcore version number
+	 */
+	t_str get_version()
+	{
+		return MAGCORE_VER;
+	}
+%}
+// ----------------------------------------------------------------------------

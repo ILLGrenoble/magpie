@@ -54,6 +54,7 @@ num_Q_points = 256
 
 
 # create the magdyn object
+print("Starting Magpie version %s." % magdyn.get_version())
 mag = magdyn.MagDyn()
 
 

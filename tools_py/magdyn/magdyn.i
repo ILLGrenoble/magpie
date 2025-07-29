@@ -6,7 +6,7 @@
  *
  * ----------------------------------------------------------------------------
  * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2018-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -187,6 +187,7 @@
 %inline
 %{
 	#include "../../libs/loadcif.h"
+	#include "../../libs/vers.h"
 
 
 	/**
@@ -205,6 +206,15 @@
 		t_cplx, t_real, std::size_t>;
 
 	using t_SofQE = typename t_MagDyn::SofQE;
+
+
+	/**
+	 * magpie version number
+	 */
+	t_str get_version()
+	{
+		return MAGPIE_VER;
+	}
 
 
 	/**
