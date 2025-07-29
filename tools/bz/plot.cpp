@@ -404,6 +404,7 @@ void BZPlotDlg::AddLine(const t_vec_bz& start, const t_vec_bz& end, bool add_ver
 
 	m_plot->GetRenderer()->SetObjectIntersectable(arrow, false);
 	m_objsLines.push_back(arrow);
+	m_plot->update();
 }
 
 
@@ -506,23 +507,36 @@ void BZPlotDlg::ClearLines(bool update)
 }
 
 
-void BZPlotDlg::Clear()
+void BZPlotDlg::ClearBZ(bool update)
 {
 	if(!m_plot)
 		return;
 
 	for(std::size_t obj : m_objsBZ)
 		m_plot->GetRenderer()->RemoveObject(obj);
+
+	m_objsBZ.clear();
+	m_objFaceIndices.clear();
+
+	if(update)
+		m_plot->update();
+}
+
+
+void BZPlotDlg::Clear()
+{
+	if(!m_plot)
+		return;
+
 	for(std::size_t obj : m_objsBragg)
 		m_plot->GetRenderer()->RemoveObject(obj);
 	for(std::size_t obj : m_objsVoronoi)
 		m_plot->GetRenderer()->RemoveObject(obj);
 
-	m_objsBZ.clear();
 	m_objsBragg.clear();
 	m_objsVoronoi.clear();
-	m_objFaceIndices.clear();
 
+	ClearBZ(false);
 	ClearLines(false);
 
 	m_plot->update();

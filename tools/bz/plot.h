@@ -56,6 +56,7 @@ public:
 
 	void Clear();
 	void ClearLines(bool update = true);
+	void ClearBZ(bool update = true);
 
 	void SetABTrafo(const t_mat_bz& crystA, const t_mat_bz& crystB);
 	void SetPlane(const t_vec_bz& norm, t_real d);
