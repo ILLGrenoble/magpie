@@ -147,8 +147,8 @@ private:
 	// results panel
 	QPlainTextEdit *m_bzresults = nullptr;
 	QPlainTextEdit *m_bzresultsJSON = nullptr;
-	std::string m_descrBZ, m_descrBZCut{};       // text description of the results
-	std::string m_descrBZJSON{};                 // json description of the results
+	std::string m_descrBZ, m_descrBZCut{};          // text description of the results
+	std::string m_descrBZJSON, m_descrBZCutJSON{};  // json description of the results
 
 	// menu
 	QAction *m_acCutHull = nullptr;

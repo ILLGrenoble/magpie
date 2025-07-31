@@ -301,7 +301,7 @@ public:
 	}
 
 
-        const std::vector<std::tuple<t_vec, t_vec, std::array<t_real, 3>>>&
+	const std::vector<std::tuple<t_vec, t_vec, std::array<t_real, 3>>>&
 	GetCutLines(bool b000 = false) const
 	{
 	        // [x, y, Q]
@@ -888,9 +888,60 @@ public:
 
 
 	/**
+	 * print a description of the bz cut
+	 */
+	std::string PrintCut(int prec = 6) const
+	{
+		using namespace tl2_ops;
+
+		t_vec vec1_invA = tl2::col<t_mat, t_vec>(GetCutPlane(), 0);
+		t_vec vec2_invA = tl2::col<t_mat, t_vec>(GetCutPlane(), 1);
+		t_vec norm_invA = tl2::col<t_mat, t_vec>(GetCutPlane(), 2);
+		t_vec vec1_rlu = m_vec1_rlu, vec2_rlu = m_vec2_rlu, norm_rlu = m_norm_rlu;
+		t_real d_rlu = m_d_rlu, d_invA = m_d_invA;
+
+		tl2::set_eps_0(norm_invA, m_eps); tl2::set_eps_0(norm_rlu, m_eps);
+		tl2::set_eps_0(vec1_invA, m_eps); tl2::set_eps_0(vec1_rlu, m_eps);
+		tl2::set_eps_0(vec2_invA, m_eps); tl2::set_eps_0(vec2_rlu, m_eps);
+
+		std::ostringstream ostr;
+		ostr.precision(prec);
+
+		// description of the cutting plane
+		ostr << "# Cutting plane";
+		ostr << "\nin relative lattice units:";
+		ostr << "\n\tnormal: [" << norm_rlu << "] rlu";
+		ostr << "\n\tin-plane vector 1: [" << vec1_rlu << "] rlu";
+		ostr << "\n\tin-plane vector 2: [" << vec2_rlu << "] rlu";
+		ostr << "\n\tplane offset: " << d_rlu << " rlu";
+
+		ostr << "\nin lab units:";
+		ostr << "\n\tnormal: [" << norm_invA << "] Å⁻¹";
+		ostr << "\n\tin-plane vector 1: [" << vec1_invA << "] Å⁻¹";
+		ostr << "\n\tin-plane vector 2: [" << vec2_invA << "] Å⁻¹";
+		ostr << "\n\tplane offset: " << d_invA << " Å⁻¹";
+		ostr << "\n" << std::endl;
+
+		// description of the bz cut
+		ostr << "# Brillouin zone cut (Å⁻¹)" << std::endl;
+		for(std::size_t i = 0; i < GetCutLines(true).size(); ++i)
+		{
+			const auto& line = GetCutLines(true)[i];
+
+			ostr << "line " << i
+				<< ":\n\tvertex 0: (" << std::get<0>(line) << ")"
+				<< "\n\tvertex 1: (" << std::get<1>(line) << ")"
+				<< std::endl;
+		}
+
+		return ostr.str();
+	}
+
+
+	/**
 	 * export a description of the bz in json format
 	 */
-	std::string PrintJSON(int prec = 6) const
+	std::string PrintJSON(int prec = 6, bool print_block = true) const
 	{
 		const t_mat& B = GetCrystalB(false);
 		const t_mat& Bortho = GetCrystalB(true);
@@ -899,7 +950,8 @@ public:
 		std::ostringstream ostr;
 		ostr.precision(prec);
 
-		ostr << "{\n";
+		if(print_block)
+			ostr << "{\n";
 
 		// voronoi vertices forming the vertices of the bz
 		// (rotated by orthonormal part of B^(-1))
@@ -1017,58 +1069,89 @@ public:
 				ostr << " ";
 			}
 		}
-		ostr << "]\n";
 
-		ostr << "}\n";
+		if(print_block)
+		{
+			ostr << "]\n";
+			ostr << "}\n";
+		}
+		else
+		{
+			ostr << "]";
+		}
+
 		return ostr.str();
 	}
 
 
 	/**
-	 * print a description of the bz cut
+	 * export a description of the bz cut in json format
 	 */
-	std::string PrintCut(int prec = 6) const
+	std::string PrintCutJSON(int prec = 6, bool print_block = true) const
 	{
-		using namespace tl2_ops;
+		const t_size num_cut_lines = GetCutLines(true).size();
+		if(num_cut_lines == 0)
+			return "";
 
-		t_vec vec1_invA = tl2::col<t_mat, t_vec>(GetCutPlane(), 0);
-		t_vec vec2_invA = tl2::col<t_mat, t_vec>(GetCutPlane(), 1);
-		t_vec norm_invA = tl2::col<t_mat, t_vec>(GetCutPlane(), 2);
-		t_vec vec1_rlu = m_vec1_rlu, vec2_rlu = m_vec2_rlu, norm_rlu = m_norm_rlu;
-		t_real d_rlu = m_d_rlu, d_invA = m_d_invA;
-
-		tl2::set_eps_0(norm_invA, m_eps); tl2::set_eps_0(norm_rlu, m_eps);
-		tl2::set_eps_0(vec1_invA, m_eps); tl2::set_eps_0(vec1_rlu, m_eps);
-		tl2::set_eps_0(vec2_invA, m_eps); tl2::set_eps_0(vec2_rlu, m_eps);
+		const t_mat& Bortho = GetCrystalB(true);
+		t_mat BorthoT = tl2::trans(Bortho);
 
 		std::ostringstream ostr;
 		ostr.precision(prec);
 
-		// description of the cutting plane
-		ostr << "# Cutting plane";
-		ostr << "\nin relative lattice units:";
-		ostr << "\n\tnormal: [" << norm_rlu << "] rlu";
-		ostr << "\n\tin-plane vector 1: [" << vec1_rlu << "] rlu";
-		ostr << "\n\tin-plane vector 2: [" << vec2_rlu << "] rlu";
-		ostr << "\n\tplane offset: " << d_rlu << " rlu";
+		if(print_block)
+			ostr << "{\n";
 
-		ostr << "\nin lab units:";
-		ostr << "\n\tnormal: [" << norm_invA << "] Å⁻¹";
-		ostr << "\n\tin-plane vector 1: [" << vec1_invA << "] Å⁻¹";
-		ostr << "\n\tin-plane vector 2: [" << vec2_invA << "] Å⁻¹";
-		ostr << "\n\tplane offset: " << d_invA << " Å⁻¹";
-		ostr << "\n" << std::endl;
-
-		// description of the bz cut
-		ostr << "# Brillouin zone cut (Å⁻¹)" << std::endl;
-		for(std::size_t i = 0; i < GetCutLines(true).size(); ++i)
+		// zone cut lines
+		// (rotated by orthonormal part of B^(-1))
+		ostr << "\"cut_lines\" : [\n";
+		for(std::size_t i = 0; i < num_cut_lines; ++i)
 		{
 			const auto& line = GetCutLines(true)[i];
 
-			ostr << "line " << i
-				<< ":\n\tvertex 0: (" << std::get<0>(line) << ")"
-				<< "\n\tvertex 1: (" << std::get<1>(line) << ")"
-				<< std::endl;
+			t_vec vert1 = BorthoT * std::get<0>(line);
+			t_vec vert2 = BorthoT * std::get<1>(line);
+			tl2::set_eps_0(vert1, m_eps);
+			tl2::set_eps_0(vert2, m_eps);
+
+			ostr << "\t[\n";
+			ostr << "\t\t[ " << vert1[0] << ", " << vert1[1] << ", " << vert1[2] << " ],\n";
+			ostr << "\t\t[ " << vert2[0] << ", " << vert2[1] << ", " << vert2[2] << " ]\n";
+			ostr << "\t]";
+
+			if(i < num_cut_lines - 1)
+				ostr << ",";
+			ostr << "\n";
+		}
+		ostr << "],\n\n";
+
+		// zone cut lines
+		ostr << "\"cut_lines_nonrot\" : [\n";
+		for(std::size_t i = 0; i < num_cut_lines; ++i)
+		{
+			const auto& line = GetCutLines(true)[i];
+
+			const t_vec& vert1 = std::get<0>(line);
+			const t_vec& vert2 = std::get<1>(line);
+
+			ostr << "\t[\n";
+			ostr << "\t\t[ " << vert1[0] << ", " << vert1[1] << ", " << vert1[2] << " ],\n";
+			ostr << "\t\t[ " << vert2[0] << ", " << vert2[1] << ", " << vert2[2] << " ]\n";
+			ostr << "\t]";
+
+			if(i < num_cut_lines - 1)
+				ostr << ",";
+			ostr << "\n";
+		}
+
+		if(print_block)
+		{
+			ostr << "]\n";
+			ostr << "}\n";
+		}
+		else
+		{
+			ostr << "]";
 		}
 
 		return ostr.str();

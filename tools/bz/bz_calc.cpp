@@ -163,7 +163,7 @@ bool BZDlg::CalcBZ(bool full_recalc)
 
 	// set bz description string
 	m_descrBZ = m_bzcalc.Print(g_prec_bz);
-	m_descrBZJSON = m_bzcalc.PrintJSON(g_prec_bz);
+	m_descrBZJSON = m_bzcalc.PrintJSON(g_prec_bz, false);
 
 	m_status->setText((std::string("<font color=\"green\">")
 		+ "Brillouin zone calculated successfully."
@@ -214,6 +214,7 @@ bool BZDlg::CalcBZCut()
 
 	// get description of the cutting plane
 	m_descrBZCut = m_bzcalc.PrintCut(g_prec_bz);
+	m_descrBZCutJSON = m_bzcalc.PrintCutJSON(g_prec_bz, false);
 
 	// update calculation results
 	if(m_dlgPlot)
