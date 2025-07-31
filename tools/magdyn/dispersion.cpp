@@ -141,9 +141,9 @@ void MagDynDlg::DispersionQChanged(bool calc_dyn)
 		// draw scan line
 		m_bz_dlg->ClearLines(false);
 
-		t_mat_real UB = m_dyn.GetCrystalUBTrafo();
-		t_vec_real pt_start = UB*Q_start;
-		t_vec_real pt_end = UB*Q_end;
+		t_mat_real B = m_dyn.GetCrystalBTrafo();
+		t_vec_real pt_start = B*Q_start;
+		t_vec_real pt_end = B*Q_end;
 
 		m_bz_dlg->AddLine(pt_start, pt_end, false);
 	}
