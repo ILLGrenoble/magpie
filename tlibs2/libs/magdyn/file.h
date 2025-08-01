@@ -466,9 +466,9 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 		// save the miller index and its number of energies in binary file
 		if(!as_py && as_binary /*&& result->E_and_S.size()*/)
 		{
-			t_num_E h = static_cast<t_E>(result->Q_rlu[0]);
-			t_num_E k = static_cast<t_E>(result->Q_rlu[1]);
-			t_num_E l = static_cast<t_E>(result->Q_rlu[2]);
+			t_E h = static_cast<t_E>(result->Q_rlu[0]);
+			t_E k = static_cast<t_E>(result->Q_rlu[1]);
+			t_E l = static_cast<t_E>(result->Q_rlu[2]);
 			ostr.write(reinterpret_cast<const char*>(&h), sizeof(h));
 			ostr.write(reinterpret_cast<const char*>(&k), sizeof(k));
 			ostr.write(reinterpret_cast<const char*>(&l), sizeof(l));
