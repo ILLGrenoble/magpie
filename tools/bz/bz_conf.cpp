@@ -27,6 +27,7 @@
 
 #include "bz_conf.h"
 #include "libs/symops.h"
+#include "tlibs2/libs/maths.h"
 
 #include <iostream>
 #include <fstream>
@@ -87,6 +88,44 @@ BZConfig load_bz_config(const std::string& filename, bool use_stdin)
 	cfg.cut_nz = node.get_optional<t_real>("bz.cut.nz");
 	cfg.cut_d = node.get_optional<t_real>("bz.cut.d");
 	cfg.sg_idx = node.get_optional<int>("bz.sg_idx");
+
+	// alternate plane definition with two in-plane vectors
+	boost::optional<t_real> cut_x2, cut_y2, cut_z2;
+	cut_x2 = node.get_optional<t_real>("bz.cut.x2");
+	cut_y2 = node.get_optional<t_real>("bz.cut.y2");
+	cut_z2 = node.get_optional<t_real>("bz.cut.z2");
+	if(cut_x2 && cut_y2 && cut_z2 &&
+		cfg.cut_x && cfg.cut_y && cfg.cut_z &&
+		cfg.xtal_a && cfg.xtal_b && cfg.xtal_c &&
+		cfg.xtal_alpha && cfg.xtal_beta && cfg.xtal_gamma)
+	{
+		t_vec_bz vec1_rlu = tl2::create<t_vec_bz>({
+			*cfg.cut_x, *cfg.cut_y, *cfg.cut_z });
+		t_vec_bz vec2_rlu = tl2::create<t_vec_bz>({
+			*cut_x2, *cut_y2, *cut_z2 });
+
+		t_mat_bz crystB = tl2::B_matrix<t_mat_bz>(
+			*cfg.xtal_a, *cfg.xtal_b, *cfg.xtal_c,
+			tl2::d2r<t_real>(*cfg.xtal_alpha),
+			tl2::d2r<t_real>(*cfg.xtal_beta),
+			tl2::d2r<t_real>(*cfg.xtal_gamma));
+
+		// get plane normal
+		if(auto [crystBinv, inv_ok] = tl2::inv(crystB); inv_ok)
+		{
+			t_vec_bz vec1_invA = crystB * vec1_rlu;
+			t_vec_bz vec2_invA = crystB * vec2_rlu;
+
+			t_vec_bz norm_invA = tl2::cross<t_vec_bz>(vec1_invA, vec2_invA);
+
+			t_vec_bz norm_rlu = crystBinv * norm_invA;
+			norm_rlu /= tl2::norm<t_vec_bz>(norm_rlu);
+
+			cfg.cut_nx = norm_rlu[0];
+			cfg.cut_ny = norm_rlu[1];
+			cfg.cut_nz = norm_rlu[2];
+		}
+	}
 
 
 	// symops

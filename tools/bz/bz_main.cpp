@@ -87,8 +87,37 @@ static int cli_main(const std::string& cfg_file, const std::string& results_file
 			return -1;
 		}
 
+		// bz cut
+		bool cut_ok = false;
+		if(cfg.cut_x && cfg.cut_y && cfg.cut_z &&
+			cfg.cut_nx && cfg.cut_ny && cfg.cut_nz)
+		{
+			t_real cut_d = cfg.cut_d ? *cfg.cut_d : 0.;
+
+			// get plane coordinate system
+			t_vec_bz vec1_rlu = tl2::create<t_vec_bz>({
+				*cfg.cut_x,
+				*cfg.cut_y,
+				*cfg.cut_z
+			});
+			t_vec_bz norm_rlu = tl2::create<t_vec_bz>({
+				*cfg.cut_nx,
+				*cfg.cut_ny,
+				*cfg.cut_nz
+			});
+
+			// calculate cut
+			cut_ok = bzcalc.CalcBZCut(vec1_rlu, norm_rlu, cut_d);
+			if(!cut_ok)
+				std::cerr << "Error calculating Brillouin zone cut." << std::endl;
+		}
+
 		// get calculated bz
-		std::string results = bzcalc.PrintJSON(g_prec_bz);
+		std::string results = "{\n";
+		results += bzcalc.PrintJSON(g_prec_bz, false);
+		if(cut_ok)
+			results += ",\n\n" + bzcalc.PrintCutJSON(g_prec_bz, false);
+		results += "\n}";
 
 		if(results_file == "")
 		{
