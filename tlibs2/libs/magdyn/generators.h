@@ -132,7 +132,7 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 			}
 			else
 			{
-				CERR_OPT << "Magdyn error: Parsing DMI component "
+				TL2_CERR_OPT << "Magdyn error: Parsing DMI component "
 					<< int(dmi_idx) << " of term \"" << term.name
 					<< "\"." << std::endl;
 			}
@@ -159,7 +159,7 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 				}
 				else
 				{
-					CERR_OPT << "Magdyn error: Parsing general J component ("
+					TL2_CERR_OPT << "Magdyn error: Parsing general J component ("
 						<< int(J_idx1) << ", " << int(J_idx2)
 						<< ") of term \"" << term.name << "\"."
 						<< std::endl;
@@ -186,7 +186,7 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 
 			if(!sc1_ok || !sc2_ok)
 			{
-				CERR_OPT << "Magdyn error: Could not find supercell"
+				TL2_CERR_OPT << "Magdyn error: Could not find supercell"
 					<< " for position generated from symop "
 					<< op_idx << "." << std::endl;
 			}

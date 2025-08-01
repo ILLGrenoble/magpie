@@ -68,7 +68,7 @@ bool MAGDYN_INST::Load(const std::string& filename)
 	}
 	catch(const std::exception& ex)
 	{
-		CERR_OPT << "Magdyn error: Could not load \""
+		TL2_CERR_OPT << "Magdyn error: Could not load \""
 			<< filename << "\"."
 			<< " Reason: " << ex.what()
 			<< std::endl;
@@ -247,7 +247,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 				}
 				else
 				{
-					CERR_OPT << "Magdyn error: Site 1 name \"" << *name1 << "\" "
+					TL2_CERR_OPT << "Magdyn error: Site 1 name \"" << *name1 << "\" "
 						<< "was not found in coupling \"" << exchange_term.name
 						<< "\"." << std::endl;
 				}
@@ -266,7 +266,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 				}
 				else
 				{
-					CERR_OPT << "Magdyn error: Site 2 name \"" << *name2 << "\" "
+					TL2_CERR_OPT << "Magdyn error: Site 2 name \"" << *name2 << "\" "
 						<< "was not found in coupling \"" << exchange_term.name
 						<< "\"." << std::endl;
 				}

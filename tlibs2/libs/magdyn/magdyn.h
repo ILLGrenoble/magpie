@@ -86,7 +86,7 @@
 
 
 // only print if it's not set to silent mode
-#define CERR_OPT if(!m_silent) std::cerr
+#define TL2_CERR_OPT if(!m_silent) std::cerr
 
 
 namespace tl2_mag {

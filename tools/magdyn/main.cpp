@@ -56,6 +56,9 @@ extern int gui_main(int argc, char** argv, const std::string& model_file,
 #endif
 
 
+#define CERR_OPT if(!silent) std::cerr
+#define COUT_OPT if(!silent) std::cout
+
 
 /**
  * starts the cli program
@@ -63,14 +66,14 @@ extern int gui_main(int argc, char** argv, const std::string& model_file,
 static int cli_main(const std::string& model_file, const std::string& results_file,
 	const t_vec_real& Qi, const t_vec_real& Qf, const t_vec_real& Qf2,
 	t_size num_Q_pts, t_size num_Q_pts2, const std::string& Qlist_file,
-	bool as_py = false, bool as_bin = false, bool calc_weights = true/*,
+	bool as_py = false, bool as_bin = false, bool calc_weights = true, bool silent = false/*,
 	t_real Emin = 1., t_real Emax = -1*/)
 {
 	using namespace tl2_ops;
 
 	if(model_file == "")
 	{
-		std::cerr << "Error: No magnetic model given." << std::endl;
+		CERR_OPT << "Error: No magnetic model given." << std::endl;
 		return -1;
 	}
 
@@ -79,12 +82,12 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 	t_magdyn magdyn;
 	if(magdyn.Load(model_file))
 	{
-		std::cout << "Loaded magnetic model from file \"" <<
+		COUT_OPT << "Loaded magnetic model from file \"" <<
 			model_file << "\"." << std::endl;
 	}
 	else
 	{
-		std::cerr << "Error: Failed loading magnetic model \"" <<
+		CERR_OPT << "Error: Failed loading magnetic model \"" <<
 			model_file << "\"." << std::endl;
 		return -1;
 	}
@@ -92,39 +95,43 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 	// calculation options
 	//if(Emax >= Emin)
 	//	magdyn.SetFilterEnergies(Emin, Emax);
+	magdyn.SetSilent(silent);
 
-	// print some infos about the model
-	std::cout << "Model infos:" << std::endl;
-
-	std::cout << "\t" << magdyn.GetMagneticSitesCount() << " magnetic site(s) and "
-		<< magdyn.GetExchangeTermsCount() << " coupling(s) defined." << std::endl;
-
-	if(magdyn.IsIncommensurate())
+	if(!silent)
 	{
-		std::cout << "\tSystem is incommensurate with ordering vector: "
-			<< magdyn.GetOrderingWavevector() << "." << std::endl;
+		// print some infos about the model
+		std::cout << "Model infos:" << std::endl;
+
+		std::cout << "\t" << magdyn.GetMagneticSitesCount() << " magnetic site(s) and "
+			<< magdyn.GetExchangeTermsCount() << " coupling(s) defined." << std::endl;
+
+		if(magdyn.IsIncommensurate())
+		{
+			std::cout << "\tSystem is incommensurate with ordering vector: "
+				<< magdyn.GetOrderingWavevector() << "." << std::endl;
+		}
+		else
+		{
+			std::cout << "\tSystem is commensurate." << std::endl;
+		}
+
+		t_real T = magdyn.GetTemperature();
+		if(T < 0.)
+			std::cout << "\tTemperature disabled." << std::endl;
+		else
+			std::cout << "\tTemperature: " << T << "." << std::endl;
+
+		const auto& field = magdyn.GetExternalField();
+		std::cout << "\tMagnetic field magnitude: " << field.mag << "." << std::endl;
+		std::cout << "\tMagnetic field direction: " << field.dir << "." << std::endl;
+		if(field.align_spins)
+			std::cout << "\tAligning spins to field." << std::endl;
+		else
+			std::cout << "\tNot aligning spins to field." << std::endl;
+
+		std::cout << "\tGround state energy: " << magdyn.CalcGroundStateEnergy()
+			<< " meV." << std::endl;
 	}
-	else
-	{
-		std::cout << "\tSystem is commensurate." << std::endl;
-	}
-
-	t_real T = magdyn.GetTemperature();
-	if(T < 0.)
-		std::cout << "\tTemperature disabled." << std::endl;
-	else
-		std::cout << "\tTemperature: " << T << "." << std::endl;
-
-	const auto& field = magdyn.GetExternalField();
-	std::cout << "\tMagnetic field magnitude: " << field.mag << "." << std::endl;
-	std::cout << "\tMagnetic field direction: " << field.dir << "." << std::endl;
-	if(field.align_spins)
-		std::cout << "\tAligning spins to field." << std::endl;
-	else
-		std::cout << "\tNot aligning spins to field." << std::endl;
-
-	std::cout << "\tGround state energy: " << magdyn.CalcGroundStateEnergy()
-		<< " meV." << std::endl;
 
 	// get output stream for results
 	std::ostream* postr = &std::cout;
@@ -137,7 +144,7 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 	}
 	else
 	{
-		std::cerr << "Warning: No output file given, using standard output."
+		CERR_OPT << "Warning: No output file given, using standard output."
 			<< std::endl;
 	}
 
@@ -154,7 +161,7 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 		std::ifstream ifstr_Qs(Qlist_file);
 		if(!ifstr_Qs)
 		{
-			std::cerr << "Error: Cannot open Q list file \""
+			CERR_OPT << "Error: Cannot open Q list file \""
 				<< Qlist_file << "\"." << std::endl;
 			return -1;
 		}
@@ -178,7 +185,7 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 			tl2::get_tokens<t_real, std::string, t_vec_real>(line, std::string(" \t;,"), Q);
 			if(Q.size() != 3)
 			{
-				std::cerr << "Error: Invalid Q vector length in line " << lineno
+				CERR_OPT << "Error: Invalid Q vector length in line " << lineno
 					<< " of \"" << Qlist_file
 					<< "\", three components, h, k, and l, are required."
 					<< std::endl;
@@ -187,7 +194,7 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 			Qs.emplace_back(std::move(Q));
 		}
 
-		std::cout << "\nCalculating dispersion for custom Q points in "
+		COUT_OPT << "\nCalculating dispersion for custom Q points in "
 			<< g_num_threads << " threads..."
 			<< std::endl;
 
@@ -229,7 +236,7 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 		if(!use_2d_map)
 		{
 			// 1d dispersion
-			std::cout << "\nCalculating 1d dispersion from"
+			COUT_OPT << "\nCalculating 1d dispersion from"
 				<< " Q_i = (" << h_start << ", " << k_start << ", " << l_start << ") to"
 				<< " Q_f = (" << h_end << ", " << k_end << ", " << l_end << ")"
 				<< " in " << num_Q_pts << " steps and " << g_num_threads << " threads..."
@@ -263,10 +270,10 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 				Qs.emplace_back(std::move(Q));
 			}
 			//stopwatch.stop();
-			//std::cout << "Generated " << num_Q_pts * num_Q_pts2 << " Q points in "
+			//COUT_OPT << "Generated " << num_Q_pts * num_Q_pts2 << " Q points in "
 			//	<< stopwatch.GetDur() << " s." << std::endl;
 
-			std::cout << "\nCalculating 2d dispersion from"
+			COUT_OPT << "\nCalculating 2d dispersion from"
 				<< " Q_i = (" << h_start << ", " << k_start << ", " << l_start << ") to"
 				<< " Q_f = (" << h_end << ", " << k_end << ", " << l_end << ") and"
 				<< " Q_f2 = (" << Qf2[0] << ", " << Qf2[1] << ", " << Qf2[2] << ")"
@@ -280,7 +287,7 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 	}
 
 	if(results_file != "")
-		std::cout << "Wrote results to \"" << results_file << "\"." << std::endl;
+		COUT_OPT << "Wrote results to \"" << results_file << "\"." << std::endl;
 
 	return 0;
 }
@@ -307,6 +314,7 @@ int main(int argc, char** argv)
 		set_locales();
 
 		bool show_help = false;
+		bool silent = false;
 		bool use_cli = false;
 		bool show_timing = false;
 		bool as_py = false;
@@ -328,6 +336,7 @@ int main(int argc, char** argv)
 #ifndef DONT_USE_QT
 			("cli,c", args::bool_switch(&use_cli), "use command-line interface")
 #endif
+			("silent", args::bool_switch(&silent), "disable console output")
 			("input,i", args::value(&model_file), "input magnetic model file (.magpie)")
 			("output,o", args::value(&results_file), "output results file (in cli mode)")
 			("qlist", args::value(&Qlist_file), "input file containing Q points")
@@ -437,7 +446,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 		if(use_cli)
 			ret = cli_main(model_file, results_file, Qi, Qf, Qf2,
 				num_Q_pts, num_Q_pts2, Qlist_file,
-				as_py, as_bin, !no_weights/*,
+				as_py, as_bin, !no_weights, silent/*,
 				Emin, Emax*/);
 		else
 			ret = gui_main(argc, argv, model_file, Qi, Qf, num_Q_pts);

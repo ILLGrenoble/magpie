@@ -83,7 +83,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		t_mat check_comm = S.evec_mat * tl2::herm(S.evec_mat);
 		if(!tl2::equals(/*S.comm*/ tl2::unit<t_mat>(2*N), check_comm, m_eps))
 		{
-			CERR_OPT << "Magdyn error: Wrong commutator at Q = "
+			TL2_CERR_OPT << "Magdyn error: Wrong commutator at Q = "
 				<< S.Q_rlu << ": " << check_comm
 				<< "." << std::endl;
 		}
@@ -98,7 +98,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	// re-create energies, to be consistent with the weights
 	if(energy_mat.size1() != S.E_and_S.size())
 	{
-		CERR_OPT << "Magdyn warning: Expected " << S.E_and_S.size() << " energies at Q = "
+		TL2_CERR_OPT << "Magdyn warning: Expected " << S.E_and_S.size() << " energies at Q = "
 			<< S.Q_rlu << ", but got " << energy_mat.size1() << " energies"
 			<< "." << std::endl;
 
@@ -109,14 +109,14 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	{
 		if(m_perform_checks && !tl2::equals_0(energy_mat(i, i).imag(), m_eps))
 		{
-			CERR_OPT << "Magdyn warning: Remaining imaginary energy component at Q = "
+			TL2_CERR_OPT << "Magdyn warning: Remaining imaginary energy component at Q = "
 				<< S.Q_rlu << " and E = " << energy_mat(i, i)
 				<< "." << std::endl;
 		}
 
 		if(m_perform_checks && !tl2::equals(energy_mat(i, i).real(), S.E_and_S[i].E, m_eps))
 		{
-			CERR_OPT << "Magdyn warning: Mismatching energy at Q = "
+			TL2_CERR_OPT << "Magdyn warning: Mismatching energy at Q = "
 				<< S.Q_rlu << " and E = " << energy_mat(i, i).real()
 				<< ", expected E = " << S.E_and_S[i].E
 				<< "." << std::endl;
@@ -130,7 +130,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	const auto [H_chol_inv, inv_ok] = tl2::inv(S.H_chol);
 	if(!inv_ok)
 	{
-		CERR_OPT << "Magdyn error: Cholesky inversion failed"
+		TL2_CERR_OPT << "Magdyn error: Cholesky inversion failed"
 			<< " at Q = " << S.Q_rlu << "." << std::endl;
 		return false;
 	}

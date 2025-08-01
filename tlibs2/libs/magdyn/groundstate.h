@@ -236,7 +236,7 @@ bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_p
 	}
 	else
 	{
-		CERR_OPT << "Magdyn error: Ground state minimisation did not converge."
+		TL2_CERR_OPT << "Magdyn error: Ground state minimisation did not converge."
 			<< std::endl;
 
 		return false;

@@ -323,7 +323,7 @@ MAGDYN_TEMPL t_size MAGDYN_INST::GetMagneticSiteIndex(const std::string& name) c
 	}
 	else
 	{
-		CERR_OPT << "Magdyn error: "
+		TL2_CERR_OPT << "Magdyn error: "
 			<< "Invalid site name \"" << name << "\"."
 			<< std::endl;
 	}
@@ -357,7 +357,7 @@ MAGDYN_TEMPL t_size MAGDYN_INST::GetExchangeTermIndex(const std::string& name) c
 	}
 	else
 	{
-		CERR_OPT << "Magdyn error: Invalid coupling name \"" << name << "\"."
+		TL2_CERR_OPT << "Magdyn error: Invalid coupling name \"" << name << "\"."
 			<< std::endl;
 	}
 
@@ -513,7 +513,7 @@ MAGDYN_TEMPL void MAGDYN_INST::SetMagneticFormFactor(const std::string& ffact)
 	{
 		m_magffact_formula = "";
 
-		CERR_OPT << "Magdyn error: Magnetic form facor formula: \""
+		TL2_CERR_OPT << "Magdyn error: Magnetic form facor formula: \""
 			<< ffact << "\" could not be parsed."
 			<< std::endl;
 	}
@@ -653,7 +653,7 @@ void MAGDYN_INST::SetCrystalLattice(t_real a, t_real b, t_real c,
 	{
 		m_xtalA = m_xtalB = tl2::unit<t_mat_real>(3);
 
-		CERR_OPT << "Magdyn error: Could not calculate crystal matrices."
+		TL2_CERR_OPT << "Magdyn error: Could not calculate crystal matrices."
 			<< std::endl;
 	}
 }
@@ -684,7 +684,7 @@ void MAGDYN_INST::SetScatteringPlane(t_real ah, t_real ak, t_real al,
 
 		if(!inv_ok)
 		{
-			CERR_OPT << "Magdyn error: UB matrix is not invertible."
+			TL2_CERR_OPT << "Magdyn error: UB matrix is not invertible."
 				<< std::endl;
 		}
 	}
@@ -692,7 +692,7 @@ void MAGDYN_INST::SetScatteringPlane(t_real ah, t_real ak, t_real al,
 	{
 		m_xtalUB = m_xtalUBinv = tl2::unit<t_mat_real>(3);
 
-		CERR_OPT << "Magdyn error: Could not calculate scattering plane matrices."
+		TL2_CERR_OPT << "Magdyn error: Could not calculate scattering plane matrices."
 			<< std::endl;
 	}
 }
@@ -752,7 +752,7 @@ bool MAGDYN_INST::CheckMagneticSite(t_size idx, bool print_error) const
 	{
 		if(print_error)
 		{
-			CERR_OPT << "Magdyn error: Site index " << idx
+			TL2_CERR_OPT << "Magdyn error: Site index " << idx
 				<< " is out of bounds."
 				<< std::endl;
 		}
@@ -778,7 +778,7 @@ bool MAGDYN_INST::CheckExchangeTerm(t_size idx, bool print_error) const
 	{
 		if(print_error)
 		{
-			CERR_OPT << "Magdyn error: Coupling index " << idx
+			TL2_CERR_OPT << "Magdyn error: Coupling index " << idx
 				<< " is out of bounds."
 				<< std::endl;
 		}
@@ -811,7 +811,7 @@ bool MAGDYN_INST::CheckImagWeights(const MAGDYN_TYPE::SofQE& S) const
 		{
 			ok = false;
 
-			CERR_OPT << "Magdyn warning: Remaining imaginary S(Q, E) component at Q = "
+			TL2_CERR_OPT << "Magdyn warning: Remaining imaginary S(Q, E) component at Q = "
 				<< S.Q_rlu << " and E = " << EandS.E
 				<< ": imag(S) = " << EandS.S_sum.imag()
 				<< ", imag(S_perp) = " << EandS.S_perp_sum.imag()

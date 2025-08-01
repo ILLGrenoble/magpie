@@ -301,7 +301,7 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 
 		if(chol_try >= m_tries_chol - 1)
 		{
-			CERR_OPT << "Magdyn error: Cholesky decomposition failed"
+			TL2_CERR_OPT << "Magdyn error: Cholesky decomposition failed"
 				<< " at Q = " << Qvec << "." << std::endl;
 
 			S.H_chol = std::move(_C);
@@ -316,14 +316,14 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 
 	if(chol_failed || S.H_chol.size1() == 0 || S.H_chol.size2() == 0)
 	{
-		CERR_OPT << "Magdyn error: Invalid Cholesky decomposition"
+		TL2_CERR_OPT << "Magdyn error: Invalid Cholesky decomposition"
 			<< " at Q = " << Qvec << "." << std::endl;
 		return S;
 	}
 
 	if(m_perform_checks && chol_try > 0)
 	{
-		CERR_OPT << "Magdyn warning: Needed " << chol_try
+		TL2_CERR_OPT << "Magdyn warning: Needed " << chol_try
 			<< " correction(s) for Cholesky decomposition"
 			<< " at Q = " << Qvec << "." << std::endl;
 	}
@@ -334,7 +334,7 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 	const bool is_herm = tl2::is_symm_or_herm<t_mat, t_real>(S.H_comm, m_eps);
 	if(m_perform_checks && !is_herm)
 	{
-		CERR_OPT << "Magdyn warning: Hamiltonian is not hermitian"
+		TL2_CERR_OPT << "Magdyn warning: Hamiltonian is not hermitian"
 			<< " at Q = " << Qvec << "." << std::endl;
 	}
 
@@ -344,7 +344,7 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 			S.H_comm, only_energies, is_herm, true);
 	if(!evecs_ok)
 	{
-		CERR_OPT << "Magdyn error: Eigensystem calculation failed"
+		TL2_CERR_OPT << "Magdyn error: Eigensystem calculation failed"
 			<< " at Q = " << Qvec << "." << std::endl;
 		return S;
 	}
@@ -361,7 +361,7 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 
 		if(m_perform_checks && !tl2::equals_0(eval.imag(), m_eps))
 		{
-			CERR_OPT << "Magdyn warning: Remaining imaginary energy component at Q = "
+			TL2_CERR_OPT << "Magdyn warning: Remaining imaginary energy component at Q = "
 				<< Qvec << " and E = " << eval
 				<< "." << std::endl;
 		}
@@ -390,7 +390,7 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 		bool corr_ok = CalcCorrelationsFromHamiltonian(S);
 		if(!corr_ok)
 		{
-			CERR_OPT << "Magdyn warning: Invalid correlations"
+			TL2_CERR_OPT << "Magdyn warning: Invalid correlations"
 				<< " at Q = " << Qvec << "." << std::endl;
 		}
 	}
