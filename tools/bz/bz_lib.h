@@ -614,6 +614,7 @@ public:
 		m_cut_plane = tl2::create<t_mat, t_vec>({ vec1_invA, vec2_invA, norm_invA }, false);
 		m_cut_plane_inv = tl2::trans<t_mat>(m_cut_plane);
 
+		// iterate bragg peaks for whose brillouin zone we calculate the cut
 		for(std::size_t idx = 0; idx < m_peaks_cut.size(); ++idx)
 		{
 			const t_vec& Q = m_peaks_cut[idx];
@@ -635,12 +636,13 @@ public:
 			if(tl2::equals(tl2::inner(norm_invA, Q_invA), m_d_invA, m_eps))
 			{
 				m_peaks_cut_in_plane.push_back(Q);
-				m_peaks_cut_in_plane_invA.push_back(m_cut_plane_inv * Q_invA);
+				m_peaks_cut_in_plane_invA.push_back(GetCutPlane(true) * Q_invA);
 			}
 
 			std::vector<t_vec> cut_verts;
 			std::optional<t_real> z_comp;
 
+			// iterate all bz polygons
 			for(const auto& _bz_poly : GetTriangles())
 			{
 				// centre bz around bragg peak
@@ -648,16 +650,17 @@ public:
 				for(t_vec& vec : bz_poly)
 					vec += Q_invA;
 
-				auto vecs = tl2::intersect_plane_poly<t_vec>(
+				// intersect plane with current polygon
+				auto inters = tl2::intersect_plane_poly<t_vec>(
 					norm_invA, m_d_invA, bz_poly, m_eps);
-				vecs = tl2::remove_duplicates(vecs, m_eps);
+				inters = tl2::remove_duplicates(inters, m_eps);
 
 				// calculate the hull of the bz cut
 				if(calc_bzcut_hull)
 				{
-					for(const t_vec& vec : vecs)
+					for(const t_vec& vec : inters)
 					{
-						t_vec vec_rot = m_cut_plane_inv * vec;
+						t_vec vec_rot = GetCutPlane(true) * vec;
 						tl2::set_eps_0(vec_rot, m_eps);
 
 						cut_verts.emplace_back(
@@ -671,21 +674,21 @@ public:
 					}
 				}
 				// alternatively use the lines directly
-				else if(vecs.size() >= 2)
+				else if(inters.size() >= 2)
 				{
-					t_vec pt1 = m_cut_plane_inv * vecs[0];
-					t_vec pt2 = m_cut_plane_inv * vecs[1];
+					t_vec pt1 = GetCutPlane(true) * inters[0];
+					t_vec pt2 = GetCutPlane(true) * inters[1];
 					tl2::set_eps_0(pt1, m_eps);
 					tl2::set_eps_0(pt2, m_eps);
 
 					m_cut_lines.emplace_back(std::make_tuple(
 						pt1, pt2,
-						std::array<t_real,3>{Q[0], Q[1], Q[2]}));
+						std::array<t_real, 3>{Q[0], Q[1], Q[2]}));
 					if(is_000)
 					{
 						m_cut_lines000.emplace_back(std::make_tuple(
 							pt1, pt2,
-							std::array<t_real,3>{Q[0], Q[1], Q[2]}));
+							std::array<t_real, 3>{Q[0], Q[1], Q[2]}));
 					}
 				}
 			}
@@ -717,12 +720,12 @@ public:
 
 					m_cut_lines.emplace_back(std::make_tuple(
 						pt1, pt2,
-						std::array<t_real,3>{Q[0], Q[1], Q[2]}));
+						std::array<t_real, 3>{Q[0], Q[1], Q[2]}));
 					if(is_000)
 					{
 						m_cut_lines000.emplace_back(std::make_tuple(
 							pt1, pt2,
-							std::array<t_real,3>{Q[0], Q[1], Q[2]}));
+							std::array<t_real, 3>{Q[0], Q[1], Q[2]}));
 					}
 				}
 			}
@@ -734,7 +737,7 @@ public:
 		m_min_y = std::numeric_limits<t_real>::max();
 		m_max_y = -m_min_y;
 
-		for(const auto& tup : m_cut_lines)
+		for(const auto& tup : GetCutLines(false))
 		{
 			const auto& pt1 = std::get<0>(tup);
 			const auto& pt2 = std::get<1>(tup);
@@ -1109,8 +1112,8 @@ public:
 		{
 			const auto& line = GetCutLines(true)[i];
 
-			t_vec vert1 = BorthoT * std::get<0>(line);
-			t_vec vert2 = BorthoT * std::get<1>(line);
+			t_vec vert1 = BorthoT * GetCutPlane(false) * std::get<0>(line);
+			t_vec vert2 = BorthoT * GetCutPlane(false) * std::get<1>(line);
 			tl2::set_eps_0(vert1, m_eps);
 			tl2::set_eps_0(vert2, m_eps);
 
@@ -1125,8 +1128,30 @@ public:
 		}
 		ostr << "],\n\n";
 
+
 		// zone cut lines
 		ostr << "\"cut_lines_nonrot\" : [\n";
+		for(std::size_t i = 0; i < num_cut_lines; ++i)
+		{
+			const auto& line = GetCutLines(true)[i];
+
+			const t_vec& vert1 = GetCutPlane(false) * std::get<0>(line);
+			const t_vec& vert2 = GetCutPlane(false) * std::get<1>(line);
+
+			ostr << "\t[\n";
+			ostr << "\t\t[ " << vert1[0] << ", " << vert1[1] << ", " << vert1[2] << " ],\n";
+			ostr << "\t\t[ " << vert2[0] << ", " << vert2[1] << ", " << vert2[2] << " ]\n";
+			ostr << "\t]";
+
+			if(i < num_cut_lines - 1)
+				ostr << ",";
+			ostr << "\n";
+		}
+		ostr << "],\n\n";
+
+
+		// zone cut lines (in plane)
+		ostr << "\"cut_lines_plane\" : [\n";
 		for(std::size_t i = 0; i < num_cut_lines; ++i)
 		{
 			const auto& line = GetCutLines(true)[i];
@@ -1206,7 +1231,7 @@ private:
 	t_mat m_cut_plane_inv{ tl2::unit<t_mat>(3) }; // ...and its inverse
 	t_real m_d_rlu = 0., m_d_invA = 0.;           // cutting plane distance
 
-	// [x, y, Q]
+	// [x, y, G of BZ center]
 	std::vector<std::tuple<t_vec, t_vec, std::array<t_real, 3>>> m_cut_lines{};
 	std::vector<std::tuple<t_vec, t_vec, std::array<t_real, 3>>> m_cut_lines000{};
 
