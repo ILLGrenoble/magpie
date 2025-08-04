@@ -855,7 +855,7 @@ void BZDlg::UpdateBZDescription()
 
 	// brillouin zone json description
 	descr = "{\n";
-	descr = m_descrBZJSON;
+	descr += m_descrBZJSON;
 	if(m_descrBZCutJSON.size())
 		descr += ",\n\n" + m_descrBZCutJSON;
 	descr += "\n}";

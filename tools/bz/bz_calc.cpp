@@ -324,7 +324,7 @@ void BZDlg::BZCutMouseMoved(t_real x, t_real y)
 	t_real plane_d = m_cutD->value() * m_bzcalc.GetCutNormScale();
 
 	t_vec_bz QinvA = m_bzcalc.GetCutPlane() * tl2::create<t_vec_bz>({ x, y, plane_d });
-	t_mat_bz B_inv = m_crystA / (t_real(2)*tl2::pi<t_real>);
+	t_mat_bz B_inv = tl2::trans(m_crystA / (t_real(2)*tl2::pi<t_real>));
 	t_vec_bz Qrlu = B_inv * QinvA;
 
 	tl2::set_eps_0(QinvA, g_eps_bz);

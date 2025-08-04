@@ -164,9 +164,12 @@ public:
 	void SetCrystal(t_real a, t_real b, t_real c,
 		t_real alpha = 90., t_real beta = 90., t_real gamma = 90.)
 	{
+		t_mat crystA = tl2::A_matrix<t_mat>(a, b, c,
+			tl2::d2r<t_real>(alpha), tl2::d2r<t_real>(beta), tl2::d2r<t_real>(gamma));
 		t_mat crystB = tl2::B_matrix<t_mat>(a, b, c,
 			tl2::d2r<t_real>(alpha), tl2::d2r<t_real>(beta), tl2::d2r<t_real>(gamma));
 
+		SetCrystalA(crystA);
 		SetCrystalB(crystB);
 	}
 
@@ -607,7 +610,7 @@ public:
 		vec1_invA /= tl2::norm<t_vec>(vec1_invA);
 		vec2_invA /= tl2::norm<t_vec>(vec2_invA);
 
-		t_mat B_inv = m_crystA / (t_real(2)*tl2::pi<t_real>);
+		t_mat B_inv = m_crystA / (t_real(2)*tl2::pi<t_real>);  // B_inv except for transposition
 		m_vec2_rlu = B_inv * vec2_invA;
 		m_vec2_rlu /= tl2::norm<t_vec>(m_vec2_rlu);
 
@@ -787,7 +790,6 @@ public:
 		{
 			t_vec voro = BorthoT * voronoiverts[idx];
 			tl2::set_eps_0(voro, m_eps);
-
 			ostr << "vertex " << idx << ": (" << voro << ")\n";
 		}
 
@@ -947,6 +949,7 @@ public:
 	std::string PrintJSON(int prec = 6, bool print_block = true) const
 	{
 		const t_mat& B = GetCrystalB(false);
+		t_mat B_inv = tl2::trans(m_crystA / (t_real(2)*tl2::pi<t_real>));
 		const t_mat& Bortho = GetCrystalB(true);
 		t_mat BorthoT = tl2::trans(Bortho);
 
@@ -984,6 +987,21 @@ public:
 		}
 		ostr << "],\n\n";
 
+		// voronoi vertices forming the vertices of the bz
+		// (in rlu)
+		ostr << "\"vertices_rlu\" : [\n";
+		for(std::size_t idx = 0; idx < voronoiverts.size(); ++idx)
+		{
+			t_vec voro = B_inv * voronoiverts[idx];
+			tl2::set_eps_0(voro, m_eps);
+
+			ostr << "\t[ " << voro[0] << ", " << voro[1] << ", " << voro[2] << " ]";
+			if(idx < voronoiverts.size() - 1)
+				ostr << ",";
+			ostr << "\n";
+		}
+		ostr << "],\n\n";
+	
 		// voronoi bisectors / polygons
 		const auto& bz_polys_idx = GetTrianglesVoronoiIndices();
 		ostr << "\"polygons\" : [\n";
@@ -1092,12 +1110,15 @@ public:
 	 */
 	std::string PrintCutJSON(int prec = 6, bool print_block = true) const
 	{
-		const t_size num_cut_lines = GetCutLines(true).size();
+		const auto& cut_lines = GetCutLines(true);
+		const t_size num_cut_lines = cut_lines.size();
 		if(num_cut_lines == 0)
 			return "";
 
 		const t_mat& Bortho = GetCrystalB(true);
 		t_mat BorthoT = tl2::trans(Bortho);
+		t_mat B_inv = tl2::trans(m_crystA / (t_real(2)*tl2::pi<t_real>));
+		const t_mat& cut_plane = GetCutPlane(false);
 
 		std::ostringstream ostr;
 		ostr.precision(prec);
@@ -1110,10 +1131,10 @@ public:
 		ostr << "\"cut_lines\" : [\n";
 		for(std::size_t i = 0; i < num_cut_lines; ++i)
 		{
-			const auto& line = GetCutLines(true)[i];
+			const auto& line = cut_lines[i];
 
-			t_vec vert1 = BorthoT * GetCutPlane(false) * std::get<0>(line);
-			t_vec vert2 = BorthoT * GetCutPlane(false) * std::get<1>(line);
+			t_vec vert1 = BorthoT * cut_plane * std::get<0>(line);
+			t_vec vert2 = BorthoT * cut_plane * std::get<1>(line);
 			tl2::set_eps_0(vert1, m_eps);
 			tl2::set_eps_0(vert2, m_eps);
 
@@ -1133,10 +1154,11 @@ public:
 		ostr << "\"cut_lines_nonrot\" : [\n";
 		for(std::size_t i = 0; i < num_cut_lines; ++i)
 		{
-			const auto& line = GetCutLines(true)[i];
-
-			const t_vec& vert1 = GetCutPlane(false) * std::get<0>(line);
-			const t_vec& vert2 = GetCutPlane(false) * std::get<1>(line);
+			const auto& line = cut_lines[i];
+			t_vec vert1 = cut_plane * std::get<0>(line);
+			t_vec vert2 = cut_plane * std::get<1>(line);
+			tl2::set_eps_0(vert1, m_eps);
+			tl2::set_eps_0(vert2, m_eps);
 
 			ostr << "\t[\n";
 			ostr << "\t\t[ " << vert1[0] << ", " << vert1[1] << ", " << vert1[2] << " ],\n";
@@ -1154,10 +1176,30 @@ public:
 		ostr << "\"cut_lines_plane\" : [\n";
 		for(std::size_t i = 0; i < num_cut_lines; ++i)
 		{
-			const auto& line = GetCutLines(true)[i];
-
+			const auto& line = cut_lines[i];
 			const t_vec& vert1 = std::get<0>(line);
 			const t_vec& vert2 = std::get<1>(line);
+
+			ostr << "\t[\n";
+			ostr << "\t\t[ " << vert1[0] << ", " << vert1[1] << ", " << vert1[2] << " ],\n";
+			ostr << "\t\t[ " << vert2[0] << ", " << vert2[1] << ", " << vert2[2] << " ]\n";
+			ostr << "\t]";
+
+			if(i < num_cut_lines - 1)
+				ostr << ",";
+			ostr << "\n";
+		}
+		ostr << "],\n\n";
+
+		// zone cut lines (in rlu)
+		ostr << "\"cut_lines_rlu\" : [\n";
+		for(std::size_t i = 0; i < num_cut_lines; ++i)
+		{
+			const auto& line = cut_lines[i];
+			t_vec vert1 = B_inv * cut_plane * std::get<0>(line);
+			t_vec vert2 = B_inv * cut_plane * std::get<1>(line);
+			tl2::set_eps_0(vert1, m_eps);
+			tl2::set_eps_0(vert2, m_eps);
 
 			ostr << "\t[\n";
 			ostr << "\t\t[ " << vert1[0] << ", " << vert1[1] << ", " << vert1[2] << " ],\n";

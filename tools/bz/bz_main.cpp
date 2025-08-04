@@ -105,6 +105,8 @@ static int cli_main(const std::string& cfg_file, const std::string& results_file
 				*cfg.cut_ny,
 				*cfg.cut_nz
 			});
+			
+			bzcalc.CalcPeaks(cfg.cut_order ? *cfg.cut_order : 5, false, true);
 
 			// calculate cut
 			cut_ok = bzcalc.CalcBZCut(vec1_rlu, norm_rlu, cut_d);
