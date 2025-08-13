@@ -30,6 +30,7 @@ option(BUILD_MAGPIE        "build main program"         TRUE)
 option(BUILD_MODULES       "build tool programs"        TRUE)
 option(BUILD_PY_MODULES    "build py scripting modules" TRUE)
 option(ONLY_BUILD_FINISHED "only build finished tools"  TRUE)
+option(USE_QT6             "use Qt version 6"           TRUE)
 
 
 # mingw settings

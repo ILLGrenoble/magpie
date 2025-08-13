@@ -71,13 +71,6 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 {
 	using namespace tl2_ops;
 
-	if(model_file == "")
-	{
-		CERR_OPT << "Error: No magnetic model given." << std::endl;
-		return -1;
-	}
-
-
 	// load model from input file
 	t_magdyn magdyn;
 	if(magdyn.Load(model_file))
@@ -444,12 +437,23 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 		int ret = 0;
 		if(use_cli)
+		{
+			if(model_file == "")
+			{
+				CERR_OPT << "Error: No magnetic model given.\n\n"
+					<< arg_descr << std::endl;
+				return -1;
+			}
+
 			ret = cli_main(model_file, results_file, Qi, Qf, Qf2,
 				num_Q_pts, num_Q_pts2, Qlist_file,
 				as_py, as_bin, !no_weights, silent/*,
 				Emin, Emax*/);
+		}
 		else
+		{
 			ret = gui_main(argc, argv, model_file, Qi, Qf, num_Q_pts);
+		}
 
 		if(show_timing)
 		{
