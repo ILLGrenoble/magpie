@@ -1153,7 +1153,7 @@ void GlPlotRenderer::UpdatePicker()
 		// intersection with bounding sphere?
 		auto boundingInters =
 			tl2::intersect_line_sphere<t_vec3_gl, std::vector>(org3, dir3,
-				matTrafo * linkedObj->m_boundingSpherePos,
+				tl2::prod_mv(matTrafo, linkedObj->m_boundingSpherePos),
 				scale*linkedObj->m_boundingSphereRad);
 		if(boundingInters.size() == 0)
 			continue;
@@ -1555,7 +1555,7 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 			if(m_coordsys == 1 && !obj.m_invariant)
 				coordTrafo = &m_matA;
 
-			t_vec3_gl posLabel3d = (*coordTrafo) * obj.m_mat * obj.m_labelPos;
+			t_vec3_gl posLabel3d = tl2::prod_mv(tl2::prod((*coordTrafo), obj.m_mat), obj.m_labelPos);
 			auto posLabel2d = GlToScreenCoords(tl2::create<t_vec_gl>(
 				{posLabel3d[0], posLabel3d[1], posLabel3d[2], 1.}));
 

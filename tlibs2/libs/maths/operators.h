@@ -467,28 +467,10 @@ requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
  */
 template<class t_mat, class t_vec>
 t_vec operator*(const t_mat& mat, const t_vec& vec)
-requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
-	&& tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
+requires tl2::is_basic_mat<t_mat> /*&& tl2::is_dyn_mat<t_mat>*/
+	&& tl2::is_basic_vec<t_vec> /*&& tl2::is_dyn_vec<t_vec>*/
 {
-	if constexpr(tl2::is_dyn_mat<t_mat>)
-		assert((mat.size2() == vec.size()));
-	else
-		static_assert(t_mat::size2() == t_vec::size());
-
-
-	t_vec vecRet(mat.size1());
-
-	for(std::size_t row = 0; row < mat.size1(); ++row)
-	{
-		vecRet[row] = typename t_vec::value_type{/*0*/};
-		for(std::size_t col = 0; col < mat.size2(); ++col)
-		{
-			auto elem = mat(row, col) * vec[col];
-			vecRet[row] = vecRet[row] + elem;
-		}
-	}
-
-	return vecRet;
+	return tl2::prod_mv<t_mat, t_vec>(mat, vec);
 }
 
 // ----------------------------------------------------------------------------

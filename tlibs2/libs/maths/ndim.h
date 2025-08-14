@@ -1366,7 +1366,7 @@ requires is_basic_vec<t_vec1> && is_basic_vec<t_vec2>
  */
 template<class t_mat>
 t_mat prod(const t_mat& mat1, const t_mat& mat2, bool assert_sizes/*=true*/)
-requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
+requires tl2::is_basic_mat<t_mat>
 {
 	// if not asserting sizes, the inner size will use the minimum of the two matrix sizes
 	if(assert_sizes)
@@ -1377,13 +1377,14 @@ requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 			static_assert(t_mat::size2() == t_mat::size1());
 	}
 
-
-	t_mat matRet(mat1.size1(), mat2.size2());
+	t_mat matRet;
+	if constexpr(tl2::is_dyn_mat<t_mat>)
+		matRet = t_mat(mat1.size1(), mat2.size2());
 	const std::size_t innersize = std::min(mat1.size2(), mat2.size1());
 
-	for(std::size_t row=0; row<matRet.size1(); ++row)
+	for(std::size_t row = 0; row < matRet.size1(); ++row)
 	{
-		for(std::size_t col=0; col<matRet.size2(); ++col)
+		for(std::size_t col = 0; col < matRet.size2(); ++col)
 		{
 			matRet(row, col) = 0;
 			for(std::size_t i = 0; i < innersize; ++i)
@@ -1392,6 +1393,61 @@ requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 	}
 
 	return matRet;
+}
+
+
+/**
+ * matrix-vector product: c_i = a_ij b_j
+*/
+template<class t_mat, class t_vec, bool hom/* = true*/>
+t_vec prod_mv(const t_mat& mat, const t_vec& vec)
+requires tl2::is_basic_mat<t_mat> && tl2::is_basic_vec<t_vec>
+{
+	if constexpr(hom)
+	{
+		if constexpr(tl2::is_dyn_mat<t_mat>)
+			assert((mat.size2() == vec.size() || mat.size2() == vec.size() + 1));
+		else
+			static_assert(t_mat::size2() == t_vec::size() || t_mat::size2() == t_vec::size() + 1);
+	}
+	else
+	{
+		if constexpr(tl2::is_dyn_mat<t_mat>)
+			assert((mat.size2() == vec.size()));
+		else
+			static_assert(t_mat::size2() == t_vec::size());
+	}
+	
+	t_vec vecRet;
+	if constexpr(tl2::is_dyn_vec<t_vec>)
+		vecRet = t_vec(mat.size1());
+
+	// matrix-vector product
+	const std::size_t mat_rows = static_cast<std::size_t>(mat.size1());
+	const std::size_t mat_cols = static_cast<std::size_t>(mat.size2());
+	const std::size_t vec_rows = static_cast<std::size_t>(vec.size());
+	for(std::size_t row = 0; row < std::min(mat_rows, vec_rows); ++row)
+	{
+		vecRet[row] = typename t_vec::value_type{};
+		for(std::size_t col = 0; col < std::min(mat_cols, vec_rows); ++col)
+		{
+			auto elem = mat(row, col) * vec[col];
+			vecRet[row] = vecRet[row] + elem;
+		}
+	}
+
+	// add translational component (treat homogeneous vector component as 1)
+	if(hom && mat_cols == vec_rows + 1)
+	{
+		std::size_t col = vec.size();
+		for(std::size_t row = 0; row < std::min(mat_rows, vec_rows); ++row)
+		{
+			auto elem = mat(row, col);
+			vecRet[row] = vecRet[row] + elem;
+		}
+	}
+
+	return vecRet;
 }
 
 
@@ -1407,7 +1463,6 @@ requires tl2::is_basic_mat<t_mat>
 		if constexpr(tl2::is_dyn_mat<t_mat>)
 			assert(mat1.size1() == mat2.size1() && mat1.size2() == mat2.size2());
 	}
-
 
 	t_mat matRet = zero<t_mat>(mat1.size1(), mat1.size2());
 

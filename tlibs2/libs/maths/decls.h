@@ -172,7 +172,12 @@ namespace tl2 {
 // ----------------------------------------------------------------------------
 template<class t_mat>
 t_mat prod(const t_mat& mat1, const t_mat& mat2, bool assert_sizes = true)
-requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>;
+requires tl2::is_basic_mat<t_mat> /*&& tl2::is_dyn_mat<t_mat>*/;
+
+template<class t_mat, class t_vec, bool hom = true>
+t_vec prod_mv(const t_mat& mat, const t_vec& vec)
+requires tl2::is_basic_mat<t_mat> /*&& tl2::is_dyn_mat<t_mat>*/
+	&& tl2::is_basic_vec<t_vec> /*&& tl2::is_dyn_vec<t_vec>*/;
 
 template<class t_mat>
 t_mat zero(std::size_t N1, std::size_t N2)

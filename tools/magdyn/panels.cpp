@@ -1591,6 +1591,12 @@ void MagDynDlg::CreateReciprocalPanel()
 	m_bzscene = new BZCutScene<t_vec_real, t_real>(m_reciprocalpanel);
 	m_bzview = new BZCutView<t_vec_real, t_real>(m_bzscene, m_sett);
 
+	// reduce path to first brillouin zone
+	QPushButton *btnReduceBZ = new QPushButton("Reduce to First Zone", this);
+	btnReduceBZ->setToolTip("Reduce the scan path to the first Brillouin zone.");
+	btnReduceBZ->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+	btnReduceBZ->setEnabled(false);
+
 	// show 3d brillouin zone
 	QPushButton *btnShowBZ = new QPushButton("View Brillouin Zone...", this);
 	btnShowBZ->setIcon(QIcon::fromTheme("applications-graphics"));
@@ -1602,6 +1608,7 @@ void MagDynDlg::CreateReciprocalPanel()
 	grid->setContentsMargins(6, 6, 6, 6);
 
 	grid->addWidget(m_bzview, 0, 0, 1, 4);
+	grid->addWidget(btnReduceBZ, 1, 0, 1, 1);
 	grid->addWidget(btnShowBZ, 1, 3, 1, 1);
 
 	// context menu
@@ -1631,6 +1638,7 @@ void MagDynDlg::CreateReciprocalPanel()
 	});
 #endif
 
+	connect(btnReduceBZ, &QAbstractButton::clicked, this, &MagDynDlg::ReducePathBZ);
 	connect(btnShowBZ, &QAbstractButton::clicked, this, &MagDynDlg::ShowBZ3DDlg);
 
 	connect(acSetQi, &QAction::triggered, [this]()

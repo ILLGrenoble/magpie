@@ -251,7 +251,7 @@ requires is_vec<t_vec> && is_mat<t_mat>
 	t_mat mat = unit<t_mat>(N);
 
 	// equations (6) and (7) from (Zhelezov 2017)
-	for(t_size n=1; n<N; ++n)
+	for(t_size n = 1; n < N; ++n)
 	{
 		t_size i = N - n - 1;
 		t_size j = i + 1;
@@ -264,8 +264,8 @@ requires is_vec<t_vec> && is_mat<t_mat>
 			t_real c = vec[i] / len;
 
 			t_mat rot_ij = givens<t_mat, t_real>(N, i, j, s, c);
-			vec = rot_ij * vec;
-			mat = rot_ij * mat;
+			vec = tl2::prod_mv<t_mat, t_vec, true>(rot_ij, vec);
+			mat = tl2::prod(rot_ij, mat);
 		}
 	}
 

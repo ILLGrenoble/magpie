@@ -131,7 +131,7 @@ requires is_vec<t_vec>
 
 	// rotate according to given normal
 	for(t_vec& vec : vertices)
-		vec = rot * vec;
+		vec = tl2::prod_mv<t_mat, t_vec>(rot, vec);
 
 	t_cont<t_cont<std::size_t>> faces = { { 0, 1, 2, 3 } };
 	t_cont<t_vec> normals = { norm };

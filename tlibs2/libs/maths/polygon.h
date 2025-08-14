@@ -264,7 +264,7 @@ requires is_vec<t_vec> && is_mat<t_mat>
 	// transform each vertex of the polygon
 	// TODO: check for homogeneous coordinates!
 	for(t_vec& vec : poly)
-		vec = mat * vec;
+		vec = tl2::prod_mv<t_mat, t_vec>(mat, vec);
 
 	return tl2::intersect_line_poly<t_vec, t_cont>(lineOrg, lineDir, poly);
 }

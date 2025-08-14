@@ -545,3 +545,13 @@ void MagDynDlg::BZCutMouseMoved(t_real x, t_real y)
 void MagDynDlg::BZCutMouseClicked(int /*buttons*/, t_real /*x*/, t_real /*y*/)
 {
 }
+
+
+
+/**
+ * reduce the current scan path to the first brillouin zone
+ */
+void MagDynDlg::ReducePathBZ()
+{
+
+}
