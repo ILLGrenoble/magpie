@@ -65,6 +65,7 @@
 #include "maths/interp.h"
 #include "maths/lapack.h"
 #include "maths/qhull.h"
+#include "maths/rtree.h"
 
 
 #endif
