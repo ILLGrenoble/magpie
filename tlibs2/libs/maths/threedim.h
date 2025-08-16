@@ -964,14 +964,12 @@ requires is_mat<t_mat> && is_vec<t_vec>
 	t_vec vec2_lab = B * vec2_rlu;
 	t_vec vec3_lab = B * vec3_rlu;
 
-	vec1_lab /= norm<t_vec>(vec1_lab);
-	vec2_lab /= norm<t_vec>(vec2_lab);
-	vec3_lab /= norm<t_vec>(vec3_lab);
-
 	t_mat U_lab = unit<t_mat>(B.size1(), B.size2());
 	set_row<t_mat, t_vec>(U_lab, vec1_lab, 0);
 	set_row<t_mat, t_vec>(U_lab, vec2_lab, 1);
 	set_row<t_mat, t_vec>(U_lab, vec3_lab, 2);
+
+	U_lab = tl2::orthonorm_sys<t_mat, t_vec>(U_lab, false);
 
 	return U_lab * B;
 }

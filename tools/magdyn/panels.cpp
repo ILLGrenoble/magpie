@@ -1642,7 +1642,8 @@ void MagDynDlg::CreateReciprocalPanel()
 
 	connect(acSetQi, &QAction::triggered, [this]()
 	{
-		auto [QinvA, Qrlu] = GetBZCutQ(m_bzview->GetClickedPosition(true));
+		t_vec_real pos = m_bzview->GetClickedPosition(true);
+		auto [QinvA, Qrlu] = m_bz.GetBZCutQ(pos[0], pos[1]);
 		if(Qrlu.size() != 3)
 			return;
 
@@ -1651,7 +1652,8 @@ void MagDynDlg::CreateReciprocalPanel()
 
 	connect(acSetQf, &QAction::triggered, [this]()
 	{
-		auto [QinvA, Qrlu] = GetBZCutQ(m_bzview->GetClickedPosition(true));
+		t_vec_real pos = m_bzview->GetClickedPosition(true);
+		auto [QinvA, Qrlu] = m_bz.GetBZCutQ(pos[0], pos[1]);
 		if(Qrlu.size() != 3)
 			return;
 

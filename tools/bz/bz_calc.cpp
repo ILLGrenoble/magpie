@@ -240,8 +240,6 @@ bool BZDlg::CalcFormulas()
 	if(max_x < min_x)
 		return false;
 
-	t_real plane_d = m_cutD->value() * m_bzcalc.GetCutNormScale();
-
 	bool all_ok = true;
 	std::vector<std::string> formulas = GetFormulas();
 	for(std::size_t formula_idx = 0; formula_idx < formulas.size(); ++formula_idx)
@@ -269,7 +267,7 @@ bool BZDlg::CalcFormulas()
 			for(t_real x = min_x; x <= max_x; x += x_delta)
 			{
 				t_vec_bz QinvA = m_bzcalc.GetCutPlane() *
-					tl2::create<t_vec_bz>({ x, 0., plane_d });
+					tl2::create<t_vec_bz>({ x, 0., m_bzcalc.GetCutPlaneD() });
 				//std::cout << x << ": " << QinvA << std::endl;
 
 				parser.register_var("x", x);
@@ -312,15 +310,8 @@ bool BZDlg::CalcFormulas()
  */
 void BZDlg::BZCutMouseMoved(t_real x, t_real y)
 {
-	t_real plane_d = m_cutD->value() * m_bzcalc.GetCutNormScale();
-	t_vec_bz QinvA = m_bzcalc.GetCutPlane() * tl2::create<t_vec_bz>({ x, y, plane_d });
-	t_mat_bz B_inv = tl2::trans(m_crystA) / (t_real(2)*tl2::pi<t_real>);
-	t_vec_bz Qrlu = B_inv * QinvA;
-
+	auto [QinvA, Qrlu] = m_bzcalc.GetBZCutQ(x, y);
 	std::vector<t_vec_bz> closest = m_bzcalc.GetClosestPeaks(Qrlu);
-
-	tl2::set_eps_0(QinvA, g_eps_bz);
-	tl2::set_eps_0(Qrlu, g_eps_bz);
 
 	std::ostringstream ostr;
 	ostr.precision(g_prec_gui_bz);

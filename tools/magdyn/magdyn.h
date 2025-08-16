@@ -393,7 +393,6 @@ protected:
 	// reciprocal space plot
 	void BZCutMouseMoved(t_real x, t_real y);
 	void BZCutMouseClicked(int buttons, t_real x, t_real y);
-	std::pair<t_vec_real, t_vec_real> GetBZCutQ(const t_vec_real& pos) const;
 	void ReducePathBZ();
 
 	// plotter functions

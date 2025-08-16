@@ -351,27 +351,39 @@ requires is_vec<t_vec>
  * @see (Arens 2015), p. 744
  */
 template<class t_mat, class t_vec>
-t_mat orthonorm_sys(const t_mat& sys)
+t_mat orthonorm_sys(const t_mat& sys, bool use_col = true)
 requires is_mat<t_mat> && is_vec<t_vec>
 {
 	using size_t = decltype(sys.size1());
 	t_mat newsys = sys;
 
-	for(size_t colidx=0; colidx<sys.size2(); ++colidx)
+	for(size_t colidx = 0; colidx < sys.size2(); ++colidx)
 	{
-		t_vec vecSys = col<t_mat, t_vec>(sys, colidx);
+		t_vec vecSys;
+		if(use_col)
+			vecSys = col<t_mat, t_vec>(sys, colidx);
+		else
+			vecSys = row<t_mat, t_vec>(sys, colidx);
 		t_vec vecOrthoProj = vecSys;
 
 		// subtract projections to other basis vectors
-		for(size_t colidx2=0; colidx2<colidx; ++colidx2)
+		for(size_t colidx2 = 0; colidx2 < colidx; ++colidx2)
 		{
-			t_vec vecNewSys = col<t_mat, t_vec>(newsys, colidx2);
+			t_vec vecNewSys;
+			if(use_col)
+				vecNewSys = col<t_mat, t_vec>(newsys, colidx2);
+			else
+				vecNewSys = row<t_mat, t_vec>(newsys, colidx2);
 			vecOrthoProj -= project<t_vec>(vecSys, vecNewSys, true);
 		}
 
 		// normalise
 		vecOrthoProj /= norm<t_vec>(vecOrthoProj);
-		set_col<t_mat, t_vec>(newsys, vecOrthoProj, colidx);
+
+		if(use_col)
+			set_col<t_mat, t_vec>(newsys, vecOrthoProj, colidx);
+		else
+			set_row<t_mat, t_vec>(newsys, vecOrthoProj, colidx);
 	}
 
 	return newsys;

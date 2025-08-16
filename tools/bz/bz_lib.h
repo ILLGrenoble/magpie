@@ -804,6 +804,23 @@ public:
 
 		return true;
 	}
+
+
+	/**
+	 * calculate reciprocal coordinates of the 2d position on the scattering plane (in 1/A)
+	 */
+	std::pair<t_vec, t_vec> GetBZCutQ(t_real pos_x, t_real pos_y) const
+	{
+		t_vec QinvA = GetCutPlane() * tl2::create<t_vec>({ pos_x, pos_y, m_d_invA });
+		t_mat B_inv = tl2::trans(GetCrystalA()) / (t_real(2)*tl2::pi<t_real>);
+		//auto [B_inv, ok] = tl2::inv(GetCrystalB());
+		t_vec Qrlu = B_inv * QinvA;
+
+		tl2::set_eps_0(QinvA, m_eps);
+		tl2::set_eps_0(Qrlu, m_eps);
+		return std::make_pair(QinvA, Qrlu);
+	}
+
 	// --------------------------------------------------------------------------------
 
 
@@ -1315,7 +1332,7 @@ private:
 	t_vec m_vec1_rlu{ };                          // first cutting plane vector in rlu
 	t_vec m_vec2_rlu{ };                          // second cutting plane vector in rlu
 	t_vec m_norm_rlu{ };                          // cutting plane normal in rlu
-	t_real m_cut_norm_scale { 1. };               // convert 1/A to rlu lengths along the normal
+	t_real m_cut_norm_scale{ 1. };                // convert 1/A to rlu lengths along the normal
 	t_mat m_cut_plane{ tl2::unit<t_mat>(3) };     // cutting plane in inverse angstroms
 	t_mat m_cut_plane_inv{ tl2::unit<t_mat>(3) }; // ...and its inverse
 	t_real m_d_rlu = 0., m_d_invA = 0.;           // cutting plane distance
