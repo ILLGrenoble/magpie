@@ -490,12 +490,14 @@ public:
 
 		constexpr std::size_t MAX_CLOSEST = 16;
 
+		// get the indices of the closest peaks
 		std::vector<std::pair<std::size_t, t_real>> pt_indices =
 			tl2::closest_point_rtree<
 				t_real, t_vec, t_mat, 3, MAX_CLOSEST,
 				t_rtree_vertex, t_rtree_leaf, t_rtree, std::vector>(
 					*m_peaks_rtree, query_pt, &m_crystB, m_eps);
 
+		// convert the indices to the corresponding vectors
 		std::vector<t_vec> closest;
 		closest.reserve(pt_indices.size());
 
@@ -504,6 +506,14 @@ public:
 			if(pt_idx < m_peaks.size())
 				closest.push_back(m_peaks[pt_idx]);
 		}
+
+		// sort by vectors by |Q|
+		std::stable_sort(closest.begin(), closest.end(),
+			[this](const t_vec& vec1, const t_vec& vec2) -> bool
+		{
+			return tl2::norm(m_crystB*vec1, false)
+				< tl2::norm(m_crystB*vec2, false);
+		});
 
 		return closest;
 	}

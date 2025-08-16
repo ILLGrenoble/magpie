@@ -196,7 +196,7 @@ void MagDynDlg::CreateSitesPanel()
 		m_sitespanel), y, 0, 1, 3);
 	grid->addWidget(btnGenBySG, y++, 3, 1, 1);
 
-	// table CustomContextMenu
+	// table context menu
 	QMenu *menuTableContext = new QMenu(m_sitestab);
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
@@ -216,7 +216,7 @@ void MagDynDlg::CreateSitesPanel()
 		[this]() { this->DelTabItem(m_sitestab); });
 
 
-	// table CustomContextMenu in case nothing is selected
+	// table context menu in case nothing is selected
 	QMenu *menuTableContextNoItem = new QMenu(m_sitestab);
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-add"),
@@ -497,7 +497,7 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	grid->addWidget(m_normaxis[1], y,2,1,1);
 	grid->addWidget(m_normaxis[2], y++,3,1,1);
 
-	// table CustomContextMenu
+	// table context menu
 	QMenu *menuTableContext = new QMenu(m_termstab);
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
@@ -517,7 +517,7 @@ void MagDynDlg::CreateExchangeTermsPanel()
 		[this]() { this->DelTabItem(m_termstab); });
 
 
-	// table CustomContextMenu in case nothing is selected
+	// table context menu in case nothing is selected
 	QMenu *menuTableContextNoItem = new QMenu(m_termstab);
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-add"),
@@ -814,7 +814,7 @@ void MagDynDlg::CreateVariablesPanel()
 	grid->addWidget(btnReplace, y++,0,1,1);
 
 
-	// table CustomContextMenu
+	// table context menu
 	QMenu *menuTableContext = new QMenu(m_varstab);
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
@@ -834,7 +834,7 @@ void MagDynDlg::CreateVariablesPanel()
 		[this]() { this->DelTabItem(m_varstab); });
 
 
-	// table CustomContextMenu in case nothing is selected
+	// table context menu in case nothing is selected
 	QMenu *menuTableContextNoItem = new QMenu(m_varstab);
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-add"),
@@ -982,7 +982,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 	}
 
 
-	// table CustomContextMenu
+	// table context menu
 	QMenu *menuTableContext = new QMenu(m_fieldstab);
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
@@ -1007,7 +1007,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 		[this]() { this->SetCurrentField(); });
 
 
-	// table CustomContextMenu in case nothing is selected
+	// table context menu in case nothing is selected
 	QMenu *menuTableContextNoItem = new QMenu(m_fieldstab);
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-add"),
@@ -1464,7 +1464,7 @@ void MagDynDlg::CreateCoordinatesPanel()
 	}
 
 
-	// table CustomContextMenu
+	// table context menu
 	QMenu *menuTableContext = new QMenu(m_coordinatestab);
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
@@ -1501,7 +1501,7 @@ void MagDynDlg::CreateCoordinatesPanel()
 		[this]() { this->SetCurrentCoordinate(1); });
 
 
-	// table CustomContextMenu in case nothing is selected
+	// table context menu in case nothing is selected
 	QMenu *menuTableContextNoItem = new QMenu(m_coordinatestab);
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-add"),

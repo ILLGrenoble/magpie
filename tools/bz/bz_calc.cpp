@@ -311,13 +311,15 @@ bool BZDlg::CalcFormulas()
 void BZDlg::BZCutMouseMoved(t_real x, t_real y)
 {
 	auto [QinvA, Qrlu] = m_bzcalc.GetBZCutQ(x, y);
+	if(Qrlu.size() < 3 || QinvA.size() < 3)
+		return;
 	std::vector<t_vec_bz> closest = m_bzcalc.GetClosestPeaks(Qrlu);
 
 	std::ostringstream ostr;
 	ostr.precision(g_prec_gui_bz);
 
-	ostr << "Q = (" << QinvA[0] << ", " << QinvA[1] << ", " << QinvA[2] << ") Å⁻¹";
-	ostr << " = (" << Qrlu[0] << ", " << Qrlu[1] << ", " << Qrlu[2] << ") rlu.";
+	ostr << "Q = (" << Qrlu[0] << ", " << Qrlu[1] << ", " << Qrlu[2] << ") rlu";
+	ostr << " = (" << QinvA[0] << ", " << QinvA[1] << ", " << QinvA[2] << ") Å⁻¹.";
 
 	if(closest.size() == 1)
 	{

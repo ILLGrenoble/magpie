@@ -432,6 +432,7 @@ void MagDynDlg::CalcBZ()
 	m_bz.CalcPeaks(g_bz_calc_order, false /*invA*/, false /*cut*/);
 	m_bz.CalcPeaks(g_bz_draw_order, false /*invA*/, true /*cut*/);
 	m_bz.CalcPeaksInvA();
+	m_bz.CalcPeaksRtree();
 
 	// get plane coordinate system
 	const t_vec_real* plane = m_dyn.GetScatteringPlane();
@@ -502,14 +503,39 @@ void MagDynDlg::CalcBZ()
 void MagDynDlg::BZCutMouseMoved(t_real x, t_real y)
 {
 	auto [QinvA, Qrlu] = m_bz.GetBZCutQ(x, y);
-	if(Qrlu.size() < 3)
+	if(Qrlu.size() < 3 || QinvA.size() < 3)
 		return;
+	std::vector<t_vec_bz> closest = m_bz.GetClosestPeaks(Qrlu);
 
 	std::ostringstream ostr;
 	ostr.precision(g_prec_gui);
 
-	ostr << "Q = (" << QinvA[0] << ", " << QinvA[1] << ", " << QinvA[2] << ") Å⁻¹";
-	ostr << " = (" << Qrlu[0] << ", " << Qrlu[1] << ", " << Qrlu[2] << ") rlu.";
+	ostr << "Q = (" << Qrlu[0] << ", " << Qrlu[1] << ", " << Qrlu[2] << ") rlu";
+	ostr << " = (" << QinvA[0] << ", " << QinvA[1] << ", " << QinvA[2] << ") Å⁻¹.";
+
+	if(closest.size() == 1)
+	{
+		t_vec_bz vec = closest[0];
+		tl2::set_eps_0(vec, g_eps);
+
+		ostr << " G = (" << vec[0] << ", " << vec[1] << ", " << vec[2] << ") rlu.";
+	}
+	else if(closest.size() == 2)
+	{
+		t_vec_bz vec0 = closest[0];
+		t_vec_bz vec1 = closest[1];
+		tl2::set_eps_0(vec0, g_eps);
+		tl2::set_eps_0(vec1, g_eps);
+
+		ostr << " On zone boundary between "
+			<< " G_1 = (" << vec0[0] << ", " << vec0[1] << ", " << vec0[2] << ") rlu and "
+			<< " G_1 = (" << vec1[0] << ", " << vec1[1] << ", " << vec1[2] << ") rlu.";
+	}
+	else if(closest.size() > 2)
+	{
+		ostr << " On zone corner.";
+	}
+
 	m_status->setText(ostr.str().c_str());
 }
 
@@ -529,5 +555,15 @@ void MagDynDlg::BZCutMouseClicked(int /*buttons*/, t_real /*x*/, t_real /*y*/)
  */
 void MagDynDlg::ReducePathBZ()
 {
+	auto [Q_start, Q_end] = GetDispersionQ();
+	t_vec_real Q_mid = Q_start + 0.5*(Q_end - Q_start);
 
+	std::vector<t_vec_bz> closest = m_bz.GetClosestPeaks(Q_mid);
+	if(closest.size() == 0)
+		return;
+
+	Q_start -= closest[0];
+	Q_end -= closest[0];
+
+	SetCoordinates(Q_start, Q_end, true);
 }

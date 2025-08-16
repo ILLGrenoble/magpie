@@ -1478,11 +1478,11 @@ requires tl2::is_basic_mat<t_mat>
  * 2-norm
  */
 template<class t_vec, class t_real = typename t_vec::value_type>
-t_real norm(const t_vec& vec)
+t_real norm(const t_vec& vec, bool do_sqrt = true)
 requires is_basic_vec<t_vec>
 {
 	t_real d = static_cast<t_real>(tl2::inner<t_vec>(vec, vec));
-	return std::sqrt(d);
+	return do_sqrt ? std::sqrt(d) : d;
 }
 
 
@@ -1490,13 +1490,13 @@ requires is_basic_vec<t_vec>
  * n-norm
  */
 template<class t_vec, class t_real = typename t_vec::value_type>
-typename t_vec::value_type norm(const t_vec& vec, t_real n)
+typename t_vec::value_type norm(const t_vec& vec, t_real n, bool do_rt = true)
 requires is_basic_vec<t_vec>
 {
 	t_real d = t_real{0};
 	for(std::size_t i = 0; i < vec.size(); ++i)
 		d += std::pow(std::abs(vec[i]), n);
-	return std::pow(d, t_real(1)/n);
+	return do_rt ? std::pow(d, t_real(1)/n) : d;
 }
 
 
