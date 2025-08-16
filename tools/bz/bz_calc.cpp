@@ -91,20 +91,10 @@ bool BZDlg::CalcB(bool full_recalc)
 		return false;
 	}
 
-	t_mat_bz crystB = tl2::B_matrix<t_mat_bz>(a, b, c,
+	m_crystA = tl2::A_matrix<t_mat_bz>(a, b, c,
 		tl2::d2r<t_real>(alpha), tl2::d2r<t_real>(beta), tl2::d2r<t_real>(gamma));
-
-	bool ok = true;
-	t_mat_bz crystA = tl2::unit<t_mat_bz>(3);
-	std::tie(crystA, ok) = tl2::inv(crystB);
-	if(!ok)
-	{
-		QMessageBox::critical(this, "Brillouin Zones", "Error: Cannot invert B matrix.");
-		return false;
-	}
-
-	m_crystA = crystA * t_real(2)*tl2::pi<t_real>;
-	m_crystB = std::move(crystB);
+	m_crystB = tl2::B_matrix<t_mat_bz>(a, b, c,
+		tl2::d2r<t_real>(alpha), tl2::d2r<t_real>(beta), tl2::d2r<t_real>(gamma));
 
 	if(m_dlgPlot)
 		m_dlgPlot->SetABTrafo(m_crystA, m_crystB);
@@ -134,6 +124,7 @@ bool BZDlg::CalcBZ(bool full_recalc)
 	m_bzcalc.SetCrystalA(m_crystA);
 	m_bzcalc.SetCrystalB(m_crystB);
 	m_bzcalc.CalcPeaksInvA();
+	m_bzcalc.CalcPeaksRtree();
 
 	// calculate bz
 	bool ok = m_bzcalc.CalcBZ();
@@ -322,10 +313,11 @@ bool BZDlg::CalcFormulas()
 void BZDlg::BZCutMouseMoved(t_real x, t_real y)
 {
 	t_real plane_d = m_cutD->value() * m_bzcalc.GetCutNormScale();
-
 	t_vec_bz QinvA = m_bzcalc.GetCutPlane() * tl2::create<t_vec_bz>({ x, y, plane_d });
-	t_mat_bz B_inv = tl2::trans(m_crystA / (t_real(2)*tl2::pi<t_real>));
+	t_mat_bz B_inv = tl2::trans(m_crystA) / (t_real(2)*tl2::pi<t_real>);
 	t_vec_bz Qrlu = B_inv * QinvA;
+
+	std::vector<t_vec_bz> closest = m_bzcalc.GetClosestPeaks(Qrlu);
 
 	tl2::set_eps_0(QinvA, g_eps_bz);
 	tl2::set_eps_0(Qrlu, g_eps_bz);
@@ -335,5 +327,29 @@ void BZDlg::BZCutMouseMoved(t_real x, t_real y)
 
 	ostr << "Q = (" << QinvA[0] << ", " << QinvA[1] << ", " << QinvA[2] << ") Å⁻¹";
 	ostr << " = (" << Qrlu[0] << ", " << Qrlu[1] << ", " << Qrlu[2] << ") rlu.";
+
+	if(closest.size() == 1)
+	{
+		t_vec_bz vec = closest[0];
+		tl2::set_eps_0(vec, g_eps_bz);
+
+		ostr << " G = (" << vec[0] << ", " << vec[1] << ", " << vec[2] << ") rlu.";
+	}
+	else if(closest.size() == 2)
+	{
+		t_vec_bz vec0 = closest[0];
+		t_vec_bz vec1 = closest[1];
+		tl2::set_eps_0(vec0, g_eps_bz);
+		tl2::set_eps_0(vec1, g_eps_bz);
+
+		ostr << " On zone boundary between "
+			<< " G_1 = (" << vec0[0] << ", " << vec0[1] << ", " << vec0[2] << ") rlu and "
+			<< " G_1 = (" << vec1[0] << ", " << vec1[1] << ", " << vec1[2] << ") rlu.";
+	}
+	else if(closest.size() > 2)
+	{
+		ostr << " On zone corner.";
+	}
+
 	m_status->setText(ostr.str().c_str());
 }

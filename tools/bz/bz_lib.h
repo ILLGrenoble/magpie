@@ -111,6 +111,7 @@ public:
 	{
 		m_peaks.clear();
 		m_peaks_invA.clear();
+		m_peaks_rtree = std::nullopt;
 	}
 
 
@@ -447,14 +448,6 @@ public:
 		if(calc_invA)
 			CalcPeaksInvA(for_cut);
 
-		if(!for_cut)
-		{
-			// TODO: use m_peaks_invA if available instead of m_crystB
-			m_peaks_rtree = tl2::make_rtree<
-				t_real, t_vec, t_mat, 3, t_rtree_vertex, t_rtree_leaf, t_rtree>(
-					m_peaks, &m_crystB);
-		}
-
 		return peaks.size();
 	}
 
@@ -475,6 +468,15 @@ public:
 			idx000 = idx;
 			break;
 		}
+	}
+
+
+	void CalcPeaksRtree()
+	{
+		// TODO: use m_peaks_invA if available instead of m_crystB
+		m_peaks_rtree = tl2::make_rtree<
+			t_real, t_vec, t_mat, 3, t_rtree_vertex, t_rtree_leaf, t_rtree>(
+				m_peaks, &m_crystB);
 	}
 
 
@@ -654,7 +656,7 @@ public:
 		vec1_invA /= tl2::norm<t_vec>(vec1_invA);
 		vec2_invA /= tl2::norm<t_vec>(vec2_invA);
 
-		t_mat B_inv = m_crystA / (t_real(2)*tl2::pi<t_real>);  // B_inv except for transposition
+		t_mat B_inv = tl2::trans(m_crystA) / (t_real(2)*tl2::pi<t_real>);
 		m_vec2_rlu = B_inv * vec2_invA;
 		m_vec2_rlu /= tl2::norm<t_vec>(m_vec2_rlu);
 
