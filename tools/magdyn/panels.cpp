@@ -1595,7 +1595,6 @@ void MagDynDlg::CreateReciprocalPanel()
 	QPushButton *btnReduceBZ = new QPushButton("Reduce to First Zone", this);
 	btnReduceBZ->setToolTip("Reduce the scan path to the first Brillouin zone.");
 	btnReduceBZ->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-	btnReduceBZ->setEnabled(false);
 
 	// show 3d brillouin zone
 	QPushButton *btnShowBZ = new QPushButton("View Brillouin Zone...", this);

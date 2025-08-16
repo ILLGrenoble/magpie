@@ -50,6 +50,13 @@ template<class t_mat, class t_vec, class t_real = typename t_vec::value_type>
 //requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
 class BZCalc
 {
+protected:
+	// types for peak index tree
+	using t_rtree_vertex = boost::geometry::model::point<t_real, 3, boost::geometry::cs::cartesian>;
+	using t_rtree_leaf = std::tuple<t_rtree_vertex, std::size_t>;
+	using t_rtree = boost::geometry::index::rtree<t_rtree_leaf, boost::geometry::index::dynamic_linear>;
+
+
 public:
 	BZCalc() = default;
 	~BZCalc() = default;
@@ -426,7 +433,7 @@ public:
 		std::vector<t_vec>& peaks = for_cut ? m_peaks_cut : m_peaks;
 
 		peaks.clear();
-		peaks.reserve((2*order+1)*(2*order+1)*(2*order+1));
+		peaks.reserve((2*order + 1)*(2*order + 1)*(2*order + 1));
 
 		for(int h = -order; h <= order; ++h)
 		for(int k = -order; k <= order; ++k)
@@ -439,6 +446,14 @@ public:
 
 		if(calc_invA)
 			CalcPeaksInvA(for_cut);
+
+		if(!for_cut)
+		{
+			// TODO: use m_peaks_invA if available instead of m_crystB
+			m_peaks_rtree = tl2::make_rtree<
+				t_real, t_vec, t_mat, 3, t_rtree_vertex, t_rtree_leaf, t_rtree>(
+					m_peaks, &m_crystB);
+		}
 
 		return peaks.size();
 	}
@@ -460,6 +475,35 @@ public:
 			idx000 = idx;
 			break;
 		}
+	}
+
+
+	/**
+	 * get the bragg peaks that are closest to the query point
+	 */
+	std::vector<t_vec> GetClosestPeaks(const t_vec& query_pt) const
+	{
+		if(!m_peaks_rtree)
+			return {};
+
+		constexpr std::size_t MAX_CLOSEST = 16;
+
+		std::vector<std::pair<std::size_t, t_real>> pt_indices =
+			tl2::closest_point_rtree<
+				t_real, t_vec, t_mat, 3, MAX_CLOSEST,
+				t_rtree_vertex, t_rtree_leaf, t_rtree, std::vector>(
+					*m_peaks_rtree, query_pt, &m_crystB, m_eps);
+
+		std::vector<t_vec> closest;
+		closest.reserve(pt_indices.size());
+
+		for(auto [pt_idx, dist] : pt_indices)
+		{
+			if(pt_idx < m_peaks.size())
+				closest.push_back(m_peaks[pt_idx]);
+		}
+
+		return closest;
 	}
 
 
@@ -1239,10 +1283,11 @@ private:
 	std::vector<t_mat> m_symops{ };                // space group centring symmetry operations
 	std::vector<t_vec> m_peaks{ };                 // nuclear bragg peaks
 	std::vector<t_vec> m_peaks_cut{ };             // nuclear bragg peaks for zone cut
-	std::vector<t_vec> m_peaks_invA { };           // nuclear bragg peaks in lab coordinates
+	std::vector<t_vec> m_peaks_invA{ };            // nuclear bragg peaks in lab coordinates
 	std::vector<t_vec> m_peaks_cut_invA{ };        // nuclear bragg peaks for zone cut in lab coordinates
-	std::optional<std::size_t> m_idx000{};         // index of the (000) peak
-	std::optional<std::size_t> m_idx000_cut{};     // index of the (000) peak for zone cut
+	std::optional<t_rtree> m_peaks_rtree{ };       // peaks r-tree
+	std::optional<std::size_t> m_idx000{ };        // index of the (000) peak
+	std::optional<std::size_t> m_idx000_cut{ };    // index of the (000) peak for zone cut
 	// --------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------
@@ -1282,7 +1327,7 @@ private:
 	t_real m_min_y{ 1. };   // y plot range for curves
 	t_real m_max_y{ -1. };  // y plot range for curves
 
-	std::vector<t_vec> m_peaks_cut_in_plane{ };      // bragg peaks on the cutting plane in rlu
+	std::vector<t_vec> m_peaks_cut_in_plane{ };      // bragg peaks in the cutting plane in rlu
 	std::vector<t_vec> m_peaks_cut_in_plane_invA{ }; // ... and in 1/A and transformed into the plane system
 	// --------------------------------------------------------------------------------
 

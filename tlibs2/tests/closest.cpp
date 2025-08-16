@@ -88,7 +88,7 @@ int main()
 		// results
 		std::cout << "Closest point(s) to " << query_pt << ":\n";
 		for(auto [pt_idx, dist] : pt_indices)
-			std::cout << "\t" << points[pt_idx] << " (distance: " << dist << " 1/A)\n";
+			std::cout << "\t" << points[pt_idx] << " (distance: " << dist << " /A)\n";
 		std::cout << std::endl;
 	}
 
