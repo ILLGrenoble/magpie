@@ -49,7 +49,7 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH
 	"${PROJECT_SOURCE_DIR}"
-	"${PROJECT_SOURCE_DIR}/../../cmake"
+	"${PROJECT_SOURCE_DIR}/../../setup/cmake"
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -246,7 +246,7 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	target_link_options(magpie
 		# create an __info_plist section in the binary
-		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../cmake/plists/InfoMagDyn.plist
+		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../setup/plists/InfoMagDyn.plist
 	)
 
 	add_custom_command(TARGET magpie POST_BUILD

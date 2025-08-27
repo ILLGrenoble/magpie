@@ -29,7 +29,7 @@ cmake_minimum_required(VERSION 3.5)
 project(moldyn)
 
 list(APPEND CMAKE_MODULE_PATH
-	"${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/../cmake"
+	"${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/../setup/cmake"
 )
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)

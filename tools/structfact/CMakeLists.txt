@@ -32,7 +32,7 @@ add_compile_options(-Wall -Wextra)
 
 list(APPEND CMAKE_MODULE_PATH
 	"${PROJECT_SOURCE_DIR}"
-	"${PROJECT_SOURCE_DIR}/../cmake"
+	"${PROJECT_SOURCE_DIR}/../setup/cmake"
 )
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
@@ -97,7 +97,7 @@ add_executable(takin_structfact
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	target_link_options(takin_structfact
 		# create an __info_plist section in the binary
-		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../cmake/plists/InfoStructFact.plist
+		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../setup/plists/InfoStructFact.plist
 	)
 
 	add_custom_command(TARGET takin_structfact POST_BUILD
@@ -123,7 +123,7 @@ add_executable(takin_magstructfact
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	target_link_options(takin_magstructfact
 		# create an __info_plist section in the binary
-		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../cmake/plists/InfoMagStructFact.plist
+		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../setup/plists/InfoMagStructFact.plist
 	)
 
 	add_custom_command(TARGET takin_magstructfact POST_BUILD

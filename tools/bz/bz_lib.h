@@ -1074,7 +1074,7 @@ public:
 			ostr << "\n";
 		}
 		ostr << "],\n\n";
-	
+
 		// voronoi bisectors / polygons
 		const auto& bz_polys_idx = GetTrianglesVoronoiIndices();
 		ostr << "\"polygons\" : [\n";
@@ -1184,7 +1184,7 @@ public:
 	std::string PrintCutJSON(int prec = 6, bool print_block = true) const
 	{
 		const auto& cut_lines = GetCutLines(true);
-		const t_size num_cut_lines = cut_lines.size();
+		const std::size_t num_cut_lines = cut_lines.size();
 		if(num_cut_lines == 0)
 			return "";
 
