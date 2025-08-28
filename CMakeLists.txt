@@ -1,10 +1,14 @@
 #
+# build all magpie tools
 # @author Tobias Weber <tweber@ill.fr>
 # @date 17-jun-2019
 # @license see 'LICENSE' file
 #
 # ----------------------------------------------------------------------------
-# magpie (part of the Takin software suite)
+# magpie
+# Copyright (C) 2022-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
+#                          Grenoble, France).
+# takin / magcore
 # Copyright (C) 2018-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
 #                          Grenoble, France).
 #

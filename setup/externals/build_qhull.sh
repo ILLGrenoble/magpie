@@ -38,9 +38,11 @@ fi
 
 
 #QHULL_REMOTE=https://codeload.github.com/qhull/qhull/zip/refs/heads/master
-QHULL_REMOTE=https://github.com/qhull/qhull/archive/refs/tags/v8.0.2.zip
+#QHULL_REMOTE=https://github.com/qhull/qhull/archive/refs/tags/v8.0.2.zip
+QHULL_REMOTE=https://codeload.github.com/qhull/qhull/zip/refs/tags/v8.1.alpha4
 QHULL_LOCAL_ZIP=${QHULL_REMOTE##*[/\\]}
-QHULL_LOCAL=qhull-8.0.2
+#QHULL_LOCAL=qhull-8.0.2
+QHULL_LOCAL=qhull-8.1.alpha4
 
 
 rm -f "${QHULL_LOCAL}"
