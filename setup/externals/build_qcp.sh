@@ -5,7 +5,7 @@
 # @date oct-2024
 # @note forked from TAS-Paths: https://github.com/ILLGrenoble/taspaths
 # @note thanks to J. Krüger for cleaning up this script
-# @license see 'LICENSE' file
+# @license GPLv2
 #
 # ----------------------------------------------------------------------------
 # Takin (inelastic neutron scattering software package)
