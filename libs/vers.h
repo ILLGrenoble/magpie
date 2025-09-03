@@ -30,7 +30,7 @@
 
 
 // tool version numbers
-#define MAGCORE_VER "2.8.5"   // corresponds to takin version
+#define MAGCORE_VER "2.9"   // corresponds to takin version
 #define MAGPIE_VER  "0.9"
 
 

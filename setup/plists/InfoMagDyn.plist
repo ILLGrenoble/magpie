@@ -2,11 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleName</key>			<string>Takin</string>
-	<key>CFBundleDisplayName</key>		<string>Takin</string>
-	<key>CFBundleIdentifier</key>		<string>eu.ill.cs.takin.magpie</string>
-	<key>CFBundleVersion</key>		<string>2.8.5</string>
-	<key>CFBundleShortVersionString</key>	<string>2.8.5</string>
+	<key>CFBundleName</key>			<string>Magpie</string>
+	<key>CFBundleDisplayName</key>		<string>Magpie</string>
+	<key>CFBundleIdentifier</key>		<string>eu.ill.cs.magpie</string>
+	<key>CFBundleVersion</key>		<string>0.9</string>
+	<key>CFBundleShortVersionString</key>	<string>0.9</string>
 	<key>CFBundleSupportedPlatforms</key>	<array> <string>MacOSX</string> </array>
 	<key>CFBundleIconFile</key>		<string>takin.icns</string>
 
