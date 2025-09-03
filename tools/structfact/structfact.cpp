@@ -276,8 +276,13 @@ StructFactDlg::StructFactDlg(QWidget* pParent) : QDialog{pParent},
 		// signals
 		connect(m_maxBZ, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
 			[this]() { this->Calc(); });
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 		connect(m_RemoveZeroes, static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
 			[this]() { this->Calc(); });
+#else
+		connect(m_RemoveZeroes, static_cast<void (QCheckBox::*)(Qt::CheckState)>(&QCheckBox::checkStateChanged),
+			[this]() { this->Calc(); });
+#endif
 
 		tabs->addTab(sfactpanel, "Structure Factors");
 	}
