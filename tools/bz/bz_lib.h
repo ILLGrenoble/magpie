@@ -111,7 +111,7 @@ public:
 	{
 		m_peaks.clear();
 		m_peaks_invA.clear();
-		m_peaks_rtree = std::nullopt;
+		m_peaks_rtree.reset();
 	}
 
 
