@@ -378,7 +378,7 @@ MagStructFactDlg::MagStructFactDlg(QWidget* pParent) : QDialog{pParent},
 		// signals
 		connect(m_maxBZ, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
 			[this]() { this->Calc(); });
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION < QT_VERSION_CHECK(6, 7, 0)
 		connect(m_RemoveZeroes, static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
 			[this]() { this->Calc(); });
 #else
