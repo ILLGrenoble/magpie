@@ -1593,10 +1593,6 @@ k_column       =  1     # k column index
 l_column       =  2     # l column index
 E_column       =  3     # E column index
 S_column       = %%S_INDEX%%     # S column index, -1: not available
-
-Qx_scale       = 1.
-Qy_scale       = 1.
-E_scale        = 1.
 # -----------------------------------------------------------------------------
 
 # get the magnons with a certain branch index
@@ -1622,8 +1618,8 @@ def get_branch(data, branch_data, E_branch_idx = 0, Q_idx1 = 0, Q_idx2 = 1):
 
 	if only_pos_E:
 		# ignore magnon annihilation
-		data_Q[0] = [ Q*Qx_scale for (Q, E) in zip(data_Q[0], data_E) if E >= 0. ]
-		data_Q[1] = [ Q*Qy_scale for (Q, E) in zip(data_Q[1], data_E) if E >= 0. ]
+		data_Q[0] = [ Q for (Q, E) in zip(data_Q[0], data_E) if E >= 0. ]
+		data_Q[1] = [ Q for (Q, E) in zip(data_Q[1], data_E) if E >= 0. ]
 		if S_column >= 0:
 			data_S = [ S for (S, E) in zip(data_S, data_E) if E >= 0. ]
 		data_E = [ E for E in data_E if E >= 0. ]
@@ -1632,7 +1628,7 @@ def get_branch(data, branch_data, E_branch_idx = 0, Q_idx1 = 0, Q_idx2 = 1):
 		# filter weights below cutoff
 		data_Q[0] = [ Q for (Q, S) in zip(data_Q[0], data_S) if S >= S_filter_min ]
 		data_Q[1] = [ Q for (Q, S) in zip(data_Q[1], data_S) if S >= S_filter_min ]
-		data_E = [ E*E_scale for (E, S) in zip(data_E, data_S) if S >= S_filter_min ]
+		data_E = [ E for (E, S) in zip(data_E, data_S) if S >= S_filter_min ]
 		data_S = [ S for S in data_S if S >= S_filter_min ]
 
 	if len(data_E) < 1:
@@ -1650,8 +1646,62 @@ def get_branch(data, branch_data, E_branch_idx = 0, Q_idx1 = 0, Q_idx2 = 1):
 
 # plot using mayavi
 def plot_disp_mvi(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_idx2 = 1):
+	# convert a colour from a string like "#ff0000" to a tuple like (1, 0., 0)
+	def conv_col(col_str):
+		r = float(int(col_str[1:3], 16)) / 255.
+		g = float(int(col_str[3:5], 16)) / 255.
+		b = float(int(col_str[5:7], 16)) / 255.
+		return (r, g, b)
+
 	from mayavi import mlab
-	import TODO
+	fig = mlab.figure(size=(800, 600), fgcolor=(0., 0., 0.), bgcolor=(1., 1., 1.))
+	axis_extents = [0., 1., 0., 1., 0., 1.]
+
+	# iterate energy branches
+	Q1_minmax = [ +999999999., -999999999. ]
+	Q2_minmax = [ +999999999., -999999999. ]
+	E_minmax  = [ +999999999., -999999999. ]
+	E_branch_eff_idx = 0             # effective index of actually plotted bands
+	E_branch_max = max(branch_data)  # maximum branch index
+	for E_branch_idx in range(0, E_branch_max + 1):
+		branch = get_branch(data, branch_data, E_branch_idx, Q_idx1, Q_idx2)
+		if branch == None:
+			continue
+
+		[data_Q, data_E, data_S, _Q1_minmax, _Q2_minmax, _E_minmax] = branch
+		Q1_minmax[0] = min(Q1_minmax[0], _Q1_minmax[0])
+		Q1_minmax[1] = max(Q1_minmax[1], _Q1_minmax[1])
+		Q2_minmax[0] = min(Q2_minmax[0], _Q2_minmax[0])
+		Q2_minmax[1] = max(Q2_minmax[1], _Q2_minmax[1])
+		E_minmax[0] = min(E_minmax[0], _E_minmax[0])
+		E_minmax[1] = max(E_minmax[1], _E_minmax[1])
+
+		colour_idx = E_branch_eff_idx
+		if only_pos_E:
+			colour_idx *= 2  # skip every other colour if E >= 0
+
+		surf_repr = "surface" # "wireframe"
+		zval = float(colour_idx) / float(E_branch_max)
+		points = mlab.points3d(data_Q[0], data_Q[1], data_E, [zval]*len(data_E),
+			mode = "point", opacity = 0.5, figure = fig, extent = axis_extents)
+		triags = mlab.pipeline.delaunay2d(points, figure = fig)
+		surface = mlab.pipeline.surface(triags, representation = surf_repr,
+			figure = fig, extent = axis_extents, opacity = 1.,
+			name = ("branch_%d" % E_branch_idx), line_width = 1.,
+			color = conv_col(branch_colours[colour_idx]))
+		E_branch_eff_idx += 1
+
+	labels = [ "h (rlu)", "k (rlu)", "l (rlu)" ]
+	mlab.xlabel(labels[Q_idx1])
+	mlab.ylabel(labels[Q_idx2])
+	mlab.zlabel("E (meV)")
+	mlab.axes(figure = fig, ranges = [*Q1_minmax, *Q2_minmax, *E_minmax],
+		extent = axis_extents, line_width = 2.)
+	mlab.outline(figure = fig, extent = axis_extents, line_width = 2.)
+
+	if plot_file != "":
+		mlab.savefig(plot_file, figure = fig)
+	mlab.show()
 
 # plot using matplotlib
 def plot_disp_mpl(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_idx2 = 1):
