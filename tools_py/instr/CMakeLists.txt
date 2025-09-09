@@ -23,7 +23,7 @@
 # ----------------------------------------------------------------------------
 #
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(instr_py)
 
 cmake_policy(SET CMP0078 NEW)
@@ -50,7 +50,7 @@ add_compile_options(-Wall -Wextra)
 # -----------------------------------------------------------------------------
 # Boost
 add_definitions(-DBOOST_SYSTEM_NO_DEPRECATED)
-find_package(Boost REQUIRED COMPONENTS system filesystem iostreams REQUIRED)
+find_package(Boost REQUIRED COMPONENTS filesystem iostreams OPTIONAL_COMPONENTS system)
 add_definitions(${Boost_CXX_FLAGS})
 
 message("Using Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}.")

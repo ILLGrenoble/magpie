@@ -1445,7 +1445,7 @@ void Dispersion3DDlg::WriteHeader(std::ostream& ostr) const
 	auto [Q_origin, Q_dir_1, Q_dir_2] = GetQVectors();
 
 	ostr << "#\n"
-		<< "# Created by Magpie\n"
+		<< "# Created by Magpie " << MAGPIE_VER << "\n"
 		<< "# URL: https://github.com/ILLGrenoble/magpie\n"
 		<< "# DOI: https://doi.org/10.5281/zenodo.16180814\n"
 		<< "# User: " << user << "\n"
@@ -1654,7 +1654,7 @@ def plot_disp_mvi(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_i
 		return (r, g, b)
 
 	from mayavi import mlab
-	fig = mlab.figure(size=(800, 600), fgcolor=(0., 0., 0.), bgcolor=(1., 1., 1.))
+	fig = mlab.figure(size = (800, 600), fgcolor = (0., 0., 0.), bgcolor = (1., 1., 1.))
 	axis_extents = [0., 1., 0., 1., 0., 1.]
 
 	# iterate energy branches
