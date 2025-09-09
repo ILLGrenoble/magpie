@@ -1580,13 +1580,6 @@ void Dispersion3DDlg::SaveScript()
 	// plot script
 	std::string pyscr = R"RAW(import sys
 import numpy
-import matplotlib.colors as colors
-import matplotlib.pyplot as pyplot
-pyplot.rcParams.update({
-	"font.sans-serif" : "DejaVu Sans",
-	"font.family" : "sans-serif",
-	"font.size" : 16,
-})
 
 # -----------------------------------------------------------------------------
 # options
@@ -1600,9 +1593,76 @@ k_column       =  1     # k column index
 l_column       =  2     # l column index
 E_column       =  3     # E column index
 S_column       = %%S_INDEX%%     # S column index, -1: not available
+
+Qx_scale       = 1.
+Qy_scale       = 1.
+E_scale        = 1.
 # -----------------------------------------------------------------------------
 
-def plot_disp(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_idx2 = 1):
+# get the magnons with a certain branch index
+def get_branch(data, branch_data, E_branch_idx = 0, Q_idx1 = 0, Q_idx2 = 1):
+	# iterate energy branches
+	Q1_minmax = [ +999999999., -999999999. ]
+	Q2_minmax = [ +999999999., -999999999. ]
+	E_minmax  = [ +999999999., -999999999. ]
+
+	# filter data for given branch
+	data_S = []
+	data_Q = [
+		[ row[h_column + Q_idx1] for (row, branch_idx) in zip(data, branch_data) \
+			if branch_idx == E_branch_idx ],
+		[ row[h_column + Q_idx2] for (row, branch_idx) in zip(data, branch_data) \
+			if branch_idx == E_branch_idx ]
+	]
+	data_E = [ row[E_column] for (row, branch_idx) in zip(data, branch_data) \
+		if branch_idx == E_branch_idx ]
+	if S_column >= 0:
+		data_S = [ row[S_column] for (row, branch_idx) in zip(data, branch_data) \
+			if branch_idx == E_branch_idx ]
+
+	if only_pos_E:
+		# ignore magnon annihilation
+		data_Q[0] = [ Q*Qx_scale for (Q, E) in zip(data_Q[0], data_E) if E >= 0. ]
+		data_Q[1] = [ Q*Qy_scale for (Q, E) in zip(data_Q[1], data_E) if E >= 0. ]
+		if S_column >= 0:
+			data_S = [ S for (S, E) in zip(data_S, data_E) if E >= 0. ]
+		data_E = [ E for E in data_E if E >= 0. ]
+
+	if S_column >= 0 and S_filter_min >= 0.:
+		# filter weights below cutoff
+		data_Q[0] = [ Q for (Q, S) in zip(data_Q[0], data_S) if S >= S_filter_min ]
+		data_Q[1] = [ Q for (Q, S) in zip(data_Q[1], data_S) if S >= S_filter_min ]
+		data_E = [ E*E_scale for (E, S) in zip(data_E, data_S) if S >= S_filter_min ]
+		data_S = [ S for S in data_S if S >= S_filter_min ]
+
+	if len(data_E) < 1:
+		return None
+
+	# data ranges
+	Q1_minmax[0] = numpy.min([ numpy.min(data_Q[0]), Q1_minmax[0] ])
+	Q1_minmax[1] = numpy.max([ numpy.max(data_Q[0]), Q1_minmax[1] ])
+	Q2_minmax[0] = numpy.min([ numpy.min(data_Q[1]), Q2_minmax[0] ])
+	Q2_minmax[1] = numpy.max([ numpy.max(data_Q[1]), Q2_minmax[1] ])
+	E_minmax[0] = numpy.min([ numpy.min(data_E), E_minmax[0] ])
+	E_minmax[1] = numpy.max([ numpy.max(data_E), E_minmax[1] ])
+
+	return [data_Q, data_E, data_S, Q1_minmax, Q2_minmax, E_minmax]
+
+# plot using mayavi
+def plot_disp_mvi(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_idx2 = 1):
+	from mayavi import mlab
+	import TODO
+
+# plot using matplotlib
+def plot_disp_mpl(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_idx2 = 1):
+	import matplotlib.colors as colors
+	import matplotlib.pyplot as pyplot
+	pyplot.rcParams.update({
+		"font.sans-serif" : "DejaVu Sans",
+		"font.family" : "sans-serif",
+		"font.size" : 16,
+	})
+
 	(plt, axis) = pyplot.subplots(nrows = 1, ncols = 1,
 		width_ratios = None, sharey = True,
 		subplot_kw = { "projection" : "3d", "proj_type" : "%%PROJ_TYPE%%",
@@ -1617,46 +1677,21 @@ def plot_disp(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_idx2 
 	E_branch_eff_idx = 0             # effective index of actually plotted bands
 	E_branch_max = max(branch_data)  # maximum branch index
 	for E_branch_idx in range(0, E_branch_max + 1):
-		# filter data for given branch
-		data_Q = [
-			[ row[h_column + Q_idx1] for (row, branch_idx) in zip(data, branch_data) \
-				if branch_idx == E_branch_idx ],
-			[ row[h_column + Q_idx2] for (row, branch_idx) in zip(data, branch_data) \
-				if branch_idx == E_branch_idx ]
-		]
-		data_E = [ row[E_column] for (row, branch_idx) in zip(data, branch_data) \
-			if branch_idx == E_branch_idx ]
-		if S_column >= 0:
-			data_S = [ row[S_column] for (row, branch_idx) in zip(data, branch_data) \
-				if branch_idx == E_branch_idx ]
+		branch = get_branch(data, branch_data, E_branch_idx, Q_idx1, Q_idx2)
+		if branch == None:
+			continue
+
+		[data_Q, data_E, data_S, _Q1_minmax, _Q2_minmax, _E_minmax] = branch
+		Q1_minmax[0] = min(Q1_minmax[0], _Q1_minmax[0])
+		Q1_minmax[1] = max(Q1_minmax[1], _Q1_minmax[1])
+		Q2_minmax[0] = min(Q2_minmax[0], _Q2_minmax[0])
+		Q2_minmax[1] = max(Q2_minmax[1], _Q2_minmax[1])
+		E_minmax[0] = min(E_minmax[0], _E_minmax[0])
+		E_minmax[1] = max(E_minmax[1], _E_minmax[1])
 
 		colour_idx = E_branch_eff_idx
 		if only_pos_E:
-			# ignore magnon annihilation
-			data_Q[0] = [ Q for (Q, E) in zip(data_Q[0], data_E) if E >= 0. ]
-			data_Q[1] = [ Q for (Q, E) in zip(data_Q[1], data_E) if E >= 0. ]
-			if S_column >= 0:
-				data_S = [ S for (S, E) in zip(data_S, data_E) if E >= 0. ]
-			data_E = [ E for E in data_E if E >= 0. ]
 			colour_idx *= 2  # skip every other colour if E >= 0
-
-		if S_column >= 0 and S_filter_min >= 0.:
-			# filter weights below cutoff
-			data_Q[0] = [ Q for (Q, S) in zip(data_Q[0], data_S) if S >= S_filter_min ]
-			data_Q[1] = [ Q for (Q, S) in zip(data_Q[1], data_S) if S >= S_filter_min ]
-			data_E = [ E for (E, S) in zip(data_E, data_S) if S >= S_filter_min ]
-			data_S = [ S for S in data_S if S >= S_filter_min ]
-
-		if len(data_E) < 1:
-			continue
-
-		# data ranges
-		Q1_minmax[0] = numpy.min([ numpy.min(data_Q[0]), Q1_minmax[0] ])
-		Q1_minmax[1] = numpy.max([ numpy.max(data_Q[0]), Q1_minmax[1] ])
-		Q2_minmax[0] = numpy.min([ numpy.min(data_Q[1]), Q2_minmax[0] ])
-		Q2_minmax[1] = numpy.max([ numpy.max(data_Q[1]), Q2_minmax[1] ])
-		E_minmax[0] = numpy.min([ numpy.min(data_E), E_minmax[0] ])
-		E_minmax[1] = numpy.max([ numpy.max(data_E), E_minmax[1] ])
 
 		axis.plot_trisurf(data_Q[0], data_Q[1], data_E,
 			color = branch_colours[colour_idx], alpha = 1., shade = True,
@@ -1695,7 +1730,14 @@ if __name__ == "__main__":
 		data = numpy.array([ h_data, k_data, l_data, E_data, S_data ]).T
 	else:
 		data = numpy.array([ h_data, k_data, l_data, E_data ]).T
-	plot_disp(data, branch_data, degen_data, colours, %%Q_IDX_1%%, %%Q_IDX_2%%))RAW";
+
+	try:
+		# try to plot using mayavi...
+		plot_disp_mvi(data, branch_data, degen_data, colours, %%Q_IDX_1%%, %%Q_IDX_2%%)
+	except ModuleNotFoundError:
+		# ... otherwise resort to matplotlib
+		plot_disp_mpl(data, branch_data, degen_data, colours, %%Q_IDX_1%%, %%Q_IDX_2%%)
+)RAW";
 	// ------------------------------------------------------------------------
 
 	const t_size num_bands = m_data.size();
