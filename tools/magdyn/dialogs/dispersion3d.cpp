@@ -1655,6 +1655,8 @@ def plot_disp_mvi(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_i
 
 	from mayavi import mlab
 	fig = mlab.figure(size = (800, 600), fgcolor = (0., 0., 0.), bgcolor = (1., 1., 1.))
+	mlab.view(azimuth = -(%%AZIMUTH%%) + 270., elevation = %%ELEVATION%% + 90., figure = fig)
+	fig.scene.parallel_projection = %%ORTHO_PROJ%%
 	axis_extents = [0., 1., 0., 1., 0., 1.]
 
 	# iterate energy branches
@@ -1695,18 +1697,20 @@ def plot_disp_mvi(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_i
 	mlab.xlabel(labels[Q_idx1])
 	mlab.ylabel(labels[Q_idx2])
 	mlab.zlabel("E (meV)")
-	mlab.axes(figure = fig, ranges = [*Q1_minmax, *Q2_minmax, *E_minmax],
+	axes = mlab.axes(figure = fig, ranges = [*Q1_minmax, *Q2_minmax, *E_minmax],
 		extent = axis_extents, line_width = 2.)
+	axes.axes.font_factor = 1.75
 	mlab.outline(figure = fig, extent = axis_extents, line_width = 2.)
 
 	if plot_file != "":
 		mlab.savefig(plot_file, figure = fig)
 	mlab.show()
+	mlab.close(all = True)
 
 # plot using matplotlib
 def plot_disp_mpl(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_idx2 = 1):
-	import matplotlib.colors as colors
-	import matplotlib.pyplot as pyplot
+	from matplotlib import colors
+	from matplotlib import pyplot
 	pyplot.rcParams.update({
 		"font.sans-serif" : "DejaVu Sans",
 		"font.family" : "sans-serif",
@@ -1765,6 +1769,7 @@ def plot_disp_mpl(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_i
 	if plot_file != "":
 		pyplot.savefig(plot_file)
 	pyplot.show()
+	pyplot.close()
 
 if __name__ == "__main__":
 	h_data = %%H_DATA%%
@@ -1887,6 +1892,7 @@ if __name__ == "__main__":
 	algo::replace_all(pyscr, "%%BRANCH_COLOURS%%", "[ " + colours.str() + "]");
 	algo::replace_all(pyscr, "%%ONLY_POS_E%%", m_only_pos_E->isChecked() ? "True " : "False");
 	algo::replace_all(pyscr, "%%PROJ_TYPE%%", m_perspective->isChecked() ? "persp" : "ortho");
+	algo::replace_all(pyscr, "%%ORTHO_PROJ%%", m_perspective->isChecked() ? "False" : "True");
 	algo::replace_all(pyscr, "%%FOCAL_LEN%%", focal_len.str());
 	algo::replace_all(pyscr, "%%AZIMUTH%%", tl2::var_to_str(-90. - m_cam_phi->value(), g_prec));
 	algo::replace_all(pyscr, "%%ELEVATION%%", tl2::var_to_str(90. + m_cam_theta->value(), g_prec));
