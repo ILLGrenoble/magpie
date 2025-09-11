@@ -142,7 +142,7 @@ namespace tl2_la {
 
 
 
-// fadeeva
+// faddeeva
 #if __has_include(<Faddeeva.hh>)
 	#define __TLIBS2_USE_FADDEEVA__
 #else
