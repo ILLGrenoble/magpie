@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# builds gemmi
+# builds minuit
 # @author Tobias Weber <tweber@ill.fr>
-# @date oct-2024
+# @date sep-2020
 # @note thanks to J. Krüger for cleaning up this script
 # @license GPLv2
 #
@@ -37,33 +37,32 @@ if [ "$1" == "--mingw" ]; then
 fi
 
 
-#GEMMI_REMOTE=https://codeload.github.com/project-gemmi/gemmi/zip/refs/heads/master
-GEMMI_REMOTE=https://github.com/project-gemmi/gemmi/archive/refs/tags/v0.7.3.zip
-GEMMI_LOCAL_ZIP=${GEMMI_REMOTE##*[/\\]}
-GEMMI_LOCAL=gemmi-0.7.3
+#MINUIT_REMOTE=https://codeload.github.com/root-project/root/zip/refs/heads/latest-stable
+#MINUIT_DIR=root-latest-stable
+MINUIT_REMOTE=https://github.com/root-project/root/archive/refs/tags/v6-33-01.zip
+MINUIT_DIR=root-6-33-01
 
 
-rm -f "${GEMMI_LOCAL}"
+MINUIT_LOCAL=${MINUIT_REMOTE##*[/\\]}
+rm -f "${MINUIT_LOCAL}"
 
 
-if ! wget ${GEMMI_REMOTE}; then
-	echo -e "Could not download ${GEMMI_REMOTE}."
+if ! wget ${MINUIT_REMOTE}; then
+	echo -e "Could not download ${MINUIT_REMOTE}."
 	exit -1
 fi
 
 
-rm -rf "${GEMMI_LOCAL}"
-unzip "${GEMMI_LOCAL_ZIP}"
-cd "${GEMMI_LOCAL}"
+rm -rf ${MINUIT_DIR}
+unzip "${MINUIT_LOCAL}"
+cd ${MINUIT_DIR}/math/minuit2/
 
 
 if [ $BUILD_FOR_MINGW -ne 0 ]; then
-	mkdir build_lib && cd build_lib
-	mingw64-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=True \
-		-DBUILD_GEMMI_PROGRAM=False -DBUILD_SHARED_LIBS=False ..
+	mkdir build && cd build
+	mingw64-cmake -DCMAKE_BUILD_TYPE=Release ..
 	mingw64-make -j${NUM_CORES} && sudo mingw64-make install/strip
 else
-	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=True -B build_lib \
-		-DBUILD_GEMMI_PROGRAM=False -DBUILD_SHARED_LIBS=False .
-	cmake --build build_lib --parallel ${NUM_CORES} && sudo cmake --install build_lib --strip
+	cmake -DCMAKE_BUILD_TYPE=Release -B build .
+	cmake --build build --parallel ${NUM_CORES} && sudo cmake --install build --strip
 fi

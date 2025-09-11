@@ -1,8 +1,8 @@
 # Magpie - a graphical magnon calculator.
 This project comprises:
-  - *Magpie*, a linear-spin wave library and graphical user interface.
-  - A scripting interface for *Magpie*.
-  - Several [Takin](https://github.com/ILLGrenoble/takin) extension modules.
+  - *Magpie*, a linear-spin wave library.
+  - A GUI and a scripting interface for *Magpie*.
+  - Several extension modules for [Takin](https://github.com/ILLGrenoble/takin).
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16180814.svg)](https://doi.org/10.5281/zenodo.16180814)
 
