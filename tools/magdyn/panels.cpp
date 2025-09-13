@@ -1179,7 +1179,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 	});
 
 
-	m_tabs_setup->addTab(m_sampleenviropanel, "Environment");
+	m_tabs_in->insertTab(1, m_sampleenviropanel, "Environment");
 }
 
 
