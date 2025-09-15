@@ -65,9 +65,9 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	m_structplot->GetRenderer()->GetCamera().UpdateTransformation();
 	m_structplot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
-	m_coordcross = new QCheckBox("Show Coordinates", this);
-	m_coordcross->setToolTip("Show the coordinate system cross.");
-	m_coordcross->setChecked(false);
+	m_unitcell = new QCheckBox("Show Unit Cell", this);
+	m_unitcell->setToolTip("Show the crystal's unit cell.");
+	m_unitcell->setChecked(true);
 
 	m_labels = new QCheckBox("Show Labels", this);
 	m_labels->setToolTip("Show magnetic site and coupling labels.");
@@ -105,6 +105,10 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	m_coordsys->addItem("Lab Units (\xe2\x84\xab)");
 	m_coordsys->setCurrentIndex(0);
 	m_coordsys->setEnabled(false);
+
+	m_coordcross = new QCheckBox("Show Coordinates", this);
+	m_coordcross->setToolTip("Show the coordinate system cross.");
+	m_coordcross->setChecked(false);
 
 	m_status = new QLabel(this);
 	m_status->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
@@ -153,7 +157,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	grid->setContentsMargins(8, 8, 8, 8);
 
 	grid->addWidget(m_structplot, y++, 0, 1, 6);
-	grid->addWidget(m_coordcross, y, 0, 1, 2);
+	grid->addWidget(m_unitcell, y, 0, 1, 2);
 	grid->addWidget(m_labels, y, 2, 1, 2);
 	grid->addWidget(m_perspective, y++, 4, 1, 2);
 	grid->addWidget(btn_100, y, 0, 1, 2);
@@ -163,7 +167,8 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	grid->addWidget(m_cam_phi, y, 2, 1, 2);
 	grid->addWidget(m_cam_theta, y++, 4, 1, 2);
 	grid->addWidget(new QLabel("Coordinate System:", this), y, 0, 1, 2);
-	grid->addWidget(m_coordsys, y++, 2, 1, 4);
+	grid->addWidget(m_coordsys, y, 2, 1, 2);
+	grid->addWidget(m_coordcross, y++, 4, 1, 2);
 	grid->addWidget(m_status, y, 0, 1, 5);
 	grid->addWidget(btnOk, y++, 5, 1, 1);
 
@@ -184,6 +189,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	connect(acCentre, &QAction::triggered, this, &StructPlotDlg::CentreCamera);
 	connect(acSaveImage, &QAction::triggered, this, &StructPlotDlg::SaveImage);
 	connect(m_coordcross, &QCheckBox::toggled, this, &StructPlotDlg::ShowCoordCross);
+	connect(m_unitcell, &QCheckBox::toggled, this, &StructPlotDlg::ShowUnitCell);
 	connect(m_labels, &QCheckBox::toggled, this, &StructPlotDlg::ShowLabels);
 	connect(m_perspective, &QCheckBox::toggled, this, &StructPlotDlg::SetPerspectiveProjection);
 	connect(m_coordsys, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
@@ -372,6 +378,20 @@ void StructPlotDlg::ShowCoordCross(bool show)
 	if(auto obj = m_structplot->GetRenderer()->GetCoordCross(); obj)
 	{
 		m_structplot->GetRenderer()->SetObjectVisible(*obj, show);
+		m_structplot->update();
+	}
+}
+
+
+
+/**
+ * show or hide the unit cell
+ */
+void StructPlotDlg::ShowUnitCell(bool show)
+{
+	for(std::size_t edge : m_cell)
+	{
+		m_structplot->GetRenderer()->SetObjectVisible(edge, show);
 		m_structplot->update();
 	}
 }
@@ -598,6 +618,11 @@ void StructPlotDlg::Sync()
 	for(const auto& [term_idx, term] : m_terms)
 		m_structplot->GetRenderer()->RemoveObject(term_idx);
 	m_terms.clear();
+
+	// clear old unit cell
+	for(std::size_t cell_idx : m_cell)
+		m_structplot->GetRenderer()->RemoveObject(cell_idx);
+	m_cell.clear();
 
 	// clear centre position for camera
 	m_centre = tl2::zero<t_vec_gl>(3);
@@ -876,10 +901,56 @@ void StructPlotDlg::Sync()
 		}
 	} // terms
 
-	m_centre /= t_real_gl(total_sites);
+	AddUnitCell();
 
+	m_centre /= t_real_gl(total_sites);
 	CentreCamera();
 	m_structplot->update();
+}
+
+
+
+/**
+ * show a cube indicating the unit cell
+ */
+void StructPlotDlg::AddUnitCell()
+{
+	auto add_edge = [this](const t_vec_gl& pos_vec, const t_vec_gl& dir_vec)
+	{
+		std::size_t edge = m_structplot->GetRenderer()->AddLinkedObject(
+			m_cyl,  0., 0., 0.,  0., 0., 0., 1.);
+		m_cell.push_back(edge);
+
+		t_real_gl dir_len = 1.; //tl2::norm<t_vec_gl>(dir_vec);
+		t_vec_gl zero_vec = tl2::create<t_vec_gl>({ 0., 0., 0. });
+		t_vec_gl start_vec = tl2::create<t_vec_gl>({ 0., 0., 1. });
+
+		m_structplot->GetRenderer()->SetObjectMatrix(edge,
+			tl2::get_arrow_matrix<t_vec_gl, t_mat_gl, t_real_gl>(
+				dir_vec, 1., zero_vec,   // to, post-scale and post-translate
+				start_vec, 1., pos_vec)  // from, pre-scale and pre-translate
+			* tl2::hom_translation<t_mat_gl>(
+				t_real_gl(0), t_real_gl(0), dir_len*t_real_gl(0.5))
+			* tl2::hom_scaling<t_mat_gl>(
+				t_real_gl(1), t_real_gl(1), dir_len));
+
+		m_structplot->GetRenderer()->SetObjectVisible(edge, m_unitcell->isChecked());
+	};
+
+	add_edge(tl2::create<t_vec_gl>({ 0., 0., 0. }), tl2::create<t_vec_gl>({ 0., 0., 1. }));
+	add_edge(tl2::create<t_vec_gl>({ 0., 1., 0. }), tl2::create<t_vec_gl>({ 0., 0., 1. }));
+	add_edge(tl2::create<t_vec_gl>({ 1., 0., 0. }), tl2::create<t_vec_gl>({ 0., 0., 1. }));
+	add_edge(tl2::create<t_vec_gl>({ 1., 1., 0. }), tl2::create<t_vec_gl>({ 0., 0., 1. }));
+
+	add_edge(tl2::create<t_vec_gl>({ 0., 0., 0. }), tl2::create<t_vec_gl>({ 1., 0., 0. }));
+	add_edge(tl2::create<t_vec_gl>({ 0., 0., 1. }), tl2::create<t_vec_gl>({ 1., 0., 0. }));
+	add_edge(tl2::create<t_vec_gl>({ 0., 1., 0. }), tl2::create<t_vec_gl>({ 1., 0., 0. }));
+	add_edge(tl2::create<t_vec_gl>({ 0., 1., 1. }), tl2::create<t_vec_gl>({ 1., 0., 0. }));
+
+	add_edge(tl2::create<t_vec_gl>({ 0., 0., 0. }), tl2::create<t_vec_gl>({ 0., 1., 0. }));
+	add_edge(tl2::create<t_vec_gl>({ 0., 0., 1. }), tl2::create<t_vec_gl>({ 0., 1., 0. }));
+	add_edge(tl2::create<t_vec_gl>({ 1., 0., 0. }), tl2::create<t_vec_gl>({ 0., 1., 0. }));
+	add_edge(tl2::create<t_vec_gl>({ 1., 0., 1. }), tl2::create<t_vec_gl>({ 0., 1., 0. }));
 }
 
 

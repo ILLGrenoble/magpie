@@ -105,6 +105,9 @@ protected:
 	void SetCameraRotation(t_real_gl phi, t_real_gl theta);
 	void SetCoordinateSystem(int which);
 
+	void AddUnitCell();
+	void ShowUnitCell(bool show);
+
 	void CameraHasUpdated();
 	void CentreCamera();
 	void CentreCameraOnObject();
@@ -126,6 +129,7 @@ private:
 
 	QLabel *m_status{};
 	QCheckBox *m_coordcross{}, *m_labels{}, *m_perspective{};
+	QCheckBox *m_unitcell{};
 	QComboBox *m_coordsys{};
 	QDoubleSpinBox *m_cam_phi{}, *m_cam_theta{};
 	QMenu *m_context{}, *m_context_site{}, *m_context_term{};
@@ -133,6 +137,7 @@ private:
 	tl2::GlPlot *m_structplot{};
 	std::unordered_map<std::size_t, MagneticSiteInfo> m_sites{};
 	std::unordered_map<std::size_t, ExchangeTermInfo> m_terms{};
+	std::vector<std::size_t> m_cell{};
 	std::optional<std::size_t> m_cur_obj{};
 	std::optional<std::string> m_cur_site{};
 	std::optional<std::string> m_cur_term{};
