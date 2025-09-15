@@ -113,7 +113,16 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 		<< "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n"
 		<< "#\n\n";
 
-	ofstr << "using Sunny\nusing Printf\n\n";
+	ofstr << "using Sunny\nusing Printf\n";
+
+
+	// --------------------------------------------------------------------
+	ofstr << "\n# options\n";
+	ofstr << "plot_structure = true\n";
+	ofstr << "plot_dynamics  = true\n";
+	ofstr << "save_dynamics  = true\n";
+	ofstr << "datfile        = \"" << dispname_rel << "\"\n";
+	// --------------------------------------------------------------------
 
 
 	// --------------------------------------------------------------------
@@ -124,14 +133,13 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	t_real k2 = (t_real)m_Q_end[1]->value();
 	t_real l2 = (t_real)m_Q_end[2]->value();
 
-	ofstr << "# variables\n";
+	ofstr << "\n# variables\n";
 
 	// internal constants and variables
 	ofstr << "g_e     = " << tl2::g_e<t_real> << "\n";
 	ofstr << "Qstart  = [ " << h1 << ", " << k1 << ", " << l1 << " ]\n";
 	ofstr << "Qend    = [ " << h2 << ", " << k2 << ", " << l2 << " ]\n";
 	ofstr << "Qpts    = " << m_num_points->value() << "\n";
-	ofstr << "datfile = \"" << dispname_rel << "\"\n";
 
 	// user variables
 	for(const auto &var : m_dyn.GetVariables())
@@ -282,9 +290,12 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 	// --------------------------------------------------------------------
 	ofstr << "\n# optionally plot nuclear and magnetic structure\n";
-	ofstr << "#using GLMakie\n";
-	ofstr << "#view_crystal(magsys)\n";
-	ofstr << "#plot_spins(magsys)\n";
+	ofstr << "if plot_structure\n";
+	ofstr << "\t@printf(\"Plotting structure...\\n\")\n";
+	ofstr << "\tusing GLMakie\n";
+	ofstr << "\tview_crystal(magsys, refbonds = 15, compass = true)\n";
+	ofstr << "\tplot_spins(magsys, compass = true)\n";
+	ofstr << "end\n";
 	// --------------------------------------------------------------------
 
 
@@ -323,32 +334,47 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "\n# spin-wave calculation\n";
 	ofstr << "@printf(\"Calculating S(Q, E)...\\n\")\n";
 
-	ofstr << "calc = SpinWaveTheory(magsys; apply_g = true)\n";
+	ofstr << "cholesky_eps = 1e-8\n";
+	std::string proj = m_use_projector->isChecked() ? "ssf_perp" : "ssf_trace";
+	ofstr << "calc = SpinWaveTheory(magsys; measure = " << proj << "(magsys), regularization = cholesky_eps)\n";
 
-	ofstr << "momenta = collect(range(Qstart, Qend, Qpts))\n";
-	std::string proj = m_use_projector->isChecked() ? ":perp" : ":trace";
-	ofstr << "energies, correlations = intensities_bands(calc, momenta,\n"
-		<< "\tintensity_formula(calc, " << proj
-		<< "; kernel = delta_function_kernel))\n";
+	//ofstr << "momenta = collect(range(Qstart, Qend, Qpts))\n";
+	ofstr << "momenta = q_space_path(magsys.crystal, [ Qstart, Qend ], Qpts)\n";
+	ofstr << "bands = intensities_bands(calc, momenta)\n";
+	// --------------------------------------------------------------------
+
+
+	// --------------------------------------------------------------------
+	ofstr << "\n# plot the dispersion\n";
+	ofstr << "if plot_dynamics\n";
+	ofstr << "\t@printf(\"Plotting dispersion...\\n\")\n";
+	ofstr << "\tusing GLMakie\n";
+	ofstr << "\tplot_intensities(bands; fwhm = 0.1, units = phys_units)\n";
+	ofstr << "end\n";
 	// --------------------------------------------------------------------
 
 
 	// --------------------------------------------------------------------
 	ofstr << "\n# output the dispersion and spin-spin correlation\n";
-	ofstr << "@printf(\"Outputting data to \\\"%s\\\", plot with (adapting x index):\\n"
+	ofstr << "if save_dynamics\n";
+	ofstr << "\t@printf(\"Outputting dispersion data to \\\"%s\\\", plot with (adapting x index):\\n"
 		<< "\\tgnuplot -p -e \\\"plot \\\\\\\"%s\\\\\\\" u 1:4:(\\\\\\$5) w p pt 7 ps var\\\"\\n\", "
 		<< "datfile, datfile)\n";
 
-	ofstr << "open(datfile, \"w\") do ostr\n";
+	ofstr << "\tenergies = bands.disp\n";
+	ofstr << "\tcorrelations = bands.data\n";
+
+	ofstr << "\topen(datfile, \"w\") do ostr\n";
 	ofstr <<
-		R"BLOCK(	@printf(ostr, "# %8s %10s %10s %10s %10s\n",
-		"h (rlu)", "k (rlu)", "l (rlu)", "E (meV)", "S(Q, E)")
-	for q_idx in 1:length(momenta)
-		for e_idx in 1:length(energies[q_idx, :])
-			@printf(ostr, "%10.4f %10.4f %10.4f %10.4f %10.4f\n",
-				momenta[q_idx][1], momenta[q_idx][2], momenta[q_idx][3],
-				energies[q_idx, e_idx],
-				correlations[q_idx, e_idx] / num_sites)
+		R"BLOCK(		@printf(ostr, "# %8s %10s %10s %10s %10s\n",
+			"h (rlu)", "k (rlu)", "l (rlu)", "E (meV)", "S(Q, E)")
+		for q_idx in 1:length(momenta.qs)
+			for e_idx in 1:length(energies[:, q_idx])
+				@printf(ostr, "%10.4f %10.4f %10.4f %10.4f %10.4f\n",
+					momenta.qs[q_idx][1], momenta.qs[q_idx][2], momenta.qs[q_idx][3],
+					energies[e_idx, q_idx],
+					correlations[e_idx, q_idx] / num_sites)
+			end
 		end
 	end
 end
