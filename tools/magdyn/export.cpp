@@ -177,14 +177,13 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 
 	ofstr << "# spin magnitudes and magnetic system\n";
-	ofstr << "magsys = System(magsites, ( 1, 1, 1 ),\n\t[\n";
+	ofstr << "magsys = System(magsites, #( 1, 1, 1 ),\n\t[\n";
 
 	t_size site_idx = 1;
 	for(const t_site& site : m_dyn.GetMagneticSites())
 	{
-		ofstr << "\t\tSpinInfo("
-			<< /*"atom = " <<*/ site_idx << ", "
-			<< "S = " << get_str_var(site.spin_mag) << ", "
+		ofstr << "\t\t" << site_idx << " => Moment("
+			<< "s = " << get_str_var(site.spin_mag) << ", "
 			<< "g = -[ g_e 0 0; 0 g_e 0; 0 0 g_e ]),"
 			<< " # " << site.name << "\n";
 		++site_idx;
@@ -270,12 +269,22 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	if(!tl2::equals_0<t_real>(field.mag, g_eps))
 	{
 		ofstr << "\n# external field\n";
-		ofstr << "set_external_field!(magsys, -[ "
+		ofstr << "phys_units = Units(:meV, :angstrom)\n";
+		ofstr << "set_field!(magsys, -[ "
 			<< field.dir[0] << ", "
 			<< field.dir[1] << ", "
 			<< field.dir[2] << " ] * " << field.mag
+			<< " * phys_units.T"
 			<< ")\n";
 	}
+	// --------------------------------------------------------------------
+
+
+	// --------------------------------------------------------------------
+	ofstr << "\n# optionally plot nuclear and magnetic structure\n";
+	ofstr << "#using GLMakie\n";
+	ofstr << "#view_crystal(magsys)\n";
+	ofstr << "#plot_spins(magsys)\n";
 	// --------------------------------------------------------------------
 
 
