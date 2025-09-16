@@ -121,10 +121,12 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 
 	// general context menu
 	m_context = new QMenu(this);
-	QAction *acCentre = new QAction("Centre Camera", m_context);
+	QAction *acCentre = new QAction("Centre Camera on Midpoint", m_context);
+	QAction *acCentreZero = new QAction("Centre Camera on (½½½)", m_context);
 	QAction *acSaveImage = new QAction("Save Image...", m_context);
 	acSaveImage->setIcon(QIcon::fromTheme("image-x-generic"));
 	m_context->addAction(acCentre);
+	m_context->addAction(acCentreZero);
 	m_context->addSeparator();
 	m_context->addAction(acSaveImage);
 
@@ -137,6 +139,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	m_context_site->addAction(acFlipSpin);
 	m_context_site->addSeparator();
 	m_context_site->addAction(acCentre);
+	m_context_site->addAction(acCentreZero);
 	m_context_site->addAction(acCentreOnObject);
 	m_context_site->addSeparator();
 	m_context_site->addAction(acSaveImage);
@@ -147,6 +150,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	m_context_term->addAction(acDelTerm);
 	m_context_term->addSeparator();
 	m_context_term->addAction(acCentre);
+	m_context_term->addAction(acCentreZero);
 	m_context_term->addAction(acCentreOnObject);
 	m_context_term->addSeparator();
 	m_context_term->addAction(acSaveImage);
@@ -187,6 +191,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	connect(acDelTerm, &QAction::triggered, this, &StructPlotDlg::DeleteItem);
 	connect(acCentreOnObject, &QAction::triggered, this, &StructPlotDlg::CentreCameraOnObject);
 	connect(acCentre, &QAction::triggered, this, &StructPlotDlg::CentreCamera);
+	connect(acCentreZero, &QAction::triggered, this, &StructPlotDlg::CentreCameraOnZero);
 	connect(acSaveImage, &QAction::triggered, this, &StructPlotDlg::SaveImage);
 	connect(m_coordcross, &QCheckBox::toggled, this, &StructPlotDlg::ShowCoordCross);
 	connect(m_unitcell, &QCheckBox::toggled, this, &StructPlotDlg::ShowUnitCell);
@@ -489,11 +494,24 @@ void StructPlotDlg::CentreCameraOnObject()
 
 
 /**
- * centre camera on central position
+ * centre camera on mean position of objects
  */
 void StructPlotDlg::CentreCamera()
 {
 	t_mat_gl matCentre = tl2::hom_translation<t_mat_gl>(m_centre[0], m_centre[1], m_centre[2]);
+	m_structplot->GetRenderer()->GetCamera().Centre(matCentre);
+	m_structplot->GetRenderer()->GetCamera().UpdateTransformation();
+	m_structplot->update();
+}
+
+
+
+/**
+ * centre camera on (000)
+ */
+void StructPlotDlg::CentreCameraOnZero()
+{
+	t_mat_gl matCentre = tl2::hom_translation<t_mat_gl>(0.5, 0.5, 0.5);
 	m_structplot->GetRenderer()->GetCamera().Centre(matCentre);
 	m_structplot->GetRenderer()->GetCamera().UpdateTransformation();
 	m_structplot->update();

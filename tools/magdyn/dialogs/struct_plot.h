@@ -111,6 +111,7 @@ protected:
 	void CameraHasUpdated();
 	void CentreCamera();
 	void CentreCameraOnObject();
+	void CentreCameraOnZero();
 
 	void HighlightSite(const std::string& name);
 	void HighlightTerm(const std::string& name);
