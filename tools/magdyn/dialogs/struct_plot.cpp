@@ -507,7 +507,7 @@ void StructPlotDlg::CentreCamera()
 
 
 /**
- * centre camera on (000)
+ * centre camera on (½½½)
  */
 void StructPlotDlg::CentreCameraOnZero()
 {
