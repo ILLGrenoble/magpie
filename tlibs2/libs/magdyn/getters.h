@@ -117,6 +117,7 @@ MAGDYN_TEMPL void MAGDYN_INST::ClearExternalField()
 	m_field.dir.clear();
 	m_field.mag = 0.;
 	m_field.align_spins = false;
+	m_field.keep_signs = false;
 }
 // --------------------------------------------------------------------
 

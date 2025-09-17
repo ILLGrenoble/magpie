@@ -197,7 +197,7 @@ protected:
 	// external magnetic field
 	QDoubleSpinBox *m_field_dir[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_field_mag{};
-	QCheckBox *m_align_spins{};
+	QCheckBox *m_align_spins{}, *m_keep_spin_signs{};
 	QDoubleSpinBox *m_rot_axis[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_rot_angle{};
 	QTableWidget *m_fieldstab{};

@@ -317,6 +317,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 
 		thefield.mag = 0.;
 		thefield.align_spins = false;
+		thefield.keep_signs = false;
 
 		thefield.dir = tl2::create<t_vec_real>(
 		{
@@ -327,9 +328,10 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 
 		if(auto optVal = field->get_optional<t_real>("magnitude"))
 			thefield.mag = *optVal;
-
 		if(auto optVal = field->get_optional<bool>("align_spins"))
 			thefield.align_spins = *optVal;
+		if(auto optVal = field->get_optional<bool>("keep_signs"))
+			thefield.keep_signs = *optVal;
 
 		SetExternalField(thefield);
 	}
@@ -413,6 +415,7 @@ bool MAGDYN_INST::Save(boost::property_tree::ptree& node) const
 	}
 	node.put<t_real>("field.magnitude", m_field.mag);
 	node.put<bool>("field.align_spins", m_field.align_spins);
+	node.put<bool>("field.keep_signs", m_field.keep_signs);
 
 	// ordering vector
 	if(m_ordering.size() == 3)

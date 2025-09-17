@@ -643,6 +643,8 @@ private:
 	ExternalField m_field{};
 	// matrix to rotate field into the [001] direction
 	t_mat m_rot_field{ tl2::unit<t_mat>(3) };
+	// matrix to rotate inverted field into the [001] direction
+	t_mat m_rot_negfield{ tl2::unit<t_mat>(3) };
 
 	// ordering wave vector for incommensurate structures
 	t_vec_real m_ordering{ tl2::zero<t_vec_real>(3) };

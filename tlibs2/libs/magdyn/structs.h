@@ -87,7 +87,7 @@ struct t_MagneticSite
 
 	t_vec_real spin_dir_calc{};  // spin vector
 	t_vec trafo_z_calc{};        // trafo z vector (3rd column in trafo matrix)
-	t_vec trafo_plane_calc{};    // trafo orthogonal plane (1st and 2nd coumns)
+	t_vec trafo_plane_calc{};    // trafo orthogonal plane (1st and 2nd columns)
 	t_vec trafo_plane_conj_calc{};
 
 	t_vec ge_trafo_z_calc{};     // g_e * trafo z vector
@@ -151,6 +151,7 @@ requires tl2::is_vec<t_vec_real>
 struct t_ExternalField
 {
 	bool align_spins{};          // align spins along external field
+	bool keep_signs{};           // keep the senses of the spins
 
 	t_vec_real dir{};            // field direction
 	t_real mag{};                // field magnitude

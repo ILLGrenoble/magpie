@@ -68,6 +68,14 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExternalField()
 				tl2::rotation<t_mat_real, t_vec_real>(
 					-m_field.dir, m_zdir, &m_rotaxis, m_eps)));
 
+		// rotate -field to [001] direction
+		if(m_field.keep_signs)
+		{
+			m_rot_negfield = tl2::convert<t_mat>(
+				tl2::trans<t_mat_real>(
+					tl2::rotation<t_mat_real, t_vec_real>(
+						m_field.dir, m_zdir, &m_rotaxis, m_eps)));
+		}
 #ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
 		std::cout << "Field rotation from:\n";
 		tl2::niceprint(std::cout, -m_field.dir, 1e-4, 4);
@@ -183,8 +191,16 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 		// spin rotation of equation (9) from (Toth 2015)
 		if(m_field.align_spins)
 		{
-			std::tie(site.trafo_plane_calc, site.trafo_z_calc) =
-				rot_to_trafo(m_rot_field);
+			if(m_field.keep_signs && tl2::inner(site.spin_dir_calc, m_field.dir) > 0.)
+			{
+				std::tie(site.trafo_plane_calc, site.trafo_z_calc) =
+					rot_to_trafo(m_rot_negfield);
+			}
+			else
+			{
+				std::tie(site.trafo_plane_calc, site.trafo_z_calc) =
+					rot_to_trafo(m_rot_field);
+			}
 		}
 		else
 		{

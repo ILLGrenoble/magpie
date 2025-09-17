@@ -755,11 +755,22 @@ void StructPlotDlg::Sync()
 		// align spin to external field?
 		if(field.align_spins)
 		{
-			spin_vec = tl2::create<t_vec_gl>({
-				t_real_gl(-field.dir[0] * site.spin_mag_calc),
-				t_real_gl(-field.dir[1] * site.spin_mag_calc),
-				t_real_gl(-field.dir[2] * site.spin_mag_calc),
-			});
+			if(field.keep_signs && tl2::inner(field.dir, site.spin_dir_calc) > 0.)
+			{
+				spin_vec = tl2::create<t_vec_gl>({
+					t_real_gl(field.dir[0] * site.spin_mag_calc),
+					t_real_gl(field.dir[1] * site.spin_mag_calc),
+					t_real_gl(field.dir[2] * site.spin_mag_calc),
+				});
+			}
+			else
+			{
+				spin_vec = tl2::create<t_vec_gl>({
+					t_real_gl(-field.dir[0] * site.spin_mag_calc),
+					t_real_gl(-field.dir[1] * site.spin_mag_calc),
+					t_real_gl(-field.dir[2] * site.spin_mag_calc),
+				});
+			}
 		}
 		else
 		{
