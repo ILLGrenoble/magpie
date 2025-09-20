@@ -67,7 +67,7 @@ void MAGDYN_INST::SymmetriseMagneticSites(const std::vector<t_mat_real>& symops)
 			newsite.pos[0] = tl2::var_to_str(newsite.pos_calc[0], m_prec);
 			newsite.pos[1] = tl2::var_to_str(newsite.pos_calc[1], m_prec);
 			newsite.pos[2] = tl2::var_to_str(newsite.pos_calc[2], m_prec);
-			newsite.name += "_" + tl2::var_to_str(idx + 1, m_prec);
+			newsite.name += "_sym" + tl2::var_to_str(idx + 1, m_prec);
 
 			newsites.emplace_back(std::move(newsite));
 		}
@@ -208,7 +208,7 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 					newterm.Jgen[idx1][idx2] = tl2::var_to_str(
 						newJgens[op_idx](idx1, idx2), m_prec);
 			}
-			newterm.name += "_" + tl2::var_to_str(op_idx + 1, m_prec);
+			newterm.name += "_op" + tl2::var_to_str(op_idx + 1, m_prec);
 
 			newterms.emplace_back(std::move(newterm));
 		}
@@ -307,12 +307,22 @@ void MAGDYN_INST::GeneratePossibleExchangeTerms(
 		return coupling1.length < coupling2.length;
 	});
 
-	// add couplings to list
-	t_size coupling_idx = 0;
+	// add couplings to list, grouping them by length
+	t_size length_idx = 0, coupling_sub_idx = 0, coupling_idx = 0;
+	t_real cur_length = couplings.size() ? couplings[0].length : 0.;
+
 	for(const PossibleCoupling& coupling : couplings)
 	{
 		if(couplings_max && coupling_idx >= *couplings_max)
 			break;
+
+		// next length group?
+		if(!tl2::equals<t_real>(coupling.length, cur_length, m_eps))
+		{
+			++length_idx;
+			coupling_sub_idx = 0;
+			cur_length = coupling.length;
+		}
 
 		ExchangeTerm newterm{};
 		newterm.site1_calc = coupling.idx1_uc;
@@ -325,9 +335,11 @@ void MAGDYN_INST::GeneratePossibleExchangeTerms(
 		newterm.dist[2] = tl2::var_to_str(newterm.dist_calc[2], m_prec);
 		newterm.length_calc = coupling.length;
 		newterm.J = "0";
-		newterm.name += "coupling_" + tl2::var_to_str(coupling_idx + 1, m_prec);
+		newterm.name += "coupling_dist" + tl2::var_to_str(length_idx + 1, m_prec)
+			+ "_" + tl2::var_to_str(coupling_sub_idx + 1, m_prec);
 		newterms.emplace_back(std::move(newterm));
 
+		++coupling_sub_idx;
 		++coupling_idx;
 	}
 
