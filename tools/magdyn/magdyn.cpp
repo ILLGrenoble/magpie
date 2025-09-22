@@ -233,7 +233,7 @@ void MagDynDlg::CreateMainWindow()
 	connect(m_btnStartStop, &QAbstractButton::clicked, [this]()
 	{
 		// behaves as start or stop button?
-		if(m_startEnabled)
+		if(m_inputEnabled)
 			this->CalcAll();
 		else
 			m_stopRequested = true;
@@ -786,7 +786,7 @@ void MagDynDlg::CalcAll()
  */
 void MagDynDlg::EnableInput(bool enable)
 {
-	m_startEnabled = enable;
+	m_inputEnabled = enable;
 
 	if(enable)
 	{

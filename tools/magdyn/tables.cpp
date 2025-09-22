@@ -97,6 +97,9 @@ void MagDynDlg::AddSiteTabItem(
 	const std::string& sox, const std::string& soy, const std::string& soz,
 	const std::string& rgb)
 {
+	if(!m_inputEnabled)
+		return;
+
 	bool bclone = false;
 	m_sitestab->blockSignals(true);
 	BOOST_SCOPE_EXIT(this_)
@@ -306,6 +309,9 @@ void MagDynDlg::AddTermTabItem(
 	const std::string& gen_zx, const std::string& gen_zy, const std::string& gen_zz,
 	const std::string& rgb)
 {
+	if(!m_inputEnabled)
+		return;
+
 	bool bclone = false;
 	m_termstab->blockSignals(true);
 	BOOST_SCOPE_EXIT(this_)
@@ -404,6 +410,9 @@ void MagDynDlg::AddTermTabItem(
  */
 void MagDynDlg::AddVariableTabItem(int row, const std::string& name, const t_cplx& value)
 {
+	if(!m_inputEnabled)
+		return;
+
 	bool bclone = false;
 	m_varstab->blockSignals(true);
 	BOOST_SCOPE_EXIT(this_)
@@ -463,6 +472,9 @@ void MagDynDlg::AddFieldTabItem(int row,
 	t_real Bh, t_real Bk, t_real Bl,
 	t_real Bmag)
 {
+	if(!m_inputEnabled)
+		return;
+
 	bool bclone = false;
 
 	if(row == -1)	// append to end of table
@@ -512,6 +524,9 @@ void MagDynDlg::AddFieldTabItem(int row,
 void MagDynDlg::AddCoordinateTabItem(int row, const std::string& name,
 	t_real h, t_real k, t_real l)
 {
+	if(!m_inputEnabled)
+		return;
+
 	bool bclone = false;
 
 	if(row == -1)	// append to end of table
@@ -556,10 +571,13 @@ void MagDynDlg::AddCoordinateTabItem(int row, const std::string& name,
 
 
 /**
- * delete table widget items
+ * delete table items
  */
 void MagDynDlg::DelTabItem(QTableWidget *pTab, int begin, int end)
 {
+	if(!m_inputEnabled)
+		return;
+
 	bool needs_recalc = true;
 	if(pTab == m_fieldstab || pTab == m_coordinatestab)
 		needs_recalc = false;
@@ -887,6 +905,9 @@ void MagDynDlg::SelectSite(const std::string& site)
  */
 void MagDynDlg::DeleteSite(const std::string& site)
 {
+	if(!m_inputEnabled)
+		return;
+
 	if(t_size idx = m_dyn.GetMagneticSiteIndex(site);
 		idx < m_dyn.GetMagneticSitesCount())
 	{
@@ -901,6 +922,9 @@ void MagDynDlg::DeleteSite(const std::string& site)
  */
 void MagDynDlg::FlipSiteSpin(const std::string& site)
 {
+	if(!m_inputEnabled)
+		return;
+
 	if(t_size idx = m_dyn.GetMagneticSiteIndex(site);
 		idx < m_dyn.GetMagneticSitesCount())
 	{
@@ -938,6 +962,9 @@ void MagDynDlg::SelectTerm(const std::string& term)
  */
 void MagDynDlg::DeleteTerm(const std::string& term)
 {
+	if(!m_inputEnabled)
+		return;
+
 	if(t_size idx = m_dyn.GetExchangeTermIndex(term);
 		idx < m_dyn.GetExchangeTermsCount())
 	{
@@ -986,6 +1013,9 @@ std::vector<t_magdyn::Variable> MagDynDlg::GetVariables() const
  */
 t_size MagDynDlg::ReplaceValuesWithVariables()
 {
+	if(!m_inputEnabled)
+		return 0;
+
 	BOOST_SCOPE_EXIT(this_)
 	{
 		this_->m_ignoreCalc = false;
@@ -1010,6 +1040,9 @@ t_size MagDynDlg::ReplaceValuesWithVariables()
  */
 t_size MagDynDlg::ReplaceValueWithVariable(const std::string& var, const t_cplx& val)
 {
+	if(!m_inputEnabled)
+		return 0;
+
 	// replace the item's numeric value if it's equal to the variable
 	auto replace = [&var, &val](t_numitem* item) -> bool
 	{
