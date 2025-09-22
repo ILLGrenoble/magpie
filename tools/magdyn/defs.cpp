@@ -65,6 +65,9 @@ t_real g_cholesky_delta = 0.0025;
 unsigned int g_bz_calc_order = 4;
 unsigned int g_bz_draw_order = 4;
 
+// draw unit cell from 0 to 1 (otherwise -0.5 to 0.5)
+int g_uc_01 = 1;
+
 // optional features
 int g_allow_ortho_spin = 0;
 int g_allow_general_J = 1;

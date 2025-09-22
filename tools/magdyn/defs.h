@@ -106,6 +106,9 @@ extern t_real g_cholesky_delta;
 extern unsigned int g_bz_calc_order;
 extern unsigned int g_bz_draw_order;
 
+// draw unit cell from 0 to 1 (otherwise -0.5 to 0.5)
+extern int g_uc_01;
+
 // optional features
 extern int g_allow_ortho_spin, g_allow_general_J;
 extern int g_evecs_ortho;
@@ -145,7 +148,7 @@ extern unsigned int g_stop_check_fraction;
 // ----------------------------------------------------------------------------
 #include "dialogs/settings.h"
 
-constexpr std::array<SettingsVariable, 24> g_settingsvariables
+constexpr std::array<SettingsVariable, 25> g_settingsvariables
 {{
 	// threads
 	{
@@ -204,6 +207,12 @@ constexpr std::array<SettingsVariable, 24> g_settingsvariables
 		.description = "BZ drawing order.",
 		.key = "bz_draw_order",
 		.value = &g_bz_draw_order,
+	},
+
+	{
+		.description = "Unit cell from 0 to 1.",
+		.key = "uc_01",
+		.value = &g_uc_01,
 	},
 
 	// file options

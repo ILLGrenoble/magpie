@@ -944,7 +944,12 @@ void StructPlotDlg::Sync()
  */
 void StructPlotDlg::AddUnitCell()
 {
-	auto add_edge = [this](const t_vec_gl& pos_vec, const t_vec_gl& dir_vec)
+	// centring of unit cell
+	t_vec_gl offs = tl2::zero<t_vec_gl>(3);
+	if(!g_uc_01)
+		offs = tl2::create<t_vec_gl>({ -0.5, -0.5, -0.5 });
+
+	auto add_edge = [this, &offs](const t_vec_gl& pos_vec, const t_vec_gl& dir_vec)
 	{
 		std::size_t edge = m_structplot->GetRenderer()->AddLinkedObject(
 			m_cyl,  0., 0., 0.,  0., 0., 0., 1.);
@@ -956,8 +961,8 @@ void StructPlotDlg::AddUnitCell()
 
 		m_structplot->GetRenderer()->SetObjectMatrix(edge,
 			tl2::get_arrow_matrix<t_vec_gl, t_mat_gl, t_real_gl>(
-				dir_vec, 1., zero_vec,   // to, post-scale and post-translate
-				start_vec, 1., pos_vec)  // from, pre-scale and pre-translate
+				dir_vec, 1., zero_vec,          // to, post-scale and post-translate
+				start_vec, 1., pos_vec + offs)  // from, pre-scale and pre-translate
 			* tl2::hom_translation<t_mat_gl>(
 				t_real_gl(0), t_real_gl(0), dir_len*t_real_gl(0.5))
 			* tl2::hom_scaling<t_mat_gl>(
@@ -966,6 +971,7 @@ void StructPlotDlg::AddUnitCell()
 		m_structplot->GetRenderer()->SetObjectVisible(edge, m_unitcell->isChecked());
 	};
 
+	// create unit cell edges
 	add_edge(tl2::create<t_vec_gl>({ 0., 0., 0. }), tl2::create<t_vec_gl>({ 0., 0., 1. }));
 	add_edge(tl2::create<t_vec_gl>({ 0., 1., 0. }), tl2::create<t_vec_gl>({ 0., 0., 1. }));
 	add_edge(tl2::create<t_vec_gl>({ 1., 0., 0. }), tl2::create<t_vec_gl>({ 0., 0., 1. }));
