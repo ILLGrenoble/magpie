@@ -365,6 +365,7 @@ protected:
 	void ImportStructure();
 	void ExportToSunny();
 	void ExportToSpinW();
+	void ExportToScript();
 	void ExportSQE();
 
 	void SavePlotFigure();
@@ -429,6 +430,7 @@ public:
 	bool ImportStructure(const QString& filename);
 	bool ExportToSunny(const QString& filename);
 	bool ExportToSpinW(const QString& filename);
+	bool ExportToScript(const QString& filename);
 	bool ExportSQE(const QString& filename);
 
 	void SetCurrentFileAndDir(const QString& filename);

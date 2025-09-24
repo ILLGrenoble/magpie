@@ -167,6 +167,33 @@ MAGDYN_INST::CalcReciprocalJs(const t_vec_real& Qvec) const
 
 
 /**
+ * get energy term for external field
+ * @note implements equation (28) from (Toth 2015)
+ */
+MAGDYN_TEMPL
+t_cplx MAGDYN_INST::CalcFieldEnergy(t_size site_idx) const
+{
+	bool use_field = !tl2::equals_0<t_real>(m_field.mag, m_eps) && m_field.dir.size() == 3;
+	if(!use_field)
+		return 0.;
+
+	const MagneticSite& s_i = GetMagneticSite(site_idx);
+
+	const t_vec& v_i  = s_i.trafo_z_calc;
+	const t_vec field = tl2::convert<t_vec>(-m_field.dir) * m_field.mag;
+	const t_vec gv    = s_i.g_e * v_i;
+	const t_cplx Bgv  = tl2::inner_noconj<t_vec>(field, gv);
+
+	// bohr magneton in [meV/T]
+	constexpr const t_real muB = tl2::mu_B<t_real>
+		/ tl2::meV<t_real> * tl2::tesla<t_real>;
+
+	return muB * Bgv;
+}
+
+
+
+/**
  * get the hamiltonian at the given momentum
  * @note implements the formalism given by (Toth 2015)
  * @note a first version for a simplified ferromagnetic dispersion was based on (Heinsdorf 2021)
@@ -184,7 +211,6 @@ t_mat MAGDYN_INST::CalcHamiltonian(const t_vec_real& Qvec) const
 
 	// create the hamiltonian of equation (25) and (26) from (Toth 2015)
 	t_mat H = tl2::create<t_mat>(2*N, 2*N);
-	bool use_field = !tl2::equals_0<t_real>(m_field.mag, m_eps) && m_field.dir.size() == 3;
 
 	// iterate magnetic sites
 	for(t_size i = 0; i < N; ++i)
@@ -235,19 +261,9 @@ t_mat MAGDYN_INST::CalcHamiltonian(const t_vec_real& Qvec) const
 		}  // end of iteration over j sites
 
 		// include external field, equation (28) from (Toth 2015)
-		if(use_field)
-		{
-			const t_vec field = tl2::convert<t_vec>(-m_field.dir) * m_field.mag;
-			const t_vec gv    = s_i.g_e * v_i;
-			const t_cplx Bgv  = tl2::inner_noconj<t_vec>(field, gv);
-
-			// bohr magneton in [meV/T]
-			constexpr const t_real muB = tl2::mu_B<t_real>
-				/ tl2::meV<t_real> * tl2::tesla<t_real>;
-
-			H(    i,     i) -= muB * Bgv;
-			H(N + i, N + i) -= std::conj(muB * Bgv);
-		}
+		t_cplx field_energy = CalcFieldEnergy(i);
+		H(    i,     i) -= field_energy;
+		H(N + i, N + i) -= std::conj(field_energy);
 	}  // end of iteration over i sites
 
 	// equation (25) from (Toth 2015)

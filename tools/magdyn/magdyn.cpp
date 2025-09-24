@@ -267,6 +267,7 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acStructImport = new QAction("Import From Table...", menuStruct);
 	QAction *acStructExportSun = new QAction("Export To Sunny Code...");
 	QAction *acStructExportSW = new QAction("Export To SpinW Code...");
+	QAction *acStructExportScript = new QAction("Export To Script [Experimental]...");
 	QAction *acStructNotes = new QAction("Notes...", menuStruct);
 	QAction *acStructView = new QAction("View Structure...", menuStruct);
 	QAction *acBZView = new QAction("View Brillouin Zone...", menuStruct);
@@ -351,6 +352,7 @@ void MagDynDlg::CreateMenuBar()
 	acSaveMultiDispScr->setIcon(QIcon::fromTheme("text-x-script"));
 	acStructExportSun->setIcon(QIcon::fromTheme("weather-clear"));
 	acStructExportSW->setIcon(QIcon::fromTheme("text-x-script"));
+	acStructExportScript->setIcon(QIcon::fromTheme("text-x-script"));
 	acStructNotes->setIcon(QIcon::fromTheme("accessories-text-editor"));
 	acStructView->setIcon(QIcon::fromTheme("applications-graphics"));
 	acBZView->setIcon(QIcon::fromTheme("applications-graphics"));
@@ -480,6 +482,7 @@ void MagDynDlg::CreateMenuBar()
 	menuStruct->addAction(acStructImport);
 	menuStruct->addAction(acStructExportSun);
 	menuStruct->addAction(acStructExportSW);
+	menuStruct->addAction(acStructExportScript);
 
 	m_menuDisp->addAction(m_plot_channels);
 	m_menuDisp->addMenu(m_menuChannels);
@@ -586,6 +589,8 @@ void MagDynDlg::CreateMenuBar()
 		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::ExportToSunny));
 	connect(acStructExportSW, &QAction::triggered,
 		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::ExportToSpinW));
+	connect(acStructExportScript, &QAction::triggered,
+		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::ExportToScript));
 	connect(m_use_dmi, &QAction::toggled, calc_all);
 	if(m_allow_general_J)
 		connect(m_use_genJ, &QAction::toggled, calc_all);

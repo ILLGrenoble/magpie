@@ -118,10 +118,11 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 	// --------------------------------------------------------------------
 	ofstr << "\n# options\n";
-	ofstr << "plot_structure = true\n";
-	ofstr << "plot_dynamics  = true\n";
-	ofstr << "save_dynamics  = true\n";
-	ofstr << "datfile        = \"" << dispname_rel << "\"\n";
+	ofstr << "calc_groundstate = false\n";
+	ofstr << "plot_structure   = true\n";
+	ofstr << "plot_dynamics    = true\n";
+	ofstr << "save_dynamics    = true\n";
+	ofstr << "datfile          = \"" << dispname_rel << "\"\n";
 	// --------------------------------------------------------------------
 
 
@@ -237,40 +238,52 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	{
 		t_size idx1 = m_dyn.GetMagneticSiteIndex(term.site1) + 1;
 		t_size idx2 = m_dyn.GetMagneticSiteIndex(term.site2) + 1;
+		bool is_aniso = (idx1 == idx2 && tl2::equals_0(term.dist_calc, g_eps));
 
-		ofstr	<< "set_exchange!(magsys," << " # " << term.name
-			<< "\n\t[\n"
-			<< "\t\t" << get_str_var(term.J, true)             // 0,0
-			<< "   " << get_str_var(term.dmi[2], true)         // 0,1
-			<< "  -" << get_str_var(term.dmi[1], true) << ";"  // 0,2
-			<< "\n\t\t-" << get_str_var(term.dmi[2], true)     // 1,0
-			<< "   " << get_str_var(term.J, true)              // 1,1
-			<< "   " << get_str_var(term.dmi[0], true) << ";"  // 1,2
-			<< "\n\t\t" << get_str_var(term.dmi[1], true)      // 2,0
-			<< "  -" << get_str_var(term.dmi[0], true)         // 2,1
-			<< "   " << get_str_var(term.J, true)              // 2,2
-			<< "\n\t]";
-
-		if(!tl2::equals_0(term.Jgen_calc, g_eps))
+		if(is_aniso)
 		{
-			ofstr	<< " +\n\t[\n"
-				<< "\t\t" << get_str_var(term.Jgen[0][0], true)
-				<< "  " << get_str_var(term.Jgen[0][1], true)
-				<< "  " << get_str_var(term.Jgen[0][2], true) << ";"
-				<< "\n\t\t" << get_str_var(term.Jgen[1][0], true)
-				<< "  " << get_str_var(term.Jgen[1][1], true)
-				<< "  " << get_str_var(term.Jgen[1][2], true) << ";"
-				<< "\n\t\t" << get_str_var(term.Jgen[2][0], true)
-				<< "  " << get_str_var(term.Jgen[2][1], true)
-				<< "  " << get_str_var(term.Jgen[2][2], true)
-				<< "\n\t]";
-		}
+			ofstr << "set_onsite_coupling!(magsys, S -> "
+			    << get_str_var(term.J, true) << "*(S[1]^2 + S[2]^2 + S[3]^2), "
+				<< idx1 << ");\n";
 
-		ofstr	<< ", Bond(" << idx1 << ", " << idx2 << ", [ "
-			<< get_str_var(term.dist[0]) << ", "
-			<< get_str_var(term.dist[1]) << ", "
-			<< get_str_var(term.dist[2])
-			<< " ]))\n";
+			// TODO: also treat dmi vector and general matrix
+		}
+		else
+		{
+			ofstr << "set_exchange!(magsys," << " # " << term.name
+				<< "\n\t[\n"
+				<< "\t\t" << get_str_var(term.J, true)             // 0,0
+				<< "   " << get_str_var(term.dmi[2], true)         // 0,1
+				<< "  -" << get_str_var(term.dmi[1], true) << ";"  // 0,2
+				<< "\n\t\t-" << get_str_var(term.dmi[2], true)     // 1,0
+				<< "   " << get_str_var(term.J, true)              // 1,1
+				<< "   " << get_str_var(term.dmi[0], true) << ";"  // 1,2
+				<< "\n\t\t" << get_str_var(term.dmi[1], true)      // 2,0
+				<< "  -" << get_str_var(term.dmi[0], true)         // 2,1
+				<< "   " << get_str_var(term.J, true)              // 2,2
+				<< "\n\t]";
+
+			if(!tl2::equals_0(term.Jgen_calc, g_eps))
+			{
+				ofstr << " +\n\t[\n"
+					<< "\t\t" << get_str_var(term.Jgen[0][0], true)
+					<< "  " << get_str_var(term.Jgen[0][1], true)
+					<< "  " << get_str_var(term.Jgen[0][2], true) << ";"
+					<< "\n\t\t" << get_str_var(term.Jgen[1][0], true)
+					<< "  " << get_str_var(term.Jgen[1][1], true)
+					<< "  " << get_str_var(term.Jgen[1][2], true) << ";"
+					<< "\n\t\t" << get_str_var(term.Jgen[2][0], true)
+					<< "  " << get_str_var(term.Jgen[2][1], true)
+					<< "  " << get_str_var(term.Jgen[2][2], true)
+					<< "\n\t]";
+			}
+
+			ofstr << ", Bond(" << idx1 << ", " << idx2 << ", [ "
+				<< get_str_var(term.dist[0]) << ", "
+				<< get_str_var(term.dist[1]) << ", "
+				<< get_str_var(term.dist[2])
+				<< " ]))\n";
+		}
 	}
 
 
@@ -285,6 +298,16 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 			<< " * phys_units.T"
 			<< ")\n";
 	}
+	// --------------------------------------------------------------------
+
+
+	// --------------------------------------------------------------------
+	ofstr << "\n# optionally calculate the ground state\n";
+	ofstr << "if calc_groundstate\n";
+	ofstr << "\t@printf(\"Calculating ground state...\\n\")\n";
+	ofstr << "\trandomize_spins!(magsys)\n";
+	ofstr << "\tminimize_energy!(magsys; maxiters = 1024)\n";
+	ofstr << "end\n";
 	// --------------------------------------------------------------------
 
 
@@ -674,4 +697,32 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 	// --------------------------------------------------------------------
 
 	return true;
+}
+
+
+
+/**
+ * export the magnetic structure to a self-contained script
+ */
+void MagDynDlg::ExportToScript()
+{
+	QString dirLast = m_sett->value("dir_export_script", "").toString();
+	QString filename = QFileDialog::getSaveFileName(
+		this, "Save As Py File", dirLast, "py files (*.py)");
+	if(filename == "")
+		return;
+
+	if(ExportToScript(filename))
+		m_sett->setValue("dir_export_script", QFileInfo(filename).path());
+}
+
+
+
+/**
+ * export the magnetic structure to a self-contained script
+ */
+bool MagDynDlg::ExportToScript(const QString& _filename)
+{
+	// TODO
+	return false;
 }

@@ -426,6 +426,11 @@ public:
 	void SortByEnergies(SofQE& S) const;
 
 	/**
+	 * get energy term for external field
+	 */
+	t_cplx CalcFieldEnergy(t_size site_idx) const;
+
+	/**
 	 * get the hamiltonian at the given momentum
 	 * @note implements the formalism given by (Toth 2015)
 	 * @note a first version for a simplified ferromagnetic dispersion was based on (Heinsdorf 2021)

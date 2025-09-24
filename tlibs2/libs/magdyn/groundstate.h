@@ -91,6 +91,7 @@ t_real MAGDYN_INST::CalcGroundStateEnergy() const
 {
 	t_real E = 0.;
 
+	// couplings
 	for(const ExchangeTerm& term : GetExchangeTerms())
 	{
 		// check if the site indices are valid
@@ -107,6 +108,10 @@ t_real MAGDYN_INST::CalcGroundStateEnergy() const
 
 		E += tl2::inner_noconj<t_vec>(Si, J * Sj).real();
 	}
+
+	// external field per site
+	for(t_size i = 0; i < GetMagneticSitesCount(); ++i)
+		E += CalcFieldEnergy(i).real();
 
 	return E;
 }
