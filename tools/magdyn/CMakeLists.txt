@@ -173,7 +173,8 @@ if(USE_QT)
 		dialogs.cpp panels.cpp
 		structure.cpp tables.cpp
 		config.cpp file.cpp
-		export.cpp export_sqe.cpp
+		export/sunny.cpp export/sw.cpp
+		export/script.cpp export/sqe.cpp
 		kernel.cpp dispersion.cpp
 		graph.cpp graph.h
 		defs.cpp defs.h
