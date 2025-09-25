@@ -34,6 +34,7 @@
 	#include <Minuit2/MnFcn.h>
 	#include <Minuit2/FunctionMinimum.h>
 	#include <Minuit2/MnMigrad.h>
+	#include <Minuit2/MnSimplex.h>
 	#include <Minuit2/MnPrint.h>
 
 	#define __TLIBS2_USE_MINUIT__
@@ -710,7 +711,7 @@ bool minimise(t_func&& func, const std::vector<std::string>& param_names,
 		if(fixed && std::all_of(fixed->begin(), fixed->end(),
 			[](bool b) -> bool { return b; }))
 			{
-				std::cerr << "Fitter: All parameters are fixed." << std::endl;
+				std::cerr << "Minimiser: All parameters are fixed." << std::endl;
 				return false;
 			}
 
@@ -757,7 +758,7 @@ bool minimise(t_func&& func, const std::vector<std::string>& param_names,
 	}
 	catch(const std::exception& ex)
 	{
-		std::cerr << "Fitter: " << ex.what() << std::endl;
+		std::cerr << "Minimiser: " << ex.what() << std::endl;
 	}
 
 	return false;
@@ -783,7 +784,7 @@ bool minimise_dynargs(std::size_t num_args, t_func&& func,
 		if(fixed && std::all_of(fixed->begin(), fixed->end(),
 			[](bool b) -> bool { return b; }))
 			{
-				std::cerr << "Fitter: All parameters are fixed." << std::endl;
+				std::cerr << "Minimiser: All parameters are fixed." << std::endl;
 				return false;
 			}
 
@@ -807,9 +808,30 @@ bool minimise_dynargs(std::size_t num_args, t_func&& func,
 				params.Fix(param_names[param_idx]);
 		}
 
+		// pre-minimise using simplex
+		ROOT::Minuit2::MnSimplex simplex(minfunc, params);
+		ROOT::Minuit2::FunctionMinimum mini_simplex = simplex();
+		bool simplex_minimum_valid = mini_simplex.IsValid()
+		    && mini_simplex.HasValidParameters()
+		    && mini_simplex.UserState().IsValid();
+		if(simplex_minimum_valid)
+		{
+			// set the fitted values if valid
+			for(std::size_t param_idx = 0; param_idx < param_names.size(); ++param_idx)
+			{
+				params.SetValue(param_names[param_idx],
+				    mini_simplex.UserState().Value(param_names[param_idx]));
+				params.SetError(param_names[param_idx],
+				    mini_simplex.UserState().Error(param_names[param_idx]));
+			}
+		}
+
+		// minimise using migrad
 		ROOT::Minuit2::MnMigrad migrad(minfunc, params, 2);
 		ROOT::Minuit2::FunctionMinimum mini = migrad();
-		bool minimum_valid = mini.IsValid() && mini.HasValidParameters() && mini.UserState().IsValid();
+		bool minimum_valid = mini.IsValid()
+		    && mini.HasValidParameters()
+		    && mini.UserState().IsValid();
 
 		for(std::size_t param_idx = 0; param_idx < param_names.size(); ++param_idx)
 		{
@@ -822,6 +844,14 @@ bool minimise_dynargs(std::size_t num_args, t_func&& func,
 		if(debug)
 			std::cerr << mini << std::endl;
 
+		if(simplex_minimum_valid && !minimum_valid)
+		{
+			std::cerr << "Minimiser: Pre-minimum valid, but not final one. Using pre-minimum."
+				<< std::endl;
+			mini = mini_simplex;
+			minimum_valid = simplex_minimum_valid;
+		}
+
 		return minimum_valid;
 	}
 	catch(const tl2::StopRequestException&)
@@ -830,7 +860,7 @@ bool minimise_dynargs(std::size_t num_args, t_func&& func,
 	}
 	catch(const std::exception& ex)
 	{
-		std::cerr << "Fitter: " << ex.what() << std::endl;
+		std::cerr << "Minimiser: " << ex.what() << std::endl;
 	}
 
 	return false;
@@ -853,7 +883,7 @@ bool minimise_expr(const std::string& func, const std::vector<std::string>& para
 		if(fixed && std::all_of(fixed->begin(), fixed->end(),
 			[](bool b) -> bool { return b; }))
 			{
-				std::cerr << "Fitter: All parameters are fixed." << std::endl;
+				std::cerr << "Minimiser: All parameters are fixed." << std::endl;
 				return false;
 			}
 
@@ -894,7 +924,7 @@ bool minimise_expr(const std::string& func, const std::vector<std::string>& para
 	}
 	catch(const std::exception& ex)
 	{
-		std::cerr << "Fitter: " << ex.what() << std::endl;
+		std::cerr << "Minimiser: " << ex.what() << std::endl;
 	}
 
 	return false;

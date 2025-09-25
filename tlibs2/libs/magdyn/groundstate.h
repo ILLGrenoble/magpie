@@ -126,7 +126,7 @@ t_real MAGDYN_INST::CalcGroundStateEnergy() const
 
 
 /**
- * minimise energy to found ground state
+ * minimise energy to find ground state
  */
 #if defined(__TLIBS2_USE_MINUIT__) && defined(__TLIBS2_MAGDYN_USE_MINUIT__)
 MAGDYN_TEMPL
@@ -203,8 +203,8 @@ bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_p
 		upper_lims.push_back(1. + m_eps);
 		upper_lims.push_back(1. + m_eps);
 
-		errs.push_back(0.1);
-		errs.push_back(0.1);
+		errs.push_back(0.25);
+		errs.push_back(0.25);
 	}
 
 	if(tl2::minimise_dynargs<t_real>(num_args, func,

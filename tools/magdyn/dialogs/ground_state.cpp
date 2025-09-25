@@ -97,7 +97,7 @@ GroundStateDlg::GroundStateDlg(QWidget *parent, QSettings *sett)
 	m_spinstab->setColumnWidth(COL_SPIN_U_FIXED, 50);
 	m_spinstab->setColumnWidth(COL_SPIN_V_FIXED, 50);
 
-	m_btnFromKernel = new QPushButton("Get Spins", this);
+	m_btnFromKernel = new QPushButton("Get Config.", this);
 	m_btnToKernel = new QPushButton("Set Spins", this);
 	m_btnMinimise = new QPushButton("Minimise", this);
 
@@ -381,7 +381,7 @@ void GroundStateDlg::SyncFromKernel(const t_magdyn *dyn,
 
 		QCheckBox* u_fixed = new QCheckBox(this);
 		QCheckBox* v_fixed = new QCheckBox(this);
-		u_fixed->setChecked(true);
+		u_fixed->setChecked(false);
 		v_fixed->setChecked(false);
 
 		m_spinstab->setItem(row, COL_SPIN_NAME, item_name);
