@@ -56,11 +56,11 @@
  */
 MAGDYN_TEMPL void MAGDYN_INST::CalcExternalField()
 {
-	bool use_field =
+	bool use_field_rot =
 		(!tl2::equals_0<t_real>(m_field.mag, m_eps) || m_field.align_spins)
 		&& m_field.dir.size() == 3;
 
-	if(use_field)
+	if(use_field_rot)
 	{
 		// rotate field to [001] direction
 		m_rot_field = tl2::convert<t_mat>(
@@ -228,7 +228,8 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 #endif
 		}
 
-		site.trafo_plane_conj_calc = tl2::conj(site.trafo_plane_calc);
+		if(!has_explicit_trafo)
+			site.trafo_plane_conj_calc = tl2::conj(site.trafo_plane_calc);
 
 		// multiply g factor
 		site.ge_trafo_z_calc = site.g_e * site.trafo_z_calc;
@@ -422,8 +423,8 @@ std::tuple<t_vec, t_vec> MAGDYN_INST::rot_to_trafo(const t_mat& R)
 MAGDYN_TEMPL
 std::tuple<t_vec, t_vec> MAGDYN_INST::spin_to_trafo(const t_vec_real& spin_dir)
 {
-	const t_mat_real _rot = tl2::rotation<t_mat_real, t_vec_real>(
-		spin_dir, m_zdir, &m_rotaxis, m_eps);
+	const t_mat_real _rot = tl2::trans(tl2::rotation<t_mat_real, t_vec_real>(
+		spin_dir, m_zdir, &m_rotaxis, m_eps));
 
 	const t_mat rot = tl2::convert<t_mat, t_mat_real>(_rot);
 	return rot_to_trafo(rot);

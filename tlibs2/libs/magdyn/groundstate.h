@@ -111,7 +111,14 @@ t_real MAGDYN_INST::CalcGroundStateEnergy() const
 
 	// external field per site
 	for(t_size i = 0; i < GetMagneticSitesCount(); ++i)
-		E += CalcFieldEnergy(i).real();
+	{
+		t_cplx E_field = CalcFieldEnergy(i);
+		E += E_field.real();
+#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+		std::cout << "Field energy for site " << i << ": "
+			<< E_field << " meV." << std::endl;
+#endif
+	}
 
 	return E;
 }
