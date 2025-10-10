@@ -55,6 +55,11 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 	std::string strBoost = BOOST_LIB_VERSION;
 	algo::replace_all(strBoost, "_", ".");
 
+	lapack_int major = -1, minor = -1, patch = -1;
+	::LAPACKE_ilaver(&major, &minor, &patch);
+	std::ostringstream ostrLapack;
+	ostrLapack << major << "." << minor << "." << patch;
+
 	auto labelTitle = new QLabel("Magpie -- Magnetic Dynamics Calculator", infopanel);
 	auto fontTitle = labelTitle->font();
 	fontTitle.setBold(true);
@@ -161,6 +166,10 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 	grid->addWidget(new QLabel(
 		QString("Boost Version: ") +
 		strBoost.c_str() + ".",
+		infopanel), y++,0, 1,1);
+	grid->addWidget(new QLabel(
+		QString("Lapack(e) Version: ") +
+		ostrLapack.str().c_str() + ".",
 		infopanel), y++,0, 1,1);
 
 	grid->addWidget(sep3, y++,0, 1,1);

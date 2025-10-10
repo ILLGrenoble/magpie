@@ -91,7 +91,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 
 	// equation (32) from (Toth 2015)
 	const t_mat energy_mat = tl2::herm(S.evec_mat) * S.H_comm * S.evec_mat;  // energies
-	t_mat E_sqrt = S.comm * energy_mat;          // abs. energies
+	t_mat E_sqrt = S.comm * energy_mat;        // abs. energies
 	for(t_size i = 0; i < E_sqrt.size1(); ++i)
 		E_sqrt(i, i) = std::sqrt(E_sqrt(i, i));  // sqrt. of abs. energies
 

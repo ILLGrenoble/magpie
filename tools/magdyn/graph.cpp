@@ -138,7 +138,7 @@ void GraphWithWeights::drawScatterPlot(
 	QPen pen = this->pen();
 	style.applyTo(paint, pen);
 
-	const bool has_weights = (data_start_idx >= 0 && m_weights.size()-data_start_idx >= num_points);
+	const bool has_weights = (data_start_idx >= 0 && m_weights.size() - data_start_idx >= num_points);
 	const qreal size_saved = style.size();
 
 	// iterate all data points
