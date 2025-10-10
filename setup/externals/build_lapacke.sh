@@ -38,9 +38,11 @@ fi
 
 
 #LAPACK_REMOTE=https://codeload.github.com/Reference-LAPACK/lapack/zip/refs/heads/master
-LAPACK_REMOTE=https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v3.12.0.zip
-LAPACK_LOCAL_ZIP=${LAPACK_REMOTE##*[/\\]}
-LAPACK_LOCAL=lapack-3.12.0
+#LAPACK_LOCAL=lapack-master
+
+LAPACK_VER=3.12.0
+LAPACK_REMOTE="https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v${LAPACK_VER}.zip"
+LAPACK_LOCAL="lapack-${LAPACK_VER}"
 
 
 rm -f "${LAPACK_LOCAL}"
@@ -53,6 +55,7 @@ fi
 
 
 rm -rf build_lapacke
+LAPACK_LOCAL_ZIP=${LAPACK_REMOTE##*[/\\]}
 unzip "${LAPACK_LOCAL_ZIP}"
 
 
