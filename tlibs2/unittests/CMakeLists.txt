@@ -34,7 +34,7 @@ enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH
 	"${PROJECT_SOURCE_DIR}"
-	"${PROJECT_SOURCE_DIR}/../../cmake")
+	"${PROJECT_SOURCE_DIR}/../../setup/cmake")
 
 
 message("Build type: ${CMAKE_BUILD_TYPE}")
@@ -56,6 +56,7 @@ add_definitions(-D__TLIBS2_MAGDYN_USE_MINUIT__)
 add_definitions(-DBOOST_SYSTEM_NO_DEPRECATED -DBOOST_STACKTRACE_USE_NOOP)
 find_package(Boost REQUIRED)
 add_definitions(${Boost_CXX_FLAGS})
+include_directories(SYSTEM "${Boost_INCLUDE_DIRS}" "${Boost_INCLUDE_DIRS}/..")
 
 message("Using Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}.")
 # -----------------------------------------------------------------------------
