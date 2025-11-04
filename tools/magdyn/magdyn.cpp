@@ -38,8 +38,6 @@
 #include <QtWidgets/QLabel>
 #include <QtGui/QDesktopServices>
 
-#include <iostream>
-
 
 
 MagDynDlg::MagDynDlg(QWidget* pParent) : QDialog{pParent},
@@ -75,9 +73,9 @@ MagDynDlg::MagDynDlg(QWidget* pParent) : QDialog{pParent},
 	ShowNotesDlg(true);
 
 	// create input panels
+	CreateSamplePanel();
 	CreateSitesPanel();
 	CreateExchangeTermsPanel();
-	CreateSamplePanel();
 	CreateSampleEnvPanel();
 	CreateVariablesPanel();
 
@@ -89,19 +87,7 @@ MagDynDlg::MagDynDlg(QWidget* pParent) : QDialog{pParent},
 	CreateHamiltonPanel();
 	CreateExportPanel();
 
-
-	// get space groups and symops
-	auto spacegroups = get_sgs<t_mat_real>();
-	m_SGops.clear();
-	m_SGops.reserve(spacegroups.size());
-	m_comboSG->clear();
-
-	for(auto [sgnum, descr, ops] : spacegroups)
-	{
-		m_comboSG->addItem(descr.c_str(), m_comboSG->count());
-		m_SGops.emplace_back(std::move(ops));
-	}
-
+	PopulateSpaceGroups();
 
 	InitSettings();
 

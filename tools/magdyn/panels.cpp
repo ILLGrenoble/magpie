@@ -614,6 +614,12 @@ void MagDynDlg::CreateSamplePanel()
 	m_comboSG = new QComboBox(m_samplepanel);
 	m_comboSG->setFocusPolicy(Qt::StrongFocus);
 
+	m_checkFilterSG = new QCheckBox("Filter Space Groups:", m_samplepanel);
+	m_checkFilterSG->setChecked(true);
+
+	m_editFilterSG = new QLineEdit(m_samplepanel);
+
+
 	// scattering plane
 	static const char* recipstr[] = { "h = ", "k = ", "l = " };
 	for(int i = 0; i < 6; ++i)
@@ -653,6 +659,8 @@ void MagDynDlg::CreateSamplePanel()
 	grid->addWidget(m_xtalangles[2], y++, 3, 1, 1);
 	grid->addWidget(new QLabel("Space Group:", m_samplepanel), y, 0, 1, 1);
 	grid->addWidget(m_comboSG, y++, 1, 1, 3);
+	grid->addWidget(m_checkFilterSG, y, 0, 1, 1);
+	grid->addWidget(m_editFilterSG, y++, 1, 1, 3);
 
 	// separator
 	QFrame *sep1 = new QFrame(m_sampleenviropanel);
@@ -715,6 +723,18 @@ void MagDynDlg::CreateSamplePanel()
 	connect(m_comboSG,
 		static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 		this, &MagDynDlg::CalcBZ);
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+	connect(m_checkFilterSG, &QCheckBox::stateChanged, [this](int checked)
+#else
+	connect(m_checkFilterSG, &QCheckBox::checkStateChanged, [this](Qt::CheckState checked)
+#endif
+	{
+		m_editFilterSG->setEnabled(int(checked) != 0);
+		PopulateSpaceGroups();
+	});
+
+	connect(m_editFilterSG, &QLineEdit::textChanged, [this]() { PopulateSpaceGroups(); });
 
 	for(int i = 0; i < 2*3; ++i)
 	{

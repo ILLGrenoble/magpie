@@ -42,6 +42,7 @@
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QTextEdit>
 #include <QtWidgets/QPlainTextEdit>
+#include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMenu>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -191,6 +192,8 @@ protected:
 	QDoubleSpinBox *m_scatteringplane[2*3]{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 	std::vector<std::vector<t_mat_real>> m_SGops{};
 	QComboBox *m_comboSG{};
+	QCheckBox *m_checkFilterSG{};
+	QLineEdit *m_editFilterSG{};
 	QPlainTextEdit *m_ffact{};             // magnetic form factor formula
 
 	// sample environment panel
@@ -281,6 +284,8 @@ protected:
 	void CreateDispersionPanel();
 	void CreateHamiltonPanel();
 	void CreateExportPanel();
+
+	void PopulateSpaceGroups();
 
 	// general table operations
 	void MoveTabItemUp(QTableWidget *pTab);

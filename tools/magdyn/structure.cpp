@@ -25,10 +25,68 @@
 
 #include "magdyn.h"
 
+#include "tlibs2/libs/str.h"
+
 #include <iostream>
 #include <boost/scope_exit.hpp>
 
 using t_numitem = tl2::NumericTableWidgetItem<t_real>;
+
+
+
+void MagDynDlg::PopulateSpaceGroups()
+{
+	BOOST_SCOPE_EXIT(this_)
+	{
+		this_->m_ignoreCalc = false;
+		if(this_->m_autocalc->isChecked())
+			this_->CalcAll();
+	} BOOST_SCOPE_EXIT_END
+	m_ignoreCalc = true;
+
+	// get currently selected space group index
+	std::optional<unsigned int> selected_index;
+	if(m_comboSG->count())
+		selected_index = m_comboSG->itemData(m_comboSG->currentIndex()).toInt();
+
+	// get space groups and symops
+	auto spacegroups = get_sgs<t_mat_real>();
+	m_SGops.clear();
+	m_SGops.reserve(spacegroups.size());
+	m_comboSG->clear();
+
+	std::string filter = m_editFilterSG->text().toStdString();
+	bool do_filter = m_checkFilterSG->isChecked() && filter.length();
+
+	unsigned int sg_idx = 0;
+	int combo_idx_to_select = -1;
+	for(auto [sgnum, descr, ops] : spacegroups)
+	{
+		// filter out non-wanted space groups
+		if(do_filter)
+		{
+			if(descr.find(filter) == std::string::npos &&
+				tl2::remove_char(descr, ' ').find(filter) == std::string::npos)
+			{
+				++sg_idx;
+				continue;
+			}
+		}
+
+		// keep last selection
+		if(selected_index && sg_idx == *selected_index)
+			combo_idx_to_select = m_comboSG->count();
+
+		// add new space group
+		m_comboSG->addItem(descr.c_str(), sg_idx);
+		m_SGops.emplace_back(std::move(ops));
+
+		++sg_idx;
+	}
+
+	if(combo_idx_to_select >= 0)
+		m_comboSG->setCurrentIndex(combo_idx_to_select);
+}
 
 
 
