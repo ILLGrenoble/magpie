@@ -307,8 +307,8 @@ void BZPlotDlg::ShowQVertices(bool show)
 		m_plot->GetRenderer()->SetObjectVisible(obj, show);
 	for(std::size_t obj : m_objsBragg)
 		m_plot->GetRenderer()->SetObjectVisible(obj, show);
-	for(std::size_t obj : m_objsLines)
-		m_plot->GetRenderer()->SetObjectVisible(obj, show);
+	//for(std::size_t obj : m_objsLines)
+	//	m_plot->GetRenderer()->SetObjectVisible(obj, show);
 
 	m_plot->update();
 }
