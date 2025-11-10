@@ -69,10 +69,13 @@ TableImportDlg::TableImportDlg(QWidget* parent, QSettings* sett)
 
 	QAction *acSWAtomSites = new QAction("Set Site Indices For SpinW's \"Atom\" Table",
 		menuSiteIndices);
-	QAction *acSWMagSites = new QAction("Set Site Indices For SpinW's \"Mag\" Table",
+	QAction *acSWMagSites = new QAction("Set Site Indices For SpinW's \"Mag\" Table (Having Only Real Components)",
+		menuSiteIndices);
+	QAction *acSWMagSitesImag = new QAction("Set Site Indices For SpinW's \"Mag\" Table (Having Imaginary Components)",
 		menuSiteIndices);
 	menuSiteIndices->addAction(acSWAtomSites);
 	menuSiteIndices->addAction(acSWMagSites);
+	menuSiteIndices->addAction(acSWMagSitesImag);
 
 	m_spinAtomName = new QSpinBox(this);
 	m_spinAtomX = new QSpinBox(this);
@@ -382,6 +385,22 @@ TableImportDlg::TableImportDlg(QWidget* parent, QSettings* sett)
 		m_spinAtomX->setValue(7);
 		m_spinAtomY->setValue(8);
 		m_spinAtomZ->setValue(9);
+		m_spinAtomSX->setValue(4);
+		m_spinAtomSY->setValue(5);
+		m_spinAtomSZ->setValue(6);
+		m_spinAtomSMag->setValue(3);
+
+		m_checkIndices1Based->setChecked(true);
+		m_checkUniteIncompleteTokens->setChecked(true);
+		m_checkIgnoreSymmetricCoupling->setChecked(false);
+		m_checkClearExisting->setChecked(true);
+	});
+	connect(acSWMagSitesImag, &QAction::triggered, [this]()
+	{
+		m_spinAtomName->setValue(1);
+		m_spinAtomX->setValue(10);
+		m_spinAtomY->setValue(11);
+		m_spinAtomZ->setValue(12);
 		m_spinAtomSX->setValue(4);
 		m_spinAtomSY->setValue(5);
 		m_spinAtomSZ->setValue(6);
