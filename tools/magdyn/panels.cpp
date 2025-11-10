@@ -724,7 +724,7 @@ void MagDynDlg::CreateSamplePanel()
 		static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 		this, &MagDynDlg::CalcBZ);
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION < QT_VERSION_CHECK(6, 7, 0)
 	connect(m_checkFilterSG, &QCheckBox::stateChanged, [this](int checked)
 #else
 	connect(m_checkFilterSG, &QCheckBox::checkStateChanged, [this](Qt::CheckState checked)
