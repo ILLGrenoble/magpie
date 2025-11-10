@@ -239,6 +239,33 @@ void MagDynDlg::ShowTopologyDlg(bool only_create)
 
 
 /**
+ * differentiation dialog
+ */
+void MagDynDlg::ShowDiffDlg(bool only_create)
+{
+	if(!m_diff_dlg)
+	{
+		m_diff_dlg = new DiffDlg(this, m_sett);
+		m_diff_dlg->setFont(this->font());
+
+		m_diff_dlg->SetKernel(&m_dyn);
+
+		// set Q position
+		auto [Q_start, Q_end] = GetDispersionQ();
+		m_diff_dlg->SetDispersionQ(Q_start, Q_end);
+	}
+
+	if(!only_create)
+	{
+		m_diff_dlg->show();
+		m_diff_dlg->raise();
+		m_diff_dlg->activateWindow();
+	}
+}
+
+
+
+/**
  * 3d dispersion dialog
  */
 void MagDynDlg::ShowDispersion3DDlg(bool only_create)

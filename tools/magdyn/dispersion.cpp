@@ -109,12 +109,13 @@ void MagDynDlg::DispersionQChanged(bool calc_dyn)
 		this->CalcDispersion();
 
 	t_vec_real Q_start, Q_end;
-	if(m_topo_dlg || m_disp3d_dlg || m_bzscene || m_bz_dlg)
+	if(m_topo_dlg || m_diff_dlg || m_disp3d_dlg || m_bzscene || m_bz_dlg)
 		std::tie(Q_start, Q_end) = GetDispersionQ();
 
 	if(m_topo_dlg)
 		m_topo_dlg->SetDispersionQ(Q_start, Q_end);
-
+	if(m_diff_dlg)
+		m_diff_dlg->SetDispersionQ(Q_start, Q_end);
 	if(m_disp3d_dlg)
 		m_disp3d_dlg->SetDispersionQ(Q_start, Q_end);
 

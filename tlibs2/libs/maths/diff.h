@@ -63,7 +63,7 @@ t_cont_out diff(const t_cont_in& xs, const t_cont_in& ys)
 	t_cont_out new_ys{};
 	new_ys.reserve(N);
 
-	for(std::size_t i = 0; i < N-1; ++i)
+	for(std::size_t i = 0; i < N - 1; ++i)
 	{
 		t_real diff_val = (ys[i+1]-ys[i]) / (xs[i+1]-xs[i]);
 		new_ys.push_back(diff_val);
@@ -196,9 +196,11 @@ cont_type convolute_discrete(const cont_type& f, const cont_type& g)
 	{
 		typename cont_type::value_type val = 0.;
 
-		for(std::size_t m=0; m<M; ++m)
-			if(n>=m && n-m<N)
+		for(std::size_t m = 0; m < M; ++m)
+		{
+			if(n >= m && n - m < N)
 				val += f[m] * g[n-m];
+		}
 
 		conv.push_back(val);
 	}

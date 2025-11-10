@@ -74,6 +74,7 @@
 #include "dialogs/struct_plot.h"
 #include "dialogs/ground_state.h"
 #include "dialogs/topology.h"
+#include "dialogs/diff.h"
 #include "dialogs/dispersion3d.h"
 #include "dialogs/trafos.h"
 #include "dialogs/pol.h"
@@ -249,6 +250,7 @@ protected:
 	StructPlotDlg *m_structplot_dlg{};     // magnetic structure plotter
 	GroundStateDlg *m_groundstate_dlg{};   // ground state minimiser
 	TopologyDlg *m_topo_dlg{};             // topological calculations
+	DiffDlg *m_diff_dlg{};                 // differentiation
 	Dispersion3DDlg *m_disp3d_dlg{};       // 3d dispersion calculations
 	BZPlotDlg *m_bz_dlg{};                 // 3d brillouin zone plotter
 
@@ -264,6 +266,7 @@ protected:
 	void ShowStructPlotDlg(bool only_create = false);
 	void ShowGroundStateDlg(bool only_create = false);
 	void ShowTopologyDlg(bool only_create = false);
+	void ShowDiffDlg(bool only_create = false);
 	void ShowDispersion3DDlg(bool only_create = false);
 	void ShowBZ3DDlg(bool only_create = false);
 	void ShowSettingsDlg();
