@@ -171,7 +171,7 @@ QWidget* DiffDlg::CreateGroupVelocityPanel()
 	m_plot_gv = new QCustomPlot(panelGroupVelocity);
 	m_plot_gv->setFont(font());
 	m_plot_gv->xAxis->setLabel("Momentum Transfer Q (rlu)");
-	m_plot_gv->yAxis->setLabel("Group Velocity v (m/s)");
+	m_plot_gv->yAxis->setLabel("Group Velocity v (meV/rlu)");
 	m_plot_gv->setInteraction(QCP::iRangeDrag, true);
 	m_plot_gv->setInteraction(QCP::iRangeZoom, true);
 	m_plot_gv->setSelectionRectMode(QCP::srmZoom);
@@ -692,22 +692,27 @@ void DiffDlg::CalculateGroupVelocity()
 	{
 		auto task = [this, &mtx, &dyn, &Q_start, &Q_end, Q_idx, Q_count, perm]()
 		{
-			const t_vec_real Q = Q_count > 1
+			const t_vec_real Q1 = Q_count > 1
 				? tl2::lerp(Q_start, Q_end, t_real(Q_idx) / t_real(Q_count - 1))
 				: Q_start;
+			const t_vec_real Q2 = Q_count > 1
+				? tl2::lerp(Q_start, Q_end, t_real(Q_idx + 1) / t_real(Q_count - 1))
+				: Q_end;
 
 			// calculate group velocities per band
 			GroupVelocityData data_gv;
-			data_gv.momentum = Q;
+			data_gv.momentum = Q1;
 			typename t_magdyn::SofQE S;
-			// TODO:
-			//std::tie(data_gv.velocity, S) = dyn.CalcGroupVelocity(Q, g_delta_diff, perm);
+			std::tie(data_gv.velocity, S) = dyn.CalcGroupVelocities(Q1, Q2 - Q1, perm);
 			t_size num_bands = data_gv.velocity.size();
 			data_gv.energies.reserve(num_bands);
 			data_gv.weights.reserve(num_bands);
 
 			// calculate energies per band
-			assert(S.E_and_S.size() == num_bands);
+			//assert(S.E_and_S.size() == num_bands);
+			if(S.E_and_S.size() != num_bands)
+				return;
+
 			for(t_size band = 0; band < num_bands; ++band)
 			{
 				data_gv.energies.push_back(S.E_and_S[band].E);

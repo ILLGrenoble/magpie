@@ -64,6 +64,7 @@
 #include "magdyn/polarisation.h"
 #include "magdyn/dispersion.h"
 #include "magdyn/topology.h"
+#include "magdyn/diff.h"
 
 
 #endif
