@@ -42,7 +42,7 @@ namespace tl2_mag {
 
 
 /**
- * get the berry curvature for each magnon band
+ * differentiate the dispersion branches (group velocities)
  */
 MAGDYN_TEMPL
 std::tuple<std::vector<t_real>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcGroupVelocities(
@@ -61,16 +61,17 @@ std::tuple<std::vector<t_real>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcGroupVeloci
 	}
 
 	const t_size num_bands = std::min(S1.E_and_S.size(), S2.E_and_S.size());
+	const t_real dQ = tl2::norm<t_vec_real>(deltaQ);
 
-	std::vector<t_real> vs;
-	vs.reserve(num_bands);
+	std::vector<t_real> diffs;
+	diffs.reserve(num_bands);
 	for(t_size idx = 0; idx < num_bands; ++idx)
 	{
-		t_real v = (S2.E_and_S[idx].E - S1.E_and_S[idx].E) / tl2::norm<t_vec_real>(deltaQ);
-		vs.push_back(v);
+		t_real v = (S2.E_and_S[idx].E - S1.E_and_S[idx].E) / dQ;
+		diffs.push_back(v);
 	}
 
-	return std::make_tuple(vs, S1);
+	return std::make_tuple(diffs, S1);
 }
 
 

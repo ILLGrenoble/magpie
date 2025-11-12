@@ -61,9 +61,6 @@ DiffDlg::DiffDlg(QWidget *parent, QSettings *sett)
 	setWindowTitle("Differentiation");
 	setSizeGripEnabled(true);
 
-	// tab widget
-	m_tabs = new QTabWidget(this);
-
 	// status bar
 	m_status = new QLabel(this);
 	m_status->setFrameShape(QFrame::Panel);
@@ -80,12 +77,9 @@ DiffDlg::DiffDlg(QWidget *parent, QSettings *sett)
 	QGridLayout *maingrid = new QGridLayout(this);
 	maingrid->setSpacing(4);
 	maingrid->setContentsMargins(8, 8, 8, 8);
-	maingrid->addWidget(m_tabs, 0, 0, 1, 4);
+	maingrid->addWidget(CreateGroupVelocityPanel(), 0, 0, 1, 4);
 	maingrid->addWidget(m_status, 1, 0, 1, 3);
 	maingrid->addWidget(btnbox, 1, 3, 1, 1);
-
-	// tab panels
-	m_tabs->addTab(CreateGroupVelocityPanel(), "Group Velocity");
 
 	// connections
 	connect(btnbox, &QDialogButtonBox::accepted, this, &DiffDlg::accept);
@@ -135,7 +129,7 @@ void DiffDlg::accept()
 	if(m_sett)
 	{
 		m_sett->setValue("diff/geo", saveGeometry());
-		m_sett->setValue("diff/splitter", m_split_plot->saveState());
+		m_sett->setValue("diff/splitter", m_split_plot_gv->saveState());
 	}
 
 	QDialog::accept();
@@ -171,38 +165,38 @@ QWidget* DiffDlg::CreateGroupVelocityPanel()
 	m_plot_gv = new QCustomPlot(panelGroupVelocity);
 	m_plot_gv->setFont(font());
 	m_plot_gv->xAxis->setLabel("Momentum Transfer Q (rlu)");
-	m_plot_gv->yAxis->setLabel("Group Velocity v (meV/rlu)");
+	m_plot_gv->yAxis->setLabel("Group Velocity v = dE / dq (meV/rlu)");
 	m_plot_gv->setInteraction(QCP::iRangeDrag, true);
 	m_plot_gv->setInteraction(QCP::iRangeZoom, true);
 	m_plot_gv->setSelectionRectMode(QCP::srmZoom);
 	m_plot_gv->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
 	// magnon band table
-	m_table_bands = new QTableWidget(panelGroupVelocity);
-	m_table_bands->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
-	m_table_bands->setShowGrid(true);
-	m_table_bands->setSortingEnabled(false);
-	m_table_bands->setSelectionBehavior(QTableWidget::SelectRows);
-	m_table_bands->setSelectionMode(QTableWidget::SingleSelection);
-	m_table_bands->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing() + 4);
-	m_table_bands->verticalHeader()->setVisible(false);
-	m_table_bands->setColumnCount(NUM_COLS_GV);
-	m_table_bands->setHorizontalHeaderItem(COL_GV_BAND, new QTableWidgetItem{"Band"});
-	m_table_bands->setHorizontalHeaderItem(COL_GV_ACTIVE, new QTableWidgetItem{"Act."});
-	m_table_bands->setColumnWidth(COL_GV_BAND, 40);
-	m_table_bands->setColumnWidth(COL_GV_ACTIVE, 25);
-	m_table_bands->resizeColumnsToContents();
+	m_table_bands_gv = new QTableWidget(panelGroupVelocity);
+	m_table_bands_gv->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
+	m_table_bands_gv->setShowGrid(true);
+	m_table_bands_gv->setSortingEnabled(false);
+	m_table_bands_gv->setSelectionBehavior(QTableWidget::SelectRows);
+	m_table_bands_gv->setSelectionMode(QTableWidget::SingleSelection);
+	m_table_bands_gv->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing() + 4);
+	m_table_bands_gv->verticalHeader()->setVisible(false);
+	m_table_bands_gv->setColumnCount(NUM_COLS_GV);
+	m_table_bands_gv->setHorizontalHeaderItem(COL_GV_BAND, new QTableWidgetItem{"Band"});
+	m_table_bands_gv->setHorizontalHeaderItem(COL_GV_ACTIVE, new QTableWidgetItem{"Act."});
+	m_table_bands_gv->setColumnWidth(COL_GV_BAND, 40);
+	m_table_bands_gv->setColumnWidth(COL_GV_ACTIVE, 25);
+	m_table_bands_gv->resizeColumnsToContents();
 
 	// splitter for plot and magnon band list
-	m_split_plot = new QSplitter(panelGroupVelocity);
-	m_split_plot->setOrientation(Qt::Horizontal);
-	m_split_plot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
-	m_split_plot->addWidget(m_plot_gv);
-	m_split_plot->addWidget(m_table_bands);
-	m_split_plot->setCollapsible(0, false);
-	m_split_plot->setCollapsible(1, true);
-	m_split_plot->setStretchFactor(m_split_plot->indexOf(m_plot_gv), 24);
-	m_split_plot->setStretchFactor(m_split_plot->indexOf(m_table_bands), 1);
+	m_split_plot_gv = new QSplitter(panelGroupVelocity);
+	m_split_plot_gv->setOrientation(Qt::Horizontal);
+	m_split_plot_gv->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
+	m_split_plot_gv->addWidget(m_plot_gv);
+	m_split_plot_gv->addWidget(m_table_bands_gv);
+	m_split_plot_gv->setCollapsible(0, false);
+	m_split_plot_gv->setCollapsible(1, true);
+	m_split_plot_gv->setStretchFactor(m_split_plot_gv->indexOf(m_plot_gv), 24);
+	m_split_plot_gv->setStretchFactor(m_split_plot_gv->indexOf(m_table_bands_gv), 1);
 
 	// context menu for plotter
 	m_menuPlot_gv = new QMenu("Plotter", panelGroupVelocity);
@@ -213,16 +207,24 @@ QWidget* DiffDlg::CreateGroupVelocityPanel()
 	acSaveFigure->setIcon(QIcon::fromTheme("image-x-generic"));
 	acSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
 
-	m_E_positive = new QAction("Ignore Magnon Annihilation", m_menuPlot_gv);
-	m_E_positive->setCheckable(true);
-	m_E_positive->setChecked(false);
+	m_E_positive_gv = new QAction("Ignore Magnon Annihilation", m_menuPlot_gv);
+	m_E_positive_gv->setCheckable(true);
+	m_E_positive_gv->setChecked(false);
 
 	m_menuPlot_gv->addAction(acRescalePlot);
 	m_menuPlot_gv->addSeparator();
 	m_menuPlot_gv->addAction(acSaveFigure);
 	m_menuPlot_gv->addAction(acSaveData);
 	m_menuPlot_gv->addSeparator();
-	m_menuPlot_gv->addAction(m_E_positive);
+	m_menuPlot_gv->addAction(m_E_positive_gv);
+
+	// differentiation order
+	m_diff = new QSpinBox(panelGroupVelocity);
+	m_diff->setMinimum(1);
+	m_diff->setMaximum(9);
+	m_diff->setValue(1);
+	m_diff->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+	m_diff->setToolTip("Differentiation order, d^n(E)/dq^n.");
 
 	// start and stop coordinates
 	m_Q_start_gv[0] = new QDoubleSpinBox(panelGroupVelocity);
@@ -312,7 +314,9 @@ QWidget* DiffDlg::CreateGroupVelocityPanel()
 	grid->setContentsMargins(6, 6, 6, 6);
 
 	int y = 0;
-	grid->addWidget(m_split_plot, y++, 0, 1, 4);
+	grid->addWidget(m_split_plot_gv, y++, 0, 1, 4);
+	grid->addWidget(new QLabel("Differentiation Order:", panelGroupVelocity), y, 0, 1, 1);
+	grid->addWidget(m_diff, y++, 1, 1, 1);
 	grid->addWidget(new QLabel("Start Q (rlu):", panelGroupVelocity), y, 0, 1, 1);
 	grid->addWidget(m_Q_start_gv[0], y, 1, 1, 1);
 	grid->addWidget(m_Q_start_gv[1], y, 2, 1, 1);
@@ -340,7 +344,7 @@ QWidget* DiffDlg::CreateGroupVelocityPanel()
 			resize(640, 640);
 
 		if(m_sett->contains("diff/splitter"))
-			m_split_plot->restoreState(m_sett->value("diff/splitter").toByteArray());
+			m_split_plot_gv->restoreState(m_sett->value("diff/splitter").toByteArray());
 	}
 
 	// connections
@@ -364,12 +368,14 @@ QWidget* DiffDlg::CreateGroupVelocityPanel()
 	});
 
 	// replotting
-	connect(m_E_positive, &QAction::toggled, [this]() { PlotGroupVelocity(); });
+	connect(m_E_positive_gv, &QAction::toggled, [this]() { PlotGroupVelocity(); });
 	connect(m_v_filter_enable_gv, &QCheckBox::toggled, [this]() { PlotGroupVelocity(); });
 	connect(m_S_filter_enable_gv, &QCheckBox::toggled, [this]() { PlotGroupVelocity(); });
 	connect(m_v_filter_gv, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 		[this]() { PlotGroupVelocity(); });
 	connect(m_S_filter_gv, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		[this]() { PlotGroupVelocity(); });
+	connect(m_diff, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
 		[this]() { PlotGroupVelocity(); });
 
 	m_v_filter_gv->setEnabled(m_v_filter_enable_gv->isChecked());
@@ -386,8 +392,8 @@ QWidget* DiffDlg::CreateGroupVelocityPanel()
  */
 void DiffDlg::ClearGroupVelocityBands()
 {
-	m_table_bands->clearContents();
-	m_table_bands->setRowCount(0);
+	m_table_bands_gv->clearContents();
+	m_table_bands_gv->setRowCount(0);
 }
 
 
@@ -397,11 +403,11 @@ void DiffDlg::ClearGroupVelocityBands()
  */
 void DiffDlg::AddGroupVelocityBand(const std::string& name, const QColor& colour, bool enabled)
 {
-	if(!m_table_bands)
+	if(!m_table_bands_gv)
 		return;
 
-	int row = m_table_bands->rowCount();
-	m_table_bands->insertRow(row);
+	int row = m_table_bands_gv->rowCount();
+	m_table_bands_gv->insertRow(row);
 
 	QTableWidgetItem *item = new QTableWidgetItem{name.c_str()};
 	item->setFlags(item->flags() & ~Qt::ItemIsEditable);
@@ -416,12 +422,12 @@ void DiffDlg::AddGroupVelocityBand(const std::string& name, const QColor& colour
 	fg.setStyle(Qt::SolidPattern);
 	item->setForeground(fg);
 
-	QCheckBox *checkBand = new QCheckBox(m_table_bands);
+	QCheckBox *checkBand = new QCheckBox(m_table_bands_gv);
 	checkBand->setChecked(enabled);
 	connect(checkBand, &QCheckBox::toggled, [this]() { PlotGroupVelocity(false); });
 
-	m_table_bands->setItem(row, COL_GV_BAND, item);
-	m_table_bands->setCellWidget(row, COL_GV_ACTIVE, checkBand);
+	m_table_bands_gv->setItem(row, COL_GV_BAND, item);
+	m_table_bands_gv->setCellWidget(row, COL_GV_ACTIVE, checkBand);
 }
 
 
@@ -431,10 +437,10 @@ void DiffDlg::AddGroupVelocityBand(const std::string& name, const QColor& colour
  */
 bool DiffDlg::IsGroupVelocityBandEnabled(t_size idx) const
 {
-	if(!m_table_bands || int(idx) >= m_table_bands->rowCount())
+	if(!m_table_bands_gv || int(idx) >= m_table_bands_gv->rowCount())
 		return true;
 
-	QCheckBox* box = reinterpret_cast<QCheckBox*>(m_table_bands->cellWidget(int(idx), COL_GV_ACTIVE));
+	QCheckBox* box = reinterpret_cast<QCheckBox*>(m_table_bands_gv->cellWidget(int(idx), COL_GV_ACTIVE));
 	if(!box)
 		return true;
 
@@ -455,13 +461,19 @@ void DiffDlg::PlotGroupVelocity(bool clear_settings)
 	std::vector<bool> enabled_bands;
 	if(!clear_settings)
 	{
-		enabled_bands.reserve(m_table_bands->rowCount());
-		for(int row = 0; row < m_table_bands->rowCount(); ++row)
+		enabled_bands.reserve(m_table_bands_gv->rowCount());
+		for(int row = 0; row < m_table_bands_gv->rowCount(); ++row)
 			enabled_bands.push_back(IsGroupVelocityBandEnabled(t_size(row)));
 	}
 
 	ClearGroupVelocityBands();
 	ClearGroupVelocityPlot(false);
+
+	int diff_order = m_diff->value();
+	if(diff_order == 1)
+		m_plot_gv->yAxis->setLabel("Group Velocity v = dE / dq (meV/rlu)");
+	else
+		m_plot_gv->yAxis->setLabel(QString("d^%1E / dq^%1").arg(diff_order));
 
 	if(m_data_gv.size() == 0)
 	{
@@ -478,10 +490,10 @@ void DiffDlg::PlotGroupVelocity(bool clear_settings)
 	if(!m_S_filter_enable_gv->isChecked())
 		min_S = -1.;  // disable S(Q, E) filter
 
-	bool only_creation = m_E_positive->isChecked();
+	bool only_creation = m_E_positive_gv->isChecked();
 
 	t_size num_Q = m_data_gv.size();
-	t_size num_bands = m_data_gv[0].velocity.size();
+	t_size num_bands = m_data_gv[0].velocities.size();
 
 	// filtered momentum transfer and group velocity per band
 	std::vector<QVector<qreal>> Qs_data_gv{num_bands};
@@ -493,7 +505,7 @@ void DiffDlg::PlotGroupVelocity(bool clear_settings)
 
 		for(t_size band = 0; band < num_bands; ++band)
 		{
-			const t_real& v = m_data_gv[Q_idx].velocity[band];
+			const t_real& v = m_data_gv[Q_idx].velocities[band];
 
 			// filter numerical artefacts in v
 			if(max_v >= 0. && std::abs(v) > max_v)
@@ -510,6 +522,14 @@ void DiffDlg::PlotGroupVelocity(bool clear_settings)
 			Qs_data_gv[band].push_back(Q[m_Q_idx_gv]);
 			vs_data_gv[band].push_back(v);
 		}
+	}
+
+	// calculate higher-order differentials if requested
+	for(int order = 1; order < diff_order; ++order)
+	{
+		// differentiate all bands
+		for(t_size band = 0; band < num_bands; ++band)
+			vs_data_gv[band] = tl2::diff<QVector<qreal>>(Qs_data_gv[band], vs_data_gv[band]);
 	}
 
 	// sort filtered data by Q
@@ -703,8 +723,8 @@ void DiffDlg::CalculateGroupVelocity()
 			GroupVelocityData data_gv;
 			data_gv.momentum = Q1;
 			typename t_magdyn::SofQE S;
-			std::tie(data_gv.velocity, S) = dyn.CalcGroupVelocities(Q1, Q2 - Q1, perm);
-			t_size num_bands = data_gv.velocity.size();
+			std::tie(data_gv.velocities, S) = dyn.CalcGroupVelocities(Q1, Q2 - Q1, perm);
+			t_size num_bands = data_gv.velocities.size();
 			data_gv.energies.reserve(num_bands);
 			data_gv.weights.reserve(num_bands);
 
@@ -899,7 +919,7 @@ void DiffDlg::SaveGroupVelocityData()
 		return;
 	}
 
-	t_size num_bands = m_data_gv[0].velocity.size();
+	t_size num_bands = m_data_gv[0].velocities.size();
 
 	ofstr.precision(g_prec);
 	int field_len = g_prec * 2.5;
@@ -942,12 +962,12 @@ void DiffDlg::SaveGroupVelocityData()
 		ofstr << std::setw(field_len) << std::left << data.momentum[1] << " ";
 		ofstr << std::setw(field_len) << std::left << data.momentum[2] << " ";
 
-		assert(num_bands == data.velocity.size());
+		assert(num_bands == data.velocities.size());
 		for(t_size band = 0; band < num_bands; ++band)
 		{
 			ofstr << std::setw(field_len) << std::left << data.energies[band] << " ";
 			ofstr << std::setw(field_len) << std::left << data.weights[band] << " ";
-			ofstr << std::setw(field_len) << std::left << data.velocity[band] << " ";
+			ofstr << std::setw(field_len) << std::left << data.velocities[band] << " ";
 		}
 
 		ofstr << "\n";

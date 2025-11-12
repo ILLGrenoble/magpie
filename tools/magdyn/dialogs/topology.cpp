@@ -135,7 +135,7 @@ void TopologyDlg::accept()
 	if(m_sett)
 	{
 		m_sett->setValue("topology/geo", saveGeometry());
-		m_sett->setValue("topology/splitter", m_split_plot->saveState());
+		m_sett->setValue("topology/splitter", m_split_plot_bc->saveState());
 	}
 
 	QDialog::accept();
@@ -178,31 +178,31 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	m_plot_bc->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
 	// magnon band table
-	m_table_bands = new QTableWidget(panelBerryCurvature);
-	m_table_bands->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
-	m_table_bands->setShowGrid(true);
-	m_table_bands->setSortingEnabled(false);
-	m_table_bands->setSelectionBehavior(QTableWidget::SelectRows);
-	m_table_bands->setSelectionMode(QTableWidget::SingleSelection);
-	m_table_bands->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing() + 4);
-	m_table_bands->verticalHeader()->setVisible(false);
-	m_table_bands->setColumnCount(NUM_COLS_BC);
-	m_table_bands->setHorizontalHeaderItem(COL_BC_BAND, new QTableWidgetItem{"Band"});
-	m_table_bands->setHorizontalHeaderItem(COL_BC_ACTIVE, new QTableWidgetItem{"Act."});
-	m_table_bands->setColumnWidth(COL_BC_BAND, 40);
-	m_table_bands->setColumnWidth(COL_BC_ACTIVE, 25);
-	m_table_bands->resizeColumnsToContents();
+	m_table_bands_bc = new QTableWidget(panelBerryCurvature);
+	m_table_bands_bc->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
+	m_table_bands_bc->setShowGrid(true);
+	m_table_bands_bc->setSortingEnabled(false);
+	m_table_bands_bc->setSelectionBehavior(QTableWidget::SelectRows);
+	m_table_bands_bc->setSelectionMode(QTableWidget::SingleSelection);
+	m_table_bands_bc->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing() + 4);
+	m_table_bands_bc->verticalHeader()->setVisible(false);
+	m_table_bands_bc->setColumnCount(NUM_COLS_BC);
+	m_table_bands_bc->setHorizontalHeaderItem(COL_BC_BAND, new QTableWidgetItem{"Band"});
+	m_table_bands_bc->setHorizontalHeaderItem(COL_BC_ACTIVE, new QTableWidgetItem{"Act."});
+	m_table_bands_bc->setColumnWidth(COL_BC_BAND, 40);
+	m_table_bands_bc->setColumnWidth(COL_BC_ACTIVE, 25);
+	m_table_bands_bc->resizeColumnsToContents();
 
 	// splitter for plot and magnon band list
-	m_split_plot = new QSplitter(panelBerryCurvature);
-	m_split_plot->setOrientation(Qt::Horizontal);
-	m_split_plot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
-	m_split_plot->addWidget(m_plot_bc);
-	m_split_plot->addWidget(m_table_bands);
-	m_split_plot->setCollapsible(0, false);
-	m_split_plot->setCollapsible(1, true);
-	m_split_plot->setStretchFactor(m_split_plot->indexOf(m_plot_bc), 24);
-	m_split_plot->setStretchFactor(m_split_plot->indexOf(m_table_bands), 1);
+	m_split_plot_bc = new QSplitter(panelBerryCurvature);
+	m_split_plot_bc->setOrientation(Qt::Horizontal);
+	m_split_plot_bc->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
+	m_split_plot_bc->addWidget(m_plot_bc);
+	m_split_plot_bc->addWidget(m_table_bands_bc);
+	m_split_plot_bc->setCollapsible(0, false);
+	m_split_plot_bc->setCollapsible(1, true);
+	m_split_plot_bc->setStretchFactor(m_split_plot_bc->indexOf(m_plot_bc), 24);
+	m_split_plot_bc->setStretchFactor(m_split_plot_bc->indexOf(m_table_bands_bc), 1);
 
 	// context menu for plotter
 	m_menuPlot_bc = new QMenu("Plotter", panelBerryCurvature);
@@ -335,7 +335,7 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	grid->setContentsMargins(6, 6, 6, 6);
 
 	int y = 0;
-	grid->addWidget(m_split_plot, y++, 0, 1, 4);
+	grid->addWidget(m_split_plot_bc, y++, 0, 1, 4);
 	grid->addWidget(new QLabel("Start Q (rlu):", panelBerryCurvature), y, 0, 1, 1);
 	grid->addWidget(m_Q_start_bc[0], y, 1, 1, 1);
 	grid->addWidget(m_Q_start_bc[1], y, 2, 1, 1);
@@ -366,7 +366,7 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 			resize(640, 640);
 
 		if(m_sett->contains("topology/splitter"))
-			m_split_plot->restoreState(m_sett->value("topology/splitter").toByteArray());
+			m_split_plot_bc->restoreState(m_sett->value("topology/splitter").toByteArray());
 	}
 
 	// connections
@@ -413,8 +413,8 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
  */
 void TopologyDlg::ClearBerryCurvatureBands()
 {
-	m_table_bands->clearContents();
-	m_table_bands->setRowCount(0);
+	m_table_bands_bc->clearContents();
+	m_table_bands_bc->setRowCount(0);
 }
 
 
@@ -424,11 +424,11 @@ void TopologyDlg::ClearBerryCurvatureBands()
  */
 void TopologyDlg::AddBerryCurvatureBand(const std::string& name, const QColor& colour, bool enabled)
 {
-	if(!m_table_bands)
+	if(!m_table_bands_bc)
 		return;
 
-	int row = m_table_bands->rowCount();
-	m_table_bands->insertRow(row);
+	int row = m_table_bands_bc->rowCount();
+	m_table_bands_bc->insertRow(row);
 
 	QTableWidgetItem *item = new QTableWidgetItem{name.c_str()};
 	item->setFlags(item->flags() & ~Qt::ItemIsEditable);
@@ -443,12 +443,12 @@ void TopologyDlg::AddBerryCurvatureBand(const std::string& name, const QColor& c
 	fg.setStyle(Qt::SolidPattern);
 	item->setForeground(fg);
 
-	QCheckBox *checkBand = new QCheckBox(m_table_bands);
+	QCheckBox *checkBand = new QCheckBox(m_table_bands_bc);
 	checkBand->setChecked(enabled);
 	connect(checkBand, &QCheckBox::toggled, [this]() { PlotBerryCurvature(false); });
 
-	m_table_bands->setItem(row, COL_BC_BAND, item);
-	m_table_bands->setCellWidget(row, COL_BC_ACTIVE, checkBand);
+	m_table_bands_bc->setItem(row, COL_BC_BAND, item);
+	m_table_bands_bc->setCellWidget(row, COL_BC_ACTIVE, checkBand);
 }
 
 
@@ -458,10 +458,10 @@ void TopologyDlg::AddBerryCurvatureBand(const std::string& name, const QColor& c
  */
 bool TopologyDlg::IsBerryCurvatureBandEnabled(t_size idx) const
 {
-	if(!m_table_bands || int(idx) >= m_table_bands->rowCount())
+	if(!m_table_bands_bc || int(idx) >= m_table_bands_bc->rowCount())
 		return true;
 
-	QCheckBox* box = reinterpret_cast<QCheckBox*>(m_table_bands->cellWidget(int(idx), COL_BC_ACTIVE));
+	QCheckBox* box = reinterpret_cast<QCheckBox*>(m_table_bands_bc->cellWidget(int(idx), COL_BC_ACTIVE));
 	if(!box)
 		return true;
 
@@ -482,8 +482,8 @@ void TopologyDlg::PlotBerryCurvature(bool clear_settings)
 	std::vector<bool> enabled_bands;
 	if(!clear_settings)
 	{
-		enabled_bands.reserve(m_table_bands->rowCount());
-		for(int row = 0; row < m_table_bands->rowCount(); ++row)
+		enabled_bands.reserve(m_table_bands_bc->rowCount());
+		for(int row = 0; row < m_table_bands_bc->rowCount(); ++row)
 			enabled_bands.push_back(IsBerryCurvatureBandEnabled(t_size(row)));
 	}
 

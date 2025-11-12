@@ -27,7 +27,6 @@
 #define __MAG_DYN_DIFF_DLG_H__
 
 #include <QtCore/QSettings>
-#include <QtWidgets/QTabWidget>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QSplitter>
@@ -54,9 +53,9 @@ struct GroupVelocityData
 {
 	t_vec_real momentum{};
 
-	std::vector<t_real> energies{};    // E
-	std::vector<t_real> weights{};     // S_perp
-	std::vector<t_real> velocity{};    // dE/dq
+	std::vector<t_real> energies{};   // E
+	std::vector<t_real> weights{};    // S_perp
+	std::vector<t_real> velocities{}; // group velocities, dE/dq
 };
 
 
@@ -83,8 +82,9 @@ protected:
 
 	void ShowError(const char* msg);
 
+
 	// ------------------------------------------------------------------------
-	// group velocity tab
+	// group velocity panel
 	QWidget* CreateGroupVelocityPanel();
 
 	// plot functions
@@ -115,13 +115,13 @@ private:
 	const t_magdyn *m_dyn{};            // main calculation kernel
 	t_vec_real m_Qstart{}, m_Qend{};    // Qs from main window
 
-	QTabWidget *m_tabs{};               // tabs
 	QSettings *m_sett{};                // program settings
 	QLabel *m_status{};                 // status bar
 	// ------------------------------------------------------------------------
 
+
 	// ------------------------------------------------------------------------
-	// group velocity tab
+	// group velocity panel
 	std::vector<GroupVelocityData> m_data_gv{};  // all (non-filtered) groupvelocity data
 
 	QCustomPlot *m_plot_gv{};           // group velocity plotter
@@ -129,8 +129,10 @@ private:
 	t_size m_Q_idx_gv{};                // index of dominant Q component
 	t_real m_Q_min_gv{}, m_Q_max_gv{};  // range of dominant Q component
 
-	QSplitter *m_split_plot{};
-	QTableWidget *m_table_bands{};      // table listing the magnon bands
+	QSplitter *m_split_plot_gv{};
+	QTableWidget *m_table_bands_gv{};   // table listing the magnon bands
+
+	QSpinBox *m_diff{};                 // differentiation order
 
 	QDoubleSpinBox *m_Q_start_gv[3]{};  // Q start coordinate
 	QDoubleSpinBox *m_Q_end_gv[3]{};    // Q end coordinate
@@ -142,7 +144,7 @@ private:
 	QCheckBox *m_S_filter_enable_gv{};  // switch to enable minimum S(Q,E) value
 	QDoubleSpinBox *m_S_filter_gv{};    // minimum S(Q,E) value
 
-	QAction *m_E_positive{};            // ignore magnon annihilation
+	QAction *m_E_positive_gv{};         // ignore magnon annihilation
 
 	QPushButton *m_btnStartStop_gv{};   // start/stop calculation
 	bool m_calcEnabled_gv{};            // enable calculations

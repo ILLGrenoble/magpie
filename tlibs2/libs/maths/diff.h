@@ -63,14 +63,17 @@ t_cont_out diff(const t_cont_in& xs, const t_cont_in& ys)
 	t_cont_out new_ys{};
 	new_ys.reserve(N);
 
+	if(N == 0)
+		return new_ys;
+
 	for(std::size_t i = 0; i < N - 1; ++i)
 	{
-		t_real diff_val = (ys[i+1]-ys[i]) / (xs[i+1]-xs[i]);
+		t_real diff_val = (ys[i + 1] - ys[i]) / (xs[i + 1] - xs[i]);
 		new_ys.push_back(diff_val);
 	}
 
 	// repeat last value
-	new_ys[N-1] = new_ys[N-2];
+	new_ys.push_back(new_ys[N - 2]);
 	return new_ys;
 }
 
@@ -80,8 +83,7 @@ t_cont_out diff(const t_cont_in& xs, const t_cont_in& ys)
  * @see https://en.wikipedia.org/wiki/Trapezoidal_rule
  */
 template<class R=double, class A=double>
-R numint_trap(const std::function<R(A)>& fkt,
-	A x0, A x1)
+R numint_trap(const std::function<R(A)>& fkt, A x0, A x1)
 {
 	return R(0.5)*R(x1-x0) * (fkt(x0) + fkt(x1));
 }
@@ -92,8 +94,7 @@ R numint_trap(const std::function<R(A)>& fkt,
  * @see https://en.wikipedia.org/wiki/Trapezoidal_rule
  */
 template<class R=double, class A=double>
-R numint_trapN(const std::function<R(A)>& fkt,
-	A x0, A x1, std::size_t N)
+R numint_trapN(const std::function<R(A)>& fkt, A x0, A x1, std::size_t N)
 {
 	const A xstep = A(x1-x0)/A(N);
 
@@ -111,8 +112,7 @@ R numint_trapN(const std::function<R(A)>& fkt,
  * @see https://en.wikipedia.org/wiki/Rectangle_method
  */
 template<class R=double, class A=double>
-R numint_rect(const std::function<R(A)>& fkt,
-	A x0, A x1, std::size_t N)
+R numint_rect(const std::function<R(A)>& fkt, A x0, A x1, std::size_t N)
 {
 	const A xstep = (x1-x0)/A(N);
 
@@ -164,8 +164,7 @@ R numint_simpN(const std::function<R(A)>& fkt, A x0, A x1, std::size_t N)
  */
 template<class R=double, class A=double>
 R convolute(const std::function<R(A)>& fkt0,
-	const std::function<R(A)>& fkt1,
-	A x, A x0, A x1, std::size_t N)
+	const std::function<R(A)>& fkt1, A x, A x0, A x1, std::size_t N)
 {
 	std::function<R(A,A)> fkt = [&fkt0, &fkt1](A t, A tau) -> R
 	{
