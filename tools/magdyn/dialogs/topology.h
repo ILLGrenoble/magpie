@@ -144,7 +144,7 @@ private:
 
 	QSpinBox *m_coords_bc[2]{};         // berry curvature component indices
 	QAction *m_imag_bc{};               // imaginary or real components?
-	QAction *m_E_positive{};            // ignore magnon annihilation
+	QCheckBox *m_only_pos_E_bc{};       // ignore magnon annihilation?
 
 	QPushButton *m_btnStartStop_bc{};   // start/stop calculation
 	bool m_calcEnabled_bc{};            // enable calculations

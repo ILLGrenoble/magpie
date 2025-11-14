@@ -132,6 +132,7 @@ private:
 	QSplitter *m_split_plot_gv{};
 	QTableWidget *m_table_bands_gv{};   // table listing the magnon bands
 
+	QCheckBox *m_only_pos_E_gv{};       // ignore magnon annihilation?
 	QSpinBox *m_diff{};                 // differentiation order
 
 	QDoubleSpinBox *m_Q_start_gv[3]{};  // Q start coordinate
@@ -143,8 +144,6 @@ private:
 
 	QCheckBox *m_S_filter_enable_gv{};  // switch to enable minimum S(Q,E) value
 	QDoubleSpinBox *m_S_filter_gv{};    // minimum S(Q,E) value
-
-	QAction *m_E_positive_gv{};         // ignore magnon annihilation
 
 	QPushButton *m_btnStartStop_gv{};   // start/stop calculation
 	bool m_calcEnabled_gv{};            // enable calculations

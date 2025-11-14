@@ -172,7 +172,8 @@ QWidget* DiffDlg::CreateGroupVelocityPanel()
 	m_plot_gv->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
 	// magnon band table
-	m_table_bands_gv = new QTableWidget(panelGroupVelocity);
+	QWidget *bands_panel = new QWidget(panelGroupVelocity);
+	m_table_bands_gv = new QTableWidget(bands_panel);
 	m_table_bands_gv->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 	m_table_bands_gv->setShowGrid(true);
 	m_table_bands_gv->setSortingEnabled(false);
@@ -187,16 +188,20 @@ QWidget* DiffDlg::CreateGroupVelocityPanel()
 	m_table_bands_gv->setColumnWidth(COL_GV_ACTIVE, 25);
 	m_table_bands_gv->resizeColumnsToContents();
 
+	m_only_pos_E_gv = new QCheckBox("E ≥ 0", bands_panel);
+	m_only_pos_E_gv->setChecked(false);
+	m_only_pos_E_gv->setToolTip("Ignore magnon annihilation.");
+
 	// splitter for plot and magnon band list
 	m_split_plot_gv = new QSplitter(panelGroupVelocity);
 	m_split_plot_gv->setOrientation(Qt::Horizontal);
 	m_split_plot_gv->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 	m_split_plot_gv->addWidget(m_plot_gv);
-	m_split_plot_gv->addWidget(m_table_bands_gv);
+	m_split_plot_gv->addWidget(bands_panel);
 	m_split_plot_gv->setCollapsible(0, false);
 	m_split_plot_gv->setCollapsible(1, true);
 	m_split_plot_gv->setStretchFactor(m_split_plot_gv->indexOf(m_plot_gv), 24);
-	m_split_plot_gv->setStretchFactor(m_split_plot_gv->indexOf(m_table_bands_gv), 1);
+	m_split_plot_gv->setStretchFactor(m_split_plot_gv->indexOf(bands_panel), 1);
 
 	// context menu for plotter
 	m_menuPlot_gv = new QMenu("Plotter", panelGroupVelocity);
@@ -207,16 +212,18 @@ QWidget* DiffDlg::CreateGroupVelocityPanel()
 	acSaveFigure->setIcon(QIcon::fromTheme("image-x-generic"));
 	acSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
 
-	m_E_positive_gv = new QAction("Ignore Magnon Annihilation", m_menuPlot_gv);
-	m_E_positive_gv->setCheckable(true);
-	m_E_positive_gv->setChecked(false);
-
 	m_menuPlot_gv->addAction(acRescalePlot);
 	m_menuPlot_gv->addSeparator();
 	m_menuPlot_gv->addAction(acSaveFigure);
 	m_menuPlot_gv->addAction(acSaveData);
-	m_menuPlot_gv->addSeparator();
-	m_menuPlot_gv->addAction(m_E_positive_gv);
+
+	// bands panel grid
+	int y_bands = 0;
+	QGridLayout *grid_bands = new QGridLayout(bands_panel);
+	grid_bands->setSpacing(4);
+	grid_bands->setContentsMargins(6, 6, 6, 6);
+	grid_bands->addWidget(m_table_bands_gv, y_bands++, 0, 1, 1);
+	grid_bands->addWidget(m_only_pos_E_gv, y_bands++, 0, 1, 1);
 
 	// differentiation order
 	m_diff = new QSpinBox(panelGroupVelocity);
@@ -368,7 +375,7 @@ QWidget* DiffDlg::CreateGroupVelocityPanel()
 	});
 
 	// replotting
-	connect(m_E_positive_gv, &QAction::toggled, [this]() { PlotGroupVelocity(); });
+	connect(m_only_pos_E_gv, &QCheckBox::toggled, [this]() { PlotGroupVelocity(); });
 	connect(m_v_filter_enable_gv, &QCheckBox::toggled, [this]() { PlotGroupVelocity(); });
 	connect(m_S_filter_enable_gv, &QCheckBox::toggled, [this]() { PlotGroupVelocity(); });
 	connect(m_v_filter_gv, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
@@ -490,7 +497,7 @@ void DiffDlg::PlotGroupVelocity(bool clear_settings)
 	if(!m_S_filter_enable_gv->isChecked())
 		min_S = -1.;  // disable S(Q, E) filter
 
-	bool only_creation = m_E_positive_gv->isChecked();
+	bool only_creation = m_only_pos_E_gv->isChecked();
 
 	t_size num_Q = m_data_gv.size();
 	t_size num_bands = m_data_gv[0].velocities.size();
@@ -576,9 +583,11 @@ void DiffDlg::PlotGroupVelocity(bool clear_settings)
 		// colour for this magnon band
 		QPen pen = curve->pen();
 		int col[3] = {
-			int(std::lerp(1., 0., t_real(effective_band) / t_real(num_effective_bands - 1)) * 255.),
+			num_effective_bands <= 1 ? 0xff
+				: int(std::lerp(1., 0., t_real(effective_band) / t_real(num_effective_bands - 1)) * 255.),
 			0x00,
-			int(std::lerp(0., 1., t_real(effective_band) / t_real(num_effective_bands - 1)) * 255.),
+			num_effective_bands <= 1 ? 0x00
+				: int(std::lerp(0., 1., t_real(effective_band) / t_real(num_effective_bands - 1)) * 255.),
 		};
 
 		//get_colour<int>(g_colPlot, col);

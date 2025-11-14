@@ -178,7 +178,8 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	m_plot_bc->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
 	// magnon band table
-	m_table_bands_bc = new QTableWidget(panelBerryCurvature);
+	QWidget *bands_panel = new QWidget(panelBerryCurvature);
+	m_table_bands_bc = new QTableWidget(bands_panel);
 	m_table_bands_bc->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 	m_table_bands_bc->setShowGrid(true);
 	m_table_bands_bc->setSortingEnabled(false);
@@ -193,16 +194,20 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	m_table_bands_bc->setColumnWidth(COL_BC_ACTIVE, 25);
 	m_table_bands_bc->resizeColumnsToContents();
 
+	m_only_pos_E_bc = new QCheckBox("E ≥ 0", bands_panel);
+	m_only_pos_E_bc->setChecked(false);
+	m_only_pos_E_bc->setToolTip("Ignore magnon annihilation.");
+
 	// splitter for plot and magnon band list
 	m_split_plot_bc = new QSplitter(panelBerryCurvature);
 	m_split_plot_bc->setOrientation(Qt::Horizontal);
 	m_split_plot_bc->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 	m_split_plot_bc->addWidget(m_plot_bc);
-	m_split_plot_bc->addWidget(m_table_bands_bc);
+	m_split_plot_bc->addWidget(bands_panel);
 	m_split_plot_bc->setCollapsible(0, false);
 	m_split_plot_bc->setCollapsible(1, true);
 	m_split_plot_bc->setStretchFactor(m_split_plot_bc->indexOf(m_plot_bc), 24);
-	m_split_plot_bc->setStretchFactor(m_split_plot_bc->indexOf(m_table_bands_bc), 1);
+	m_split_plot_bc->setStretchFactor(m_split_plot_bc->indexOf(bands_panel), 1);
 
 	// context menu for plotter
 	m_menuPlot_bc = new QMenu("Plotter", panelBerryCurvature);
@@ -212,10 +217,6 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 
 	acSaveFigure->setIcon(QIcon::fromTheme("image-x-generic"));
 	acSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
-
-	m_E_positive = new QAction("Ignore Magnon Annihilation", m_menuPlot_bc);
-	m_E_positive->setCheckable(true);
-	m_E_positive->setChecked(false);
 
 	m_imag_bc = new QAction("Show Imaginary B Component", m_menuPlot_bc);
 	m_imag_bc->setCheckable(true);
@@ -227,8 +228,15 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	m_menuPlot_bc->addAction(acSaveFigure);
 	m_menuPlot_bc->addAction(acSaveData);
 	m_menuPlot_bc->addSeparator();
-	m_menuPlot_bc->addAction(m_E_positive);
 	m_menuPlot_bc->addAction(m_imag_bc);
+
+	// bands panel grid
+	int y_bands = 0;
+	QGridLayout *grid_bands = new QGridLayout(bands_panel);
+	grid_bands->setSpacing(4);
+	grid_bands->setContentsMargins(6, 6, 6, 6);
+	grid_bands->addWidget(m_table_bands_bc, y_bands++, 0, 1, 1);
+	grid_bands->addWidget(m_only_pos_E_bc, y_bands++, 0, 1, 1);
 
 	// start and stop coordinates
 	m_Q_start_bc[0] = new QDoubleSpinBox(panelBerryCurvature);
@@ -390,7 +398,7 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	});
 
 	// replotting
-	connect(m_E_positive, &QAction::toggled, [this]() { PlotBerryCurvature(); });
+	connect(m_only_pos_E_bc, &QCheckBox::toggled, [this]() { PlotBerryCurvature(); });
 	connect(m_imag_bc, &QAction::toggled, [this]() { PlotBerryCurvature(); });
 	connect(m_B_filter_enable_bc, &QCheckBox::toggled, [this]() { PlotBerryCurvature(); });
 	connect(m_S_filter_enable_bc, &QCheckBox::toggled, [this]() { PlotBerryCurvature(); });
@@ -506,7 +514,7 @@ void TopologyDlg::PlotBerryCurvature(bool clear_settings)
 		min_S = -1.;  // disable S(Q, E) filter
 
 	bool show_imag_comp = m_imag_bc->isChecked();
-	bool only_creation = m_E_positive->isChecked();
+	bool only_creation = m_only_pos_E_bc->isChecked();
 
 	t_size num_Q = m_data_bc.size();
 	t_size num_bands = m_data_bc[0].curvatures.size();
@@ -586,9 +594,11 @@ void TopologyDlg::PlotBerryCurvature(bool clear_settings)
 		// colour for this magnon band
 		QPen pen = curve->pen();
 		int col[3] = {
-			int(std::lerp(1., 0., t_real(effective_band) / t_real(num_effective_bands - 1)) * 255.),
+			num_effective_bands <= 1 ? 0xff
+				: int(std::lerp(1., 0., t_real(effective_band) / t_real(num_effective_bands - 1)) * 255.),
 			0x00,
-			int(std::lerp(0., 1., t_real(effective_band) / t_real(num_effective_bands - 1)) * 255.),
+			num_effective_bands <= 1 ? 0x00
+				: int(std::lerp(0., 1., t_real(effective_band) / t_real(num_effective_bands - 1)) * 255.),
 		};
 
 		//get_colour<int>(g_colPlot, col);
