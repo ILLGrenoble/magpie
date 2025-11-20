@@ -1025,7 +1025,7 @@ requires is_vec<t_vec>
 {
 	t_vec newatom = _atom;
 
-	for(std::size_t i=0; i</*newatom.size()*/ dim; ++i)
+	for(std::size_t i = 0; i < /*newatom.size()*/ dim; ++i)
 	{
 		newatom[i] = std::fmod(newatom[i], t_real{1});
 		if(newatom[i] <= t_real{-0.5})
@@ -1101,7 +1101,7 @@ template<class t_vec, class t_mat, class t_real = typename t_vec::value_type,
 	template<class...> class t_cont = std::vector>
 t_cont<t_vec> apply_ops_hom(const t_vec& _vec, const t_cont<t_mat>& ops,
 	t_real eps = std::numeric_limits<t_real>::epsilon(),
-	bool keepInUnitCell = true, bool ignore_occupied = false,
+	bool keep_in_unit_cell = true, bool ignore_occupied = false,
 	bool ret_hom = false, bool is_pseudovector = false)
 requires is_vec<t_vec> && is_mat<t_mat>
 {
@@ -1129,7 +1129,7 @@ requires is_vec<t_vec> && is_mat<t_mat>
 		if(!ret_hom)
 			newvec = create<t_vec>({ newvec[0], newvec[1], newvec[2] });
 
-		if(keepInUnitCell)
+		if(keep_in_unit_cell)
 			newvec = keep_atom_in_uc<t_vec>(newvec, 3);
 
 		// position already occupied?

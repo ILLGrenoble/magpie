@@ -87,7 +87,7 @@ MagDynDlg::MagDynDlg(QWidget* pParent) : QDialog{pParent},
 	CreateHamiltonPanel();
 	CreateExportPanel();
 
-	PopulateSpaceGroups();
+	PopulateSpaceGroups(true);
 
 	InitSettings();
 

@@ -288,7 +288,7 @@ protected:
 	void CreateHamiltonPanel();
 	void CreateExportPanel();
 
-	void PopulateSpaceGroups();
+	void PopulateSpaceGroups(bool init = false);
 
 	// general table operations
 	void MoveTabItemUp(QTableWidget *pTab);

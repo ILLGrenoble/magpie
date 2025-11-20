@@ -34,7 +34,11 @@ using t_numitem = tl2::NumericTableWidgetItem<t_real>;
 
 
 
-void MagDynDlg::PopulateSpaceGroups()
+/**
+ * creates the vector of symmetry matrices (if init is true),
+ * and the entries of the space group combo box, which might be filtered
+ */
+void MagDynDlg::PopulateSpaceGroups(bool init)
 {
 	BOOST_SCOPE_EXIT(this_)
 	{
@@ -51,8 +55,13 @@ void MagDynDlg::PopulateSpaceGroups()
 
 	// get space groups and symops
 	auto spacegroups = get_sgs<t_mat_real>();
-	m_SGops.clear();
-	m_SGops.reserve(spacegroups.size());
+
+	if(init)
+	{
+		m_SGops.clear();
+		m_SGops.reserve(spacegroups.size());
+	}
+
 	m_comboSG->clear();
 
 	std::string filter = m_editFilterSG->text().toStdString();
@@ -63,24 +72,25 @@ void MagDynDlg::PopulateSpaceGroups()
 	for(auto [sgnum, descr, ops] : spacegroups)
 	{
 		// filter out non-wanted space groups
-		if(do_filter)
+		bool ignore_sg = false;
+		if(do_filter && descr.find(filter) == std::string::npos &&
+			tl2::remove_char(descr, ' ').find(filter) == std::string::npos)
 		{
-			if(descr.find(filter) == std::string::npos &&
-				tl2::remove_char(descr, ' ').find(filter) == std::string::npos)
-			{
-				++sg_idx;
-				continue;
-			}
+			ignore_sg = true;
 		}
 
-		// keep last selection
-		if(selected_index && sg_idx == *selected_index)
-			combo_idx_to_select = m_comboSG->count();
+		if(!ignore_sg)
+		{
+			// keep last selection
+			if(selected_index && sg_idx == *selected_index)
+				combo_idx_to_select = m_comboSG->count();
 
-		// add new space group
-		m_comboSG->addItem(descr.c_str(), sg_idx);
-		m_SGops.emplace_back(std::move(ops));
+			// add new space group
+			m_comboSG->addItem(descr.c_str(), sg_idx);
+		}
 
+		if(init)
+			m_SGops.emplace_back(std::move(ops));
 		++sg_idx;
 	}
 
@@ -322,7 +332,11 @@ const std::vector<t_mat_real>& MagDynDlg::GetSymOpsForCurrentSG(bool show_err) c
 	if(sgidx < 0 || t_size(sgidx) >= m_SGops.size())
 	{
 		if(show_err)
-			ShowError("Invalid space group selected.");
+		{
+			std::ostringstream ostrErr;
+			ostrErr << "Invalid space group selected, index: " << sgidx << ".";
+			ShowError(ostrErr.str().c_str());
+		}
 
 		// return empty symop list
 		static const std::vector<t_mat_real> nullvec{};
