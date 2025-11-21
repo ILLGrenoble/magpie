@@ -213,6 +213,7 @@ constexpr std::array<SettingsVariable, 25> g_settingsvariables
 		.description = "Unit cell from 0 to 1.",
 		.key = "uc_01",
 		.value = &g_uc_01,
+		.editor = SettingsVariableEditor::YESNO,
 	},
 
 	// file options
