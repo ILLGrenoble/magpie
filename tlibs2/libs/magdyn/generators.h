@@ -58,7 +58,8 @@ void MAGDYN_INST::SymmetriseMagneticSites(const std::vector<t_mat_real>& symops)
 	{
 		// get symmetry-equivalent positions
 		const auto positions = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(
-			site.pos_calc, symops, m_eps);
+			site.pos_calc, symops, m_eps, true /*keep in uc*/, false /*ignore occupied*/,
+			false /*return homogeneous*/, false /*pseudovector*/, m_uc_min, m_uc_max);
 
 		for(t_size idx = 0; idx < positions.size(); ++idx)
 		{
@@ -112,11 +113,13 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 		auto sites1_sc = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(
 			sites_uc[term.site1_calc], symops, m_eps,
 			false /*keep in uc*/, true /*ignore occupied*/,
-			true /*return homogeneous*/);
+			true /*return homogeneous*/, false /*pseudovector*/,
+			m_uc_min, m_uc_max);
 		auto sites2_sc = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(
 			sites_uc[term.site2_calc] + dist_sc, symops, m_eps,
 			false /*keep in uc*/, true /*ignore occupied*/,
-			true /*return homogeneous*/);
+			true /*return homogeneous*/, false /*pseudovector*/,
+			m_uc_min, m_uc_max);
 
 		// generate new dmi vectors
 		t_vec_real dmi = tl2::zero<t_vec_real>(4);
@@ -141,7 +144,8 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 		const auto newdmis = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(
 			dmi, symops, m_eps,
 			false /*keep in uc*/, true /*ignore occupied*/,
-			false /*return homogeneous*/, true /*pseudovector*/);
+			false /*return homogeneous*/, true /*pseudovector*/,
+			m_uc_min, m_uc_max);
 
 		// generate new general J matrices
 		t_real Jgen_arr[3][3]{};
@@ -180,9 +184,9 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 		{
 			// get position of the site in the supercell
 			const auto [sc1_ok, site1_sc_idx, sc1] = tl2::get_supercell(
-				sites1_sc[op_idx], sites_uc, 3, m_eps);
+				sites1_sc[op_idx], sites_uc, 3, m_uc_min, m_uc_max, m_eps);
 			const auto [sc2_ok, site2_sc_idx, sc2] = tl2::get_supercell(
-				sites2_sc[op_idx], sites_uc, 3, m_eps);
+				sites2_sc[op_idx], sites_uc, 3, m_uc_min, m_uc_max, m_eps);
 
 			if(!sc1_ok || !sc2_ok)
 			{
@@ -272,7 +276,7 @@ void MAGDYN_INST::GeneratePossibleExchangeTerms(
 		const t_vec_real sc_vec = tl2::create<t_vec_real>({ sc_h, sc_k, sc_l });
 
 		for(t_size idx1 = 0; idx1 < num_sites; ++idx1)
-		for(t_size idx2 = idx1; idx2 < num_sites; ++idx2)
+		for(t_size idx2 = 0 /*idx1*/; idx2 < num_sites; ++idx2)
 		{
 			// no self-coupling
 			if(idx1 == idx2 && tl2::equals_0<t_vec_real>(sc_vec, m_eps))
@@ -525,9 +529,15 @@ void MAGDYN_INST::RemoveDuplicateMagneticSites()
 	for(auto iter2 = std::next(iter1, 1); iter2 != m_sites.end();)
 	{
 		if(tl2::equals<t_vec_real>(iter1->pos_calc, iter2->pos_calc, m_eps))
+		{
 			iter2 = m_sites.erase(iter2);
+			if(iter1 == iter2)
+				std::advance(iter2, 1);
+		}
 		else
+		{
 			std::advance(iter2, 1);
+		}
 	}
 }
 
@@ -551,9 +561,15 @@ void MAGDYN_INST::RemoveDuplicateExchangeTerms()
 		bool inv_sc = tl2::equals<t_vec_real>(iter1->dist_calc, -iter2->dist_calc, m_eps);
 
 		if((same_uc && same_sc) || (inv_uc && inv_sc))
+		{
 			iter2 = m_exchange_terms.erase(iter2);
+			if(iter1 == iter2)
+				std::advance(iter2, 1);
+		}
 		else
+		{
 			std::advance(iter2, 1);
+		}
 	}
 }
 
@@ -569,7 +585,10 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
 {
 	// get symmetry-equivalent positions
 	const auto positions = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(
-		site1.pos_calc, symops, m_eps);
+		site1.pos_calc, symops, m_eps,
+		true /*keep in uc*/, false /*ignore occupied*/,
+		false /*return homogeneous*/, false /*pseudovector*/,
+		m_uc_min, m_uc_max);
 
 	for(const auto& pos : positions)
 	{
@@ -591,10 +610,11 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
 	const MAGDYN_TYPE::ExchangeTerm& term1, const MAGDYN_TYPE::ExchangeTerm& term2,
 	const std::vector<t_mat_real>& symops) const
 {
-	// check if site indices are within bounds
-	const t_size N = GetMagneticSitesCount();
-	if(term1.site1_calc >= N || term1.site2_calc >= N ||
-		term2.site1_calc >= N || term2.site2_calc >= N)
+	// check if the site indices are valid
+	if(!CheckMagneticSite(term1.site1_calc) || !CheckMagneticSite(term1.site2_calc))
+		return false;
+	// check if the site indices are valid
+	if(!CheckMagneticSite(term2.site1_calc) || !CheckMagneticSite(term2.site2_calc))
 		return false;
 
 	// create unit cell site vectors
@@ -612,20 +632,37 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
 		sites_uc[term1.site2_calc] + dist_sc, symops, m_eps,
 		false /*keep in uc*/, true /*ignore occupied*/,
 		true /*return homogeneous*/);
+	
+#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+	using namespace tl2_ops;
+	std::cout << "term1:     " << term1.site1_calc << ", " << term1.site2_calc
+		<< ", dist: " << term1.dist_calc << ", " << term1.name << std::endl;
+	std::cout << "term2:     " << term2.site1_calc << ", " << term2.site2_calc
+		<< ", dist: " << term2.dist_calc << ", " << term2.name << std::endl;
+#endif
 
-	for(t_size idx = 0; idx < std::min(sites1_sc.size(), sites2_sc.size()); ++idx)
+	for(t_size op_idx = 0; op_idx < std::min(sites1_sc.size(), sites2_sc.size()); ++op_idx)
 	{
 		// get position of the site in the supercell
 		const auto [sc1_ok, site1_sc_idx, sc1] = tl2::get_supercell(
-			sites1_sc[idx], sites_uc, 3, m_eps);
+			sites1_sc[op_idx], sites_uc, 3, m_uc_min, m_uc_max, m_eps);
 		const auto [sc2_ok, site2_sc_idx, sc2] = tl2::get_supercell(
-			sites2_sc[idx], sites_uc, 3, m_eps);
+			sites2_sc[op_idx], sites_uc, 3, m_uc_min, m_uc_max, m_eps);
+
 		if(!sc1_ok || !sc2_ok)
 			continue;
+
+#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+		std::cout << "term1_op" << op_idx << ": " << site1_sc_idx << ", " << site2_sc_idx
+			<< ", dist: " << to_3vec<t_vec_real>(sc2 - sc1) << std::endl;
+#endif
 
 		// symmetry-equivalent coupling found?
 		if(tl2::equals<t_vec_real>(to_3vec<t_vec_real>(sc2 - sc1), term2.dist_calc, m_eps)
 			&& site1_sc_idx == term2.site1_calc && site2_sc_idx == term2.site2_calc)
+			return true;
+		if(tl2::equals<t_vec_real>(to_3vec<t_vec_real>(sc1 - sc2), term2.dist_calc, m_eps)
+			&& site1_sc_idx == term2.site2_calc && site2_sc_idx == term2.site1_calc)
 			return true;
 	}
 

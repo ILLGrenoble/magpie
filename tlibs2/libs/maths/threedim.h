@@ -1020,17 +1020,18 @@ requires is_mat<t_mat> && is_vec<t_vec>
  * wrap atom positions back to unit cell
  */
 template<class t_vec, class t_real = typename t_vec::value_type>
-t_vec keep_atom_in_uc(const t_vec& _atom, std::size_t dim = 3)
+t_vec keep_atom_in_uc(const t_vec& _atom, std::size_t dim = 3,
+	t_real uc_min = -0.5, t_real uc_max = 0.5)
 requires is_vec<t_vec>
 {
 	t_vec newatom = _atom;
 
 	for(std::size_t i = 0; i < /*newatom.size()*/ dim; ++i)
 	{
-		newatom[i] = std::fmod(newatom[i], t_real{1});
-		if(newatom[i] <= t_real{-0.5})
+		newatom[i] = std::fmod(newatom[i], uc_max - uc_min);
+		if(newatom[i] <= uc_min)
 			newatom[i] += std::abs(std::floor(newatom[i]));
-		if(newatom[i] > t_real{0.5})
+		if(newatom[i] > uc_max)
 			newatom[i] -= std::abs(std::ceil(newatom[i]));
 	}
 
@@ -1044,14 +1045,15 @@ requires is_vec<t_vec>
  */
 template<class t_vec, class t_real = typename t_vec::value_type,
 	template<class...> class t_cont = std::vector>
-t_cont<t_vec> keep_atoms_in_uc(const t_cont<t_vec>& _atoms, std::size_t dim = 3)
+t_cont<t_vec> keep_atoms_in_uc(const t_cont<t_vec>& _atoms, std::size_t dim = 3,
+	t_real uc_min = -0.5, t_real uc_max = 0.5)
 requires is_vec<t_vec>
 {
 	t_cont<t_vec> newatoms;
 	newatoms.reserve(_atoms.size());
 
 	for(const auto& _atom : _atoms)
-		newatoms.emplace_back(keep_atom_in_uc<t_vec, t_real>(_atom, dim));
+		newatoms.emplace_back(keep_atom_in_uc<t_vec, t_real>(_atom, dim, uc_min, uc_max));
 
 	return newatoms;
 }
@@ -1065,14 +1067,16 @@ template<class t_vec, class t_real = typename t_vec::value_type,
 	template<class...> class t_cont = std::vector>
 std::tuple<bool, std::size_t, t_vec>
 get_supercell(const t_vec& sc_pos, const t_cont<t_vec>& _uc_sites,
-	std::size_t dim = 3,
+	std::size_t dim = 3, t_real uc_min = -0.5, t_real uc_max = 0.5,
 	t_real eps = std::numeric_limits<t_real>::eps())
 requires is_vec<t_vec>
 {
-	t_cont<t_vec> uc_sites = keep_atoms_in_uc<t_vec, t_real, t_cont>(_uc_sites, dim);
+	// ensure that sites are in unit cell
+	t_cont<t_vec> uc_sites = keep_atoms_in_uc<t_vec, t_real, t_cont>(
+		_uc_sites, dim, uc_min, uc_max);
 
 	// unit cell position corresponding to supercell position
-	t_vec uc_pos = keep_atom_in_uc<t_vec, t_real>(sc_pos, dim);
+	t_vec uc_pos = keep_atom_in_uc<t_vec, t_real>(sc_pos, dim, uc_min, uc_max);
 
 	// get corresponding unit cell index
 	bool found = false;
@@ -1080,9 +1084,9 @@ requires is_vec<t_vec>
 	t_vec sc_vec = sc_pos - uc_pos;
 
 	if(auto iter = std::find_if(uc_sites.begin(), uc_sites.end(),
-		[&uc_pos, &eps](const t_vec& vec) -> bool
+		[&uc_pos, &eps](const t_vec& site_vec) -> bool
 	{
-		return equals<t_vec>(uc_pos, vec, eps);
+		return equals<t_vec>(uc_pos, site_vec, eps);
 	}); iter != uc_sites.end())
 	{
 		found = true;
@@ -1102,7 +1106,8 @@ template<class t_vec, class t_mat, class t_real = typename t_vec::value_type,
 t_cont<t_vec> apply_ops_hom(const t_vec& _vec, const t_cont<t_mat>& ops,
 	t_real eps = std::numeric_limits<t_real>::epsilon(),
 	bool keep_in_unit_cell = true, bool ignore_occupied = false,
-	bool ret_hom = false, bool is_pseudovector = false)
+	bool ret_hom = false, bool is_pseudovector = false,
+	t_real uc_min = -0.5, t_real uc_max = 0.5)
 requires is_vec<t_vec> && is_mat<t_mat>
 {
 	// convert vector to homogeneous coordinates
@@ -1130,7 +1135,7 @@ requires is_vec<t_vec> && is_mat<t_mat>
 			newvec = create<t_vec>({ newvec[0], newvec[1], newvec[2] });
 
 		if(keep_in_unit_cell)
-			newvec = keep_atom_in_uc<t_vec>(newvec, 3);
+			newvec = keep_atom_in_uc<t_vec>(newvec, 3, uc_min, uc_max);
 
 		// position already occupied?
 		if(ignore_occupied ||

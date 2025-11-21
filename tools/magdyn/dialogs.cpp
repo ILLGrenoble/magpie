@@ -62,6 +62,10 @@ void MagDynDlg::InitSettings()
 	m_dyn.SetPerformChecks(g_checks);
 	m_dyn.SetEpsilon(g_eps);
 	m_dyn.SetPrecision(g_prec);
+	if(g_uc_01)
+		m_dyn.SetUnitCellExtents(0., 1.);
+	else
+		m_dyn.SetUnitCellExtents(-0.5, 0.5);
 	m_dyn.SetBoseCutoffEnergy(g_bose_cutoff);
 	m_dyn.SetCholeskyMaxTries(g_cholesky_maxtries);
 	m_dyn.SetCholeskyInc(g_cholesky_delta);

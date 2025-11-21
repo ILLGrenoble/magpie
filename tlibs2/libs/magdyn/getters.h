@@ -444,6 +444,13 @@ MAGDYN_TEMPL void MAGDYN_INST::SetPrecision(int prec)
 }
 
 
+MAGDYN_TEMPL void MAGDYN_INST::SetUnitCellExtents(t_real uc_min, t_real uc_max)
+{
+	m_uc_min = uc_min;
+	m_uc_max = uc_max;
+}
+
+
 MAGDYN_TEMPL void MAGDYN_INST::SetTemperature(t_real T)
 {
 	m_temperature = T;

@@ -228,6 +228,7 @@ public:
 	// --------------------------------------------------------------------
 	void SetEpsilon(t_real eps);
 	void SetPrecision(int prec);
+	void SetUnitCellExtents(t_real uc_min, t_real uc_max);
 
 	void SetTemperature(t_real T);
 	void SetBoseCutoffEnergy(t_real E);
@@ -704,13 +705,15 @@ private:
 		tl2::create<t_vec_real>({ 0., 0., 1. }),  // out-of-plane, z
 	};
 
+	t_real m_uc_min{-0.5}, m_uc_max{0.5};       // unit cell extents
+
 	// settings
 	bool m_is_incommensurate{ false };
 	bool m_force_incommensurate{ false };
 	bool m_unite_degenerate_energies{ true };
 	bool m_perform_checks{ true };
 	bool m_silent { false };
-	t_real m_E_minmax[2] { 1., -1. };             // filter energies
+	t_real m_E_minmax[2] { 1., -1. };           // filter energies
 
 	// settings for cholesky decomposition
 	t_size m_tries_chol{ 50 };
