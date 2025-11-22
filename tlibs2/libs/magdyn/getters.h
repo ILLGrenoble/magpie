@@ -28,15 +28,8 @@
 #ifndef __TLIBS2_MAGDYN_GETTERS_H__
 #define __TLIBS2_MAGDYN_GETTERS_H__
 
-#include <vector>
-#include <tuple>
-#include <string>
-#include <iostream>
-#include <iomanip>
 
-#include "../maths.h"
-#include "../expr.h"
-
+#include "magdyn.h"
 
 
 // --------------------------------------------------------------------
@@ -739,96 +732,5 @@ tl2::ExprParser<t_cplx> MAGDYN_INST::GetExprParser() const
 }
 // --------------------------------------------------------------------
 
-
-
-// --------------------------------------------------------------------
-// sanity checks
-// --------------------------------------------------------------------
-/**
- * check if the site index is valid
- */
-MAGDYN_TEMPL
-bool MAGDYN_INST::CheckMagneticSite(t_size idx, bool print_error) const
-{
-	// always perform this check as the GUI deliberately sets invalid
-	// indices when adding a new coupling to the table
-
-	//if(!m_perform_checks)
-	//	return true;
-
-	if(idx >= m_sites.size())
-	{
-		if(print_error)
-		{
-			TL2_CERR_OPT << "Magdyn error: Site index " << idx
-				<< " is out of bounds."
-				<< std::endl;
-		}
-
-		return false;
-	}
-
-	return true;
-}
-
-
-
-/**
- * check if the term index is valid
- */
-MAGDYN_TEMPL
-bool MAGDYN_INST::CheckExchangeTerm(t_size idx, bool print_error) const
-{
-	if(!m_perform_checks)
-		return true;
-
-	if(idx >= m_exchange_terms.size())
-	{
-		if(print_error)
-		{
-			TL2_CERR_OPT << "Magdyn error: Coupling index " << idx
-				<< " is out of bounds."
-				<< std::endl;
-		}
-
-		return false;
-	}
-
-	return true;
-}
-
-
-
-/**
- * check if imaginary weights remain
- */
-MAGDYN_TEMPL
-bool MAGDYN_INST::CheckImagWeights(const MAGDYN_TYPE::SofQE& S) const
-{
-	if(!m_perform_checks)
-		return true;
-
-	using namespace tl2_ops;
-	bool ok = true;
-
-	for(const EnergyAndWeight& EandS : S.E_and_S)
-	{
-		// imaginary parts should be gone after UniteEnergies()
-		if(!tl2::equals_0(EandS.S_perp_sum.imag(), m_eps) ||
-			!tl2::equals_0(EandS.S_sum.imag(), m_eps))
-		{
-			ok = false;
-
-			TL2_CERR_OPT << "Magdyn warning: Remaining imaginary S(Q, E) component at Q = "
-				<< S.Q_rlu << " and E = " << EandS.E
-				<< ": imag(S) = " << EandS.S_sum.imag()
-				<< ", imag(S_perp) = " << EandS.S_perp_sum.imag()
-				<< "." << std::endl;
-		}
-	}
-
-	return ok;
-}
-// --------------------------------------------------------------------
 
 #endif

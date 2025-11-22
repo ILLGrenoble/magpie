@@ -28,13 +28,6 @@
 #ifndef __TLIBS2_MAGDYN_GEN_H__
 #define __TLIBS2_MAGDYN_GEN_H__
 
-#include <vector>
-#include <string>
-#include <iostream>
-#include <iomanip>
-
-#include "../maths.h"
-#include "../expr.h"
 
 #include "magdyn.h"
 

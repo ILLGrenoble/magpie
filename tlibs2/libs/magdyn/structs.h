@@ -38,11 +38,10 @@
 #ifndef __TLIBS2_MAGDYN_STRUCTS_H__
 #define __TLIBS2_MAGDYN_STRUCTS_H__
 
-#include <vector>
-#include <array>
-#include <string>
 
 #include "../maths.h"
+
+#include "magdyn.h"
 
 
 namespace tl2_mag {

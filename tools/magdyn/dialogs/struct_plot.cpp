@@ -932,7 +932,8 @@ void StructPlotDlg::Sync()
 
 	AddUnitCell();
 
-	m_centre /= t_real_gl(total_sites);
+	if(total_sites)
+		m_centre /= t_real_gl(total_sites);
 	CentreCamera();
 	m_structplot->update();
 }

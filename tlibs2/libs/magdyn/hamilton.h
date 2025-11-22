@@ -38,12 +38,7 @@
 #ifndef __TLIBS2_MAGDYN_HAM_H__
 #define __TLIBS2_MAGDYN_HAM_H__
 
-#include <tuple>
-#include <string>
-#include <iostream>
-#include <iomanip>
 
-#include "../maths.h"
 #include "../units.h"
 
 #include "magdyn.h"

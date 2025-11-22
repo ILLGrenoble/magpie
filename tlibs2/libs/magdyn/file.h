@@ -28,11 +28,9 @@
 #ifndef __TLIBS2_MAGDYN_FILE_H__
 #define __TLIBS2_MAGDYN_FILE_H__
 
-#include <string>
-#include <iostream>
+
 #include <fstream>
 #include <sstream>
-#include <iomanip>
 
 #include <boost/algorithm/string/replace.hpp>
 

@@ -39,12 +39,8 @@
 #ifndef __TLIBS2_MAGDYN_CORREL_H__
 #define __TLIBS2_MAGDYN_CORREL_H__
 
-#include <vector>
-#include <iostream>
-#include <iomanip>
 
 #include "../algos.h"
-#include "../maths.h"
 #include "../phys.h"
 
 #include "magdyn.h"

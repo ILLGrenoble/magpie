@@ -38,11 +38,7 @@
 #ifndef __TLIBS2_MAGDYN_PRECALC_H__
 #define __TLIBS2_MAGDYN_PRECALC_H__
 
-#include <string>
-#include <iostream>
-#include <iomanip>
 
-#include "../maths.h"
 #include "../units.h"
 
 #include "magdyn.h"

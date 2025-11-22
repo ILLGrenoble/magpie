@@ -50,6 +50,8 @@
 #include <functional>
 #include <string>
 #include <string_view>
+#include <iostream>
+#include <iomanip>
 
 #include <boost/container_hash/hash.hpp>
 #include <boost/property_tree/ptree.hpp>

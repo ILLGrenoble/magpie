@@ -28,17 +28,13 @@
 #ifndef __TLIBS2_MAGDYN_CFG_FILE_H__
 #define __TLIBS2_MAGDYN_CFG_FILE_H__
 
-#include <unordered_set>
-#include <string>
-#include <iostream>
+
 #include <fstream>
-#include <iomanip>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "../algos.h"
-#include "../maths.h"
 #include "../str.h"
 
 #include "magdyn.h"

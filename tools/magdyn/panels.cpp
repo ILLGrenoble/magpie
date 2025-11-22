@@ -753,7 +753,7 @@ void MagDynDlg::CreateSamplePanel()
 			calc_all);
 	}
 
-	m_tabs_setup->addTab(m_samplepanel, "Sample");
+	m_tabs_setup->addTab(m_samplepanel, "Crystal");
 }
 
 

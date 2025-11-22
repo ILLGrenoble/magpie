@@ -38,13 +38,12 @@
 #ifndef __TLIBS2_MAGDYN_DISP_H__
 #define __TLIBS2_MAGDYN_DISP_H__
 
+
 #include <numeric>
-#include <vector>
 #include <thread>
 
 #include <boost/asio.hpp>
 
-#include "../maths.h"
 #include "magdyn.h"
 
 

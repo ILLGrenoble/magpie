@@ -28,7 +28,6 @@
 #ifndef __TLIBS2_MAGDYN_DIFF_H__
 #define __TLIBS2_MAGDYN_DIFF_H__
 
-#include "../maths.h"
 
 #include "magdyn.h"
 

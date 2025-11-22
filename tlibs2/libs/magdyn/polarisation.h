@@ -33,11 +33,7 @@
 #ifndef __TLIBS2_MAGDYN_POLARISATION_H__
 #define __TLIBS2_MAGDYN_POLARISATION_H__
 
-#include <vector>
-#include <iostream>
-#include <iomanip>
 
-#include "../maths.h"
 #include "../phys.h"
 
 #include "magdyn.h"

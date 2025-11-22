@@ -28,6 +28,7 @@
 #ifndef __TLIBS2_MAGDYN_HELPERS_H__
 #define __TLIBS2_MAGDYN_HELPERS_H__
 
+
 #include <string>
 
 #include "../maths.h"

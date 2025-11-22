@@ -304,7 +304,7 @@ requires is_vec<t_vec>
 		// cross product gives sine and rotation axis
 		t_vec axis = cross<t_vec>({ vec0, vec1 });
 		t_real s = tl2::norm(axis);
-		if(rotaxis)
+		if(rotaxis && s > 0.)
 			*rotaxis = axis / s;
 
 		// dot product gives cosine

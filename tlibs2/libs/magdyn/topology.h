@@ -34,7 +34,7 @@
 #ifndef __TLIBS2_MAGDYN_TOPO_H__
 #define __TLIBS2_MAGDYN_TOPO_H__
 
-#include "../maths.h"
+
 #include "../algos.h"
 
 #include "magdyn.h"

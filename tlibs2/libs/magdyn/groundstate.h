@@ -38,13 +38,7 @@
 #ifndef __TLIBS2_MAGDYN_GS_H__
 #define __TLIBS2_MAGDYN_GS_H__
 
-#include <vector>
-#include <unordered_set>
-#include <string>
-#include <iostream>
-#include <iomanip>
 
-#include "../maths.h"
 #include "../str.h"
 #include "../fit.h"
 
