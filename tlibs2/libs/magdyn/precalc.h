@@ -121,7 +121,6 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 				<< "." << std::endl;
 		}
 
-
 		for(std::uint8_t idx = 0; idx < 3; ++idx)
 		{
 			// position
@@ -153,7 +152,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 					TL2_CERR_OPT << "Magdyn error: Parsing spin direction \""
 						<< site.spin_dir[idx] << "\""
 						<< " for site \"" << site.name << "\""
-						<< " and component " << idx
+						<< " and component " << int(idx)
 						<< "." << std::endl;
 				}
 			}
@@ -174,7 +173,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 					TL2_CERR_OPT << "Magdyn error: Parsing spin orthogonal plane \""
 						<< site.spin_ortho[idx] << "\""
 						<< " for site \"" << site.name << "\""
-						<< " and component " << idx
+						<< " and component " << int(idx)
 						<< "." << std::endl;
 				}
 			}

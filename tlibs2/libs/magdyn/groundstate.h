@@ -128,24 +128,37 @@ bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_p
 	bool verbose, const bool *stop_request)
 {
 	// function to minimise the state's energy
-	auto func = [this](const std::vector<tl2::t_real_min>& args)
+	auto func = [this](const std::vector<tl2::t_real_min>& args) -> t_real
 	{
-		// set new spin configuration
-		auto dyn = *this;
+		auto dyn = *this;  // work on copy of spin configuration to avoid race conditions
+		const t_size N = dyn.GetMagneticSitesCount();
 
-		for(t_size site_idx = 0; site_idx < dyn.GetMagneticSitesCount(); ++site_idx)
+		// invalid arguments vector?
+		if(args.size() < N*2)
+			return std::numeric_limits<t_real>::max();
+
+		for(t_size site_idx = 0; site_idx < N; ++site_idx)
 		{
-			MagneticSite& site = dyn.m_sites[site_idx];
-
 			t_real u = args[site_idx * 2 + 0];
 			t_real v = args[site_idx * 2 + 1];
+			if(std::isnan(u) || std::isnan(v) || std::isinf(u) || std::isinf(v))
+				return std::numeric_limits<t_real>::max();
 
 			const auto [ phi, theta ] = tl2::uv_to_sph<t_real>(u, v);
 			const auto [ x, y, z ] = tl2::sph_to_cart<t_real>(1., phi, theta);
 
+			MagneticSite& site = dyn.m_sites[site_idx];
 			site.spin_dir[0] = tl2::var_to_str(x, m_prec);
 			site.spin_dir[1] = tl2::var_to_str(y, m_prec);
 			site.spin_dir[2] = tl2::var_to_str(z, m_prec);
+
+#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+			std::cout << "u = " << u << ", v = " << v << std::endl;
+			std::cout << "phi = " << phi << ", theta = " << theta << std::endl;
+			std::cout << "x = " << x << " -> " << site.spin_dir[0] << std::endl;
+			std::cout << "y = " << y << " -> " << site.spin_dir[y] << std::endl;
+			std::cout << "z = " << z << " -> " << site.spin_dir[z] << std::endl;
+#endif
 
 			dyn.CalcMagneticSite(site);
 		}
