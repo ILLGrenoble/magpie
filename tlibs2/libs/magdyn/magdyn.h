@@ -707,7 +707,8 @@ private:
 		tl2::create<t_vec_real>({ 0., 0., 1. }),  // out-of-plane, z
 	};
 
-	t_real m_uc_min{-0.5}, m_uc_max{0.5};       // unit cell extents
+	t_real m_uc_min{-0.5};                      //
+	t_real m_uc_max{0.5};                       // unit cell extents
 
 	// settings
 	bool m_is_incommensurate{ false };

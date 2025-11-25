@@ -143,4 +143,5 @@ bool MAGDYN_INST::CheckImagWeights(const MAGDYN_TYPE::SofQE& S) const
 	return ok;
 }
 
+
 #endif

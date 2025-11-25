@@ -39,6 +39,7 @@
 #ifndef __TLIBS2_MAGDYN_H__
 #define __TLIBS2_MAGDYN_H__
 
+
 #ifndef USE_LAPACK
 	#define USE_LAPACK 1
 #endif
