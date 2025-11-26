@@ -161,7 +161,7 @@ public:
 	/**
 	 * set the range for parallel projection
 	 */
-	void SetParalellRange(t_real range)
+	void SetParallelRange(t_real range)
 	{
 		m_parallel_range = range;
 		if(!GetPerspectiveProjection())
@@ -169,7 +169,7 @@ public:
 	}
 
 
-	t_real GetParalellRange() const
+	t_real GetParallelRange() const
 	{
 		return m_parallel_range;
 	}
@@ -307,7 +307,7 @@ public:
 		}
 		else
 		{
-			SetParalellRange(GetParalellRange() / factor);
+			SetParallelRange(GetParallelRange() / factor);
 			m_persp_needs_update = true;
 		}
 	}

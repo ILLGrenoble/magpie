@@ -59,7 +59,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	m_structplot->GetRenderer()->SetLight(0, tl2::create<t_vec3_gl>({ 5, 5, 5 }));
 	m_structplot->GetRenderer()->SetLight(1, tl2::create<t_vec3_gl>({ -5, -5, -5 }));
 	m_structplot->GetRenderer()->SetCoordMax(1.);
-	m_structplot->GetRenderer()->GetCamera().SetParalellRange(4.);
+	m_structplot->GetRenderer()->GetCamera().SetParallelRange(4.);
 	m_structplot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real_gl>(g_structplot_fov));
 	m_structplot->GetRenderer()->GetCamera().SetDist(1.5);
 	m_structplot->GetRenderer()->GetCamera().UpdateTransformation();
@@ -948,7 +948,7 @@ void StructPlotDlg::Sync()
 		}
 	} // terms
 
-	//AddFieldVector();
+	AddFieldVector();
 	AddUnitCell();
 
 	if(total_sites)
@@ -974,14 +974,15 @@ void StructPlotDlg::Sync()
 void StructPlotDlg::AddFieldVector()
 {
 	const auto& field = m_dyn->GetExternalField();
-	if(field.dir.size() < 3 || tl2::equals_0<t_real>(field.mag, g_eps))
+	if(field.dir.size() < 3 || tl2::equals_0<t_real>(field.mag, g_eps) ||
+		tl2::equals_0(field.dir, g_eps))
 		return;
 
 	t_vec3_gl dir = tl2::create<t_vec3_gl>({
 		t_real_gl(field.dir[0]), t_real_gl(field.dir[1]), t_real_gl(field.dir[2]) });
 
 	t_vec3_gl mid = tl2::create<t_vec3_gl>({ 0., 0., 0. });
-	t_real_gl len = tl2::norm(dir);
+	t_real_gl len = tl2::norm(dir) * 0.5;
 
 	m_field = m_structplot->GetRenderer()->AddArrow(
 		0.025, len,  0., 0., 0.5,  0.25, 0.25, 1., 1.);
@@ -995,7 +996,7 @@ void StructPlotDlg::AddFieldVector()
 
 	m_structplot->GetRenderer()->SetObjectCameraInvariant(*m_field, true);
 	m_structplot->GetRenderer()->SetObjectLabel(*m_field, "Magnetic Field Vector");
-	m_structplot->GetRenderer()->SetObjectIntersectable(*m_field, true);
+	m_structplot->GetRenderer()->SetObjectIntersectable(*m_field, false);
 }
 
 

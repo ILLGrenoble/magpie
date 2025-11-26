@@ -58,7 +58,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	m_dispplot->GetRenderer()->SetLight(0, tl2::create<t_vec3_gl>({ 50, 50, 50 }));
 	m_dispplot->GetRenderer()->SetLight(1, tl2::create<t_vec3_gl>({ -50, -50, -50 }));
 	m_dispplot->GetRenderer()->SetCoordMax(50.);
-	m_dispplot->GetRenderer()->GetCamera().SetParalellRange(100.);
+	m_dispplot->GetRenderer()->GetCamera().SetParallelRange(100.);
 	m_dispplot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real>(g_structplot_fov));
 	m_dispplot->GetRenderer()->GetCamera().SetDist(40.);
 	m_dispplot->GetRenderer()->GetCamera().UpdateTransformation();

@@ -57,7 +57,7 @@ BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett)
 	m_plot->GetRenderer()->SetLight(1, tl2::create<t_vec3_gl>({ -5, -5, -5 }));
 	m_plot->GetRenderer()->SetCoordMax(1.);
 	m_plot->GetRenderer()->GetCamera().SetDist(2.);
-	m_plot->GetRenderer()->GetCamera().SetParalellRange(4.);
+	m_plot->GetRenderer()->GetCamera().SetParallelRange(4.);
 	//m_plot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real>(g_structplot_fov));
 	m_plot->GetRenderer()->GetCamera().UpdateTransformation();
 	m_plot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});

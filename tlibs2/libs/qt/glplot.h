@@ -95,7 +95,6 @@ protected:
 	GLint m_uniMatrixProj = -1;
 	GLint m_uniMatrixCam = -1;
 	GLint m_uniMatrixCamInv = -1;
-	//GLint m_uniMatrixCamRot = -1;
 	GLint m_uniMatrixObj = -1;
 	GLint m_uniMatrixA = -1;
 	GLint m_uniMatrixB = -1;

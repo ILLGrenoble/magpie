@@ -768,7 +768,6 @@ const float pi = ${PI};
 uniform mat4 proj    = mat4(1.);
 uniform mat4 cam     = mat4(1.);
 uniform mat4 cam_inv = mat4(1.);
-//uniform mat4 cam_rot = mat4(1.);
 uniform mat4 obj     = mat4(1.);
 uniform mat4 trafoA  = mat4(1.);
 uniform mat4 trafoB  = mat4(1.);  // B = 2 pi / A
@@ -804,11 +803,15 @@ void main()
 	if(cam_invar != 0)
 	{
 		mat4 cam_rot = cam;
-		cam_rot[3][0] = cam_rot[3][1] = cam_rot[3][2] =
-			cam_rot[0][3] = cam_rot[1][3] = cam_rot[2][3] = 0.;
-		// TODO
-		gl_Position = cam_rot * objPos;
-		gl_Position[2] -= 1.5;
+		cam_rot[3][0] = cam_rot[3][1] = cam_rot[3][2] = 0.;
+		cam_rot[0][3] = cam_rot[1][3] = cam_rot[2][3] = 0.;
+		mat4 mat_scale = mat4(0.1);
+		mat_scale[3][3] = 1.;
+
+		gl_Position = mat_scale * cam_rot * objPos;
+		gl_Position[0] -= 0.2;
+		gl_Position[1] -= 0.15;
+		gl_Position[2] -= 1.;
 		gl_Position *= proj;
 	}
 	else
@@ -887,7 +890,6 @@ void main()
 
 		m_uniMatrixCam = m_pShaders->uniformLocation("cam");
 		m_uniMatrixCamInv = m_pShaders->uniformLocation("cam_inv");
-		//m_uniMatrixCamRot = m_pShaders->uniformLocation("cam_rot");
 		m_uniMatrixProj = m_pShaders->uniformLocation("proj");
 		m_uniMatrixObj = m_pShaders->uniformLocation("obj");
 		m_uniMatrixA = m_pShaders->uniformLocation("trafoA");
@@ -968,7 +970,6 @@ void GlPlotRenderer::UpdateViewport()
 	// set matrices
 	m_pShaders->setUniformValue(m_uniMatrixCam, m_cam.GetTransformation());
 	m_pShaders->setUniformValue(m_uniMatrixCamInv, m_cam.GetInverseTransformation());
-	//m_pShaders->setUniformValue(m_uniMatrixCamRot, m_cam.GetRotationMatrix());
 	m_pShaders->setUniformValue(m_uniMatrixProj, m_cam.GetPerspective());
 	LOGGLERR(pGl);
 
@@ -1381,9 +1382,7 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 	// set cam matrix
 	m_pShaders->setUniformValue(m_uniMatrixCam, m_cam.GetTransformation());
 	m_pShaders->setUniformValue(m_uniMatrixCamInv, m_cam.GetInverseTransformation());
-	//m_pShaders->setUniformValue(m_uniMatrixCamRot, m_cam.GetRotationMatrix());
 	//tl2::niceprint(std::cout, m_cam.GetTransformation());
-	//tl2::niceprint(std::cout, m_cam.GetRotationMatrix());
 
 	auto colOverride = tl2::create<t_vec_gl>({ 1, 1, 1, 1 });
 	auto colHighlight = tl2::create<t_vec_gl>({ 1, 1, 1, 1 });
