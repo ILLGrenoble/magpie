@@ -122,11 +122,11 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	// general context menu
 	m_context = new QMenu(this);
 	QAction *acCentre = new QAction("Centre Camera on Midpoint", m_context);
-	QAction *acCentreZero = new QAction("Centre Camera on (½½½)", m_context);
+	QAction *acCentreUC = new QAction("Centre Camera on Unit Cell", m_context);
 	QAction *acSaveImage = new QAction("Save Image...", m_context);
 	acSaveImage->setIcon(QIcon::fromTheme("image-x-generic"));
 	m_context->addAction(acCentre);
-	m_context->addAction(acCentreZero);
+	m_context->addAction(acCentreUC);
 	m_context->addSeparator();
 	m_context->addAction(acSaveImage);
 
@@ -139,7 +139,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	m_context_site->addAction(acFlipSpin);
 	m_context_site->addSeparator();
 	m_context_site->addAction(acCentre);
-	m_context_site->addAction(acCentreZero);
+	m_context_site->addAction(acCentreUC);
 	m_context_site->addAction(acCentreOnObject);
 	m_context_site->addSeparator();
 	m_context_site->addAction(acSaveImage);
@@ -150,7 +150,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	m_context_term->addAction(acDelTerm);
 	m_context_term->addSeparator();
 	m_context_term->addAction(acCentre);
-	m_context_term->addAction(acCentreZero);
+	m_context_term->addAction(acCentreUC);
 	m_context_term->addAction(acCentreOnObject);
 	m_context_term->addSeparator();
 	m_context_term->addAction(acSaveImage);
@@ -191,7 +191,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	connect(acDelTerm, &QAction::triggered, this, &StructPlotDlg::DeleteItem);
 	connect(acCentreOnObject, &QAction::triggered, this, &StructPlotDlg::CentreCameraOnObject);
 	connect(acCentre, &QAction::triggered, this, &StructPlotDlg::CentreCamera);
-	connect(acCentreZero, &QAction::triggered, this, &StructPlotDlg::CentreCameraOnZero);
+	connect(acCentreUC, &QAction::triggered, this, &StructPlotDlg::CentreCameraOnUC);
 	connect(acSaveImage, &QAction::triggered, this, &StructPlotDlg::SaveImage);
 	connect(m_coordcross, &QCheckBox::toggled, this, &StructPlotDlg::ShowCoordCross);
 	connect(m_unitcell, &QCheckBox::toggled, this, &StructPlotDlg::ShowUnitCell);
@@ -507,11 +507,12 @@ void StructPlotDlg::CentreCamera()
 
 
 /**
- * centre camera on (½½½)
+ * centre camera on the unit cell
  */
-void StructPlotDlg::CentreCameraOnZero()
+void StructPlotDlg::CentreCameraOnUC()
 {
-	t_mat_gl matCentre = tl2::hom_translation<t_mat_gl>(0.5, 0.5, 0.5);
+	t_real_gl mid = g_uc_01 ? 0.5 : 0;
+	t_mat_gl matCentre = tl2::hom_translation<t_mat_gl>(mid, mid, mid);
 	m_structplot->GetRenderer()->GetCamera().Centre(matCentre);
 	m_structplot->GetRenderer()->GetCamera().UpdateTransformation();
 	m_structplot->update();
@@ -610,22 +611,17 @@ void StructPlotDlg::AfterGLInitialisation()
 
 
 
-/**
- * get the sites and exchange terms and
- * transfer them to the structure plotter
- */
-void StructPlotDlg::Sync()
+void StructPlotDlg::Clear()
 {
-	if(!m_structplot || !m_dyn)
+	if(!m_structplot)
 		return;
-
-	// get sites and terms
-	const auto& sites = m_dyn->GetMagneticSites();
-	const auto& terms = m_dyn->GetExchangeTerms();
-	const auto& field = m_dyn->GetExternalField();
-	const auto& ordering = m_dyn->GetOrderingWavevector();
-	const auto& rotaxis = m_dyn->GetRotationAxis();
-	const bool is_incommensurate = m_dyn->IsIncommensurate();
+	
+	// clear field direction
+	if(m_field)
+	{
+		m_structplot->GetRenderer()->RemoveObject(*m_field);
+		m_field.reset();
+	}
 
 	// clear old magnetic sites
 	for(const auto& [site_idx, site] : m_sites)
@@ -644,6 +640,28 @@ void StructPlotDlg::Sync()
 
 	// clear centre position for camera
 	m_centre = tl2::zero<t_vec_gl>(3);
+}
+
+
+
+/**
+ * get the sites and exchange terms and
+ * transfer them to the structure plotter
+ */
+void StructPlotDlg::Sync()
+{
+	if(!m_structplot || !m_dyn)
+		return;
+
+	Clear();
+
+	// get sites and terms
+	const auto& sites = m_dyn->GetMagneticSites();
+	const auto& terms = m_dyn->GetExchangeTerms();
+	const auto& field = m_dyn->GetExternalField();
+	const auto& ordering = m_dyn->GetOrderingWavevector();
+	const auto& rotaxis = m_dyn->GetRotationAxis();
+	const bool is_incommensurate = m_dyn->IsIncommensurate();
 	t_size total_sites = 0;
 
 	// crystal matrix
@@ -930,12 +948,54 @@ void StructPlotDlg::Sync()
 		}
 	} // terms
 
+	//AddFieldVector();
 	AddUnitCell();
 
 	if(total_sites)
+	{
+		// centre is mean of all site positions
 		m_centre /= t_real_gl(total_sites);
-	CentreCamera();
+		CentreCamera();
+	}
+	else
+	{
+		// centre is middle of unit cell
+		CentreCameraOnUC();
+	}
+
 	m_structplot->update();
+}
+
+
+
+/**
+ * adds an arrow indicating the direction of the magnetic field
+ */
+void StructPlotDlg::AddFieldVector()
+{
+	const auto& field = m_dyn->GetExternalField();
+	if(field.dir.size() < 3 || tl2::equals_0<t_real>(field.mag, g_eps))
+		return;
+
+	t_vec3_gl dir = tl2::create<t_vec3_gl>({
+		t_real_gl(field.dir[0]), t_real_gl(field.dir[1]), t_real_gl(field.dir[2]) });
+
+	t_vec3_gl mid = tl2::create<t_vec3_gl>({ 0., 0., 0. });
+	t_real_gl len = tl2::norm(dir);
+
+	m_field = m_structplot->GetRenderer()->AddArrow(
+		0.025, len,  0., 0., 0.5,  0.25, 0.25, 1., 1.);
+
+	m_structplot->GetRenderer()->SetObjectMatrix(*m_field,
+		tl2::get_arrow_matrix<t_vec3_gl, t_mat_gl, t_real_gl>(
+			dir, 1.,                             // to and post-scale
+			tl2::create<t_vec3_gl>({ 0, 0, 0 }), // post-translate
+			tl2::create<t_vec3_gl>({ 0, 0, 1 }), // from
+			1., mid));                           // pre-scale and pre-translate
+
+	m_structplot->GetRenderer()->SetObjectCameraInvariant(*m_field, true);
+	m_structplot->GetRenderer()->SetObjectLabel(*m_field, "Magnetic Field Vector");
+	m_structplot->GetRenderer()->SetObjectIntersectable(*m_field, true);
 }
 
 

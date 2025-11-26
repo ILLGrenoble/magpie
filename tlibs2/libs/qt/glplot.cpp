@@ -1,7 +1,7 @@
 /**
  * tlibs2 -- GL plotter
  * @author Tobias Weber <tweber@ill.fr>
- * @date 2017-2021
+ * @date 2017 - 2021
  * @license GPLv3, see 'LICENSE' file
  *
  * @note this file is based on code from my following projects:
@@ -257,6 +257,14 @@ void GlPlotRenderer::SetObjectInvariant(std::size_t idx, bool invariant)
 	if(idx >= m_objs.size())
 		return;
 	m_objs[idx].m_invariant = invariant;
+}
+
+
+void GlPlotRenderer::SetObjectCameraInvariant(std::size_t idx, bool invariant)
+{
+	if(idx >= m_objs.size())
+		return;
+	m_objs[idx].m_cam_invariant = invariant;
 }
 
 
@@ -597,23 +605,28 @@ out vec4 outcol;
 // ----------------------------------------------------------------------------
 // lighting
 // ----------------------------------------------------------------------------
-uniform vec4 const_col = vec4(1, 1, 1, 1);
-uniform vec3 light_pos[] = vec3[]( vec3(5, 5, 5), vec3(0, 0, 0), vec3(0, 0, 0), vec3(0, 0, 0) );
+uniform vec4 const_col    = vec4(1, 1, 1, 1);
+uniform vec3 light_pos[]  = vec3[](
+	vec3(5, 5, 5),
+	vec3(0, 0, 0),
+	vec3(0, 0, 0),
+	vec3(0, 0, 0)
+);
 uniform int active_lights = 1;	// how many lights to use?
 
-float g_diffuse = 1.;
-float g_specular = 0.25;
+float g_diffuse   = 1.;
+float g_specular  = 0.25;
 float g_shininess = 1.;
-float g_ambient = 0.2;
+float g_ambient   = 0.2;
 // ----------------------------------------------------------------------------
 
 
 // ----------------------------------------------------------------------------
 // transformations
 // ----------------------------------------------------------------------------
-uniform mat4 cam = mat4(1.);
+uniform mat4 cam     = mat4(1.);
 uniform mat4 cam_inv = mat4(1.);
-uniform mat4 obj = mat4(1.);
+uniform mat4 obj     = mat4(1.);
 uniform int lighting = 1;
 // ----------------------------------------------------------------------------
 
@@ -752,15 +765,17 @@ const float pi = ${PI};
 // ----------------------------------------------------------------------------
 // transformations
 // ----------------------------------------------------------------------------
-uniform mat4 proj = mat4(1.);
-uniform mat4 cam = mat4(1.);
+uniform mat4 proj    = mat4(1.);
+uniform mat4 cam     = mat4(1.);
 uniform mat4 cam_inv = mat4(1.);
-uniform mat4 obj = mat4(1.);
-uniform mat4 trafoA = mat4(1.);
-uniform mat4 trafoB = mat4(1.);  // B = 2 pi / A
+//uniform mat4 cam_rot = mat4(1.);
+uniform mat4 obj     = mat4(1.);
+uniform mat4 trafoA  = mat4(1.);
+uniform mat4 trafoB  = mat4(1.);  // B = 2 pi / A
 
-uniform int is_real_space = 1;   // real or reciprocal space
-uniform int coordsys = 0;        // 0: crystal system, 1: lab system
+uniform int is_real_space = 1;    // real or reciprocal space
+uniform int coordsys      = 0;    // 0: crystal system, 1: lab system
+uniform int cam_invar     = 0;    // object is invariant to camera translation
 // ----------------------------------------------------------------------------
 
 
@@ -785,7 +800,21 @@ void main()
 	// coordTrafo_inv is needed so not to distort the object
 	vec4 objPos = coordTrafo * obj * coordTrafo_inv * vertex;
 	vec4 objNorm = normalize(coordTrafo * obj * coordTrafo_inv * normal);
-	gl_Position = proj * cam * objPos;
+
+	if(cam_invar != 0)
+	{
+		mat4 cam_rot = cam;
+		cam_rot[3][0] = cam_rot[3][1] = cam_rot[3][2] =
+			cam_rot[0][3] = cam_rot[1][3] = cam_rot[2][3] = 0.;
+		// TODO
+		gl_Position = cam_rot * objPos;
+		gl_Position[2] -= 1.5;
+		gl_Position *= proj;
+	}
+	else
+	{
+		gl_Position = proj * cam * objPos;
+	}
 
 	fragpos = objPos;
 	fragnorm = objNorm;
@@ -858,12 +887,14 @@ void main()
 
 		m_uniMatrixCam = m_pShaders->uniformLocation("cam");
 		m_uniMatrixCamInv = m_pShaders->uniformLocation("cam_inv");
+		//m_uniMatrixCamRot = m_pShaders->uniformLocation("cam_rot");
 		m_uniMatrixProj = m_pShaders->uniformLocation("proj");
 		m_uniMatrixObj = m_pShaders->uniformLocation("obj");
 		m_uniMatrixA = m_pShaders->uniformLocation("trafoA");
 		m_uniMatrixB = m_pShaders->uniformLocation("trafoB");
 		m_uniIsRealSpace = m_pShaders->uniformLocation("is_real_space");
 		m_uniCoordSys = m_pShaders->uniformLocation("coordsys");
+		m_uniCamInvar = m_pShaders->uniformLocation("cam_invar");
 		m_uniConstCol = m_pShaders->uniformLocation("const_col");
 		m_uniLightPos = m_pShaders->uniformLocation("light_pos");
 		m_uniNumActiveLights = m_pShaders->uniformLocation("active_lights");
@@ -937,6 +968,7 @@ void GlPlotRenderer::UpdateViewport()
 	// set matrices
 	m_pShaders->setUniformValue(m_uniMatrixCam, m_cam.GetTransformation());
 	m_pShaders->setUniformValue(m_uniMatrixCamInv, m_cam.GetInverseTransformation());
+	//m_pShaders->setUniformValue(m_uniMatrixCamRot, m_cam.GetRotationMatrix());
 	m_pShaders->setUniformValue(m_uniMatrixProj, m_cam.GetPerspective());
 	LOGGLERR(pGl);
 
@@ -1349,7 +1381,9 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 	// set cam matrix
 	m_pShaders->setUniformValue(m_uniMatrixCam, m_cam.GetTransformation());
 	m_pShaders->setUniformValue(m_uniMatrixCamInv, m_cam.GetInverseTransformation());
-
+	//m_pShaders->setUniformValue(m_uniMatrixCamRot, m_cam.GetRotationMatrix());
+	//tl2::niceprint(std::cout, m_cam.GetTransformation());
+	//tl2::niceprint(std::cout, m_cam.GetRotationMatrix());
 
 	auto colOverride = tl2::create<t_vec_gl>({ 1, 1, 1, 1 });
 	auto colHighlight = tl2::create<t_vec_gl>({ 1, 1, 1, 1 });
@@ -1417,6 +1451,10 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 		// set to untransformed coordinate system if the object is invariant
 		m_pShaders->setUniformValue(m_uniCoordSys,
 			linkedObj->m_invariant ? 0 : m_coordsys.load());
+
+		// ignore camera translation
+		m_pShaders->setUniformValue(m_uniCamInvar,
+			linkedObj->m_cam_invariant);
 
 
 		// main vertex array object

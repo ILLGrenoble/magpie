@@ -332,6 +332,15 @@ public:
 
 
 	/**
+	 * get the camera's rotation matrix (without translation parts)
+	 */
+	const t_mat& GetRotationMatrix() const
+	{
+		return m_matRot;
+	}
+
+
+	/**
 	 * get the camera's full transformation matrix
 	 */
 	const t_mat& GetPerspective() const

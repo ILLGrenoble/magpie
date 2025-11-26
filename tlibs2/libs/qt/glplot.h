@@ -1,7 +1,7 @@
 /**
  * tlibs2 -- GL plotter
  * @author Tobias Weber <tweber@ill.fr>
- * @date 2017-2021
+ * @date 2017 - 2021
  * @license GPLv3, see 'LICENSE' file
  *
  * @note this file is based on code from my following projects:
@@ -95,11 +95,13 @@ protected:
 	GLint m_uniMatrixProj = -1;
 	GLint m_uniMatrixCam = -1;
 	GLint m_uniMatrixCamInv = -1;
+	//GLint m_uniMatrixCamRot = -1;
 	GLint m_uniMatrixObj = -1;
 	GLint m_uniMatrixA = -1;
 	GLint m_uniMatrixB = -1;
 	GLint m_uniIsRealSpace = -1;
 	GLint m_uniCoordSys = -1;
+	GLint m_uniCamInvar = -1;
 
 	t_mat_gl m_matA = tl2::unit<t_mat_gl>();
 	t_mat_gl m_matB = tl2::unit<t_mat_gl>();
@@ -240,6 +242,7 @@ public:
 	void SetObjectIntersectable(std::size_t idx, bool intersect);
 	void SetObjectPriority(std::size_t idx, int prio);
 	void SetObjectInvariant(std::size_t idx, bool invariant);
+	void SetObjectCameraInvariant(std::size_t idx, bool invariant);
 	void SetObjectForceCull(std::size_t idx, bool cull);
 	void SetObjectCullBack(std::size_t idx, bool cull_back);
 	void SetObjectLighting(std::size_t idx, int lighting);

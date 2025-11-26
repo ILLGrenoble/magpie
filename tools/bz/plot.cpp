@@ -357,7 +357,6 @@ void BZPlotDlg::AddVertex(const t_vec_bz& pos,
 }
 
 
-
 /**
  * add a voronoi vertex to the plot
  */
@@ -400,7 +399,7 @@ void BZPlotDlg::AddLine(const t_vec_bz& start, const t_vec_bz& end, bool add_ver
 			tl2::create<t_vec3_gl>({ 0, 0, 0 }), // post-translate
 			tl2::create<t_vec3_gl>({ 0, 0, 1 }), // from
 			1.,                                  // pre-scale
-			tl2::convert<t_vec3_gl>(mid)));    // pre-translate
+			tl2::convert<t_vec3_gl>(mid)));      // pre-translate
 
 	m_plot->GetRenderer()->SetObjectIntersectable(arrow, false);
 	m_objsLines.push_back(arrow);

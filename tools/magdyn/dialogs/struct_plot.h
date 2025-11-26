@@ -75,6 +75,7 @@ public:
 	StructPlotDlg(const StructPlotDlg&) = delete;
 	StructPlotDlg& operator=(const StructPlotDlg&) = delete;
 
+	void Clear();
 	void Sync();
 	void SetKernel(const t_magdyn* dyn) { m_dyn = dyn; }
 	void SetTables(QTableWidget *sites, QTableWidget *terms)
@@ -108,10 +109,12 @@ protected:
 	void AddUnitCell();
 	void ShowUnitCell(bool show);
 
+	void AddFieldVector();
+
 	void CameraHasUpdated();
 	void CentreCamera();
 	void CentreCameraOnObject();
-	void CentreCameraOnZero();
+	void CentreCameraOnUC();
 
 	void HighlightSite(const std::string& name);
 	void HighlightTerm(const std::string& name);
@@ -148,6 +151,7 @@ private:
 	std::size_t m_sphere{};
 	std::size_t m_arrow{};
 	std::size_t m_cyl{};
+	std::optional<std::size_t> m_field{};
 
 
 signals:
