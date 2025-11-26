@@ -189,7 +189,8 @@ if(USE_QT)
 		dialogs/ground_state.cpp dialogs/ground_state.h
 		dialogs/topology.cpp dialogs/topology.h
 		dialogs/diff.cpp dialogs/diff.h
-		dialogs/dispersion3d.cpp dialogs/dispersion3d.h
+		dialogs/dispersion3d.cpp dialogs/dispersion3d_file.cpp
+		dialogs/dispersion3d_calc.cpp dialogs/dispersion3d.h
 		dialogs/table_import.cpp dialogs/table_import.h
 		dialogs/trafos.cpp dialogs/trafos.h
 		dialogs/pol.cpp dialogs/pol.h

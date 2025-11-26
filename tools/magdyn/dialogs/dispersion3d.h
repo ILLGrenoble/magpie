@@ -53,6 +53,16 @@
  */
 class Dispersion3DDlg : public QDialog
 { Q_OBJECT
+private:
+	// column indices in magnon band table
+	enum : int
+	{
+		COL_BC_BAND = 0,
+		COL_BC_ACTIVE,
+		NUM_COLS_BC,
+	};
+
+
 protected:
 	using t_data_Q = std::tuple<t_vec_real /*0: Q*/, t_real /*1: E*/, t_real /*2: S*/,
 		t_size /*3: Q_idx_1*/, t_size /*4: Q_idx_2*/,
