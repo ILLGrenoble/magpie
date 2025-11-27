@@ -223,7 +223,12 @@ struct GlPlotObj : public GlRenderObj
 	// does not define a geometry itself, but just links to another object
 	std::optional<std::size_t> linkedObj{};
 
+	// object transformation matrix
 	t_mat_gl m_mat = tl2::unit<t_mat_gl>();
+
+	// additional transformation matrices applied after camera/projection trafo
+	t_mat_gl m_mat_after_cam  = tl2::unit<t_mat_gl>();
+	t_mat_gl m_mat_after_proj = tl2::unit<t_mat_gl>();
 
 	bool m_invariant      = false;   // invariant to A, B matrices
 	bool m_cam_invariant  = false;   // invariant to camera translations

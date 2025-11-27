@@ -133,6 +133,23 @@ void GlPlotRenderer::SetObjectMatrix(std::size_t idx, const t_mat_gl& mat)
 }
 
 
+void GlPlotRenderer::SetObjectMatrixAfterCam(std::size_t idx, const t_mat_gl& mat)
+{
+	if(idx >= m_objs.size())
+		return;
+	m_objs[idx].m_mat_after_cam = mat;
+}
+
+
+
+void GlPlotRenderer::SetObjectMatrixAfterProj(std::size_t idx, const t_mat_gl& mat)
+{
+	if(idx >= m_objs.size())
+		return;
+	m_objs[idx].m_mat_after_proj = mat;
+}
+
+
 const t_mat_gl& GlPlotRenderer::GetObjectMatrix(std::size_t idx) const
 {
 	static t_mat_gl invalid_matrix{};
@@ -765,12 +782,14 @@ const float pi = ${PI};
 // ----------------------------------------------------------------------------
 // transformations
 // ----------------------------------------------------------------------------
-uniform mat4 proj    = mat4(1.);
-uniform mat4 cam     = mat4(1.);
-uniform mat4 cam_inv = mat4(1.);
-uniform mat4 obj     = mat4(1.);
-uniform mat4 trafoA  = mat4(1.);
-uniform mat4 trafoB  = mat4(1.);  // B = 2 pi / A
+uniform mat4 proj     = mat4(1.);
+uniform mat4 cam      = mat4(1.);
+uniform mat4 cam_inv  = mat4(1.);
+uniform mat4 obj      = mat4(1.);
+uniform mat4 obj_cam  = mat4(1.);  // additional trafo when invariant to camera translation
+uniform mat4 obj_proj = mat4(1.);  // additional trafo when invariant to camera translation
+uniform mat4 trafoA   = mat4(1.);
+uniform mat4 trafoB   = mat4(1.);  // B = 2 pi / A
 
 uniform int is_real_space = 1;    // real or reciprocal space
 uniform int coordsys      = 0;    // 0: crystal system, 1: lab system
@@ -805,18 +824,12 @@ void main()
 		mat4 cam_rot = cam;
 		cam_rot[3][0] = cam_rot[3][1] = cam_rot[3][2] = 0.;
 		cam_rot[0][3] = cam_rot[1][3] = cam_rot[2][3] = 0.;
-		mat4 mat_scale = mat4(0.1);
-		mat_scale[3][3] = 1.;
 
-		gl_Position = mat_scale * cam_rot * objPos;
-		gl_Position[0] -= 0.2;
-		gl_Position[1] -= 0.15;
-		gl_Position[2] -= 1.;
-		gl_Position *= proj;
+		gl_Position = obj_proj * proj * obj_cam * cam_rot * objPos;
 	}
 	else
 	{
-		gl_Position = proj * cam * objPos;
+		gl_Position = /*obj_proj **/ proj * /*obj_cam **/ cam * objPos;
 	}
 
 	fragpos = objPos;
@@ -892,6 +905,8 @@ void main()
 		m_uniMatrixCamInv = m_pShaders->uniformLocation("cam_inv");
 		m_uniMatrixProj = m_pShaders->uniformLocation("proj");
 		m_uniMatrixObj = m_pShaders->uniformLocation("obj");
+		m_uniMatrixObjCam = m_pShaders->uniformLocation("obj_cam");
+		m_uniMatrixObjAfterProj = m_pShaders->uniformLocation("obj_proj");
 		m_uniMatrixA = m_pShaders->uniformLocation("trafoA");
 		m_uniMatrixB = m_pShaders->uniformLocation("trafoB");
 		m_uniIsRealSpace = m_pShaders->uniformLocation("is_real_space");
@@ -1446,6 +1461,8 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 			pGl->glCullFace(GL_FRONT);
 
 		m_pShaders->setUniformValue(m_uniMatrixObj, obj.m_mat);
+		m_pShaders->setUniformValue(m_uniMatrixObjCam, obj.m_mat_after_cam);
+		m_pShaders->setUniformValue(m_uniMatrixObjAfterProj, obj.m_mat_after_proj);
 
 		// set to untransformed coordinate system if the object is invariant
 		m_pShaders->setUniformValue(m_uniCoordSys,

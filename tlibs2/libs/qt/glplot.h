@@ -85,21 +85,14 @@ protected:
 
 	std::shared_ptr<QOpenGLShaderProgram> m_pShaders{};
 
-	GLint m_attrVertex = -1;
-	GLint m_attrVertexNorm = -1;
-	GLint m_attrVertexCol = -1;
+	GLint m_attrVertex = -1, m_attrVertexNorm = -1, m_attrVertexCol = -1;
 	GLint m_uniConstCol = -1;
-	GLint m_uniLightPos = -1;
-	GLint m_uniNumActiveLights = -1;
-	GLint m_uniLighting = -1;
-	GLint m_uniMatrixProj = -1;
-	GLint m_uniMatrixCam = -1;
-	GLint m_uniMatrixCamInv = -1;
-	GLint m_uniMatrixObj = -1;
-	GLint m_uniMatrixA = -1;
-	GLint m_uniMatrixB = -1;
-	GLint m_uniIsRealSpace = -1;
-	GLint m_uniCoordSys = -1;
+	GLint m_uniLightPos = -1, m_uniNumActiveLights = -1, m_uniLighting = -1;
+	GLint m_uniMatrixProj = -1, m_uniMatrixObjAfterProj = -1;
+	GLint m_uniMatrixCam = -1, m_uniMatrixCamInv = -1;
+	GLint m_uniMatrixObj = -1, m_uniMatrixObjCam = -1;
+	GLint m_uniMatrixA = -1, m_uniMatrixB = -1;
+	GLint m_uniIsRealSpace = -1, m_uniCoordSys = -1;
 	GLint m_uniCamInvar = -1;
 
 	t_mat_gl m_matA = tl2::unit<t_mat_gl>();
@@ -234,6 +227,8 @@ public:
 		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);
 
 	void SetObjectMatrix(std::size_t idx, const t_mat_gl& mat);
+	void SetObjectMatrixAfterCam(std::size_t idx, const t_mat_gl& mat);
+	void SetObjectMatrixAfterProj(std::size_t idx, const t_mat_gl& mat);
 	void SetObjectCol(std::size_t idx, t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a = 1);
 	void SetObjectLabel(std::size_t idx, const std::string& label);
 	void SetObjectDataString(std::size_t idx, const std::string& data);

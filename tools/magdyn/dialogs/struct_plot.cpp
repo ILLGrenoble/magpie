@@ -994,6 +994,12 @@ void StructPlotDlg::AddFieldVector()
 			tl2::create<t_vec3_gl>({ 0, 0, 1 }), // from
 			1., mid));                           // pre-scale and pre-translate
 
+	m_structplot->GetRenderer()->SetObjectMatrixAfterCam(*m_field,
+			tl2::hom_translation<t_mat_gl>(/*-1., -0.75,*/0., 0., -1.) *
+			tl2::hom_scaling<t_mat_gl>(0.5, 0.5, 0.5));
+	m_structplot->GetRenderer()->SetObjectMatrixAfterProj(*m_field,
+			tl2::hom_translation<t_mat_gl>(-0.75, -0.75, 0.));
+
 	m_structplot->GetRenderer()->SetObjectCameraInvariant(*m_field, true);
 	m_structplot->GetRenderer()->SetObjectLabel(*m_field, "Magnetic Field Vector");
 	m_structplot->GetRenderer()->SetObjectIntersectable(*m_field, false);
