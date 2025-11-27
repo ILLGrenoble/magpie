@@ -241,7 +241,7 @@ struct GlPlotObj : public GlRenderObj
 	int m_lighting        = 1;       // lighting model
 	int m_priority        = 1;       // object rendering priority
 
-	t_vec3_gl m_labelPos = tl2::create<t_vec3_gl>({ 0., 0., 0. });
+	t_vec3_gl m_label_pos = tl2::create<t_vec3_gl>({ 0., 0., 0. });
 	std::string m_label{};
 	std::string m_datastr{};
 

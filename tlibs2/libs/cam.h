@@ -496,6 +496,39 @@ public:
 
 
 	/**
+	 * convert a vector for a camera-invariant object into screen coordinates
+	 */
+	t_vec ToScreenCoordsInvar(const t_vec& vec4,
+	  const t_mat& after_cam, const t_mat& after_proj,
+		bool *visible = nullptr) const
+	{
+		auto [ persp, vec ] =
+			tl2::hom_to_screen_coords<t_mat, t_vec>(vec4,
+			  after_cam * GetRotationMatrix(),
+			  after_proj * GetPerspective(),
+				GetViewport(), true);
+
+		// position not visible -> return a point outside the viewport
+		if(persp[2] > 1.)
+		{
+			if(visible)
+				*visible = false;
+
+			return tl2::create<t_vec>(
+			{
+				t_real(-1.) * GetScreenDimensions()[0],
+				t_real(-1.) * GetScreenDimensions()[1]
+			});
+		}
+
+		if(visible)
+			*visible = true;
+
+		return vec;
+	}
+
+
+	/**
 	 * get position of object relative to the camera frustum
 	 * -1: left of camera frustum
 	 * +1: right of camera frustum

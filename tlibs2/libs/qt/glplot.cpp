@@ -98,9 +98,15 @@ void GlPlotRenderer::startedThread() { }
 void GlPlotRenderer::stoppedThread() { }
 
 
-QPointF GlPlotRenderer::GlToScreenCoords(const t_vec_gl& vec4, bool *pVisible) const
+QPointF GlPlotRenderer::GlToScreenCoords(const t_vec_gl& vec4,
+	const GlPlotObj *obj, bool *visible) const
 {
-	t_vec_gl pt = m_cam.ToScreenCoords(vec4, pVisible);
+	t_vec_gl pt;
+	if(obj && obj->m_cam_invariant)
+		pt = m_cam.ToScreenCoordsInvar(vec4, obj->m_mat_after_cam, obj->m_mat_after_proj, visible);
+	else
+		pt = m_cam.ToScreenCoords(vec4, visible);
+
 	return QPointF(pt[0], pt[1]);
 }
 
@@ -169,11 +175,14 @@ void GlPlotRenderer::SetObjectCol(std::size_t idx,
 }
 
 
-void GlPlotRenderer::SetObjectLabel(std::size_t idx, const std::string& label)
+void GlPlotRenderer::SetObjectLabel(std::size_t idx, const std::string& label,
+	const t_vec3_gl *pos)
 {
 	if(idx >= m_objs.size())
 		return;
 	m_objs[idx].m_label = label;
+	if(pos)
+		m_objs[idx].m_label_pos = *pos;
 }
 
 const std::string& GlPlotRenderer::GetObjectLabel(std::size_t idx) const
@@ -482,7 +491,7 @@ std::size_t GlPlotRenderer::AddArrow(t_real_gl rad, t_real_gl h,
 		tl2::create<t_vec_gl>({0,0,1}));
 	obj.m_boundingSpherePos = std::move(boundingSpherePos);
 	obj.m_boundingSphereRad = boundingSphereRad;
-	obj.m_labelPos = tl2::create<t_vec3_gl>({0., 0., 0.75});
+	obj.m_label_pos = tl2::create<t_vec3_gl>({0., 0., 0.75});
 	m_objs.emplace_back(std::move(obj));
 
 	return m_objs.size() - 1;		// object handle
@@ -558,7 +567,7 @@ std::size_t GlPlotRenderer::AddTriangleObject(
 	obj.m_mat = tl2::hom_translation<t_mat_gl, t_real_gl>(0., 0., 0.);
 	obj.m_boundingSpherePos = std::move(boundingSpherePos);
 	obj.m_boundingSphereRad = boundingSphereRad;
-	obj.m_labelPos = tl2::create<t_vec3_gl>({0., 0., 0.75});
+	obj.m_label_pos = tl2::create<t_vec3_gl>({0., 0., 0.75});
 	m_objs.emplace_back(std::move(obj));
 
 	return m_objs.size() - 1;		// object handle
@@ -782,18 +791,18 @@ const float pi = ${PI};
 // ----------------------------------------------------------------------------
 // transformations
 // ----------------------------------------------------------------------------
-uniform mat4 proj     = mat4(1.);
-uniform mat4 cam      = mat4(1.);
-uniform mat4 cam_inv  = mat4(1.);
-uniform mat4 obj      = mat4(1.);
+uniform mat4 proj     = mat4(1.);  // projection matrix
+uniform mat4 cam      = mat4(1.);  // camera transformation matrix
+uniform mat4 cam_inv  = mat4(1.);  // inverse camera transformation matrix
+uniform mat4 obj      = mat4(1.);  // object transformation matrix
 uniform mat4 obj_cam  = mat4(1.);  // additional trafo when invariant to camera translation
 uniform mat4 obj_proj = mat4(1.);  // additional trafo when invariant to camera translation
-uniform mat4 trafoA   = mat4(1.);
+uniform mat4 trafoA   = mat4(1.);  // crystal matrix
 uniform mat4 trafoB   = mat4(1.);  // B = 2 pi / A
 
-uniform int is_real_space = 1;    // real or reciprocal space
-uniform int coordsys      = 0;    // 0: crystal system, 1: lab system
-uniform int cam_invar     = 0;    // object is invariant to camera translation
+uniform int is_real_space = 1;     // real or reciprocal space
+uniform int coordsys      = 0;     // 0: crystal system, 1: lab system
+uniform int cam_invar     = 0;     // object is invariant to camera translation
 // ----------------------------------------------------------------------------
 
 
@@ -1525,7 +1534,8 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 	if(objCoordCross && GetObjectVisible(*objCoordCross))
 	{
 		// coordinate labels
-		painter.drawText(GlToScreenCoords(tl2::create<t_vec_gl>({0.,0.,0.,1.})), "0");
+		painter.drawText(GlToScreenCoords(tl2::create<t_vec_gl>({0., 0., 0., 1.})), "0");
+
 		for(t_real_gl f = -std::floor(m_CoordMax); f <= std::floor(m_CoordMax); f += 0.5)
 		{
 			if(tl2::equals<t_real_gl>(f, 0))
@@ -1534,11 +1544,11 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 			std::ostringstream ostrF;
 			ostrF << f;
 			painter.drawText(GlToScreenCoords(
-				tl2::create<t_vec_gl>({f,0.,0.,1.})), ostrF.str().c_str());
+				tl2::create<t_vec_gl>({f, 0., 0., 1.})), ostrF.str().c_str());
 			painter.drawText(GlToScreenCoords(
-				tl2::create<t_vec_gl>({0.,f,0.,1.})), ostrF.str().c_str());
+				tl2::create<t_vec_gl>({0., f, 0., 1.})), ostrF.str().c_str());
 			painter.drawText(GlToScreenCoords(
-				tl2::create<t_vec_gl>({0.,0.,f,1.})), ostrF.str().c_str());
+				tl2::create<t_vec_gl>({0., 0., f, 1.})), ostrF.str().c_str());
 		}
 
 		t_vec_gl x = tl2::create<t_vec_gl>({m_CoordMax*t_real_gl(1.2), 0., 0., 1.});
@@ -1556,7 +1566,7 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 	if(objCoordCross && GetObjectVisible(*objCoordCross))
 	{
 		// coordinate labels
-		painter.drawText(GlToScreenCoords(tl2::create<t_vec_gl>({0.,0.,0.,1.})), "0");
+		painter.drawText(GlToScreenCoords(tl2::create<t_vec_gl>({0., 0., 0., 1.})), "0");
 		for(t_real_gl f = -std::floor(m_CoordMax); f <= std::floor(m_CoordMax); f += 0.5)
 		{
 			if(tl2::equals<t_real_gl>(f, 0))
@@ -1565,11 +1575,11 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 			std::ostringstream ostrF;
 			ostrF << f;
 			painter.drawText(GlToScreenCoords(
-				tl2::create<t_vec_gl>({f,0.,0.,1.})), ostrF.str().c_str());
+				tl2::create<t_vec_gl>({f, 0., 0., 1.})), ostrF.str().c_str());
 			painter.drawText(GlToScreenCoords(
-				tl2::create<t_vec_gl>({0.,f,0.,1.})), ostrF.str().c_str());
+				tl2::create<t_vec_gl>({0., f, 0., 1.})), ostrF.str().c_str());
 			painter.drawText(GlToScreenCoords(
-				tl2::create<t_vec_gl>({0.,0.,f,1.})), ostrF.str().c_str());
+				tl2::create<t_vec_gl>({0., 0., f, 1.})), ostrF.str().c_str());
 		}
 
 		t_vec_gl h = tl2::create<t_vec_gl>({m_CoordMax*t_real_gl(1.2), 0., 0., 1.});
@@ -1609,9 +1619,9 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 			if(m_coordsys == 1 && !obj.m_invariant)
 				coordTrafo = &m_matA;
 
-			t_vec3_gl posLabel3d = tl2::prod_mv(tl2::prod((*coordTrafo), obj.m_mat), obj.m_labelPos);
+			t_vec3_gl posLabel3d = tl2::prod_mv(tl2::prod((*coordTrafo), obj.m_mat), obj.m_label_pos);
 			auto posLabel2d = GlToScreenCoords(tl2::create<t_vec_gl>(
-				{posLabel3d[0], posLabel3d[1], posLabel3d[2], 1.}));
+				{ posLabel3d[0], posLabel3d[1], posLabel3d[2], 1. }), &obj);
 
 			QFont fontLabel = fontOrig;
 			QPen penLabel = penOrig;

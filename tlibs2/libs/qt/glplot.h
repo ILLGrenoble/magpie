@@ -160,7 +160,8 @@ public:
 	static constexpr bool m_isthreaded = false;
 	static constexpr bool m_usetimer = false;
 
-	QPointF GlToScreenCoords(const t_vec_gl& vec, bool *pVisible = nullptr) const;
+	QPointF GlToScreenCoords(const t_vec_gl& vec,
+		const GlPlotObj *obj = nullptr, bool *pVisible = nullptr) const;
 
 	const t_cam& GetCamera() const
 	{
@@ -230,7 +231,7 @@ public:
 	void SetObjectMatrixAfterCam(std::size_t idx, const t_mat_gl& mat);
 	void SetObjectMatrixAfterProj(std::size_t idx, const t_mat_gl& mat);
 	void SetObjectCol(std::size_t idx, t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a = 1);
-	void SetObjectLabel(std::size_t idx, const std::string& label);
+	void SetObjectLabel(std::size_t idx, const std::string& label, const t_vec3_gl *pos = nullptr);
 	void SetObjectDataString(std::size_t idx, const std::string& data);
 	void SetObjectVisible(std::size_t idx, bool visible);
 	void SetObjectIntersectable(std::size_t idx, bool intersect);
