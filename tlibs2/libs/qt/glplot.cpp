@@ -99,7 +99,7 @@ void GlPlotRenderer::stoppedThread() { }
 
 
 QPointF GlPlotRenderer::GlToScreenCoords(const t_vec_gl& vec4,
-	const GlPlotObj *obj, bool *visible) const
+	const GlRenderObj *obj, bool *visible) const
 {
 	t_vec_gl pt;
 	if(obj && obj->m_cam_invariant)
@@ -111,21 +111,22 @@ QPointF GlPlotRenderer::GlToScreenCoords(const t_vec_gl& vec4,
 }
 
 
-GlPlotObj GlPlotRenderer::CreateTriangleObject(const std::vector<t_vec3_gl>& verts,
+GlRenderObj GlPlotRenderer::CreateTriangleObject(const std::vector<t_vec3_gl>& verts,
 	const std::vector<t_vec3_gl>& triagverts, const std::vector<t_vec3_gl>& norms,
-	const t_vec_gl& colour, bool bUseVertsAsNorm)
+	const t_vec_gl& colour, bool bUseVertsAsNorm, const std::vector<t_vec3_gl>* uvs)
 {
-	GlPlotObj obj;
-	create_triangle_object(m_pPlot, obj, verts, triagverts, norms, {}, colour,
-		bUseVertsAsNorm, m_attrVertex, m_attrVertexNorm, m_attrVertexCol, -1);
+	GlRenderObj obj;
+	create_triangle_object(m_pPlot, obj, verts, triagverts, norms,
+	  uvs ? *uvs : std::vector<t_vec3_gl>{}, colour, bUseVertsAsNorm,
+		m_attrVertex, m_attrVertexNorm, m_attrVertexCol, m_attrTexCoords);
 	return obj;
 }
 
 
-GlPlotObj GlPlotRenderer::CreateLineObject(
+GlRenderObj GlPlotRenderer::CreateLineObject(
 	const std::vector<t_vec3_gl>& verts, const t_vec_gl& colour)
 {
-	GlPlotObj obj;
+	GlRenderObj obj;
 	create_line_object(m_pPlot, obj, verts, colour, m_attrVertex, m_attrVertexCol);
 	return obj;
 }
@@ -364,7 +365,7 @@ std::size_t GlPlotRenderer::AddLinkedObject(std::size_t linkTo,
 	t_real_gl x, t_real_gl y, t_real_gl z,
 	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a)
 {
-	GlPlotObj obj;
+	GlRenderObj obj;
 	obj.linkedObj = linkTo;
 	obj.m_mat = tl2::hom_translation<t_mat_gl>(x, y, z);
 	obj.m_colour = tl2::create<t_vec_gl>({r, g, b, a});
@@ -389,7 +390,8 @@ std::size_t GlPlotRenderer::AddCuboid(
 	QMutexLocker _locker{&m_mutexObj};
 
 	auto obj = CreateTriangleObject(std::get<0>(solid),
-		triagverts, norms, tl2::create<t_vec_gl>({ r, g, b, a }), false);
+		triagverts, norms, tl2::create<t_vec_gl>({ r, g, b, a }),
+		false, &uvs);
 	obj.m_mat = tl2::hom_translation<t_mat_gl>(x, y, z);
 	obj.m_boundingSpherePos = std::move(boundingSpherePos);
 	obj.m_boundingSphereRad = boundingSphereRad;
@@ -415,7 +417,8 @@ std::size_t GlPlotRenderer::AddSphere(
 	QMutexLocker _locker{&m_mutexObj};
 
 	auto obj = CreateTriangleObject(std::get<0>(solid),
-		triagverts, norms, tl2::create<t_vec_gl>({ r, g, b, a }), true);
+		triagverts, norms, tl2::create<t_vec_gl>({ r, g, b, a }),
+		true, &uvs);
 	obj.m_mat = tl2::hom_translation<t_mat_gl>(x, y, z);
 	obj.m_boundingSpherePos = std::move(boundingSpherePos);
 	obj.m_boundingSphereRad = boundingSphereRad;
@@ -438,7 +441,8 @@ std::size_t GlPlotRenderer::AddCylinder(t_real_gl rad, t_real_gl h,
 	QMutexLocker _locker{&m_mutexObj};
 
 	auto obj = CreateTriangleObject(std::get<0>(solid),
-		triagverts, norms, tl2::create<t_vec_gl>({ r, g, b, a }), false);
+		triagverts, norms, tl2::create<t_vec_gl>({ r, g, b, a }),
+		false, &uvs);
 	obj.m_mat = tl2::hom_translation<t_mat_gl>(x, y, z);
 	obj.m_boundingSpherePos = std::move(boundingSpherePos);
 	obj.m_boundingSphereRad = boundingSphereRad;
@@ -460,7 +464,8 @@ std::size_t GlPlotRenderer::AddCone(t_real_gl rad, t_real_gl h,
 	QMutexLocker _locker{&m_mutexObj};
 
 	auto obj = CreateTriangleObject(std::get<0>(solid),
-		triagverts, norms, tl2::create<t_vec_gl>({ r, g, b, a }), false);
+		triagverts, norms, tl2::create<t_vec_gl>({ r, g, b, a }),
+		false, &uvs);
 	obj.m_mat = tl2::hom_translation<t_mat_gl>(x, y, z);
 	obj.m_boundingSpherePos = std::move(boundingSpherePos);
 	obj.m_boundingSphereRad = boundingSphereRad;
@@ -484,11 +489,12 @@ std::size_t GlPlotRenderer::AddArrow(t_real_gl rad, t_real_gl h,
 	QMutexLocker _locker{&m_mutexObj};
 
 	auto obj = CreateTriangleObject(std::get<0>(solid),
-		triagverts, norms, tl2::create<t_vec_gl>({ r,g,b,a }), false);
+		triagverts, norms, tl2::create<t_vec_gl>({ r,g,b,a }),
+		false, &uvs);
 	obj.m_mat = tl2::get_arrow_matrix<t_vec_gl, t_mat_gl, t_real_gl>(
-		tl2::create<t_vec_gl>({1,0,0}), 1.,
-		tl2::create<t_vec_gl>({x,y,z}),
-		tl2::create<t_vec_gl>({0,0,1}));
+		tl2::create<t_vec_gl>({1, 0, 0}), 1.,
+		tl2::create<t_vec_gl>({x, y, z}),
+		tl2::create<t_vec_gl>({0, 0, 1}));
 	obj.m_boundingSpherePos = std::move(boundingSpherePos);
 	obj.m_boundingSphereRad = boundingSphereRad;
 	obj.m_label_pos = tl2::create<t_vec3_gl>({0., 0., 0.75});
@@ -514,7 +520,8 @@ std::size_t GlPlotRenderer::AddPlane(
 	QMutexLocker _locker{&m_mutexObj};
 
 	auto obj = CreateTriangleObject(std::get<0>(solid),
-		triagverts, norms, tl2::create<t_vec_gl>({ r, g, b, a }), false);
+		triagverts, norms, tl2::create<t_vec_gl>({ r, g, b, a }),
+		false, &uvs);
 	obj.m_mat = tl2::hom_translation<t_mat_gl>(x, y, z);
 	obj.m_boundingSpherePos = std::move(boundingSpherePos);
 	obj.m_boundingSphereRad = boundingSphereRad;
@@ -542,7 +549,8 @@ std::size_t GlPlotRenderer::AddPatch(
 	QMutexLocker _locker{&m_mutexObj};
 
 	auto obj = CreateTriangleObject(std::get<0>(solid),
-		verts, norms, tl2::create<t_vec_gl>({ r, g, b, a }), false);
+		verts, norms, tl2::create<t_vec_gl>({ r, g, b, a }),
+		false, &uvs);
 	obj.m_mat = tl2::hom_translation<t_mat_gl>(x, y, z);
 	obj.m_boundingSpherePos = std::move(boundingSpherePos);
 	obj.m_boundingSphereRad = boundingSphereRad;
@@ -563,7 +571,8 @@ std::size_t GlPlotRenderer::AddTriangleObject(
 	QMutexLocker _locker{&m_mutexObj};
 
 	auto obj = CreateTriangleObject(triag_verts, triag_verts,
-		triag_norms, tl2::create<t_vec_gl>({ r, g, b, a }), false);
+		triag_norms, tl2::create<t_vec_gl>({ r, g, b, a }),
+		false, nullptr);
 	obj.m_mat = tl2::hom_translation<t_mat_gl, t_real_gl>(0., 0., 0.);
 	obj.m_boundingSpherePos = std::move(boundingSpherePos);
 	obj.m_boundingSphereRad = boundingSphereRad;
@@ -623,8 +632,17 @@ void GlPlotRenderer::initialiseGL()
 in vec4 fragpos;
 in vec4 fragnorm;
 in vec4 fragcol;
+in vec2 fragtexcoords;
 
 out vec4 outcol;
+// ----------------------------------------------------------------------------
+
+
+// ----------------------------------------------------------------------------
+// texture
+// ----------------------------------------------------------------------------
+uniform bool texture_active = false;
+uniform sampler2D texture_index;
 // ----------------------------------------------------------------------------
 
 
@@ -755,13 +773,18 @@ float flat_lighting(vec4 objNorm)
 
 void main()
 {
+	outcol = vec4(1, 1, 1, 1);
+
+	if(texture_active)
+		outcol = texture(texture_index, fragtexcoords);
+
 	float I = 1.;
 	if(lighting == 1)
 		I = phong_lighting(fragpos, fragnorm);
 	else if(lighting == 2)
 		I = flat_lighting(fragnorm);
 
-	outcol = fragcol;
+	outcol *= fragcol;
 	outcol.rgb *= I;
 	outcol *= const_col;
 })RAW";
@@ -778,10 +801,12 @@ void main()
 in vec4 vertex;
 in vec4 normal;
 in vec4 vertex_col;
+in vec2 texture_coords;
 
 out vec4 fragcol;
 out vec4 fragpos;
 out vec4 fragnorm;
+out vec2 fragtexcoords;
 // ----------------------------------------------------------------------------
 
 
@@ -844,6 +869,7 @@ void main()
 	fragpos = objPos;
 	fragnorm = objNorm;
 	fragcol = vertex_col;
+	fragtexcoords = texture_coords;
 })RAW";
 // --------------------------------------------------------------------
 
@@ -910,6 +936,7 @@ void main()
 			return;
 		}
 
+		// uniforms
 		m_uniMatrixCam = m_pShaders->uniformLocation("cam");
 		m_uniMatrixCamInv = m_pShaders->uniformLocation("cam_inv");
 		m_uniMatrixProj = m_pShaders->uniformLocation("proj");
@@ -925,9 +952,14 @@ void main()
 		m_uniLightPos = m_pShaders->uniformLocation("light_pos");
 		m_uniNumActiveLights = m_pShaders->uniformLocation("active_lights");
 		m_uniLighting = m_pShaders->uniformLocation("lighting");
+		m_uniTextureIndex = m_pShaders->uniformLocation("texture_index");
+		m_uniTextureActive = m_pShaders->uniformLocation("texture_active");
+
+		// attributes
 		m_attrVertex = m_pShaders->attributeLocation("vertex");
 		m_attrVertexNorm = m_pShaders->attributeLocation("normal");
 		m_attrVertexCol = m_pShaders->attributeLocation("vertex_col");
+		m_attrTexCoords = m_pShaders->attributeLocation("texture_coords");
 	}
 	LOGGLERR(pGl);
 
@@ -1193,11 +1225,11 @@ void GlPlotRenderer::UpdatePicker()
 	for(std::size_t curObj = 0; curObj < m_objs.size(); ++curObj)
 	{
 		const auto& obj = m_objs[curObj];
-		const GlPlotObj *linkedObj = &obj;
+		const GlRenderObj *linkedObj = &obj;
 		if(obj.linkedObj)
 			linkedObj = &m_objs[*obj.linkedObj];
 
-		if(linkedObj->m_type != GlPlotObjType::TRIANGLES ||
+		if(linkedObj->m_type != GlRenderObjType::TRIANGLES ||
 			!obj.m_visible || !obj.m_valid || !obj.m_intersect)
 			continue;
 
@@ -1403,13 +1435,16 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 	if(m_Btrafo_needs_update)
 		UpdateBTrafo();
 
+
 	// set cam matrix
 	m_pShaders->setUniformValue(m_uniMatrixCam, m_cam.GetTransformation());
 	m_pShaders->setUniformValue(m_uniMatrixCamInv, m_cam.GetInverseTransformation());
 	//tl2::niceprint(std::cout, m_cam.GetTransformation());
 
+
 	auto colOverride = tl2::create<t_vec_gl>({ 1, 1, 1, 1 });
 	auto colHighlight = tl2::create<t_vec_gl>({ 1, 1, 1, 1 });
+
 
 	// get rendering order
 	std::vector<std::size_t> obj_order(m_objs.size());
@@ -1420,6 +1455,7 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 			return m_objs[idx1].m_priority >= m_objs[idx2].m_priority;
 		});
 
+
 	// render triangle geometry
 	for(std::size_t obj_idx : obj_order)
 	{
@@ -1428,7 +1464,7 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 		if(!obj.m_visible || !obj.m_valid)
 			continue;
 
-		const GlPlotObj *linkedObj = &obj;
+		const GlRenderObj *linkedObj = &obj;
 		if(obj.linkedObj)
 		{
 			// get linked object
@@ -1447,6 +1483,38 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 		}
 
 		m_pShaders->setUniformValue(m_uniLighting, obj.m_lighting);
+
+
+		// texture
+		BOOST_SCOPE_EXIT(/*this_,*/ pGl, &obj)
+		{
+			if(obj.m_texture)
+			{
+				pGl->glActiveTexture(GL_TEXTURE0);
+				pGl->glBindTexture(GL_TEXTURE_2D, 0);
+				obj.m_texture->release();
+			}
+		} BOOST_SCOPE_EXIT_END
+
+		if(obj.m_texture)
+		{
+			m_pShaders->setUniformValue(m_uniTextureIndex, 0);
+			m_pShaders->setUniformValue(m_uniTextureActive, 1);
+
+			pGl->glActiveTexture(GL_TEXTURE0);
+			obj.m_texture->bind();
+			LOGGLERR(pGl);
+
+			// see: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexParameter.xhtml
+			pGl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			pGl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		}
+		else
+		{
+			m_pShaders->setUniformValue(m_uniTextureIndex, 0);
+			m_pShaders->setUniformValue(m_uniTextureActive, 0);
+		}
+
 
 		// force object culling?
 		if(obj.m_force_cull)
@@ -1478,31 +1546,34 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 			linkedObj->m_invariant ? 0 : m_coordsys.load());
 
 		// ignore camera translation
-		m_pShaders->setUniformValue(m_uniCamInvar,
-			linkedObj->m_cam_invariant);
+		m_pShaders->setUniformValue(m_uniCamInvar, linkedObj->m_cam_invariant);
 
 
 		// main vertex array object
 		linkedObj->m_vertex_array->bind();
 
 		pGl->glEnableVertexAttribArray(m_attrVertex);
-		if(linkedObj->m_type == GlPlotObjType::TRIANGLES)
+		if(linkedObj->m_type == GlRenderObjType::TRIANGLES)
+		{
 			pGl->glEnableVertexAttribArray(m_attrVertexNorm);
+			pGl->glEnableVertexAttribArray(m_attrTexCoords);
+		}
 		pGl->glEnableVertexAttribArray(m_attrVertexCol);
-		BOOST_SCOPE_EXIT(pGl, &m_attrVertex, &m_attrVertexNorm, &m_attrVertexCol)
+		BOOST_SCOPE_EXIT(pGl, &m_attrVertex, &m_attrVertexNorm, &m_attrVertexCol, &m_attrTexCoords)
 		{
 			pGl->glDisableVertexAttribArray(m_attrVertexCol);
 			pGl->glDisableVertexAttribArray(m_attrVertexNorm);
 			pGl->glDisableVertexAttribArray(m_attrVertex);
+			pGl->glDisableVertexAttribArray(m_attrTexCoords);
 		}
 		BOOST_SCOPE_EXIT_END
 		LOGGLERR(pGl);
 
 
 		// draw object
-		if(linkedObj->m_type == GlPlotObjType::TRIANGLES)
+		if(linkedObj->m_type == GlRenderObjType::TRIANGLES)
 			pGl->glDrawArrays(GL_TRIANGLES, 0, linkedObj->m_triangles.size());
-		else if(linkedObj->m_type == GlPlotObjType::LINES)
+		else if(linkedObj->m_type == GlRenderObjType::LINES)
 			pGl->glDrawArrays(GL_LINES, 0, linkedObj->m_vertices.size());
 		else
 			std::cerr << "Unknown plot object type." << std::endl;

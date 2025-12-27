@@ -197,29 +197,21 @@ enum class GlRenderObjType
 };
 
 
-#ifndef GlPlotObjType
-	#define GlPlotObjType GlRenderObjType
-#endif
-
-
 struct GlRenderObj
 {
-	GlPlotObjType m_type = GlPlotObjType::TRIANGLES;
+	GlRenderObjType m_type = GlRenderObjType::TRIANGLES;
 
 	std::shared_ptr<QOpenGLVertexArrayObject> m_vertex_array{};
 	std::shared_ptr<QOpenGLBuffer> m_vertex_buffer{};
 	std::shared_ptr<QOpenGLBuffer> m_normals_buffer{};
 	std::shared_ptr<QOpenGLBuffer> m_uv_buffer{};
 	std::shared_ptr<QOpenGLBuffer> m_colour_buffer{};
+	std::shared_ptr<QOpenGLTexture> m_texture{};
 
 	std::vector<t_vec3_gl> m_vertices{}, m_triangles{}, m_uvs{};
 
 	t_vec_gl m_colour = tl2::create<t_vec_gl>({ 0., 0., 1., 1. });	// rgba
-};
 
-
-struct GlPlotObj : public GlRenderObj
-{
 	// does not define a geometry itself, but just links to another object
 	std::optional<std::size_t> linkedObj{};
 

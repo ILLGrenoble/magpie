@@ -85,13 +85,24 @@ protected:
 
 	std::shared_ptr<QOpenGLShaderProgram> m_pShaders{};
 
-	GLint m_attrVertex = -1, m_attrVertexNorm = -1, m_attrVertexCol = -1;
-	GLint m_uniConstCol = -1;
+	// vertices
+	GLint m_attrVertex = -1, m_attrVertexNorm = -1;
+	GLint m_attrVertexCol = -1, m_attrTexCoords = -1;
+
+	// texture
+	GLint m_uniTextureIndex = -1, m_uniTextureActive = -1;
+
+	// lighting
 	GLint m_uniLightPos = -1, m_uniNumActiveLights = -1, m_uniLighting = -1;
+	GLint m_uniConstCol = -1;
+
+	// matrices
 	GLint m_uniMatrixProj = -1, m_uniMatrixObjAfterProj = -1;
 	GLint m_uniMatrixCam = -1, m_uniMatrixCamInv = -1;
 	GLint m_uniMatrixObj = -1, m_uniMatrixObjCam = -1;
 	GLint m_uniMatrixA = -1, m_uniMatrixB = -1;
+
+	// flags
 	GLint m_uniIsRealSpace = -1, m_uniCoordSys = -1;
 	GLint m_uniCamInvar = -1;
 
@@ -114,7 +125,7 @@ protected:
 	bool m_showLabels = true;
 
 	std::vector<t_vec3_gl> m_lights{};
-	std::vector<GlPlotObj> m_objs{};
+	std::vector<GlRenderObj> m_objs{};
 	std::optional<std::size_t> m_coordCrossLab{}, m_coordCrossXtal{};
 	std::optional<std::size_t> m_coordCubeLab{};
 
@@ -161,7 +172,7 @@ public:
 	static constexpr bool m_usetimer = false;
 
 	QPointF GlToScreenCoords(const t_vec_gl& vec,
-		const GlPlotObj *obj = nullptr, bool *pVisible = nullptr) const;
+		const GlRenderObj *obj = nullptr, bool *pVisible = nullptr) const;
 
 	const t_cam& GetCamera() const
 	{
@@ -186,10 +197,11 @@ public:
 		m_pickerSphereRadius = rad;
 	}
 
-	GlPlotObj CreateTriangleObject(const std::vector<t_vec3_gl>& verts,
+	GlRenderObj CreateTriangleObject(const std::vector<t_vec3_gl>& verts,
 		const std::vector<t_vec3_gl>& triag_verts, const std::vector<t_vec3_gl>& norms,
-		const t_vec_gl& colour, bool bUseVertsAsNorm=false);
-	GlPlotObj CreateLineObject(const std::vector<t_vec3_gl>& verts, const t_vec_gl& colour);
+		const t_vec_gl& colour, bool bUseVertsAsNorm = false,
+		const std::vector<t_vec3_gl>* uvs = nullptr);
+	GlRenderObj CreateLineObject(const std::vector<t_vec3_gl>& verts, const t_vec_gl& colour);
 
 	std::size_t GetNumObjects() const { return m_objs.size(); }
 	void RemoveObject(std::size_t obj);

@@ -671,7 +671,7 @@ requires is_vec<t_vec>
 		}
 
 		// iterate over face vertices
-		while(1)
+		while(true)
 		{
 			std::advance(iterFaceVertIdx, 1);
 			if(iterFaceVertIdx == iterFaces->end())
