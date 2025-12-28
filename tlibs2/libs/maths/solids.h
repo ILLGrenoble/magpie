@@ -50,8 +50,36 @@
 
 namespace tl2 {
 // ----------------------------------------------------------------------------
-// 3-dim solids
+// helper functions
 // ----------------------------------------------------------------------------
+
+/**
+ * split a solid by the individual faces
+ */
+template<class t_vec, template<class...> class t_cont = std::vector,
+	class t_tup = std::tuple<t_cont<t_vec>, t_cont<t_cont<std::size_t>>, t_cont<t_vec>, t_cont<t_cont<t_vec>>>>
+t_cont<t_tup> split_solid(const t_tup& solid)
+requires is_vec<t_vec>
+{
+	const std::size_t num_faces = std::get<1>(solid).size();
+
+	t_cont<t_tup> all_solids;
+	all_solids.reserve(num_faces);
+
+	for(std::size_t idx = 0; idx < num_faces; ++idx)
+	{
+		t_tup tup = std::make_tuple(
+			std::get<0>(solid),  // vertices, TODO: filter out the unused ones
+			decltype(std::get<1>(solid)){{ std::get<1>(solid)[idx] }},
+			decltype(std::get<2>(solid)){{ std::get<2>(solid)[idx] }},
+			decltype(std::get<3>(solid)){{ std::get<3>(solid)[idx] }});
+
+		all_solids.emplace_back(std::move(tup));
+	}
+
+	return all_solids;
+}
+
 
 /**
  * create the faces of a sphere
@@ -73,7 +101,6 @@ requires is_vec<t_vec>
 	vertices_new.reserve(vertices.size());
 	normals_new.reserve(vertices.size());
 
-
 	// vertices
 	for(t_vec vec : vertices)
 	{
@@ -81,7 +108,6 @@ requires is_vec<t_vec>
 		vec *= rad;
 		vertices_new.emplace_back(std::move(vec));
 	}
-
 
 	// face normals
 	auto itervert = vertices.begin();
@@ -106,7 +132,13 @@ requires is_vec<t_vec>
 
 	return std::make_tuple(vertices_new, normals_new, uvs);
 }
+// ----------------------------------------------------------------------------
 
+
+
+// ----------------------------------------------------------------------------
+// 3-dim solids
+// ----------------------------------------------------------------------------
 
 /**
  * create a plane
@@ -122,12 +154,12 @@ requires is_vec<t_vec>
 	t_mat rot = rotation<t_mat, t_vec>(norm_old, norm, &rot_vec);
 
 	t_cont<t_vec> vertices =
-	{
+	{{
 		create<t_vec>({ -lx, -ly, 0. }),	// vertex 0
 		create<t_vec>({ -lx, +ly, 0. }),	// vertex 1
 		create<t_vec>({ +lx, +ly, 0. }),	// vertex 2
 		create<t_vec>({ +lx, -ly, 0. }),	// vertex 3
-	};
+	}};
 
 	// rotate according to given normal
 	for(t_vec& vec : vertices)
@@ -138,10 +170,10 @@ requires is_vec<t_vec>
 
 	t_cont<t_cont<t_vec>> uvs =
 	{{
-		create<t_vec>({0, 0}),
-		create<t_vec>({0, 1}),
-		create<t_vec>({1, 1}),
-		create<t_vec>({1, 0}),
+		create<t_vec>({ 0, 0 }),
+		create<t_vec>({ 0, 1 }),
+		create<t_vec>({ 1, 1 }),
+		create<t_vec>({ 1, 0 }),
 	}};
 
 	return std::make_tuple(vertices, faces, normals, uvs);
@@ -871,6 +903,11 @@ requires is_vec<t_vec>
 	return std::make_tuple(vertices, faces, normals, uvs);
 }
 
+
+
+// ----------------------------------------------------------------------------
+// bounding volumes
+// ----------------------------------------------------------------------------
 
 /**
  * calculates the bounding sphere of a collection of vertices

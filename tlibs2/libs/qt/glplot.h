@@ -127,7 +127,7 @@ protected:
 	std::vector<t_vec3_gl> m_lights{};
 	std::vector<GlRenderObj> m_objs{};
 	std::optional<std::size_t> m_coordCrossLab{}, m_coordCrossXtal{};
-	std::optional<std::size_t> m_coordCubeLab{};
+	std::vector<std::size_t> m_coordCubeLab{};
 
 	QPointF m_posMouse{};
 	QPointF m_posMouseRotationStart{}, m_posMouseRotationEnd{};
@@ -156,7 +156,7 @@ protected:
 	void tick(const std::chrono::milliseconds& ms);
 
 	std::size_t AddCoordinateCross(t_real_gl min, t_real_gl max);
-	std::size_t AddCoordinateCube(t_real_gl min, t_real_gl max);
+	std::vector<std::size_t> AddCoordinateCube(t_real_gl min, t_real_gl max);
 
 	void CollectGarbage();
 
@@ -214,6 +214,9 @@ public:
 	std::size_t AddCuboid(t_real_gl lx = 1, t_real_gl ly = 1, t_real_gl lz = 1,
 		t_real_gl x = 0, t_real_gl y = 0, t_real_gl z = 0,
 		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);
+	std::vector<std::size_t> AddCuboidFaces(t_real_gl lx = 1, t_real_gl ly = 1, t_real_gl lz = 1,
+		t_real_gl x = 0, t_real_gl y = 0, t_real_gl z = 0,
+		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);
 	std::size_t AddSphere(t_real_gl rad = 1,
 		t_real_gl x = 0, t_real_gl y = 0, t_real_gl z = 0,
 		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);
@@ -255,6 +258,20 @@ public:
 	void SetObjectLighting(std::size_t idx, int lighting);
 	void SetObjectHighlight(std::size_t idx, bool highlight);
 	void SetObjectsHighlight(bool highlight);
+
+	GlRenderObj* GetObject(std::size_t idx)
+	{
+		if(idx >= GetNumObjects())
+			return nullptr;
+		return &m_objs[idx];
+	}
+
+	const GlRenderObj* GetObject(std::size_t idx) const
+	{
+		if(idx >= GetNumObjects())
+			return nullptr;
+		return &m_objs[idx];
+	}
 
 	const t_mat_gl& GetObjectMatrix(std::size_t idx) const;
 	const std::string& GetObjectLabel(std::size_t idx) const;
@@ -311,15 +328,17 @@ public:
 		return m_coordCrossLab;
 	}
 
-	std::optional<std::size_t> GetCoordCube(bool xtal = false) const
+	std::vector<std::size_t> GetCoordCube(bool xtal = false) const
 	{
 		if(xtal)
-			return std::nullopt;
+			return std::vector<std::size_t>{};
 		return m_coordCubeLab;
 	}
 
 	void RequestViewportUpdate();
 	void UpdateViewport();
+
+	void UpdateCoordCubeTextures();
 
 
 public slots:

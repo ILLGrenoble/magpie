@@ -561,7 +561,7 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 			static_cast<t_real_gl>(2.5 * (m_minmax_E[1] + 4.) * E_scale) }));
 
 	// set coordinate cube size
-	if(auto obj = m_dispplot->GetRenderer()->GetCoordCube(); obj)
+	if(m_dispplot->GetRenderer()->GetCoordCube().size())
 	{
 		t_real E_range = m_minmax_E[1];
 
@@ -575,8 +575,14 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 			0.5 * COORD_PADDING * E_scale * E_range);
 		t_mat_gl obj_shift = tl2::hom_translation<t_mat_gl>(0., 0., E_scale * E_mean);
 
-		using namespace tl2_ops;
-		m_dispplot->GetRenderer()->SetObjectMatrix(*obj, obj_shift * obj_scale);
+		for(auto obj : m_dispplot->GetRenderer()->GetCoordCube())
+		{
+			using namespace tl2_ops;
+			m_dispplot->GetRenderer()->SetObjectMatrix(obj, obj_shift * obj_scale);
+		}
+
+		// TODO
+		m_dispplot->GetRenderer()->UpdateCoordCubeTextures();
 	}
 
 	// plot the magnon bands

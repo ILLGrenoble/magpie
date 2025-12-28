@@ -134,122 +134,114 @@ GlRenderObj GlPlotRenderer::CreateLineObject(
 
 void GlPlotRenderer::SetObjectMatrix(std::size_t idx, const t_mat_gl& mat)
 {
-	if(idx >= m_objs.size())
-		return;
-	m_objs[idx].m_mat = mat;
+	if(GlRenderObj *obj = GetObject(idx); obj)
+		obj->m_mat = mat;
 }
 
 
 void GlPlotRenderer::SetObjectMatrixAfterCam(std::size_t idx, const t_mat_gl& mat)
 {
-	if(idx >= m_objs.size())
-		return;
-	m_objs[idx].m_mat_after_cam = mat;
+	if(GlRenderObj *obj = GetObject(idx); obj)
+		obj->m_mat_after_cam = mat;
 }
 
 
 
 void GlPlotRenderer::SetObjectMatrixAfterProj(std::size_t idx, const t_mat_gl& mat)
 {
-	if(idx >= m_objs.size())
-		return;
-	m_objs[idx].m_mat_after_proj = mat;
+	if(GlRenderObj *obj = GetObject(idx); obj)
+		obj->m_mat_after_proj = mat;
 }
 
 
 const t_mat_gl& GlPlotRenderer::GetObjectMatrix(std::size_t idx) const
 {
-	static t_mat_gl invalid_matrix{};
+	if(const GlRenderObj *obj = GetObject(idx); obj)
+		return obj->m_mat;
 
-	if(idx >= m_objs.size())
-		return invalid_matrix;
-	return m_objs[idx].m_mat;
+	static const t_mat_gl invalid_mat;
+	return invalid_mat;
 }
 
 
 void GlPlotRenderer::SetObjectCol(std::size_t idx,
 	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a)
 {
-	if(idx >= m_objs.size())
-		return;
-	m_objs[idx].m_colour = tl2::create<t_vec_gl>({ r, g, b, a });
+	if(GlRenderObj *obj = GetObject(idx); obj)
+		obj->m_colour = tl2::create<t_vec_gl>({ r, g, b, a });
 }
 
 
 void GlPlotRenderer::SetObjectLabel(std::size_t idx, const std::string& label,
 	const t_vec3_gl *pos)
 {
-	if(idx >= m_objs.size())
-		return;
-	m_objs[idx].m_label = label;
-	if(pos)
-		m_objs[idx].m_label_pos = *pos;
+	if(GlRenderObj *obj = GetObject(idx); obj)
+	{
+		obj->m_label = label;
+		if(pos)
+			obj->m_label_pos = *pos;
+	}
 }
 
 const std::string& GlPlotRenderer::GetObjectLabel(std::size_t idx) const
 {
-	static const std::string empty{};
-	if(idx >= m_objs.size())
-		return empty;
+	if(const GlRenderObj *obj = GetObject(idx); obj)
+		return obj->m_label;
 
-	return m_objs[idx].m_label;
+	static const std::string invalid_label;
+	return invalid_label;
 }
 
 
 void GlPlotRenderer::SetObjectDataString(std::size_t idx, const std::string& data)
 {
-	if(idx >= m_objs.size())
-		return;
-	m_objs[idx].m_datastr = data;
+	if(GlRenderObj *obj = GetObject(idx); obj)
+		obj->m_datastr = data;
 }
 
 const std::string& GlPlotRenderer::GetObjectDataString(std::size_t idx) const
 {
-	static const std::string empty{};
-	if(idx >= m_objs.size())
-		return empty;
+	if(const GlRenderObj *obj = GetObject(idx); obj)
+		return obj->m_datastr;
 
-	return m_objs[idx].m_datastr;
+	static const std::string invalid_str;
+	return invalid_str;
 }
 
 
 void GlPlotRenderer::SetObjectVisible(std::size_t idx, bool visible)
 {
-	if(idx >= m_objs.size())
-		return;
-	m_objs[idx].m_visible = visible;
+	if(GlRenderObj *obj = GetObject(idx); obj)
+		obj->m_visible = visible;
 }
 
 
 void GlPlotRenderer::SetObjectIntersectable(std::size_t idx, bool intersect)
 {
-	if(idx >= m_objs.size())
-		return;
-	m_objs[idx].m_intersect = intersect;
+	if(GlRenderObj *obj = GetObject(idx); obj)
+		obj->m_intersect = intersect;
 }
 
 
 bool GlPlotRenderer::GetObjectVisible(std::size_t idx) const
 {
-	if(idx >= m_objs.size())
-		return false;
-	return m_objs[idx].m_visible;
+	if(const GlRenderObj *obj = GetObject(idx); obj)
+		return obj->m_visible;
+	return false;
 }
 
 
 void GlPlotRenderer::SetObjectLighting(std::size_t idx, int lighting)
 {
-	if(idx >= m_objs.size())
-		return;
-	m_objs[idx].m_lighting = lighting;
+	if(GlRenderObj *obj = GetObject(idx); obj)
+		obj->m_lighting = lighting;
 }
 
 
 void GlPlotRenderer::SetObjectHighlight(std::size_t idx, bool highlight)
 {
-	if(idx >= m_objs.size())
-		return;
-	m_objs[idx].m_highlighted = highlight;
+	if(GlRenderObj *obj = GetObject(idx); obj)
+		obj->m_highlighted = highlight;
 }
 
 
@@ -265,62 +257,61 @@ void GlPlotRenderer::SetObjectsHighlight(bool highlight)
 
 void GlPlotRenderer::SetObjectPriority(std::size_t idx, int prio)
 {
-	if(idx >= m_objs.size())
-		return;
-	m_objs[idx].m_priority = prio;
+	if(GlRenderObj *obj = GetObject(idx); obj)
+		obj->m_priority = prio;
 }
 
 
 bool GlPlotRenderer::GetObjectHighlight(std::size_t idx) const
 {
-	if(idx >= m_objs.size())
-		return false;
-	return m_objs[idx].m_highlighted;
+	if(const GlRenderObj *obj = GetObject(idx); obj)
+		return obj->m_highlighted;
+	return false;
 }
 
 
 void GlPlotRenderer::SetObjectInvariant(std::size_t idx, bool invariant)
 {
-	if(idx >= m_objs.size())
-		return;
-	m_objs[idx].m_invariant = invariant;
+	if(GlRenderObj *obj = GetObject(idx); obj)
+		obj->m_invariant = invariant;
 }
 
 
 void GlPlotRenderer::SetObjectCameraInvariant(std::size_t idx, bool invariant)
 {
-	if(idx >= m_objs.size())
-		return;
-	m_objs[idx].m_cam_invariant = invariant;
+	if(GlRenderObj *obj = GetObject(idx); obj)
+		obj->m_cam_invariant = invariant;
 }
 
 
 void GlPlotRenderer::SetObjectForceCull(std::size_t idx, bool cull)
 {
-	if(idx >= m_objs.size())
-		return;
-	m_objs[idx].m_force_cull = cull;
+	if(GlRenderObj *obj = GetObject(idx); obj)
+		obj->m_force_cull = cull;
 }
 
 
 void GlPlotRenderer::SetObjectCullBack(std::size_t idx, bool cull_back)
 {
-	if(idx >= m_objs.size())
-		return;
-	m_objs[idx].m_cull_back = cull_back;
+	if(GlRenderObj *obj = GetObject(idx); obj)
+		obj->m_cull_back = cull_back;
 }
 
 
 void GlPlotRenderer::RemoveObject(std::size_t idx)
 {
-	m_objs[idx].m_valid = false;
+	GlRenderObj *obj = GetObject(idx);
+	if(!obj)
+		return;
 
-	m_objs[idx].m_vertex_buffer.reset();
-	m_objs[idx].m_normals_buffer.reset();
-	m_objs[idx].m_colour_buffer.reset();
+	obj->m_valid = false;
 
-	m_objs[idx].m_vertices.clear();
-	m_objs[idx].m_triangles.clear();
+	obj->m_vertex_buffer.reset();
+	obj->m_normals_buffer.reset();
+	obj->m_colour_buffer.reset();
+
+	obj->m_vertices.clear();
+	obj->m_triangles.clear();
 
 	CollectGarbage();
 }
@@ -335,7 +326,16 @@ void GlPlotRenderer::RemoveObjects()
 			continue;
 		if(m_coordCrossXtal && obj == *m_coordCrossXtal)
 			continue;
-		if(m_coordCubeLab && obj == *m_coordCubeLab)
+		bool found = false;
+		for(std::size_t i = 0; i < m_coordCubeLab.size(); ++i)
+		{
+			if(obj == m_coordCubeLab[i])
+			{
+				found = true;
+				break;
+			}
+		}
+		if(found)
 			continue;
 
 		RemoveObject(obj);
@@ -398,6 +398,40 @@ std::size_t GlPlotRenderer::AddCuboid(
 	m_objs.emplace_back(std::move(obj));
 
 	return m_objs.size() - 1;		// object handle
+}
+
+
+std::vector<std::size_t> GlPlotRenderer::AddCuboidFaces(
+	t_real_gl lx, t_real_gl ly, t_real_gl lz,
+	t_real_gl x, t_real_gl y, t_real_gl z,
+	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a)
+{
+	auto org_solid = tl2::create_cuboid<t_vec3_gl>(lx, ly, lz);
+	auto solids = split_solid<t_vec3_gl>(org_solid);
+
+	std::vector<std::size_t> obj_handles;
+	obj_handles.reserve(solids.size());
+
+	for(const auto& solid : solids)
+	{
+		auto [triagverts, norms, uvs] = tl2::create_triangles<t_vec3_gl>(solid);
+		auto [boundingSpherePos, boundingSphereRad] =
+			tl2::bounding_sphere<t_vec3_gl>(triagverts);
+
+		QMutexLocker _locker{&m_mutexObj};
+
+		auto obj = CreateTriangleObject(std::get<0>(solid),
+			triagverts, norms, tl2::create<t_vec_gl>({ r, g, b, a }),
+			false, &uvs);
+		obj.m_mat = tl2::hom_translation<t_mat_gl>(x, y, z);
+		obj.m_boundingSpherePos = std::move(boundingSpherePos);
+		obj.m_boundingSphereRad = boundingSphereRad;
+		m_objs.emplace_back(std::move(obj));
+
+		obj_handles.push_back(m_objs.size() - 1);
+	}
+
+	return obj_handles;
 }
 
 
@@ -603,19 +637,45 @@ std::size_t GlPlotRenderer::AddCoordinateCross(t_real_gl min, t_real_gl max)
 }
 
 
-std::size_t GlPlotRenderer::AddCoordinateCube(t_real_gl min, t_real_gl max)
+std::vector<std::size_t> GlPlotRenderer::AddCoordinateCube(t_real_gl min, t_real_gl max)
 {
 	t_real_gl w = max - min;
-	auto obj = AddCuboid(1., 1., 1.,  0., 0., 0.,  0.75, 0.75, 0.75, 1.);
+	auto objs = AddCuboidFaces(1., 1., 1.,  0., 0., 0.,  0.75, 0.75, 0.75, 1.);
 
-	SetObjectMatrix(obj, hom_scaling<t_mat_gl>(w, w, w));
-	SetObjectIntersectable(obj, false);
-	SetObjectInvariant(obj, true);
-	SetObjectForceCull(obj, true);
-	SetObjectCullBack(obj, false);
-	SetObjectLighting(obj, 2);
+	for(auto obj : objs)
+	{
+		SetObjectMatrix(obj, hom_scaling<t_mat_gl>(w, w, w));
+		SetObjectIntersectable(obj, false);
+		SetObjectInvariant(obj, true);
+		SetObjectForceCull(obj, true);
+		SetObjectCullBack(obj, false);
+		SetObjectLighting(obj, 2);
+	}
 
-	return obj;  // object handle
+	return objs;  // object handles
+}
+
+
+/**
+ * create the coordinate label textures
+ * TODO
+ */
+void GlPlotRenderer::UpdateCoordCubeTextures()
+{
+	if(m_coordCubeLab.size() != 6)
+		return;
+
+	for(std::size_t idx : m_coordCubeLab)
+	{
+		QImage img{512, 512, QImage::Format_RGB32};
+		img.fill(0xffff0000);
+
+		GlRenderObj *obj = GetObject(idx);
+		if(!obj)
+			continue;
+
+		obj->m_texture = std::make_shared<QOpenGLTexture>(img);
+	}
 }
 
 
@@ -970,7 +1030,8 @@ void main()
 	m_coordCubeLab = AddCoordinateCube(-m_CoordMax, m_CoordMax);
 	SetObjectVisible(*m_coordCrossLab, true);
 	SetObjectVisible(*m_coordCrossXtal, false);
-	SetObjectVisible(*m_coordCubeLab, false);
+	for(std::size_t i = 0; i <  m_coordCubeLab.size(); ++i)
+		SetObjectVisible(m_coordCubeLab[i], false);
 
 	m_initialised = true;
 

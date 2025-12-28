@@ -565,11 +565,10 @@ void Dispersion3DDlg::ShowPlotCoordCube(bool show)
 		m_dispplot->GetRenderer()->SetObjectVisible(*obj, false);
 
 	// show coordinate cube
-	if(auto obj = m_dispplot->GetRenderer()->GetCoordCube(); obj)
-	{
-		m_dispplot->GetRenderer()->SetObjectVisible(*obj, show);
-		m_dispplot->update();
-	}
+	for(auto obj : m_dispplot->GetRenderer()->GetCoordCube())
+		m_dispplot->GetRenderer()->SetObjectVisible(obj, show);
+
+	m_dispplot->update();
 }
 
 

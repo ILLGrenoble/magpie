@@ -223,7 +223,7 @@ requires is_vec<t_vec>
 
 	// is intersection point contained in polygon?
 	const t_vec* vecFirst = &(*poly.rbegin());
-	for(auto iter=poly.begin(); iter!=poly.end(); std::advance(iter, 1))
+	for(auto iter = poly.begin(); iter != poly.end(); std::advance(iter, 1))
 	{
 		const t_vec* vecSecond = &(*iter);
 		const t_vec edge = *vecSecond - *vecFirst;
@@ -431,8 +431,8 @@ requires is_mat<t_mat> && is_vec<t_vec>
 	if(!bOk)
 		return zero<t_vec>(uv1.size());
 
-	t_vec pt = _pt - vert1;		// real pt
-	pt = basisInv * pt;		// reciprocal pt
+	t_vec pt = _pt - vert1;  // real pt
+	pt = basisInv * pt;      // reciprocal pt
 
 	// uv coordinates at specified point
 	t_vec uv12 = uv2 - uv1;
@@ -463,7 +463,7 @@ requires is_vec<t_vec>
 	t_real tBestCross = t_real(0);
 
 	// find non-collinear vectors
-	for(std::size_t iVecPoly=1; iVecPoly<vecPoly.size(); ++iVecPoly)
+	for(std::size_t iVecPoly = 1; iVecPoly < vecPoly.size(); ++iVecPoly)
 	{
 		t_vec vecNorm = tl2::cross<t_vec>({vecPoly[0]-vecCentre, vecPoly[1]-vecCentre});
 		t_real tCross = tl2::norm(vecNorm);
@@ -582,10 +582,12 @@ requires is_vec<t_vec>
 	{
 		auto iter = lineverts.begin();
 
-		while(1)
+		while(true)
 		{
 			const t_vec& linevec1 = *iter;
-			std::advance(iter, 1); if(iter == lineverts.end()) break;
+			std::advance(iter, 1);
+			if(iter == lineverts.end())
+				break;
 			const t_vec& linevec2 = *iter;
 
 			if(equals<t_vec>(vec1, linevec1) && equals<t_vec>(vec2, linevec2))
@@ -593,7 +595,9 @@ requires is_vec<t_vec>
 			if(equals<t_vec>(vec1, linevec2) && equals<t_vec>(vec2, linevec1))
 				return true;
 
-			std::advance(iter, 1); if(iter == lineverts.end()) break;
+			std::advance(iter, 1);
+			if(iter == lineverts.end())
+				break;
 		}
 
 		return false;
@@ -710,8 +714,10 @@ requires is_vec<t_vec>
 
 
 		std::advance(iterFaces, 1);
-		if(iterNorms != normals.end()) std::advance(iterNorms, 1);
-		if(iterUVs != uvs.end()) std::advance(iterUVs, 1);
+		if(iterNorms != normals.end())
+			std::advance(iterNorms, 1);
+		if(iterUVs != uvs.end())
+			std::advance(iterUVs, 1);
 	}
 
 	return std::make_tuple(triangles, triag_normals, vert_uvs);
@@ -840,7 +846,7 @@ subdivide_triangles(const std::tuple<t_cont<t_vec>, t_cont<t_vec>, t_cont<t_vec>
 requires is_vec<t_vec>
 {
 	auto tupDiv = tup;
-	for(std::size_t i=0; i<iters; ++i)
+	for(std::size_t i = 0; i < iters; ++i)
 		tupDiv = tl2::subdivide_triangles<t_vec, t_cont>(tupDiv);
 	return tupDiv;
 }
