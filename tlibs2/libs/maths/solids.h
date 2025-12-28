@@ -555,7 +555,7 @@ requires is_vec<t_vec>
 template<class t_vec, template<class...> class t_cont = std::vector>
 std::tuple<t_cont<t_vec>, t_cont<t_cont<std::size_t>>, t_cont<t_vec>, t_cont<t_cont<t_vec>>>
 create_cuboid(typename t_vec::value_type lx = 1, typename t_vec::value_type ly = 1,
-	typename t_vec::value_type lz = 1)
+	typename t_vec::value_type lz = 1, bool flip_uv = false /* for mapping texture to the inside of the cube */)
 requires is_vec<t_vec>
 {
 	t_cont<t_vec> vertices =
@@ -591,49 +591,53 @@ requires is_vec<t_vec>
 		create<t_vec>({ +1, 0, 0 }),	// +x face
 	};
 
+	using t_real = typename t_vec::value_type;
+	t_real min = flip_uv ? 1. : 0.;
+	t_real max = flip_uv ? 0. : 1.;
+
 	t_cont<t_cont<t_vec>> uvs =
 	{
 		// -z face
 		{
-			create<t_vec>({0, 0}),
-			create<t_vec>({1, 0}),
-			create<t_vec>({1, 1}),
-			create<t_vec>({0, 1})
+			create<t_vec>({ min, 1 }),
+			create<t_vec>({ max, 1 }),
+			create<t_vec>({ max, 0 }),
+			create<t_vec>({ min, 0 }),
 		},
 		// +z face
 		{
-			create<t_vec>({0, 1}),
-			create<t_vec>({1, 1}),
-			create<t_vec>({1, 0}),
-			create<t_vec>({0, 0})
+			create<t_vec>({ max, 0 }),
+			create<t_vec>({ min, 0 }),
+			create<t_vec>({ min, 1 }),
+			create<t_vec>({ max, 1 }),
 		},
 		// -y face
 		{
-			create<t_vec>({0, 1}),
-			create<t_vec>({1, 1}),
-			create<t_vec>({1, 0}),
-			create<t_vec>({0, 0}),
+			create<t_vec>({ min, 1 }),
+			create<t_vec>({ max, 1 }),
+			create<t_vec>({ max, 0 }),
+			create<t_vec>({ min, 0 }),
 		},
 		// +y face
 		{
-			create<t_vec>({1, 0}),
-			create<t_vec>({0, 0}),
-			create<t_vec>({0, 1}),
-			create<t_vec>({1, 1})
+			create<t_vec>({ max, 0 }),
+			create<t_vec>({ min, 0 }),
+			create<t_vec>({ min, 1 }),
+			create<t_vec>({ max, 1 }),
 		},
 		// -x face
 		{
-			create<t_vec>({1, 1}),
-			create<t_vec>({1, 0}),
-			create<t_vec>({0, 0}),
-			create<t_vec>({0, 1})
+			create<t_vec>({ max, 1 }),
+			create<t_vec>({ max, 0 }),
+			create<t_vec>({ min, 0 }),
+			create<t_vec>({ min, 1 }),
 		},
 		// +x face
 		{
-			create<t_vec>({0, 0}),
-			create<t_vec>({0, 1}),
-			create<t_vec>({1, 1}),
-			create<t_vec>({1, 0})
+			create<t_vec>({ min, 0 }),
+			create<t_vec>({ min, 1 }),
+			create<t_vec>({ max, 1 }),
+			create<t_vec>({ max, 0 }),
 		},
 	};
 

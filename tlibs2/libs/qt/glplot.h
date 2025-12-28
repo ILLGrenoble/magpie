@@ -216,7 +216,7 @@ public:
 		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);
 	std::vector<std::size_t> AddCuboidFaces(t_real_gl lx = 1, t_real_gl ly = 1, t_real_gl lz = 1,
 		t_real_gl x = 0, t_real_gl y = 0, t_real_gl z = 0,
-		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);
+		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1, bool flip_uv = false);
 	std::size_t AddSphere(t_real_gl rad = 1,
 		t_real_gl x = 0, t_real_gl y = 0, t_real_gl z = 0,
 		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);

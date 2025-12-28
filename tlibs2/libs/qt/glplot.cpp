@@ -5,9 +5,9 @@
  * @license GPLv3, see 'LICENSE' file
  *
  * @note this file is based on code from my following projects:
- *         - "geo" (https://github.com/t-weber/geo),
- *         - "mathlibs" (https://github.com/t-weber/mathlibs),
- *         - "magtools" (https://github.com/t-weber/magtools).
+ *   - "geo" (https://github.com/t-weber/geo),
+ *   - "mathlibs" (https://github.com/t-weber/mathlibs),
+ *   - "magtools" (https://github.com/t-weber/magtools).
  *
  * References:
  *   - http://doc.qt.io/qt-5/qopenglwidget.html#details
@@ -404,9 +404,10 @@ std::size_t GlPlotRenderer::AddCuboid(
 std::vector<std::size_t> GlPlotRenderer::AddCuboidFaces(
 	t_real_gl lx, t_real_gl ly, t_real_gl lz,
 	t_real_gl x, t_real_gl y, t_real_gl z,
-	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a)
+	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a,
+	bool flip_uv)
 {
-	auto org_solid = tl2::create_cuboid<t_vec3_gl>(lx, ly, lz);
+	auto org_solid = tl2::create_cuboid<t_vec3_gl>(lx, ly, lz, flip_uv);
 	auto solids = split_solid<t_vec3_gl>(org_solid);
 
 	std::vector<std::size_t> obj_handles;
@@ -640,7 +641,7 @@ std::size_t GlPlotRenderer::AddCoordinateCross(t_real_gl min, t_real_gl max)
 std::vector<std::size_t> GlPlotRenderer::AddCoordinateCube(t_real_gl min, t_real_gl max)
 {
 	t_real_gl w = max - min;
-	auto objs = AddCuboidFaces(1., 1., 1.,  0., 0., 0.,  0.75, 0.75, 0.75, 1.);
+	auto objs = AddCuboidFaces(1., 1., 1.,  0., 0., 0.,  0.75, 0.75, 0.75, 1., true);
 
 	for(auto obj : objs)
 	{
@@ -667,12 +668,19 @@ void GlPlotRenderer::UpdateCoordCubeTextures()
 
 	for(std::size_t idx : m_coordCubeLab)
 	{
-		QImage img{512, 512, QImage::Format_RGB32};
-		img.fill(0xffff0000);
-
 		GlRenderObj *obj = GetObject(idx);
 		if(!obj)
 			continue;
+
+		QImage img{1024, 1024, QImage::Format_RGB32};
+		img.fill(0xffffffff);
+
+		QFont font;
+		font.setPointSize(128.);
+
+		QPainter painter{&img};
+		painter.setFont(font);
+		painter.drawText(512., 512., "Test");
 
 		obj->m_texture = std::make_shared<QOpenGLTexture>(img);
 	}
