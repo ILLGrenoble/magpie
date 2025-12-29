@@ -99,6 +99,7 @@ protected:
 	t_real GetMeanEnergy(const t_data_Qs& data) const;
 	t_real GetMeanEnergy(t_size band_idx) const;
 	std::tuple<t_vec_real, t_vec_real, t_vec_real> GetQVectors() const;
+	std::tuple<t_size, t_size> GetQIndices() const;
 	std::array<int, 3> GetBranchColour(t_size branch_idx, t_size num_branches) const;
 	void FromMainQ();
 	void ShowError(const QString& msg);

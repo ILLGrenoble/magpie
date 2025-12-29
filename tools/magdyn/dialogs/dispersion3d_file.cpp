@@ -407,7 +407,6 @@ if __name__ == "__main__":
 	// ------------------------------------------------------------------------
 
 	const t_size num_bands = m_data.size();
-	auto [Q_origin, Q_dir_1, Q_dir_2] = GetQVectors();
 
 	// create data arrays
 	std::ostringstream h_data, k_data, l_data, E_data, S_data, bandidx_data, degen_data, colours;
@@ -453,35 +452,6 @@ if __name__ == "__main__":
 			<< "\", ";
 	}
 
-	// find first Q axis index for plot
-	int Q_idx_1 = 0;
-	t_real cur_comp1 = Q_dir_1[Q_idx_1];
-	for(int i = 0; i < 3; ++i)
-	{
-		// use largest absolute component as index
-		if(std::abs(Q_dir_1[i]) > std::abs(cur_comp1))
-		{
-			Q_idx_1 = i;
-			cur_comp1 = Q_dir_1[i];
-		}
-	}
-
-	// find second Q axis index for plot
-	int Q_idx_2 = (Q_idx_1 + 1) % 3;
-	t_real cur_comp2 = Q_dir_2[Q_idx_2];
-	for(int i = 0; i < 3; ++i)
-	{
-		if(i == Q_idx_1)
-			continue;
-
-		// use largest absolute component as index
-		if(std::abs(Q_dir_2[i]) > std::abs(cur_comp2))
-		{
-			Q_idx_2 = i;
-			cur_comp2 = Q_dir_2[i];
-		}
-	}
-
 	std::ostringstream focal_len;
 	focal_len.precision(g_prec);
 	if(m_perspective->isChecked())
@@ -490,6 +460,8 @@ if __name__ == "__main__":
 		focal_len << "\"focal_length\" : 1. / numpy.tan(0.5 * "
 			<< g_structplot_fov << "/180.*numpy.pi),\n";
 	}
+
+	auto [Q_idx_1, Q_idx_2] = GetQIndices();
 
 	// TODO: for the moment the azimuth only matches for Q directions in a right-handed system -> add a trafo
 	algo::replace_all(pyscr, "%%H_DATA%%", "[ " + h_data.str() + "]");

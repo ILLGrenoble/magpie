@@ -76,11 +76,17 @@ GlPlotRenderer::~GlPlotRenderer()
 	// get context
 	if constexpr(m_isthreaded)
 	{
-		m_pPlot->context()->moveToThread(qGuiApp->thread());
+		if(m_pPlot)
+			m_pPlot->context()->moveToThread(qGuiApp->thread());
 	}
 
-	m_pPlot->makeCurrent();
-	BOOST_SCOPE_EXIT(m_pPlot) { m_pPlot->doneCurrent(); } BOOST_SCOPE_EXIT_END
+	if(m_pPlot)
+		m_pPlot->makeCurrent();
+	BOOST_SCOPE_EXIT(m_pPlot)
+	{
+		if(m_pPlot)
+			m_pPlot->doneCurrent();
+	} BOOST_SCOPE_EXIT_END
 
 	// delete gl objects within current gl context
 	m_pShaders.reset();
@@ -661,8 +667,12 @@ std::vector<std::size_t> GlPlotRenderer::AddCoordinateCube(t_real_gl min, t_real
  * create the coordinate label textures
  * TODO
  */
-void GlPlotRenderer::UpdateCoordCubeTextures()
+void GlPlotRenderer::UpdateCoordCubeTextures(
+	const std::string& xlabel, const std::string& ylabel, const std::string& zlabel)
 {
+	if(!m_pPlot)
+		return;
+
 	if(m_coordCubeLab.size() != 6)
 		return;
 
@@ -670,20 +680,64 @@ void GlPlotRenderer::UpdateCoordCubeTextures()
 	{
 		GlRenderObj *obj = GetObject(idx);
 		if(!obj)
-			continue;
+			return;
+	}
 
-		QImage img{1024, 1024, QImage::Format_RGB32};
+	t_real_gl dx = 0.1;
+	t_real_gl dy = 0.1;
+
+	int texture_width = 1024;
+	int texture_height = 1024;
+
+	auto draw_texture = [this, dx, dy, texture_width, texture_height](
+		GlRenderObj* obj, const std::string& label)
+	{
+		QImage img{texture_width, texture_height, QImage::Format_RGB32};
 		img.fill(0xffffffff);
 
 		QFont font;
 		font.setPointSize(128.);
 
+		QPen pen{QColor{0x00, 0x00, 0x00}};
+		pen.setWidthF(4.);
+
 		QPainter painter{&img};
 		painter.setFont(font);
-		painter.drawText(512., 512., "Test");
+		painter.setPen(pen);
 
+		// lines in y direction
+		for(t_real_gl x = 0.; x < 1.; x += dx)
+		{
+			t_real_gl x_img = x * t_real_gl(texture_width);
+			t_real_gl y_img_min = 0.;
+			t_real_gl y_img_max = t_real_gl(texture_height);
+
+			painter.drawLine(QLineF{QPointF{x_img, y_img_min}, QPointF{x_img, y_img_max}});
+		}
+
+		// lines in x direction
+		for(t_real_gl y = 0.; y < 1.; y += dy)
+		{
+			t_real_gl y_img = y * t_real_gl(texture_height);
+			t_real_gl x_img_min = 0.;
+			t_real_gl x_img_max = t_real_gl(texture_width);
+
+			painter.drawLine(QLineF{QPointF{x_img_min, y_img}, QPointF{x_img_max, y_img}});
+		}
+
+		painter.drawText(512., 512., label.c_str());
+
+		m_pPlot->makeCurrent();
+		BOOST_SCOPE_EXIT(m_pPlot) { m_pPlot->doneCurrent(); } BOOST_SCOPE_EXIT_END
 		obj->m_texture = std::make_shared<QOpenGLTexture>(img);
-	}
+	};
+
+	draw_texture(GetObject(m_coordCubeLab[0]), zlabel);
+	draw_texture(GetObject(m_coordCubeLab[1]), zlabel);
+	draw_texture(GetObject(m_coordCubeLab[2]), ylabel);
+	draw_texture(GetObject(m_coordCubeLab[3]), ylabel);
+	draw_texture(GetObject(m_coordCubeLab[4]), xlabel);
+	draw_texture(GetObject(m_coordCubeLab[5]), xlabel);
 }
 
 
@@ -1794,6 +1848,8 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 void GlPlotRenderer::paintGL()
 {
 	if(!m_platform_supported)
+		return;
+	if(!m_pPlot)
 		return;
 	QMutexLocker _locker{&m_mutexObj};
 

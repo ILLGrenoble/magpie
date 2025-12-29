@@ -123,6 +123,48 @@ std::tuple<t_vec_real, t_vec_real, t_vec_real> Dispersion3DDlg::GetQVectors() co
 
 
 /**
+ * get the indices of the q directions
+ */
+std::tuple<t_size, t_size> Dispersion3DDlg::GetQIndices() const
+{
+	auto [Q_origin, Q_dir_1, Q_dir_2] = GetQVectors();
+
+	// find first Q axis index for plot
+	using t_idx = t_size;
+	t_idx Q_idx_1 = 0;
+	t_real cur_comp1 = Q_dir_1[Q_idx_1];
+	for(t_idx i = 0; i < 3; ++i)
+	{
+		// use largest absolute component as index
+		if(std::abs(Q_dir_1[i]) > std::abs(cur_comp1))
+		{
+			Q_idx_1 = i;
+			cur_comp1 = Q_dir_1[i];
+		}
+	}
+
+	// find second Q axis index for plot
+	t_idx Q_idx_2 = (Q_idx_1 + 1) % 3;
+	t_real cur_comp2 = Q_dir_2[Q_idx_2];
+	for(t_idx i = 0; i < 3; ++i)
+	{
+		if(i == Q_idx_1)
+			continue;
+
+		// use largest absolute component as index
+		if(std::abs(Q_dir_2[i]) > std::abs(cur_comp2))
+		{
+			Q_idx_2 = i;
+			cur_comp2 = Q_dir_2[i];
+		}
+	}
+
+	return std::make_tuple(Q_idx_1, Q_idx_2);
+}
+
+
+
+/**
  * calculate the dispersion
  */
 void Dispersion3DDlg::Calculate()
@@ -581,8 +623,14 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 			m_dispplot->GetRenderer()->SetObjectMatrix(obj, obj_shift * obj_scale);
 		}
 
-		// TODO
-		m_dispplot->GetRenderer()->UpdateCoordCubeTextures();
+		auto [Q_idx_1, Q_idx_2] = GetQIndices();
+		static const std::array<std::string, 3> labels
+		{{
+			"h (rlu)", "k (rlu)", "l (rlu)"
+		}};
+
+		m_dispplot->GetRenderer()->UpdateCoordCubeTextures(
+			labels[Q_idx_1], labels[Q_idx_2], "E (rlu)");
 	}
 
 	// plot the magnon bands

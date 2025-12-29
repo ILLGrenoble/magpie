@@ -338,7 +338,8 @@ public:
 	void RequestViewportUpdate();
 	void UpdateViewport();
 
-	void UpdateCoordCubeTextures();
+	void UpdateCoordCubeTextures(
+		const std::string& xlabel, const std::string& ylabel, const std::string& zlabel);
 
 
 public slots:
