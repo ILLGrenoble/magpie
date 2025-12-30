@@ -668,7 +668,9 @@ std::vector<std::size_t> GlPlotRenderer::AddCoordinateCube(t_real_gl min, t_real
  * TODO
  */
 void GlPlotRenderer::UpdateCoordCubeTextures(
-	const std::string& xlabel, const std::string& ylabel, const std::string& zlabel)
+	t_real_gl x_min, t_real_gl x_max, t_real_gl x_tick,
+	t_real_gl y_min, t_real_gl y_max, t_real_gl y_tick,
+	t_real_gl z_min, t_real_gl z_max, t_real_gl z_tick)
 {
 	if(!m_pPlot)
 		return;
@@ -683,14 +685,23 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 			return;
 	}
 
-	t_real_gl dx = 0.1;
-	t_real_gl dy = 0.1;
-
 	int texture_width = 1024;
 	int texture_height = 1024;
 
-	auto draw_texture = [this, dx, dy, texture_width, texture_height](
-		GlRenderObj* obj, const std::string& label)
+	// transform coordinate component into a [0, 1] range
+	auto trafo = [](t_real_gl min, t_real_gl max, t_real_gl val) -> t_real_gl
+	{
+		// min + (max - min)*lam = val
+		// (max - min)*lam       = val - min
+		//             lam       = (val - min) / (max - min)
+		return (val - min) / (max - min);
+	};
+
+	auto draw_texture = [this, &trafo, texture_width, texture_height](
+		GlRenderObj* obj,
+		t_real_gl x_min, t_real_gl x_max, t_real_gl x_tick,
+		t_real_gl y_min, t_real_gl y_max, t_real_gl y_tick,
+		const std::string& label = "")
 	{
 		QImage img{texture_width, texture_height, QImage::Format_RGB32};
 		img.fill(0xffffffff);
@@ -705,39 +716,60 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 		painter.setFont(font);
 		painter.setPen(pen);
 
-		// lines in y direction
-		for(t_real_gl x = 0.; x < 1.; x += dx)
+		// lines in +y direction
+		for(t_real_gl x = 0.; x <= x_max; x += x_tick)
 		{
-			t_real_gl x_img = x * t_real_gl(texture_width);
+			t_real_gl x_img = trafo(x_min, x_max, x) * t_real_gl(texture_width);
 			t_real_gl y_img_min = 0.;
 			t_real_gl y_img_max = t_real_gl(texture_height);
 
 			painter.drawLine(QLineF{QPointF{x_img, y_img_min}, QPointF{x_img, y_img_max}});
 		}
 
-		// lines in x direction
-		for(t_real_gl y = 0.; y < 1.; y += dy)
+		// lines in -y direction
+		for(t_real_gl x = -x_tick; x >= x_min; x -= x_tick)
 		{
-			t_real_gl y_img = y * t_real_gl(texture_height);
+			t_real_gl x_img = trafo(x_min, x_max, x) * t_real_gl(texture_width);
+			t_real_gl y_img_min = 0.;
+			t_real_gl y_img_max = t_real_gl(texture_height);
+
+			painter.drawLine(QLineF{QPointF{x_img, y_img_min}, QPointF{x_img, y_img_max}});
+		}
+
+		// lines in +x direction
+		for(t_real_gl y = 0.; y <= y_max; y += y_tick)
+		{
+			t_real_gl y_img = trafo(y_min, y_max, y) * t_real_gl(texture_height);
 			t_real_gl x_img_min = 0.;
 			t_real_gl x_img_max = t_real_gl(texture_width);
 
 			painter.drawLine(QLineF{QPointF{x_img_min, y_img}, QPointF{x_img_max, y_img}});
 		}
 
-		painter.drawText(512., 512., label.c_str());
+		// lines in -x direction
+		for(t_real_gl y = -y_tick; y >= y_min; y -= y_tick)
+		{
+			t_real_gl y_img = trafo(y_min, y_max, y) * t_real_gl(texture_height);
+			t_real_gl x_img_min = 0.;
+			t_real_gl x_img_max = t_real_gl(texture_width);
+
+			painter.drawLine(QLineF{QPointF{x_img_min, y_img}, QPointF{x_img_max, y_img}});
+		}
+
+		if(label != "")
+			painter.drawText(512., 512., label.c_str());
 
 		m_pPlot->makeCurrent();
 		BOOST_SCOPE_EXIT(m_pPlot) { m_pPlot->doneCurrent(); } BOOST_SCOPE_EXIT_END
 		obj->m_texture = std::make_shared<QOpenGLTexture>(img);
 	};
 
-	draw_texture(GetObject(m_coordCubeLab[0]), zlabel);
-	draw_texture(GetObject(m_coordCubeLab[1]), zlabel);
-	draw_texture(GetObject(m_coordCubeLab[2]), ylabel);
-	draw_texture(GetObject(m_coordCubeLab[3]), ylabel);
-	draw_texture(GetObject(m_coordCubeLab[4]), xlabel);
-	draw_texture(GetObject(m_coordCubeLab[5]), xlabel);
+	draw_texture(GetObject(m_coordCubeLab[0]), x_min, x_max, x_tick, y_min, y_max, y_tick, ""); // -z
+	draw_texture(GetObject(m_coordCubeLab[1]), x_min, x_max, x_tick, y_min, y_max, y_tick, ""); // +z
+	draw_texture(GetObject(m_coordCubeLab[2]), x_min, x_max, x_tick, z_min, z_max, z_tick, ""); // -y
+	draw_texture(GetObject(m_coordCubeLab[3]), x_min, x_max, x_tick, z_min, z_max, z_tick, ""); // +y
+	draw_texture(GetObject(m_coordCubeLab[4]), y_min, y_max, y_tick, z_min, z_max, z_tick, ""); // -x
+	draw_texture(GetObject(m_coordCubeLab[5]), y_min, y_max, y_tick, z_min, z_max, z_tick, ""); // +x
 }
 
 

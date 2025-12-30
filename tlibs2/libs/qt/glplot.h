@@ -339,7 +339,9 @@ public:
 	void UpdateViewport();
 
 	void UpdateCoordCubeTextures(
-		const std::string& xlabel, const std::string& ylabel, const std::string& zlabel);
+		t_real_gl x_min = -1., t_real_gl x_max = 1., t_real_gl x_tick = 0.1,
+		t_real_gl y_min = -1., t_real_gl y_max = 1., t_real_gl y_tick = 0.1,
+		t_real_gl z_min = -1., t_real_gl z_max = 1., t_real_gl z_tick = 0.1);
 
 
 public slots:

@@ -123,7 +123,7 @@ std::tuple<t_vec_real, t_vec_real, t_vec_real> Dispersion3DDlg::GetQVectors() co
 
 
 /**
- * get the indices of the q directions
+ * get the indices of the (principal) q directions
  */
 std::tuple<t_size, t_size> Dispersion3DDlg::GetQIndices() const
 {
@@ -606,9 +606,8 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 	if(m_dispplot->GetRenderer()->GetCoordCube().size())
 	{
 		t_real E_range = m_minmax_E[1];
-
-		if(!only_pos_E)
-			E_range -= m_minmax_E[0];
+		t_real E_min = only_pos_E ? 0. : m_minmax_E[0];
+		E_range -= E_min;
 
 		t_real E_mean = only_pos_E ? 0.5*E_range : m_minmax_E[0] + 0.5*E_range;
 
@@ -630,7 +629,9 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 		}};
 
 		m_dispplot->GetRenderer()->UpdateCoordCubeTextures(
-			labels[Q_idx_1], labels[Q_idx_2], "E (rlu)");
+			-1., 1., 0.1,
+			-1., 1., 0.1,
+			COORD_PADDING * E_min, COORD_PADDING * m_minmax_E[1], E_range / 10.);
 	}
 
 	// plot the magnon bands
