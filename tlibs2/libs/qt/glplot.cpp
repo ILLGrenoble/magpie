@@ -701,10 +701,14 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 	auto calc_tick_marks = [](t_real_gl min, t_real_gl max) -> t_real_gl
 	{
 		t_real_gl range = max - min;
-		t_real_gl num_ticks = 10.;
-
 		int power = static_cast<int>(std::log10(std::abs(range)));
-		t_real_gl tick = std::round(range / std::pow(10., power)) / num_ticks;
+		t_real_gl tick = std::pow(10., power);
+
+		if(range / tick < 3.)
+			tick /= 5.;
+		else if(range / tick < 2.)
+			tick /= 10.;
+
 		return tick;
 	};
 
@@ -727,6 +731,11 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 		QPainter painter{&img};
 		painter.setFont(font);
 		painter.setPen(pen);
+
+		if(x_min > x_max)
+			std::swap(x_min, x_max);
+		if(y_min > y_max)
+			std::swap(y_min, y_max);
 
 		// if none are given, find a tick spacing
 		if(x_tick < 0.)

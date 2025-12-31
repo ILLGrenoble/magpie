@@ -38,9 +38,6 @@ namespace asio = boost::asio;
 #include "tlibs2/libs/str.h"
 
 
-#define COORD_PADDING    1.2     // space between magnon bands and coordinate planes
-
-
 
 /**
  * set a pointer to the main magdyn kernel
@@ -174,6 +171,8 @@ void Dispersion3DDlg::Calculate()
 
 	m_minmax_E[0] = +std::numeric_limits<t_real>::max();
 	m_minmax_E[1] = -std::numeric_limits<t_real>::max();
+	m_minmax_Q1[0] = m_minmax_Q1[1] = tl2::zero<t_vec_real>(3);
+	m_minmax_Q2[0] = m_minmax_Q2[1] = tl2::zero<t_vec_real>(3);
 	m_data.clear();
 
 	BOOST_SCOPE_EXIT(this_)
@@ -190,6 +189,11 @@ void Dispersion3DDlg::Calculate()
 
 	t_vec_real Q_step_1 = Q_dir_1 / t_real(m_Q_count_1);
 	t_vec_real Q_step_2 = Q_dir_2 / t_real(m_Q_count_2);
+
+	m_minmax_Q1[0] = Q_origin;
+	m_minmax_Q1[1] = Q_origin + Q_step_1*t_real(m_Q_count_1 - 1);
+	m_minmax_Q2[0] = Q_origin;
+	m_minmax_Q2[1] = Q_origin + Q_step_2*t_real(m_Q_count_2 - 1);
 
 	t_real min_S = m_S_filter->value();
 	bool use_weights = m_S_filter_enable->isChecked();
@@ -612,8 +616,7 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 		t_real E_mean = only_pos_E ? 0.5*E_range : m_minmax_E[0] + 0.5*E_range;
 
 		t_mat_gl obj_scale = tl2::hom_scaling<t_mat_gl>(
-			0.5 * COORD_PADDING * Q_scale1, 0.5 * COORD_PADDING * Q_scale2,
-			0.5 * COORD_PADDING * E_scale * E_range);
+			0.5 * Q_scale1, 0.5 * Q_scale2, 0.5 * E_scale * E_range);
 		t_mat_gl obj_shift = tl2::hom_translation<t_mat_gl>(0., 0., E_scale * E_mean);
 
 		for(auto obj : m_dispplot->GetRenderer()->GetCoordCube())
@@ -623,15 +626,22 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 		}
 
 		auto [Q_idx_1, Q_idx_2] = GetQIndices();
-		static const std::array<std::string, 3> labels
+		/*static const std::array<std::string, 3> labels
 		{{
 			"h (rlu)", "k (rlu)", "l (rlu)"
-		}};
+		}};*/
 
-		m_dispplot->GetRenderer()->UpdateCoordCubeTextures(
-			-1., 1., 0.1,
-			-1., 1., 0.1,
-			COORD_PADDING * E_min, COORD_PADDING * m_minmax_E[1], E_range / 10.);
+		if(m_dispplot || m_minmax_Q1[0].size() == 3)
+		{
+			//using namespace tl2_ops;
+			//std::cout << m_minmax_Q1[0] << " -> " << m_minmax_Q1[1] << ", " << Q_idx_1 << std::endl;
+			//std::cout << m_minmax_Q2[0] << " -> " << m_minmax_Q2[1] << ", " << Q_idx_2 << std::endl;
+
+			m_dispplot->GetRenderer()->UpdateCoordCubeTextures(
+				m_minmax_Q1[0][Q_idx_1], m_minmax_Q1[1][Q_idx_1], -1.,
+				m_minmax_Q2[0][Q_idx_2], m_minmax_Q2[1][Q_idx_2], -1.,
+				E_min, m_minmax_E[1], -1.);
+		}
 	}
 
 	// plot the magnon bands

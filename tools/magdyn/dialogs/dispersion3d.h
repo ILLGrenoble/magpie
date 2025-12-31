@@ -142,6 +142,8 @@ private:
 	t_size m_Q_count_1{}, m_Q_count_2{}; // number of Q points along the two directions
 	t_data_bands m_data{};               // data for all energy bands
 	std::array<t_real, 2> m_minmax_E{};  // minimum and maximum band energy
+	std::array<t_vec_real, 2> m_minmax_Q1{};  // minimum and maximum Q
+	std::array<t_vec_real, 2> m_minmax_Q2{};  // minimum and maximum Q
 
 	// ------------------------------------------------------------------------
 	// from main dialog
