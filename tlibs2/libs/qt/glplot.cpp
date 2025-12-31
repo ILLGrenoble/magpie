@@ -697,7 +697,19 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 		return (val - min) / (max - min);
 	};
 
-	auto draw_texture = [this, &trafo, texture_width, texture_height](
+	// calculate a possible tick spacing
+	auto calc_tick_marks = [](t_real_gl min, t_real_gl max) -> t_real_gl
+	{
+		t_real_gl range = max - min;
+		t_real_gl num_ticks = 10.;
+
+		int power = static_cast<int>(std::log10(std::abs(range)));
+		t_real_gl tick = std::round(range / std::pow(10., power)) / num_ticks;
+		return tick;
+	};
+
+	auto draw_texture = [this, &trafo, &calc_tick_marks,
+		texture_width, texture_height](
 		GlRenderObj* obj,
 		t_real_gl x_min, t_real_gl x_max, t_real_gl x_tick,
 		t_real_gl y_min, t_real_gl y_max, t_real_gl y_tick,
@@ -715,6 +727,12 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 		QPainter painter{&img};
 		painter.setFont(font);
 		painter.setPen(pen);
+
+		// if none are given, find a tick spacing
+		if(x_tick < 0.)
+			x_tick = calc_tick_marks(x_min, x_max);
+		if(y_tick < 0.)
+			y_tick = calc_tick_marks(y_min, y_max);
 
 		// lines in +y direction
 		for(t_real_gl x = 0.; x <= x_max; x += x_tick)
