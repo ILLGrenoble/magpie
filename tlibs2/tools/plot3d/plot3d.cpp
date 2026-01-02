@@ -58,7 +58,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 	m_dispplot->GetRenderer()->SetLight(0, tl2::create<t_vec3_gl>({ 50, 50, 50 }));
 	m_dispplot->GetRenderer()->SetLight(1, tl2::create<t_vec3_gl>({ -50, -50, -50 }));
 	m_dispplot->GetRenderer()->SetCoordMax(50.);
-	m_dispplot->GetRenderer()->GetCamera().SetParallelRange(100.);
+	m_dispplot->GetRenderer()->GetCamera().SetParallelRange(5.);
 	m_dispplot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real>(g_fov));
 	m_dispplot->GetRenderer()->GetCamera().SetDist(2.);
 	m_dispplot->GetRenderer()->GetCamera().UpdateTransformation();
@@ -269,7 +269,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 	Qgrid->addWidget(new QLabel("y Range:", this), y, 0, 1, 1);
 	Qgrid->addWidget(m_yrange[0], y, 1, 1, 1);
 	Qgrid->addWidget(m_yrange[1], y++, 2, 1, 1);
-	Qgrid->addWidget(new QLabel("Grid Points:", this), y, 0, 1, 1);
+	Qgrid->addWidget(new QLabel("Grid:", this), y, 0, 1, 1);
 	Qgrid->addWidget(m_num_points[0], y, 1, 1, 1);
 	Qgrid->addWidget(m_num_points[1], y++, 2, 1, 1);
 
