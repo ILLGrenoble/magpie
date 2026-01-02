@@ -96,42 +96,31 @@ void Plot3DDlg::SaveData()
 
 	// write column header
 	int field_len = g_prec * 2.5;
-	ofstr << std::setw(field_len) << std::left << "# h" << " ";
-	ofstr << std::setw(field_len) << std::left << "k" << " ";
-	ofstr << std::setw(field_len) << std::left << "l" << " ";
-	ofstr << std::setw(field_len) << std::left << "E" << " ";
+	ofstr << std::setw(field_len) << std::left << "# x" << " ";
+	ofstr << std::setw(field_len) << std::left << "y" << " ";
+	ofstr << std::setw(field_len) << std::left << "z" << " ";
 	if(!skip_invalid_points)
 		ofstr << std::setw(field_len) << std::left << "valid" << " ";
-	ofstr << std::setw(field_len) << std::left << "band" << " ";
-	ofstr << std::setw(field_len) << std::left << "Qidx1" << " ";
-	ofstr << std::setw(field_len) << std::left << "Qidx2" << " ";
-	ofstr << std::setw(field_len) << std::left << "degen" << "\n";
+	ofstr << std::setw(field_len) << std::left << "surf." << "\n";
 
-	const t_size num_bands = m_data.size();
-	for(t_size band_idx = 0; band_idx < num_bands; ++band_idx)
+	const t_size num_surfs = m_data.size();
+	for(t_size surf_idx = 0; surf_idx < num_surfs; ++surf_idx)
 	{
-		for(t_data_Q& data : m_data[band_idx])
+		for(t_data_Q& data : m_data[surf_idx])
 		{
-			const t_vec& Q = std::get<0>(data);
-			t_real E = std::get<1>(data);
-			t_size Qidx1 = std::get<3>(data);
-			t_size Qidx2 = std::get<4>(data);
-			t_size degen = std::get<5>(data);
-			bool valid = std::get<6>(data);
+			const t_vec& xy = std::get<0>(data);
+			t_real z = std::get<1>(data);
+			bool valid = std::get<4>(data);
 
 			if(skip_invalid_points && !valid)
 				continue;
 
-			ofstr << std::setw(field_len) << std::left << Q[0] << " ";
-			ofstr << std::setw(field_len) << std::left << Q[1] << " ";
-			ofstr << std::setw(field_len) << std::left << Q[2] << " ";
-			ofstr << std::setw(field_len) << std::left << E << " ";
+			ofstr << std::setw(field_len) << std::left << xy[0] << " ";
+			ofstr << std::setw(field_len) << std::left << xy[1] << " ";
+			ofstr << std::setw(field_len) << std::left << z << " ";
 			if(!skip_invalid_points)
 				ofstr << std::setw(field_len) << std::left << valid << " ";
-			ofstr << std::setw(field_len) << std::left << band_idx << " ";
-			ofstr << std::setw(field_len) << std::left << Qidx1 << " ";
-			ofstr << std::setw(field_len) << std::left << Qidx2 << " ";
-			ofstr << std::setw(field_len) << std::left << degen << "\n";
+			ofstr << std::setw(field_len) << std::left << surf_idx << "\n";
 		}
 	}
 
@@ -181,59 +170,41 @@ import numpy
 # -----------------------------------------------------------------------------
 # options
 # -----------------------------------------------------------------------------
-plot_file      = ""     # file to save plot to
-S_filter_min   = 1e-5   # cutoff minimum spectral weight
-
-h_column       =  0     # h column index in data files
-k_column       =  1     # k column index
-l_column       =  2     # l column index
-E_column       =  3     # E column index
-S_column       = %%S_INDEX%%     # S column index, -1: not available
+plot_file = ""  # file to save plot to
 # -----------------------------------------------------------------------------
 
-# get the magnons with a certain branch index
-def get_branch(data, branch_data, E_branch_idx = 0, Q_idx1 = 0, Q_idx2 = 1):
-	# iterate energy branches
-	Q1_minmax = [ +999999999., -999999999. ]
-	Q2_minmax = [ +999999999., -999999999. ]
-	E_minmax  = [ +999999999., -999999999. ]
+# get the surface with a certain index
+def get_surf(data, surf_data, z_surf_idx = 0):
+	# iterate surfaces
+	x_minmax = [ +999999999., -999999999. ]
+	y_minmax = [ +999999999., -999999999. ]
+	z_minmax = [ +999999999., -999999999. ]
 
-	# filter data for given branch
-	data_S = []
+	# filter data for given surface
 	data_Q = [
-		[ row[h_column + Q_idx1] for (row, branch_idx) in zip(data, branch_data) \
-			if branch_idx == E_branch_idx ],
-		[ row[h_column + Q_idx2] for (row, branch_idx) in zip(data, branch_data) \
-			if branch_idx == E_branch_idx ]
+		[ row[0] for (row, surf_idx) in zip(data, surf_data) \
+			if surf_idx == z_surf_idx ],
+		[ row[1] for (row, surf_idx) in zip(data, surf_data) \
+			if surf_idx == z_surf_idx ]
 	]
-	data_E = [ row[E_column] for (row, branch_idx) in zip(data, branch_data) \
-		if branch_idx == E_branch_idx ]
-	if S_column >= 0:
-		data_S = [ row[S_column] for (row, branch_idx) in zip(data, branch_data) \
-			if branch_idx == E_branch_idx ]
-
-	if S_column >= 0 and S_filter_min >= 0.:
-		# filter weights below cutoff
-		data_Q[0] = [ Q for (Q, S) in zip(data_Q[0], data_S) if S >= S_filter_min ]
-		data_Q[1] = [ Q for (Q, S) in zip(data_Q[1], data_S) if S >= S_filter_min ]
-		data_E = [ E for (E, S) in zip(data_E, data_S) if S >= S_filter_min ]
-		data_S = [ S for S in data_S if S >= S_filter_min ]
+	data_E = [ row[2] for (row, surf_idx) in zip(data, surf_data) \
+		if surf_idx == z_surf_idx ]
 
 	if len(data_E) < 1:
 		return None
 
 	# data ranges
-	Q1_minmax[0] = numpy.min([ numpy.min(data_Q[0]), Q1_minmax[0] ])
-	Q1_minmax[1] = numpy.max([ numpy.max(data_Q[0]), Q1_minmax[1] ])
-	Q2_minmax[0] = numpy.min([ numpy.min(data_Q[1]), Q2_minmax[0] ])
-	Q2_minmax[1] = numpy.max([ numpy.max(data_Q[1]), Q2_minmax[1] ])
-	E_minmax[0] = numpy.min([ numpy.min(data_E), E_minmax[0] ])
-	E_minmax[1] = numpy.max([ numpy.max(data_E), E_minmax[1] ])
+	x_minmax[0] = numpy.min([ numpy.min(data_Q[0]), x_minmax[0] ])
+	x_minmax[1] = numpy.max([ numpy.max(data_Q[0]), x_minmax[1] ])
+	y_minmax[0] = numpy.min([ numpy.min(data_Q[1]), y_minmax[0] ])
+	y_minmax[1] = numpy.max([ numpy.max(data_Q[1]), y_minmax[1] ])
+	z_minmax[0] = numpy.min([ numpy.min(data_E), z_minmax[0] ])
+	z_minmax[1] = numpy.max([ numpy.max(data_E), z_minmax[1] ])
 
-	return [data_Q, data_E, data_S, Q1_minmax, Q2_minmax, E_minmax]
+	return [data_Q, data_E, x_minmax, y_minmax, z_minmax]
 
 # plot using mayavi
-def plot_disp_mvi(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_idx2 = 1):
+def plot_disp_mvi(data, surf_data, surf_colours):
 	# convert a colour from a string like "#ff0000" to a tuple like (1, 0., 0)
 	def conv_col(col_str):
 		r = float(int(col_str[1:3], 16)) / 255.
@@ -247,43 +218,42 @@ def plot_disp_mvi(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_i
 	fig.scene.parallel_projection = %%ORTHO_PROJ%%
 	axis_extents = [0., 1., 0., 1., 0., 1.]
 
-	# iterate energy branches
-	Q1_minmax = [ +999999999., -999999999. ]
-	Q2_minmax = [ +999999999., -999999999. ]
-	E_minmax  = [ +999999999., -999999999. ]
-	E_branch_eff_idx = 0             # effective index of actually plotted bands
-	E_branch_max = max(branch_data)  # maximum branch index
-	for E_branch_idx in range(0, E_branch_max + 1):
-		branch = get_branch(data, branch_data, E_branch_idx, Q_idx1, Q_idx2)
-		if branch == None:
+	# iterate surfaces
+	x_minmax = [ +999999999., -999999999. ]
+	y_minmax = [ +999999999., -999999999. ]
+	z_minmax = [ +999999999., -999999999. ]
+	z_surf_eff_idx = 0           # effective index of actually plotted surfaces
+	z_surf_max = max(surf_data)  # maximum surface index
+	for z_surf_idx in range(0, z_surf_max + 1):
+		surf = get_surf(data, surf_data, z_surf_idx)
+		if surf == None:
 			continue
 
-		[data_Q, data_E, data_S, _Q1_minmax, _Q2_minmax, _E_minmax] = branch
-		Q1_minmax[0] = min(Q1_minmax[0], _Q1_minmax[0])
-		Q1_minmax[1] = max(Q1_minmax[1], _Q1_minmax[1])
-		Q2_minmax[0] = min(Q2_minmax[0], _Q2_minmax[0])
-		Q2_minmax[1] = max(Q2_minmax[1], _Q2_minmax[1])
-		E_minmax[0] = min(E_minmax[0], _E_minmax[0])
-		E_minmax[1] = max(E_minmax[1], _E_minmax[1])
+		[data_Q, data_E, _x_minmax, _y_minmax, _z_minmax] = surf
+		x_minmax[0] = min(x_minmax[0], _x_minmax[0])
+		x_minmax[1] = max(x_minmax[1], _x_minmax[1])
+		y_minmax[0] = min(y_minmax[0], _y_minmax[0])
+		y_minmax[1] = max(y_minmax[1], _y_minmax[1])
+		z_minmax[0] = min(z_minmax[0], _z_minmax[0])
+		z_minmax[1] = max(z_minmax[1], _z_minmax[1])
 
-		colour_idx = E_branch_eff_idx
+		colour_idx = z_surf_eff_idx
 
 		surf_repr = "surface" # "wireframe"
-		zval = float(colour_idx) / float(E_branch_max)
+		zval = float(colour_idx) / float(z_surf_max)
 		points = mlab.points3d(data_Q[0], data_Q[1], data_E, [zval]*len(data_E),
 			mode = "point", opacity = 0.5, figure = fig, extent = axis_extents)
 		triags = mlab.pipeline.delaunay2d(points, figure = fig)
 		surface = mlab.pipeline.surface(triags, representation = surf_repr,
 			figure = fig, extent = axis_extents, opacity = 1.,
-			name = ("branch_%d" % E_branch_idx), line_width = 1.,
-			color = conv_col(branch_colours[colour_idx]))
-		E_branch_eff_idx += 1
+			name = ("surf_%d" % z_surf_idx), line_width = 1.,
+			color = conv_col(surf_colours[colour_idx]))
+		z_surf_eff_idx += 1
 
-	labels = [ "h (rlu)", "k (rlu)", "l (rlu)" ]
-	mlab.xlabel(labels[Q_idx1])
-	mlab.ylabel(labels[Q_idx2])
-	mlab.zlabel("E (meV)")
-	axes = mlab.axes(figure = fig, ranges = [*Q1_minmax, *Q2_minmax, *E_minmax],
+	mlab.xlabel("x")
+	mlab.ylabel("y")
+	mlab.zlabel("z")
+	axes = mlab.axes(figure = fig, ranges = [*x_minmax, *y_minmax, *z_minmax],
 		extent = axis_extents, line_width = 2.)
 	axes.axes.font_factor = 1.75
 	mlab.outline(figure = fig, extent = axis_extents, line_width = 2.)
@@ -294,7 +264,7 @@ def plot_disp_mvi(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_i
 	mlab.close(all = True)
 
 # plot using matplotlib
-def plot_disp_mpl(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_idx2 = 1):
+def plot_disp_mpl(data, surf_data, surf_colours):
 	from matplotlib import colors
 	from matplotlib import pyplot
 	pyplot.rcParams.update({
@@ -310,41 +280,40 @@ def plot_disp_mpl(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_i
 			"azim" : %%AZIMUTH%%, "elev" : %%ELEVATION%% })
 	light = colors.LightSource(azdeg = %%AZIMUTH%%, altdeg = 45.)
 
-	# iterate energy branches
-	Q1_minmax = [ +999999999., -999999999. ]
-	Q2_minmax = [ +999999999., -999999999. ]
-	E_minmax  = [ +999999999., -999999999. ]
-	E_branch_eff_idx = 0             # effective index of actually plotted bands
-	E_branch_max = max(branch_data)  # maximum branch index
-	for E_branch_idx in range(0, E_branch_max + 1):
-		branch = get_branch(data, branch_data, E_branch_idx, Q_idx1, Q_idx2)
-		if branch == None:
+	# iterate surfaces
+	x_minmax = [ +999999999., -999999999. ]
+	y_minmax = [ +999999999., -999999999. ]
+	z_minmax = [ +999999999., -999999999. ]
+	z_surf_eff_idx = 0           # effective index of actually plotted surfaces
+	z_surf_max = max(surf_data)  # maximum surface index
+	for z_surf_idx in range(0, z_surf_max + 1):
+		surf = get_surf(data, surf_data, z_surf_idx)
+		if surf == None:
 			continue
 
-		[data_Q, data_E, data_S, _Q1_minmax, _Q2_minmax, _E_minmax] = branch
-		Q1_minmax[0] = min(Q1_minmax[0], _Q1_minmax[0])
-		Q1_minmax[1] = max(Q1_minmax[1], _Q1_minmax[1])
-		Q2_minmax[0] = min(Q2_minmax[0], _Q2_minmax[0])
-		Q2_minmax[1] = max(Q2_minmax[1], _Q2_minmax[1])
-		E_minmax[0] = min(E_minmax[0], _E_minmax[0])
-		E_minmax[1] = max(E_minmax[1], _E_minmax[1])
+		[data_Q, data_E, _x_minmax, _y_minmax, _z_minmax] = surf
+		x_minmax[0] = min(x_minmax[0], _x_minmax[0])
+		x_minmax[1] = max(x_minmax[1], _x_minmax[1])
+		y_minmax[0] = min(y_minmax[0], _y_minmax[0])
+		y_minmax[1] = max(y_minmax[1], _y_minmax[1])
+		z_minmax[0] = min(z_minmax[0], _z_minmax[0])
+		z_minmax[1] = max(z_minmax[1], _z_minmax[1])
 
-		colour_idx = E_branch_eff_idx
+		colour_idx = z_surf_eff_idx
 
 		axis.plot_trisurf(data_Q[0], data_Q[1], data_E,
-			color = branch_colours[colour_idx], alpha = 1., shade = True,
+			color = surf_colours[colour_idx], alpha = 1., shade = True,
 			lightsource = light, antialiased = False,
-			zorder = E_branch_max - E_branch_idx)
-		E_branch_eff_idx += 1
+			zorder = z_surf_max - z_surf_idx)
+		z_surf_eff_idx += 1
 
-	labels = [ "h (rlu)", "k (rlu)", "l (rlu)" ]
-	axis.set_xlabel(labels[Q_idx1], labelpad = 12)
-	axis.set_ylabel(labels[Q_idx2], labelpad = 12)
-	axis.set_zlabel("E (meV)", labelpad = 12)
+	axis.set_xlabel("x", labelpad = 12)
+	axis.set_ylabel("y", labelpad = 12)
+	axis.set_zlabel("z", labelpad = 12)
 
-	axis.set_xlim([Q1_minmax[0], Q1_minmax[1]])
-	axis.set_ylim([Q2_minmax[0], Q2_minmax[1]])
-	axis.set_zlim([E_minmax[0], E_minmax[1]])
+	axis.set_xlim([x_minmax[0], x_minmax[1]])
+	axis.set_ylim([y_minmax[0], y_minmax[1]])
+	axis.set_zlim([z_minmax[0], z_minmax[1]])
 	axis.set_box_aspect([ 1., 1., 1. ])
 
 	plt.tight_layout()
@@ -356,65 +325,53 @@ def plot_disp_mpl(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_i
 	pyplot.close()
 
 if __name__ == "__main__":
-	h_data = %%H_DATA%%
-	k_data = %%K_DATA%%
-	l_data = %%L_DATA%%
-	E_data = %%E_DATA%%
-	S_data = %%S_DATA%%
-	branch_data = %%BRANCH_DATA%%
-	degen_data = %%DEGEN_DATA%%
-	colours = %%BRANCH_COLOURS%%
+	x_data = %%X_DATA%%
+	y_data = %%Y_DATA%%
+	z_data = %%Z_DATA%%
+	surf_data = %%SURF_DATA%%
+	colours = %%SURF_COLOURS%%
 
-	if len(S_data) == len(E_data):
-		data = numpy.array([ h_data, k_data, l_data, E_data, S_data ]).T
-	else:
-		data = numpy.array([ h_data, k_data, l_data, E_data ]).T
+	data = numpy.array([ x_data, y_data, z_data ]).T
 
 	try:
 		# try to plot using mayavi...
-		plot_disp_mvi(data, branch_data, degen_data, colours, %%Q_IDX_1%%, %%Q_IDX_2%%)
+		plot_disp_mvi(data, surf_data, colours)
 	except ModuleNotFoundError:
 		# ... otherwise resort to matplotlib
-		plot_disp_mpl(data, branch_data, degen_data, colours, %%Q_IDX_1%%, %%Q_IDX_2%%)
+		plot_disp_mpl(data, surf_data, colours)
 )RAW";
 	// ------------------------------------------------------------------------
 
-	const t_size num_bands = m_data.size();
+	const t_size num_surfs = m_data.size();
 
 	// create data arrays
-	std::ostringstream h_data, k_data, l_data, E_data, S_data, bandidx_data, degen_data, colours;
-	for(std::ostringstream* ostr : { &h_data, &k_data, &l_data, &E_data, &S_data,
-		&bandidx_data, &degen_data, &colours })
+	std::ostringstream x_data, y_data, z_data, surfidx_data, colours;
+	for(std::ostringstream* ostr : { &x_data, &y_data, &z_data, &surfidx_data, &colours })
 	{
 		ostr->precision(g_prec);
 	}
 
-	for(t_size band_idx = 0; band_idx < num_bands; ++band_idx)
+	for(t_size surf_idx = 0; surf_idx < num_surfs; ++surf_idx)
 	{
-		// band data
-		for(t_data_Q& data : m_data[band_idx])
+		// surface data
+		for(t_data_Q& data : m_data[surf_idx])
 		{
-			const t_vec& Q = std::get<0>(data);
-			t_real E = std::get<1>(data);
-			//t_size Qidx1 = std::get<3>(data);
-			//t_size Qidx2 = std::get<4>(data);
-			t_size degen = std::get<5>(data);
-			bool valid = std::get<6>(data);
+			const t_vec& xy = std::get<0>(data);
+			t_real z = std::get<1>(data);
+			bool valid = std::get<4>(data);
 
 			if(skip_invalid_points && !valid)
 				continue;
 
-			h_data << Q[0] << ", ";
-			k_data << Q[1] << ", ";
-			l_data << Q[2] << ", ";
-			E_data << E << ", ";
+			x_data << xy[0] << ", ";
+			y_data << xy[1] << ", ";
+			z_data << z << ", ";
 
-			bandidx_data << band_idx << ", ";
-			degen_data << degen << ", ";
+			surfidx_data << surf_idx << ", ";
 		}
 
-		// band colour
-		std::array<int, 3> col = GetBranchColour(band_idx, num_bands);
+		// surface colour
+		std::array<int, 3> col = GetBranchColour(surf_idx, num_surfs);
 		colours << "\"#" << std::hex
 			<< std::setw(2) << std::setfill('0') << col[0]
 			<< std::setw(2) << std::setfill('0') << col[1]
@@ -431,23 +388,16 @@ if __name__ == "__main__":
 			<< g_fov << "/180.*numpy.pi),\n";
 	}
 
-	// TODO: for the moment the azimuth only matches for Q directions in a right-handed system -> add a trafo
-	algo::replace_all(pyscr, "%%H_DATA%%", "[ " + h_data.str() + "]");
-	algo::replace_all(pyscr, "%%K_DATA%%", "[ " + k_data.str() + "]");
-	algo::replace_all(pyscr, "%%L_DATA%%", "[ " + l_data.str() + "]");
-	algo::replace_all(pyscr, "%%E_DATA%%", "[ " + E_data.str() + "]");
-	algo::replace_all(pyscr, "%%S_DATA%%", "[ " + S_data.str() + "]");
-	algo::replace_all(pyscr, "%%S_INDEX%%", "-1");
-	algo::replace_all(pyscr, "%%BRANCH_DATA%%", "[ " + bandidx_data.str() + "]");
-	algo::replace_all(pyscr, "%%DEGEN_DATA%%", "[ " + degen_data.str() + "]");
-	algo::replace_all(pyscr, "%%BRANCH_COLOURS%%", "[ " + colours.str() + "]");
+	algo::replace_all(pyscr, "%%X_DATA%%", "[ " + x_data.str() + "]");
+	algo::replace_all(pyscr, "%%Y_DATA%%", "[ " + y_data.str() + "]");
+	algo::replace_all(pyscr, "%%Z_DATA%%", "[ " + z_data.str() + "]");
+	algo::replace_all(pyscr, "%%SURF_DATA%%", "[ " + surfidx_data.str() + "]");
+	algo::replace_all(pyscr, "%%SURF_COLOURS%%", "[ " + colours.str() + "]");
 	algo::replace_all(pyscr, "%%PROJ_TYPE%%", m_perspective->isChecked() ? "persp" : "ortho");
 	algo::replace_all(pyscr, "%%ORTHO_PROJ%%", m_perspective->isChecked() ? "False" : "True");
 	algo::replace_all(pyscr, "%%FOCAL_LEN%%", focal_len.str());
 	algo::replace_all(pyscr, "%%AZIMUTH%%", tl2::var_to_str(-90. - m_cam_phi->value(), g_prec));
 	algo::replace_all(pyscr, "%%ELEVATION%%", tl2::var_to_str(90. + m_cam_theta->value(), g_prec));
-	algo::replace_all(pyscr, "%%Q_IDX_1%%", "0");
-	algo::replace_all(pyscr, "%%Q_IDX_2%%", "1");
 
 	ofstr << pyscr << std::endl;
 }

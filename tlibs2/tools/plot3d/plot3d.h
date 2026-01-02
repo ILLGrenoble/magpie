@@ -64,9 +64,9 @@ private:
 
 
 protected:
-	using t_data_Q = std::tuple<t_vec /*0: Q*/, t_real /*1: E*/, t_real /*2: S*/,
-		t_size /*3: Q_idx_1*/, t_size /*4: Q_idx_2*/,
-		t_size /*5: degeneracy*/, bool /*6: valid*/>;
+	using t_data_Q = std::tuple<t_vec /*0: xy*/, t_real /*1: z*/,
+		t_size /*2: Q_idx_1*/, t_size /*3: Q_idx_2*/,
+		bool /*4: valid*/>;
 	using t_data_Qs = std::vector<t_data_Q>;
 	using t_data_bands = std::vector<t_data_Qs>;
 

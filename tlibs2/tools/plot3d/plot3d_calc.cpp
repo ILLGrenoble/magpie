@@ -142,7 +142,7 @@ void Plot3DDlg::Calculate()
 				}
 
 				// generate and add data point
-				t_data_Q dat{std::make_tuple(Q, z, -1., x_idx, y_idx, 0, valid)};
+				t_data_Q dat{std::make_tuple(Q, z, x_idx, y_idx, valid)};
 
 				std::lock_guard<std::mutex> _lck{mtx};
 				m_data[band_idx].emplace_back(std::move(dat));
@@ -186,10 +186,10 @@ void Plot3DDlg::Calculate()
 			[this, band_idx](std::size_t idx1, std::size_t idx2) -> bool
 		{
 			// sorting by Q indices
-			t_size Q1_idx_1 = std::get<3>(m_data[band_idx][idx1]);
-			t_size Q1_idx_2 = std::get<4>(m_data[band_idx][idx1]);
-			t_size Q2_idx_1 = std::get<3>(m_data[band_idx][idx2]);
-			t_size Q2_idx_2 = std::get<4>(m_data[band_idx][idx2]);
+			t_size Q1_idx_1 = std::get<2>(m_data[band_idx][idx1]);
+			t_size Q1_idx_2 = std::get<3>(m_data[band_idx][idx1]);
+			t_size Q2_idx_1 = std::get<2>(m_data[band_idx][idx2]);
+			t_size Q2_idx_2 = std::get<3>(m_data[band_idx][idx2]);
 
 			if(Q1_idx_1 != Q2_idx_1)
 				return Q1_idx_1 < Q2_idx_1;
@@ -239,7 +239,7 @@ bool Plot3DDlg::IsValid(const t_data_Qs& data) const
 	for(const t_data_Q& data : data)
 	{
 		// data point valid?
-		if(std::get<6>(data))
+		if(std::get<4>(data))
 			return true;
 	}
 
@@ -259,7 +259,7 @@ std::pair<t_size, t_size> Plot3DDlg::NumValid(const t_data_Qs& data) const
 	for(const t_data_Q& data : data)
 	{
 		// data point valid?
-		if(std::get<6>(data))
+		if(std::get<4>(data))
 			++valid;
 		else
 			++invalid;
@@ -281,7 +281,7 @@ t_real Plot3DDlg::GetMeanZ(const Plot3DDlg::t_data_Qs& data) const
 	for(const t_data_Q& data : data)
 	{
 		// data point invalid?
-		if(!std::get<6>(data))
+		if(!std::get<4>(data))
 			continue;
 
 		E_mean += std::get<1>(data);
@@ -405,12 +405,12 @@ void Plot3DDlg::Plot(bool clear_settings)
 				if(idx >= data.size())
 					return std::make_pair(0., false);
 
-				bool valid = std::get<6>(data[idx]);
-				if(std::get<3>(data[idx]) != idx_1 || std::get<4>(data[idx]) != idx_2)
+				bool valid = std::get<4>(data[idx]);
+				if(std::get<2>(data[idx]) != idx_1 || std::get<3>(data[idx]) != idx_2)
 				{
 					std::cerr << "Error: Patch index mismatch: "
-						<< "Expected " << std::get<3>(data[idx]) << " for x, but got " << idx_1
-						<< "; expected " << std::get<4>(data[idx]) << " for y, but got " << idx_2
+						<< "Expected " << std::get<2>(data[idx]) << " for x, but got " << idx_1
+						<< "; expected " << std::get<3>(data[idx]) << " for y, but got " << idx_2
 						<< "." << std::endl;
 					valid = false;
 				}
