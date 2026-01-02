@@ -49,7 +49,7 @@
 Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 	: QDialog{parent}, m_sett{sett}
 {
-	setWindowTitle("3D Dispersion");
+	setWindowTitle("3D Plotter");
 	setSizeGripEnabled(true);
 
 	// create gl plotter
@@ -60,7 +60,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 	m_dispplot->GetRenderer()->SetCoordMax(50.);
 	m_dispplot->GetRenderer()->GetCamera().SetParallelRange(100.);
 	m_dispplot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real>(g_fov));
-	m_dispplot->GetRenderer()->GetCamera().SetDist(40.);
+	m_dispplot->GetRenderer()->GetCamera().SetDist(2.);
 	m_dispplot->GetRenderer()->GetCamera().UpdateTransformation();
 	m_dispplot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
@@ -126,18 +126,28 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 	m_context_band->addSeparator();
 	m_context_band->addAction(acSaveImage);
 
-	// coordinates
-	QGroupBox *groupQ = new QGroupBox("Surface", this);
+	// formulas
+	QGroupBox *groupFormulas = new QGroupBox("Formulas", this);
+	m_formulas = new QTextEdit(groupFormulas);
+	m_formulas->setPlaceholderText("Enter formulas separated by ';'. Variables are 'x' and 'y'.");
+	m_formulas->setReadOnly(false);
+	//m_formulas->setFixedHeight(QFontMetrics{m_formulas->font()}.lineSpacing() * 4);
+	m_formulas->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Ignored});
+
+	// surfaces
+	QGroupBox *groupQ = new QGroupBox("Surface Options", this);
 	m_xrange[0] = new QDoubleSpinBox(groupQ);
 	m_xrange[1] = new QDoubleSpinBox(groupQ);
 	m_yrange[0] = new QDoubleSpinBox(groupQ);
 	m_yrange[1] = new QDoubleSpinBox(groupQ);
+
 	m_num_points[0] = new QSpinBox(groupQ);
 	m_num_points[1] = new QSpinBox(groupQ);
 	m_num_points[0]->setToolTip("Number of grid points along the first axis.");
 	m_num_points[1]->setToolTip("Number of grid points along the second axis.");
 
-	static const char* hklPrefix[] = { "x = ", "y = " };
+	static const char* prefix[] = { "x = ", "y = " };
+	static const char* prefix_minmax[] = { "min = ", "max = " };
 	for(int i = 0; i < 2; ++i)
 	{
 		m_xrange[i]->setDecimals(4);
@@ -146,7 +156,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 		m_xrange[i]->setSingleStep(0.01);
 		m_xrange[i]->setValue(i == 1 ? 1. : 0.);
 		m_xrange[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
-		m_xrange[i]->setPrefix(hklPrefix[i]);
+		m_xrange[i]->setPrefix(prefix_minmax[i]);
 		m_xrange[i]->setToolTip("Range of the first axis.");
 
 		m_yrange[i]->setDecimals(4);
@@ -155,15 +165,13 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 		m_yrange[i]->setSingleStep(0.01);
 		m_yrange[i]->setValue(i == 1 ? 1. : 0.);
 		m_yrange[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
-		m_yrange[i]->setPrefix(hklPrefix[i]);
+		m_yrange[i]->setPrefix(prefix_minmax[i]);
 		m_yrange[i]->setToolTip("Range of the second axis.");
-	}
 
-	for(int i = 0; i < 2; ++i)
-	{
 		m_num_points[i]->setMinimum(1);
 		m_num_points[i]->setMaximum(9999);
 		m_num_points[i]->setSingleStep(1);
+		m_num_points[i]->setPrefix(prefix[i]);
 		m_num_points[i]->setValue(64);
 	}
 
@@ -243,7 +251,14 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 	grid_bands->setContentsMargins(6, 6, 6, 6);
 	grid_bands->addWidget(m_table_bands, y++, 0, 1, 1);
 
-	// coordinates grid
+	// formulas grid
+	y = 0;
+	QGridLayout *gridFormulas = new QGridLayout(groupFormulas);
+	gridFormulas->setSpacing(4);
+	gridFormulas->setContentsMargins(6, 6, 6, 6);
+	gridFormulas->addWidget(m_formulas, y++, 0, 1, 1);
+
+	// surface options grid
 	y = 0;
 	QGridLayout *Qgrid = new QGridLayout(groupQ);
 	Qgrid->setSpacing(4);
@@ -286,7 +301,8 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 	maingrid->setSpacing(4);
 	maingrid->setContentsMargins(8, 8, 8, 8);
 	maingrid->addWidget(m_split_plot, y++, 0, 1, 4);
-	maingrid->addWidget(groupQ, y++, 0, 1, 4);
+	maingrid->addWidget(groupFormulas, y, 0, 1, 2);
+	maingrid->addWidget(groupQ, y++, 2, 1, 2);
 	maingrid->addWidget(groupPlotOptions, y++, 0, 1, 4);
 	maingrid->addWidget(m_progress, y, 0, 1, 3);
 	maingrid->addWidget(m_btn_start_stop, y++, 3, 1, 1);
@@ -295,13 +311,13 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 	// restore settings
 	if(m_sett)
 	{
-		if(m_sett->contains("dispersion3d/geo"))
-			restoreGeometry(m_sett->value("dispersion3d/geo").toByteArray());
+		if(m_sett->contains("plot3d/geo"))
+			restoreGeometry(m_sett->value("plot3d/geo").toByteArray());
 		else
 			resize(640, 640);
 
-		if(m_sett->contains("dispersion3d/splitter"))
-			m_split_plot->restoreState(m_sett->value("dispersion3d/splitter").toByteArray());
+		if(m_sett->contains("plot3d/splitter"))
+			m_split_plot->restoreState(m_sett->value("plot3d/splitter").toByteArray());
 	}
 
 	// connections
@@ -384,13 +400,13 @@ void Plot3DDlg::EnableCalculation(bool enable)
 	if(enable)
 	{
 		m_btn_start_stop->setText("Calculate");
-		m_btn_start_stop->setToolTip("Start dispersion calculation.");
+		m_btn_start_stop->setToolTip("Start surface calculation.");
 		m_btn_start_stop->setIcon(QIcon::fromTheme("media-playback-start"));
 	}
 	else
 	{
 		m_btn_start_stop->setText("Stop");
-		m_btn_start_stop->setToolTip("Stop running dispersion calculation.");
+		m_btn_start_stop->setToolTip("Stop running surface calculation.");
 		m_btn_start_stop->setIcon(QIcon::fromTheme("media-playback-stop"));
 	}
 }
@@ -398,7 +414,7 @@ void Plot3DDlg::EnableCalculation(bool enable)
 
 
 /**
- * the dispersion plot's camera properties have been updated
+ * the surface plot's camera properties have been updated
  */
 void Plot3DDlg::PlotCameraHasUpdated()
 {
@@ -422,7 +438,7 @@ void Plot3DDlg::PlotCameraHasUpdated()
 
 
 /**
- * dispersion plot mouse button clicked
+ * surface plot mouse button clicked
  */
 void Plot3DDlg::PlotMouseClick(
 	[[maybe_unused]] bool left,
@@ -450,7 +466,7 @@ void Plot3DDlg::PlotMouseClick(
 
 
 /**
- * dispersion plot mouse button pressed
+ * surface plot mouse button pressed
  */
 void Plot3DDlg::PlotMouseDown(
 	[[maybe_unused]] bool left,
@@ -462,7 +478,7 @@ void Plot3DDlg::PlotMouseDown(
 
 
 /**
- * dispersion plot mouse button released
+ * surface plot mouse button released
  */
 void Plot3DDlg::PlotMouseUp(
 	[[maybe_unused]] bool left,
@@ -474,7 +490,7 @@ void Plot3DDlg::PlotMouseUp(
 
 
 /**
- * dispersion plot has initialised
+ * surface plot has initialised
  */
 void Plot3DDlg::AfterPlotGLInitialisation()
 {
@@ -617,8 +633,8 @@ void Plot3DDlg::accept()
 {
 	if(m_sett)
 	{
-		m_sett->setValue("dispersion3d/geo", saveGeometry());
-		m_sett->setValue("dispersion3d/splitter", m_split_plot->saveState());
+		m_sett->setValue("plot3d/geo", saveGeometry());
+		m_sett->setValue("plot3d/splitter", m_split_plot->saveState());
 	}
 
 	QDialog::accept();

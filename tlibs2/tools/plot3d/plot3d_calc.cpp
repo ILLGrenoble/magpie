@@ -39,14 +39,14 @@ namespace asio = boost::asio;
 
 
 /**
- * calculate the dispersion
+ * calculate the surfaces
  */
 void Plot3DDlg::Calculate()
 {
 	m_minmax_z[0] = +std::numeric_limits<t_real>::max();
 	m_minmax_z[1] = -std::numeric_limits<t_real>::max();
-	m_minmax_x[0] = m_minmax_x[1] = tl2::zero<t_vec>(3);
-	m_minmax_y[0] = m_minmax_y[1] = tl2::zero<t_vec>(3);
+	m_minmax_x[0] = m_minmax_x[1] = 0.;
+	m_minmax_y[0] = m_minmax_y[1] = 0.;
 	m_data.clear();
 
 	BOOST_SCOPE_EXIT(this_)
@@ -55,21 +55,42 @@ void Plot3DDlg::Calculate()
 	} BOOST_SCOPE_EXIT_END
 	EnableCalculation(false);
 
+	// get formulas
+	std::string all_formulas = m_formulas->toPlainText().toStdString();
+	std::vector<std::string> formulas;
+	tl2::get_tokens<std::string, std::string>(all_formulas, ";", formulas);
+	if(formulas.size() == 0)
+		return;
+
+	// parse formulas
+	std::vector<tl2::ExprParser<t_real>> parsers;
+	for(const std::string& formula : formulas)
+	{
+		tl2::ExprParser<t_real> parser;
+
+		parser.SetAutoregisterVariables(false);
+		parser.register_var("x", 0.);
+		parser.register_var("y", 0.);
+
+		if(!parser.parse_noexcept(formula))
+		{
+			std::cerr << "Error parsing formula \"" << formula << "\"." << std::endl;
+			continue;
+		}
+
+		parsers.emplace_back(std::move(parser));
+	}
+
 	m_x_count = m_num_points[0]->value();
 	m_y_count = m_num_points[1]->value();
 
-	// TODO
-	t_vec Q_origin = tl2::zero<t_vec>(3);
-	t_vec Q_dir_1 = tl2::zero<t_vec>(3);
-	t_vec Q_dir_2 = tl2::zero<t_vec>(3);
+	t_vec start = tl2::create<t_vec>({ m_xrange[0]->value(), m_yrange[0]->value() });
+	t_vec end = tl2::create<t_vec>({ m_xrange[1]->value(), m_yrange[1]->value() });
 
-	t_vec Q_step_1 = Q_dir_1 / t_real(m_x_count);
-	t_vec Q_step_2 = Q_dir_2 / t_real(m_y_count);
-
-	m_minmax_x[0] = Q_origin;
-	m_minmax_x[1] = Q_origin + Q_step_1*t_real(m_x_count - 1);
-	m_minmax_y[0] = Q_origin;
-	m_minmax_y[1] = Q_origin + Q_step_2*t_real(m_y_count - 1);
+	m_minmax_x[0] = start[0];
+	m_minmax_x[1] = end[0];
+	m_minmax_y[0] = start[1];
+	m_minmax_y[1] = end[1];
 
 	// tread pool and mutex to protect the data vectors
 	asio::thread_pool pool{g_num_threads};
@@ -90,52 +111,41 @@ void Plot3DDlg::Calculate()
 	std::vector<t_taskptr> tasks;
 	tasks.reserve(m_x_count * m_y_count);
 
-	t_size expected_bands = 1;
-	m_data.resize(expected_bands);
+	m_data.resize(parsers.size());
 
-	for(t_size Q_idx_1 = 0; Q_idx_1 < m_x_count; ++Q_idx_1)
-	for(t_size Q_idx_2 = 0; Q_idx_2 < m_y_count; ++Q_idx_2)
+	for(t_size x_idx = 0; x_idx < m_x_count; ++x_idx)
+	for(t_size y_idx = 0; y_idx < m_y_count; ++y_idx)
 	{
-		auto task = [this, &mtx, Q_idx_1, Q_idx_2,
-			&Q_origin, &Q_step_1, &Q_step_2, expected_bands]()
+		auto task = [this, &parsers, &mtx, &start, &end, x_idx, y_idx]()
 		{
-			// calculate the dispersion at the given Q point
-			t_vec Q = Q_origin + Q_step_1*t_real(Q_idx_1) + Q_step_2*t_real(Q_idx_2);
+			// calculate the surface at the given coordinate
+			t_vec Q = start;
+			Q[0] += (end[0] - start[0]) / t_real(m_x_count) * t_real(x_idx);
+			Q[1] += (end[1] - start[1]) / t_real(m_y_count) * t_real(y_idx);
 
 			// iterate the energies for this Q point
-			t_size data_band_idx = 0;
-			for(t_size band_idx = 0; band_idx < /*Es_and_S.size()*/ 1 && data_band_idx < expected_bands; ++band_idx, ++data_band_idx)
+			for(t_size band_idx = 0; band_idx < parsers.size(); ++band_idx)
 			{
-				bool valid = true;
-				t_real E = 0.;
-				if(std::isnan(E) || std::isinf(E))
-					valid = false;
+				tl2::ExprParser<t_real> localparser = parsers[band_idx];
+				localparser.register_var("x", Q[0]);
+				localparser.register_var("y", Q[1]);
 
-				t_real weight = -1;
+				bool valid = true;
+				t_real z = localparser.eval();
+				if(std::isnan(z) || std::isinf(z))
+					valid = false;
 
 				if(valid)
 				{
-					m_minmax_z[0] = std::min(m_minmax_z[0], E);
-					m_minmax_z[1] = std::max(m_minmax_z[1], E);
+					m_minmax_z[0] = std::min(m_minmax_z[0], z);
+					m_minmax_z[1] = std::max(m_minmax_z[1], z);
 				}
 
-				// count energy degeneracy
-				t_size degeneracy = 0.;
-
 				// generate and add data point
-				t_data_Q dat{std::make_tuple(Q, E, weight, Q_idx_1, Q_idx_2, degeneracy, valid)};
+				t_data_Q dat{std::make_tuple(Q, z, -1., x_idx, y_idx, 0, valid)};
 
 				std::lock_guard<std::mutex> _lck{mtx};
-				m_data[data_band_idx].emplace_back(std::move(dat));
-			}
-
-			// fill up band data in case some indices were skipped due to invalid hamiltonians
-			for(; data_band_idx < expected_bands; ++data_band_idx)
-			{
-				t_data_Q dat{std::make_tuple(Q, 0., 0., Q_idx_1, Q_idx_2, 1, false)};
-
-				std::lock_guard<std::mutex> _lck{mtx};
-				m_data[data_band_idx].emplace_back(std::move(dat));
+				m_data[band_idx].emplace_back(std::move(dat));
 			}
 		};
 
@@ -144,7 +154,7 @@ void Plot3DDlg::Calculate()
 		asio::post(pool, [taskptr]() { (*taskptr)(); });
 	}
 
-	m_status->setText(QString("Calculating dispersion in %1 threads...").arg(g_num_threads));
+	m_status->setText(QString("Calculating in %1 threads...").arg(g_num_threads));
 
 	// get results from tasks
 	for(std::size_t task_idx = 0; task_idx < tasks.size(); ++task_idx)
@@ -208,7 +218,7 @@ void Plot3DDlg::Calculate()
 	stopwatch.stop();
 	std::ostringstream ostrMsg;
 	ostrMsg.precision(g_prec_gui);
-	ostrMsg << "Dispersion calculation";
+	ostrMsg << "Calculation";
 	if(m_stop_requested)
 		ostrMsg << " stopped ";
 	else
@@ -316,7 +326,7 @@ std::array<int, 3> Plot3DDlg::GetBranchColour(t_size branch_idx, t_size num_bran
 
 
 /**
- * plot the calculated dispersion
+ * plot the calculated surfaces
  */
 void Plot3DDlg::Plot(bool clear_settings)
 {
@@ -366,13 +376,10 @@ void Plot3DDlg::Plot(bool clear_settings)
 			m_dispplot->GetRenderer()->SetObjectMatrix(obj, obj_shift * obj_scale);
 		}
 
-		if(m_dispplot || m_minmax_x[0].size() == 3)
-		{
-			m_dispplot->GetRenderer()->UpdateCoordCubeTextures(
-				m_minmax_x[0][0], m_minmax_x[1][0], -1.,
-				m_minmax_y[0][1], m_minmax_y[1][1], -1.,
-				E_min, m_minmax_z[1], -1.);
-		}
+		m_dispplot->GetRenderer()->UpdateCoordCubeTextures(
+			m_minmax_x[0], m_minmax_x[1], -1.,
+			m_minmax_y[0], m_minmax_y[1], -1.,
+			E_min, m_minmax_z[1], -1.);
 	}
 
 	// plot the surfaces
@@ -509,7 +516,7 @@ bool Plot3DDlg::IsSurfaceEnabled(t_size idx) const
 
 
 /**
- * mouse intersection with dispersion band
+ * mouse intersection with surface
  */
 void Plot3DDlg::PlotPickerIntersection(
 	[[maybe_unused]] const t_vec3_gl* pos,
@@ -527,14 +534,10 @@ void Plot3DDlg::PlotPickerIntersection(
 
 	m_cur_obj = objIdx;
 
-	// coordinate scaling
-	t_real x_scale = m_x_scale->value();
-	t_real y_scale = m_y_scale->value();
-	t_real z_scale = m_z_scale->value();
-
-	t_real_gl x = (*pos)[0] / x_scale;
-	t_real_gl y = (*pos)[1] / y_scale;
-	t_real_gl z = (*pos)[2] / z_scale;
+	// coordinate trafo
+	t_real_gl x = std::lerp(m_xrange[0]->value(), m_xrange[1]->value(), (*pos)[0] / m_x_scale->value() + 0.5);
+	t_real_gl y = std::lerp(m_yrange[0]->value(), m_yrange[1]->value(), (*pos)[1] / m_y_scale->value() + 0.5);
+	t_real_gl z = (*pos)[2] / m_z_scale->value();
 
 	std::ostringstream ostr;
 	ostr.precision(g_prec_gui);

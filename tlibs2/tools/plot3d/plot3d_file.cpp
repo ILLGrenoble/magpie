@@ -64,7 +64,7 @@ void Plot3DDlg::WriteHeader(std::ostream& ostr) const
 
 
 /**
- * save the dispersion as a text data file
+ * save the surfaces as a text data file
  */
 void Plot3DDlg::SaveData()
 {
@@ -75,14 +75,14 @@ void Plot3DDlg::SaveData()
 
 	QString dirLast;
 	if(m_sett)
-		dirLast = m_sett->value("dispersion3d/dir", "").toString();
+		dirLast = m_sett->value("plot3d/dir", "").toString();
 	QString filename = QFileDialog::getSaveFileName(
-		this, "Save Dispersion Data",
+		this, "Save Surface Data",
 		dirLast, "Data Files (*.dat)");
 	if(filename == "")
 		return;
 	if(m_sett)
-		m_sett->setValue("dispersion3d/dir", QFileInfo(filename).path());
+		m_sett->setValue("plot3d/dir", QFileInfo(filename).path());
 
 	std::ofstream ofstr(filename.toStdString());
 	if(!ofstr)
@@ -141,7 +141,7 @@ void Plot3DDlg::SaveData()
 
 
 /**
- * save the dispersion as a script file
+ * save the surfaces as a script file
  */
 void Plot3DDlg::SaveScript()
 {
@@ -154,14 +154,14 @@ void Plot3DDlg::SaveScript()
 
 	QString dirLast;
 	if(m_sett)
-		dirLast = m_sett->value("dispersion3d/dir", "").toString();
+		dirLast = m_sett->value("plot3d/dir", "").toString();
 	QString filename = QFileDialog::getSaveFileName(
-		this, "Save Dispersion Data As Script",
+		this, "Save Surface Data As Script",
 		dirLast, "Py Files (*.py)");
 	if(filename == "")
 		return;
 	if(m_sett)
-		m_sett->setValue("dispersion3d/dir", QFileInfo(filename).path());
+		m_sett->setValue("plot3d/dir", QFileInfo(filename).path());
 
 	std::ofstream ofstr(filename.toStdString());
 	if(!ofstr)
@@ -464,14 +464,14 @@ void Plot3DDlg::SaveImage()
 
 	QString dirLast;
 	if(m_sett)
-		dirLast = m_sett->value("dispersion3d/dir", "").toString();
+		dirLast = m_sett->value("plot3d/dir", "").toString();
 	QString filename = QFileDialog::getSaveFileName(
 		this, "Save Plot Image",
 		dirLast, "PNG Files (*.png)");
 	if(filename == "")
 		return;
 	if(m_sett)
-		m_sett->setValue("dispersion3d/dir", QFileInfo(filename).path());
+		m_sett->setValue("plot3d/dir", QFileInfo(filename).path());
 
 	if(!m_dispplot->grabFramebuffer().save(filename, nullptr, 90))
 		ShowError(QString("Could not save plot image to file \"%1\".").arg(filename));

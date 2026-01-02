@@ -34,6 +34,7 @@
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QCheckBox>
+#include <QtWidgets/QTextEdit>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMenu>
 
@@ -131,13 +132,13 @@ protected:
 private:
 	t_size m_x_count{}, m_y_count{};     // number of points along the two directions
 	t_data_bands m_data{};               // data for all surfaces
-	std::array<t_vec, 2> m_minmax_x{};   // minimum and maximum x values
-	std::array<t_vec, 2> m_minmax_y{};   // minimum and maximum y values
+	std::array<t_real, 2> m_minmax_x{};  // minimum and maximum x values
+	std::array<t_real, 2> m_minmax_y{};  // minimum and maximum y values
 	std::array<t_real, 2> m_minmax_z{};  // minimum and maximum z values
 
 	std::shared_ptr<QSettings> m_sett{}; // program settings
 
-	// dispersion
+	// surface plot
 	tl2::GlPlot *m_dispplot{};           // 3d plotter
 	std::optional<std::size_t> m_cur_obj{};
 	std::unordered_map<std::size_t /*plot object*/, t_size /*surface index*/> m_band_objs{};
@@ -146,7 +147,8 @@ private:
 	QSplitter *m_split_plot{};
 	QTableWidget *m_table_bands{};       // table listing the surfaces
 
-	// dispersion options
+	// surface options
+	QTextEdit *m_formulas{};             // formulas for the surfaces
 	QDoubleSpinBox *m_xrange[2]{}, *m_yrange[2]{};
 	QSpinBox *m_num_points[2]{};         // number of points on the (x, y) grid
 
