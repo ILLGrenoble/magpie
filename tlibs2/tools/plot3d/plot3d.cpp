@@ -65,32 +65,32 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 	m_dispplot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
 	// surfaces table
-	QWidget *bands_panel = new QWidget(this);
-	m_table_bands = new QTableWidget(bands_panel);
-	m_table_bands->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
-	m_table_bands->setShowGrid(true);
-	m_table_bands->setSortingEnabled(false);
-	m_table_bands->setSelectionBehavior(QTableWidget::SelectRows);
-	m_table_bands->setSelectionMode(QTableWidget::SingleSelection);
-	m_table_bands->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing() + 4);
-	m_table_bands->verticalHeader()->setVisible(false);
-	m_table_bands->setColumnCount(NUM_COLS_BC);
-	m_table_bands->setHorizontalHeaderItem(COL_BC_BAND, new QTableWidgetItem{"Surf."});
-	m_table_bands->setHorizontalHeaderItem(COL_BC_ACTIVE, new QTableWidgetItem{"Act."});
-	m_table_bands->setColumnWidth(COL_BC_BAND, 40);
-	m_table_bands->setColumnWidth(COL_BC_ACTIVE, 25);
-	m_table_bands->resizeColumnsToContents();
+	QWidget *surfs_panel = new QWidget(this);
+	m_table_surfs = new QTableWidget(surfs_panel);
+	m_table_surfs->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
+	m_table_surfs->setShowGrid(true);
+	m_table_surfs->setSortingEnabled(false);
+	m_table_surfs->setSelectionBehavior(QTableWidget::SelectRows);
+	m_table_surfs->setSelectionMode(QTableWidget::SingleSelection);
+	m_table_surfs->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing() + 4);
+	m_table_surfs->verticalHeader()->setVisible(false);
+	m_table_surfs->setColumnCount(NUM_COLS);
+	m_table_surfs->setHorizontalHeaderItem(COL_SURF, new QTableWidgetItem{"Surf."});
+	m_table_surfs->setHorizontalHeaderItem(COL_ACTIVE, new QTableWidgetItem{"Act."});
+	m_table_surfs->setColumnWidth(COL_SURF, 40);
+	m_table_surfs->setColumnWidth(COL_ACTIVE, 25);
+	m_table_surfs->resizeColumnsToContents();
 
 	// splitter for plot and surface list
 	m_split_plot = new QSplitter(this);
 	m_split_plot->setOrientation(Qt::Horizontal);
 	m_split_plot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 	m_split_plot->addWidget(m_dispplot);
-	m_split_plot->addWidget(bands_panel);
+	m_split_plot->addWidget(surfs_panel);
 	m_split_plot->setCollapsible(0, false);
 	m_split_plot->setCollapsible(1, true);
 	m_split_plot->setStretchFactor(m_split_plot->indexOf(m_dispplot), 24);
-	m_split_plot->setStretchFactor(m_split_plot->indexOf(bands_panel), 1);
+	m_split_plot->setStretchFactor(m_split_plot->indexOf(surfs_panel), 1);
 
 	// general plot context menu
 	m_context = new QMenu(this);
@@ -114,17 +114,17 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 	m_context->addAction(acSaveImage);
 
 	// context menu for surfaces
-	m_context_band = new QMenu(this);
-	QAction *acCentreOnObject = new QAction("Centre Camera on Surface", m_context_band);
-	m_context_band->addAction(acCentre);
-	m_context_band->addAction(acCentreOnObject);
-	m_context_band->addSeparator();
-	m_context_band->addAction(acShowCoords);
-	m_context_band->addSeparator();
-	m_context_band->addAction(acSaveData);
-	m_context_band->addAction(acSaveScript);
-	m_context_band->addSeparator();
-	m_context_band->addAction(acSaveImage);
+	m_context_surf = new QMenu(this);
+	QAction *acCentreOnObject = new QAction("Centre Camera on Surface", m_context_surf);
+	m_context_surf->addAction(acCentre);
+	m_context_surf->addAction(acCentreOnObject);
+	m_context_surf->addSeparator();
+	m_context_surf->addAction(acShowCoords);
+	m_context_surf->addSeparator();
+	m_context_surf->addAction(acSaveData);
+	m_context_surf->addAction(acSaveScript);
+	m_context_surf->addSeparator();
+	m_context_surf->addAction(acSaveImage);
 
 	// formulas
 	QGroupBox *groupFormulas = new QGroupBox("Formulas", this);
@@ -246,10 +246,10 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 
 	// surfaces panel grid
 	int y = 0;
-	QGridLayout *grid_bands = new QGridLayout(bands_panel);
-	grid_bands->setSpacing(4);
-	grid_bands->setContentsMargins(6, 6, 6, 6);
-	grid_bands->addWidget(m_table_bands, y++, 0, 1, 1);
+	QGridLayout *grid_surfs = new QGridLayout(surfs_panel);
+	grid_surfs->setSpacing(4);
+	grid_surfs->setContentsMargins(6, 6, 6, 6);
+	grid_surfs->addWidget(m_table_surfs, y++, 0, 1, 1);
 
 	// formulas grid
 	y = 0;
@@ -450,10 +450,10 @@ void Plot3DDlg::PlotMouseClick(
 		const QPointF& _pt = m_dispplot->GetRenderer()->GetMousePosition();
 		QPoint pt = m_dispplot->mapToGlobal(_pt.toPoint());
 
-		if(m_cur_obj && m_band_objs.find(*m_cur_obj) != m_band_objs.end())
+		if(m_cur_obj && m_surf_objs.find(*m_cur_obj) != m_surf_objs.end())
 		{
 			// surface selected
-			m_context_band->popup(pt);
+			m_context_surf->popup(pt);
 		}
 		else
 		{
@@ -584,11 +584,11 @@ void Plot3DDlg::CentrePlotCameraOnObject()
 	t_mat_gl mat = m_dispplot->GetRenderer()->GetObjectMatrix(*m_cur_obj);
 
 	// selected a surface?
-	auto band_iter = m_band_objs.find(*m_cur_obj);
-	if(band_iter != m_band_objs.end())
+	auto surf_iter = m_surf_objs.find(*m_cur_obj);
+	if(surf_iter != m_surf_objs.end())
 	{
 		// translate camera to the surface's mean z position
-		t_real z_mean = GetMeanZ(band_iter->second) * m_z_scale->value();
+		t_real z_mean = GetMeanZ(surf_iter->second) * m_z_scale->value();
 		mat(2, 3) = z_mean;
 	}
 

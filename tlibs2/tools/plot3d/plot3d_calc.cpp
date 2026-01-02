@@ -124,9 +124,9 @@ void Plot3DDlg::Calculate()
 			Q[1] += (end[1] - start[1]) / t_real(m_y_count) * t_real(y_idx);
 
 			// iterate the energies for this Q point
-			for(t_size band_idx = 0; band_idx < parsers.size(); ++band_idx)
+			for(t_size surf_idx = 0; surf_idx < parsers.size(); ++surf_idx)
 			{
-				tl2::ExprParser<t_real> localparser = parsers[band_idx];
+				tl2::ExprParser<t_real> localparser = parsers[surf_idx];
 				localparser.register_var("x", Q[0]);
 				localparser.register_var("y", Q[1]);
 
@@ -142,10 +142,10 @@ void Plot3DDlg::Calculate()
 				}
 
 				// generate and add data point
-				t_data_Q dat{std::make_tuple(Q, z, x_idx, y_idx, valid)};
+				t_data dat{std::make_tuple(Q, z, x_idx, y_idx, valid)};
 
 				std::lock_guard<std::mutex> _lck{mtx};
-				m_data[band_idx].emplace_back(std::move(dat));
+				m_data[surf_idx].emplace_back(std::move(dat));
 			}
 		};
 
@@ -179,27 +179,27 @@ void Plot3DDlg::Calculate()
 	// finish parallel calculations
 	pool.join();
 
-	// get sorting of data by Q
-	for(t_size band_idx = 0; band_idx < m_data.size(); ++band_idx)
+	// get sorting of data
+	for(t_size surf_idx = 0; surf_idx < m_data.size(); ++surf_idx)
 	{
-		std::vector<std::size_t> perm = tl2::get_perm(m_data[band_idx].size(),
-			[this, band_idx](std::size_t idx1, std::size_t idx2) -> bool
+		std::vector<std::size_t> perm = tl2::get_perm(m_data[surf_idx].size(),
+			[this, surf_idx](std::size_t idx1, std::size_t idx2) -> bool
 		{
-			// sorting by Q indices
-			t_size Q1_idx_1 = std::get<2>(m_data[band_idx][idx1]);
-			t_size Q1_idx_2 = std::get<3>(m_data[band_idx][idx1]);
-			t_size Q2_idx_1 = std::get<2>(m_data[band_idx][idx2]);
-			t_size Q2_idx_2 = std::get<3>(m_data[band_idx][idx2]);
+			// sorting by indices
+			t_size x_idx_1 = std::get<2>(m_data[surf_idx][idx1]);
+			t_size x_idx_2 = std::get<3>(m_data[surf_idx][idx1]);
+			t_size y_idx_1 = std::get<2>(m_data[surf_idx][idx2]);
+			t_size y_idx_2 = std::get<3>(m_data[surf_idx][idx2]);
 
-			if(Q1_idx_1 != Q2_idx_1)
-				return Q1_idx_1 < Q2_idx_1;
-			return Q1_idx_2 < Q2_idx_2;
+			if(x_idx_1 != y_idx_1)
+				return x_idx_1 < y_idx_1;
+			return x_idx_2 < y_idx_2;
 		});
 
-		m_data[band_idx] = tl2::reorder(m_data[band_idx], perm);
+		m_data[surf_idx] = tl2::reorder(m_data[surf_idx], perm);
 	}
 
-	// remove fully invalid bands
+	// remove fully invalid surfaces
 	for(auto iter = m_data.begin(); iter != m_data.end();)
 	{
 		if(!IsValid(*iter))
@@ -208,8 +208,8 @@ void Plot3DDlg::Calculate()
 			++iter;
 	}
 
-	// sort band energies in descending order
-	std::stable_sort(m_data.begin(), m_data.end(), [this](const t_data_Qs& dat1, const t_data_Qs& dat2)
+	// sort surfaces in descending order
+	std::stable_sort(m_data.begin(), m_data.end(), [this](const t_data_vec& dat1, const t_data_vec& dat2)
 	{
 		return GetMeanZ(dat1) >= GetMeanZ(dat2);
 	});
@@ -232,11 +232,11 @@ void Plot3DDlg::Calculate()
 
 
 /**
- * determine if a band is valid or only contains invalid points
+ * determine if a surface is valid or only contains invalid points
  */
-bool Plot3DDlg::IsValid(const t_data_Qs& data) const
+bool Plot3DDlg::IsValid(const t_data_vec& data) const
 {
-	for(const t_data_Q& data : data)
+	for(const t_data& data : data)
 	{
 		// data point valid?
 		if(std::get<4>(data))
@@ -250,13 +250,13 @@ bool Plot3DDlg::IsValid(const t_data_Qs& data) const
 
 
 /**
- * count the number of valid and invalid points in a band
+ * count the number of valid and invalid points in a surface
  */
-std::pair<t_size, t_size> Plot3DDlg::NumValid(const t_data_Qs& data) const
+std::pair<t_size, t_size> Plot3DDlg::NumValid(const t_data_vec& data) const
 {
 	t_size valid = 0, invalid = 0;
 
-	for(const t_data_Q& data : data)
+	for(const t_data& data : data)
 	{
 		// data point valid?
 		if(std::get<4>(data))
@@ -273,12 +273,12 @@ std::pair<t_size, t_size> Plot3DDlg::NumValid(const t_data_Qs& data) const
 /**
  * calculate the mean surface z value
  */
-t_real Plot3DDlg::GetMeanZ(const Plot3DDlg::t_data_Qs& data) const
+t_real Plot3DDlg::GetMeanZ(const Plot3DDlg::t_data_vec& data) const
 {
 	t_real E_mean = 0.;
 	t_size num_pts = 0;
 
-	for(const t_data_Q& data : data)
+	for(const t_data& data : data)
 	{
 		// data point invalid?
 		if(!std::get<4>(data))
@@ -298,12 +298,12 @@ t_real Plot3DDlg::GetMeanZ(const Plot3DDlg::t_data_Qs& data) const
 /**
  * calculate the mean surface z value
  */
-t_real Plot3DDlg::GetMeanZ(t_size band_idx) const
+t_real Plot3DDlg::GetMeanZ(t_size surf_idx) const
 {
-	if(band_idx >= m_data.size())
+	if(surf_idx >= m_data.size())
 		return 0.;
 
-	return GetMeanZ(m_data[band_idx]);
+	return GetMeanZ(m_data[surf_idx]);
 }
 
 
@@ -311,15 +311,15 @@ t_real Plot3DDlg::GetMeanZ(t_size band_idx) const
 /**
  * get a unique colour for a given surface
  */
-std::array<int, 3> Plot3DDlg::GetBranchColour(t_size branch_idx, t_size num_branches) const
+std::array<int, 3> Plot3DDlg::GetSurfColour(t_size surf_idx, t_size num_surfs) const
 {
-	if(num_branches <= 1)
+	if(num_surfs <= 1)
 		return std::array<int, 3>{{ 0xff, 0x00, 0x00 }};
 
 	return std::array<int, 3>{{
-		int(std::lerp(1., 0., t_real(branch_idx) / t_real(num_branches - 1)) * 255.),
+		int(std::lerp(1., 0., t_real(surf_idx) / t_real(num_surfs - 1)) * 255.),
 		0x00,
-		int(std::lerp(0., 1., t_real(branch_idx) / t_real(num_branches - 1)) * 255.),
+		int(std::lerp(0., 1., t_real(surf_idx) / t_real(num_surfs - 1)) * 255.),
 	}};
 }
 
@@ -333,13 +333,13 @@ void Plot3DDlg::Plot(bool clear_settings)
 	if(!m_dispplot)
 		return;
 
-	// keep some settings from previous plot, e.g. the band visibility flags
-	std::vector<bool> active_bands;
+	// keep some settings from previous plot, e.g. the surface visibility flags
+	std::vector<bool> active_surfs;
 	if(!clear_settings)
 	{
-		active_bands.reserve(m_table_bands->rowCount());
-		for(int row = 0; row < m_table_bands->rowCount(); ++row)
-			active_bands.push_back(IsSurfaceEnabled(t_size(row)));
+		active_surfs.reserve(m_table_surfs->rowCount());
+		for(int row = 0; row < m_table_surfs->rowCount(); ++row)
+			active_surfs.push_back(IsSurfaceEnabled(t_size(row)));
 	}
 
 	t_real x_scale = m_x_scale->value();
@@ -383,19 +383,19 @@ void Plot3DDlg::Plot(bool clear_settings)
 	}
 
 	// plot the surfaces
-	t_size num_bands = m_data.size();
-	t_size num_active_bands = 0;
-	for(t_size band_idx = 0; band_idx < num_bands; ++band_idx)
+	t_size num_surfs = m_data.size();
+	t_size num_active_surfs = 0;
+	for(t_size surf_idx = 0; surf_idx < num_surfs; ++surf_idx)
 	{
-		bool band_active = band_idx < active_bands.size() ? active_bands[band_idx] : true;
+		bool surf_active = surf_idx < active_surfs.size() ? active_surfs[surf_idx] : true;
 
 		// colour for this surface
-		std::array<int, 3> col = GetBranchColour(band_idx, num_bands);
+		std::array<int, 3> col = GetSurfColour(surf_idx, num_surfs);
 		const QColor colFull(col[0], col[1], col[2]);
 
-		if(band_active)
+		if(surf_active)
 		{
-			t_data_Qs& data = m_data[band_idx];
+			t_data_vec& data = m_data[surf_idx];
 
 			auto patch_fkt = [this, &data, z_scale](
 				t_real_gl /*x2*/, t_real_gl /*x1*/, t_size idx_1, t_size idx_2)
@@ -420,7 +420,7 @@ void Plot3DDlg::Plot(bool clear_settings)
 			};
 
 			std::ostringstream objLabel;
-			objLabel << "Surface #" << (band_idx + 1);
+			objLabel << "Surface #" << (surf_idx + 1);
 
 			t_real_gl r = t_real_gl(col[0]) / t_real_gl(255.);
 			t_real_gl g = t_real_gl(col[1]) / t_real_gl(255.);
@@ -429,17 +429,17 @@ void Plot3DDlg::Plot(bool clear_settings)
 			std::size_t obj = m_dispplot->GetRenderer()->AddPatch(patch_fkt, 0., 0., 0.,
 				x_scale, y_scale, m_x_count, m_y_count, r, g, b);
 			m_dispplot->GetRenderer()->SetObjectLabel(obj, objLabel.str());
-			m_band_objs.insert(std::make_pair(obj, band_idx));
+			m_surf_objs.insert(std::make_pair(obj, surf_idx));
 
-			m_cam_centre[2] += GetMeanZ(band_idx);
-			++num_active_bands;
+			m_cam_centre[2] += GetMeanZ(surf_idx);
+			++num_active_surfs;
 		}
 
-		AddSurface("#" + tl2::var_to_str(band_idx + 1), colFull, band_active);
+		AddSurface("#" + tl2::var_to_str(surf_idx + 1), colFull, surf_active);
 	}
 
-	if(num_active_bands)
-		m_cam_centre[2] /= static_cast<t_real>(num_active_bands);
+	if(num_active_surfs)
+		m_cam_centre[2] /= static_cast<t_real>(num_active_surfs);
 
 	if(clear_settings)
 		CentrePlotCamera();    // centre camera and update
@@ -454,11 +454,11 @@ void Plot3DDlg::Plot(bool clear_settings)
  */
 void Plot3DDlg::ClearSurfaces()
 {
-	m_band_objs.clear();
+	m_surf_objs.clear();
 	m_cur_obj = std::nullopt;
 
-	m_table_bands->clearContents();
-	m_table_bands->setRowCount(0);
+	m_table_surfs->clearContents();
+	m_table_surfs->setRowCount(0);
 }
 
 
@@ -468,11 +468,11 @@ void Plot3DDlg::ClearSurfaces()
  */
 void Plot3DDlg::AddSurface(const std::string& name, const QColor& colour, bool enabled)
 {
-	if(!m_table_bands)
+	if(!m_table_surfs)
 		return;
 
-	int row = m_table_bands->rowCount();
-	m_table_bands->insertRow(row);
+	int row = m_table_surfs->rowCount();
+	m_table_surfs->insertRow(row);
 
 	QTableWidgetItem *item = new QTableWidgetItem{name.c_str()};
 	item->setFlags(item->flags() & ~Qt::ItemIsEditable);
@@ -487,12 +487,12 @@ void Plot3DDlg::AddSurface(const std::string& name, const QColor& colour, bool e
 	fg.setStyle(Qt::SolidPattern);
 	item->setForeground(fg);
 
-	QCheckBox *checkBand = new QCheckBox(m_table_bands);
-	checkBand->setChecked(enabled);
-	connect(checkBand, &QCheckBox::toggled, [this]() { Plot(false); });
+	QCheckBox *checkSurf = new QCheckBox(m_table_surfs);
+	checkSurf->setChecked(enabled);
+	connect(checkSurf, &QCheckBox::toggled, [this]() { Plot(false); });
 
-	m_table_bands->setItem(row, COL_BC_BAND, item);
-	m_table_bands->setCellWidget(row, COL_BC_ACTIVE, checkBand);
+	m_table_surfs->setItem(row, COL_SURF, item);
+	m_table_surfs->setCellWidget(row, COL_ACTIVE, checkSurf);
 }
 
 
@@ -502,11 +502,11 @@ void Plot3DDlg::AddSurface(const std::string& name, const QColor& colour, bool e
  */
 bool Plot3DDlg::IsSurfaceEnabled(t_size idx) const
 {
-	if(!m_table_bands || int(idx) >= m_table_bands->rowCount())
+	if(!m_table_surfs || int(idx) >= m_table_surfs->rowCount())
 		return true;
 
 	QCheckBox* box = reinterpret_cast<QCheckBox*>(
-		m_table_bands->cellWidget(int(idx), COL_BC_ACTIVE));
+		m_table_surfs->cellWidget(int(idx), COL_ACTIVE));
 	if(!box)
 		return true;
 

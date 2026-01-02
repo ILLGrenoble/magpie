@@ -106,7 +106,7 @@ void Plot3DDlg::SaveData()
 	const t_size num_surfs = m_data.size();
 	for(t_size surf_idx = 0; surf_idx < num_surfs; ++surf_idx)
 	{
-		for(t_data_Q& data : m_data[surf_idx])
+		for(t_data& data : m_data[surf_idx])
 		{
 			const t_vec& xy = std::get<0>(data);
 			t_real z = std::get<1>(data);
@@ -181,27 +181,27 @@ def get_surf(data, surf_data, z_surf_idx = 0):
 	z_minmax = [ +999999999., -999999999. ]
 
 	# filter data for given surface
-	data_Q = [
+	data_xy = [
 		[ row[0] for (row, surf_idx) in zip(data, surf_data) \
 			if surf_idx == z_surf_idx ],
 		[ row[1] for (row, surf_idx) in zip(data, surf_data) \
 			if surf_idx == z_surf_idx ]
 	]
-	data_E = [ row[2] for (row, surf_idx) in zip(data, surf_data) \
+	data_z = [ row[2] for (row, surf_idx) in zip(data, surf_data) \
 		if surf_idx == z_surf_idx ]
 
-	if len(data_E) < 1:
+	if len(data_z) < 1:
 		return None
 
 	# data ranges
-	x_minmax[0] = numpy.min([ numpy.min(data_Q[0]), x_minmax[0] ])
-	x_minmax[1] = numpy.max([ numpy.max(data_Q[0]), x_minmax[1] ])
-	y_minmax[0] = numpy.min([ numpy.min(data_Q[1]), y_minmax[0] ])
-	y_minmax[1] = numpy.max([ numpy.max(data_Q[1]), y_minmax[1] ])
-	z_minmax[0] = numpy.min([ numpy.min(data_E), z_minmax[0] ])
-	z_minmax[1] = numpy.max([ numpy.max(data_E), z_minmax[1] ])
+	x_minmax[0] = numpy.min([ numpy.min(data_xy[0]), x_minmax[0] ])
+	x_minmax[1] = numpy.max([ numpy.max(data_xy[0]), x_minmax[1] ])
+	y_minmax[0] = numpy.min([ numpy.min(data_xy[1]), y_minmax[0] ])
+	y_minmax[1] = numpy.max([ numpy.max(data_xy[1]), y_minmax[1] ])
+	z_minmax[0] = numpy.min([ numpy.min(data_z), z_minmax[0] ])
+	z_minmax[1] = numpy.max([ numpy.max(data_z), z_minmax[1] ])
 
-	return [data_Q, data_E, x_minmax, y_minmax, z_minmax]
+	return [data_xy, data_z, x_minmax, y_minmax, z_minmax]
 
 # plot using mayavi
 def plot_disp_mvi(data, surf_data, surf_colours):
@@ -229,7 +229,7 @@ def plot_disp_mvi(data, surf_data, surf_colours):
 		if surf == None:
 			continue
 
-		[data_Q, data_E, _x_minmax, _y_minmax, _z_minmax] = surf
+		[data_xy, data_z, _x_minmax, _y_minmax, _z_minmax] = surf
 		x_minmax[0] = min(x_minmax[0], _x_minmax[0])
 		x_minmax[1] = max(x_minmax[1], _x_minmax[1])
 		y_minmax[0] = min(y_minmax[0], _y_minmax[0])
@@ -241,7 +241,7 @@ def plot_disp_mvi(data, surf_data, surf_colours):
 
 		surf_repr = "surface" # "wireframe"
 		zval = float(colour_idx) / float(z_surf_max)
-		points = mlab.points3d(data_Q[0], data_Q[1], data_E, [zval]*len(data_E),
+		points = mlab.points3d(data_xy[0], data_xy[1], data_z, [zval]*len(data_z),
 			mode = "point", opacity = 0.5, figure = fig, extent = axis_extents)
 		triags = mlab.pipeline.delaunay2d(points, figure = fig)
 		surface = mlab.pipeline.surface(triags, representation = surf_repr,
@@ -291,7 +291,7 @@ def plot_disp_mpl(data, surf_data, surf_colours):
 		if surf == None:
 			continue
 
-		[data_Q, data_E, _x_minmax, _y_minmax, _z_minmax] = surf
+		[data_xy, data_z, _x_minmax, _y_minmax, _z_minmax] = surf
 		x_minmax[0] = min(x_minmax[0], _x_minmax[0])
 		x_minmax[1] = max(x_minmax[1], _x_minmax[1])
 		y_minmax[0] = min(y_minmax[0], _y_minmax[0])
@@ -301,7 +301,7 @@ def plot_disp_mpl(data, surf_data, surf_colours):
 
 		colour_idx = z_surf_eff_idx
 
-		axis.plot_trisurf(data_Q[0], data_Q[1], data_E,
+		axis.plot_trisurf(data_xy[0], data_xy[1], data_z,
 			color = surf_colours[colour_idx], alpha = 1., shade = True,
 			lightsource = light, antialiased = False,
 			zorder = z_surf_max - z_surf_idx)
@@ -354,7 +354,7 @@ if __name__ == "__main__":
 	for(t_size surf_idx = 0; surf_idx < num_surfs; ++surf_idx)
 	{
 		// surface data
-		for(t_data_Q& data : m_data[surf_idx])
+		for(t_data& data : m_data[surf_idx])
 		{
 			const t_vec& xy = std::get<0>(data);
 			t_real z = std::get<1>(data);
@@ -371,7 +371,7 @@ if __name__ == "__main__":
 		}
 
 		// surface colour
-		std::array<int, 3> col = GetBranchColour(surf_idx, num_surfs);
+		std::array<int, 3> col = GetSurfColour(surf_idx, num_surfs);
 		colours << "\"#" << std::hex
 			<< std::setw(2) << std::setfill('0') << col[0]
 			<< std::setw(2) << std::setfill('0') << col[1]

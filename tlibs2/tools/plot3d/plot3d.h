@@ -57,18 +57,18 @@ private:
 	// column indices in surface table
 	enum : int
 	{
-		COL_BC_BAND = 0,
-		COL_BC_ACTIVE,
-		NUM_COLS_BC,
+		COL_SURF = 0,
+		COL_ACTIVE,
+		NUM_COLS,
 	};
 
 
 protected:
-	using t_data_Q = std::tuple<t_vec /*0: xy*/, t_real /*1: z*/,
-		t_size /*2: Q_idx_1*/, t_size /*3: Q_idx_2*/,
+	using t_data = std::tuple<t_vec /*0: xy*/, t_real /*1: z*/,
+		t_size /*2: x_idx*/, t_size /*3: y_idx*/,
 		bool /*4: valid*/>;
-	using t_data_Qs = std::vector<t_data_Q>;
-	using t_data_bands = std::vector<t_data_Qs>;
+	using t_data_vec = std::vector<t_data>;
+	using t_data_surfs = std::vector<t_data_vec>;
 
 
 public:
@@ -88,11 +88,11 @@ protected:
 	void Plot(bool clear_settings = true);
 
 	// calculation helper functions
-	std::pair<t_size, t_size> NumValid(const t_data_Qs& data) const;
-	bool IsValid(const t_data_Qs& data) const;
-	t_real GetMeanZ(const t_data_Qs& data) const;
-	t_real GetMeanZ(t_size band_idx) const;
-	std::array<int, 3> GetBranchColour(t_size branch_idx, t_size num_branches) const;
+	std::pair<t_size, t_size> NumValid(const t_data_vec& data) const;
+	bool IsValid(const t_data_vec& data) const;
+	t_real GetMeanZ(const t_data_vec& data) const;
+	t_real GetMeanZ(t_size surf_idx) const;
+	std::array<int, 3> GetSurfColour(t_size surf_idx, t_size num_surfs) const;
 	void ShowError(const QString& msg);
 
 	// surface table functions
@@ -131,7 +131,7 @@ protected:
 
 private:
 	t_size m_x_count{}, m_y_count{};     // number of points along the two directions
-	t_data_bands m_data{};               // data for all surfaces
+	t_data_surfs m_data{};               // data for all surfaces
 	std::array<t_real, 2> m_minmax_x{};  // minimum and maximum x values
 	std::array<t_real, 2> m_minmax_y{};  // minimum and maximum y values
 	std::array<t_real, 2> m_minmax_z{};  // minimum and maximum z values
@@ -141,11 +141,11 @@ private:
 	// surface plot
 	tl2::GlPlot *m_dispplot{};           // 3d plotter
 	std::optional<std::size_t> m_cur_obj{};
-	std::unordered_map<std::size_t /*plot object*/, t_size /*surface index*/> m_band_objs{};
+	std::unordered_map<std::size_t /*plot object*/, t_size /*surface index*/> m_surf_objs{};
 	t_vec_gl m_cam_centre{tl2::zero<t_vec_gl>(3)};
 
 	QSplitter *m_split_plot{};
-	QTableWidget *m_table_bands{};       // table listing the surfaces
+	QTableWidget *m_table_surfs{};       // table listing the surfaces
 
 	// surface options
 	QTextEdit *m_formulas{};             // formulas for the surfaces
@@ -154,7 +154,7 @@ private:
 
 	// context menus
 	QMenu *m_context{};                  // general plot context menu
-	QMenu *m_context_band{};             // context menu for the surfaces
+	QMenu *m_context_surf{};             // context menu for the surfaces
 
 	// plot options
 	QDoubleSpinBox *m_x_scale{}, *m_y_scale{}, *m_z_scale{};
