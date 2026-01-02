@@ -711,9 +711,9 @@ t_mat hom_translation(t_real x, t_real y, t_real z)
 requires is_mat<t_mat>
 {
 	return create<t_mat>({
-		1.,  0.,  0.,  x,
-		0.,  1.,  0.,  y,
-		0.,  0.,  1.,  z,
+		1.,  0.,  0.,  static_cast<typename t_mat::value_type>(x),
+		0.,  1.,  0.,  static_cast<typename t_mat::value_type>(y),
+		0.,  0.,  1.,  static_cast<typename t_mat::value_type>(z),
 		0.,  0.,  0.,  1.
 	});
 }
@@ -727,9 +727,9 @@ t_mat hom_scaling(t_real x, t_real y, t_real z)
 requires is_mat<t_mat>
 {
 	return create<t_mat>({
-		x,   0.,  0.,  0.,
-		0.,  y,   0.,  0.,
-		0.,  0.,  z,   0.,
+		static_cast<typename t_mat::value_type>(x),   0.,  0.,  0.,
+		0.,  static_cast<typename t_mat::value_type>(y),   0.,  0.,
+		0.,  0.,  static_cast<typename t_mat::value_type>(z),   0.,
 		0.,  0.,  0.,  1.
 	});
 }

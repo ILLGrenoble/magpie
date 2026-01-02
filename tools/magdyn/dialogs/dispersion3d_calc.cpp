@@ -32,7 +32,6 @@ namespace asio = boost::asio;
 #include <sstream>
 
 #include "dispersion3d.h"
-#include "helper.h"
 
 #include "tlibs2/libs/algos.h"
 #include "tlibs2/libs/str.h"

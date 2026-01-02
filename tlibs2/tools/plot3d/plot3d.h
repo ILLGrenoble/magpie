@@ -1,12 +1,12 @@
 /**
- * magnetic dynamics -- 3d dispersion plot
+ * 3d plotter
  * @author Tobias Weber <tweber@ill.fr>
  * @date January 2025
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * tlibs
+ * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,8 +23,8 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __MAG_DYN_DISP3D_DLG_H__
-#define __MAG_DYN_DISP3D_DLG_H__
+#ifndef __TL2_PLOT3D_DLG_H__
+#define __TL2_PLOT3D_DLG_H__
 
 #include <QtCore/QSettings>
 #include <QtWidgets/QPushButton>
@@ -43,17 +43,17 @@
 #include <unordered_map>
 
 #include "tlibs2/libs/qt/glplot.h"
-#include "gui_defs.h"
+#include "defs.h"
 
 
 
 /**
- * 3d dispersion dialog
+ * 3d plotter dialog
  */
-class Dispersion3DDlg : public QDialog
+class Plot3DDlg : public QDialog
 { Q_OBJECT
 private:
-	// column indices in magnon band table
+	// column indices in surface table
 	enum : int
 	{
 		COL_BC_BAND = 0,
@@ -63,7 +63,7 @@ private:
 
 
 protected:
-	using t_data_Q = std::tuple<t_vec_real /*0: Q*/, t_real /*1: E*/, t_real /*2: S*/,
+	using t_data_Q = std::tuple<t_vec /*0: Q*/, t_real /*1: E*/, t_real /*2: S*/,
 		t_size /*3: Q_idx_1*/, t_size /*4: Q_idx_2*/,
 		t_size /*5: degeneracy*/, bool /*6: valid*/>;
 	using t_data_Qs = std::vector<t_data_Q>;
@@ -71,15 +71,11 @@ protected:
 
 
 public:
-	Dispersion3DDlg(QWidget *parent, QSettings *sett = nullptr);
-	virtual ~Dispersion3DDlg();
+	Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett);
+	virtual ~Plot3DDlg();
 
-	Dispersion3DDlg(const Dispersion3DDlg&) = delete;
-	Dispersion3DDlg& operator=(const Dispersion3DDlg&) = delete;
-
-	// set kernel and Q path from the main window
-	void SetKernel(const t_magdyn* dyn);
-	void SetDispersionQ(const t_vec_real& Qstart, const t_vec_real& Qend);
+	Plot3DDlg(const Plot3DDlg&) = delete;
+	Plot3DDlg& operator=(const Plot3DDlg&) = delete;
 
 
 protected:
@@ -91,22 +87,17 @@ protected:
 	void Plot(bool clear_settings = true);
 
 	// calculation helper functions
-	t_size NumPositive() const;
-	bool IsPositive(const t_data_Qs& data) const;
 	std::pair<t_size, t_size> NumValid(const t_data_Qs& data) const;
 	bool IsValid(const t_data_Qs& data) const;
-	t_real GetMeanEnergy(const t_data_Qs& data) const;
-	t_real GetMeanEnergy(t_size band_idx) const;
-	std::tuple<t_vec_real, t_vec_real, t_vec_real> GetQVectors() const;
-	std::tuple<t_size, t_size> GetQIndices() const;
+	t_real GetMeanZ(const t_data_Qs& data) const;
+	t_real GetMeanZ(t_size band_idx) const;
 	std::array<int, 3> GetBranchColour(t_size branch_idx, t_size num_branches) const;
-	void FromMainQ();
 	void ShowError(const QString& msg);
 
-	// band table functions
-	void ClearBands();
-	void AddBand(const std::string& name, const QColor& colour, bool enabled = true);
-	bool IsBandEnabled(t_size idx) const;
+	// surface table functions
+	void ClearSurfaces();
+	void AddSurface(const std::string& name, const QColor& colour, bool enabled = true);
+	bool IsSurfaceEnabled(t_size idx) const;
 
 	// export data
 	void WriteHeader(std::ostream& ostr) const;
@@ -138,44 +129,33 @@ protected:
 
 
 private:
-	t_size m_Q_count_1{}, m_Q_count_2{}; // number of Q points along the two directions
-	t_data_bands m_data{};               // data for all energy bands
-	std::array<t_real, 2> m_minmax_E{};  // minimum and maximum band energy
-	std::array<t_vec_real, 2> m_minmax_Q1{};  // minimum and maximum Q
-	std::array<t_vec_real, 2> m_minmax_Q2{};  // minimum and maximum Q
+	t_size m_x_count{}, m_y_count{};     // number of points along the two directions
+	t_data_bands m_data{};               // data for all surfaces
+	std::array<t_vec, 2> m_minmax_x{};   // minimum and maximum x values
+	std::array<t_vec, 2> m_minmax_y{};   // minimum and maximum y values
+	std::array<t_real, 2> m_minmax_z{};  // minimum and maximum z values
 
-	// ------------------------------------------------------------------------
-	// from main dialog
-	const t_magdyn *m_dyn{};             // main calculation kernel
-	t_vec_real m_Qstart{}, m_Qend{};     // Qs from the main window
-	QSettings *m_sett{};                 // program settings
-	// ------------------------------------------------------------------------
+	std::shared_ptr<QSettings> m_sett{}; // program settings
 
 	// dispersion
 	tl2::GlPlot *m_dispplot{};           // 3d plotter
 	std::optional<std::size_t> m_cur_obj{};
-	std::unordered_map<std::size_t /*plot object*/, t_size /*band index*/> m_band_objs{};
+	std::unordered_map<std::size_t /*plot object*/, t_size /*surface index*/> m_band_objs{};
 	t_vec_gl m_cam_centre{tl2::zero<t_vec_gl>(3)};
 
 	QSplitter *m_split_plot{};
-	QTableWidget *m_table_bands{};       // table listing the magnon bands
+	QTableWidget *m_table_bands{};       // table listing the surfaces
 
 	// dispersion options
-	QDoubleSpinBox *m_Q_origin[3]{}, *m_Q_dir1[3]{}, *m_Q_dir2[3]{};
-	QSpinBox *m_num_Q_points[2]{};       // number of points on the Q grid
-	QCheckBox *m_only_pos_E{};           // ignore magnon annihilation
-
-	// correlation options
-	QCheckBox *m_S_filter_enable{};      // switch to enable minimum S(Q,E) value
-	QDoubleSpinBox *m_S_filter{};        // minimum S(Q,E) value
-	QCheckBox *m_unite_degeneracies{};   // unite degenerate energies
+	QDoubleSpinBox *m_xrange[2]{}, *m_yrange[2]{};
+	QSpinBox *m_num_points[2]{};         // number of points on the (x, y) grid
 
 	// context menus
 	QMenu *m_context{};                  // general plot context menu
-	QMenu *m_context_band{};             // context menu for magnon bands
+	QMenu *m_context_band{};             // context menu for the surfaces
 
 	// plot options
-	QDoubleSpinBox *m_Q_scale1{}, *m_Q_scale2{}, *m_E_scale{};
+	QDoubleSpinBox *m_x_scale{}, *m_y_scale{}, *m_z_scale{};
 	QDoubleSpinBox *m_cam_phi{}, *m_cam_theta{};
 	QCheckBox *m_perspective{};
 

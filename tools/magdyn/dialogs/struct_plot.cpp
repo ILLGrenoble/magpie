@@ -30,7 +30,6 @@
 #include <boost/scope_exit.hpp>
 
 #include "struct_plot.h"
-#include "helper.h"
 
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QPushButton>
@@ -39,6 +38,8 @@
 
 #include <unordered_set>
 #include <functional>
+
+#include "tlibs2/libs/str.h"
 
 using namespace tl2_ops;
 
@@ -730,7 +731,7 @@ void StructPlotDlg::Sync()
 		bool user_col = false;
 		if(m_sitestab && site_idx < t_size(m_sitestab->rowCount()))
 		{
-			user_col = get_colour<t_real_gl>(
+			user_col = tl2::get_colour<t_real_gl>(
 				m_sitestab->item(site_idx, COL_SITE_RGB)->
 					text().toStdString(), rgb);
 		}
@@ -867,7 +868,7 @@ void StructPlotDlg::Sync()
 		t_real_gl rgb[3] {0., 0.75, 0.};
 		if(m_termstab && term_idx < t_size(m_termstab->rowCount()))
 		{
-			get_colour<t_real_gl>(
+			tl2::get_colour<t_real_gl>(
 				m_termstab->item(term_idx, COL_XCH_RGB)->text().toStdString(), rgb);
 		}
 

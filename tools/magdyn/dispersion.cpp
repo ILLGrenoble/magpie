@@ -29,17 +29,15 @@
 namespace asio = boost::asio;
 
 #include "magdyn.h"
-#include "helper.h"
 
 #include <QtWidgets/QApplication>
 
-#include <sstream>
-#include <thread>
 #include <future>
 #include <mutex>
 
 #include "tlibs2/libs/phys.h"
 #include "tlibs2/libs/algos.h"
+#include "tlibs2/libs/str.h"
 
 using namespace tl2_ops;
 
@@ -206,7 +204,7 @@ void MagDynDlg::PlotDispersion()
 
 		// dispersion colour
 		int col_comp[3] = { 0, 0, 0xff };      // default colour
-		get_colour<int>(g_colPlot, col_comp);  // get actual colour
+		tl2::get_colour<int>(g_colPlot, col_comp);  // get actual colour
 		const QColor colFull(col_comp[0], col_comp[1], col_comp[2]);
 
 		QPen pen = graph->pen();
@@ -217,7 +215,7 @@ void MagDynDlg::PlotDispersion()
 		{
 			// colour for degenerate dispersion points
 			int col_comp_degen[3] = { 0xff, 0, 0 };      // default colour
-			get_colour<int>(g_colPlotDegen, col_comp_degen);  // get actual colour
+			tl2::get_colour<int>(g_colPlotDegen, col_comp_degen);  // get actual colour
 			const QColor colDegen(col_comp_degen[0], col_comp_degen[1], col_comp_degen[2]);
 
 			graph->AddColour(colFull);

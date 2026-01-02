@@ -34,10 +34,6 @@
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QDialogButtonBox>
 
-#include <locale>
-#include <iostream>
-#include <optional>
-
 #include "tlibs2/libs/maths.h"
 #include "tlibs2/libs/phys.h"
 #include "tlibs2/libs/str.h"

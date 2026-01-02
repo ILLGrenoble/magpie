@@ -1,12 +1,12 @@
 /**
- * magnetic dynamics -- 3d dispersion plot -- file related functions
+ * 3d plotter -- file related functions
  * @author Tobias Weber <tweber@ill.fr>
  * @date January 2025
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * tlibs
+ * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,17 +33,18 @@ namespace algo = boost::algorithm;
 
 #include <QtWidgets/QFileDialog>
 
-#include "dispersion3d.h"
+#include "plot3d.h"
 
 #include "tlibs2/libs/algos.h"
 #include "tlibs2/libs/str.h"
+#include "tlibs2/libs/ver.h"
 
 
 
 /**
  * write the meta data header for text file exports
  */
-void Dispersion3DDlg::WriteHeader(std::ostream& ostr) const
+void Plot3DDlg::WriteHeader(std::ostream& ostr) const
 {
 	using namespace tl2_ops;
 
@@ -51,19 +52,12 @@ void Dispersion3DDlg::WriteHeader(std::ostream& ostr) const
 	if(!user)
 		user = "";
 
-	const t_size num_bands = m_data.size();
-	auto [Q_origin, Q_dir_1, Q_dir_2] = GetQVectors();
-
 	ostr << "#\n"
-		<< "# Created by Magpie " << MAGPIE_VER << "\n"
+		<< "# Created by tlibs " << TLIBS2_VER << "\n"
 		<< "# URL: https://github.com/ILLGrenoble/magpie\n"
 		<< "# DOI: https://doi.org/10.5281/zenodo.16180814\n"
 		<< "# User: " << user << "\n"
 		<< "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n"
-		<< "#\n# branch_count: " << num_bands << "\n"
-		<< "# Q_origin: " << Q_origin << "\n"
-		<< "# Q_direction_1: " << Q_dir_1 << "\n"
-		<< "# Q_direction_2: " << Q_dir_2 << "\n"
 		<< "#\n\n";
 }
 
@@ -72,10 +66,9 @@ void Dispersion3DDlg::WriteHeader(std::ostream& ostr) const
 /**
  * save the dispersion as a text data file
  */
-void Dispersion3DDlg::SaveData()
+void Plot3DDlg::SaveData()
 {
 	bool skip_invalid_points = true;
-	bool use_weights = m_S_filter_enable->isChecked();
 
 	if(m_data.size() == 0)
 		return;
@@ -109,8 +102,6 @@ void Dispersion3DDlg::SaveData()
 	ofstr << std::setw(field_len) << std::left << "E" << " ";
 	if(!skip_invalid_points)
 		ofstr << std::setw(field_len) << std::left << "valid" << " ";
-	if(use_weights)
-		ofstr << std::setw(field_len) << std::left << "S" << " ";
 	ofstr << std::setw(field_len) << std::left << "band" << " ";
 	ofstr << std::setw(field_len) << std::left << "Qidx1" << " ";
 	ofstr << std::setw(field_len) << std::left << "Qidx2" << " ";
@@ -121,9 +112,8 @@ void Dispersion3DDlg::SaveData()
 	{
 		for(t_data_Q& data : m_data[band_idx])
 		{
-			const t_vec_real& Q = std::get<0>(data);
+			const t_vec& Q = std::get<0>(data);
 			t_real E = std::get<1>(data);
-			t_real S = std::get<2>(data);
 			t_size Qidx1 = std::get<3>(data);
 			t_size Qidx2 = std::get<4>(data);
 			t_size degen = std::get<5>(data);
@@ -138,8 +128,6 @@ void Dispersion3DDlg::SaveData()
 			ofstr << std::setw(field_len) << std::left << E << " ";
 			if(!skip_invalid_points)
 				ofstr << std::setw(field_len) << std::left << valid << " ";
-			if(use_weights)
-				ofstr << std::setw(field_len) << std::left << S << " ";
 			ofstr << std::setw(field_len) << std::left << band_idx << " ";
 			ofstr << std::setw(field_len) << std::left << Qidx1 << " ";
 			ofstr << std::setw(field_len) << std::left << Qidx2 << " ";
@@ -155,12 +143,11 @@ void Dispersion3DDlg::SaveData()
 /**
  * save the dispersion as a script file
  */
-void Dispersion3DDlg::SaveScript()
+void Plot3DDlg::SaveScript()
 {
 	using namespace tl2_ops;
 
 	bool skip_invalid_points = true;
-	bool use_weights = m_S_filter_enable->isChecked();
 
 	if(m_data.size() == 0)
 		return;
@@ -195,7 +182,6 @@ import numpy
 # options
 # -----------------------------------------------------------------------------
 plot_file      = ""     # file to save plot to
-only_pos_E     = %%ONLY_POS_E%%  # ignore magnon annihilation?
 S_filter_min   = 1e-5   # cutoff minimum spectral weight
 
 h_column       =  0     # h column index in data files
@@ -225,14 +211,6 @@ def get_branch(data, branch_data, E_branch_idx = 0, Q_idx1 = 0, Q_idx2 = 1):
 	if S_column >= 0:
 		data_S = [ row[S_column] for (row, branch_idx) in zip(data, branch_data) \
 			if branch_idx == E_branch_idx ]
-
-	if only_pos_E:
-		# ignore magnon annihilation
-		data_Q[0] = [ Q for (Q, E) in zip(data_Q[0], data_E) if E >= 0. ]
-		data_Q[1] = [ Q for (Q, E) in zip(data_Q[1], data_E) if E >= 0. ]
-		if S_column >= 0:
-			data_S = [ S for (S, E) in zip(data_S, data_E) if E >= 0. ]
-		data_E = [ E for E in data_E if E >= 0. ]
 
 	if S_column >= 0 and S_filter_min >= 0.:
 		# filter weights below cutoff
@@ -289,8 +267,6 @@ def plot_disp_mvi(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_i
 		E_minmax[1] = max(E_minmax[1], _E_minmax[1])
 
 		colour_idx = E_branch_eff_idx
-		if only_pos_E:
-			colour_idx *= 2  # skip every other colour if E >= 0
 
 		surf_repr = "surface" # "wireframe"
 		zval = float(colour_idx) / float(E_branch_max)
@@ -354,8 +330,6 @@ def plot_disp_mpl(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_i
 		E_minmax[1] = max(E_minmax[1], _E_minmax[1])
 
 		colour_idx = E_branch_eff_idx
-		if only_pos_E:
-			colour_idx *= 2  # skip every other colour if E >= 0
 
 		axis.plot_trisurf(data_Q[0], data_Q[1], data_E,
 			color = branch_colours[colour_idx], alpha = 1., shade = True,
@@ -420,9 +394,8 @@ if __name__ == "__main__":
 		// band data
 		for(t_data_Q& data : m_data[band_idx])
 		{
-			const t_vec_real& Q = std::get<0>(data);
+			const t_vec& Q = std::get<0>(data);
 			t_real E = std::get<1>(data);
-			t_real S = std::get<2>(data);
 			//t_size Qidx1 = std::get<3>(data);
 			//t_size Qidx2 = std::get<4>(data);
 			t_size degen = std::get<5>(data);
@@ -435,8 +408,6 @@ if __name__ == "__main__":
 			k_data << Q[1] << ", ";
 			l_data << Q[2] << ", ";
 			E_data << E << ", ";
-			if(use_weights)
-				S_data << S << ", ";
 
 			bandidx_data << band_idx << ", ";
 			degen_data << degen << ", ";
@@ -457,10 +428,8 @@ if __name__ == "__main__":
 	{
 		// see: https://en.wikipedia.org/wiki/Focal_length
 		focal_len << "\"focal_length\" : 1. / numpy.tan(0.5 * "
-			<< g_structplot_fov << "/180.*numpy.pi),\n";
+			<< g_fov << "/180.*numpy.pi),\n";
 	}
-
-	auto [Q_idx_1, Q_idx_2] = GetQIndices();
 
 	// TODO: for the moment the azimuth only matches for Q directions in a right-handed system -> add a trafo
 	algo::replace_all(pyscr, "%%H_DATA%%", "[ " + h_data.str() + "]");
@@ -468,18 +437,17 @@ if __name__ == "__main__":
 	algo::replace_all(pyscr, "%%L_DATA%%", "[ " + l_data.str() + "]");
 	algo::replace_all(pyscr, "%%E_DATA%%", "[ " + E_data.str() + "]");
 	algo::replace_all(pyscr, "%%S_DATA%%", "[ " + S_data.str() + "]");
-	algo::replace_all(pyscr, "%%S_INDEX%%", use_weights ? " 4" : "-1");
+	algo::replace_all(pyscr, "%%S_INDEX%%", "-1");
 	algo::replace_all(pyscr, "%%BRANCH_DATA%%", "[ " + bandidx_data.str() + "]");
 	algo::replace_all(pyscr, "%%DEGEN_DATA%%", "[ " + degen_data.str() + "]");
 	algo::replace_all(pyscr, "%%BRANCH_COLOURS%%", "[ " + colours.str() + "]");
-	algo::replace_all(pyscr, "%%ONLY_POS_E%%", m_only_pos_E->isChecked() ? "True " : "False");
 	algo::replace_all(pyscr, "%%PROJ_TYPE%%", m_perspective->isChecked() ? "persp" : "ortho");
 	algo::replace_all(pyscr, "%%ORTHO_PROJ%%", m_perspective->isChecked() ? "False" : "True");
 	algo::replace_all(pyscr, "%%FOCAL_LEN%%", focal_len.str());
 	algo::replace_all(pyscr, "%%AZIMUTH%%", tl2::var_to_str(-90. - m_cam_phi->value(), g_prec));
 	algo::replace_all(pyscr, "%%ELEVATION%%", tl2::var_to_str(90. + m_cam_theta->value(), g_prec));
-	algo::replace_all(pyscr, "%%Q_IDX_1%%", tl2::var_to_str(Q_idx_1, g_prec));
-	algo::replace_all(pyscr, "%%Q_IDX_2%%", tl2::var_to_str(Q_idx_2, g_prec));
+	algo::replace_all(pyscr, "%%Q_IDX_1%%", "0");
+	algo::replace_all(pyscr, "%%Q_IDX_2%%", "1");
 
 	ofstr << pyscr << std::endl;
 }
@@ -489,7 +457,7 @@ if __name__ == "__main__":
 /**
  * save an image of the plot
  */
-void Dispersion3DDlg::SaveImage()
+void Plot3DDlg::SaveImage()
 {
 	if(!m_dispplot)
 		return;

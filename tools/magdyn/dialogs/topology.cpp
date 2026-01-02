@@ -41,7 +41,6 @@ namespace asio = boost::asio;
 #include <QtWidgets/QFileDialog>
 
 #include "topology.h"
-#include "helper.h"
 
 #include "tlibs2/libs/algos.h"
 #include "tlibs2/libs/str.h"
@@ -601,7 +600,7 @@ void TopologyDlg::PlotBerryCurvature(bool clear_settings)
 				: int(std::lerp(0., 1., t_real(effective_band) / t_real(num_effective_bands - 1)) * 255.),
 		};
 
-		//get_colour<int>(g_colPlot, col);
+		//tl2::get_colour<int>(g_colPlot, col);
 		const QColor colFull(col[0], col[1], col[2]);
 		pen.setColor(colFull);
 		pen.setWidthF(2.);

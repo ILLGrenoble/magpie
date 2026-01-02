@@ -28,7 +28,8 @@ tests/jl/*.dat
 tmp/**
 !tmp/.dir
 build/**
-script/build/**
+tools/script/build/**
+tools/plot3d/build/**
 tests/build/**
 unittests/build/**
 *.pyc

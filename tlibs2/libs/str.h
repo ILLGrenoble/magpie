@@ -7,7 +7,7 @@
  *
  * ----------------------------------------------------------------------------
  * tlibs
- * Copyright (C) 2017-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
@@ -910,6 +910,51 @@ std::pair<bool, t_val> eval_expr(const t_str& str) noexcept
 #endif
 		return std::make_pair(false, t_val(0));
 	}
+}
+
+
+
+// ----------------------------------------------------------------------------
+
+
+
+/**
+ * get the rgb colour values from a string
+ */
+template<class t_val>
+bool get_colour(const std::string& _col, t_val *rgb)
+{
+	std::string col = tl2::trimmed(_col);
+
+	// use default colour
+	if(col == "" || col == "auto")
+		return false;
+
+	std::istringstream istrcolour(col);
+
+	// optional colour code prefix
+	if(istrcolour.peek() == '#')
+		istrcolour.get();
+
+	std::size_t colour = 0;
+	istrcolour >> std::hex >> colour;
+
+	if constexpr(std::is_floating_point_v<t_val>)
+	{
+		// get the colour values as floats in the range [0, 1]
+		rgb[0] = t_val((colour & 0xff0000) >> 16) / t_val(0xff);
+		rgb[1] = t_val((colour & 0x00ff00) >> 8) / t_val(0xff);
+		rgb[2] = t_val((colour & 0x0000ff) >> 0) / t_val(0xff);
+	}
+	else
+	{
+		// get the colour values as bytes in the range [0, 255]
+		rgb[0] = t_val((colour & 0xff0000) >> 16);
+		rgb[1] = t_val((colour & 0x00ff00) >> 8);
+		rgb[2] = t_val((colour & 0x0000ff) >> 0);
+	}
+
+	return true;
 }
 
 }
