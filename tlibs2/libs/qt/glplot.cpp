@@ -744,8 +744,8 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 		if(y_tick < 0.)
 			y_tick = calc_tick_marks(y_min, y_max);
 
-		t_real_gl x_start = std::floor<t_real_gl>(x_min / x_tick)*x_tick;
-		t_real_gl y_start = std::floor<t_real_gl>(y_min / y_tick)*y_tick;
+		t_real_gl x_start = std::floor(x_min / x_tick)*x_tick;
+		t_real_gl y_start = std::floor(y_min / y_tick)*y_tick;
 
 		// lines in y direction
 		for(t_real_gl x = x_start; x <= x_max; x += x_tick)

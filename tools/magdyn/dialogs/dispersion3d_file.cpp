@@ -263,11 +263,35 @@ def plot_disp_mvi(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_i
 		b = float(int(col_str[5:7], 16)) / 255.
 		return (r, g, b)
 
+	def get_extents(minmax1, minmax2):
+		x_range = numpy.abs(minmax1[1] - minmax1[0])
+		y_range = numpy.abs(minmax1[3] - minmax1[2])
+		z_range = numpy.abs(minmax1[5] - minmax1[4])
+
+		scale = numpy.array([
+			[ 1./x_range, 0.,         0.,         0. ],
+			[ 0.,         1./y_range, 0.,         0. ],
+			[ 0.,         0.,         1./z_range, 0. ],
+			[ 0.,         0.,         0.,         1. ] ])
+
+		offs = numpy.array([
+			[ 1., 0., 0., -minmax1[0] ],
+			[ 0., 1., 0., -minmax1[2] ],
+			[ 0., 0., 1., -minmax1[4] ],
+			[ 0., 0., 0., 1.          ] ])
+
+		trafo = numpy.dot(scale, offs)
+		pt_min = numpy.dot(trafo, numpy.array([ minmax2[0], minmax2[2], minmax2[4], 1. ]))
+		pt_max = numpy.dot(trafo, numpy.array([ minmax2[1], minmax2[3], minmax2[5], 1. ]))
+
+		return [ pt_min[0], pt_max[0],
+			pt_min[1], pt_max[1],
+   			pt_min[2], pt_max[2] ]
+
 	from mayavi import mlab
 	fig = mlab.figure(size = (800, 600), fgcolor = (0., 0., 0.), bgcolor = (1., 1., 1.))
 	mlab.view(azimuth = -(%%AZIMUTH%%) + 270., elevation = %%ELEVATION%% + 90., figure = fig)
 	fig.scene.parallel_projection = %%ORTHO_PROJ%%
-	axis_extents = [0., 1., 0., 1., 0., 1.]
 
 	# iterate energy branches
 	Q1_minmax = [ +999999999., -999999999. ]
@@ -275,6 +299,9 @@ def plot_disp_mvi(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_i
 	E_minmax  = [ +999999999., -999999999. ]
 	E_branch_eff_idx = 0             # effective index of actually plotted bands
 	E_branch_max = max(branch_data)  # maximum branch index
+
+	first_minmax = None
+
 	for E_branch_idx in range(0, E_branch_max + 1):
 		branch = get_branch(data, branch_data, E_branch_idx, Q_idx1, Q_idx2)
 		if branch == None:
@@ -288,16 +315,22 @@ def plot_disp_mvi(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_i
 		E_minmax[0] = min(E_minmax[0], _E_minmax[0])
 		E_minmax[1] = max(E_minmax[1], _E_minmax[1])
 
+		if first_minmax == None:
+			first_minmax = [ *Q1_minmax, *Q2_minmax, *E_minmax ]
+
 		colour_idx = E_branch_eff_idx
 		if only_pos_E:
 			colour_idx *= 2  # skip every other colour if E >= 0
 
-		surf_repr = "surface" # "wireframe"
-		zval = float(colour_idx) / float(E_branch_max)
+		zval = float(colour_idx)
+		if E_branch_max > 0:
+			zval /= float(E_branch_max)
+
+		axis_extents = get_extents(first_minmax, [*Q1_minmax, *Q2_minmax, *E_minmax])
 		points = mlab.points3d(data_Q[0], data_Q[1], data_E, [zval]*len(data_E),
 			mode = "point", opacity = 0.5, figure = fig, extent = axis_extents)
 		triags = mlab.pipeline.delaunay2d(points, figure = fig)
-		surface = mlab.pipeline.surface(triags, representation = surf_repr,
+		surface = mlab.pipeline.surface(triags, representation = "surface", # "wireframe",
 			figure = fig, extent = axis_extents, opacity = 1.,
 			name = ("branch_%d" % E_branch_idx), line_width = 1.,
 			color = conv_col(branch_colours[colour_idx]))
@@ -307,10 +340,12 @@ def plot_disp_mvi(data, branch_data, degen_data, branch_colours, Q_idx1 = 0, Q_i
 	mlab.xlabel(labels[Q_idx1])
 	mlab.ylabel(labels[Q_idx2])
 	mlab.zlabel("E (meV)")
+
+	total_extents = get_extents(first_minmax, [*Q1_minmax, *Q2_minmax, *E_minmax])
 	axes = mlab.axes(figure = fig, ranges = [*Q1_minmax, *Q2_minmax, *E_minmax],
-		extent = axis_extents, line_width = 2.)
+		extent = total_extents, line_width = 2.)
 	axes.axes.font_factor = 1.75
-	mlab.outline(figure = fig, extent = axis_extents, line_width = 2.)
+	mlab.outline(figure = fig, extent = total_extents, line_width = 2.)
 
 	if plot_file != "":
 		mlab.savefig(plot_file, figure = fig)
@@ -397,6 +432,7 @@ if __name__ == "__main__":
 		data = numpy.array([ h_data, k_data, l_data, E_data ]).T
 
 	try:
+		raise ModuleNotFoundError  # skip mayavi until the plotting function works correctly
 		# try to plot using mayavi...
 		plot_disp_mvi(data, branch_data, degen_data, colours, %%Q_IDX_1%%, %%Q_IDX_2%%)
 	except ModuleNotFoundError:

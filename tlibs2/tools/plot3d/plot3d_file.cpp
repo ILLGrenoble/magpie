@@ -216,7 +216,6 @@ def plot_disp_mvi(data, surf_data, surf_colours):
 	fig = mlab.figure(size = (800, 600), fgcolor = (0., 0., 0.), bgcolor = (1., 1., 1.))
 	mlab.view(azimuth = -(%%AZIMUTH%%) + 270., elevation = %%ELEVATION%% + 90., figure = fig)
 	fig.scene.parallel_projection = %%ORTHO_PROJ%%
-	axis_extents = [0., 1., 0., 1., 0., 1.]
 
 	# iterate surfaces
 	x_minmax = [ +999999999., -999999999. ]
@@ -240,13 +239,17 @@ def plot_disp_mvi(data, surf_data, surf_colours):
 		colour_idx = z_surf_eff_idx
 
 		surf_repr = "surface" # "wireframe"
-		zval = float(colour_idx) / float(z_surf_max)
+		zval = float(colour_idx)
+		if z_surf_max > 0:
+			zval /= float(z_surf_max)
 		points = mlab.points3d(data_xy[0], data_xy[1], data_z, [zval]*len(data_z),
-			mode = "point", opacity = 0.5, figure = fig, extent = axis_extents)
+			mode = "point", opacity = 0.5,
+			#extent = [0., 1., 0., 1., 0., 1.],
+			figure = fig)
 		triags = mlab.pipeline.delaunay2d(points, figure = fig)
 		surface = mlab.pipeline.surface(triags, representation = surf_repr,
-			figure = fig, extent = axis_extents, opacity = 1.,
-			name = ("surf_%d" % z_surf_idx), line_width = 1.,
+			figure = fig, opacity = 1., line_width = 1., name = ("surf_%d" % z_surf_idx),
+			#extent = [0., 1., 0., 1., 0., 1.],
 			color = conv_col(surf_colours[colour_idx]))
 		z_surf_eff_idx += 1
 
@@ -254,9 +257,12 @@ def plot_disp_mvi(data, surf_data, surf_colours):
 	mlab.ylabel("y")
 	mlab.zlabel("z")
 	axes = mlab.axes(figure = fig, ranges = [*x_minmax, *y_minmax, *z_minmax],
-		extent = axis_extents, line_width = 2.)
+		#extent = [0., 1., 0., 1., 0., 1.],
+		line_width = 2.)
 	axes.axes.font_factor = 1.75
-	mlab.outline(figure = fig, extent = axis_extents, line_width = 2.)
+	mlab.outline(figure = fig,
+		#extent = [0., 1., 0., 1., 0., 1.],
+		line_width = 2.)
 
 	if plot_file != "":
 		mlab.savefig(plot_file, figure = fig)

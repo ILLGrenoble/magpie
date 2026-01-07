@@ -23,6 +23,8 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <QtWidgets/QApplication>
+
 #include <boost/scope_exit.hpp>
 #include <boost/asio.hpp>
 namespace asio = boost::asio;
