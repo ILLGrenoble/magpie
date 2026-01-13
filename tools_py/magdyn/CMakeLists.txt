@@ -114,6 +114,7 @@ swig_add_library(magdyn_py LANGUAGE python SOURCES magdyn.i)
 target_link_libraries(magdyn_py
 	Python3::Python
 	${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES}
+	#/usr/local/lib/libgemmi_cpp.a
 	gemmi::gemmi_cpp
 )
 #target_link_libraries(magdyn_py Python3::Python /usr/local/lib/liblapacke.a /usr/local/lib/liblapack.a /usr/local/lib/libblas.a libgfortran.so)

@@ -38,9 +38,9 @@ fi
 
 
 #GEMMI_REMOTE=https://codeload.github.com/project-gemmi/gemmi/zip/refs/heads/master
-GEMMI_REMOTE=https://github.com/project-gemmi/gemmi/archive/refs/tags/v0.7.3.zip
+GEMMI_REMOTE=https://github.com/project-gemmi/gemmi/archive/refs/tags/v0.7.4.zip
 GEMMI_LOCAL_ZIP=${GEMMI_REMOTE##*[/\\]}
-GEMMI_LOCAL=gemmi-0.7.3
+GEMMI_LOCAL=gemmi-0.7.4
 
 
 rm -f "${GEMMI_LOCAL}"
