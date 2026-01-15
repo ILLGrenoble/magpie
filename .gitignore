@@ -40,6 +40,7 @@ tools/setup/build/**
 tools_py/magdyn/build/**
 tools_py/bz/build/**
 tools_py/instr/build/**
+tools_c/build/**
 *.pyc
 .DS_Store
 ._.DS_Store
