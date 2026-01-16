@@ -32,20 +32,7 @@
 #define __TLIBS2_C_MATHLIB_H__
 
 
-// ----------------------------------------------------------------------------
-// linked list
-// ----------------------------------------------------------------------------
-struct tl2_list
-{
-	struct tl2_list *next;
-	void *elem;
-};
-
-extern struct tl2_list* tl2_lst_create(void *elem);
-extern struct tl2_list* tl2_lst_append(struct tl2_list *lst, void *elem);
-extern void tl2_lst_remove(struct tl2_list *lst, void *elem);
-extern void tl2_lst_free(struct tl2_list *lst);
-// ----------------------------------------------------------------------------
+#include "list.h"
 
 
 // ----------------------------------------------------------------------------
