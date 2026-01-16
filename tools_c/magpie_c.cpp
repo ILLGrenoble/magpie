@@ -45,14 +45,16 @@ using t_magdyn = tl2_mag::MagDyn<
 
 
 
-extern "C" void* magpie_create()
+extern "C"
+t_magpie magpie_create()
 {
 	return new t_magdyn{};
 }
 
 
 
-extern "C" void magpie_free(void *_mag)
+extern "C"
+void magpie_free(t_magpie _mag)
 {
 	if(!_mag)
 		return;
@@ -63,27 +65,70 @@ extern "C" void magpie_free(void *_mag)
 
 
 
-extern "C" int magpie_load(void *_mag, const char* file)
+extern "C"
+int magpie_load(t_magpie _mag, const char* file)
 {
 	if(!_mag)
 		return false;
-	
+
 	t_magdyn *mag = reinterpret_cast<t_magdyn*>(_mag);
 	return mag->Load(file);
 }
 
 
 
-extern "C" int magpie_save_dispersion(void *_mag,
+extern "C"
+unsigned int magpie_site_count(t_magpie _mag)
+{
+	if(!_mag)
+		return 0;
+
+	t_magdyn *mag = reinterpret_cast<t_magdyn*>(_mag);
+
+	return static_cast<unsigned int>(mag->GetMagneticSitesCount());
+}
+
+
+
+extern "C"
+unsigned int magpie_calc_energies(t_magpie _mag,
+	t_magpie_real h, t_magpie_real k, t_magpie_real l,
+	t_magpie_real* Es, t_magpie_real* ws)
+{
+	if(!_mag)
+		return 0;
+
+	t_magdyn *mag = reinterpret_cast<t_magdyn*>(_mag);
+
+	auto Es_and_S = mag->CalcEnergies(h, k, l, !ws);
+
+	std::size_t max_branches = 2*mag->GetMagneticSitesCount();
+	std::size_t num_branches = std::min(Es_and_S.size(), max_branches);
+
+	for(std::size_t branch_idx = 0; branch_idx < num_branches; ++branch_idx)
+	{
+		if(Es)
+			Es[branch_idx] = Es_and_S[branch_idx].E;
+		if(ws)
+			ws[branch_idx] = Es_and_S[branch_idx].weight;
+	}
+
+	return static_cast<unsigned int>(num_branches);
+}
+
+
+
+extern "C"
+int magpie_save_dispersion(t_magpie _mag,
   const char* file,
 	t_magpie_real h0, t_magpie_real k0, t_magpie_real l0,
 	t_magpie_real h1, t_magpie_real k1, t_magpie_real l1,
 	unsigned int num_pts)
 {
-	
+
 	if(!_mag)
 		return false;
-	
+
 	t_magdyn *mag = reinterpret_cast<t_magdyn*>(_mag);
 	return mag->SaveDispersion(file, h0, k0, l0, h1, k1, l1, num_pts);
 }

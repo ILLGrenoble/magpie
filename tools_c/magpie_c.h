@@ -30,6 +30,7 @@
 #define __MAGDYN_C__
 
 
+typedef void* t_magpie;
 typedef double t_magpie_real;
 
 
@@ -38,20 +39,28 @@ extern "C" {
 #endif
 
 
-void* magpie_create();
+t_magpie magpie_create();
 
 
-void magpie_free(void *_mag);
+void magpie_free(t_magpie _mag);
 
 
-int magpie_load(void *_mag, const char* file);
+int magpie_load(t_magpie _mag, const char* file);
 
 
-int magpie_save_dispersion(void *_mag,
- const char* file,
- t_magpie_real h0, t_magpie_real k0, t_magpie_real l0,
- t_magpie_real h1, t_magpie_real k1, t_magpie_real l1,
- unsigned int num_pts);
+unsigned int magpie_site_count(t_magpie _mag);
+
+
+unsigned int magpie_calc_energies(t_magpie _mag,
+	t_magpie_real h, t_magpie_real k, t_magpie_real l,
+	t_magpie_real* Es, t_magpie_real* ws);
+
+
+int magpie_save_dispersion(t_magpie _mag,
+	const char* file,
+	t_magpie_real h0, t_magpie_real k0, t_magpie_real l0,
+	t_magpie_real h1, t_magpie_real k1, t_magpie_real l1,
+	unsigned int num_pts);
 
 
 #ifdef __cplusplus
