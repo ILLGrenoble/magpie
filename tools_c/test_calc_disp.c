@@ -30,9 +30,6 @@
 
 #include "magpie_c.h"
 
-#define CALC_DISP 1
-#define SAVE_DISP 0
-
 
 int main(int argc, char** argv)
 {
@@ -42,9 +39,8 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-
 	const char *model_file = argv[1];
-	const char *disp_file = "disp.dat";
+
 
 	// initialise magpie
 	void* mag = magpie_create();
@@ -64,15 +60,13 @@ int main(int argc, char** argv)
 	}
 
 
-	t_magpie_real h_step = 0.05;
-
-#if CALC_DISP
 	// calculate the energies and weights for the given momentum transfers
 	unsigned int max_branches = 2*magpie_site_count(mag);
 	t_magpie_real *Es = malloc(max_branches * sizeof(t_magpie_real));
 	t_magpie_real *ws = malloc(max_branches * sizeof(t_magpie_real));
 
 	t_magpie_real k = 0., l = 0.;
+	t_magpie_real h_step = 0.05;
 
 	printf("%10s %10s %10s %10s %10s\n", "h (rlu)", "k (rlu)", "l (rlu)", "E (meV)", "S (a.u.)");
 	for(t_magpie_real h = h_step; h < 1.; h += h_step)
@@ -84,22 +78,6 @@ int main(int argc, char** argv)
 
 	free(Es);
 	free(ws);
-#endif
-
-
-#if SAVE_DISP
-	// directly save a dispersion branch to a text data file
-	fprintf(stderr, "Saving dispersion branch to file \"%s\"...\n", disp_file);
-	if(!magpie_save_dispersion(mag,
-		disp_file,
-		h_step, 0., 0.,
-		1. - h_step, 0., 0.,
-		128))
-	{
-		fprintf(stderr, "Cannot save dispersion branch to file  \"%s\".\n", disp_file);
-		return -4;
-	}
-#endif
 
 
 	// clean up magpie

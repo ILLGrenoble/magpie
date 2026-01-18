@@ -41,17 +41,11 @@ if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 endif()
 
 
-set(CMAKE_CXX_STANDARD 20)
-add_compile_options(-std=c++20)
-add_compile_options(-Wall -Wextra)
-
-
 
 # -----------------------------------------------------------------------------
 # Boost
 add_definitions(-DBOOST_SYSTEM_NO_DEPRECATED)
 find_package(Boost REQUIRED COMPONENTS filesystem iostreams OPTIONAL_COMPONENTS system)
-add_definitions(${Boost_CXX_FLAGS})
 
 message("Using Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}.")
 # -----------------------------------------------------------------------------
@@ -61,7 +55,6 @@ message("Using Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boo
 # Lapack(e)
 find_package(GFortran)
 find_package(Lapacke REQUIRED)
-add_definitions(-DUSE_LAPACK=1)
 # -----------------------------------------------------------------------------
 
 
@@ -82,11 +75,40 @@ include_directories(
 
 
 
+# -----------------------------------------------------------------------------
+# magpie c library
 add_library(magpie_c SHARED magpie_c.cpp magpie_c.h)
 
+set_target_properties(magpie_c PROPERTIES CMAKE_CXX_STANDARD 20)
+target_compile_options(magpie_c PRIVATE -std=c++20)
+target_compile_options(magpie_c PUBLIC -Wall -Wextra)
+
+target_compile_definitions(magpie_c PRIVATE -DUSE_LAPACK=1)
+target_compile_definitions(magpie_c PRIVATE ${Boost_CXX_FLAGS})
 
 target_link_libraries(magpie_c
 	${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES}
 	#/usr/local/lib/libgemmi_cpp.a
 	gemmi::gemmi_cpp
 )
+# -----------------------------------------------------------------------------
+
+
+
+# -----------------------------------------------------------------------------
+# test programs
+add_executable(test_calc_disp test_calc_disp.c)
+
+set_target_properties(test_calc_disp PROPERTIES CMAKE_C_STANDARD 99)
+target_compile_options(test_calc_disp PRIVATE -std=c99)
+
+target_link_libraries(test_calc_disp magpie_c)
+
+
+add_executable(test_save_disp test_save_disp.c)
+
+set_target_properties(test_save_disp PROPERTIES CMAKE_C_STANDARD 99)
+target_compile_options(test_save_disp PRIVATE -std=c99)
+
+target_link_libraries(test_save_disp magpie_c)
+# -----------------------------------------------------------------------------
