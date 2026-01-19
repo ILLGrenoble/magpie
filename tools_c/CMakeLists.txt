@@ -97,7 +97,7 @@ target_link_libraries(magpie_c
 
 # -----------------------------------------------------------------------------
 # test programs
-add_executable(test_calc_disp test_calc_disp.c)
+add_executable(test_calc_disp tests/calc_disp.c)
 
 set_target_properties(test_calc_disp PROPERTIES CMAKE_C_STANDARD 99)
 target_compile_options(test_calc_disp PRIVATE -std=c99)
@@ -105,7 +105,7 @@ target_compile_options(test_calc_disp PRIVATE -std=c99)
 target_link_libraries(test_calc_disp magpie_c)
 
 
-add_executable(test_save_disp test_save_disp.c)
+add_executable(test_save_disp tests/save_disp.c)
 
 set_target_properties(test_save_disp PROPERTIES CMAKE_C_STANDARD 99)
 target_compile_options(test_save_disp PRIVATE -std=c99)

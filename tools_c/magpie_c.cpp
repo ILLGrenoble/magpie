@@ -45,6 +45,9 @@ using t_magdyn = tl2_mag::MagDyn<
 
 
 
+/**
+ * initialise the magpie library
+ */
 extern "C"
 t_magpie magpie_create()
 {
@@ -53,6 +56,9 @@ t_magpie magpie_create()
 
 
 
+/**
+ * free the magpie library
+ */
 extern "C"
 void magpie_free(t_magpie _mag)
 {
@@ -65,6 +71,9 @@ void magpie_free(t_magpie _mag)
 
 
 
+/**
+ * load a magnetic model
+ */
 extern "C"
 int magpie_load(t_magpie _mag, const char* file)
 {
@@ -77,6 +86,9 @@ int magpie_load(t_magpie _mag, const char* file)
 
 
 
+/**
+ * count the number of sites in the current magnetic model
+ */
 extern "C"
 unsigned int magpie_site_count(t_magpie _mag)
 {
@@ -90,6 +102,9 @@ unsigned int magpie_site_count(t_magpie _mag)
 
 
 
+/**
+ * calculate the energies and spin-spin correlation at the point Q = (hkl)
+ */
 extern "C"
 unsigned int magpie_calc_energies(t_magpie _mag,
 	t_magpie_real h, t_magpie_real k, t_magpie_real l,
@@ -118,6 +133,9 @@ unsigned int magpie_calc_energies(t_magpie _mag,
 
 
 
+/**
+ * save a dispersion branch going from (h0 k0 l0) to (h1 k1 l1)
+ */
 extern "C"
 int magpie_save_dispersion(t_magpie _mag,
   const char* file,

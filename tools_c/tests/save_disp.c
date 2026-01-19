@@ -36,10 +36,12 @@ int main(int argc, char** argv)
 	if(argc < 2)
 	{
 		fprintf(stderr, "Please give a magpie model file.\n");
+		fprintf(stderr, "For example: %s ../../tools/magdyn/test/ferromagnetic_chain.magpie\n", argv[0]);
 		return -1;
 	}
 
 	const char *model_file = argv[1];
+	const char *disp_file = "disp.dat";
 
 
 	// initialise magpie
@@ -53,6 +55,7 @@ int main(int argc, char** argv)
 
 	// load a magnetic model
 	fprintf(stderr, "Loading model file \"%s\"...\n", model_file);
+
 	if(!magpie_load(mag, model_file))
 	{
 		fprintf(stderr, "Cannot load magpie model file \"%s\".\n", model_file);
@@ -60,24 +63,19 @@ int main(int argc, char** argv)
 	}
 
 
-	// calculate the energies and weights for the given momentum transfers
-	unsigned int max_branches = 2*magpie_site_count(mag);
-	t_magpie_real *Es = malloc(max_branches * sizeof(t_magpie_real));
-	t_magpie_real *ws = malloc(max_branches * sizeof(t_magpie_real));
-
-	t_magpie_real k = 0., l = 0.;
+	// directly save a dispersion branch to a text data file
 	t_magpie_real h_step = 0.05;
+	fprintf(stderr, "Saving dispersion branch to file \"%s\"...\n", disp_file);
 
-	printf("%10s %10s %10s %10s %10s\n", "h (rlu)", "k (rlu)", "l (rlu)", "E (meV)", "S (a.u.)");
-	for(t_magpie_real h = h_step; h < 1.; h += h_step)
+	if(!magpie_save_dispersion(mag,
+		disp_file,
+		h_step, 0., 0.,
+		1. - h_step, 0., 0.,
+		128))
 	{
-		unsigned int num_branches = magpie_calc_energies(mag, h, k, l, Es, ws);
-		for(unsigned int branch_idx = 0; branch_idx < num_branches; ++branch_idx)
-			printf("%10.4f %10.4f %10.4f %10.4f %10.4f\n", h, k, l, Es[branch_idx], ws[branch_idx]);
+		fprintf(stderr, "Cannot save dispersion branch to file  \"%s\".\n", disp_file);
+		return -4;
 	}
-
-	free(Es);
-	free(ws);
 
 
 	// clean up magpie
