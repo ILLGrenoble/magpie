@@ -105,6 +105,7 @@ unsigned int magpie_site_count(t_magpie _mag)
 /**
  * get the maximum number of magnon branches in the current magnetic model
  */
+extern "C"
 unsigned int magpie_branch_count(t_magpie _mag)
 {
 	if(!_mag)
