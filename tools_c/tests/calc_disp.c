@@ -62,7 +62,9 @@ int main(int argc, char** argv)
 
 
 	// calculate the energies and weights for the given momentum transfers
-	unsigned int max_branches = 2*magpie_site_count(mag);
+	unsigned int max_branches = magpie_branch_count(mag);
+	fprintf(stderr, "Calculating dispersion with up to %d magnon branches per Q...\n", max_branches);
+
 	t_magpie_real *Es = malloc(max_branches * sizeof(t_magpie_real));
 	t_magpie_real *ws = malloc(max_branches * sizeof(t_magpie_real));
 

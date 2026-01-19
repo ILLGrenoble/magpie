@@ -103,6 +103,33 @@ unsigned int magpie_site_count(t_magpie _mag)
 
 
 /**
+ * get the maximum number of magnon branches in the current magnetic model
+ */
+unsigned int magpie_branch_count(t_magpie _mag)
+{
+	if(!_mag)
+		return 0;
+
+	t_magdyn *mag = reinterpret_cast<t_magdyn*>(_mag);
+
+	// each magnetic site leads to a magnon branch
+	std::size_t max_branch_count = mag->GetMagneticSitesCount();
+
+	// include magnon creation and annihilation
+	max_branch_count *= 2;
+
+	if(mag->IsIncommensurate())
+	{
+		// include non-commensurate structures
+		max_branch_count *= 3;
+	}
+
+	return static_cast<unsigned int>(max_branch_count);
+}
+
+
+
+/**
  * calculate the energies and spin-spin correlation at the point Q = (hkl)
  */
 extern "C"

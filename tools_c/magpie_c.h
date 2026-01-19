@@ -51,6 +51,9 @@ int magpie_load(t_magpie _mag, const char* file);
 // count the number of sites in the current magnetic model
 unsigned int magpie_site_count(t_magpie _mag);
 
+// get the maximum number of magnon branches in the current magnetic model
+unsigned int magpie_branch_count(t_magpie _mag);
+
 // calculate the energies and spin-spin correlation at the point Q = (hkl)
 unsigned int magpie_calc_energies(t_magpie _mag,
 	t_magpie_real h, t_magpie_real k, t_magpie_real l,
