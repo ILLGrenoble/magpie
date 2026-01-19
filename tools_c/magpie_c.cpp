@@ -66,6 +66,7 @@ void magpie_free(t_magpie _mag)
 		return;
 
 	t_magdyn *mag = reinterpret_cast<t_magdyn*>(_mag);
+
 	delete mag;
 }
 
@@ -81,6 +82,7 @@ int magpie_load(t_magpie _mag, const char* file)
 		return false;
 
 	t_magdyn *mag = reinterpret_cast<t_magdyn*>(_mag);
+
 	return mag->Load(file);
 }
 
@@ -135,18 +137,18 @@ unsigned int magpie_branch_count(t_magpie _mag)
  */
 extern "C"
 unsigned int magpie_calc_energies(t_magpie _mag,
-	t_magpie_real h, t_magpie_real k, t_magpie_real l,
-	t_magpie_real* Es, t_magpie_real* ws)
+	t_real h, t_real k, t_real l,
+	t_real* Es, t_real* ws)
 {
 	if(!_mag)
 		return 0;
 
 	t_magdyn *mag = reinterpret_cast<t_magdyn*>(_mag);
 
-	auto Es_and_S = mag->CalcEnergies(h, k, l, !ws);
+	const auto Es_and_S = mag->CalcEnergies(h, k, l, !ws);
 
-	std::size_t max_branches = 2*mag->GetMagneticSitesCount();
-	std::size_t num_branches = std::min(Es_and_S.size(), max_branches);
+	const std::size_t max_branches = 2*mag->GetMagneticSitesCount();
+	const std::size_t num_branches = std::min(Es_and_S.size(), max_branches);
 
 	for(std::size_t branch_idx = 0; branch_idx < num_branches; ++branch_idx)
 	{
@@ -162,13 +164,42 @@ unsigned int magpie_calc_energies(t_magpie _mag,
 
 
 /**
+ * calculate S(h, k, l, E)
+ */
+extern "C"
+t_real magpie_calc_S(t_magpie _mag,
+	t_real h, t_real k, t_real l, t_real E,
+	t_real sigma)
+{
+	if(!_mag)
+		return 0;
+
+	t_magdyn *mag = reinterpret_cast<t_magdyn*>(_mag);
+
+	const auto Es_and_S = mag->CalcEnergies(h, k, l, false);
+
+	t_real S = 0.;
+	for(std::size_t branch_idx = 0; branch_idx < Es_and_S.size(); ++branch_idx)
+	{
+		const t_real E_branch = Es_and_S[branch_idx].E;
+		const t_real S_branch = Es_and_S[branch_idx].weight;
+
+		S += S_branch * tl2::gauss_model(E, E_branch, sigma, 1., 0.);
+	}
+
+	return S;
+}
+
+
+
+/**
  * save a dispersion branch going from (h0 k0 l0) to (h1 k1 l1)
  */
 extern "C"
 int magpie_save_dispersion(t_magpie _mag,
   const char* file,
-	t_magpie_real h0, t_magpie_real k0, t_magpie_real l0,
-	t_magpie_real h1, t_magpie_real k1, t_magpie_real l1,
+	t_real h0, t_real k0, t_real l0,
+	t_real h1, t_real k1, t_real l1,
 	unsigned int num_pts)
 {
 

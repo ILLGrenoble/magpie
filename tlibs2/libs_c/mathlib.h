@@ -36,7 +36,7 @@
 
 
 // ----------------------------------------------------------------------------
-// linalg functions
+// helper functions
 // ----------------------------------------------------------------------------
 /**
  * set float epsilon
@@ -52,7 +52,12 @@ extern double tl2_get_eps();
  * tests equality of floating point numbers
  */
 extern int tl2_flt_equals(double x, double y, double eps);
+// ----------------------------------------------------------------------------
 
+
+// ----------------------------------------------------------------------------
+// linalg functions
+// ----------------------------------------------------------------------------
 /**
  * set matrix elements to zero
  */
@@ -195,6 +200,15 @@ extern void tl2_mat_trafo(const double* M, const double* T, double* RES, int N, 
  */
 extern void tl2_reso(const struct tl2_list* veclist, const struct tl2_list* problist,
 	double* COV, double* RESO);
+// ----------------------------------------------------------------------------
+
+
+// ----------------------------------------------------------------------------
+// gaussian
+// ----------------------------------------------------------------------------
+extern double gauss_model(double x, double x0, double sigma);
+
+extern double gauss_model_amp(double x, double x0, double sigma);
 // ----------------------------------------------------------------------------
 
 

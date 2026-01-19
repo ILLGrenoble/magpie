@@ -59,6 +59,11 @@ unsigned int magpie_calc_energies(t_magpie _mag,
 	t_magpie_real h, t_magpie_real k, t_magpie_real l,
 	t_magpie_real* Es, t_magpie_real* ws);
 
+// calculate S(h, k, l, E)
+t_magpie_real magpie_calc_S(t_magpie _mag,
+	t_magpie_real h, t_magpie_real k, t_magpie_real l, t_magpie_real E,
+	t_magpie_real sigma);
+
 // save a dispersion branch going from (h0 k0 l0) to (h1 k1 l1)
 int magpie_save_dispersion(t_magpie _mag,
 	const char* file,
