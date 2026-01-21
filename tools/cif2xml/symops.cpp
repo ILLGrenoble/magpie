@@ -1,12 +1,12 @@
 /**
- * finds a matching space group
+ * generates symmetry-equivalent vectors
  * @author Tobias Weber <tweber@ill.fr>
- * @date jan-2020
+ * @date jan-2026
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
  * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2021  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <iostream>
-#include <memory>
 
 
 using t_vec = tl2::vec<t_real, std::vector>;
@@ -39,21 +38,36 @@ using t_mat = tl2::mat<t_real, std::vector>;
 constexpr t_real g_eps = 1e-6;
 
 
-/**
- * entry point
- */
 int main(int argc, char** argv)
 {
 	using namespace tl2_ops;
-	std::cout << "Input atomic positions, 'e' or ENTER to end." << std::endl;
 
-	std::vector<t_vec> vecFinal;
-	std::size_t atomnr = 1;
+	std::string sgname;
+	std::cout << "Enter space group name: ";
+	std::getline(std::cin, sgname);
+
+	std::vector<t_mat> ops = get_sg_ops<t_mat, t_real>(sgname);
+	if(ops.size() == 0)
+	{
+		std::cerr << "Invalid space group." << std::endl;
+		return -1;
+	}
+
+	for(std::size_t op_idx = 0; op_idx < ops.size(); ++op_idx)
+	{
+		std::cout << "Symmetry transformation " << op_idx + 1;
+		std::cout << " (det_rot: ";
+		std::cout << tl2::det<t_mat>(tl2::submat<t_mat>(ops[op_idx], 3, 3));
+		std::cout  << "):\n";
+		tl2::niceprint(std::cout, ops[op_idx], g_eps);
+		std::cout << "\n";
+	}
+
 
 	while(true)
 	{
 		std::string strpos;
-		std::cout << "Position " << atomnr++ << ": ";
+		std::cout << "Enter vector ['p' for pseudo-vector, 'e' or ENTER to end]: ";
 
 		std::getline(std::cin, strpos);
 		boost::trim(strpos);
@@ -69,63 +83,31 @@ int main(int argc, char** argv)
 
 
 		// convert to real vector
-		t_vec vecPos;
+		t_vec vec;
+		bool pseudovec = false;
 		for(const std::string& str : vecstr)
-			vecPos.emplace_back(tl2::stoval<t_real>(str));
+		{
+			vec.emplace_back(tl2::stoval<t_real>(str));
+			if(str == "p")
+				pseudovec = true;
+		}
 
 		// fill up possibly missing coordinates
-		while(vecPos.size() < 3)
-			vecPos.push_back(0);
-		vecPos.resize(3);
+		while(vec.size() < 3)
+			vec.push_back(0);
+		vec.resize(3);
 
-		vecFinal.emplace_back(std::move(vecPos));
-	}
+		std::cout << "Input " << (pseudovec ? "pseudo-vector: " : "vector: ") << vec << "\n";
 
-	if(vecFinal.size() == 0)
-	{
-		std::cerr << "Insufficient number of positions given." << std::endl;
-		return -1;
-	}
+		std::vector<t_vec> vecs = tl2::apply_ops_hom<t_vec, t_mat, t_real>(
+			vec, ops, g_eps, false /*keep in uc*/, true /*ignore occupied*/,
+			false /*return homogeneous*/, pseudovec);
 
-
-	std::cout << "\nFull set of positions to match:\n";
-	std::size_t ctr = 1;
-	for(const auto& pos : vecFinal)
-		std::cout << "\t(" << ctr++ << ") " << pos << "\n";
-	std::cout << std::endl;
-
-
-	std::vector<t_vec> vecInit = vecFinal;
-
-
-	while(true)
-	{
-		std::cout << "\n--------------------------------------------------------------------------------\n";
-		std::cout << "Base set of positions:\n";
-		ctr = 1;
-		for(const auto& pos : vecInit)
-			std::cout << "\t(" << ctr++ << ") " << pos << "\n";
-		std::cout << std::endl;
-
-		auto matchingSGs = find_matching_sgs<t_vec, t_mat, t_real>(vecInit, vecFinal, g_eps);
-
-		if(matchingSGs.size())
+		for(std::size_t sym_idx = 0; sym_idx < vecs.size(); ++sym_idx)
 		{
-			std::cout << "Matching space groups:\n";
-			ctr = 1;
-			for(const auto& sg : matchingSGs)
-				std::cout << "\t(" << ctr++ << ") " << std::get<1>(sg) << "\n";
+			std::cout << "Symmetry-equivalent vector " << sym_idx + 1 << ": ";
+			std::cout << vecs[sym_idx] << "\n";
 		}
-		else
-		{
-			std::cout << "No matching space groups.\n";
-		}
-		std::cout << "--------------------------------------------------------------------------------\n";
-		std::cout << std::endl;
-
-		vecInit.pop_back();
-		if(vecInit.size() == 0)
-			break;
 	}
 
 	return 0;

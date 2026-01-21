@@ -62,6 +62,13 @@ target_link_libraries(takin_findsg
 )
 
 
+add_executable(symops
+	symops.cpp ../../libs/loadcif.h)
+target_link_libraries(symops
+	gemmi::gemmi_cpp
+)
+
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	target_link_options(takin_cif2xml
 		# create an __info_plist section in the binary
@@ -80,6 +87,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 
 	add_custom_command(TARGET takin_findsg POST_BUILD
 		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:takin_findsg> || true
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+	)
+
+	add_custom_command(TARGET symops POST_BUILD
+		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:symops> || true
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	)
 endif()
