@@ -163,7 +163,7 @@ void MagDynDlg::Load()
 {
 	QString dirLast = m_sett->value("dir", "").toString();
 	QString filename = QFileDialog::getOpenFileName(
-		this, "Load File", dirLast, "Magnetic Dynamics Files (*.magpie *.magdyn *.xml)");
+		this, "Load File", dirLast, "Magpie Files (*.magpie *.magdyn *.xml);;All Files (*.*)");
 	if(filename == "" || !QFile::exists(filename))
 		return;
 
@@ -633,7 +633,7 @@ void MagDynDlg::SaveAs()
 {
 	QString dirLast = m_sett->value("dir", "").toString();
 	QString filename = QFileDialog::getSaveFileName(
-		this, "Save File", dirLast, "Magnetic Dynamics Files (*.magpie)");
+		this, "Save File", dirLast, "Magpie Files (*.magpie)");
 	if(filename == "")
 		return;
 
