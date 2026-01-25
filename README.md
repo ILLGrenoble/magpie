@@ -6,6 +6,8 @@ This project comprises:
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16180814.svg)](https://doi.org/10.5281/zenodo.16180814)
 
+(No AI is used in the application or its development.)
+
 
 ## Documentation
   - *Magpie* is documented [here](https://github.com/ILLGrenoble/magpie/wiki) and in the [Takin Wiki](https://github.com/ILLGrenoble/takin/wiki).
