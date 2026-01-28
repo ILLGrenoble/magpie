@@ -47,7 +47,7 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH
 	"${PROJECT_SOURCE_DIR}"
-	"${PROJECT_SOURCE_DIR}/../../setup/cmake"
+	"${PROJECT_SOURCE_DIR}/../../../setup/cmake"
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -93,6 +93,12 @@ find_package(Threads REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options)
 set(Boost_USE_MULTITHREADED TRUE)
 add_definitions(${Boost_CXX_FLAGS})
+
+find_package(Qhull REQUIRED)
+if(Qhull_FOUND)
+	add_definitions(-DUSE_QHULL)
+	include_directories("${Qhull_INCLUDE_DIRS}")
+endif()
 # -----------------------------------------------------------------------------
 
 
@@ -134,6 +140,7 @@ add_executable(plot3d
 target_link_libraries(plot3d
 	Threads::Threads
 	${QtLibraries}
+	${Qhull_LIBRARIES}
 	${Boost_LIBRARIES}
 	${MINGW_EXTRALIBS}
 )

@@ -16,7 +16,7 @@
  *
  * ----------------------------------------------------------------------------
  * TAS-Paths (part of the Takin software suite)
- * Copyright (C) 2021-2023  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2021-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * "geo" project
  * Copyright (C) 2020-2021  Tobias WEBER (privately developed).
@@ -54,7 +54,7 @@
 
 #include <boost/math/quaternion.hpp>
 
-#include "tlibs2/libs/maths.h"
+#include "maths.h"
 
 
 namespace geo {
@@ -69,6 +69,23 @@ requires tl2::is_vec<t_vec>
 	t_vec dir = pt2 - pt1;
 	t_real angle = std::atan2(t_real(dir[1]), t_real(dir[0]));
 	return angle;
+}
+
+
+
+/**
+ * returns > 0 if point is on the left-hand side of line
+ */
+template<class t_vec, class t_real = typename t_vec::value_type>
+t_real side_of_line(const t_vec& vec1a, const t_vec& vec1b, const t_vec& pt)
+requires tl2::is_vec<t_vec>
+{
+	using namespace tl2_ops;
+
+	t_vec dir1 = vec1b - vec1a;
+	t_vec dir2 = pt - vec1a;
+
+	return dir1[0]*dir2[1] - dir1[1]*dir2[0];
 }
 
 
@@ -100,7 +117,7 @@ requires tl2::is_vec<t_vec> && tl2::is_quat<t_quat>
 	bool rot_to_001 = (dim == 3 && verts.size() >= 3);
 	if(rot_to_001)
 	{
-		t_vec norm = tl2::cross(verts[2] - verts[0], verts[1] - verts[0]);
+		t_vec norm = tl2::cross<t_vec>(verts[2] - verts[0], verts[1] - verts[0]);
 
 		// rotate the vertices so that their normal points to [001]
 		t_vec dir001 = tl2::create<t_vec>({ 0, 0, 1 });
@@ -149,7 +166,8 @@ requires tl2::is_vec<t_vec> && tl2::is_quat<t_quat>
 std::tuple<std::vector<t_vec>, std::vector<std::vector<t_vec>>, std::vector<std::set<std::size_t>>>
 calc_delaunay(int dim, const std::vector<t_vec>& verts,
 	bool only_hull, bool triangulate = true,
-	std::optional<std::size_t> onlysite_idx = std::nullopt)
+	std::optional<std::size_t> onlysite_idx = std::nullopt,
+	typename t_vec::value_type eps = 1e-5)
 {
 	using namespace tl2_ops;
 	namespace qh = orgQhull;
@@ -157,7 +175,6 @@ calc_delaunay(int dim, const std::vector<t_vec>& verts,
 	using t_real = typename t_vec::value_type;
 	using t_real_qhull = coordT;
 
-	const t_real eps = 1e-5;
 	std::vector<t_vec> voronoi;                     // voronoi vertices
 	std::vector<std::vector<t_vec>> triags;         // delaunay triangles
 	std::vector<std::set<std::size_t>> neighbours;  // neighbour triangle indices
@@ -330,6 +347,51 @@ calc_delaunay(int dim, const std::vector<t_vec>& verts,
 
 	return std::make_tuple(voronoi, triags, neighbours);
 }
+
+
+
+/**
+ * tests if a vertex is in the hull
+ */
+template<class t_vec> requires tl2::is_vec<t_vec>
+std::tuple<bool, std::size_t, std::size_t> is_vert_in_hull(
+	const std::vector<t_vec>& hull, const t_vec& newvert,
+	const t_vec *vert_in_hull = nullptr, bool check_vert_segment = true,
+	typename t_vec::value_type eps = 1e-5)
+{
+	using t_real = typename t_vec::value_type;
+
+	// get a point inside the hull if none given
+	t_vec mean;
+	if(!vert_in_hull && check_vert_segment)
+	{
+		mean = std::accumulate(hull.begin(), hull.end(), tl2::zero<t_vec>(2));
+		mean /= t_real(hull.size());
+		vert_in_hull = &mean;
+	}
+
+	// iterate vertices
+	for(std::size_t hullvertidx1 = 0; hullvertidx1 < hull.size(); ++hullvertidx1)
+	{
+		std::size_t hullvertidx2 = (hullvertidx1 + 1) % hull.size();
+
+		const t_vec& hullvert1 = hull[hullvertidx1];
+		const t_vec& hullvert2 = hull[hullvertidx2];
+
+		// is the vertex between these two points?
+		if(check_vert_segment &&
+			side_of_line<t_vec>(*vert_in_hull, hullvert1, newvert) <= -eps &&
+			side_of_line<t_vec>(*vert_in_hull, hullvert2, newvert) > eps)
+			continue;
+
+		// outside hull?
+		if(side_of_line<t_vec>(hullvert1, hullvert2, newvert) < eps)
+			return std::make_tuple(false, hullvertidx1, hullvertidx2);
+	}
+
+	return std::make_tuple(true, 0, 0);
+}
+
 
 }
 

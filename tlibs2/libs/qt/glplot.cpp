@@ -37,6 +37,7 @@
  */
 
 #include "glplot.h"
+#include "../voronoi.h"
 
 #include <QtGui/QPainter>
 #include <QtGui/QGuiApplication>
@@ -1811,8 +1812,10 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 	}
 
 
+/*
+#ifdef USE_QHULL
 	// TODO: draw labels and ticks for coordinate cube
-	/*if(m_coordCubeLab.size() && GetObjectVisible(m_coordCubeLab[0]))
+	if(m_coordCubeLab.size() && GetObjectVisible(m_coordCubeLab[0]))
 	{
 		using namespace tl2_ops;
 
@@ -1830,14 +1833,37 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 		t_vec_gl corner_ppm = matScale * tl2::create<t_vec_gl>({ +1., +1., -1., 1. });
 		t_vec_gl corner_ppp = matScale * tl2::create<t_vec_gl>({ +1., +1., +1., 1. });
 
-		// draw edge labels and ticks
-		auto draw_edge = [this, &painter](const t_vec_gl& corner0, const t_vec_gl& corner1,
-			const QString& label)
+		// calculate projected cube
+		std::vector<t_vec_gl> proj_cube;
+		proj_cube.reserve(8);
+		for(const t_vec_gl& vec : { corner_mmm, corner_mmp, corner_mpm, corner_mpp,
+			corner_pmm, corner_pmp, corner_ppm, corner_ppp })
 		{
-			// TODO: only consider this edge if it's at the border of the projected coordinate cube
+			QPointF pt = GlToScreenCoords(vec);
+			proj_cube.push_back(tl2::create<t_vec_gl>({
+				static_cast<t_real_gl>(pt.x()), static_cast<t_real_gl>(pt.y()) }));
+		}
 
-			t_vec_gl edge = corner0 + 0.5*(corner1 - corner0);
-			painter.drawText(GlToScreenCoords(edge), label);
+		// calculate the contour (hull) of the projected cube
+		auto [cube_hull_verts, cube_hull_triags, cuble_hull_neighbours] =
+				geo::calc_delaunay(2, proj_cube, true, false);
+
+		// draw edge labels and ticks
+		auto draw_edge = [this, &painter, &cube_hull_verts](
+		  const t_vec_gl& corner0, const t_vec_gl& corner1, const QString& label)
+		{
+			// only consider this edge if it's at the border of the projected coordinate cube
+			constexpr const t_real_gl eps_hull = 1e-2; 
+
+			t_vec_gl edge_mid = corner0 + 0.5*(corner1 - corner0);
+			QPointF proj = GlToScreenCoords(edge_mid);
+
+			t_vec_gl proj_vert = tl2::create<t_vec_gl>({
+				static_cast<t_real_gl>(proj.x()), static_cast<t_real_gl>(proj.y()) });
+			if(std::get<0>(geo::is_vert_in_hull<t_vec_gl>(cube_hull_verts, proj_vert, nullptr, true, eps_hull)))
+				return;
+
+			painter.drawText(proj, label);
 		};
 
 		draw_edge(corner_mmm, corner_mmp, QString("e1"));
@@ -1854,7 +1880,9 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 		draw_edge(corner_mmp, corner_pmp, QString("e10"));
 		draw_edge(corner_mpm, corner_ppm, QString("e11"));
 		draw_edge(corner_mpp, corner_ppp, QString("e12"));
-	}*/
+	}
+#endif
+*/
 
 
 	// draw coordinate system in generally non-orthogonal crystal system in rlu

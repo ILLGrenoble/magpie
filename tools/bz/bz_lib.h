@@ -39,7 +39,7 @@
 #if __has_include("pathslib/libs/voronoi.h")
 	#include "pathslib/libs/voronoi.h"
 #else
-	#include "libs/voronoi.h"
+	#include "tlibs2/libs/voronoi.h"
 #endif
 
 
