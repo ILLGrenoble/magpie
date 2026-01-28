@@ -238,12 +238,8 @@ public:
 	 */
 	void SetLookAt(const t_vec3& pos, const t_vec3& target, const t_vec3& up)
 	{
-		m_mat = tl2::hom_lookat<t_mat, t_vec3>(
-			pos, target, up);
-
-		std::tie(m_mat_inv, std::ignore)
-			= tl2::inv<t_mat>(m_mat);
-
+		m_mat = tl2::hom_lookat<t_mat, t_vec3>(pos, target, up);
+		std::tie(m_mat_inv, std::ignore) = tl2::inv<t_mat>(m_mat);
 		m_trafo_needs_update = false;
 
 		// TODO: extract position and angles corresponding to this matrix
@@ -467,8 +463,7 @@ public:
 	/**
 	 * convert a vector into screen coordinates
 	 */
-	t_vec ToScreenCoords(
-		const t_vec& vec4, bool *visible = nullptr) const
+	t_vec ToScreenCoords(const t_vec& vec4, bool *visible = nullptr) const
 	{
 		auto [ persp, vec ] =
 			tl2::hom_to_screen_coords<t_mat, t_vec>(

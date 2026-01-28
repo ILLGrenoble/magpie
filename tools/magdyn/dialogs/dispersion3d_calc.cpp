@@ -577,7 +577,7 @@ std::array<int, 3> Dispersion3DDlg::GetBranchColour(t_size branch_idx, t_size nu
  */
 void Dispersion3DDlg::Plot(bool clear_settings)
 {
-	if(!m_dispplot)
+	if(!m_dispplot || !m_dispplot->GetRenderer())
 		return;
 
 	// keep some settings from previous plot, e.g. the band visibility flags
@@ -630,12 +630,11 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 			"h (rlu)", "k (rlu)", "l (rlu)"
 		}};*/
 
-		if(m_dispplot || m_minmax_Q1[0].size() == 3)
+		if(m_dispplot && m_minmax_Q1[0].size() == 3)
 		{
 			//using namespace tl2_ops;
 			//std::cout << m_minmax_Q1[0] << " -> " << m_minmax_Q1[1] << ", " << Q_idx_1 << std::endl;
 			//std::cout << m_minmax_Q2[0] << " -> " << m_minmax_Q2[1] << ", " << Q_idx_2 << std::endl;
-
 			m_dispplot->GetRenderer()->UpdateCoordCubeTextures(
 				m_minmax_Q1[0][Q_idx_1], m_minmax_Q1[1][Q_idx_1], -1.,
 				m_minmax_Q2[0][Q_idx_2], m_minmax_Q2[1][Q_idx_2], -1.,
@@ -650,6 +649,7 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 		num_bands = NumPositive();
 		//num_bands /= 2;
 	}
+
 	t_size num_active_bands = 0;
 	for(t_size band_idx = 0; band_idx < num_bands; ++band_idx)
 	{

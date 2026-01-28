@@ -664,8 +664,7 @@ std::vector<std::size_t> GlPlotRenderer::AddCoordinateCube(t_real_gl min, t_real
 
 
 /**
- * create the coordinate label textures
- * TODO
+ * create the coordinate tick textures
  */
 void GlPlotRenderer::UpdateCoordCubeTextures(
 	t_real_gl x_min, t_real_gl x_max, t_real_gl x_tick,
@@ -1390,7 +1389,7 @@ void GlPlotRenderer::UpdatePicker()
 	{
 		coordTrafo = &m_matA;
 		coordTrafoInv = m_matB / (t_real_gl(2)*tl2::pi<t_real_gl>);
-		coordTrafoInv(3,3) = 1;
+		coordTrafoInv(3, 3) = 1;
 	}
 
 
@@ -1558,8 +1557,7 @@ void GlPlotRenderer::tick()
 }
 
 
-void GlPlotRenderer::tick(
-	[[maybe_unused]] const std::chrono::milliseconds& ms)
+void GlPlotRenderer::tick([[maybe_unused]] const std::chrono::milliseconds& ms)
 {
 	// TODO
 	UpdateCam();
@@ -1803,14 +1801,60 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 				tl2::create<t_vec_gl>({0., 0., f, 1.})), ostrF.str().c_str());
 		}
 
-		t_vec_gl x = tl2::create<t_vec_gl>({m_CoordMax*t_real_gl(1.2), 0., 0., 1.});
-		t_vec_gl y = tl2::create<t_vec_gl>({0., m_CoordMax*t_real_gl(1.2), 0., 1.});
-		t_vec_gl z = tl2::create<t_vec_gl>({0., 0., m_CoordMax*t_real_gl(1.2), 1.});
+		t_vec_gl x = tl2::create<t_vec_gl>({ m_CoordMax*t_real_gl(1.2), 0., 0., 1. });
+		t_vec_gl y = tl2::create<t_vec_gl>({ 0., m_CoordMax*t_real_gl(1.2), 0., 1. });
+		t_vec_gl z = tl2::create<t_vec_gl>({ 0., 0., m_CoordMax*t_real_gl(1.2), 1. });
 
 		painter.drawText(GlToScreenCoords(x), m_is_real_space ? "x" : "Qx");
 		painter.drawText(GlToScreenCoords(y), m_is_real_space ? "y" : "Qy");
 		painter.drawText(GlToScreenCoords(z), m_is_real_space ? "z" : "Qz");
 	}
+
+
+	// TODO: draw labels and ticks for coordinate cube
+	/*if(m_coordCubeLab.size() && GetObjectVisible(m_coordCubeLab[0]))
+	{
+		using namespace tl2_ops;
+
+		const t_mat_gl& camtrafo = m_cam.GetTransformation();
+
+		// assumes that the matrix is the same for all six sides of the cube
+		const t_mat_gl& matScale = GetObjectMatrix(m_coordCubeLab[0]);
+
+		t_vec_gl corner_mmm = matScale * tl2::create<t_vec_gl>({ -1., -1., -1., 1. });
+		t_vec_gl corner_mmp = matScale * tl2::create<t_vec_gl>({ -1., -1., +1., 1. });
+		t_vec_gl corner_mpm = matScale * tl2::create<t_vec_gl>({ -1., +1., -1., 1. });
+		t_vec_gl corner_mpp = matScale * tl2::create<t_vec_gl>({ -1., +1., +1., 1. });
+		t_vec_gl corner_pmm = matScale * tl2::create<t_vec_gl>({ +1., -1., -1., 1. });
+		t_vec_gl corner_pmp = matScale * tl2::create<t_vec_gl>({ +1., -1., +1., 1. });
+		t_vec_gl corner_ppm = matScale * tl2::create<t_vec_gl>({ +1., +1., -1., 1. });
+		t_vec_gl corner_ppp = matScale * tl2::create<t_vec_gl>({ +1., +1., +1., 1. });
+
+		// draw edge labels and ticks
+		auto draw_edge = [this, &painter](const t_vec_gl& corner0, const t_vec_gl& corner1,
+			const QString& label)
+		{
+			// TODO: only consider this edge if it's at the border of the projected coordinate cube
+
+			t_vec_gl edge = corner0 + 0.5*(corner1 - corner0);
+			painter.drawText(GlToScreenCoords(edge), label);
+		};
+
+		draw_edge(corner_mmm, corner_mmp, QString("e1"));
+		draw_edge(corner_mpm, corner_mpp, QString("e2"));
+		draw_edge(corner_pmm, corner_pmp, QString("e3"));
+		draw_edge(corner_ppm, corner_ppp, QString("e4"));
+
+		draw_edge(corner_mmm, corner_mpm, QString("e5"));
+		draw_edge(corner_mmp, corner_mpp, QString("e6"));
+		draw_edge(corner_pmm, corner_ppm, QString("e7"));
+		draw_edge(corner_pmp, corner_ppp, QString("e8"));
+
+		draw_edge(corner_mmm, corner_pmm, QString("e9"));
+		draw_edge(corner_mmp, corner_pmp, QString("e10"));
+		draw_edge(corner_mpm, corner_ppm, QString("e11"));
+		draw_edge(corner_mpp, corner_ppp, QString("e12"));
+	}*/
 
 
 	// draw coordinate system in generally non-orthogonal crystal system in rlu
