@@ -665,6 +665,40 @@ std::vector<std::size_t> GlPlotRenderer::AddCoordinateCube(t_real_gl min, t_real
 
 
 /**
+ * calculate a possible tick spacing
+ */
+std::pair<t_real_gl, t_real_gl>
+GlPlotRenderer::CalcTickMarks(t_real_gl min, t_real_gl max)
+{
+	t_real_gl range = max - min;
+	int power = static_cast<int>(std::log10(std::abs(range)));
+	t_real_gl tick_delta = std::pow(10., power);
+
+	if(range / tick_delta < 3.)
+		tick_delta /= 5.;
+	else if(range / tick_delta < 2.)
+		tick_delta /= 10.;
+
+	t_real_gl start = std::floor(min / tick_delta)*tick_delta;
+
+	return std::make_pair(tick_delta, start);
+};
+
+
+/**
+ * transform coordinate component into a [0, 1] range
+ *
+ *   min + (max - min)*lam = val
+ *   (max - min)*lam       = val - min
+ *               lam       = (val - min) / (max - min)
+ */
+t_real_gl GlPlotRenderer::TickTrafo(t_real_gl min, t_real_gl max, t_real_gl val)
+{
+	return (val - min) / (max - min);
+};
+
+
+/**
  * create the coordinate tick textures
  */
 void GlPlotRenderer::UpdateCoordCubeTextures(
@@ -688,32 +722,7 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 	int texture_width = 1024;
 	int texture_height = 1024;
 
-	// transform coordinate component into a [0, 1] range
-	auto trafo = [](t_real_gl min, t_real_gl max, t_real_gl val) -> t_real_gl
-	{
-		// min + (max - min)*lam = val
-		// (max - min)*lam       = val - min
-		//             lam       = (val - min) / (max - min)
-		return (val - min) / (max - min);
-	};
-
-	// calculate a possible tick spacing
-	auto calc_tick_marks = [](t_real_gl min, t_real_gl max) -> t_real_gl
-	{
-		t_real_gl range = max - min;
-		int power = static_cast<int>(std::log10(std::abs(range)));
-		t_real_gl tick = std::pow(10., power);
-
-		if(range / tick < 3.)
-			tick /= 5.;
-		else if(range / tick < 2.)
-			tick /= 10.;
-
-		return tick;
-	};
-
-	auto draw_texture = [this, &trafo, &calc_tick_marks,
-		texture_width, texture_height](
+	auto draw_texture = [this, texture_width, texture_height](
 		GlRenderObj* obj,
 		t_real_gl x_min, t_real_gl x_max, t_real_gl x_tick,
 		t_real_gl y_min, t_real_gl y_max, t_real_gl y_tick,
@@ -738,19 +747,19 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 		if(y_min > y_max)
 			std::swap(y_min, y_max);
 
-		// if none are given, find a tick spacing
-		if(x_tick < 0.)
-			x_tick = calc_tick_marks(x_min, x_max);
-		if(y_tick < 0.)
-			y_tick = calc_tick_marks(y_min, y_max);
+		auto [_x_tick, x_start] = CalcTickMarks(x_min, x_max);
+		auto [_y_tick, y_start] = CalcTickMarks(y_min, y_max);
 
-		t_real_gl x_start = std::floor(x_min / x_tick)*x_tick;
-		t_real_gl y_start = std::floor(y_min / y_tick)*y_tick;
+		// use the calculated tick spacing if non is given
+		if(x_tick < 0.)
+			x_tick = _x_tick;
+		if(y_tick < 0.)
+			y_tick = _y_tick;
 
 		// lines in y direction
 		for(t_real_gl x = x_start; x <= x_max; x += x_tick)
 		{
-			t_real_gl x_img = trafo(x_min, x_max, x) * t_real_gl(texture_width);
+			t_real_gl x_img = TickTrafo(x_min, x_max, x) * t_real_gl(texture_width);
 			t_real_gl y_img_min = 0.;
 			t_real_gl y_img_max = t_real_gl(texture_height);
 			if(!pos_x)
@@ -761,7 +770,7 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 		// lines in x direction
 		for(t_real_gl y = y_start; y <= y_max; y += y_tick)
 		{
-			t_real_gl y_img = trafo(y_min, y_max, y) * t_real_gl(texture_height);
+			t_real_gl y_img = TickTrafo(y_min, y_max, y) * t_real_gl(texture_height);
 			t_real_gl x_img_min = 0.;
 			t_real_gl x_img_max = t_real_gl(texture_width);
 			if(!pos_y)
@@ -1806,9 +1815,15 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 		t_vec_gl y = tl2::create<t_vec_gl>({ 0., m_CoordMax*t_real_gl(1.2), 0., 1. });
 		t_vec_gl z = tl2::create<t_vec_gl>({ 0., 0., m_CoordMax*t_real_gl(1.2), 1. });
 
-		painter.drawText(GlToScreenCoords(x), m_is_real_space ? "x" : "Qx");
-		painter.drawText(GlToScreenCoords(y), m_is_real_space ? "y" : "Qy");
-		painter.drawText(GlToScreenCoords(z), m_is_real_space ? "z" : "Qz");
+		painter.drawText(GlToScreenCoords(x), m_axisLabels[0].length()
+			? m_axisLabels[0].c_str()
+			: (m_is_real_space ? "x" : "Qx"));
+		painter.drawText(GlToScreenCoords(y), m_axisLabels[1].length()
+			? m_axisLabels[1].c_str()
+			: (m_is_real_space ? "y" : "Qy"));
+		painter.drawText(GlToScreenCoords(z), m_axisLabels[2].length()
+			? m_axisLabels[2].c_str()
+			: (m_is_real_space ? "z" : "Qz"));
 	}
 
 
@@ -1817,8 +1832,7 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 	if(m_coordCubeLab.size() && GetObjectVisible(m_coordCubeLab[0]))
 	{
 		using namespace tl2_ops;
-
-		const t_mat_gl& camtrafo = m_cam.GetTransformation();
+		//const t_mat_gl& camtrafo = m_cam.GetTransformation();
 
 		// assumes that the matrix is the same for all six sides of the cube
 		const t_mat_gl& matScale = GetObjectMatrix(m_coordCubeLab[0]);

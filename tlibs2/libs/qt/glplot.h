@@ -161,6 +161,12 @@ protected:
 	std::size_t AddCoordinateCross(t_real_gl min, t_real_gl max);
 	std::vector<std::size_t> AddCoordinateCube(t_real_gl min, t_real_gl max);
 
+	// calculate a possible tick spacing
+	std::pair<t_real_gl, t_real_gl> CalcTickMarks(t_real_gl min, t_real_gl max);
+
+	// transform coordinate component into a [0, 1] range
+	t_real_gl TickTrafo(t_real_gl min, t_real_gl max, t_real_gl val);
+
 	void CollectGarbage();
 
 
@@ -348,6 +354,7 @@ public:
 	void RequestViewportUpdate();
 	void UpdateViewport();
 
+	// create the coordinate tick textures
 	void UpdateCoordCubeTextures(
 		t_real_gl x_min = -1., t_real_gl x_max = 1., t_real_gl x_tick = -1.,
 		t_real_gl y_min = -1., t_real_gl y_max = 1., t_real_gl y_tick = -1.,
