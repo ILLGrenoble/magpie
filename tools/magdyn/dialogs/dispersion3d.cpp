@@ -38,7 +38,7 @@
 #include "tlibs2/libs/str.h"
 
 
-#define SHOW_COORD_CUBE  false   // show coordinate cube by default?
+#define SHOW_COORD_CUBE  true   // show coordinate cube by default?
 
 
 
@@ -53,6 +53,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 
 	// create gl plotter
 	m_dispplot = new tl2::GlPlot(this);
+	m_dispplot->GetRenderer()->SetAxisLabels("Q1 (rlu)", "Q2 (rlu)", "E (meV)");
 	m_dispplot->GetRenderer()->SetRestrictCamTheta(false);
 	m_dispplot->GetRenderer()->SetLight(0, tl2::create<t_vec3_gl>({ 50, 50, 50 }));
 	m_dispplot->GetRenderer()->SetLight(1, tl2::create<t_vec3_gl>({ -50, -50, -50 }));

@@ -48,6 +48,7 @@
 #include <memory>
 #include <chrono>
 #include <tuple>
+#include <array>
 #include <atomic>
 
 #include "gl.h"
@@ -121,8 +122,10 @@ protected:
 	std::atomic<bool> m_blend = false;
 	std::atomic<bool> m_is_real_space = true;
 	std::atomic<int> m_coordsys = 0;  // 0: orthogonal, 1: using crystal matrix
+	std::atomic<bool> m_showLabels = true;
+
 	t_real_gl m_pickerSphereRadius = 1;
-	bool m_showLabels = true;
+	std::array<std::string, 3> m_axisLabels{};
 
 	std::vector<t_vec3_gl> m_lights{};
 	std::vector<GlRenderObj> m_objs{};
@@ -319,6 +322,13 @@ public:
 	void SetLabelsVisible(bool show)
 	{
 		m_showLabels = show;
+	}
+
+	void SetAxisLabels(const std::string& x, const std::string& y, const std::string& z)
+	{
+		m_axisLabels[0] = x;
+		m_axisLabels[1] = y;
+		m_axisLabels[2] = z;
 	}
 
 	std::optional<std::size_t> GetCoordCross(bool xtal = false) const

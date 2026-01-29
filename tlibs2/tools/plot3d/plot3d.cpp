@@ -39,7 +39,7 @@
 #include "tlibs2/libs/str.h"
 
 
-#define SHOW_COORD_CUBE  false   // show coordinate cube by default?
+#define SHOW_COORD_CUBE  true   // show coordinate cube by default?
 
 
 
@@ -54,6 +54,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 
 	// create gl plotter
 	m_dispplot = new tl2::GlPlot(this);
+	m_dispplot->GetRenderer()->SetAxisLabels("x", "y", "z");
 	m_dispplot->GetRenderer()->SetRestrictCamTheta(false);
 	m_dispplot->GetRenderer()->SetLight(0, tl2::create<t_vec3_gl>({ 50, 50, 50 }));
 	m_dispplot->GetRenderer()->SetLight(1, tl2::create<t_vec3_gl>({ -50, -50, -50 }));

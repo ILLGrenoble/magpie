@@ -1812,7 +1812,6 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 	}
 
 
-/*
 #ifdef USE_QHULL
 	// TODO: draw labels and ticks for coordinate cube
 	if(m_coordCubeLab.size() && GetObjectVisible(m_coordCubeLab[0]))
@@ -1824,6 +1823,7 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 		// assumes that the matrix is the same for all six sides of the cube
 		const t_mat_gl& matScale = GetObjectMatrix(m_coordCubeLab[0]);
 
+		t_vec_gl centre = matScale * tl2::create<t_vec_gl>({ 0., 0., 0., 1. });
 		t_vec_gl corner_mmm = matScale * tl2::create<t_vec_gl>({ -1., -1., -1., 1. });
 		t_vec_gl corner_mmp = matScale * tl2::create<t_vec_gl>({ -1., -1., +1., 1. });
 		t_vec_gl corner_mpm = matScale * tl2::create<t_vec_gl>({ -1., +1., -1., 1. });
@@ -1850,39 +1850,41 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 
 		// draw edge labels and ticks
 		auto draw_edge = [this, &painter, &cube_hull_verts](
-		  const t_vec_gl& corner0, const t_vec_gl& corner1, const QString& label)
+		  const t_vec_gl& corner0, const t_vec_gl& corner1,
+		  const t_vec_gl& centre, const QString& label)
 		{
 			// only consider this edge if it's at the border of the projected coordinate cube
-			constexpr const t_real_gl eps_hull = 1e-2; 
+			constexpr const t_real_gl eps_hull = 1e-2;
 
 			t_vec_gl edge_mid = corner0 + 0.5*(corner1 - corner0);
-			QPointF proj = GlToScreenCoords(edge_mid);
+			t_vec_gl offs = 0.1 * (edge_mid - centre);
+			QPointF proj = GlToScreenCoords(edge_mid + offs);
 
 			t_vec_gl proj_vert = tl2::create<t_vec_gl>({
 				static_cast<t_real_gl>(proj.x()), static_cast<t_real_gl>(proj.y()) });
 			if(std::get<0>(geo::is_vert_in_hull<t_vec_gl>(cube_hull_verts, proj_vert, nullptr, true, eps_hull)))
 				return;
 
-			painter.drawText(proj, label);
+			if(label.length())
+				painter.drawText(proj, label);
 		};
 
-		draw_edge(corner_mmm, corner_mmp, QString("e1"));
-		draw_edge(corner_mpm, corner_mpp, QString("e2"));
-		draw_edge(corner_pmm, corner_pmp, QString("e3"));
-		draw_edge(corner_ppm, corner_ppp, QString("e4"));
+		draw_edge(corner_mmm, corner_mmp, centre, QString(m_axisLabels[2].c_str()));
+		draw_edge(corner_mpm, corner_mpp, centre, QString(m_axisLabels[2].c_str()));
+		draw_edge(corner_pmm, corner_pmp, centre, QString(m_axisLabels[2].c_str()));
+		draw_edge(corner_ppm, corner_ppp, centre, QString(m_axisLabels[2].c_str()));
 
-		draw_edge(corner_mmm, corner_mpm, QString("e5"));
-		draw_edge(corner_mmp, corner_mpp, QString("e6"));
-		draw_edge(corner_pmm, corner_ppm, QString("e7"));
-		draw_edge(corner_pmp, corner_ppp, QString("e8"));
+		draw_edge(corner_mmm, corner_mpm, centre, QString(m_axisLabels[1].c_str()));
+		draw_edge(corner_mmp, corner_mpp, centre, QString(m_axisLabels[1].c_str()));
+		draw_edge(corner_pmm, corner_ppm, centre, QString(m_axisLabels[1].c_str()));
+		draw_edge(corner_pmp, corner_ppp, centre, QString(m_axisLabels[1].c_str()));
 
-		draw_edge(corner_mmm, corner_pmm, QString("e9"));
-		draw_edge(corner_mmp, corner_pmp, QString("e10"));
-		draw_edge(corner_mpm, corner_ppm, QString("e11"));
-		draw_edge(corner_mpp, corner_ppp, QString("e12"));
+		draw_edge(corner_mmm, corner_pmm, centre, QString(m_axisLabels[0].c_str()));
+		draw_edge(corner_mmp, corner_pmp, centre, QString(m_axisLabels[0].c_str()));
+		draw_edge(corner_mpm, corner_ppm, centre, QString(m_axisLabels[0].c_str()));
+		draw_edge(corner_mpp, corner_ppp, centre, QString(m_axisLabels[0].c_str()));
 	}
 #endif
-*/
 
 
 	// draw coordinate system in generally non-orthogonal crystal system in rlu

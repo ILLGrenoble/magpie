@@ -132,6 +132,7 @@ protected:
 private:
 	t_size m_x_count{}, m_y_count{};     // number of points along the two directions
 	t_data_surfs m_data{};               // data for all surfaces
+
 	std::array<t_real, 2> m_minmax_x{};  // minimum and maximum x values
 	std::array<t_real, 2> m_minmax_y{};  // minimum and maximum y values
 	std::array<t_real, 2> m_minmax_z{};  // minimum and maximum z values
