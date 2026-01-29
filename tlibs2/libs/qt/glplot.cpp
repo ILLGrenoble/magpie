@@ -1872,11 +1872,18 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 
 		// draw edge labels and ticks
 		auto draw_edge = [this, &painter, &cube_hull_verts](
-		  const t_vec_gl& corner0, const t_vec_gl& corner1, const t_vec_gl& centre,
-		  t_real_gl min, t_real_gl max, t_real_gl tick, const QString& label)
+		  const t_vec_gl& corner0, const t_vec_gl& corner1,
+		  const t_vec_gl& centre, std::size_t coord_idx)
 		{
+		  t_real_gl min = m_coordCubeRanges[coord_idx*2];
+		  t_real_gl max = m_coordCubeRanges[coord_idx*2 + 1];
+		  t_real_gl tick = m_coordCubeTicks[coord_idx];
+		  QString label = m_axisLabels[coord_idx].c_str();
+
 			// only consider this edge if it's at the border of the projected coordinate cube
 			constexpr const t_real_gl eps_hull = 1e-2;
+			constexpr const t_real_gl label_offs = 0.25;
+			constexpr const t_real_gl tick_offs = 0.05;
 
 			t_vec_gl edge_mid = corner0 + 0.5*(corner1 - corner0);
 			QPointF proj = GlToScreenCoords(edge_mid);
@@ -1887,13 +1894,15 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 				return;
 
 			// axis label
-			t_vec_gl offs = 0.25 * (edge_mid - centre);
+			t_vec_gl offs = label_offs * (edge_mid - centre);
 			proj = GlToScreenCoords(edge_mid + offs);
 
 			if(label.length())
 				painter.drawText(proj, label);
 
 			// ticks
+			t_vec_gl centre_axis = centre;
+
 			t_real_gl tick_start = 0.;
 			std::tie(tick, tick_start) = CalcTickMarks(min, max, tick);
 
@@ -1901,51 +1910,30 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 			{
 				t_real_gl t_img = TickTrafo(min, max, t);
 				t_vec_gl edge_pt = corner0 + t_img*(corner1 - corner0);
-				//offs = 0.1 * (edge_pt - centre);
-				proj = GlToScreenCoords(edge_pt /*+ offs*/);
 
+				centre_axis[coord_idx] = t;
+				offs = tick_offs * (edge_pt - centre_axis);
+				proj = GlToScreenCoords(edge_pt + offs);
+
+				tl2::set_eps_0(t);
 				painter.drawText(proj, QString{"%1"}.arg(t));
 			}
 		};
 
-		draw_edge(corner_mmm, corner_mmp, centre,
-			m_coordCubeRanges[4], m_coordCubeRanges[5], m_coordCubeTicks[2],
-			QString(m_axisLabels[2].c_str()));
-		draw_edge(corner_mpm, corner_mpp, centre,
-			m_coordCubeRanges[4], m_coordCubeRanges[5], m_coordCubeTicks[2],
-			QString(m_axisLabels[2].c_str()));
-		draw_edge(corner_pmm, corner_pmp, centre,
-			m_coordCubeRanges[4], m_coordCubeRanges[5], m_coordCubeTicks[2],
-			QString(m_axisLabels[2].c_str()));
-		draw_edge(corner_ppm, corner_ppp, centre,
-			m_coordCubeRanges[4], m_coordCubeRanges[5], m_coordCubeTicks[2],
-			QString(m_axisLabels[2].c_str()));
+		draw_edge(corner_mmm, corner_mmp, centre, 2);
+		draw_edge(corner_mpm, corner_mpp, centre, 2);
+		draw_edge(corner_pmm, corner_pmp, centre, 2);
+		draw_edge(corner_ppm, corner_ppp, centre, 2);
 
-		draw_edge(corner_mmm, corner_mpm, centre,
-			m_coordCubeRanges[2], m_coordCubeRanges[3], m_coordCubeTicks[1],
-			QString(m_axisLabels[1].c_str()));
-		draw_edge(corner_mmp, corner_mpp, centre,
-			m_coordCubeRanges[2], m_coordCubeRanges[3], m_coordCubeTicks[1],
-			QString(m_axisLabels[1].c_str()));
-		draw_edge(corner_pmm, corner_ppm, centre,
-			m_coordCubeRanges[2], m_coordCubeRanges[3], m_coordCubeTicks[1],
-			QString(m_axisLabels[1].c_str()));
-		draw_edge(corner_pmp, corner_ppp, centre,
-			m_coordCubeRanges[2], m_coordCubeRanges[3], m_coordCubeTicks[1],
-			QString(m_axisLabels[1].c_str()));
+		draw_edge(corner_mmm, corner_mpm, centre, 1);
+		draw_edge(corner_mmp, corner_mpp, centre, 1);
+		draw_edge(corner_pmm, corner_ppm, centre, 1);
+		draw_edge(corner_pmp, corner_ppp, centre, 1);
 
-		draw_edge(corner_mmm, corner_pmm, centre,
-			m_coordCubeRanges[0], m_coordCubeRanges[1], m_coordCubeTicks[0],
-			QString(m_axisLabels[0].c_str()));
-		draw_edge(corner_mmp, corner_pmp, centre,
-			m_coordCubeRanges[0], m_coordCubeRanges[1], m_coordCubeTicks[0],
-			QString(m_axisLabels[0].c_str()));
-		draw_edge(corner_mpm, corner_ppm, centre,
-			m_coordCubeRanges[0], m_coordCubeRanges[1], m_coordCubeTicks[0],
-			QString(m_axisLabels[0].c_str()));
-		draw_edge(corner_mpp, corner_ppp, centre,
-			m_coordCubeRanges[0], m_coordCubeRanges[1], m_coordCubeTicks[0],
-			QString(m_axisLabels[0].c_str()));
+		draw_edge(corner_mmm, corner_pmm, centre, 0);
+		draw_edge(corner_mmp, corner_pmp, centre, 0);
+		draw_edge(corner_mpm, corner_ppm, centre, 0);
+		draw_edge(corner_mpp, corner_ppp, centre, 0);
 	}
 #endif
 
