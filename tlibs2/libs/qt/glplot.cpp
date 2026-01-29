@@ -668,16 +668,19 @@ std::vector<std::size_t> GlPlotRenderer::AddCoordinateCube(t_real_gl min, t_real
  * calculate a possible tick spacing
  */
 std::pair<t_real_gl, t_real_gl>
-GlPlotRenderer::CalcTickMarks(t_real_gl min, t_real_gl max)
+GlPlotRenderer::CalcTickMarks(t_real_gl min, t_real_gl max, t_real_gl tick_delta)
 {
-	t_real_gl range = max - min;
-	int power = static_cast<int>(std::log10(std::abs(range)));
-	t_real_gl tick_delta = std::pow(10., power);
+	if(tick_delta <= 0.)  // calculate tick spacing if none given
+	{
+		t_real_gl range = max - min;
+		int power = static_cast<int>(std::log10(std::abs(range)));
+		tick_delta = std::pow(10., power);
 
-	if(range / tick_delta < 3.)
-		tick_delta /= 5.;
-	else if(range / tick_delta < 2.)
-		tick_delta /= 10.;
+		if(range / tick_delta < 3.)
+			tick_delta /= 5.;
+		else if(range / tick_delta < 2.)
+			tick_delta /= 10.;
+	}
 
 	t_real_gl start = std::floor(min / tick_delta)*tick_delta;
 
@@ -706,6 +709,16 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 	t_real_gl y_min, t_real_gl y_max, t_real_gl y_tick,
 	t_real_gl z_min, t_real_gl z_max, t_real_gl z_tick)
 {
+	m_coordCubeRanges[0] = x_min;
+	m_coordCubeRanges[1] = x_max;
+	m_coordCubeRanges[2] = y_min;
+	m_coordCubeRanges[3] = y_max;
+	m_coordCubeRanges[4] = z_min;
+	m_coordCubeRanges[5] = z_max;
+	m_coordCubeTicks[0] = x_tick;
+	m_coordCubeTicks[1] = y_tick;
+	m_coordCubeTicks[2] = z_tick;
+
 	if(!m_pPlot)
 		return;
 
@@ -747,14 +760,9 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 		if(y_min > y_max)
 			std::swap(y_min, y_max);
 
-		auto [_x_tick, x_start] = CalcTickMarks(x_min, x_max);
-		auto [_y_tick, y_start] = CalcTickMarks(y_min, y_max);
-
-		// use the calculated tick spacing if non is given
-		if(x_tick < 0.)
-			x_tick = _x_tick;
-		if(y_tick < 0.)
-			y_tick = _y_tick;
+		t_real_gl x_start = 0., y_start = 0.;
+		std::tie(x_tick, x_start) = CalcTickMarks(x_min, x_max, x_tick);
+		std::tie(y_tick, y_start) = CalcTickMarks(y_min, y_max, y_tick);
 
 		// lines in y direction
 		for(t_real_gl x = x_start; x <= x_max; x += x_tick)
@@ -1864,39 +1872,80 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 
 		// draw edge labels and ticks
 		auto draw_edge = [this, &painter, &cube_hull_verts](
-		  const t_vec_gl& corner0, const t_vec_gl& corner1,
-		  const t_vec_gl& centre, const QString& label)
+		  const t_vec_gl& corner0, const t_vec_gl& corner1, const t_vec_gl& centre,
+		  t_real_gl min, t_real_gl max, t_real_gl tick, const QString& label)
 		{
 			// only consider this edge if it's at the border of the projected coordinate cube
 			constexpr const t_real_gl eps_hull = 1e-2;
 
 			t_vec_gl edge_mid = corner0 + 0.5*(corner1 - corner0);
-			t_vec_gl offs = 0.1 * (edge_mid - centre);
-			QPointF proj = GlToScreenCoords(edge_mid + offs);
+			QPointF proj = GlToScreenCoords(edge_mid);
 
 			t_vec_gl proj_vert = tl2::create<t_vec_gl>({
 				static_cast<t_real_gl>(proj.x()), static_cast<t_real_gl>(proj.y()) });
 			if(std::get<0>(geo::is_vert_in_hull<t_vec_gl>(cube_hull_verts, proj_vert, nullptr, true, eps_hull)))
 				return;
 
+			// axis label
+			t_vec_gl offs = 0.25 * (edge_mid - centre);
+			proj = GlToScreenCoords(edge_mid + offs);
+
 			if(label.length())
 				painter.drawText(proj, label);
+
+			// ticks
+			t_real_gl tick_start = 0.;
+			std::tie(tick, tick_start) = CalcTickMarks(min, max, tick);
+
+			for(t_real_gl t = tick_start; t <= max; t += tick)
+			{
+				t_real_gl t_img = TickTrafo(min, max, t);
+				t_vec_gl edge_pt = corner0 + t_img*(corner1 - corner0);
+				//offs = 0.1 * (edge_pt - centre);
+				proj = GlToScreenCoords(edge_pt /*+ offs*/);
+
+				painter.drawText(proj, QString{"%1"}.arg(t));
+			}
 		};
 
-		draw_edge(corner_mmm, corner_mmp, centre, QString(m_axisLabels[2].c_str()));
-		draw_edge(corner_mpm, corner_mpp, centre, QString(m_axisLabels[2].c_str()));
-		draw_edge(corner_pmm, corner_pmp, centre, QString(m_axisLabels[2].c_str()));
-		draw_edge(corner_ppm, corner_ppp, centre, QString(m_axisLabels[2].c_str()));
+		draw_edge(corner_mmm, corner_mmp, centre,
+			m_coordCubeRanges[4], m_coordCubeRanges[5], m_coordCubeTicks[2],
+			QString(m_axisLabels[2].c_str()));
+		draw_edge(corner_mpm, corner_mpp, centre,
+			m_coordCubeRanges[4], m_coordCubeRanges[5], m_coordCubeTicks[2],
+			QString(m_axisLabels[2].c_str()));
+		draw_edge(corner_pmm, corner_pmp, centre,
+			m_coordCubeRanges[4], m_coordCubeRanges[5], m_coordCubeTicks[2],
+			QString(m_axisLabels[2].c_str()));
+		draw_edge(corner_ppm, corner_ppp, centre,
+			m_coordCubeRanges[4], m_coordCubeRanges[5], m_coordCubeTicks[2],
+			QString(m_axisLabels[2].c_str()));
 
-		draw_edge(corner_mmm, corner_mpm, centre, QString(m_axisLabels[1].c_str()));
-		draw_edge(corner_mmp, corner_mpp, centre, QString(m_axisLabels[1].c_str()));
-		draw_edge(corner_pmm, corner_ppm, centre, QString(m_axisLabels[1].c_str()));
-		draw_edge(corner_pmp, corner_ppp, centre, QString(m_axisLabels[1].c_str()));
+		draw_edge(corner_mmm, corner_mpm, centre,
+			m_coordCubeRanges[2], m_coordCubeRanges[3], m_coordCubeTicks[1],
+			QString(m_axisLabels[1].c_str()));
+		draw_edge(corner_mmp, corner_mpp, centre,
+			m_coordCubeRanges[2], m_coordCubeRanges[3], m_coordCubeTicks[1],
+			QString(m_axisLabels[1].c_str()));
+		draw_edge(corner_pmm, corner_ppm, centre,
+			m_coordCubeRanges[2], m_coordCubeRanges[3], m_coordCubeTicks[1],
+			QString(m_axisLabels[1].c_str()));
+		draw_edge(corner_pmp, corner_ppp, centre,
+			m_coordCubeRanges[2], m_coordCubeRanges[3], m_coordCubeTicks[1],
+			QString(m_axisLabels[1].c_str()));
 
-		draw_edge(corner_mmm, corner_pmm, centre, QString(m_axisLabels[0].c_str()));
-		draw_edge(corner_mmp, corner_pmp, centre, QString(m_axisLabels[0].c_str()));
-		draw_edge(corner_mpm, corner_ppm, centre, QString(m_axisLabels[0].c_str()));
-		draw_edge(corner_mpp, corner_ppp, centre, QString(m_axisLabels[0].c_str()));
+		draw_edge(corner_mmm, corner_pmm, centre,
+			m_coordCubeRanges[0], m_coordCubeRanges[1], m_coordCubeTicks[0],
+			QString(m_axisLabels[0].c_str()));
+		draw_edge(corner_mmp, corner_pmp, centre,
+			m_coordCubeRanges[0], m_coordCubeRanges[1], m_coordCubeTicks[0],
+			QString(m_axisLabels[0].c_str()));
+		draw_edge(corner_mpm, corner_ppm, centre,
+			m_coordCubeRanges[0], m_coordCubeRanges[1], m_coordCubeTicks[0],
+			QString(m_axisLabels[0].c_str()));
+		draw_edge(corner_mpp, corner_ppp, centre,
+			m_coordCubeRanges[0], m_coordCubeRanges[1], m_coordCubeTicks[0],
+			QString(m_axisLabels[0].c_str()));
 	}
 #endif
 
@@ -2077,7 +2126,6 @@ void GlPlotRenderer::paintGL()
 	}
 }
 // ----------------------------------------------------------------------------
-
 
 
 

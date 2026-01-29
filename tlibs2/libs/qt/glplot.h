@@ -126,6 +126,8 @@ protected:
 
 	t_real_gl m_pickerSphereRadius = 1;
 	std::array<std::string, 3> m_axisLabels{};
+	std::array<t_real_gl, 6> m_coordCubeRanges{};
+	std::array<t_real_gl, 3> m_coordCubeTicks{};
 
 	std::vector<t_vec3_gl> m_lights{};
 	std::vector<GlRenderObj> m_objs{};
@@ -162,7 +164,7 @@ protected:
 	std::vector<std::size_t> AddCoordinateCube(t_real_gl min, t_real_gl max);
 
 	// calculate a possible tick spacing
-	std::pair<t_real_gl, t_real_gl> CalcTickMarks(t_real_gl min, t_real_gl max);
+	std::pair<t_real_gl, t_real_gl> CalcTickMarks(t_real_gl min, t_real_gl max, t_real_gl delta);
 
 	// transform coordinate component into a [0, 1] range
 	t_real_gl TickTrafo(t_real_gl min, t_real_gl max, t_real_gl val);
