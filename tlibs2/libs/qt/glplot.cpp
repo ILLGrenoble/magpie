@@ -1938,8 +1938,8 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 				proj = GlToScreenCoords(edge_pt + offs);
 
 				t_real_gl t_disp = t;
-				if(swapped)
-					t_disp = min - t;
+				if(swapped)  // invert the range
+					t_disp = max - (t - tick_start);
 				tl2::set_eps_0(t_disp);
 				painter.drawText(proj, QString{"%1"}.arg(t_disp));
 			}
