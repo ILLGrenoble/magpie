@@ -746,6 +746,8 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 		img.fill(0xffffffff);
 
 		QFont font;
+		font.setStyleStrategy(QFont::StyleStrategy(
+			QFont::PreferAntialias | QFont::PreferQuality));
 		font.setPointSize(128.);
 
 		QPen pen{QColor{0x00, 0x00, 0x00}};
@@ -1906,12 +1908,12 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 			t_real_gl tick_start = 0.;
 			std::tie(tick, tick_start) = CalcTickMarks(min, max, tick);
 
-			for(t_real_gl t = tick_start; t <= max; t += tick)
+			for(t_real_gl t = tick_start; t < max; t += tick)
 			{
 				t_real_gl t_img = TickTrafo(min, max, t);
 				t_vec_gl edge_pt = corner0 + t_img*(corner1 - corner0);
 
-				centre_axis[coord_idx] = t;
+				centre_axis[coord_idx] = t_img;
 				offs = tick_offs * (edge_pt - centre_axis);
 				proj = GlToScreenCoords(edge_pt + offs);
 
