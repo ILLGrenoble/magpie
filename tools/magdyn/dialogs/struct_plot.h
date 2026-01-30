@@ -75,6 +75,8 @@ public:
 	StructPlotDlg(const StructPlotDlg&) = delete;
 	StructPlotDlg& operator=(const StructPlotDlg&) = delete;
 
+	void SetPlotFont(const QString& font);
+
 	void Clear();
 	void Sync();
 	void SetKernel(const t_magdyn* dyn) { m_dyn = dyn; }

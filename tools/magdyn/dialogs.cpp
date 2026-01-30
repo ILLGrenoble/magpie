@@ -43,6 +43,7 @@ void MagDynDlg::InitSettingsDlg()
 	// set-up common gui settings variables
 	t_SettingsDlg::SetGuiTheme(&g_theme);
 	t_SettingsDlg::SetGuiFont(&g_font);
+	t_SettingsDlg::SetGuiFont3d(&g_font3d);
 	t_SettingsDlg::SetGuiUseNativeMenubar(&g_use_native_menubar);
 	t_SettingsDlg::SetGuiUseNativeDialogs(&g_use_native_dialogs);
 
@@ -78,6 +79,16 @@ void MagDynDlg::InitSettings()
 		QFont font = this->font();
 		if(font.fromString(g_font))
 			setFont(font);
+	}
+
+	if(g_font3d != "")
+	{
+		if(m_disp3d_dlg)
+			m_disp3d_dlg->SetPlotFont(g_font3d);
+		if(m_structplot_dlg)
+			m_structplot_dlg->SetPlotFont(g_font3d);
+		if(m_bz_dlg)
+			m_bz_dlg->SetPlotFont(g_font3d);
 	}
 }
 
@@ -156,6 +167,7 @@ void MagDynDlg::ShowStructPlotDlg(bool only_create)
 	{
 		m_structplot_dlg = new StructPlotDlg(this, m_sett);
 		m_structplot_dlg->setFont(this->font());
+		m_structplot_dlg->SetPlotFont(g_font3d);
 
 		m_structplot_dlg->SetKernel(&m_dyn);
 		m_structplot_dlg->SetTables(m_sitestab, m_termstab);
@@ -278,6 +290,7 @@ void MagDynDlg::ShowDispersion3DDlg(bool only_create)
 	{
 		m_disp3d_dlg = new Dispersion3DDlg(this, m_sett);
 		m_disp3d_dlg->setFont(this->font());
+		m_disp3d_dlg->SetPlotFont(g_font3d);
 
 		m_disp3d_dlg->SetKernel(&m_dyn);
 
@@ -307,6 +320,8 @@ void MagDynDlg::ShowBZ3DDlg(bool only_create)
 	if(!m_bz_dlg)
 	{
 		m_bz_dlg = new BZPlotDlg(this, m_sett);
+		m_bz_dlg->setFont(this->font());
+		m_bz_dlg->SetPlotFont(g_font3d);
 
 		// context menu
 		QMenu* context = m_bz_dlg->GetContextMenu();

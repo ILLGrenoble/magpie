@@ -235,6 +235,16 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 
 
 
+void StructPlotDlg::SetPlotFont(const QString& font)
+{
+	if(!m_structplot)
+		return;
+
+	m_structplot->GetRenderer()->SetFont(font);
+}
+
+
+
 /**
  * dialog is closing
  */

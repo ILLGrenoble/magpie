@@ -65,6 +65,9 @@ GlPlotRenderer::GlPlotRenderer(GlPlot *pPlot) : m_pPlot{pPlot}
 		m_timer.start(std::chrono::milliseconds(1000 / 60));
 	}
 
+	m_font.setStyleStrategy(QFont::StyleStrategy(
+		QFont::PreferAntialias | QFont::PreferQuality));
+
 	UpdateCam();
 }
 
@@ -103,6 +106,20 @@ GlPlotRenderer::~GlPlotRenderer()
 
 void GlPlotRenderer::startedThread() { }
 void GlPlotRenderer::stoppedThread() { }
+
+
+void GlPlotRenderer::SetFont(const QString& fontname)
+{
+	if(fontname == "")
+		return;
+
+	QFont font;
+	if(font.fromString(fontname))
+	{
+		m_font = std::move(font);
+		//std::cout << "Set font: " << fontname.toStdString() << std::endl;
+	}
+}
 
 
 QPointF GlPlotRenderer::GlToScreenCoords(const t_vec_gl& vec4,
@@ -745,16 +762,11 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 		QImage img{texture_width, texture_height, QImage::Format_RGB32};
 		img.fill(0xffffffff);
 
-		QFont font;
-		font.setStyleStrategy(QFont::StyleStrategy(
-			QFont::PreferAntialias | QFont::PreferQuality));
-		font.setPointSize(128.);
-
 		QPen pen{QColor{0x00, 0x00, 0x00}};
 		pen.setWidthF(4.);
 
 		QPainter painter{&img};
-		painter.setFont(font);
+		painter.setFont(m_font);
 		painter.setPen(pen);
 
 		if(x_min > x_max)
@@ -1797,6 +1809,7 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 
 	QPen penLabel(Qt::black);
 	painter.setPen(penLabel);
+	painter.setFont(m_font);
 
 
 	// draw coordinate system in orthogonal lab system in 1/A
@@ -1882,6 +1895,13 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 		  t_real_gl tick = m_coordCubeTicks[coord_idx];
 		  QString label = m_axisLabels[coord_idx].c_str();
 
+			bool swapped = false;
+			if(min > max)
+			{
+				std::swap(min, max);
+				swapped = true;
+			}
+
 			// only consider this edge if it's at the border of the projected coordinate cube
 			constexpr const t_real_gl eps_hull = 1e-2;
 			constexpr const t_real_gl label_offs = 0.25;
@@ -1917,8 +1937,11 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 				offs = tick_offs * (edge_pt - centre_axis);
 				proj = GlToScreenCoords(edge_pt + offs);
 
-				tl2::set_eps_0(t);
-				painter.drawText(proj, QString{"%1"}.arg(t));
+				t_real_gl t_disp = t;
+				if(swapped)
+					t_disp = max - t;
+				tl2::set_eps_0(t_disp);
+				painter.drawText(proj, QString{"%1"}.arg(t_disp));
 			}
 		};
 
@@ -2002,11 +2025,9 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 			auto posLabel2d = GlToScreenCoords(tl2::create<t_vec_gl>(
 				{ posLabel3d[0], posLabel3d[1], posLabel3d[2], 1. }), &obj);
 
-			QFont fontLabel = fontOrig;
+			QFont fontLabel = m_font;
 			QPen penLabel = penOrig;
 
-			fontLabel.setStyleStrategy(QFont::StyleStrategy(
-				QFont::PreferAntialias | QFont::PreferQuality));
 			fontLabel.setWeight(QFont::Medium);
 			penLabel.setColor(QColor(0,0,0,255));
 			painter.setFont(fontLabel);

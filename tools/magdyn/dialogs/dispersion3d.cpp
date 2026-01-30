@@ -423,6 +423,16 @@ Dispersion3DDlg::~Dispersion3DDlg()
 
 
 
+void Dispersion3DDlg::SetPlotFont(const QString& font)
+{
+	if(!m_dispplot)
+		return;
+
+	m_dispplot->GetRenderer()->SetFont(font);
+}
+
+
+
 void Dispersion3DDlg::ShowError(const QString& msg)
 {
 	QMessageBox::critical(this, windowTitle() + " -- Error", msg);

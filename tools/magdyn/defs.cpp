@@ -83,6 +83,7 @@ QString g_theme = "Fusion";
 
 // gui font
 QString g_font = "";
+QString g_font3d = "";
 #endif
 
 // use native menu bar?
@@ -124,6 +125,7 @@ void get_settings_from_takin_core()
 	if(sett_core.contains("main/font_gen"))
 	{
 		g_font = sett_core.value("main/font_gen").toString();
+		g_font3d = g_font;
 	}
 
 	if(sett_core.contains("main/prec"))

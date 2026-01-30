@@ -224,6 +224,15 @@ BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett)
 }
 
 
+void BZPlotDlg::SetPlotFont(const QString& font)
+{
+	if(!m_plot)
+		return;
+
+	m_plot->GetRenderer()->SetFont(font);
+}
+
+
 /**
  * dialog is closing
  */

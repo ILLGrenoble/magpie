@@ -74,6 +74,8 @@ public:
 	QMenu* GetContextMenu();
 	const t_vec_bz& GetClickedPosition(bool right_button = false) const;
 
+	void SetPlotFont(const QString& font);
+
 
 protected:
 	void SetStatusMsg(const std::string& msg);

@@ -135,7 +135,7 @@ extern unsigned int g_stop_check_fraction;
 
 #ifndef DONT_USE_QT
 	// gui theme and font
-	extern QString g_theme, g_font;
+	extern QString g_theme, g_font, g_font3d;
 
 	// transfer the setting from the takin core program
 	void get_settings_from_takin_core();

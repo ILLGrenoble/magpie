@@ -81,6 +81,8 @@ public:
 	void SetKernel(const t_magdyn* dyn);
 	void SetDispersionQ(const t_vec_real& Qstart, const t_vec_real& Qend);
 
+	void SetPlotFont(const QString& font);
+
 
 protected:
 	virtual void accept() override;

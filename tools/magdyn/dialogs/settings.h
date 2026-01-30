@@ -272,6 +272,48 @@ public:
 			gridGui->addWidget(btnFont, yGui++,2,1,1);
 		}
 
+		// 3d font
+		if(s_font3d)
+		{
+			QLabel *labelFont3d = new QLabel("3D Font:", panelGui);
+			labelFont3d->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+
+			m_editFont3d = new QLineEdit(panelGui);
+			m_editFont3d->setReadOnly(true);
+
+			QPushButton *btnFont3d = new QPushButton("Select...", panelGui);
+			connect(btnFont3d, &QPushButton::clicked, [this]()
+			{
+				// current font
+				QFont font = QApplication::font();
+
+				// select a new font
+				bool okClicked = false;
+				font = QFontDialog::getFont(&okClicked, font, this);
+				if(okClicked)
+				{
+					*s_font3d = font.toString();
+					if(*s_font3d == "")
+						*s_font3d = QApplication::font().toString();
+					m_editFont3d->setText(*s_font3d);
+				}
+
+				// hack for the QFontDialog hiding the settings dialog
+				this->show();
+				this->raise();
+				this->activateWindow();
+			});
+
+			get_setting<QString>(m_sett, "font3d", s_font3d);
+			if(*s_font3d == "")
+				*s_font3d = QApplication::font().toString();
+			m_editFont3d->setText(*s_font3d);
+
+			gridGui->addWidget(labelFont3d, yGui,0,1,1);
+			gridGui->addWidget(m_editFont3d, yGui,1,1,1);
+			gridGui->addWidget(btnFont3d, yGui++,2,1,1);
+		}
+
 		// native menubar
 		if(s_use_native_menubar)
 		{
@@ -390,6 +432,7 @@ public:
 
 		get_setting<QString>(sett, "theme", s_theme);
 		get_setting<QString>(sett, "font", s_font);
+		get_setting<QString>(sett, "font3d", s_font3d);
 		get_setting<int>(sett, "native_menubar", s_use_native_menubar);
 		get_setting<int>(sett, "native_dialogs", s_use_native_dialogs);
 
@@ -401,6 +444,7 @@ public:
 	// common gui settings
 	static void SetGuiTheme(QString* str) { s_theme = str; }
 	static void SetGuiFont(QString* str) { s_font = str; }
+	static void SetGuiFont3d(QString* str) { s_font3d = str; }
 	static void SetGuiUseNativeMenubar(int *i) { s_use_native_menubar = i; }
 	static void SetGuiUseNativeDialogs(int *i) { s_use_native_dialogs = i; }
 
@@ -420,6 +464,8 @@ public:
 			s_defaults.insert_or_assign("<theme>", s_theme->toStdString());
 		if(s_font)
 			s_defaults.insert_or_assign("<font>", s_font->toStdString());
+		if(s_font3d)
+			s_defaults.insert_or_assign("<font3d>", s_font3d->toStdString());
 		if(s_use_native_menubar)
 			s_defaults.insert_or_assign("<native_menubar>", *s_use_native_menubar);
 		if(s_use_native_dialogs)
@@ -519,6 +565,7 @@ protected:
 				}
 			}
 		}
+
 		if(s_font)
 		{
 			if(auto iter = s_defaults.find(std::string{"<font>"}); iter != s_defaults.end())
@@ -527,6 +574,17 @@ protected:
 					*s_font = std::get<std::string>(iter->second).c_str();
 				if(m_editFont && *s_font != "")
 					m_editFont->setText(*s_font);
+			}
+		}
+
+		if(s_font3d)
+		{
+			if(auto iter = s_defaults.find(std::string{"<font3d>"}); iter != s_defaults.end())
+			{
+				if(std::holds_alternative<std::string>(iter->second))
+					*s_font3d = std::get<std::string>(iter->second).c_str();
+				if(m_editFont3d && *s_font3d != "")
+					m_editFont3d->setText(*s_font3d);
 			}
 		}
 
@@ -579,6 +637,8 @@ protected:
 			*s_theme = m_comboTheme->currentText();
 		if(s_font)
 			*s_font = m_editFont->text();
+		if(s_font3d)
+			*s_font3d = m_editFont3d->text();
 		if(s_use_native_menubar)
 			*s_use_native_menubar = m_checkMenubar->isChecked();
 		if(s_use_native_dialogs)
@@ -591,6 +651,8 @@ protected:
 				m_sett->setValue("theme", *s_theme);
 			if(s_font)
 				m_sett->setValue("font", *s_font);
+			if(s_font3d)
+				m_sett->setValue("font3d", *s_font3d);
 			if(s_use_native_menubar)
 				m_sett->setValue("native_menubar",
 					*s_use_native_menubar);
@@ -928,12 +990,14 @@ private:
 
 	QComboBox *m_comboTheme{nullptr};
 	QLineEdit *m_editFont{nullptr};
+	QLineEdit *m_editFont3d{nullptr};
 	QCheckBox *m_checkMenubar{nullptr};
 	QCheckBox *m_checkDialogs{nullptr};
 
 	// common gui settings
 	static QString *s_theme;           // gui theme
 	static QString *s_font;            // gui font
+	static QString *s_font3d;          // 3d font
 	static int *s_use_native_menubar;  // use native menubar?
 	static int *s_use_native_dialogs;  // use native dialogs?
 
@@ -980,6 +1044,11 @@ template<
 	std::size_t num_settingsvariables,
 	const std::array<SettingsVariable, num_settingsvariables> *settingsvariables>
 QString *SettingsDlg<num_settingsvariables, settingsvariables>::s_font{nullptr};
+
+template<
+	std::size_t num_settingsvariables,
+	const std::array<SettingsVariable, num_settingsvariables> *settingsvariables>
+QString *SettingsDlg<num_settingsvariables, settingsvariables>::s_font3d{nullptr};
 
 template<
 	std::size_t num_settingsvariables,

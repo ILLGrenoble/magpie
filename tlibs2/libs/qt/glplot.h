@@ -68,6 +68,9 @@ class GlPlot;
 class GlPlotRenderer : public QObject
 { Q_OBJECT
 public:
+	static constexpr bool m_isthreaded = false;
+	static constexpr bool m_usetimer = false;
+
 	using t_cam = tl2::Camera<t_mat_gl, t_vec_gl, t_vec3_gl, t_real_gl>;
 
 
@@ -85,6 +88,7 @@ protected:
 		m_strGlVendor{}, m_strGlRenderer{};
 
 	std::shared_ptr<QOpenGLShaderProgram> m_pShaders{};
+	QFont m_font{};
 
 	// vertices
 	GLint m_attrVertex = -1, m_attrVertexNorm = -1;
@@ -179,8 +183,7 @@ public:
 	GlPlotRenderer(const GlPlotRenderer&) = delete;
 	const GlPlotRenderer& operator=(const GlPlotRenderer&) = delete;
 
-	static constexpr bool m_isthreaded = false;
-	static constexpr bool m_usetimer = false;
+	void SetFont(const QString& font);
 
 	QPointF GlToScreenCoords(const t_vec_gl& vec,
 		const GlRenderObj *obj = nullptr, bool *pVisible = nullptr) const;
@@ -400,6 +403,10 @@ signals:
 class GlPlot : public QOpenGLWidget
 { Q_OBJECT
 public:
+	static constexpr bool m_isthreaded = GlPlotRenderer::m_isthreaded;
+
+
+public:
 	GlPlot(QWidget *pParent = nullptr);
 	virtual ~GlPlot();
 
@@ -410,8 +417,6 @@ public:
 	{
 		return m_renderer.get();
 	}
-
-	static constexpr bool m_isthreaded = GlPlotRenderer::m_isthreaded;
 
 
 protected:
