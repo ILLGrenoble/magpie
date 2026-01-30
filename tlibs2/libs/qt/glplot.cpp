@@ -1939,7 +1939,7 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 
 				t_real_gl t_disp = t;
 				if(swapped)
-					t_disp = max - t;
+					t_disp = min - t;
 				tl2::set_eps_0(t_disp);
 				painter.drawText(proj, QString{"%1"}.arg(t_disp));
 			}
