@@ -130,8 +130,10 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 	// formulas
 	QGroupBox *groupFormulas = new QGroupBox("Formulas", this);
 	m_formulas = new QTextEdit(groupFormulas);
-	m_formulas->setPlaceholderText("Enter formulas separated by ';'. Variables are 'x' and 'y'.");
+	m_formulas->setPlaceholderText("Enter formulas separated by ';'."
+		" Variables are 'x' and 'y'.");
 	m_formulas->setReadOnly(false);
+	m_formulas->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
 	//m_formulas->setFixedHeight(QFontMetrics{m_formulas->font()}.lineSpacing() * 4);
 	m_formulas->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Ignored});
 

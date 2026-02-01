@@ -693,10 +693,13 @@ GlPlotRenderer::CalcTickMarks(t_real_gl min, t_real_gl max, t_real_gl tick_delta
 		int power = static_cast<int>(std::log10(std::abs(range)));
 		tick_delta = std::pow(10., power);
 
+		// if there's too little ticks, decrease the delta
 		if(range / tick_delta < 3.)
 			tick_delta /= 5.;
-		else if(range / tick_delta < 2.)
-			tick_delta /= 10.;
+
+		// if there's too many ticks, increase the delta
+		if(range / tick_delta > 4.)
+			tick_delta *= 2.;
 	}
 
 	t_real_gl start = std::floor(min / tick_delta)*tick_delta;
@@ -1903,7 +1906,7 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 			}
 
 			// only consider this edge if it's at the border of the projected coordinate cube
-			constexpr const t_real_gl eps_hull = 1e-2;
+			constexpr const t_real_gl eps_hull = 1e-1;
 			constexpr const t_real_gl label_offs = 0.25;
 			constexpr const t_real_gl tick_offs = 0.05;
 
@@ -1933,7 +1936,7 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 				t_real_gl t_img = TickTrafo(min, max, t);
 				t_vec_gl edge_pt = corner0 + t_img*(corner1 - corner0);
 
-				centre_axis[coord_idx] = t_img;
+				centre_axis[coord_idx] = edge_pt[coord_idx];
 				offs = tick_offs * (edge_pt - centre_axis);
 				proj = GlToScreenCoords(edge_pt + offs);
 
