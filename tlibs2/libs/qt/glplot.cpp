@@ -15,7 +15,7 @@
  *
  * ----------------------------------------------------------------------------
  * tlibs
- * Copyright (C) 2017-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
@@ -1886,7 +1886,7 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 
 		// calculate the contour (hull) of the projected cube
 		auto [cube_hull_verts, cube_hull_triags, cuble_hull_neighbours] =
-				geo::calc_delaunay(2, proj_cube, true, false);
+			geo::calc_delaunay(2, proj_cube, true, false);
 
 		// draw edge labels and ticks
 		auto draw_edge = [this, &painter, &cube_hull_verts](
@@ -1912,6 +1912,7 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 
 			t_vec_gl edge_mid = corner0 + 0.5*(corner1 - corner0);
 			QPointF proj = GlToScreenCoords(edge_mid);
+			QPointF proj_centre = GlToScreenCoords(centre);
 
 			t_vec_gl proj_vert = tl2::create<t_vec_gl>({
 				static_cast<t_real_gl>(proj.x()), static_cast<t_real_gl>(proj.y()) });
@@ -1919,8 +1920,17 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 				return;
 
 			// axis label
+			bool is_on_left = false;
 			t_vec_gl offs = label_offs * (edge_mid - centre);
 			proj = GlToScreenCoords(edge_mid + offs);
+
+			// move text rendered on the left side further out
+			if(proj.x() < proj_centre.x())
+			{
+				is_on_left = true;
+				offs *= 1.25;
+				proj = GlToScreenCoords(edge_mid + offs);
+			}
 
 			if(label.length())
 				painter.drawText(proj, label);
@@ -1938,6 +1948,11 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 
 				centre_axis[coord_idx] = edge_pt[coord_idx];
 				offs = tick_offs * (edge_pt - centre_axis);
+
+				// move text rendered on the left side further out
+				if(is_on_left)
+					offs *= 2.5;
+
 				proj = GlToScreenCoords(edge_pt + offs);
 
 				t_real_gl t_disp = t;
