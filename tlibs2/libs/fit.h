@@ -558,7 +558,7 @@ bool fit(t_func&& func,
 				params.Fix(param_names[param_idx]);
 		}
 
-		ROOT::Minuit2::MnMigrad migrad(*chi2, params, 2);
+		ROOT::Minuit2::MnMigrad migrad(*chi2, params, ROOT::Minuit2::MnStrategy{2});
 		ROOT::Minuit2::FunctionMinimum mini = migrad();
 		bool fit_valid = mini.IsValid() && mini.HasValidParameters() && mini.UserState().IsValid();
 
@@ -663,7 +663,7 @@ bool fit_expr(const std::string& func,
 				params.Fix(param_names[param_idx]);
 		}
 
-		ROOT::Minuit2::MnMigrad migrad(*chi2, params, 2);
+		ROOT::Minuit2::MnMigrad migrad(*chi2, params, ROOT::Minuit2::MnStrategy{2});
 		ROOT::Minuit2::FunctionMinimum mini = migrad();
 		bool fit_valid = mini.IsValid() && mini.HasValidParameters() && mini.UserState().IsValid();
 
@@ -735,7 +735,7 @@ bool minimise(t_func&& func, const std::vector<std::string>& param_names,
 				params.Fix(param_names[param_idx]);
 		}
 
-		ROOT::Minuit2::MnMigrad migrad(minfunc, params, 2);
+		ROOT::Minuit2::MnMigrad migrad(minfunc, params, ROOT::Minuit2::MnStrategy{2});
 		ROOT::Minuit2::FunctionMinimum mini = migrad();
 		bool minimum_valid = mini.IsValid() && mini.HasValidParameters() && mini.UserState().IsValid();
 
@@ -827,7 +827,7 @@ bool minimise_dynargs(std::size_t num_args, t_func&& func,
 		}
 
 		// minimise using migrad
-		ROOT::Minuit2::MnMigrad migrad(minfunc, params, 2);
+		ROOT::Minuit2::MnMigrad migrad(minfunc, params, ROOT::Minuit2::MnStrategy{2});
 		ROOT::Minuit2::FunctionMinimum mini = migrad();
 		bool minimum_valid = mini.IsValid()
 		    && mini.HasValidParameters()
@@ -901,7 +901,7 @@ bool minimise_expr(const std::string& func, const std::vector<std::string>& para
 				params.Fix(param_names[param_idx]);
 		}
 
-		ROOT::Minuit2::MnMigrad migrad(minfunc, params, 2);
+		ROOT::Minuit2::MnMigrad migrad(minfunc, params, ROOT::Minuit2::MnStrategy{2});
 		ROOT::Minuit2::FunctionMinimum mini = migrad();
 		bool minimum_valid = mini.IsValid() && mini.HasValidParameters() && mini.UserState().IsValid();
 
