@@ -29,6 +29,7 @@
 #
 
 NUM_CORES=$(nproc)
+TMP_DIR=tmp
 
 
 BUILD_FOR_MINGW=0
@@ -43,7 +44,8 @@ GEMMI_LOCAL_ZIP=${GEMMI_REMOTE##*[/\\]}
 GEMMI_LOCAL=gemmi-0.7.4
 
 
-rm -f "${GEMMI_LOCAL}"
+mkdir -v "${TMP_DIR}"
+rm -f "${TMP_DIR}/${GEMMI_LOCAL}"
 
 
 if ! wget ${GEMMI_REMOTE}; then
@@ -51,6 +53,9 @@ if ! wget ${GEMMI_REMOTE}; then
 	exit -1
 fi
 
+
+mv -v "${GEMMI_LOCAL_ZIP}" "${TMP_DIR}"
+cd "${TMP_DIR}"
 
 rm -rf "${GEMMI_LOCAL}"
 unzip "${GEMMI_LOCAL_ZIP}"

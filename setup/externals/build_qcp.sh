@@ -9,7 +9,7 @@
 #
 # ----------------------------------------------------------------------------
 # Takin (inelastic neutron scattering software package)
-# Copyright (C) 2017-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
+# Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
 #                          Grenoble, France).
 # Copyright (C) 2013-2017  Tobias WEBER (Technische Universitaet Muenchen
 #                          (TUM), Garching, Germany).
@@ -31,6 +31,9 @@
 
 NUM_CORES=$(nproc)
 
+SCRIPT_DIR=$(dirname $(realpath $0))
+TMP_DIR=tmp
+
 
 BUILD_FOR_MINGW=0
 if [ "$1" == "--mingw" ]; then
@@ -42,13 +45,18 @@ QCP_REMOTE=https://www.qcustomplot.com/release/2.1.1/QCustomPlot-source.tar.gz
 QCP_LOCAL=${QCP_REMOTE##*[/\\]}
 
 
-rm -f "${QCP_LOCAL}"
+mkdir -v "${TMP_DIR}"
+rm -f "${TMP_DIR}/${QCP_LOCAL}"
 
 
 if ! wget ${QCP_REMOTE}; then
 	echo -e "Could not download ${QCP_REMOTE}."
 	exit -1
 fi
+
+
+mv -v "${QCP_LOCAL}" "${TMP_DIR}"
+cd "${TMP_DIR}"
 
 
 if ! tar xzvf ${QCP_LOCAL}
@@ -58,7 +66,7 @@ then
 fi
 
 
-cp -v CMakeLists_qcp.txt qcustomplot-source/CMakeLists.txt
+cp -v "${SCRIPT_DIR}/CMakeLists_qcp.txt" qcustomplot-source/CMakeLists.txt
 cd qcustomplot-source
 
 

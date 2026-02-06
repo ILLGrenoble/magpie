@@ -29,6 +29,7 @@
 #
 
 NUM_CORES=$(nproc)
+TMP_DIR=tmp
 
 
 BUILD_FOR_MINGW=0
@@ -45,7 +46,8 @@ LAPACK_REMOTE="https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v${L
 LAPACK_LOCAL="lapack-${LAPACK_VER}"
 
 
-rm -f "${LAPACK_LOCAL}"
+mkdir -v "${TMP_DIR}"
+rm -f "${TMP_DIR}/${LAPACK_LOCAL}"
 
 
 if ! wget ${LAPACK_REMOTE}; then
@@ -56,6 +58,8 @@ fi
 
 rm -rf build_lapacke
 LAPACK_LOCAL_ZIP=${LAPACK_REMOTE##*[/\\]}
+mv -v "${LAPACK_LOCAL_ZIP}" "${TMP_DIR}"
+cd "${TMP_DIR}"
 unzip "${LAPACK_LOCAL_ZIP}"
 
 

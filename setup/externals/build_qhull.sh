@@ -29,6 +29,7 @@
 #
 
 NUM_CORES=$(nproc)
+TMP_DIR=tmp
 
 
 BUILD_FOR_MINGW=0
@@ -54,7 +55,14 @@ if ! wget ${QHULL_REMOTE}; then
 fi
 
 
-rm -rf "${QHULL_LOCAL}"
+mkdir -v "${TMP_DIR}"
+
+rm -f "${TMP_DIR}/${QHULL_LOCAL_ZIP}"
+rm -rf "${TMP_DIR}/${QHULL_LOCAL}"
+
+mv -v "${QHULL_LOCAL_ZIP}" "${TMP_DIR}"
+cd "${TMP_DIR}"
+
 unzip "${QHULL_LOCAL_ZIP}"
 cd "${QHULL_LOCAL}"
 

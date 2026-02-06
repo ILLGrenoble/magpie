@@ -29,6 +29,7 @@
 #
 
 NUM_CORES=$(nproc)
+TMP_DIR=tmp
 
 
 BUILD_FOR_MINGW=0
@@ -44,7 +45,8 @@ MINUIT_DIR=root-6-33-01
 
 
 MINUIT_LOCAL=${MINUIT_REMOTE##*[/\\]}
-rm -f "${MINUIT_LOCAL}"
+mkdir -v "${TMP_DIR}"
+rm -f "${TMP_DIR}/${MINUIT_LOCAL}"
 
 
 if ! wget ${MINUIT_REMOTE}; then
@@ -52,6 +54,8 @@ if ! wget ${MINUIT_REMOTE}; then
 	exit -1
 fi
 
+mv -v "${MINUIT_LOCAL}" "${TMP_DIR}"
+cd "${TMP_DIR}"
 
 rm -rf ${MINUIT_DIR}
 unzip "${MINUIT_LOCAL}"
