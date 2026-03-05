@@ -6,7 +6,7 @@
  *
  * ----------------------------------------------------------------------------
  * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -72,7 +72,7 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 	auto labelAuthor = new QLabel("Written by Tobias Weber <tweber@ill.fr>.", infopanel);
 	labelAuthor->setAlignment(Qt::AlignHCenter);
 
-	auto labelDate = new QLabel("2022 - 2025.", infopanel);
+	auto labelDate = new QLabel("2022 - 2026.", infopanel);
 	labelDate->setAlignment(Qt::AlignHCenter);
 
 	auto labelPaper = new QLabel(
