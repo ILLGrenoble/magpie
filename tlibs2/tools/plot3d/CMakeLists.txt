@@ -152,7 +152,7 @@ target_link_libraries(plot3d
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	target_link_options(plot3d
 		# create an __info_plist section in the binary
-		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../../setup/plists/InfoPlot3D.plist
+		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../../setup/osx/InfoPlot3D.plist
 	)
 
 	add_custom_command(TARGET plot3d POST_BUILD

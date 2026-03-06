@@ -142,7 +142,7 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	target_link_options(takin_bz
 		# create an __info_plist section in the binary
-		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../setup/plists/InfoBZ.plist
+		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../setup/osx/InfoBZ.plist
 	)
 
 	add_custom_command(TARGET takin_bz POST_BUILD

@@ -249,7 +249,7 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	target_link_options(magpie
 		# create an __info_plist section in the binary
-		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../setup/plists/InfoMagDyn.plist
+		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../setup/osx/InfoMagDyn.plist
 	)
 
 	add_custom_command(TARGET magpie POST_BUILD

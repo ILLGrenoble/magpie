@@ -46,6 +46,7 @@ tools_c/build/**
 ._.DS_Store
 *.csv
 *.swp
+local_bindings.txt
 
 # Temporary lexer/parser files
 cliparser_impl.*
