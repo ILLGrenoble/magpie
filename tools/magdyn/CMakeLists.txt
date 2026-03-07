@@ -83,7 +83,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	add_compile_options(-Wl,--subsystem,windows)
 	set(MINGW_EXTRALIBS "ws2_32")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	add_compile_options(-mmacosx-version-min=10.15)
+	add_compile_options(-mmacosx-version-min=11.0)
 endif()
 
 

@@ -177,5 +177,5 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# pass linker --subsystem option
 	target_compile_options(takin_bz PUBLIC -Wl,--subsystem,windows)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	target_compile_options(takin_bz PUBLIC -mmacosx-version-min=10.15)
+	target_compile_options(takin_bz PUBLIC -mmacosx-version-min=11.0)
 endif()
