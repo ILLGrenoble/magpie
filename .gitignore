@@ -22,6 +22,7 @@
 *.exe
 *.out
 *.app
+*.dmg
 
 # Temporary files
 tmp/**
