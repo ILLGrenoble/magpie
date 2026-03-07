@@ -30,7 +30,7 @@
 # settings
 create_icon=1
 create_appdir=1
-create_dmg=0
+create_dmg=1
 strip_binaries=1
 clean_frameworks=1
 
