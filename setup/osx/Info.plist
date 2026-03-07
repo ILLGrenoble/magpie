@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+
+<plist version="1.0">
+<dict>
+  <key>CFBundlePackageType</key>                   <string>APPL</string>
+	<key>CFBundleSupportedPlatforms</key>            <array> <string>MacOSX</string> </array>
+	<key>CFBundleInfoDictionaryVersion</key>         <string>6.0</string>
+
+	<key>CFBundleName</key>                          <string>Magpie</string>
+	<key>CFBundleDisplayName</key>                   <string>Magpie</string>
+	<key>CFBundleExecutable</key>                    <string>magpie</string>
+	<key>CFBundleIdentifier</key>                    <string>eu.ill.cs.magpie</string>
+	<key>CFBundleVersion</key>                       <string>0.9.5</string>
+	<key>CFBundleShortVersionString</key>            <string>0.9.5</string>
+	<key>CFBundleIconFile</key>                      <string>magpie.icns</string>
+
+	<key>NSPrincipalClass</key>                      <string>NSApplication</string>
+	<key>NSSupportsSuddenTermination</key>           <string>True</string>
+	<key>NSHighResolutionCapable</key>               <string>True</string>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>  <string>True</string>
+	<key>NSHumanReadableCopyright</key>              <string>Copyright (C) 2022-2026 by Tobias Weber (ILL, Grenoble, France). Copyleft: GPLv3.</string>
+
+	<key>CFBundleDocumentTypes</key>
+	<array> <dict>
+		<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>magpie</string>
+				<string>magdyn</string>
+			</array>
+		<key>CFBundleTypeName</key>                    <string>Magpie File</string>
+		<key>CFBundleTypeRole</key>                    <string>Editor</string>
+		<key>LSHandlerRank</key>                       <string>Owner</string>
+		<key>CFBundleTypeIconFile</key>                <string>magpie.icns</string>
+	</dict> </array>
+
+	<key>LSMinimumSystemVersion</key>                <string>11.0</string>
+	<key>LSApplicationCategoryType</key>             <string>public.app-category.education</string>
+</dict>
+</plist>

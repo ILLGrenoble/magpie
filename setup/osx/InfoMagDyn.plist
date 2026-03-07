@@ -5,11 +5,11 @@
 	<key>CFBundleName</key>			<string>Magpie</string>
 	<key>CFBundleDisplayName</key>		<string>Magpie</string>
 	<key>CFBundleIdentifier</key>		<string>eu.ill.cs.magpie</string>
-	<key>CFBundleVersion</key>		<string>0.9</string>
+	<key>CFBundleVersion</key>		<string>0.9.5</string>
 	<key>CFBundleShortVersionString</key>	<string>0.9.5</string>
 	<key>CFBundleSupportedPlatforms</key>	<array> <string>MacOSX</string> </array>
-	<key>CFBundleIconFile</key>		<string>takin.icns</string>
+	<key>CFBundleIconFile</key>		<string>magpie.icns</string>
 
-	<key>LSMinimumSystemVersion</key>	<string>10.13</string>
+	<key>LSMinimumSystemVersion</key>	<string>11.0</string>
 </dict>
 </plist>

@@ -10,6 +10,6 @@
 	<key>CFBundleSupportedPlatforms</key>	<array> <string>MacOSX</string> </array>
 	<key>CFBundleIconFile</key>		<string>takin.icns</string>
 
-	<key>LSMinimumSystemVersion</key>	<string>10.13</string>
+	<key>LSMinimumSystemVersion</key>	<string>11.0</string>
 </dict>
 </plist>

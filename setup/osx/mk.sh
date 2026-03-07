@@ -70,12 +70,11 @@ declare -a LOCAL_LIBS=(
 	libqhull_r.8.0.dylib
 	libhdf5.320.dylib libhdf5_cpp.320.dylib
 	libdouble-conversion.3.dylib
-	libfreetype.6.dylib
-	libharfbuzz.0.dylib
+	libfreetype.6.dylib libharfbuzz.0.dylib
 	libpng16.16.dylib libzstd.1.dylib
 	libpcre2-8.0.dylib libpcre2-16.0.dylib
 	libglib-2.0.0.dylib libgthread-2.0.0.dylib libintl.8.dylib
-	libdbus-1.3.dylib
+	libdbus-1.3.dylib libsz.2.dylib libaec.0.dylib
 	libb2.1.dylib libmd4c.0.dylib libgraphite2.3.dylib
 )
 
@@ -145,7 +144,6 @@ function check_local_bindings()
 	echo -e "${local_binding}" >> tmp/local_bindings.txt
 	echo -e "--------------------------------------------------------------------------------\n" >> tmp/local_bindings.txt
 }
-
 
 
 #
@@ -259,22 +257,21 @@ if [ $create_appdir -ne 0 ]; then
 	echo -e "\nCopying files to ${APPDIRNAME}..."
 
 	# program files
-	cp -v setup/osx/Info.plist "${APPDIRNAME}/Contents/"
-	cp -v build/magpie/magpie "${APPDIRNAME}/Contents/MacOS/"
+	cp -v setup/osx/Info.plist  "${APPDIRNAME}/Contents/"
+	cp -v build/magpie/magpie   "${APPDIRNAME}/Contents/MacOS/"
 
 	# resources
-	cp -v "${APPICON_ICNS}" "${APPDIRNAME}/Contents/Resources/"
-	cp -v AUTHORS "${APPDIRNAME}/Contents/Resources/AUTHORS.txt"
-	cp -v LICENSE "${APPDIRNAME}/Contents/Resources/LICENSE.txt"
-	cp -v LICENSES "${APPDIRNAME}/Contents/Resources/LICENSES.txt"
-	cp -v LITERATURE "${APPDIRNAME}/Contents/Resources/LITERATURE.txt"
+	cp -v "${APPICON_ICNS}"     "${APPDIRNAME}/Contents/Resources/"
+	cp -v AUTHORS               "${APPDIRNAME}/Contents/Resources/AUTHORS.txt"
+	cp -v LICENSE               "${APPDIRNAME}/Contents/Resources/LICENSE.txt"
+	cp -v LICENSES              "${APPDIRNAME}/Contents/Resources/LICENSES.txt"
+	cp -v LITERATURE            "${APPDIRNAME}/Contents/Resources/LITERATURE.txt"
 
 	# local libraries
 	for (( libidx=0; libidx<${#LOCAL_LIBS[@]}; ++libidx )); do
 		LOCAL_LIB=${LOCAL_LIBS[$libidx]}
 
-		cp -v ${LOCAL_DIR}/lib/${LOCAL_LIB} \
-			"${APPDIRNAME}/Contents/Libraries/"
+		cp -v ${LOCAL_DIR}/lib/${LOCAL_LIB} "${APPDIRNAME}/Contents/Libraries/"
 	done
 
 	# libraries with full path
@@ -288,8 +285,7 @@ if [ $create_appdir -ne 0 ]; then
 	for (( libidx=0; libidx<${#QT_LIBS[@]}; ++libidx )); do
 		QT_LIB=${QT_LIBS[$libidx]}
 
-		cp -rv ${LOCAL_FRAMEWORKS_DIR}/${QT_LIB}.framework/ \
-			"${APPDIRNAME}/Contents/Frameworks/"
+		cp -rv ${LOCAL_FRAMEWORKS_DIR}/${QT_LIB}.framework "${APPDIRNAME}/Contents/Frameworks/"
 	done
 
 	# remove unnecessary files from frameworks
@@ -301,10 +297,10 @@ if [ $create_appdir -ne 0 ]; then
 	fi
 
 	# qt plugins
-	cp -rv ${QT_PLUGIN_DIR}/platforms "${APPDIRNAME}/Contents/Libraries/Qt_Plugins/"
-	cp -rv ${QT_PLUGIN_DIR}/styles "${APPDIRNAME}/Contents/Libraries/Qt_Plugins/"
-	cp -rv ${QT_PLUGIN_DIR}/imageformats "${APPDIRNAME}/Contents/Libraries/Qt_Plugins/"
-	cp -rv ${QT_PLUGIN_DIR}/iconengines "${APPDIRNAME}/Contents/Libraries/Qt_Plugins/"
+	cp -rv ${QT_PLUGIN_DIR}/platforms     "${APPDIRNAME}/Contents/Libraries/Qt_Plugins/"
+	cp -rv ${QT_PLUGIN_DIR}/styles        "${APPDIRNAME}/Contents/Libraries/Qt_Plugins/"
+	cp -rv ${QT_PLUGIN_DIR}/imageformats  "${APPDIRNAME}/Contents/Libraries/Qt_Plugins/"
+	cp -rv ${QT_PLUGIN_DIR}/iconengines   "${APPDIRNAME}/Contents/Libraries/Qt_Plugins/"
 
 	rm -fv ${APPDIRNAME}/Contents/Libraries/Qt_Plugins/platforms/libqoffscreen.dylib
 	rm -fv ${APPDIRNAME}/Contents/Libraries/Qt_Plugins/platforms/libqwebgl.dylib
@@ -325,13 +321,12 @@ if [ $create_appdir -ne 0 ]; then
 			-add_rpath @executable_path/../Frameworks \
 			"${APPDIRNAME}/Contents/MacOS/${binary}"
 
-		change_to_rpath "${APPDIRNAME}/Contents/MacOS/${binary}"
+		change_to_rpath      "${APPDIRNAME}/Contents/MacOS/${binary}"
 		check_local_bindings "${APPDIRNAME}/Contents/MacOS/${binary}"
-
-		chmod a+xr-w "${APPDIRNAME}/Contents/MacOS/${binary}"
+		chmod a+xr-w         "${APPDIRNAME}/Contents/MacOS/${binary}"
 
 		if [ $strip_binaries -ne 0 ]; then
-			${STRIP} "${APPDIRNAME}/Contents/MacOS/${binary}"
+			${STRIP}           "${APPDIRNAME}/Contents/MacOS/${binary}"
 		fi
 	done
 
@@ -346,13 +341,12 @@ if [ $create_appdir -ne 0 ]; then
 
 		echo -e "\nProcessing library ${library}..."
 
-		change_to_rpath "${library}"
+		change_to_rpath      "${library}"
 		check_local_bindings "${library}"
-
-		chmod a-wx+r "${library}"
+		chmod a-wx+r         "${library}"
 
 		if [ $strip_binaries -ne 0 ]; then
-			${STRIP} "${library}"
+			${STRIP}           "${library}"
 		fi
 	done
 
@@ -383,8 +377,7 @@ if [ $create_dmg -ne 0 ]; then
 	fi
 
 	echo -e "\nAdding files to ${APPDMGNAME}..."
-	ln -sf /Applications \
-		"/Volumes/${APPNAME}/Install by dragging ${APPDIRNAME} here."
+	ln -sf /Applications "/Volumes/${APPNAME}/Install by dragging ${APPDIRNAME} here."
 
 	echo -e "\nUnmounting ${APPDMGNAME}..."
 	if ! hdiutil detach "/Volumes/${APPNAME}"; then
