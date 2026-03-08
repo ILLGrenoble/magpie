@@ -31,6 +31,7 @@
 
 #ifndef DONT_USE_QT
 	#include <QtCore/QString>
+	#include <QtGui/QIcon>
 #endif
 
 #include <string>
@@ -136,6 +137,12 @@ extern unsigned int g_stop_check_fraction;
 #ifndef DONT_USE_QT
 	// gui theme and font
 	extern QString g_theme, g_font, g_font3d;
+
+	// resource directory
+	extern QString g_resdir;
+
+	// application icon
+	extern QIcon g_icon;
 
 	// transfer the setting from the takin core program
 	void get_settings_from_takin_core();

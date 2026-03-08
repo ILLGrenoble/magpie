@@ -74,6 +74,7 @@ void MagDynDlg::InitSettings()
 	m_recent.SetMaxRecentFiles(g_maxnum_recents);
 	m_recent_struct.SetMaxRecentFiles(g_maxnum_recents);
 
+	// main font
 	if(g_font != "")
 	{
 		QFont font = this->font();
@@ -81,6 +82,7 @@ void MagDynDlg::InitSettings()
 			setFont(font);
 	}
 
+	// font for 3d views
 	if(g_font3d != "")
 	{
 		if(m_disp3d_dlg)

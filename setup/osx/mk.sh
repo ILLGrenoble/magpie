@@ -262,6 +262,7 @@ if [ $create_appdir -ne 0 ]; then
 
 	# resources
 	cp -v "${APPICON_ICNS}"     "${APPDIRNAME}/Contents/Resources/"
+	cp -v "${APPICON}"          "${APPDIRNAME}/Contents/Resources/"
 	cp -v AUTHORS               "${APPDIRNAME}/Contents/Resources/AUTHORS.txt"
 	cp -v LICENSE               "${APPDIRNAME}/Contents/Resources/LICENSE.txt"
 	cp -v LICENSES              "${APPDIRNAME}/Contents/Resources/LICENSES.txt"

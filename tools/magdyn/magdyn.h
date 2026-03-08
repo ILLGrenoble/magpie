@@ -259,6 +259,7 @@ protected:
 	// set up gui
 	void CreateMainWindow();
 	void CreateMenuBar();
+	void InitResources();
 
 	// set up dialogs
 	void ShowInfoDlg(bool only_create = false);

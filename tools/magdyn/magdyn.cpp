@@ -67,6 +67,7 @@ MagDynDlg::MagDynDlg(QWidget* pParent) : QDialog{pParent},
 	// create gui
 	CreateMainWindow();
 	CreateMenuBar();
+	InitResources();
 
 	// create dialogs
 	ShowInfoDlg(true);
@@ -152,6 +153,34 @@ MagDynDlg::~MagDynDlg()
 }
 
 
+void MagDynDlg::InitResources()
+{
+	QString appPath = QApplication::applicationDirPath();
+
+	// find resource directory
+	if(QDir{appPath + "/res"}.exists())
+		g_resdir = appPath + "/res/";
+	else if(QDir{appPath + "/../res"}.exists())
+		g_resdir = appPath + "/../res/";
+	else if(QDir{appPath + "/resources"}.exists())
+		g_resdir = appPath + "/resources/";
+	else if(QDir{appPath + "/../resources"}.exists())
+		g_resdir = appPath + "/../resources/";
+	else if(QDir{"res"}.exists())
+		g_resdir = "res/";
+	else if(QDir{"../res"}.exists())
+		g_resdir = "../res/";
+	else
+		std::cerr << "Warning: Resource directory could not be found." << std::endl;
+
+	// main icon
+	if(QFileInfo{g_resdir + "magpie.svg"}.exists())
+		g_icon = QIcon{g_resdir + "magpie.svg"};
+
+	if(!g_icon.isNull())
+		setWindowIcon(g_icon);
+}
+
 
 void MagDynDlg::CreateMainWindow()
 {
@@ -214,9 +243,6 @@ void MagDynDlg::CreateMainWindow()
 	m_maingrid->addWidget(m_progress, 1,4, 1,2);
 	m_maingrid->addWidget(m_btnStartStop, 1,6, 1,1);
 	m_maingrid->addWidget(btnShowStruct, 1,7, 1,1);
-
-	// icon
-	setWindowIcon(QIcon{"res/magpie.svg"});
 
 	// signals
 	connect(m_btnStartStop, &QAbstractButton::clicked, [this]()

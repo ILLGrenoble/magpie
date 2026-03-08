@@ -77,11 +77,10 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 
 	auto labelIcon = new QLabel(infopanel);
 	auto labelIconFlipped = new QLabel(infopanel);
-	QIcon icon = QIcon{"res/magpie.svg"};
-	if(!icon.isNull())
+	if(!g_icon.isNull())
 	{
-		labelIcon->setPixmap(icon.pixmap(75, 75));
-		labelIconFlipped->setPixmap(icon.pixmap(75, 75).transformed(QTransform{-1., 0., 0., 1., 0., 0.}));
+		labelIcon->setPixmap(g_icon.pixmap(75, 75));
+		labelIconFlipped->setPixmap(g_icon.pixmap(75, 75).transformed(QTransform{-1., 0., 0., 1., 0., 0.}));
 		labelIcon->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 		labelIconFlipped->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	}
@@ -130,14 +129,14 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 	}
 
 	int y = 0;
-	int w = icon.isNull() ? 1 : 3;
-	int x = icon.isNull() ? 0 : 1;
+	int w = g_icon.isNull() ? 1 : 3;
+	int x = g_icon.isNull() ? 0 : 1;
 	grid->addWidget(labelTitle, y++,x, 1,1);
 	grid->addWidget(labelVersion, y++,x, 1,1);
 	grid->addWidget(labelAuthor, y++,x, 1,1);
 	grid->addWidget(labelDate, y++,x, 1,1);
 
-	if(!icon.isNull())
+	if(!g_icon.isNull())
 	{
 		grid->addWidget(labelIcon, 0,0, 4,1);
 		grid->addWidget(labelIconFlipped, 0,2, 4,1);
@@ -173,8 +172,18 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 		QString(__TIME__) + ".",
 		infopanel), y++,0, 1,w);
 	grid->addWidget(new QLabel(
-		QString("Using %1-bit real and %2-bit integer type.").arg(sizeof(t_real)*8).arg(sizeof(t_size)*8),
+		QString("Using %1-bit real and %2-bit integer type.").
+			arg(sizeof(t_real)*8).arg(sizeof(t_size)*8),
 		infopanel), y++,0, 1,w);
+	if(g_resdir != "")
+	{
+		auto labelRes = new QLabel(
+			QString("Resource directory: ") +
+			g_resdir + ".",
+			infopanel);
+		labelRes->setWordWrap(true);
+		grid->addWidget(labelRes, y++,0, 1,w);
+	}
 
 	grid->addWidget(sep2, y++,0, 1,w);
 
