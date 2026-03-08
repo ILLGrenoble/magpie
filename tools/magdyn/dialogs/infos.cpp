@@ -75,6 +75,17 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 	auto labelDate = new QLabel("2022 - 2026.", infopanel);
 	labelDate->setAlignment(Qt::AlignHCenter);
 
+	auto labelIcon = new QLabel(infopanel);
+	auto labelIconFlipped = new QLabel(infopanel);
+	QIcon icon = QIcon{"res/magpie.svg"};
+	if(!icon.isNull())
+	{
+		labelIcon->setPixmap(icon.pixmap(75, 75));
+		labelIconFlipped->setPixmap(icon.pixmap(75, 75).transformed(QTransform{-1., 0., 0., 1., 0., 0.}));
+		labelIcon->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+		labelIconFlipped->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	}
+
 	auto labelPaper = new QLabel(
 		"Paper DOI: "
 		"<a href=\"https://doi.org/10.1016/j.softx.2023.101471\">10.1016/j.softx.2023.101471</a>."
@@ -119,10 +130,18 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 	}
 
 	int y = 0;
-	grid->addWidget(labelTitle, y++,0, 1,1);
-	grid->addWidget(labelVersion, y++,0, 1,1);
-	grid->addWidget(labelAuthor, y++,0, 1,1);
-	grid->addWidget(labelDate, y++,0, 1,1);
+	int w = icon.isNull() ? 1 : 3;
+	int x = icon.isNull() ? 0 : 1;
+	grid->addWidget(labelTitle, y++,x, 1,1);
+	grid->addWidget(labelVersion, y++,x, 1,1);
+	grid->addWidget(labelAuthor, y++,x, 1,1);
+	grid->addWidget(labelDate, y++,x, 1,1);
+
+	if(!icon.isNull())
+	{
+		grid->addWidget(labelIcon, 0,0, 4,1);
+		grid->addWidget(labelIconFlipped, 0,2, 4,1);
+	}
 
 	auto sep1 = new QFrame(infopanel);
 	sep1->setFrameStyle(QFrame::HLine);
@@ -137,54 +156,54 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 
 	grid->addItem(new QSpacerItem(16, 16,
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
-		y++,0, 1,1);
-	grid->addWidget(sep1, y++,0, 1,1);
+		y++,0, 1,w);
+	grid->addWidget(sep1, y++,0, 1,w);
 
 	grid->addWidget(new QLabel(
 		QString("Compiler: ") +
 		QString(BOOST_COMPILER) + ".",
-		infopanel), y++,0, 1,1);
+		infopanel), y++,0, 1,w);
 	grid->addWidget(new QLabel(
 		QString("C++ Library: ") +
 		QString(BOOST_STDLIB) + ".",
-		infopanel), y++,0, 1,1);
+		infopanel), y++,0, 1,w);
 	grid->addWidget(new QLabel(
 		QString("Build Date: ") +
 		QString(__DATE__) + ", " +
 		QString(__TIME__) + ".",
-		infopanel), y++,0, 1,1);
+		infopanel), y++,0, 1,w);
 	grid->addWidget(new QLabel(
 		QString("Using %1-bit real and %2-bit integer type.").arg(sizeof(t_real)*8).arg(sizeof(t_size)*8),
-		infopanel), y++,0, 1,1);
+		infopanel), y++,0, 1,w);
 
-	grid->addWidget(sep2, y++,0, 1,1);
+	grid->addWidget(sep2, y++,0, 1,w);
 
 	grid->addWidget(new QLabel(
 		QString("Qt Version: ") +
 		QString(QT_VERSION_STR) + ".",
-		infopanel), y++,0, 1,1);
+		infopanel), y++,0, 1,w);
 	grid->addWidget(new QLabel(
 		QString("Boost Version: ") +
 		strBoost.c_str() + ".",
-		infopanel), y++,0, 1,1);
+		infopanel), y++,0, 1,w);
 	grid->addWidget(new QLabel(
 		QString("Lapack(e) Version: ") +
 		ostrLapack.str().c_str() + ".",
-		infopanel), y++,0, 1,1);
+		infopanel), y++,0, 1,w);
 
-	grid->addWidget(sep3, y++,0, 1,1);
-	grid->addWidget(labelPaper, y++,0, 1,1);
-	grid->addWidget(labelDoi, y++,0, 1,1);
-	grid->addWidget(sep4, y++,0, 1,1);
-	grid->addWidget(labelLicense, y++,0, 1,1);
-	grid->addWidget(sep5, y++,0, 1,1);
+	grid->addWidget(sep3, y++,0, 1,w);
+	grid->addWidget(labelPaper, y++,0, 1,w);
+	grid->addWidget(labelDoi, y++,0, 1,w);
+	grid->addWidget(sep4, y++,0, 1,w);
+	grid->addWidget(labelLicense, y++,0, 1,w);
+	grid->addWidget(sep5, y++,0, 1,w);
 
 	for(int i = 0; i < 4; ++i)
-		grid->addWidget(m_labelGlInfos[i], y++,0, 1,1);
+		grid->addWidget(m_labelGlInfos[i], y++,0, 1,w);
 
 	grid->addItem(new QSpacerItem(16, 16,
 		QSizePolicy::Minimum, QSizePolicy::Expanding),
-		y++,0, 1,1);
+		y++,0, 1,w);
 
 	QDialogButtonBox *btnbox = new QDialogButtonBox(this);
 	btnbox->addButton(QDialogButtonBox::Ok);
@@ -205,7 +224,7 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 			restoreGeometry(m_sett->value("infos/geo").toByteArray());
 		else
 			resize(700, 700);
-        }
+	}
 }
 
 

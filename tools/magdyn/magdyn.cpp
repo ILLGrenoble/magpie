@@ -215,6 +215,9 @@ void MagDynDlg::CreateMainWindow()
 	m_maingrid->addWidget(m_btnStartStop, 1,6, 1,1);
 	m_maingrid->addWidget(btnShowStruct, 1,7, 1,1);
 
+	// icon
+	setWindowIcon(QIcon{"res/magpie.svg"});
+
 	// signals
 	connect(m_btnStartStop, &QAbstractButton::clicked, [this]()
 	{

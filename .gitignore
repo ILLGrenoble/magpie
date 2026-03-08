@@ -1,4 +1,4 @@
-# Compiled object files
+# object files
 *.slo
 *.lo
 *.o
@@ -6,28 +6,40 @@
 *.moc
 *.class
 
-# Compiled dynamic libraries
+# libraries
 *.so
 *.dylib
 *.dll
-!tools_py/magdyn/tests/_magdyn_py.so
-
-# Compiled static libraries
 *.lai
 *.la
 *.a
 *.lib
+!tools_py/magdyn/tests/_magdyn_py.so
 
-# Executables
+# executables
 *.exe
 *.out
 *.app
 *.dmg
 
-# Temporary files
+# temporary files
 tmp/**
 build/**
 __pycache__/**
+*.pyc
+*.csv
+*.swp
+*.png
+*.pdf
+*.icns
+*.log
+*.aux
+*.synctex.*
+*.toc
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
 tools/structfact/build/**
 tools/bz/build/**
 tools/cif2xml/build/**
@@ -42,25 +54,9 @@ tools_py/magdyn/build/**
 tools_py/bz/build/**
 tools_py/instr/build/**
 tools_c/build/**
-*.pyc
 .DS_Store
 ._.DS_Store
-*.csv
-*.swp
 local_bindings.txt
-
-# Temporary lexer/parser files
 cliparser_impl.*
 clilexer_impl.*
 stack.hh
-
-# Temporary tex files
-*.log
-*.aux
-*.pdf
-*.synctex.*
-*.toc
-*.bbl
-*.blg
-*.fls
-*.fdb_latexmk

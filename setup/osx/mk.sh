@@ -44,7 +44,7 @@ APPNAME="Magpie"
 APPDIRNAME="${APPNAME}.app"
 APPDMGNAME="${APPNAME}.dmg"
 TMPFILE="${APPNAME}_tmp.dmg"
-APPICON="magpie.svg"
+APPICON="res/magpie.svg"
 APPICON_ICNS="${APPICON%\.svg}.icns"
 
 
