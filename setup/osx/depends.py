@@ -104,12 +104,9 @@ def get_depends(bin):
 		if lib.find("@rpath") >= 0:
 			for rpath in rpaths:
 				new_lib = lib.replace("@rpath", rpath)
-
-				if not add_lib(new_lib):
-					continue
+				add_lib(new_lib)
 		else:
-			if not add_lib(lib):
-				continue
+			add_lib(lib)
 
 
 #
