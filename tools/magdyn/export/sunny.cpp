@@ -122,6 +122,13 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	t_real k2 = (t_real)m_Q_end[1]->value();
 	t_real l2 = (t_real)m_Q_end[2]->value();
 
+	// principal scan direction
+	t_size q_idx = 1;
+	if(std::abs(k2 - k1) > std::abs(h2 - h1))
+		q_idx = 2;
+	if(std::abs(l2 - l1) > std::abs(k2 - k1))
+		q_idx = 3;
+
 	ofstr << "\n# variables\n";
 
 	// internal constants and variables
@@ -368,8 +375,9 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	// --------------------------------------------------------------------
 	ofstr << "\n# output the dispersion and spin-spin correlation\n";
 	ofstr << "if save_dynamics\n";
-	ofstr << "\t@printf(\"Outputting dispersion data to \\\"%s\\\", plot with (adapting x index):\\n"
-		<< "\\tgnuplot -p -e \\\"plot \\\\\\\"%s\\\\\\\" u 1:4:(\\\\\\$5) w p pt 7 ps var\\\"\\n\", "
+	ofstr << "\t@printf(\"Outputting dispersion data to \\\"%s\\\", plot with:\\n"
+		<< "\\tgnuplot -p -e \\\"plot \\\\\\\"%s\\\\\\\" u " << q_idx
+		<< ":4:(\\\\\\$5) w p pt 7 ps var\\\"\\n\", "
 		<< "datfile, datfile)\n";
 
 	ofstr << "\tenergies = bands.disp\n";

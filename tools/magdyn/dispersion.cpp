@@ -1019,11 +1019,39 @@ void MagDynDlg::PlotMouseMove(QMouseEvent* evt)
 	if(!m_status)
 		return;
 
-	t_real Q = m_plot->xAxis->pixelToCoord(evt->pos().x());
-	t_real E = m_plot->yAxis->pixelToCoord(evt->pos().y());
+	// range minimum
+	const t_real Q1[] =
+	{
+		(t_real)m_Q_start[0]->value(),
+		(t_real)m_Q_start[1]->value(),
+		(t_real)m_Q_start[2]->value()
+	};
 
-	QString status("Q = %1 rlu, E = %2 meV.");
-	status = status.arg(Q, 0, 'g', g_prec_gui).arg(E, 0, 'g', g_prec_gui);
+	// range maximum
+	const t_real Q2[] =
+	{
+		(t_real)m_Q_end[0]->value(),
+		(t_real)m_Q_end[1]->value(),
+		(t_real)m_Q_end[2]->value()
+	};
+
+	// plot (Q, E)
+	const t_real Q = m_plot->xAxis->pixelToCoord(evt->pos().x());
+	const t_real E = m_plot->yAxis->pixelToCoord(evt->pos().y());
+
+	// lerp parameter
+	t_size Q_idx = m_Q_idx;
+	if(Q_idx > 2)
+		Q_idx = 2;
+	const t_real t = (Q - Q1[Q_idx]) / (Q2[Q_idx] - Q1[Q_idx]);
+
+	// write status
+	QString status("Q = (%1, %2, %3) rlu, E = %4 meV.");
+	status = status
+		.arg(std::lerp(Q1[0], Q2[0], t), 0, 'g', g_prec_gui)
+		.arg(std::lerp(Q1[1], Q2[1], t), 0, 'g', g_prec_gui)
+		.arg(std::lerp(Q1[2], Q2[2], t), 0, 'g', g_prec_gui)
+		.arg(E, 0, 'g', g_prec_gui);
 	m_status->setText(status);
 }
 
