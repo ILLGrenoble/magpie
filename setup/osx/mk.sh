@@ -294,6 +294,7 @@ if [ $create_appdir -ne 0 ]; then
 		echo -e "\nCleaning frameworks..."
 		find ${APPDIRNAME}/Contents/Frameworks/ -type d -name "Headers" -exec rm -rfv {} \;
 		find ${APPDIRNAME}/Contents/Frameworks/ -type l -name "Headers" -exec rm -rv {} \;
+		find ${APPDIRNAME} -type d -name "_CodeSignature" -exec rm -rfv {} \;
 		echo -e "--------------------------------------------------------------------------------"
 	fi
 
