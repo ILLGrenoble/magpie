@@ -154,11 +154,10 @@ static int gui_main(int argc, char** argv, const std::string& cfg_file, bool use
 	tl2::set_gl_format(1, _GL_MAJ_VER, _GL_MIN_VER, 8);
 
 	// application
+	auto app = std::make_unique<QApplication>(argc, argv);
 	QApplication::addLibraryPath(QString(".") + QDir::separator() + "Qt_Plugins");
 	QApplication::addLibraryPath(QApplication::applicationDirPath() + QDir::separator() + ".." +
 		QDir::separator() + "Libraries" + QDir::separator() + "Qt_Plugins");
-
-	auto app = std::make_unique<QApplication>(argc, argv);
 
 	// re-set locales
 	set_locales();

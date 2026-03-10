@@ -1457,12 +1457,11 @@ void MolDynDlg::keyPressEvent(QKeyEvent *evt)
 int main(int argc, char** argv)
 {
 	tl2::set_gl_format(1, _GL_MAJ_VER, _GL_MIN_VER, 0);
+
+	auto app = std::make_unique<QApplication>(argc, argv);
 	QApplication::addLibraryPath(QString(".") + QDir::separator() + "Qt_Plugins");
 	QApplication::addLibraryPath(QApplication::applicationDirPath() + QDir::separator() + ".." +
 		QDir::separator() + "Libraries" + QDir::separator() + "Qt_Plugins");
-
-	auto app = std::make_unique<QApplication>(argc, argv);
-	QApplication::addLibraryPath(QApplication::applicationDirPath() + QDir::separator() + "qtplugins");
 
 	tl2::set_locales();
 	auto dlg = std::make_unique<MolDynDlg>(nullptr);
