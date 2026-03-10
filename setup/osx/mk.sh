@@ -304,7 +304,7 @@ if [ $create_appdir -ne 0 ]; then
 	cp -rv ${QT_PLUGIN_DIR}/imageformats  "${APPDIRNAME}/Contents/Libraries/Qt_Plugins/"
 	cp -rv ${QT_PLUGIN_DIR}/iconengines   "${APPDIRNAME}/Contents/Libraries/Qt_Plugins/"
 
-	rm -fv ${APPDIRNAME}/Contents/Libraries/Qt_Plugins/platforms/libqoffscreen.dylib
+	#rm -fv ${APPDIRNAME}/Contents/Libraries/Qt_Plugins/platforms/libqoffscreen.dylib
 	rm -fv ${APPDIRNAME}/Contents/Libraries/Qt_Plugins/platforms/libqwebgl.dylib
 
 	rm -fv ${APPDIRNAME}/Contents/Libraries/Qt_Plugins/imageformats/libq[^sj][^vp][^g]*.dylib
