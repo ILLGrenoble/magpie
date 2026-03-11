@@ -60,7 +60,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	m_dispplot->GetRenderer()->SetCoordMax(50.);
 	m_dispplot->GetRenderer()->GetCamera().SetParallelRange(100.);
 	m_dispplot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real>(g_cam_fov));
-	m_dispplot->GetRenderer()->GetCamera().SetDist(40.);
+	m_dispplot->GetRenderer()->GetCamera().SetDist(75.);
 	m_dispplot->GetRenderer()->GetCamera().UpdateTransformation();
 	m_dispplot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
