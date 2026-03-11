@@ -660,18 +660,19 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 	}
 
 	// plot the magnon bands
-	t_size bands_begin = 0;
+	m_first_band = 0;
 	t_size bands_end = m_data.size();
 	if(use_E_min || use_E_max)
-		std::tie(bands_begin, bands_end) = BandIndicesInRange();
+		std::tie(m_first_band, bands_end) = BandIndicesInRange();
 
 	t_size num_active_bands = 0;
-	for(t_size band_idx = bands_begin; band_idx < bands_end; ++band_idx)
+	for(t_size band_idx = m_first_band; band_idx < bands_end; ++band_idx)
 	{
-		bool band_active = band_idx < active_bands.size() ? active_bands[band_idx] : true;
+		bool band_active = band_idx - m_first_band < active_bands.size()
+			? active_bands[band_idx - m_first_band] : true;
 
 		// colour for this magnon band
-		std::array<int, 3> col = GetBranchColour(band_idx - bands_begin, bands_end - bands_begin);
+		std::array<int, 3> col = GetBranchColour(band_idx - m_first_band, bands_end - m_first_band);
 		const QColor colFull(col[0], col[1], col[2]);
 
 		if(band_active)
@@ -716,7 +717,7 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 			++num_active_bands;
 		}
 
-		AddBand("#" + tl2::var_to_str(band_idx + 1), colFull, band_active);
+		AddBand("#" + tl2::var_to_str(band_idx + 1 - m_first_band), colFull, band_active);
 	}
 
 	if(num_active_bands)

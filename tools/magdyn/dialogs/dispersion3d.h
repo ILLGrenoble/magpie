@@ -144,6 +144,7 @@ private:
 	std::array<t_real, 2> m_minmax_E{};  // minimum and maximum band energy
 	std::array<t_vec_real, 2> m_minmax_Q1{};  // minimum and maximum Q
 	std::array<t_vec_real, 2> m_minmax_Q2{};  // minimum and maximum Q
+	t_size m_first_band{};               // index of first visible band
 
 	// ------------------------------------------------------------------------
 	// from main dialog
