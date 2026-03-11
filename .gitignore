@@ -1,12 +1,9 @@
-# object files
-*.slo
-*.lo
-*.o
-*.obj
-*.moc
-*.class
-
-# libraries
+# binaries
+*.exe
+*.out
+*.app
+*.dmg
+*.deb
 *.so
 *.dylib
 *.dll
@@ -14,13 +11,13 @@
 *.la
 *.a
 *.lib
+*.slo
+*.lo
+*.o
+*.obj
+*.moc
+*.class
 !tools_py/magdyn/tests/_magdyn_py.so
-
-# executables
-*.exe
-*.out
-*.app
-*.dmg
 
 # temporary files
 tmp/**
