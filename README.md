@@ -1,4 +1,4 @@
-# Magpie - a graphical magnon calculator.
+# Magpie (Graphical Magnon Software).
 <img src="https://raw.githubusercontent.com/ILLGrenoble/magpie/main/res/magpie.svg" width="10%" height="10%" title="Logo" alt="">
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16180814.svg)](https://doi.org/10.5281/zenodo.16180814)
