@@ -682,7 +682,11 @@ void MagDynDlg::CreateMenuBar()
 	connect(acPlot3d, &QAction::triggered, [this]()
 	{
 		if(!m_plot3d)
+		{
 			m_plot3d = new Plot3DDlg(this, m_sett);
+			connect(m_plot3d, &Plot3DDlg::GlDeviceInfos,
+				m_info_dlg, &InfoDlg::SetGlDeviceInfos);
+		}
 
 		m_plot3d->show();
 		m_plot3d->raise();
