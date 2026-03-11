@@ -157,7 +157,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 		m_xrange[i]->setMinimum(-99.9999);
 		m_xrange[i]->setMaximum(+99.9999);
 		m_xrange[i]->setSingleStep(0.01);
-		m_xrange[i]->setValue(i == 1 ? 1. : 0.);
+		m_xrange[i]->setValue(i == 1 ? 1. : -1.);
 		m_xrange[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 		m_xrange[i]->setPrefix(prefix_minmax[i]);
 		m_xrange[i]->setToolTip("Range of the first axis.");
@@ -166,7 +166,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 		m_yrange[i]->setMinimum(-99.9999);
 		m_yrange[i]->setMaximum(+99.9999);
 		m_yrange[i]->setSingleStep(0.01);
-		m_yrange[i]->setValue(i == 1 ? 1. : 0.);
+		m_yrange[i]->setValue(i == 1 ? 1. : -1.);
 		m_yrange[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 		m_yrange[i]->setPrefix(prefix_minmax[i]);
 		m_yrange[i]->setToolTip("Range of the second axis.");
