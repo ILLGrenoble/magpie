@@ -216,6 +216,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 
 	// main dispersion button
 	QPushButton *btnMainQ = new QPushButton("From Main Q", groupQ);
+	btnMainQ->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	btnMainQ->setToolTip("Set the Q origin and directions from the dispersion in the main window.");
 
 	// minimum cutoff for filtering S(Q, E)
@@ -285,6 +286,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 
 	// start/stop button
 	m_btn_start_stop = new QPushButton("Calculate", this);
+	m_btn_start_stop->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 	// status bar
 	m_status = new QLabel(this);
@@ -300,6 +302,8 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	QPushButton *btnSaveScript = btnbox->addButton("Save Script...", QDialogButtonBox::ActionRole);
 	btnSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
 	btnSaveScript->setIcon(QIcon::fromTheme("text-x-script"));
+	btnSaveData->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+	btnSaveScript->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 	btnbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
 	// bands panel grid
