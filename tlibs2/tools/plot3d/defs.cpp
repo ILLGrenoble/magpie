@@ -48,7 +48,7 @@ t_real g_eps = 1e-6;
 // fraction of points to check if the stop button was pressed
 unsigned int g_stop_check_fraction = 100;
 
-t_real g_fov = 90.;
+t_real g_cam_fov = 90.;
 
 // gui theme
 QString g_theme = "Fusion";

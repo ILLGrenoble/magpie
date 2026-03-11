@@ -444,36 +444,50 @@ void Dispersion3DDlg::Calculate()
 
 
 /**
- * count number of bands with positive energies (should be half of all bands)
+ * count number of bands within the given energy range
  */
-t_size Dispersion3DDlg::NumPositive() const
+std::pair<t_size, t_size> Dispersion3DDlg::BandIndicesInRange() const
 {
-	t_size num_pos = 0;
+	bool use_E_min = m_enable_E_range[0]->isChecked();
+	bool use_E_max = m_enable_E_range[1]->isChecked();
+	t_real E_min_sel = m_E_range[0]->value();
+	t_real E_max_sel = m_E_range[1]->value();
 
-	for(const t_data_Qs& band : m_data)
+	// determine if a band is withing the given energy range
+	auto is_band_in_range = [use_E_min, use_E_max, E_min_sel, E_max_sel](
+		const t_data_Qs& data) -> bool
 	{
-		if(IsPositive(band))
-			++num_pos;
+		for(const t_data_Q& data : data)
+		{
+			t_real E = std::get<1>(data);
+			if(use_E_min && E < E_min_sel)
+				return false;
+			if(use_E_max && E > E_max_sel)
+				return false;
+		}
+
+		return true;
+	};
+
+
+	std::optional<t_size> begin;
+	t_size num_bands = 0;
+
+	for(t_size band_idx = 0; band_idx < m_data.size(); ++band_idx)
+	{
+		const t_data_Qs& band = m_data[band_idx];
+
+		if(is_band_in_range(band))
+		{
+			if(!begin)
+				begin = band_idx;
+			++num_bands;
+		}
 	}
 
-	return num_pos;
-}
-
-
-
-/**
- * determine if a band only contains positive energies
- */
-bool Dispersion3DDlg::IsPositive(const t_data_Qs& data) const
-{
-	for(const t_data_Q& data : data)
-	{
-		t_real E = std::get<1>(data);
-		if(E < 0.)
-			return false;
-	}
-
-	return true;
+	if(!begin)
+		begin = m_data.size();
+	return std::make_pair(*begin, *begin + num_bands);
 }
 
 
@@ -589,7 +603,11 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 			active_bands.push_back(IsBandEnabled(t_size(row)));
 	}
 
-	bool only_pos_E = m_only_pos_E->isChecked();
+	bool use_E_min = m_enable_E_range[0]->isChecked();
+	bool use_E_max = m_enable_E_range[1]->isChecked();
+	t_real E_min_sel = m_E_range[0]->value();
+	t_real E_max_sel = m_E_range[1]->value();
+
 	t_real E_scale = m_E_scale->value();
 	t_real Q_scale1 = m_Q_scale1->value();
 	t_real Q_scale2 = m_Q_scale2->value();
@@ -608,11 +626,10 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 	// set coordinate cube size
 	if(m_dispplot->GetRenderer()->GetCoordCube().size())
 	{
-		t_real E_range = m_minmax_E[1];
-		t_real E_min = only_pos_E ? 0. : m_minmax_E[0];
-		E_range -= E_min;
-
-		t_real E_mean = only_pos_E ? 0.5*E_range : m_minmax_E[0] + 0.5*E_range;
+		t_real E_min = use_E_min ? E_min_sel : m_minmax_E[0];
+		t_real E_max = use_E_max ? E_max_sel : m_minmax_E[1];
+		t_real E_range = E_max - E_min;
+		t_real E_mean = E_min + E_range*0.5;
 
 		t_mat_gl obj_scale = tl2::hom_scaling<t_mat_gl>(
 			0.5 * Q_scale1, 0.5 * Q_scale2, 0.5 * E_scale * E_range);
@@ -638,25 +655,23 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 			m_dispplot->GetRenderer()->UpdateCoordCubeTextures(
 				m_minmax_Q1[0][Q_idx_1], m_minmax_Q1[1][Q_idx_1], -1.,
 				m_minmax_Q2[0][Q_idx_2], m_minmax_Q2[1][Q_idx_2], -1.,
-				E_min, m_minmax_E[1], -1.);
+				E_min, E_max, -1.);
 		}
 	}
 
 	// plot the magnon bands
-	t_size num_bands = m_data.size();
-	if(only_pos_E)
-	{
-		num_bands = NumPositive();
-		//num_bands /= 2;
-	}
+	t_size bands_begin = 0;
+	t_size bands_end = m_data.size();
+	if(use_E_min || use_E_max)
+		std::tie(bands_begin, bands_end) = BandIndicesInRange();
 
 	t_size num_active_bands = 0;
-	for(t_size band_idx = 0; band_idx < num_bands; ++band_idx)
+	for(t_size band_idx = bands_begin; band_idx < bands_end; ++band_idx)
 	{
 		bool band_active = band_idx < active_bands.size() ? active_bands[band_idx] : true;
 
 		// colour for this magnon band
-		std::array<int, 3> col = GetBranchColour(band_idx, num_bands);
+		std::array<int, 3> col = GetBranchColour(band_idx - bands_begin, bands_end - bands_begin);
 		const QColor colFull(col[0], col[1], col[2]);
 
 		if(band_active)

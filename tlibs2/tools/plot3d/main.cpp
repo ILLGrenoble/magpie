@@ -55,7 +55,7 @@ int main(int argc, char** argv)
 
 	// main window
 	auto sett = std::make_shared<QSettings>("tlibs", "plot3d");
-	auto plt = std::make_unique<Plot3DDlg>(nullptr, sett);
+	auto plt = std::make_unique<Plot3DDlg>(nullptr, sett.get());
 	plt->show();
 
 	return app->exec();

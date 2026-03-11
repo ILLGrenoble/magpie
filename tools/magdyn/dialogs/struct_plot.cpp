@@ -61,7 +61,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	m_structplot->GetRenderer()->SetLight(1, tl2::create<t_vec3_gl>({ -5, -5, -5 }));
 	m_structplot->GetRenderer()->SetCoordMax(1.);
 	m_structplot->GetRenderer()->GetCamera().SetParallelRange(4.);
-	m_structplot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real_gl>(g_structplot_fov));
+	m_structplot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real_gl>(g_cam_fov));
 	m_structplot->GetRenderer()->GetCamera().SetDist(1.5);
 	m_structplot->GetRenderer()->GetCamera().UpdateTransformation();
 	m_structplot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
@@ -626,7 +626,7 @@ void StructPlotDlg::Clear()
 {
 	if(!m_structplot)
 		return;
-	
+
 	// clear field direction
 	if(m_field)
 	{

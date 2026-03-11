@@ -46,7 +46,7 @@
 /**
  * sets up the topology dialog
  */
-Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
+Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 	: QDialog{parent}, m_sett{sett}
 {
 	setWindowTitle("3D Plotter");
@@ -60,7 +60,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett)
 	m_dispplot->GetRenderer()->SetLight(1, tl2::create<t_vec3_gl>({ -50, -50, -50 }));
 	m_dispplot->GetRenderer()->SetCoordMax(50.);
 	m_dispplot->GetRenderer()->GetCamera().SetParallelRange(5.);
-	m_dispplot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real>(g_fov));
+	m_dispplot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real>(g_cam_fov));
 	m_dispplot->GetRenderer()->GetCamera().SetDist(2.);
 	m_dispplot->GetRenderer()->GetCamera().UpdateTransformation();
 	m_dispplot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});

@@ -59,7 +59,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	m_dispplot->GetRenderer()->SetLight(1, tl2::create<t_vec3_gl>({ -50, -50, -50 }));
 	m_dispplot->GetRenderer()->SetCoordMax(50.);
 	m_dispplot->GetRenderer()->GetCamera().SetParallelRange(100.);
-	m_dispplot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real>(g_structplot_fov));
+	m_dispplot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real>(g_cam_fov));
 	m_dispplot->GetRenderer()->GetCamera().SetDist(40.);
 	m_dispplot->GetRenderer()->GetCamera().UpdateTransformation();
 	m_dispplot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
@@ -76,14 +76,40 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	m_table_bands->verticalHeader()->setVisible(false);
 	m_table_bands->setColumnCount(NUM_COLS_BC);
 	m_table_bands->setHorizontalHeaderItem(COL_BC_BAND, new QTableWidgetItem{"Band"});
-	m_table_bands->setHorizontalHeaderItem(COL_BC_ACTIVE, new QTableWidgetItem{"Act."});
-	m_table_bands->setColumnWidth(COL_BC_BAND, 40);
-	m_table_bands->setColumnWidth(COL_BC_ACTIVE, 25);
+	m_table_bands->setHorizontalHeaderItem(COL_BC_ACTIVE, new QTableWidgetItem{"Active"});
+	m_table_bands->setColumnWidth(COL_BC_BAND, 45);
+	m_table_bands->setColumnWidth(COL_BC_ACTIVE, 45);
 	m_table_bands->resizeColumnsToContents();
 
-	m_only_pos_E = new QCheckBox("E ≥ 0", bands_panel);
-	m_only_pos_E->setChecked(true);
-	m_only_pos_E->setToolTip("Ignore magnon annihilation.");
+	m_enable_E_range[0] = new QCheckBox("Min.:", bands_panel);
+	m_enable_E_range[0]->setChecked(true);
+	m_enable_E_range[0]->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Preferred});
+	m_enable_E_range[0]->setToolTip("Minimum magnon energy to plot.");
+	m_E_range[0] = new QDoubleSpinBox(bands_panel);
+	m_E_range[0]->setEnabled(true);
+	m_E_range[0]->setDecimals(2);
+	m_E_range[0]->setSingleStep(0.1);
+	m_E_range[0]->setMinimum(-999.99);
+	m_E_range[0]->setMaximum(+999.99);
+	m_E_range[0]->setValue(0.);
+	//m_E_range[0]->setSuffix(" meV");
+	m_E_range[0]->setToolTip("Minimum magnon energy to plot.");
+	m_E_range[0]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+
+	m_enable_E_range[1] = new QCheckBox("Max.:", bands_panel);
+	m_enable_E_range[1]->setChecked(false);
+	m_enable_E_range[1]->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Preferred});
+	m_enable_E_range[1]->setToolTip("Maximum magnon energy to plot.");
+	m_E_range[1] = new QDoubleSpinBox(bands_panel);
+	m_E_range[1]->setEnabled(false);
+	m_E_range[1]->setDecimals(2);
+	m_E_range[1]->setSingleStep(0.1);
+	m_E_range[1]->setMinimum(-999.99);
+	m_E_range[1]->setMaximum(+999.99);
+	m_E_range[1]->setValue(0.);
+	//m_E_range[1]->setSuffix(" meV");
+	m_E_range[1]->setToolTip("Maximum magnon energy to plot.");
+	m_E_range[1]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 	// splitter for plot and magnon band list
 	m_split_plot = new QSplitter(this);
@@ -281,8 +307,12 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	QGridLayout *grid_bands = new QGridLayout(bands_panel);
 	grid_bands->setSpacing(4);
 	grid_bands->setContentsMargins(6, 6, 6, 6);
-	grid_bands->addWidget(m_table_bands, y++, 0, 1, 1);
-	grid_bands->addWidget(m_only_pos_E, y++, 0, 1, 1);
+	grid_bands->addWidget(m_table_bands, y++, 0, 1, 2);
+	grid_bands->addWidget(new QLabel("E Range (meV):"), y++, 0, 1, 2);
+	grid_bands->addWidget(m_enable_E_range[0], y, 0, 1, 1);
+	grid_bands->addWidget(m_E_range[0], y++, 1, 1, 1);
+	grid_bands->addWidget(m_enable_E_range[1], y, 0, 1, 1);
+	grid_bands->addWidget(m_E_range[1], y++, 1, 1, 1);
 
 	// Q coordinates grid
 	y = 0;
@@ -377,7 +407,10 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	connect(m_dispplot, &tl2::GlPlot::MouseDown, this, &Dispersion3DDlg::PlotMouseDown);
 	connect(m_dispplot, &tl2::GlPlot::MouseUp, this, &Dispersion3DDlg::PlotMouseUp);
 	connect(m_perspective, &QCheckBox::toggled, this, &Dispersion3DDlg::SetPlotPerspectiveProjection);
-	connect(m_only_pos_E, &QCheckBox::toggled, [this]() { Plot(true); });
+	connect(m_enable_E_range[0], &QCheckBox::toggled, [this](bool enabled) { m_E_range[0]->setEnabled(enabled); Plot(true); });
+	connect(m_enable_E_range[1], &QCheckBox::toggled, [this](bool enabled) { m_E_range[1]->setEnabled(enabled); Plot(true); });
+	connect(m_E_range[0], &QDoubleSpinBox::valueChanged, [this]() { Plot(true); });
+	connect(m_E_range[1], &QDoubleSpinBox::valueChanged, [this]() { Plot(true); });
 	connect(btnMainQ, &QAbstractButton::clicked, this, &Dispersion3DDlg::FromMainQ);
 	connect(m_S_filter_enable, &QCheckBox::toggled, m_S_filter, &QDoubleSpinBox::setEnabled);
 

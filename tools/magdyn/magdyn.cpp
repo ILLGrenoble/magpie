@@ -288,8 +288,8 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acBZView = new QAction("View Brillouin Zone...", menuStruct);
 	QAction *acGroundState = new QAction("Minimise Ground State...", menuStruct);
 
-	// dispersion menu
-	m_menuDisp = new QMenu("Dispersion", m_menu);
+	// dispersion plot menu
+	m_menuDisp = new QMenu("Dispersion Plot", m_menu);
 	m_plot_channels = new QAction("Plot Channels", m_menuDisp);
 	m_plot_channels->setToolTip("Plot individual polarisation channels.");
 	m_plot_channels->setCheckable(true);
@@ -372,63 +372,63 @@ void MagDynDlg::CreateMenuBar()
 	acStructView->setIcon(QIcon::fromTheme("applications-graphics"));
 	acBZView->setIcon(QIcon::fromTheme("applications-graphics"));
 
-	// calculation menu
-	QMenu *menuCalc = new QMenu("Calculation", m_menu);
-	m_autocalc = new QAction("Automatically Calculate", menuCalc);
+	// calculation options menu
+	QMenu *menuCalcOpt = new QMenu("Calculation Options", m_menu);
+	m_autocalc = new QAction("Automatically Calculate", menuCalcOpt);
 	m_autocalc->setToolTip("Automatically calculate the results.");
 	m_autocalc->setCheckable(true);
 	m_autocalc->setChecked(false);
-	QAction *acCalc = new QAction("Start Calculation", menuCalc);
+	QAction *acCalc = new QAction("Start Calculation", menuCalcOpt);
 	acCalc->setIcon(QIcon::fromTheme("media-playback-start"));
 	acCalc->setToolTip("Calculate all results.");
-	m_use_dmi = new QAction("Use DMI", menuCalc);
+	m_use_dmi = new QAction("Use DMI", menuCalcOpt);
 	m_use_dmi->setToolTip("Enables the Dzyaloshinskij-Moriya interaction.");
 	m_use_dmi->setCheckable(true);
 	m_use_dmi->setChecked(true);
 
 	if(m_allow_general_J)
 	{
-		m_use_genJ = new QAction("Use General J", menuCalc);
+		m_use_genJ = new QAction("Use General J", menuCalcOpt);
 		m_use_genJ->setToolTip("Enables the general interaction matrix.");
 		m_use_genJ->setCheckable(true);
 		m_use_genJ->setChecked(true);
 	}
 
-	m_use_field = new QAction("Use External Field", menuCalc);
+	m_use_field = new QAction("Use External Field", menuCalcOpt);
 	m_use_field->setToolTip("Enables an external field.");
 	m_use_field->setCheckable(true);
 	m_use_field->setChecked(true);
-	m_use_temperature = new QAction("Use Bose Factor", menuCalc);
+	m_use_temperature = new QAction("Use Bose Factor", menuCalcOpt);
 	m_use_temperature->setToolTip("Enables the Bose factor.");
 	m_use_temperature->setCheckable(true);
 	m_use_temperature->setChecked(true);
-	m_use_formfact = new QAction("Use Form Factor", menuCalc);
+	m_use_formfact = new QAction("Use Form Factor", menuCalcOpt);
 	m_use_formfact->setToolTip("Enables the magnetic form factor.");
 	m_use_formfact->setCheckable(true);
 	m_use_formfact->setChecked(false);
-	m_use_weights = new QAction("Use Neutron Spectral Weights", menuCalc);
+	m_use_weights = new QAction("Use Neutron Spectral Weights", menuCalcOpt);
 	m_use_weights->setToolTip("Enables calculation of the spin correlation function.");
 	m_use_weights->setCheckable(true);
 	m_use_weights->setChecked(true);
-	m_use_projector = new QAction("Use Neutron Projector", menuCalc);
+	m_use_projector = new QAction("Use Neutron Projector", menuCalcOpt);
 	m_use_projector->setToolTip("Enables the neutron orthogonal projector.");
 	m_use_projector->setCheckable(true);
 	m_use_projector->setChecked(true);
-	m_unite_degeneracies = new QAction("Unite Degenerate Energies", menuCalc);
+	m_unite_degeneracies = new QAction("Unite Degenerate Energies", menuCalcOpt);
 	m_unite_degeneracies->setToolTip("Unites the weight factors corresponding to degenerate eigenenergies.");
 	m_unite_degeneracies->setCheckable(true);
 	m_unite_degeneracies->setChecked(true);
-	m_ignore_annihilation = new QAction("Ignore Magnon Annihilation", menuCalc);
+	m_ignore_annihilation = new QAction("Ignore Magnon Annihilation", menuCalcOpt);
 	m_ignore_annihilation->setToolTip("Calculate only magnon creation..");
 	m_ignore_annihilation->setCheckable(true);
 	m_ignore_annihilation->setChecked(false);
-	m_force_incommensurate = new QAction("Force Incommensurate", menuCalc);
+	m_force_incommensurate = new QAction("Force Incommensurate", menuCalcOpt);
 	m_force_incommensurate->setToolTip("Enforce incommensurate calculation even for commensurate magnetic structures.");
 	m_force_incommensurate->setCheckable(true);
 	m_force_incommensurate->setChecked(false);
 
 	// H components sub-menu
-	QMenu *menuHamiltonians = new QMenu("Selected Hamiltonians", menuCalc);
+	QMenu *menuHamiltonians = new QMenu("Selected Hamiltonians", menuCalcOpt);
 	m_hamiltonian_comp[0] = new QAction("H(Q)", menuHamiltonians);
 	m_hamiltonian_comp[1] = new QAction("H(Q + O)", menuHamiltonians);
 	m_hamiltonian_comp[2] = new QAction("H(Q - O)", menuHamiltonians);
@@ -441,15 +441,20 @@ void MagDynDlg::CreateMenuBar()
 	menuHamiltonians->addAction(m_hamiltonian_comp[1]);
 	menuHamiltonians->addAction(m_hamiltonian_comp[2]);
 
+	// calculation menu
+	QMenu *menuCalc = new QMenu("Calculation", m_menu);
+	QAction *acDisp3D = new QAction("3D Dispersion...", menuCalc);
+	QAction *acTopo = new QAction("Topology...", menuCalc);
+	QAction *acDiff = new QAction("Differentiation...", menuCalc);
+
 	// tools menu
 	QMenu *menuTools = new QMenu("Tools", m_menu);
-	QAction *acDisp3D = new QAction("3D Dispersion...", menuTools);
-	QAction *acTopo = new QAction("Topology...", menuTools);
-	QAction *acDiff = new QAction("Differentiation...", menuTools);
 	QAction *acTrafoCalc = new QAction("Transformations...", menuTools);
+	QAction *acPlot3d = new QAction("3D Plotter...", menuTools);
 	QAction *acPolCalc = new QAction("Polarisation Vectors...", menuTools);
 	QAction *acPreferences = new QAction("Preferences...", menuTools);
 	acTrafoCalc->setIcon(QIcon::fromTheme("accessories-calculator"));
+	acPlot3d->setIcon(QIcon::fromTheme("x-office-spreadsheet"));
 	acPreferences->setIcon(QIcon::fromTheme("preferences-system"));
 	acPreferences->setShortcut(QKeySequence::Preferences);
 	acPreferences->setMenuRole(QAction::PreferencesRole);
@@ -515,29 +520,30 @@ void MagDynDlg::CreateMenuBar()
 	m_menuDisp->addAction(acSaveDispScr);
 	m_menuDisp->addAction(acSaveMultiDispScr);
 
-	menuCalc->addAction(m_autocalc);
-	menuCalc->addAction(acCalc);
-	menuCalc->addSeparator();
-	menuCalc->addAction(m_use_dmi);
+	menuCalcOpt->addAction(m_autocalc);
+	menuCalcOpt->addAction(acCalc);
+	menuCalcOpt->addSeparator();
+	menuCalcOpt->addAction(m_use_dmi);
 	if(m_allow_general_J)
-		menuCalc->addAction(m_use_genJ);
-	menuCalc->addAction(m_use_field);
-	menuCalc->addAction(m_use_temperature);
-	menuCalc->addAction(m_use_formfact);
-	menuCalc->addSeparator();
-	menuCalc->addAction(m_use_weights);
-	menuCalc->addAction(m_use_projector);
-	menuCalc->addSeparator();
-	menuCalc->addAction(m_unite_degeneracies);
-	menuCalc->addAction(m_ignore_annihilation);
-	menuCalc->addAction(m_force_incommensurate);
-	menuCalc->addMenu(menuHamiltonians);
+		menuCalcOpt->addAction(m_use_genJ);
+	menuCalcOpt->addAction(m_use_field);
+	menuCalcOpt->addAction(m_use_temperature);
+	menuCalcOpt->addAction(m_use_formfact);
+	menuCalcOpt->addSeparator();
+	menuCalcOpt->addAction(m_use_weights);
+	menuCalcOpt->addAction(m_use_projector);
+	menuCalcOpt->addSeparator();
+	menuCalcOpt->addAction(m_unite_degeneracies);
+	menuCalcOpt->addAction(m_ignore_annihilation);
+	menuCalcOpt->addAction(m_force_incommensurate);
+	menuCalcOpt->addMenu(menuHamiltonians);
 
-	menuTools->addAction(acDisp3D);
-	menuTools->addAction(acTopo);
-	menuTools->addAction(acDiff);
-	menuTools->addSeparator();
+	menuCalc->addAction(acDisp3D);
+	menuCalc->addAction(acTopo);
+	menuCalc->addAction(acDiff);
+
 	menuTools->addAction(acTrafoCalc);
+	menuTools->addAction(acPlot3d);
 	menuTools->addAction(acPolCalc);
 	menuTools->addSeparator();
 	menuTools->addAction(acPreferences);
@@ -672,6 +678,17 @@ void MagDynDlg::CreateMenuBar()
 		m_trafos->activateWindow();
 	});
 
+	// show general 3d plotter dialog
+	connect(acPlot3d, &QAction::triggered, [this]()
+	{
+		if(!m_plot3d)
+			m_plot3d = new Plot3DDlg(this, m_sett);
+
+		m_plot3d->show();
+		m_plot3d->raise();
+		m_plot3d->activateWindow();
+	});
+
 	// show polarisation calculator dialog
 	connect(acPolCalc, &QAction::triggered, [this]()
 	{
@@ -710,6 +727,7 @@ void MagDynDlg::CreateMenuBar()
 	m_menu->addMenu(menuFile);
 	m_menu->addMenu(menuStruct);
 	m_menu->addMenu(m_menuDisp);
+	m_menu->addMenu(menuCalcOpt);
 	m_menu->addMenu(menuCalc);
 	m_menu->addMenu(menuTools);
 	m_menu->addMenu(menuHelp);

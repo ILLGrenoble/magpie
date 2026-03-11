@@ -80,6 +80,7 @@
 #include "dialogs/pol.h"
 #include "dialogs/notes.h"
 #include "dialogs/infos.h"
+#include "tlibs2/tools/plot3d/plot3d.h"
 
 
 
@@ -244,7 +245,6 @@ protected:
 	QDialog *m_settings_dlg{};             // settings dialog
 	TableImportDlg *m_table_import_dlg{};  // table import dialog
 	NotesDlg *m_notes_dlg{};               // notes dialog
-	TrafoCalculator *m_trafos{};           // trafo calculator
 	PolDlg *m_pol{};                       // polarisation calculator
 	InfoDlg *m_info_dlg{};                 // info dialog
 	StructPlotDlg *m_structplot_dlg{};     // magnetic structure plotter
@@ -253,6 +253,8 @@ protected:
 	DiffDlg *m_diff_dlg{};                 // differentiation
 	Dispersion3DDlg *m_disp3d_dlg{};       // 3d dispersion calculations
 	BZPlotDlg *m_bz_dlg{};                 // 3d brillouin zone plotter
+	TrafoCalculator *m_trafos{};           // trafo calculator
+	Plot3DDlg *m_plot3d{};                 // general 3d function plotter
 
 
 protected:

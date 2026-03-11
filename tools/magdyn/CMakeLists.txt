@@ -204,6 +204,10 @@ if(USE_QT)
 		../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h
 		../../tlibs2/libs/qt/recent.cpp ../../tlibs2/libs/qt/recent.h
 
+		# plotting tool
+		../../tlibs2/tools/plot3d/plot3d.cpp ../../tlibs2/tools/plot3d/plot3d_file.cpp
+        ../../tlibs2/tools/plot3d/plot3d_calc.cpp ../../tlibs2/tools/plot3d/plot3d.h
+
 #		../../ext/qcp/qcustomplot.cpp
 	)
 

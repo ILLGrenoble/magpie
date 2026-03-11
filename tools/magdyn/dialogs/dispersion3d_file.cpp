@@ -493,7 +493,7 @@ if __name__ == "__main__":
 	{
 		// see: https://en.wikipedia.org/wiki/Focal_length
 		focal_len << "\"focal_length\" : 1. / numpy.tan(0.5 * "
-			<< g_structplot_fov << "/180.*numpy.pi),\n";
+			<< g_cam_fov << "/180.*numpy.pi),\n";
 	}
 
 	auto [Q_idx_1, Q_idx_2] = GetQIndices();
@@ -508,7 +508,7 @@ if __name__ == "__main__":
 	algo::replace_all(pyscr, "%%BRANCH_DATA%%", "[ " + bandidx_data.str() + "]");
 	algo::replace_all(pyscr, "%%DEGEN_DATA%%", "[ " + degen_data.str() + "]");
 	algo::replace_all(pyscr, "%%BRANCH_COLOURS%%", "[ " + colours.str() + "]");
-	algo::replace_all(pyscr, "%%ONLY_POS_E%%", m_only_pos_E->isChecked() ? "True " : "False");
+	algo::replace_all(pyscr, "%%ONLY_POS_E%%", "True");
 	algo::replace_all(pyscr, "%%PROJ_TYPE%%", m_perspective->isChecked() ? "persp" : "ortho");
 	algo::replace_all(pyscr, "%%ORTHO_PROJ%%", m_perspective->isChecked() ? "False" : "True");
 	algo::replace_all(pyscr, "%%FOCAL_LEN%%", focal_len.str());

@@ -86,8 +86,8 @@ void Plot3DDlg::Calculate()
 	m_x_count = m_num_points[0]->value();
 	m_y_count = m_num_points[1]->value();
 
-	t_vec start = tl2::create<t_vec>({ m_xrange[0]->value(), m_yrange[0]->value() });
-	t_vec end = tl2::create<t_vec>({ m_xrange[1]->value(), m_yrange[1]->value() });
+	t_vec_real start = tl2::create<t_vec_real>({ m_xrange[0]->value(), m_yrange[0]->value() });
+	t_vec_real end = tl2::create<t_vec_real>({ m_xrange[1]->value(), m_yrange[1]->value() });
 
 	m_minmax_x[0] = start[0];
 	m_minmax_x[1] = end[0];
@@ -121,7 +121,7 @@ void Plot3DDlg::Calculate()
 		auto task = [this, &parsers, &mtx, &start, &end, x_idx, y_idx]()
 		{
 			// calculate the surface at the given coordinate
-			t_vec Q = start;
+			t_vec_real Q = start;
 			Q[0] += (end[0] - start[0]) / t_real(m_x_count) * t_real(x_idx);
 			Q[1] += (end[1] - start[1]) / t_real(m_y_count) * t_real(y_idx);
 

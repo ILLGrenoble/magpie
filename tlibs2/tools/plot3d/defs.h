@@ -49,9 +49,7 @@ using t_size = std::size_t;
 
 //using t_real = float;
 using t_real = double;
-
-using t_vec = tl2::vec<t_real, std::vector>;
-using t_mat = tl2::mat<t_real, std::vector>;
+using t_vec_real = tl2::vec<t_real, std::vector>;
 
 using t_real_gl = tl2::t_real_gl;
 using t_vec2_gl = tl2::t_vec2_gl;
@@ -78,7 +76,7 @@ extern t_real g_eps;
 extern unsigned int g_stop_check_fraction;
 
 // camera fov
-extern t_real g_fov;
+extern t_real g_cam_fov;
 
 // use native menubar and dialogs?
 extern int g_use_native_menubar, g_use_native_dialogs;

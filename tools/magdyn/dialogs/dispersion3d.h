@@ -93,8 +93,7 @@ protected:
 	void Plot(bool clear_settings = true);
 
 	// calculation helper functions
-	t_size NumPositive() const;
-	bool IsPositive(const t_data_Qs& data) const;
+	std::pair<t_size, t_size> BandIndicesInRange() const;
 	std::pair<t_size, t_size> NumValid(const t_data_Qs& data) const;
 	bool IsValid(const t_data_Qs& data) const;
 	t_real GetMeanEnergy(const t_data_Qs& data) const;
@@ -165,7 +164,8 @@ private:
 	// dispersion options
 	QDoubleSpinBox *m_Q_origin[3]{}, *m_Q_dir1[3]{}, *m_Q_dir2[3]{};
 	QSpinBox *m_num_Q_points[2]{};       // number of points on the Q grid
-	QCheckBox *m_only_pos_E{};           // ignore magnon annihilation
+	QDoubleSpinBox *m_E_range[2]{};
+	QCheckBox *m_enable_E_range[2]{};
 
 	// correlation options
 	QCheckBox *m_S_filter_enable{};      // switch to enable minimum S(Q,E) value

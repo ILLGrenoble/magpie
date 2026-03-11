@@ -108,7 +108,7 @@ void Plot3DDlg::SaveData()
 	{
 		for(t_data& data : m_data[surf_idx])
 		{
-			const t_vec& xy = std::get<0>(data);
+			const t_vec_real& xy = std::get<0>(data);
 			t_real z = std::get<1>(data);
 			bool valid = std::get<4>(data);
 
@@ -362,7 +362,7 @@ if __name__ == "__main__":
 		// surface data
 		for(t_data& data : m_data[surf_idx])
 		{
-			const t_vec& xy = std::get<0>(data);
+			const t_vec_real& xy = std::get<0>(data);
 			t_real z = std::get<1>(data);
 			bool valid = std::get<4>(data);
 
@@ -391,7 +391,7 @@ if __name__ == "__main__":
 	{
 		// see: https://en.wikipedia.org/wiki/Focal_length
 		focal_len << "\"focal_length\" : 1. / numpy.tan(0.5 * "
-			<< g_fov << "/180.*numpy.pi),\n";
+			<< g_cam_fov << "/180.*numpy.pi),\n";
 	}
 
 	algo::replace_all(pyscr, "%%X_DATA%%", "[ " + x_data.str() + "]");

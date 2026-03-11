@@ -64,7 +64,7 @@ private:
 
 
 protected:
-	using t_data = std::tuple<t_vec /*0: xy*/, t_real /*1: z*/,
+	using t_data = std::tuple<t_vec_real /*0: xy*/, t_real /*1: z*/,
 		t_size /*2: x_idx*/, t_size /*3: y_idx*/,
 		bool /*4: valid*/>;
 	using t_data_vec = std::vector<t_data>;
@@ -72,7 +72,7 @@ protected:
 
 
 public:
-	Plot3DDlg(QWidget *parent, std::shared_ptr<QSettings> sett);
+	Plot3DDlg(QWidget *parent, QSettings* sett);
 	virtual ~Plot3DDlg();
 
 	Plot3DDlg(const Plot3DDlg&) = delete;
@@ -137,7 +137,7 @@ private:
 	std::array<t_real, 2> m_minmax_y{};  // minimum and maximum y values
 	std::array<t_real, 2> m_minmax_z{};  // minimum and maximum z values
 
-	std::shared_ptr<QSettings> m_sett{}; // program settings
+	QSettings *m_sett{};                 // program settings
 
 	// surface plot
 	tl2::GlPlot *m_dispplot{};           // 3d plotter

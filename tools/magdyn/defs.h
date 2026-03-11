@@ -128,7 +128,9 @@ extern t_real g_structplot_site_rad;
 extern t_real g_structplot_term_rad;
 extern t_real g_structplot_dmi_rad;
 extern t_real g_structplot_dmi_len;
-extern t_real g_structplot_fov;
+
+// camera parameters
+extern t_real g_cam_fov;
 
 // fraction of points to check if the stop button was pressed
 extern unsigned int g_stop_check_fraction;
@@ -265,8 +267,8 @@ constexpr std::array<SettingsVariable, 25> g_settingsvariables
 	},
 	{
 		.description = "Camera field-of-view in 3d plotters.",
-		.key = "structplot_fov",
-		.value = &g_structplot_fov,
+		.key = "cam_fov",
+		.value = &g_cam_fov,
 	},
 
 	// optional features
