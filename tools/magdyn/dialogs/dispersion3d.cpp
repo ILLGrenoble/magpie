@@ -253,7 +253,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 		box->setMinimum(0.001);
 		box->setMaximum(999.99);
 		box->setSingleStep(box == m_E_scale ? 0.1 : 0.5);
-		box->setValue(box == m_E_scale ? 4. : 32.);
+		box->setValue(box == m_E_scale ? 4. : 64.);
 		box->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
