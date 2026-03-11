@@ -1067,6 +1067,7 @@ t_size MagDynDlg::ReplaceValueWithVariable(const std::string& var, const t_cplx&
 
 
 	// iterate lines in the exchange terms table and replace the values
+	m_termstab->setSortingEnabled(false);
 	t_size num_replacements = 0;
 	for(int row = 0; row < m_termstab->rowCount(); ++row)
 	{
@@ -1103,6 +1104,7 @@ t_size MagDynDlg::ReplaceValueWithVariable(const std::string& var, const t_cplx&
 				++num_replacements;
 		}
 	}
+	m_termstab->setSortingEnabled(true);
 
 	return num_replacements;
 }
