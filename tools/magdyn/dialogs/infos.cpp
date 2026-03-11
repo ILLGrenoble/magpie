@@ -60,7 +60,7 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 	std::ostringstream ostrLapack;
 	ostrLapack << major << "." << minor << "." << patch;
 
-	auto labelTitle = new QLabel("Magpie -- Magnetic Dynamics Calculator", infopanel);
+	auto labelTitle = new QLabel("Magpie: A Graphical Magnon Software", infopanel);
 	auto fontTitle = labelTitle->font();
 	fontTitle.setBold(true);
 	labelTitle->setFont(fontTitle);
