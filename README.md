@@ -6,7 +6,7 @@
 This project comprises:
   - A C++ linear spin-wave library (*Magdyn*).
   - A graphical front-end (*Magpie*).
-  - A scripting interface (*Magpy*).
+  - A Python scripting interface (*Magpy*).
   - Several extension modules for [Takin](https://github.com/ILLGrenoble/takin).
 
 (No AI is used in this application or its development.)
