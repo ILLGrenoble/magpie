@@ -4,8 +4,9 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16180814.svg)](https://doi.org/10.5281/zenodo.16180814)
 
 This project comprises:
-  - *Magpie*, a linear spin-wave library.
-  - A GUI and a scripting interface for *Magpie*.
+  - A C++ linear spin-wave library (*Magdyn*).
+  - A graphical front-end (*Magpie*).
+  - A scripting interface (*Magpy*).
   - Several extension modules for [Takin](https://github.com/ILLGrenoble/takin).
 
 (No AI is used in this application or its development.)
