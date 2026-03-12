@@ -1,5 +1,5 @@
 #
-# magdyn py bindings
+# magpie py bindings
 # @author Tobias Weber <tweber@ill.fr>
 # @date 2023-2024
 # @license GPLv3, see 'LICENSE' file
@@ -24,7 +24,7 @@
 #
 
 cmake_minimum_required(VERSION 3.10)
-project(magdyn_py)
+project(magpy)
 
 cmake_policy(SET CMP0078 NEW)
 cmake_policy(SET CMP0086 NEW)
@@ -107,22 +107,22 @@ find_package(SWIG REQUIRED)
 set(UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
 include(${SWIG_USE_FILE})
 
-set_source_files_properties(magdyn.i PROPERTIES CPLUSPLUS TRUE)
-set_source_files_properties(magdyn.i PROPERTIES SWIG_FLAGS "-I ${PROJECT_SOURCE_DIR}/libs")
+set_source_files_properties(magpy.i PROPERTIES CPLUSPLUS TRUE)
+set_source_files_properties(magpy.i PROPERTIES SWIG_FLAGS "-I ${PROJECT_SOURCE_DIR}/libs")
 
-swig_add_library(magdyn_py LANGUAGE python SOURCES magdyn.i)
-target_link_libraries(magdyn_py
+swig_add_library(magpy LANGUAGE python SOURCES magpy.i)
+target_link_libraries(magpy
 	Python3::Python
 	${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES}
 	#/usr/local/lib/libgemmi_cpp.a
 	gemmi::gemmi_cpp
 )
-#target_link_libraries(magdyn_py Python3::Python /usr/local/lib/liblapacke.a /usr/local/lib/liblapack.a /usr/local/lib/libblas.a libgfortran.so)
+#target_link_libraries(magpy Python3::Python /usr/local/lib/liblapacke.a /usr/local/lib/liblapack.a /usr/local/lib/libblas.a libgfortran.so)
 
 # installation
-get_property(MAGDYN_AUX_FILES TARGET magdyn_py PROPERTY SWIG_SUPPORT_FILES)
+get_property(MAGDYN_AUX_FILES TARGET magpy PROPERTY SWIG_SUPPORT_FILES)
 install(FILES ${MAGDYN_AUX_FILES} DESTINATION "${Python3_SITEARCH}")
-install(TARGETS magdyn_py LIBRARY DESTINATION "${Python3_SITEARCH}")
+install(TARGETS magpy LIBRARY DESTINATION "${Python3_SITEARCH}")
 # -----------------------------------------------------------------------------
 
 
@@ -132,11 +132,11 @@ install(TARGETS magdyn_py LIBRARY DESTINATION "${Python3_SITEARCH}")
 #set(UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
 #include(${SWIG_USE_FILE})
 #
-#set_source_files_properties(magdyn.i PROPERTIES CPLUSPLUS TRUE)
-#set_source_files_properties(magdyn.i PROPERTIES SWIG_FLAGS "-I ${PROJECT_SOURCE_DIR}/libs")
+#set_source_files_properties(magpy.i PROPERTIES CPLUSPLUS TRUE)
+#set_source_files_properties(magpy.i PROPERTIES SWIG_FLAGS "-I ${PROJECT_SOURCE_DIR}/libs")
 #
-#swig_add_library(magdyn_java LANGUAGE java SOURCES magdyn.i)
-#target_link_libraries(magdyn_java
+#swig_add_library(magpy_java LANGUAGE java SOURCES magpy.i)
+#target_link_libraries(magpy_java
 #	${JNI_LIBRARIES}
 #	${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES}
 #	gemmi::gemmi_cpp

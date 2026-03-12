@@ -170,8 +170,13 @@ void MagDynDlg::InitResources()
 		g_resdir = "res/";
 	else if(QDir{"../res"}.exists())
 		g_resdir = "../res/";
+	else if(QDir{"/usr/local/share/magpie/res"}.exists())
+		g_resdir = "/usr/local/share/magpie/res/";
+	else if(QDir{"/usr/share/magpie/res"}.exists())
+		g_resdir = "/usr/share/magpie/res/";
 	else
 		std::cerr << "Warning: Resource directory could not be found." << std::endl;
+	//std::cerr << "Resource path: " << g_resdir.toStdString() << std::endl;
 
 	// main icon
 	if(QFileInfo{g_resdir + "magpie.svg"}.exists())

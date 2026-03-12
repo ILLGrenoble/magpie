@@ -24,13 +24,7 @@
 #
 
 import numpy
-
-try:
-	# try importing packaged version
-	from takin import magdyn
-except ModuleNotFoundError:
-	# try importing unpackaged version
-	import magdyn
+import magpy
 
 
 # options
@@ -54,31 +48,31 @@ num_Q_points = 256
 
 
 # create the magdyn object
-mag = magdyn.MagDyn()
+mag = magpy.MagDyn()
 
 
 # add variables (either register them with magdyn or use them directly)
-#magdyn.add_variable(mag, "J", -1.)
+#magpy.add_variable(mag, "J", -1.)
 J = -1
 
 
 # add magnetic sites
 # the numeric values have to be passed as either all strings or all doubles
 # (the strings can contain the variables registered above)
-#magdyn.add_site(mag, "site_1",  "0", "0", "0",  "0", "0", "1",  "1")
-magdyn.add_site(mag, "site_1",  0, 0, 0,  0, 0, 1,  1)
+#magpy.add_site(mag, "site_1",  "0", "0", "0",  "0", "0", "1",  "1")
+magpy.add_site(mag, "site_1",  0, 0, 0,  0, 0, 1,  1)
 
 
 # add couplings between the sites
 # the numeric values have to be passed as either all strings or all doubles
 # (the strings can contain the variables registered above)
-#magdyn.add_coupling(mag, "coupling_1",  "site_1", "site_1",  "1", "0", "0",  "J")
-magdyn.add_coupling(mag, "coupling_1",  "site_1", "site_1",  1, 0, 0,  J)
+#magpy.add_coupling(mag, "coupling_1",  "site_1", "site_1",  "1", "0", "0",  "J")
+magpy.add_coupling(mag, "coupling_1",  "site_1", "site_1",  1, 0, 0,  J)
 
 
 # explicitly re-calculate all sites and couplings if needed
 # (e.g., when changing the external field after adding the sites)
-#magdyn.calc(mag)
+#magpy.calc(mag)
 
 
 # minimum energy

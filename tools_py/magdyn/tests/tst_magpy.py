@@ -24,13 +24,7 @@
 #
 
 import numpy
-
-try:
-	# try importing packaged version
-	from takin import magdyn
-except ModuleNotFoundError:
-	# try importing unpackaged version
-	import magdyn
+import magpy
 
 
 # options
@@ -54,12 +48,12 @@ num_Q_points = 256
 
 
 # create the magdyn object
-print("Starting Magpie version %s." % magdyn.get_version())
-mag = magdyn.MagDyn()
+print("Starting Magpie version %s." % magpy.get_version())
+mag = magpy.MagDyn()
 
 
 # add variables
-var = magdyn.Variable()
+var = magpy.Variable()
 var.name = "J"
 var.value = -1
 mag.AddVariable(var)
@@ -68,7 +62,7 @@ mag.AddVariable(var)
 # add magnetic sites
 # all values have to be passed as strings
 # (these can contain the variables registered above)
-site = magdyn.MagneticSite()
+site = magpy.MagneticSite()
 site.name = "site_1"
 site.pos[0] = "0"; site.pos[1] = "0"; site.pos[2] = "0"
 site.spin_dir[0] = "0"; site.spin_dir[1] = "0"; site.spin_dir[2] = "1"
@@ -79,7 +73,7 @@ mag.AddMagneticSite(site)
 # add couplings between the sites
 # all values have to be passed as strings
 # (these can contain the variables registered above)
-coupling = magdyn.ExchangeTerm()
+coupling = magpy.ExchangeTerm()
 coupling.name = "coupling_1"
 coupling.site1 = "site_1"; coupling.site2 = "site_1"
 coupling.dist[0] = "1"; coupling.dist[1] = "0"; coupling.dist[2] = "0"

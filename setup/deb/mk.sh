@@ -39,7 +39,7 @@ APPDEBNAME="${APPNAME}.deb"
 # install directories
 BINDIR=/usr/local/bin
 SHAREDIR=/usr/local/share
-PY_DISTDIR=/usr/local/lib/python3.14/dist-packages
+PY_DISTDIR=/usr/local/lib/python3.12/dist-packages
 
 
 #
@@ -103,8 +103,8 @@ if [ $create_appdir -ne 0 ]; then
 		exit -1
 	fi
 
-	# program files
-	cp -v  build/magpie/magpie       ${APPDIRNAME}${BINDIR}
+	# program files (changing bin name to not interfere with takin's bundled version)
+	cp -v  build/magpie/magpie       ${APPDIRNAME}${BINDIR}/themagpie
 	cp -v  AUTHORS                   ${APPDIRNAME}${SHAREDIR}/${APPNAME}/
 	cp -v  LICENSE                   ${APPDIRNAME}${SHAREDIR}/${APPNAME}/
 	cp -v  LICENSES                  ${APPDIRNAME}${SHAREDIR}/${APPNAME}/
@@ -112,13 +112,13 @@ if [ $create_appdir -ne 0 ]; then
 	cp -v  setup/deb/magpie.desktop  ${APPDIRNAME}/usr/share/applications
 
 	# py interface
-	cp -v  build/tools_py/magdyn/_magpie_py.so  ${APPDIRNAME}${PY_DISTDIR}
-	cp -v  build/tools_py/magdyn/magpie.py      ${APPDIRNAME}${PY_DISTDIR}
+	cp -v  build/tools_py/magdyn/_magpy.so  ${APPDIRNAME}${PY_DISTDIR}
+	cp -v  build/tools_py/magdyn/magpy.py   ${APPDIRNAME}${PY_DISTDIR}
 
 	# cleanups
-	chmod a+x  ${APPDIRNAME}${BINDIR}/magpie
-	strip -v   ${APPDIRNAME}${BINDIR}/magpie
-	strip -v   ${APPDIRNAME}${PY_DISTDIR}/_magpie_py.so
+	chmod a+x  ${APPDIRNAME}${BINDIR}/themagpie
+	strip -v   ${APPDIRNAME}${BINDIR}/themagpie
+	strip -v   ${APPDIRNAME}${PY_DISTDIR}/_magpy.so
 fi
 
 

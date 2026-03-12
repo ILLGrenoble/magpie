@@ -2,7 +2,7 @@
 	Name=Magpie
 	GenericName=Magpie
 	Comment=A Graphical Magnon Software.
-	Exec=/usr/bin/env LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH} /usr/local/bin/magpie
+	Exec=/usr/bin/env LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH} /usr/local/bin/themagpie
 	Icon=/usr/local/share/magpie/res/magpie.svg
 	Terminal=false
 	StartupNotify=false

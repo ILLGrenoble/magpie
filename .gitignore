@@ -18,6 +18,7 @@
 *.moc
 *.class
 !tools_py/magdyn/tests/_magdyn_py.so
+!tools_py/magdyn/tests/_magpy.so
 
 # temporary files
 tmp/**
