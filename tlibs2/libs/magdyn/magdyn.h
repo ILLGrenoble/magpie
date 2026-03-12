@@ -192,6 +192,7 @@ public:
 
 	bool IsIncommensurate() const;
 	bool GetSilent() const;
+	bool GetPerformChecks() const;
 
 	/**
 	 * get number of magnetic sites with the given name (to check if the name is unique)

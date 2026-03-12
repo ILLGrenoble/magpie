@@ -258,6 +258,13 @@ MAGDYN_TEMPL bool MAGDYN_INST::GetSilent() const
 
 
 
+MAGDYN_TEMPL bool MAGDYN_INST::GetPerformChecks() const
+{
+	return m_perform_checks;
+}
+
+
+
 /**
  * get number of magnetic sites with the given name (to check if the name is unique)
  */
