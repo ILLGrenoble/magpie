@@ -192,7 +192,7 @@ void FileFrm<t_real>::ReadData(std::istream& istr)
 	std::string strLineUnits;
 	std::getline(istr, strLineUnits);
 	get_tokens<std::string, std::string, t_vecColNames>
-		(strLineQuantities, " \t", m_vecUnits);
+		(strLineUnits, " \t", m_vecUnits);
 
 
 	m_vecData.resize(m_vecQuantities.size());
