@@ -696,6 +696,8 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 		}
 
 		// atom positions
+		const t_real uc_min = g_uc_01 ? 0. : -0.5;
+		const t_real uc_max = g_uc_01 ? 1. : +0.5;
 		for(std::size_t atomnum = 0; atomnum < atoms.size(); ++atomnum)
 		{
 			const std::string& name = atomnames[atomnum];
@@ -703,7 +705,9 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 
 			for(std::size_t symnum = 0; symnum < generatedatoms[atomnum].size(); ++symnum)
 			{
-				const t_vec_real& pos = generatedatoms[atomnum][symnum];
+				// adapt atom positions to defined unit cell
+				t_vec_real& pos = generatedatoms[atomnum][symnum];
+				pos = tl2::keep_atom_in_uc<t_vec_real>(pos, 3, uc_min, uc_max);
 
 				AddSiteTabItem(-1, name, 0,
 					tl2::var_to_str(pos[0], g_prec),  // pos.x
