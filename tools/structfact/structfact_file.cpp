@@ -33,7 +33,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <random>
 #include <cstdlib>
 
 #include <boost/scope_exit.hpp>
@@ -42,6 +41,7 @@
 namespace pt = boost::property_tree;
 
 #include "libs/loadcif.h"
+#include "libs/rnd.h"
 #include "tlibs2/libs/maths.h"
 #include "tlibs2/libs/algos.h"
 
@@ -464,21 +464,15 @@ void StructFactDlg::ImportCIF()
 
 
 		// atoms
-		std::mt19937 gen{tl2::epoch<unsigned int>()};
 		for(std::size_t atomnum=0; atomnum<atoms.size(); ++atomnum)
 		{
-			// random colour
-			std::ostringstream ostrcol;
-			std::uniform_int_distribution<int> dist{0, 255};
-			ostrcol << "#" << std::hex << std::setw(2) << std::setfill('0') << dist(gen)
-				<< std::setw(2) << std::setfill('0') << dist(gen)
-				<< std::setw(2) << std::setfill('0') << dist(gen);
+			std::string col = get_random_colour();
 
 			for(std::size_t symnr=0; symnr<generatedatoms[atomnum].size(); ++symnr)
 			{
 				AddTabItem(-1, atomnames[atomnum], 0, 0,
 					generatedatoms[atomnum][symnr][0],  generatedatoms[atomnum][symnr][1], generatedatoms[atomnum][symnr][2],
-					1, ostrcol.str());
+					1, col);
 			}
 		}
 	}

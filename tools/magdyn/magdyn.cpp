@@ -275,6 +275,7 @@ void MagDynDlg::CreateMenuBar()
 	QMenu *menuFile = new QMenu("File", m_menu);
 	QAction *acNew = new QAction("New", menuFile);
 	QAction *acLoad = new QAction("Open...", menuFile);
+	QAction *acImportCIF = new QAction("Import CIF...", menuFile);
 	QAction *acImportStructure = new QAction("Import Structure...", menuFile);
 	QAction *acSave = new QAction("Save", menuFile);
 	QAction *acSaveAs = new QAction("Save As...", menuFile);
@@ -488,6 +489,7 @@ void MagDynDlg::CreateMenuBar()
 	menuFile->addAction(acSave);
 	menuFile->addAction(acSaveAs);
 	menuFile->addSeparator();
+	menuFile->addAction(acImportCIF);
 	menuFile->addAction(acImportStructure);
 	menuFile->addMenu(m_menuImportStructRecent);
 	menuFile->addSeparator();
@@ -562,6 +564,8 @@ void MagDynDlg::CreateMenuBar()
 	connect(acNew, &QAction::triggered, [this]() { Clear(true); } );
 	connect(acLoad, &QAction::triggered,
 		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::Load));
+	connect(acImportCIF, &QAction::triggered,
+		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::ImportCIF));
 	connect(acImportStructure, &QAction::triggered,
 		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::ImportStructure));
 	connect(acSave, &QAction::triggered,

@@ -37,6 +37,7 @@ namespace pt = boost::property_tree;
 #include <cstdlib>
 
 #include "tlibs2/libs/str.h"
+#include "libs/rnd.h"
 
 
 // precision
@@ -560,6 +561,8 @@ bool MagDynDlg::ImportStructure(const QString& filename)
 		// spin structure
 		if(auto nuclei = sfact.get_child_optional("nuclei"); nuclei)
 		{
+			std::string rndcol = get_random_colour();
+
 			for(const auto &nucl : *nuclei)
 			{
 				std::string name = nucl.second.get<std::string>("name", "n/a");
@@ -570,7 +573,7 @@ bool MagDynDlg::ImportStructure(const QString& filename)
 				std::string ReMx = nucl.second.get<std::string>("ReMx", "0");
 				std::string ReMy = nucl.second.get<std::string>("ReMy", "0");
 				std::string ReMz = nucl.second.get<std::string>("ReMz", "1");
-				std::string rgb = nucl.second.get<std::string>("col", "auto");
+				std::string rgb = nucl.second.get<std::string>("col", /*"auto"*/ rndcol);
 
 				AddSiteTabItem(-1, name, 0,
 					x, y, z,
@@ -597,6 +600,105 @@ bool MagDynDlg::ImportStructure(const QString& filename)
 
 			if(propvecs->size() > 1)
 				ShowError("Only one propagation vector is supported.", false);
+		}
+	}
+	catch(const std::exception& ex)
+	{
+		ShowError(ex.what());
+		return false;
+	}
+
+	return true;
+}
+// --------------------------------------------------------------------------------
+
+
+
+
+// --------------------------------------------------------------------------------
+/**
+ * import structure from cif
+ */
+void MagDynDlg::ImportCIF()
+{
+	QString dirLast = m_sett->value("dir_cif", "").toString();
+	QString filename = QFileDialog::getOpenFileName(
+		this, "Import File", dirLast, "CIFs (*.cif)");
+	if(filename == "" || !QFile::exists(filename))
+		return;
+
+	Clear(false);
+
+	if(ImportCIF(filename))
+	{
+		m_sett->setValue("dir_cif", QFileInfo(filename).path());
+		m_recent_struct.AddRecentFile(filename);
+	}
+	else
+	{
+		Clear(true);
+	}
+}
+
+
+
+/**
+ * import structure from cif
+ */
+bool MagDynDlg::ImportCIF(const QString& filename)
+{
+	try
+	{
+		BOOST_SCOPE_EXIT(this_)
+		{
+			this_->m_ignoreCalc = false;
+
+			if(this_->m_autocalc->isChecked())
+			{
+				this_->SyncToKernel();
+				this_->CalcBZ();
+				this_->DispersionQChanged(false);
+			}
+		} BOOST_SCOPE_EXIT_END
+		m_ignoreCalc = true;
+		m_needsBZCalc = true;
+
+		auto [errstr, atoms, generatedatoms, atomnames, lattice, symops] =
+			load_cif<t_vec_real, t_mat_real>(filename.toStdString(), g_eps);
+		if(errstr != "")
+		{
+			ShowError(("Could not load CIF: " + errstr).c_str());
+			return false;
+		}
+
+		// lattice constants and angles
+		m_xtallattice[0]->setValue(lattice.a);
+		m_xtallattice[1]->setValue(lattice.b);
+		m_xtallattice[2]->setValue(lattice.c);
+		m_xtalangles[0]->setValue(lattice.alpha);
+		m_xtalangles[1]->setValue(lattice.beta);
+		m_xtalangles[2]->setValue(lattice.gamma);
+
+		// TODO: space group
+
+		// atom positions
+		for(std::size_t atomnum = 0; atomnum < atoms.size(); ++atomnum)
+		{
+			const std::string& name = atomnames[atomnum];
+			std::string rndcol = get_random_colour();
+
+			for(std::size_t symnum = 0; symnum < generatedatoms[atomnum].size(); ++symnum)
+			{
+				const t_vec_real& pos = generatedatoms[atomnum][symnum];
+
+				AddSiteTabItem(-1, name, 0,
+					tl2::var_to_str(pos[0], g_prec),  // pos.x
+					tl2::var_to_str(pos[1], g_prec),  // pos.y
+					tl2::var_to_str(pos[2], g_prec),  // pos.z
+					"0", "0", "1", "1",               // spin
+					"auto", "auto", "auto",
+					rndcol);
+			}
 		}
 	}
 	catch(const std::exception& ex)

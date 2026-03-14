@@ -53,11 +53,13 @@
 
 #include <qcustomplot.h>
 
+#include <filesystem>
 #include <vector>
 #include <unordered_map>
 #include <optional>
 
 #include <boost/property_tree/ptree.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "tlibs2/libs/magdyn.h"
 #include "tlibs2/libs/qt/numerictablewidgetitem.h"
@@ -160,7 +162,10 @@ protected:
 		= [this](const QString& filename) -> bool
 	{
 		this->Clear(false);
-		return this->ImportStructure(filename);
+		if(boost::to_lower_copy(std::filesystem::path(filename.toStdString()).extension().string()) == ".cif")
+			return this->ImportCIF(filename);
+		else
+			return this->ImportStructure(filename);
 	};
 
 	QGridLayout *m_maingrid{};
@@ -373,6 +378,7 @@ protected:
 	void Save();
 	void SaveAs();
 
+	void ImportCIF();
 	void ImportStructure();
 	void ExportToSunny();
 	void ExportToSpinW();
@@ -438,6 +444,7 @@ public:
 	bool Load(const QString& filename, bool calc_dynamics = true);
 	bool Save(const QString& filename);
 
+	bool ImportCIF(const QString& filename);
 	bool ImportStructure(const QString& filename);
 	bool ExportToSunny(const QString& filename);
 	bool ExportToSpinW(const QString& filename);
