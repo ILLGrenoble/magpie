@@ -679,7 +679,21 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 		m_xtalangles[1]->setValue(lattice.beta);
 		m_xtalangles[2]->setValue(lattice.gamma);
 
-		// TODO: space group
+		// find space group
+		/*if(atoms.size() && generatedatoms.size())
+		{
+			if(auto matching_sgs =
+				find_matching_sgs<t_vec_real, t_mat_real>(
+					{ atoms[0] }, generatedatoms[0], g_eps); matching_sgs.size())
+			{
+				std::cout << std::get<1>(matching_sgs[0]) << std::endl;
+			}
+		}*/
+		if(t_size sgidx = match_symops<t_mat_real, t_real, t_size>(
+			symops, m_SGops, g_eps); sgidx < m_SGops.size())
+		{
+			m_comboSG->setCurrentIndex(sgidx);
+		}
 
 		// atom positions
 		for(std::size_t atomnum = 0; atomnum < atoms.size(); ++atomnum)

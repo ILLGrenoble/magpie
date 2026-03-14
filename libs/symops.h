@@ -299,4 +299,57 @@ requires tl2::is_mat<t_mat>
 }
 
 
+
+/**
+ * find matching symmetry operations in a list
+ */
+template<class t_mat, class t_real = typename t_mat::value_type, class t_size = std::size_t>
+t_size match_symops(const std::vector<t_mat>& symops,
+	const std::vector<std::vector<t_mat>>& symoplst, t_real eps = 1e-6)
+requires tl2::is_mat<t_mat>
+{
+	// try to find the symops in a symop list
+	auto match = [&symops, &symoplst, eps](std::size_t idx) -> bool
+	{
+		const std::vector<t_mat>& symops2 = symoplst[idx];
+
+		if(symops.size() != symops2.size())
+			return false;
+
+		// find this op in the symops2 list
+		for(const t_mat& op : symops)
+		{
+			auto iter = std::find_if(symops2.begin(), symops2.end(),
+			  [&op, eps](const t_mat& op2) -> bool
+			{
+				return tl2::equals<t_mat>(op, op2, eps);
+			});
+
+			// not found?
+			if(iter == symops2.end())
+			{
+				//using namespace tl2_ops;
+				//std::cout << "Not found: " << op << std::endl;
+				return false;
+			}
+		}
+
+		return true;
+	};
+
+
+	t_size idx = symoplst.size();  // set to invalid index
+
+	for(t_size i = 0; i < symoplst.size(); ++i)
+	{
+		if(match(i))
+		{
+			idx = i;
+			break;
+		}
+	}
+
+	return idx;
+}
+
 #endif
