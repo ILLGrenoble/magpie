@@ -31,7 +31,7 @@ APPDIRNAME="magpie_mingw"
 
 
 # icon
-APPICON="magpie.svg"
+APPICON="res/magpie.svg"
 APPICON_ICO="${APPICON%\.svg}.ico"
 
 
@@ -48,6 +48,7 @@ EXT_LIBS=( \
 	libboost_program_options-mt-x64.dll \
 	libMinuit2.dll libMinuit2Math.dll \
 	libqhull_r.dll libqcustomplot.dll \
+	libgemmi_cpp.dll \
 	liblapack.dll liblapacke.dll libblas.dll libgfortran-5.dll libquadmath-0.dll \
 	libstdc++-6.dll libwinpthread-1.dll libglib-2.0-0.dll libgcc_s_seh-1.dll \
 	libbz2-1.dll zlib1.dll libpng16-16.dll \
@@ -62,6 +63,9 @@ EXT_LIBS=( \
 QT_PLUGINS=( \
 	platforms/*.dll \
 	styles/*.dll \
+	iconengines/*.dll \
+	imageformats/qsvg.dll \
+	imageformats/qico.dll \
 )
 
 
@@ -79,10 +83,11 @@ svg_to_png() {
 	local ICON_SIZE="$2"
 
 	echo -e "${ICON_SVG} -> ${ICON_PNG} (size: ${ICON_SIZE}x${ICON_SIZE})..."
-	magick -resize "${ICON_SIZE}x${ICON_SIZE}" \
+	magick "${ICON_SVG}" \
+		-resize "${ICON_SIZE}x${ICON_SIZE}" \
 		-antialias -channel rgba \
 		-background "#ffffff00" -alpha background \
-		"${ICON_SVG}" "${ICON_PNG}"
+		"${ICON_PNG}"
 
 	svg_to_png_result="${ICON_PNG}"
 }
@@ -100,9 +105,11 @@ magick "${APPICON_PNG}" "${APPICON_ICO}"
 cp -v  tools/magdyn/build/*.exe  "${APPDIRNAME}/"
 cp -rv tools/magdyn/test         "${APPDIRNAME}/"
 cp -rv tools/magdyn/scripts      "${APPDIRNAME}/"
+cp -rv res                       "${APPDIRNAME}/"
+cp -v  "${APPICON_ICO}"          "${APPDIRNAME}/"
 cp -v  AUTHORS                   "${APPDIRNAME}/"
 cp -v  LICENSE                   "${APPDIRNAME}/"
-cp -rv 3rdparty_licenses         "${APPDIRNAME}/"
+cp -v  LICENSES                  "${APPDIRNAME}/"
 
 
 # copy third-party libraries
@@ -115,7 +122,7 @@ done
 for THELIB in ${QT_PLUGINS[@]}; do
 	LIBDIRNAME=$(dirname ${THELIB})
 	mkdir -p "${APPDIRNAME}/qt_plugins/${LIBDIRNAME}"
-	cp -v "${MINGW_QT_ROOT}/plugins/${THELIB}" "${APPDIRNAME}/qt_plugins/${LIBDIRNAME}"
+	cp -v "${MINGW_QT_ROOT}/plugins/"${THELIB} "${APPDIRNAME}/qt_plugins/${LIBDIRNAME}"
 done
 
 
