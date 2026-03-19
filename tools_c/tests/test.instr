@@ -1,0 +1,107 @@
+/**
+ * magpie c library interface test
+ * @author Tobias Weber <tweber@ill.fr>
+ * @date 19-march-2026
+ * @license GPLv3, see 'LICENSE' file
+ *
+ * ----------------------------------------------------------------------------
+ * tlibs
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
+ *                          Grenoble, France).
+ * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
+ *                          (TUM), Garching, Germany).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * ----------------------------------------------------------------------------
+ *
+ * compile with: ./build_instr.sh
+ * run with: DYLD_LIBRARY_PATH=../build LD_LIBRARY_PATH=../build ./test
+ */
+
+DEFINE INSTRUMENT MagpieTest
+(
+	string model_file = "../../tools/magdyn/test/ferromagnetic_chain.magpie"
+)
+
+
+
+DECLARE
+%{
+	#include "magpie_c.h"
+
+	void *mag = 0;   // magpie handle
+%}
+
+
+
+INITIALIZE
+%{
+	// initialise magpie
+	mag = magpie_create();
+	if(!mag)
+	{
+		fprintf(stderr, "Cannot initialise magpie.\n");
+		exit(-1);
+	}
+
+	// load the magnetic model given in the "model_file" parameter
+	fprintf(stderr, "Loading model file \"%s\"...\n", model_file);
+	if(!magpie_load(mag, model_file))
+	{
+		fprintf(stderr, "Cannot load magpie model file \"%s\".\n", model_file);
+		exit(-1);
+	}
+
+
+	// calculate the energies and weights for the given momentum transfers
+	unsigned int max_branches = magpie_branch_count(mag);
+	fprintf(stderr, "Calculating dispersion with up to %d magnon branches per Q...\n", max_branches);
+
+	t_magpie_real *Es = malloc(max_branches * sizeof(t_magpie_real));
+	t_magpie_real *ws = malloc(max_branches * sizeof(t_magpie_real));
+
+	t_magpie_real k = 0., l = 0.;
+	t_magpie_real h_step = 0.05;
+
+	printf("%10s %10s %10s %10s %10s\n", "h (rlu)", "k (rlu)", "l (rlu)", "E (meV)", "S (a.u.)");
+	for(t_magpie_real h = h_step; h < 1.; h += h_step)
+	{
+		unsigned int num_branches = magpie_calc_energies(mag, h, k, l, Es, ws);
+		for(unsigned int branch_idx = 0; branch_idx < num_branches; ++branch_idx)
+			printf("%10.4f %10.4f %10.4f %10.4f %10.4f\n", h, k, l, Es[branch_idx], ws[branch_idx]);
+	}
+
+	free(Es);
+	free(ws);
+%}
+
+
+
+TRACE
+
+
+COMPONENT start = Progress_bar() AT (0, 0, 0) ABSOLUTE
+
+
+FINALLY
+%{
+	// clean up magpie
+	if(mag)
+	{
+		magpie_free(mag);
+		mag = 0;
+	}
+%}
+
+
+END

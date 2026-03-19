@@ -44,6 +44,7 @@ endif()
 
 # -----------------------------------------------------------------------------
 # Boost
+# -----------------------------------------------------------------------------
 add_definitions(-DBOOST_SYSTEM_NO_DEPRECATED)
 find_package(Boost REQUIRED COMPONENTS filesystem iostreams OPTIONAL_COMPONENTS system)
 
@@ -53,6 +54,7 @@ message("Using Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boo
 
 # -----------------------------------------------------------------------------
 # Lapack(e)
+# -----------------------------------------------------------------------------
 find_package(GFortran)
 find_package(Lapacke REQUIRED)
 # -----------------------------------------------------------------------------
@@ -60,6 +62,7 @@ find_package(Lapacke REQUIRED)
 
 # -----------------------------------------------------------------------------
 # Gemmi
+# -----------------------------------------------------------------------------
 find_package(Gemmi REQUIRED)
 # -----------------------------------------------------------------------------
 
@@ -77,7 +80,9 @@ include_directories(
 
 # -----------------------------------------------------------------------------
 # magpie c library
+# -----------------------------------------------------------------------------
 add_library(magpie_c SHARED magpie_c.cpp magpie_c.h)
+#add_library(magpie_c STATIC magpie_c.cpp magpie_c.h)
 
 set_target_properties(magpie_c PROPERTIES CMAKE_CXX_STANDARD 20)
 target_compile_options(magpie_c PRIVATE -std=c++20)
@@ -91,12 +96,26 @@ target_link_libraries(magpie_c
 	#/usr/local/lib/libgemmi_cpp.a
 	gemmi::gemmi_cpp
 )
+
+# rpath
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+	target_link_options(magpie_c
+		# create an __info_plist section in the binary
+		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../setup/osx/InfoMagDyn.plist
+	)
+
+	add_custom_command(TARGET magpie_c POST_BUILD
+		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:magpie_c> || true
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+	)
+endif()
 # -----------------------------------------------------------------------------
 
 
 
 # -----------------------------------------------------------------------------
 # test programs
+# -----------------------------------------------------------------------------
 add_executable(test_calc_disp tests/calc_disp.c)
 
 set_target_properties(test_calc_disp PROPERTIES CMAKE_C_STANDARD 99)
