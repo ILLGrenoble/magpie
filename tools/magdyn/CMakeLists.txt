@@ -87,6 +87,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 endif()
 
 
+
 # -----------------------------------------------------------------------------
 # packages
 # -----------------------------------------------------------------------------
@@ -136,6 +137,10 @@ endif()
 # -----------------------------------------------------------------------------
 
 
+
+# -----------------------------------------------------------------------------
+# building
+# -----------------------------------------------------------------------------
 include_directories("${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/../..")
 
 include_directories(
@@ -245,6 +250,8 @@ else()
 		gemmi::gemmi_cpp
 	)
 endif()
+# -----------------------------------------------------------------------------
+
 
 
 # -----------------------------------------------------------------------------
@@ -261,4 +268,26 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	)
 endif()
+# -----------------------------------------------------------------------------
+
+
+
+# -----------------------------------------------------------------------------
+# installation and packaging
+# -----------------------------------------------------------------------------
+include(GNUInstallDirs)
+
+install(TARGETS magpie RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES ${PROJECT_SOURCE_DIR}/../../res/magpie.svg DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/magpie/res)
+install(FILES ${PROJECT_SOURCE_DIR}/../../AUTHORS DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/magpie)
+install(FILES ${PROJECT_SOURCE_DIR}/../../LICENSE DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/magpie)
+install(FILES ${PROJECT_SOURCE_DIR}/../../LICENSES DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/magpie)
+install(FILES ${PROJECT_SOURCE_DIR}/../../LITERATURE DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/magpie)
+install(FILES ${PROJECT_SOURCE_DIR}/../../CITATION.cff DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/magpie)
+
+
+set(CPACK_PACKAGE_VERSION "0.9.5")
+set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/../../LICENSE")
+
+include(CPack)
 # -----------------------------------------------------------------------------

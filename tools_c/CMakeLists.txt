@@ -131,3 +131,25 @@ target_compile_options(test_save_disp PRIVATE -std=c99)
 
 target_link_libraries(test_save_disp magpie_c)
 # -----------------------------------------------------------------------------
+
+
+
+# -----------------------------------------------------------------------------
+# installation and packaging
+# -----------------------------------------------------------------------------
+include(GNUInstallDirs)
+
+set_target_properties(magpie_c PROPERTIES PUBLIC_HEADER "magpie_c.h")
+
+install(TARGETS magpie_c
+	LIBRARY DESTINATION       ${CMAKE_INSTALL_LIBDIR}
+	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+
+
+set(CPACK_PACKAGE_VERSION "0.9.5")
+set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/../LICENSE")
+
+include(CPack)
+# -----------------------------------------------------------------------------
