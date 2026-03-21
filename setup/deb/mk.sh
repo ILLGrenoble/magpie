@@ -104,12 +104,13 @@ if [ $create_appdir -ne 0 ]; then
 	fi
 
 	# program files (changing bin name to not interfere with takin's bundled version)
-	cp -v  build/magpie/magpie       ${APPDIRNAME}${BINDIR}/themagpie
-	cp -v  AUTHORS                   ${APPDIRNAME}${SHAREDIR}/${APPNAME}/
-	cp -v  LICENSE                   ${APPDIRNAME}${SHAREDIR}/${APPNAME}/
-	cp -v  LICENSES                  ${APPDIRNAME}${SHAREDIR}/${APPNAME}/
-	cp -rv res/*                     ${APPDIRNAME}${SHAREDIR}/${APPNAME}/res/
-	cp -v  setup/deb/magpie.desktop  ${APPDIRNAME}/usr/share/applications
+	cp -v  build/magpie/magpie          ${APPDIRNAME}${BINDIR}/themagpie
+	cp -v  AUTHORS                      ${APPDIRNAME}${SHAREDIR}/${APPNAME}/
+	cp -v  LICENSE                      ${APPDIRNAME}${SHAREDIR}/${APPNAME}/
+	cp -v  LICENSES                     ${APPDIRNAME}${SHAREDIR}/${APPNAME}/
+	cp -rv res/*                        ${APPDIRNAME}${SHAREDIR}/${APPNAME}/res/
+	cp -v  setup/deb/themagpie.desktop  ${APPDIRNAME}/usr/share/applications
+	#cp -v  setup/deb/magpie.desktop     ${APPDIRNAME}/usr/share/applications
 
 	# py interface
 	cp -v  build/tools_py/magdyn/_magpy.so  ${APPDIRNAME}${PY_DISTDIR}
