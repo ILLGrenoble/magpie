@@ -208,10 +208,18 @@ if(USE_QT)
 		../../tlibs2/libs/qt/gl.cpp ../../tlibs2/libs/qt/gl.h
 		../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h
 		../../tlibs2/libs/qt/recent.cpp ../../tlibs2/libs/qt/recent.h
+		../../libs/symops.h
 
 		# plotting tool
 		../../tlibs2/tools/plot3d/plot3d.cpp ../../tlibs2/tools/plot3d/plot3d_file.cpp
-        ../../tlibs2/tools/plot3d/plot3d_calc.cpp ../../tlibs2/tools/plot3d/plot3d.h
+		../../tlibs2/tools/plot3d/plot3d_calc.cpp ../../tlibs2/tools/plot3d/plot3d.h
+
+		# bz tool
+		../bz/bz.cpp ../bz/bz_file.cpp ../bz/bz_calc.cpp
+		../bz/bz_ops.cpp ../bz/bz.h
+		../bz/bz_conf.cpp ../bz/bz_conf.h
+		../bz/globals.cpp ../bz/globals.h
+		../bz/bz_formulas.cpp
 
 #		../../ext/qcp/qcustomplot.cpp
 	)
@@ -287,8 +295,13 @@ install(FILES ${PROJECT_SOURCE_DIR}/../../CITATION.cff DESTINATION ${CMAKE_INSTA
 install(FILES ${PROJECT_SOURCE_DIR}/../../setup/deb/magpie.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
 
 
+set(CPACK_PACKAGE_NAME "Magpie")
+set(CPACK_PACKAGE_VENDOR "T. Weber, ILL, Grenoble")
 set(CPACK_PACKAGE_VERSION "0.9.5")
+set(CPACK_PACKAGE_DESCRIPTION "A Graphical Magnon Software")
+set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/../../res/magpie.svg")
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/../../LICENSE")
+set(CPACK_STRIP_FILES True)
 
 include(CPack)
 # -----------------------------------------------------------------------------

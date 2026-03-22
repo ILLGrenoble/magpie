@@ -138,7 +138,7 @@ using qgl_funcs = _GL_FUNC(_GL_MAJ_VER, _GL_MIN_VER, _GL_SUFFIX);
 
 
 // GL error codes: https://www.khronos.org/opengl/wiki/OpenGL_Error
-#define LOGGLERR(pGl) { while(true) {	\
+#define LOGGLERR(pGl) { while(pGl) {	\
 		auto err = pGl->glGetError();	\
 		if(err == GL_NO_ERROR) break;	\
 		std::cerr << "GL error in " << __func__ \

@@ -6,7 +6,7 @@
 #
 # ----------------------------------------------------------------------------
 # mag-core (part of the Takin software suite)
-# Copyright (C) 2018-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
+# Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
 #                          Grenoble, France).
 #
 # This program is free software: you can redistribute it and/or modify
@@ -49,6 +49,7 @@ add_compile_options(-Wall -Wextra)
 
 # -----------------------------------------------------------------------------
 # Boost
+# -----------------------------------------------------------------------------
 add_definitions(-DBOOST_SYSTEM_NO_DEPRECATED)
 find_package(Boost REQUIRED COMPONENTS filesystem iostreams OPTIONAL_COMPONENTS system)
 add_definitions(${Boost_CXX_FLAGS})
@@ -60,6 +61,7 @@ message("Using Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boo
 
 # -----------------------------------------------------------------------------
 # Python
+# -----------------------------------------------------------------------------
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development REQUIRED)
 
 message("Using Python version ${Python3_VERSION}. Dist packages: ${Python3_SITEARCH}")
@@ -78,6 +80,7 @@ include_directories(
 
 # -----------------------------------------------------------------------------
 # Python module
+# -----------------------------------------------------------------------------
 find_package(SWIG REQUIRED)
 set(UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
 include(${SWIG_USE_FILE})
@@ -93,4 +96,20 @@ target_link_libraries(instr_py Python3::Python)
 get_property(INSTR_AUX_FILES TARGET instr_py PROPERTY SWIG_SUPPORT_FILES)
 install(FILES ${INSTR_AUX_FILES} DESTINATION "${Python3_SITEARCH}")
 install(TARGETS instr_py LIBRARY DESTINATION "${Python3_SITEARCH}")
+# -----------------------------------------------------------------------------
+
+
+
+# -----------------------------------------------------------------------------
+# packaging
+# -----------------------------------------------------------------------------
+#set(CPACK_PACKAGE_NAME "Magpie")
+set(CPACK_PACKAGE_VERSION "0.9.5")
+set(CPACK_PACKAGE_VENDOR "T. Weber, ILL, Grenoble")
+set(CPACK_PACKAGE_DESCRIPTION "Instrument Data File Loader")
+#set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/../../res/magpie.svg")
+set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/../../LICENSE")
+set(CPACK_STRIP_FILES True)
+
+include(CPack)
 # -----------------------------------------------------------------------------

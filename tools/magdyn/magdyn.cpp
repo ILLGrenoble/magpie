@@ -457,6 +457,7 @@ void MagDynDlg::CreateMenuBar()
 	QMenu *menuTools = new QMenu("Tools", m_menu);
 	QAction *acTrafoCalc = new QAction("Transformations...", menuTools);
 	QAction *acPlot3d = new QAction("3D Plotter...", menuTools);
+	QAction *acBZTool = new QAction("Brillouin Zones...", menuTools);
 	QAction *acPolCalc = new QAction("Polarisation Vectors...", menuTools);
 	QAction *acPreferences = new QAction("Preferences...", menuTools);
 	acTrafoCalc->setIcon(QIcon::fromTheme("accessories-calculator"));
@@ -551,6 +552,8 @@ void MagDynDlg::CreateMenuBar()
 
 	menuTools->addAction(acTrafoCalc);
 	menuTools->addAction(acPlot3d);
+	menuTools->addAction(acBZTool);
+	menuTools->addAction(acBZTool);
 	menuTools->addAction(acPolCalc);
 	menuTools->addSeparator();
 	menuTools->addAction(acPreferences);
@@ -700,6 +703,17 @@ void MagDynDlg::CreateMenuBar()
 		m_plot3d->show();
 		m_plot3d->raise();
 		m_plot3d->activateWindow();
+	});
+
+	// show brillouin zone dialog
+	connect(acBZTool, &QAction::triggered, [this]()
+	{
+		if(!m_bz_tool)
+			m_bz_tool = new BZDlg(this/*, m_sett*/);
+
+		m_bz_tool->show();
+		m_bz_tool->raise();
+		m_bz_tool->activateWindow();
 	});
 
 	// show polarisation calculator dialog

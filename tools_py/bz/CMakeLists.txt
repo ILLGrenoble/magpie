@@ -96,3 +96,19 @@ if(SWIG_FOUND AND SWIG_python_FOUND)
 	install(FILES ${BZ_AUX_FILES} DESTINATION "${Python3_SITEARCH}")
 	install(TARGETS bz_py LIBRARY DESTINATION "${Python3_SITEARCH}")
 endif()
+
+
+
+# -----------------------------------------------------------------------------
+# packaging
+# -----------------------------------------------------------------------------
+#set(CPACK_PACKAGE_NAME "Magpie")
+set(CPACK_PACKAGE_VERSION "0.9.5")
+set(CPACK_PACKAGE_VENDOR "T. Weber, ILL, Grenoble")
+set(CPACK_PACKAGE_DESCRIPTION "Brillouin Zone Calculator")
+#set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/../../res/magpie.svg")
+set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/../../LICENSE")
+set(CPACK_STRIP_FILES True)
+
+include(CPack)
+# -----------------------------------------------------------------------------

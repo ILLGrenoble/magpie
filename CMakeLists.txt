@@ -30,11 +30,12 @@ cmake_minimum_required(VERSION 3.10)
 project(magpie)
 
 
-option(BUILD_MAGPIE        "build main program"         TRUE)
-option(BUILD_MODULES       "build tool programs"        TRUE)
-option(BUILD_PY_MODULES    "build py scripting modules" TRUE)
-option(ONLY_BUILD_FINISHED "only build finished tools"  TRUE)
-option(USE_QT6             "use Qt version 6"           TRUE)
+option(BUILD_MAGPIE        "build main program"             TRUE)
+option(BUILD_LIBRARY       "build program library"          TRUE)
+option(BUILD_MODULES       "build standalone tool programs" TRUE)
+option(BUILD_PY_MODULES    "build py scripting modules"     TRUE)
+option(ONLY_BUILD_FINISHED "only build finished tools"      TRUE)
+option(USE_QT6             "use Qt version 6"               TRUE)
 
 
 # mingw settings
@@ -50,6 +51,16 @@ if(BUILD_MAGPIE)
 	message("Configuring magpie...")
 	message("================================================================================")
 	add_subdirectory(tools/magdyn magpie)
+endif()
+
+
+# library
+if(BUILD_LIBRARY)
+	# magpie -- magnetic dynamics tool
+	message("\n================================================================================")
+	message("Configuring magpie C library...")
+	message("================================================================================")
+	add_subdirectory(tools_c)
 endif()
 
 

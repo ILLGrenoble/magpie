@@ -762,6 +762,9 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 		bool pos_x = true, bool pos_y = true,
 		const std::string& label = "")
 	{
+		if(texture_width <= 0 || texture_height <= 0)
+			return;
+
 		QImage img{texture_width, texture_height, QImage::Format_RGB32};
 		img.fill(0xffffffff);
 
@@ -1090,8 +1093,8 @@ void main()
 
 	// set glsl version and constants
 	const std::string strGlsl = std::to_string(_GLSL_MAJ_VER*100 + _GLSL_MIN_VER*10);
-	std::string strPi = std::to_string(tl2::pi<t_real_gl>);	// locale-dependent !
-	algo::replace_all(strPi, std::string(","), std::string("."));	// ensure decimal point
+	std::string strPi = std::to_string(tl2::pi<t_real_gl>);	      // locale-dependent !
+	algo::replace_all(strPi, std::string(","), std::string(".")); // ensure decimal point
 
 	for(std::string* strSrc : { &strFragShader, &strVertexShader })
 	{
@@ -1104,6 +1107,7 @@ void main()
 	auto *pGl = GetGlFunctions();
 	if(!pGl)
 		return;
+	LOGGLERR(pGl);
 
 	m_strGlVer = (char*)pGl->glGetString(GL_VERSION);
 	m_strGlShaderVer = (char*)pGl->glGetString(GL_SHADING_LANGUAGE_VERSION);
@@ -1131,14 +1135,12 @@ void main()
 		// compile & link shaders
 		m_pShaders = std::make_shared<QOpenGLShaderProgram>(this);
 
-		if(!m_pShaders->addShaderFromSourceCode(
-			QOpenGLShader::Fragment, strFragShader.c_str()))
+		if(!m_pShaders->addShaderFromSourceCode(QOpenGLShader::Fragment, strFragShader.c_str()))
 		{
 			shader_err("Cannot compile fragment shader.");
 			return;
 		}
-		if(!m_pShaders->addShaderFromSourceCode(
-			QOpenGLShader::Vertex, strVertexShader.c_str()))
+		if(!m_pShaders->addShaderFromSourceCode(QOpenGLShader::Vertex, strVertexShader.c_str()))
 		{
 			shader_err("Cannot compile vertex shader.");
 			return;
@@ -1705,7 +1707,7 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 			if(obj.m_texture)
 			{
 				pGl->glActiveTexture(GL_TEXTURE0);
-				pGl->glBindTexture(GL_TEXTURE_2D, 0);
+				pGl->glBindTexture(GL_TEXTURE_2D, 0);				
 				obj.m_texture->release();
 			}
 		} BOOST_SCOPE_EXIT_END
@@ -1770,7 +1772,11 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 		if(linkedObj->m_type == GlRenderObjType::TRIANGLES)
 		{
 			pGl->glEnableVertexAttribArray(m_attrVertexNorm);
-			pGl->glEnableVertexAttribArray(m_attrTexCoords);
+
+			if(linkedObj->m_uvs.size())
+				pGl->glEnableVertexAttribArray(m_attrTexCoords);
+			else
+				pGl->glDisableVertexAttribArray(m_attrTexCoords);
 		}
 		pGl->glEnableVertexAttribArray(m_attrVertexCol);
 		BOOST_SCOPE_EXIT(pGl, &m_attrVertex, &m_attrVertexNorm, &m_attrVertexCol, &m_attrTexCoords)

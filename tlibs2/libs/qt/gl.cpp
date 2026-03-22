@@ -77,7 +77,7 @@ QSurfaceFormat gl_format(
 
 	surf.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 	if(iSamples > 0)
-		surf.setSamples(iSamples);	// multisampling
+		surf.setSamples(iSamples);  // multisampling
 
 	return surf;
 }
@@ -300,9 +300,6 @@ bool create_line_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 	qgl_funcs* pGl = get_gl_functions(pGLWidget);
 	if(!pGl)
 		return false;
-
-	//GLint attrVertex = m_attrVertex;
-	//GLint attrVertexcolour = m_attrVertexCol;
 
 	obj.m_type = GlRenderObjType::LINES;
 	obj.m_colour = colour;
