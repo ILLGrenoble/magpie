@@ -86,6 +86,8 @@ class BZDlg : public QDialog
 {
 public:
 	BZDlg(QWidget* pParent = nullptr);
+	BZDlg(const BZDlg&) = delete;
+	BZDlg& operator=(const BZDlg&) = delete;
 	~BZDlg() = default;
 
 
