@@ -41,19 +41,19 @@
  */
 struct BZConfig
 {
-	boost::optional<t_real> xtal_a, xtal_b, xtal_c;
-	boost::optional<t_real> xtal_alpha, xtal_beta, xtal_gamma;
+	boost::optional<t_real> xtal_a{}, xtal_b{}, xtal_c{};
+	boost::optional<t_real> xtal_alpha{}, xtal_beta{}, xtal_gamma{};
 
-	boost::optional<int> order, cut_order;
+	boost::optional<int> order{}, cut_order{};
 
-	boost::optional<t_real> cut_x, cut_y, cut_z;
-	boost::optional<t_real> cut_nx, cut_ny, cut_nz;
-	boost::optional<t_real> cut_d;
+	boost::optional<t_real> cut_x{}, cut_y{}, cut_z{};
+	boost::optional<t_real> cut_nx{}, cut_ny{}, cut_nz{};
+	boost::optional<t_real> cut_d{};
 
-	boost::optional<int> sg_idx;
+	boost::optional<int> sg_idx{};
 
-	std::vector<t_mat_bz> symops;
-	std::vector<std::string> formulas;
+	std::vector<t_mat_bz> symops{};
+	std::vector<std::string> formulas{};
 };
 
 

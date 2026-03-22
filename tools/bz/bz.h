@@ -149,8 +149,8 @@ private:
 	// results panel
 	QPlainTextEdit *m_bzresults = nullptr;
 	QPlainTextEdit *m_bzresultsJSON = nullptr;
-	std::string m_descrBZ, m_descrBZCut{};          // text description of the results
-	std::string m_descrBZJSON, m_descrBZCutJSON{};  // json description of the results
+	std::string m_descrBZ{}, m_descrBZCut{};          // text description of the results
+	std::string m_descrBZJSON{}, m_descrBZCutJSON{};  // json description of the results
 
 	// menu
 	QAction *m_acCutHull = nullptr;
@@ -169,7 +169,7 @@ private:
 	t_mat_bz m_crystB = tl2::unit<t_mat_bz>(3);     // crystal B matrix
 
 	std::vector<std::vector<t_mat_bz>> m_sg_ops{};  // symops per space group
-	BZCalc<t_mat_bz, t_vec_bz, t_real> m_bzcalc;    // calculation kernel
+	BZCalc<t_mat_bz, t_vec_bz, t_real> m_bzcalc{};  // calculation kernel
 
 
 protected:
