@@ -44,7 +44,7 @@
 int gui_main(int argc, char** argv, const std::string& model_file,
 	const t_vec_real& Qi, const t_vec_real& Qf, t_size num_Q_pts)
 {
-	tl2::set_gl_format(1, _GL_MAJ_VER, _GL_MIN_VER, 8);
+	tl2::set_gl_format(true, _GL_MAJ_VER, _GL_MIN_VER);
 
 	// application
 	auto app = std::make_unique<QApplication>(argc, argv);

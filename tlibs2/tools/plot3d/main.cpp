@@ -44,7 +44,7 @@
 
 int main(int argc, char** argv)
 {
-	tl2::set_gl_format(1, _GL_MAJ_VER, _GL_MIN_VER, 8);
+	tl2::set_gl_format(true, _GL_MAJ_VER, _GL_MIN_VER);
 
 	// application
 	QApplication::addLibraryPath(QString(".") + QDir::separator() + "qtplugins");

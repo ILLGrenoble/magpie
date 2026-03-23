@@ -15,7 +15,7 @@
  *
  * ----------------------------------------------------------------------------
  * tlibs
- * Copyright (C) 2017-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
@@ -39,6 +39,7 @@
 #include <QtGui/QOpenGLContext>
 #include <QtGui/QOpenGLFunctions>
 #include <QtGui/QSurfaceFormat>
+#include <QtGui/QColorSpace>
 
 #include "gl.h"
 
@@ -63,8 +64,8 @@ namespace tl2 {
 /**
  * create a gl surface format
  */
-QSurfaceFormat gl_format(
-	bool bCore, int iMajorVer, int iMinorVer, int iSamples, QSurfaceFormat surf)
+QSurfaceFormat gl_format(bool bCore, int iMajorVer, int iMinorVer,
+	int iSamples, QSurfaceFormat surf)
 {
 	surf.setRenderableType(QSurfaceFormat::OpenGL);
 	if(bCore)
@@ -76,8 +77,10 @@ QSurfaceFormat gl_format(
 		surf.setVersion(iMajorVer, iMinorVer);
 
 	surf.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-	if(iSamples > 0)
-		surf.setSamples(iSamples);  // multisampling
+	surf.setSwapInterval(1);
+	surf.setSamples(iSamples);  // multisampling
+
+	surf.setColorSpace(QColorSpace(QColorSpace::SRgb));
 
 	return surf;
 }
@@ -116,7 +119,7 @@ qgl_funcs* get_gl_functions(QOpenGLWidget *pGLWidget)
 	}
 
 	if(!pGl)
-		std::cerr << "No suitable GL interface found." << std::endl;
+		std::cerr << "GL error: No suitable interface found." << std::endl;
 
 	return pGl;
 }
@@ -190,9 +193,9 @@ bool create_triangle_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 		} BOOST_SCOPE_EXIT_END
 
 		if(!obj.m_vertex_buffer->create())
-			std::cerr << "Cannot create vertex buffer." << std::endl;
+			std::cerr << "GL error: Cannot create vertex buffer." << std::endl;
 		if(!obj.m_vertex_buffer->bind())
-			std::cerr << "Cannot bind vertex buffer." << std::endl;
+			std::cerr << "GL error: Cannot bind vertex buffer." << std::endl;
 
 		auto vecVerts = to_float_array(triagverts, 1, 4, false, 1.);
 		obj.m_vertex_buffer->allocate(

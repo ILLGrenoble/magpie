@@ -151,7 +151,7 @@ static int cli_main(const std::string& cfg_file, const std::string& results_file
  */
 static int gui_main(int argc, char** argv, const std::string& cfg_file, bool use_stdin)
 {
-	tl2::set_gl_format(1, _GL_MAJ_VER, _GL_MIN_VER, 8);
+	tl2::set_gl_format(true, _GL_MAJ_VER, _GL_MIN_VER);
 
 	// application
 	auto app = std::make_unique<QApplication>(argc, argv);

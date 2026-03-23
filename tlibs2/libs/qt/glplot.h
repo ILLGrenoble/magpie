@@ -148,9 +148,9 @@ protected:
 
 
 protected:
-	qgl_funcs* GetGlFunctions()
+	inline qgl_funcs* GetGlFunctions()
 	{
-		return get_gl_functions((QOpenGLWidget*)m_pPlot);
+		return get_gl_functions(reinterpret_cast<QOpenGLWidget*>(m_pPlot));
 	}
 
 	void UpdateCam();

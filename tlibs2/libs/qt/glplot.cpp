@@ -918,7 +918,7 @@ vec3 get_campos()
 
 /**
  * phong lighting model
- * @see: https://en.wikipedia.org/wiki/Phong_reflection_model
+ * @see https://en.wikipedia.org/wiki/Phong_reflection_model
  */
 float phong_lighting(vec4 objVert, vec4 objNorm)
 {
@@ -1168,8 +1168,8 @@ void main()
 		m_uniLightPos = m_pShaders->uniformLocation("light_pos");
 		m_uniNumActiveLights = m_pShaders->uniformLocation("active_lights");
 		m_uniLighting = m_pShaders->uniformLocation("lighting");
-		m_uniTextureIndex = m_pShaders->uniformLocation("texture_index");
 		m_uniTextureActive = m_pShaders->uniformLocation("texture_active");
+		m_uniTextureIndex = m_pShaders->uniformLocation("texture_index");
 
 		// attributes
 		m_attrVertex = m_pShaders->attributeLocation("vertex");
@@ -1199,7 +1199,7 @@ void main()
 			pContext && !pContext->supportsThreadedOpenGL())
 		{
 			m_platform_supported = false;
-			std::cerr << "Threaded GL is not supported on this platform."
+			std::cerr << "GL error: Threading is not supported on this platform."
 				<< std::endl;
 		}
 	}
@@ -1279,7 +1279,7 @@ void GlPlotRenderer::SetBTrafo(const t_mat_gl& matB, const t_mat_gl* matA, bool 
 		if(!ok)
 		{
 			m_matA = tl2::unit<t_mat_gl>();
-			std::cerr << "Error: Cannot invert B matrix." << std::endl;
+			std::cerr << "GL error: Cannot invert B matrix." << std::endl;
 		}
 		else
 		{
@@ -1707,15 +1707,17 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 			if(obj.m_texture)
 			{
 				pGl->glActiveTexture(GL_TEXTURE0);
-				pGl->glBindTexture(GL_TEXTURE_2D, 0);				
+				pGl->glBindTexture(GL_TEXTURE_2D, 0);
+				//GLuint tex_num = 0;
+				//pGl->glDeleteTextures(1, &tex_num);
 				obj.m_texture->release();
 			}
 		} BOOST_SCOPE_EXIT_END
 
 		if(obj.m_texture)
 		{
+			m_pShaders->setUniformValue(m_uniTextureActive, true);
 			m_pShaders->setUniformValue(m_uniTextureIndex, 0);
-			m_pShaders->setUniformValue(m_uniTextureActive, 1);
 
 			pGl->glActiveTexture(GL_TEXTURE0);
 			obj.m_texture->bind();
@@ -1727,8 +1729,8 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 		}
 		else
 		{
+			m_pShaders->setUniformValue(m_uniTextureActive, false);
 			m_pShaders->setUniformValue(m_uniTextureIndex, 0);
-			m_pShaders->setUniformValue(m_uniTextureActive, 0);
 		}
 
 
@@ -1796,7 +1798,7 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 		else if(linkedObj->m_type == GlRenderObjType::LINES)
 			pGl->glDrawArrays(GL_LINES, 0, linkedObj->m_vertices.size());
 		else
-			std::cerr << "Unknown plot object type." << std::endl;
+			std::cerr << "GL error: Unknown plot object type." << std::endl;
 
 
 		LOGGLERR(pGl);
@@ -2123,7 +2125,7 @@ void GlPlotRenderer::paintGL()
 #endif
 		if(!m_pPlot->IsContextInThread())
 		{
-			std::cerr << __func__ << ": Context is not in thread!" << std::endl;
+			std::cerr << "GL error in " << __func__ << ": Context is not in thread!" << std::endl;
 			return;
 		}
 
@@ -2148,7 +2150,7 @@ void GlPlotRenderer::paintGL()
 			initialiseGL();
 		if(!m_initialised)
 		{
-			std::cerr << "Cannot initialise GL." << std::endl;
+			std::cerr << "GL error: Initialisation failed." << std::endl;
 			return;
 		}
 
