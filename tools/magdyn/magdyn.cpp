@@ -737,7 +737,7 @@ void MagDynDlg::CreateMenuBar()
 	// show info dialog
 	connect(acHelp, &QAction::triggered, [this]()
 	{
-		QUrl url("https://github.com/ILLGrenoble/magpie/wiki/Modelling-Magnetic-Structures");
+		QUrl url("https://github.com/ILLGrenoble/magpie/wiki");
 		if(!QDesktopServices::openUrl(url))
 			ShowError("Could not open the wiki.");
 	});
