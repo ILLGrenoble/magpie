@@ -352,9 +352,27 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "\n# spin-wave calculation\n";
 	ofstr << "@printf(\"Calculating S(Q, E)...\\n\")\n";
 
+	// form factors
+	ofstr << "ffacts = nothing\n";
+	ofstr << "try\n";
+	ofstr << "\tglobal ffacts = [\n";
+	site_idx = 1;
+	for(const t_site& site : m_dyn.GetMagneticSites())
+	{
+		ofstr << "\t\t" << site_idx << " => FormFactor(\"" << site.name << "\"),\n";
+		++site_idx;
+	}
+	ofstr << "\t]\n";
+	ofstr << "catch err\n";
+	ofstr << "\t#println(\"Error: Invalid form factors.\")\n";
+	ofstr << "end\n";
+
+	// magnon energies and spin-spin correlations
 	ofstr << "cholesky_eps = 1e-8\n";
 	std::string proj = m_use_projector->isChecked() ? "ssf_perp" : "ssf_trace";
-	ofstr << "calc = SpinWaveTheory(magsys; measure = " << proj << "(magsys), regularization = cholesky_eps)\n";
+	ofstr << "calc = SpinWaveTheory(magsys; measure = "
+		<< proj << "(magsys; formfactors = ffacts)"
+		<< ", regularization = cholesky_eps)\n";
 
 	//ofstr << "momenta = collect(range(Qstart, Qend, Qpts))\n";
 	ofstr << "momenta = q_space_path(magsys.crystal, [ Qstart, Qend ], Qpts)\n";
