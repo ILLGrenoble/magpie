@@ -359,7 +359,8 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	site_idx = 1;
 	for(const t_site& site : m_dyn.GetMagneticSites())
 	{
-		ofstr << "\t\t# TODO: use ion names as they are defined in sunny's database\n";
+		if(site_idx == 1)
+			ofstr << "\t\t# TODO: use ion names as they are defined in sunny's database\n";
 		ofstr << "\t\t" << site_idx << " => FormFactor(\"" << site.name << "\"),\n";
 		++site_idx;
 	}
