@@ -6,7 +6,7 @@
  *
  * ----------------------------------------------------------------------------
  * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -359,6 +359,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	site_idx = 1;
 	for(const t_site& site : m_dyn.GetMagneticSites())
 	{
+		ofstr << "\t\t# TODO: use ion names as they are defined in sunny's database"
 		ofstr << "\t\t" << site_idx << " => FormFactor(\"" << site.name << "\"),\n";
 		++site_idx;
 	}
