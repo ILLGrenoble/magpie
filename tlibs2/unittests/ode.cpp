@@ -48,8 +48,9 @@ using namespace tl2_ops;
 namespace odeint = boost::numeric::odeint;
 
 // mark custom vector as resizeable
-template<> struct odeint::is_resizeable<tl2::vec<float, std::vector>> : std::true_type {};
-template<> struct odeint::is_resizeable<tl2::vec<double, std::vector>> : std::true_type {};
+template<> struct odeint::is_resizeable<tl2::vec<float, std::vector>> : boost::true_type {};
+template<> struct odeint::is_resizeable<tl2::vec<double, std::vector>> : boost::true_type {};
+
 
 template<class t_mat, class t_vec, class t_val=typename t_vec::value_type>
 t_vec odesys(const t_mat& C, const t_vec& y0, t_val x_start, t_val x_end, t_val x_step = 0.01)

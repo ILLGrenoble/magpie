@@ -307,6 +307,7 @@ int main(int argc, char** argv)
 		set_locales();
 
 		bool show_help = false;
+		bool healthcheck = false;
 		bool silent = false;
 		bool use_cli = false;
 		bool show_timing = false;
@@ -326,6 +327,7 @@ int main(int argc, char** argv)
 		args::options_description arg_descr("Magpie arguments");
 		arg_descr.add_options()
 			("help,h", args::bool_switch(&show_help), "show help")
+			("healthcheck", args::bool_switch(&healthcheck), "check program integrity")
 #ifndef DONT_USE_QT
 			("cli,c", args::bool_switch(&use_cli), "use command-line interface")
 #endif
@@ -384,6 +386,20 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 )BLOCK";
 			std::cout << std::endl;
+			return 0;
+		}
+
+
+		if(healthcheck)
+		{
+			extern bool healthcheck();
+			if(!healthcheck())
+			{
+				CERR_OPT << "Error: Program integrity check failed!" << std::endl;
+				return -1;
+			}
+
+			CERR_OPT << "All OK." << std::endl;
 			return 0;
 		}
 

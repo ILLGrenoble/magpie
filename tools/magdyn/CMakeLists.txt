@@ -182,8 +182,8 @@ if(USE_QT)
 		export/script.cpp export/sqe.cpp
 		kernel.cpp dispersion.cpp
 		graph.cpp graph.h
-		defs.cpp defs.h
-		gui_defs.h
+		defs.cpp defs.h gui_defs.h
+		healthcheck.cpp
 
 		# bz calculator
 		../bz/bz_lib.h ../bz/plot_cut.h
