@@ -31,13 +31,17 @@
 #include <QtCore/QDir>
 #include <QtWidgets/QApplication>
 
-#include <iostream>
+#include <string>
 
 #include "tlibs2/libs/qt/helper.h"
 
 
 int main(int argc, char** argv)
 {
+	// TODO
+	if(argc > 1 && std::string(argv[1]) == "--healthcheck")
+		return 0;
+
 	tl2::set_gl_format(true, _GL_MAJ_VER, _GL_MIN_VER);
 
 	auto app = std::make_unique<QApplication>(argc, argv);

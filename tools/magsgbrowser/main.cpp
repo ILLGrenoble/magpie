@@ -29,7 +29,7 @@
 #include <QtCore/QSettings>
 #include <QtWidgets/QApplication>
 
-#include <locale>
+#include <string>
 #include <memory>
 
 #include "browser.h"
@@ -41,6 +41,10 @@
 
 int main(int argc, char** argv)
 {
+	// TODO
+	if(argc > 1 && std::string(argv[1]) == "--healthcheck")
+		return 0;
+
 	QSettings sett("takin", "sgbrowser", nullptr);
 
 	auto app = std::make_unique<QApplication>(argc, argv);

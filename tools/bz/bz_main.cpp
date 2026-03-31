@@ -188,6 +188,7 @@ int main(int argc, char** argv)
 	bool use_cli = false;
 #endif
 	bool show_help = false;
+	bool health_check = false;
 	bool use_stdin = false;
 	t_real eps = -1.;
 	std::string cfg_file, results_file;
@@ -195,6 +196,7 @@ int main(int argc, char** argv)
 	args::options_description arg_descr("Takin/BZ arguments");
 	arg_descr.add_options()
 		("help,h", args::bool_switch(&show_help), "show help")
+		("healthcheck", args::bool_switch(&health_check), "check program integrity")
 #ifndef DONT_USE_QT
 		("cli,c", args::bool_switch(&use_cli), "use command-line interface")
 #endif
@@ -219,6 +221,12 @@ int main(int argc, char** argv)
 	if(show_help)
 	{
 		std::cout << arg_descr << std::endl;
+		return 0;
+	}
+
+	if(health_check)
+	{
+		// TODO
 		return 0;
 	}
 

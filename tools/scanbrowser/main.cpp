@@ -23,8 +23,9 @@
  * ----------------------------------------------------------------------------
  */
 
-#include <iostream>
 #include <QtWidgets/QApplication>
+
+#include <string>
 
 #include "tlibs2/libs/qt/helper.h"
 #include "mainwnd.h"
@@ -32,6 +33,10 @@
 
 int main(int argc, char** argv)
 {
+	// TODO
+	if(argc > 1 && std::string(argv[1]) == "--healthcheck")
+		return 0;
+
 	QApplication app(argc, argv);
 	tl2::set_locales();
 
