@@ -395,11 +395,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 			extern bool healthcheck();
 			if(!healthcheck())
 			{
-				CERR_OPT << "Error: Program integrity check failed!" << std::endl;
+				CERR_OPT << "Magpie error: Program integrity check failed!" << std::endl;
 				return -1;
 			}
 
-			CERR_OPT << "All OK." << std::endl;
+			CERR_OPT << "Magpie: All OK." << std::endl;
 			return 0;
 		}
 
