@@ -1,12 +1,23 @@
 /**
  * magnetic dynamics -- exporting the magnetic structure to other magnon tools
  * @author Tobias Weber <tweber@ill.fr>
- * @date 26-june-2024
+ * @date 26-june-2024, 3-april-2026
  * @license GPLv3, see 'LICENSE' file
+ *
+ * References:
+ *   - (Toth 2015) S. Toth and B. Lake, J. Phys.: Condens. Matter 27 166002 (2015):
+ *                 https://doi.org/10.1088/0953-8984/27/16/166002
+ *                 https://arxiv.org/abs/1402.6069
+ *   - (McClarty 2022) https://doi.org/10.1146/annurev-conmatphys-031620-104715
+ *   - (Heinsdorf 2021) N. Heinsdorf, manual example calculation for a simple
+ *                      ferromagnetic case, personal communications, 2021/2022.
+ *
+ * @desc This file implements the formalism given by (Toth 2015).
+ * @desc For further references, see the 'LITERATURE' file.
  *
  * ----------------------------------------------------------------------------
  * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -84,12 +95,10 @@ void MagDynDlg::ExportToScript()
 bool MagDynDlg::ExportToScript(const QString& _filename)
 {
 	std::string scr = R"BLOCK(
-import numpy as np
-import numpy.linalg as la
-
 only_pos_E    = True     # hide magnon annihilation?
 verbose_print = False    # print intermediate results
 weight_scale  = 16.      # S(q, E) scaling factor for plotting
+
 
 # debug output
 def print_infos(str):
@@ -216,10 +225,10 @@ def get_correlations(Qvec, states, H, C, signs, sites):
 			M = np.zeros((2*num_sites, 2*num_sites), dtype = complex)
 			for i in range(num_sites):
 				S_i = sites[i]["S"]
-				u_i = -2. * sites[i]["u"]
+				u_i = g_e * sites[i]["u"]
 				for j in range(num_sites):
 					S_j = sites[j]["S"]
-					u_j = -2. * sites[j]["u"]
+					u_j = g_e * sites[j]["u"]
 
 					S = np.sqrt(S_i * S_j)
 					e = np.exp(2j*np.pi * np.dot(Qvec, (np.array(sites[j]["pos"]) - np.array(sites[i]["pos"]))))
@@ -240,7 +249,6 @@ def get_correlations(Qvec, states, H, C, signs, sites):
 		weights.append(np.abs(S_mats[E_idx, :, :].trace().real))
 
 	return weights
-
 )BLOCK";
 
 	std::string filename = _filename.toStdString();
@@ -254,6 +262,7 @@ def get_correlations(Qvec, states, H, C, signs, sites):
 
 	ofstr.precision(g_prec);
 
+	// header
 	const char* user = std::getenv("USER");
 	if(!user)
 		user = "";
@@ -265,9 +274,11 @@ def get_correlations(Qvec, states, H, C, signs, sites):
 		<< "# DOI: https://doi.org/10.5281/zenodo.16180814\n"
 		<< "# User: " << user << "\n"
 		<< "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n"
-		<< "#\n";
+		<< "#\n\n";
 
-	ofstr << scr << "\n";
+	// imports
+	ofstr << "import numpy as np\n";
+	ofstr << "import numpy.linalg as la\n\n";
 
 
 	// --------------------------------------------------------------------
@@ -281,6 +292,7 @@ def get_correlations(Qvec, states, H, C, signs, sites):
 	ofstr << "\n# variables\n";
 
 	// internal constants and variables
+	ofstr << "g_e     = " << tl2::g_e<t_real> << "\n";
 	ofstr << "Qstart  = np.array([ " << h1 << ", " << k1 << ", " << l1 << " ])\n";
 	ofstr << "Qend    = np.array([ " << h2 << ", " << k2 << ", " << l2 << " ])\n";
 	ofstr << "Qpts    = " << m_num_points->value() << "\n";
@@ -294,6 +306,10 @@ def get_correlations(Qvec, states, H, C, signs, sites):
 		ofstr << "\n";
 	}
 	// --------------------------------------------------------------------
+
+
+	// script functions
+	ofstr << scr << "\n";
 
 
 	// --------------------------------------------------------------------
@@ -333,9 +349,9 @@ def get_correlations(Qvec, states, H, C, signs, sites):
 		if(field.align_spins)
 		{
 			ofstr << ", \"Sdir\" : [ "
-				<< field.dir[0] << ", "
-				<< field.dir[1] << ", "
-				<< field.dir[2] << " ]";
+				<< -field.dir[0] << ", "
+				<< -field.dir[1] << ", "
+				<< -field.dir[2] << " ]";
 		}
 		else
 		{
