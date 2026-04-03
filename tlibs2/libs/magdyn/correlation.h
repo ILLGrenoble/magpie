@@ -63,7 +63,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	if(N == 0)
 		return false;
 
-	SortByEnergies(S);
+	SortByEnergies(S);  // in descending order
 
 	// create a matrix of eigenvectors
 	std::vector<t_vec> evecs;
@@ -87,11 +87,24 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 
 	// equation (32) from (Toth 2015)
 	const t_mat energy_mat = tl2::herm(S.evec_mat) * S.H_comm * S.evec_mat;  // energies
+
+#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+	std::cout << "E_mat =\n";
+	tl2::niceprint(std::cout, energy_mat, 1e-4, 4);
+#endif
+
+	// check that the energy matrix is diagonal
+	if(m_perform_checks && !tl2::is_diag(energy_mat, m_eps))
+	{
+		TL2_CERR_OPT << "Magdyn error: Energy matrix is not diagonal at Q = "
+			<< S.Q_rlu << ": " << energy_mat
+			<< "." << std::endl;
+	}
+
 	t_mat E_sqrt = S.comm * energy_mat;        // abs. energies
 	for(t_size i = 0; i < E_sqrt.size1(); ++i)
 		E_sqrt(i, i) = std::sqrt(E_sqrt(i, i));  // sqrt. of abs. energies
 
-	// re-create energies, to be consistent with the weights
 	if(energy_mat.size1() != S.E_and_S.size())
 	{
 		TL2_CERR_OPT << "Magdyn warning: Expected " << S.E_and_S.size() << " energies at Q = "
@@ -101,6 +114,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		S.E_and_S.resize(energy_mat.size1());
 	}
 
+	// re-create energies, to be consistent with the weights
 	for(t_size i = 0; i < energy_mat.size1(); ++i)
 	{
 		if(m_perform_checks && !tl2::equals_0(energy_mat(i, i).imag(), m_eps))
@@ -153,29 +167,35 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		t_mat M = tl2::create<t_mat>(2*N, 2*N);
 
 		for(t_size i = 0; i < N; ++i)
-		for(t_size j = 0; j < N; ++j)
 		{
-			// get the sites
+			// get the outer site
 			const MagneticSite& s_i = GetMagneticSite(i);
-			const MagneticSite& s_j = GetMagneticSite(j);
 
 			// get the pre-calculated u vectors
 			const t_vec& u_i = s_i.ge_trafo_plane_calc;
-			const t_vec& u_j = s_j.ge_trafo_plane_calc;
 			const t_vec& uc_i = s_i.ge_trafo_plane_conj_calc;
-			const t_vec& uc_j = s_j.ge_trafo_plane_conj_calc;
 
-			// pre-factors of equation (44) from (Toth 2015)
-			const t_real S_mag = std::sqrt(s_i.spin_mag_calc * s_j.spin_mag_calc);
-			const t_cplx phase = std::exp(-m_phase_sign * s_imag * s_twopi *
-				tl2::inner<t_vec_real>(s_j.pos_calc - s_i.pos_calc, S.Q_rlu));
+			for(t_size j = 0; j < N; ++j)
+			{
+				// get the inner site
+				const MagneticSite& s_j = GetMagneticSite(j);
 
-			// matrix elements of equation (44) from (Toth 2015)
-			M(    i,     j) = phase * S_mag * u_i[x_idx]  * uc_j[y_idx];  // b_i+ b_j terms
-			M(    i, N + j) = phase * S_mag * u_i[x_idx]  * u_j[y_idx];   // b_i+ b_j+ terms
-			M(N + i,     j) = phase * S_mag * uc_i[x_idx] * uc_j[y_idx];  // b_i b_j terms
-			M(N + i, N + j) = phase * S_mag * uc_i[x_idx] * u_j[y_idx];   // b_i b_j+ terms
-		} // end of site iteration
+				// get the pre-calculated u vectors
+				const t_vec& u_j = s_j.ge_trafo_plane_calc;
+				const t_vec& uc_j = s_j.ge_trafo_plane_conj_calc;
+
+				// pre-factors of equation (44) from (Toth 2015)
+				const t_real S_mag = std::sqrt(s_i.spin_mag_calc * s_j.spin_mag_calc);
+				const t_cplx phase = std::exp(-m_phase_sign * s_imag * s_twopi *
+					tl2::inner<t_vec_real>(s_j.pos_calc - s_i.pos_calc, S.Q_rlu));
+
+				// matrix elements of equation (44) from (Toth 2015)
+				M(    i,     j) = phase * S_mag * u_i[x_idx]  * uc_j[y_idx];  // b_i+ b_j terms
+				M(    i, N + j) = phase * S_mag * u_i[x_idx]  * u_j[y_idx];   // b_i+ b_j+ terms
+				M(N + i,     j) = phase * S_mag * uc_i[x_idx] * uc_j[y_idx];  // b_i b_j terms
+				M(N + i, N + j) = phase * S_mag * uc_i[x_idx] * u_j[y_idx];   // b_i b_j+ terms
+			}  // end of inner site iteration
+		}  // end of outer site iteration
 
 		// multiply with boson operators
 		const t_mat M_xy = boson_ops_herm * M * boson_ops;

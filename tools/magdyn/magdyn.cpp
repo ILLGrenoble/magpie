@@ -288,7 +288,7 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acStructImport = new QAction("Import From Table...", menuStruct);
 	QAction *acStructExportSun = new QAction("Export To Sunny Code...");
 	QAction *acStructExportSW = new QAction("Export To SpinW Code...");
-	QAction *acStructExportScript = new QAction("Export To Script [Experimental]...");
+	QAction *acStructExportScript = new QAction("Export To Script...");
 	QAction *acStructNotes = new QAction("Notes...", menuStruct);
 	QAction *acStructView = new QAction("View Structure...", menuStruct);
 	QAction *acBZView = new QAction("View Brillouin Zone...", menuStruct);

@@ -412,7 +412,7 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 
 
 /**
- * sort states by energies
+ * sort states by energies in descending order
  */
 MAGDYN_TEMPL
 void MAGDYN_INST::SortByEnergies(MAGDYN_TYPE::SofQE& S) const

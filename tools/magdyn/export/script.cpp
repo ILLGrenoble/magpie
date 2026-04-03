@@ -31,10 +31,7 @@ namespace pt = boost::property_tree;
 
 #include <QtCore/QString>
 
-#include <iostream>
 #include <fstream>
-#include <vector>
-#include <unordered_set>
 #include <cstdlib>
 
 #include "tlibs2/libs/str.h"
@@ -92,6 +89,7 @@ import numpy.linalg as la
 
 only_pos_E    = True     # hide magnon annihilation?
 verbose_print = False    # print intermediate results
+weight_scale  = 16.      # S(q, E) scaling factor for plotting
 
 # debug output
 def print_infos(str):
@@ -156,7 +154,7 @@ def get_energies(Qvec, sites, couplings):
 		site1 = coupling["sites"][0]
 		site2 = coupling["sites"][1]
 
-		J_ft = J_real * np.exp(-1j * 2.*np.pi * np.dot(dist, Qvec))
+		J_ft = J_real * np.exp(-2j*np.pi * np.dot(dist, Qvec))
 		J_fourier[site1, site2] += J_ft
 		J_fourier[site2, site1] += J_ft.transpose().conj()
 		J0_fourier[site1, site2] += J_real
@@ -178,16 +176,12 @@ def get_energies(Qvec, sites, couplings):
 			v_j = sites[j]["v"]
 			S = 0.5 * np.sqrt(S_i * S_j)
 
-			H[i, j] += S * np.dot(u_i, np.dot(J_fourier[i, j], u_j.conj()))
-			H[i, i] -= S_j * np.dot(v_i, np.dot(J0_fourier[i, j], v_j))
-			H[num_sites + i, num_sites + j] += \
-				S * np.dot(u_i.conj(), np.dot(J_fourier[i, j], u_j))
-			H[num_sites + i, num_sites + i] -= \
-				S_j * np.dot(v_i, np.dot(J0_fourier[i, j], v_j))
-			H[i, num_sites + j] += \
-				S * np.dot(u_i, np.dot(J_fourier[i, j], u_j))
-			H[num_sites + i, j] += \
-				(S * np.dot(u_j, np.dot(J_fourier[j, i], u_i))).conj()
+			H[            i,             j] += S   * np.dot(u_i,        np.dot(J_fourier[i, j],  u_j.conj()))
+			H[            i,             i] -= S_j * np.dot(v_i,        np.dot(J0_fourier[i, j], v_j))
+			H[num_sites + i, num_sites + j] += S   * np.dot(u_i.conj(), np.dot(J_fourier[i, j],  u_j))
+			H[num_sites + i, num_sites + i] -= S_j * np.dot(v_i,        np.dot(J0_fourier[i, j], v_j))
+			H[            i, num_sites + j] += S   * np.dot(u_i,        np.dot(J_fourier[i, j],  u_j))
+			H[num_sites + i,             j] += (S  * np.dot(u_j,        np.dot(J_fourier[j, i],  u_i))).conj()
 
 	print_infos("\nH =\n%s" % H)
 
@@ -198,10 +192,55 @@ def get_energies(Qvec, sites, couplings):
 	print_infos("\nC =\n%s\n\nH_trafo =\n%s" % (C, H_trafo))
 
 	# the eigenvalues of H give the energies
-	Es = np.real(la.eigvals(H_trafo))
+	#Es = la.eigvalsh(H_trafo)
+	Es, states = la.eigh(H_trafo)
 	print_infos("\nEs = %s" % Es)
 
-	return Es
+	# sort by the energies in descending order
+	Es = np.flip(Es)
+	states = np.flip(states, axis = 1)
+	return Es, states, H_trafo, C, signs
+
+# get the spin-spin correlation at the momentum transfer Qvec
+def get_correlations(Qvec, states, H, C, signs, sites):
+	num_sites = len(sites)
+
+	energy_mat = np.dot(states.transpose().conj(), np.dot(H, states))
+	#Es = np.diag(energy_mat)
+	E_sqrt = np.sqrt(np.dot(signs, energy_mat))
+	boson_ops = np.dot(la.inv(C), np.dot(states, E_sqrt))
+
+	S_mats = [ np.zeros((3, 3), dtype = complex) ] * num_sites * 2
+	for x in range(3):
+		for y in range(3):
+			M = np.zeros((2*num_sites, 2*num_sites), dtype = complex)
+			for i in range(num_sites):
+				S_i = sites[i]["S"]
+				u_i = -2. * sites[i]["u"]
+				for j in range(num_sites):
+					S_j = sites[j]["S"]
+					u_j = -2. * sites[j]["u"]
+
+					S = np.sqrt(S_i * S_j)
+					e = np.exp(2j*np.pi * np.dot(Qvec, (np.array(sites[j]["pos"]) - np.array(sites[i]["pos"]))))
+
+					M[            i,             j] = e * S * u_i[x]        * u_j[y].conj()
+					M[            i, num_sites + j] = e * S * u_i[x]        * u_j[y]
+					M[num_sites + i,             j] = e * S * u_i[x].conj() * u_j[y].conj()
+					M[num_sites + i, num_sites + j] = e * S * u_i[x].conj() * u_j[y]
+
+			M = np.dot(boson_ops.transpose().conj(), np.dot(M, boson_ops))
+			for E_idx in range(num_sites * 2):
+				S_mats[E_idx][x, y] += M[E_idx, E_idx] / (2. * num_sites)
+
+	proj = np.eye(3) - np.outer(Qvec, Qvec) / la.norm(Qvec)**2.
+	weights = []
+	for E_idx in range(num_sites * 2):
+		S_mats[E_idx] = np.dot(proj, np.dot(S_mats[E_idx], proj))
+		weights.append(np.abs(S_mats[E_idx].trace().real))
+
+	return weights
+
 )BLOCK";
 
 	std::string filename = _filename.toStdString();
@@ -263,12 +302,11 @@ def get_energies(Qvec, sites, couplings):
 	if(!tl2::equals_0<t_real>(field.mag, g_eps))
 	{
 		ofstr << "\n# external field\n";
-		ofstr << "\n# external field\n";
 		ofstr << "field = { ";
-		ofstr << "\"dir\" : -[ "
+		ofstr << "\"dir\" : -np.array([ "
 			<< field.dir[0] << ", "
 			<< field.dir[1] << ", "
-			<< field.dir[2] << " ], "
+			<< field.dir[2] << " ]), "
 			<< "\"mag\" : " << field.mag
 			<< " }\n";
 	}
@@ -369,20 +407,20 @@ init(sites, couplings)
 # plot the dispersion branch
 import matplotlib.pyplot as plt
 
-hs = []
-ks = []
-ls = []
-Es = []
+hs, ks, ls, Es, ws = [], [], [], [], []
 for Qidx in range(Qpts):
 	try:
 		Qvec = Qstart + (Qend - Qstart) * Qidx / Qpts
-		for E in get_energies(Qvec, sites, couplings):
+		allEs, allstates, H, C, signs = get_energies(Qvec, sites, couplings)
+		allws = get_correlations(Qvec, allstates, H, C, signs, sites)
+		for E, state, w in zip(allEs, allstates, allws):
 			if only_pos_E and E < 0.:
 				continue
 			hs.append(Qvec[0])
 			ks.append(Qvec[1])
 			ls.append(Qvec[2])
 			Es.append(E)
+			ws.append(w * weight_scale)
 	except la.LinAlgError:
 		pass
 
@@ -396,7 +434,7 @@ if np.std(ls) > np.std(qs):
 plt.plot()
 plt.xlabel("q (rlu)")
 plt.ylabel("E (meV)")
-plt.scatter(qs, Es, marker = '.')
+plt.scatter(qs, Es, marker = '.', s = ws)
 plt.show()
 )BLOCK";
 	// --------------------------------------------------------------------

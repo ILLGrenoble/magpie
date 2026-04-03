@@ -31,9 +31,7 @@ namespace pt = boost::property_tree;
 
 #include <QtCore/QString>
 
-#include <iostream>
 #include <fstream>
-#include <vector>
 #include <unordered_set>
 #include <cstdlib>
 
