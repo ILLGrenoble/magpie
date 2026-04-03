@@ -186,9 +186,9 @@ def get_energies(Qvec, sites, couplings):
 	print_infos("\nH =\n%s" % H)
 
 	# trafo
-	C = la.cholesky(H)
+	C = la.cholesky(H, upper = True)
 	signs = np.diag(np.concatenate((np.repeat(1, num_sites), np.repeat(-1, num_sites))))
-	H_trafo = np.dot(C.transpose().conj(), np.dot(signs, C))
+	H_trafo = np.dot(C, np.dot(signs, C.transpose().conj()))
 	print_infos("\nC =\n%s\n\nH_trafo =\n%s" % (C, H_trafo))
 
 	# the eigenvalues of H give the energies
@@ -210,7 +210,7 @@ def get_correlations(Qvec, states, H, C, signs, sites):
 	E_sqrt = np.sqrt(np.dot(signs, energy_mat))
 	boson_ops = np.dot(la.inv(C), np.dot(states, E_sqrt))
 
-	S_mats = [ np.zeros((3, 3), dtype = complex) ] * num_sites * 2
+	S_mats = np.zeros((2*num_sites, 3, 3), dtype = complex)
 	for x in range(3):
 		for y in range(3):
 			M = np.zeros((2*num_sites, 2*num_sites), dtype = complex)
@@ -231,13 +231,13 @@ def get_correlations(Qvec, states, H, C, signs, sites):
 
 			M = np.dot(boson_ops.transpose().conj(), np.dot(M, boson_ops))
 			for E_idx in range(num_sites * 2):
-				S_mats[E_idx][x, y] += M[E_idx, E_idx] / (2. * num_sites)
+				S_mats[E_idx, x, y] += M[E_idx, E_idx] / (2. * num_sites)
 
 	proj = np.eye(3) - np.outer(Qvec, Qvec) / la.norm(Qvec)**2.
 	weights = []
 	for E_idx in range(num_sites * 2):
-		S_mats[E_idx] = np.dot(proj, np.dot(S_mats[E_idx], proj))
-		weights.append(np.abs(S_mats[E_idx].trace().real))
+		S_mats[E_idx, :, :] = np.dot(proj, np.dot(S_mats[E_idx, :, :], proj))
+		weights.append(np.abs(S_mats[E_idx, :, :].trace().real))
 
 	return weights
 

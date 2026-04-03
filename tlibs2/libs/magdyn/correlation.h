@@ -157,6 +157,8 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	tl2::niceprint(std::cout, E_sqrt, 1e-4, 4);
 	std::cout << "L_energy =\n";
 	tl2::niceprint(std::cout, energy_mat, 1e-4, 4);
+	std::cout << "boson_ops =\n";
+	tl2::niceprint(std::cout, boson_ops, 1e-4, 4);
 #endif
 
 	// building the spin correlation functions of equation (47) from (Toth 2015)
