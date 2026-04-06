@@ -37,6 +37,9 @@ clean_frameworks=1
 
 # tools
 STRIP=/opt/homebrew/Cellar/llvm/22.1.0/bin/llvm-strip
+if [ ! -e $STRIP ]; then
+	STRIP=llvm-strip
+fi
 
 
 # application name
@@ -50,10 +53,13 @@ APPICON_ICNS="${APPICON%\.svg}.icns"
 
 # directories
 LOCAL_DIR=/opt/homebrew
+if [ ! -e $LOCAL_DIR ]; then
+	LOCAL_DIR=/usr/local
+fi
 QT_PLUGIN_DIR=${LOCAL_DIR}/share/qt/plugins
 GCC_LIB_DIR=${LOCAL_DIR}/Cellar/gcc/15.2.0_1/lib/gcc/current/
 LOCAL_FRAMEWORKS_DIR=${LOCAL_DIR}/Frameworks
-ICU_LIB_DIR=${LOCAL_DIR}/Cellar/icu4c@78/78.2/lib
+ICU_LIB_DIR=${LOCAL_DIR}/Cellar/icu4c@78/78.3/lib
 
 
 # qt libraries
