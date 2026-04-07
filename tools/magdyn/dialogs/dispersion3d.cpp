@@ -143,9 +143,12 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	m_context->addSeparator();
 	m_context->addAction(acSaveImage);
 
-	// context menu for sites
+	// context menu for bands
 	m_context_band = new QMenu(this);
+	QAction *acToggleBand = new QAction("Hide Band", m_context_band);
 	QAction *acCentreOnObject = new QAction("Centre Camera on Band", m_context_band);
+	m_context_band->addAction(acToggleBand);
+	m_context_band->addSeparator();
 	m_context_band->addAction(acCentre);
 	m_context_band->addAction(acCentreOnObject);
 	m_context_band->addSeparator();
@@ -392,6 +395,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 
 	// connections
 	connect(btnbox, &QDialogButtonBox::accepted, this, &Dispersion3DDlg::accept);
+	connect(acToggleBand, &QAction::triggered, this, &Dispersion3DDlg::ToggleBand);
 	connect(acCentreOnObject, &QAction::triggered, this, &Dispersion3DDlg::CentrePlotCameraOnObject);
 	connect(acCentre, &QAction::triggered, this, &Dispersion3DDlg::CentrePlotCamera);
 	connect(acShowCoords, &QAction::toggled, this, &Dispersion3DDlg::ShowPlotCoordCube);
@@ -532,21 +536,28 @@ void Dispersion3DDlg::PlotMouseClick(
 	[[maybe_unused]] bool mid,
 	[[maybe_unused]] bool right)
 {
+	const QPointF& _pt = m_dispplot->GetRenderer()->GetMousePosition();
+	QPoint pt = m_dispplot->mapToGlobal(_pt.toPoint());
+
+	typename decltype(m_band_objs)::iterator band_iter = m_band_objs.end();
+	if(m_cur_obj)
+		band_iter = m_band_objs.find(*m_cur_obj);
+	bool band_selected = (band_iter != m_band_objs.end());
+
+	if(left && band_selected)
+	{
+		// select current band in list
+		t_size band_idx = band_iter->second;
+		if(int(band_idx) < m_table_bands->rowCount())
+			m_table_bands->setCurrentCell(band_idx, 0);
+	}
+
 	if(right)
 	{
-		const QPointF& _pt = m_dispplot->GetRenderer()->GetMousePosition();
-		QPoint pt = m_dispplot->mapToGlobal(_pt.toPoint());
-
-		if(m_cur_obj && m_band_objs.find(*m_cur_obj) != m_band_objs.end())
-		{
-			// band selected
+		if(band_selected)
 			m_context_band->popup(pt);
-		}
 		else
-		{
-			// no band selected
 			m_context->popup(pt);
-		}
 	}
 }
 
@@ -656,6 +667,33 @@ void Dispersion3DDlg::SetPlotCameraRotation(t_real_gl phi, t_real_gl theta)
 	m_dispplot->GetRenderer()->GetCamera().UpdateTransformation();
 	PlotCameraHasUpdated();
 	m_dispplot->update();
+}
+
+
+
+/**
+ * toggle the band under the cursor
+ */
+void Dispersion3DDlg::ToggleBand()
+{
+	if(!m_cur_obj)
+		return;
+
+	// selected something else than a band?
+	auto band_iter = m_band_objs.find(*m_cur_obj);
+	if(band_iter == m_band_objs.end())
+		return;
+
+	t_size band_idx = band_iter->second;
+	if(int(band_idx) >= m_table_bands->rowCount())
+		return;
+
+	QCheckBox* box = reinterpret_cast<QCheckBox*>(
+		m_table_bands->cellWidget(int(band_idx), COL_BC_ACTIVE));
+	if(!box)
+		return;
+
+	box->setChecked(!box->isChecked());
 }
 
 

@@ -122,6 +122,7 @@ protected:
 		std::size_t objIdx, std::size_t triagIdx,
 		const t_vec3_gl* posSphere);
 
+	void ToggleBand();
 	void PlotCameraHasUpdated();
 	void CentrePlotCamera();
 	void CentrePlotCameraOnObject();
