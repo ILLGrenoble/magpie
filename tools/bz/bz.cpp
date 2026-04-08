@@ -695,7 +695,7 @@ void BZDlg::CreateInfoDialog()
 	std::string strBoost = BOOST_LIB_VERSION;
 	algo::replace_all(strBoost, "_", ".");
 
-	auto labelTitle = new QLabel("Takin / Brillouin Zone Calculator", infopanel);
+	auto labelTitle = new QLabel("Brillouin Zone Calculator", infopanel);
 	auto fontTitle = labelTitle->font();
 	fontTitle.setBold(true);
 	labelTitle->setFont(fontTitle);
