@@ -345,7 +345,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 					<< std::setw(field_len) << std::left << result->Q_rlu[1] << " "
 					<< std::setw(field_len) << std::left << result->Q_rlu[2] << " "
 					<< std::setw(field_len) << E_and_S.E << " "
-					<< std::setw(field_len) << E_and_S.weight << " "
+					<< std::setw(field_len) << E_and_S.weight_perp << " "
 					<< std::setw(field_len) << E_and_S.S_perp(0, 0).real() << " "
 					<< std::setw(field_len) << E_and_S.S_perp(1, 1).real() << " "
 					<< std::setw(field_len) << E_and_S.S_perp(2, 2).real() << " "
@@ -355,7 +355,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 			if(!as_py && as_binary)  // save (E, S) tuples in binary file
 			{
 				t_E E = static_cast<t_E>(E_and_S.E);
-				t_E S = static_cast<t_E>(E_and_S.weight);
+				t_E S = static_cast<t_E>(E_and_S.weight_perp);
 
 				ostr.write(reinterpret_cast<const char*>(&E), sizeof(E));
 				ostr.write(reinterpret_cast<const char*>(&S), sizeof(S));
@@ -367,7 +367,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 					<< ", " << result->Q_rlu[1]
 					<< ", " << result->Q_rlu[2]
 					<< ", " << E_and_S.E
-					<< ", " << E_and_S.weight
+					<< ", " << E_and_S.weight_perp
 					<< ", " << branch_idx
 					<< ", " << E_and_S.degeneracy
 					<< " ],\n";
@@ -487,7 +487,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 					<< std::setw(field_len) << std::left << result->Q_rlu[1] << " "
 					<< std::setw(field_len) << std::left << result->Q_rlu[2] << " "
 					<< std::setw(field_len) << E_and_S.E << " "
-					<< std::setw(field_len) << E_and_S.weight << " "
+					<< std::setw(field_len) << E_and_S.weight_perp << " "
 					<< std::setw(field_len) << E_and_S.S_perp(0, 0).real() << " "
 					<< std::setw(field_len) << E_and_S.S_perp(1, 1).real() << " "
 					<< std::setw(field_len) << E_and_S.S_perp(2, 2).real() << " "
@@ -497,7 +497,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 			if(!as_py && as_binary)  // save (E, S) tuples in binary file
 			{
 				t_E E = static_cast<t_E>(E_and_S.E);
-				t_E S = static_cast<t_E>(E_and_S.weight);
+				t_E S = static_cast<t_E>(E_and_S.weight_perp);
 
 				ostr.write(reinterpret_cast<const char*>(&E), sizeof(E));
 				ostr.write(reinterpret_cast<const char*>(&S), sizeof(S));
@@ -509,7 +509,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 					<< ", " << result->Q_rlu[1]
 					<< ", " << result->Q_rlu[2]
 					<< ", " << E_and_S.E
-					<< ", " << E_and_S.weight
+					<< ", " << E_and_S.weight_perp
 					<< ", " << branch_idx
 					<< ", " << E_and_S.degeneracy
 					<< " ],\n";
@@ -635,7 +635,7 @@ bool MAGDYN_INST::SaveMultiDispersion(std::ostream& ostr,
 						<< ", " << result.Q_rlu[1]
 						<< ", " << result.Q_rlu[2]
 						<< ", " << E_and_S.E
-						<< ", " << E_and_S.weight
+						<< ", " << E_and_S.weight_perp
 						<< ", " << branch_idx
 						<< ", " << E_and_S.degeneracy
 						<< " ],\n";

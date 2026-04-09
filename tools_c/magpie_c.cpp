@@ -155,7 +155,7 @@ unsigned int magpie_calc_energies(t_magpie _mag,
 		if(Es)
 			Es[branch_idx] = Es_and_S[branch_idx].E;
 		if(ws)
-			ws[branch_idx] = Es_and_S[branch_idx].weight;
+			ws[branch_idx] = Es_and_S[branch_idx].weight_perp;
 	}
 
 	return static_cast<unsigned int>(num_branches);
@@ -182,7 +182,7 @@ t_real magpie_calc_S(t_magpie _mag,
 	for(std::size_t branch_idx = 0; branch_idx < Es_and_S.size(); ++branch_idx)
 	{
 		const t_real E_branch = Es_and_S[branch_idx].E;
-		const t_real S_branch = Es_and_S[branch_idx].weight;
+		const t_real S_branch = Es_and_S[branch_idx].weight_perp;
 
 		S += S_branch * tl2::gauss_model(E, E_branch, sigma, 1., 0.);
 	}

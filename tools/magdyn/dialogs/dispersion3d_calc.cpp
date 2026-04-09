@@ -252,7 +252,7 @@ void Dispersion3DDlg::Calculate()
 				t_real weight = -1;
 				if(use_weights)
 				{
-					weight = E_and_S.weight;
+					weight = E_and_S.weight_perp;
 
 					if(!use_projector)
 					{

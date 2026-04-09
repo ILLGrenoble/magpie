@@ -197,7 +197,7 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 					continue;
 
 				const t_mat& S = E_and_S.S;
-				t_real weight = E_and_S.weight;
+				t_real weight = E_and_S.weight_perp;
 
 				if(!use_projector)
 					weight = tl2::trace<t_mat>(S).real();

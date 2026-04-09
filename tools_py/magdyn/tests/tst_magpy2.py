@@ -105,7 +105,7 @@ for hkl in numpy.linspace(hkl_start, hkl_end, num_Q_points):
 		if only_positive_energies and S.E < 0.:
 			continue
 
-		weight = S.weight * S_scale
+		weight = S.weight_perp * S_scale
 		if weight < S_min:
 			weight = S_min
 		elif weight > S_max:

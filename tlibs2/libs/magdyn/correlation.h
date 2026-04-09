@@ -250,13 +250,23 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 		t_mat proj_neutron = tl2::ortho_projector<t_mat, t_vec>(S.Q_rlu, false);
 		E_and_S.S_perp = proj_neutron * E_and_S.S * proj_neutron;
 
-		CalcPolarisation(S.Q_rlu, E_and_S);
-
 		// weights
 		E_and_S.S_sum       = tl2::trace<t_mat>(E_and_S.S);
 		E_and_S.S_perp_sum  = tl2::trace<t_mat>(E_and_S.S_perp);
 		E_and_S.weight_full = std::abs(E_and_S.S_sum.real());
-		E_and_S.weight      = std::abs(E_and_S.S_perp_sum.real());
+		E_and_S.weight_perp = std::abs(E_and_S.S_perp_sum.real());
+#ifdef MAGDYN_COMPAT
+		E_and_S.weight      = E_and_S.weight_perp;
+#endif
+
+		if(m_calc_pol)
+		{
+			CalcPolarisation(S.Q_rlu, E_and_S);
+			E_and_S.S_pol_sum       = tl2::trace<t_mat>(E_and_S.S_pol);
+			E_and_S.S_pol_perp_sum  = tl2::trace<t_mat>(E_and_S.S_pol_perp);
+			E_and_S.weight_pol_full = std::abs(E_and_S.S_pol_sum.real());
+			E_and_S.weight_pol_perp = std::abs(E_and_S.S_pol_perp_sum.real());
+		}
 	}
 }
 // --------------------------------------------------------------------

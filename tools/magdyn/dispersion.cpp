@@ -420,7 +420,7 @@ void MagDynDlg::CalcDispersion()
 				// weights
 				if(use_weights)
 				{
-					t_real weight = use_projector ? E_and_S.weight : E_and_S.weight_full;
+					t_real weight = use_projector ? E_and_S.weight_perp : E_and_S.weight_full;
 					if(std::isnan(weight) || std::isinf(weight))
 						continue;
 
@@ -770,7 +770,7 @@ void MagDynDlg::CalcHamiltonian()
 
 			const t_mat& S = E_and_S.S;
 			const t_mat& S_perp = E_and_S.S_perp;
-			t_real weight = E_and_S.weight;
+			t_real weight = E_and_S.weight_perp;
 			if(!use_projector)
 				weight = tl2::trace<t_mat>(S).real();
 

@@ -46,6 +46,9 @@ add_compile_options(-std=c++20)
 add_compile_options(-Wall -Wextra)
 
 
+add_definitions(-DMAGDYN_COMPAT)
+
+
 
 # -----------------------------------------------------------------------------
 # Boost

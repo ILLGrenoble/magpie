@@ -752,7 +752,7 @@ void TopologyDlg::CalculateBerryCurvature()
 			for(t_size band = 0; band < num_bands; ++band)
 			{
 				data_bc.energies.push_back(S.E_and_S[band].E);
-				data_bc.weights.push_back(S.E_and_S[band].weight);
+				data_bc.weights.push_back(S.E_and_S[band].weight_perp);
 			}
 
 			std::lock_guard<std::mutex> _lck{mtx};

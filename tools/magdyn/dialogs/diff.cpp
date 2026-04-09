@@ -744,7 +744,7 @@ void DiffDlg::CalculateGroupVelocity()
 			for(t_size band = 0; band < num_bands; ++band)
 			{
 				data_gv.energies.push_back(S.E_and_S[band].E);
-				data_gv.weights.push_back(S.E_and_S[band].weight);
+				data_gv.weights.push_back(S.E_and_S[band].weight_perp);
 			}
 
 			std::lock_guard<std::mutex> _lck{mtx};

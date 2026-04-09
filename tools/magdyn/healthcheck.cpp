@@ -96,7 +96,7 @@ bool healthcheck()
 		return false;
 	if(!tl2::equals<t_real>(std::abs(Es_and_S[0].E), 0.5878, eps))
 		return false;
-	if(!tl2::equals<t_real>(std::abs(Es_and_S[0].weight), 0.6513, eps))
+	if(!tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), 0.6513, eps))
 		return false;
 
 	return true;

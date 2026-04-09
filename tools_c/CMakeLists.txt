@@ -81,6 +81,8 @@ include_directories(
 # -----------------------------------------------------------------------------
 # magpie c library
 # -----------------------------------------------------------------------------
+add_definitions(-DMAGDYN_COMPAT)
+
 add_library(magpie_c SHARED magpie_c.cpp magpie_c.h)
 #add_library(magpie_c STATIC magpie_c.cpp magpie_c.h)
 

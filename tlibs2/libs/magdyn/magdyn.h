@@ -86,6 +86,8 @@
 
 #define MAGDYN_TYPE typename MAGDYN_INST
 
+//#define MAGDYN_COMPAT
+
 
 // only print if it's not set to silent mode
 #define TL2_CERR_OPT if(!m_silent) std::cerr
@@ -261,6 +263,7 @@ public:
 	void SetRotationAxis(const t_vec_real& axis);
 
 	void SetCalcHamiltonian(bool H, bool Hp, bool Hm);
+	void SetCalcPolarisation(bool);
 
 	void AddVariable(Variable&& var);
 	void SetVariable(Variable&& var);
@@ -674,6 +677,9 @@ private:
 	bool m_calc_Hp{ true };
 	bool m_calc_Hm{ true };
 
+	// calculate S for polarisation analysis
+	bool m_calc_pol{ false };
+
 	// direction to rotation spins into, usually [001]
 	t_vec_real m_zdir{ tl2::create<t_vec_real>({ 0., 0., 1. }) };
 
@@ -708,8 +714,8 @@ private:
 		tl2::create<t_vec_real>({ 0., 0., 1. }),  // out-of-plane, z
 	};
 
-	t_real m_uc_min{-0.5};                      //
-	t_real m_uc_max{0.5};                       // unit cell extents
+	t_real m_uc_min{ -0.5 };                    //
+	t_real m_uc_max{ +0.5 };                    // unit cell extents
 
 	// settings
 	bool m_is_incommensurate{ false };

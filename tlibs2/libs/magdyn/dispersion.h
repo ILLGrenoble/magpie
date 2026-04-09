@@ -84,9 +84,23 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::UniteEnergies(const MAGDYN_TYPE::SofQE& S) const
 			iter->S_perp      += curState.S_perp;
 			iter->S_sum       += curState.S_sum;
 			iter->S_perp_sum  += curState.S_perp_sum;
-			iter->weight      += curState.weight;
+			iter->weight_perp += curState.weight_perp;
 			iter->weight_full += curState.weight_full;
-			iter->degeneracy  += curState.degeneracy;
+
+			if(m_calc_pol)
+			{
+				iter->S_pol           += curState.S_pol;
+				iter->S_pol_perp      += curState.S_pol_perp;
+				iter->S_pol_sum       += curState.S_pol_sum;
+				iter->S_pol_perp_sum  += curState.S_pol_perp_sum;
+				iter->weight_pol_perp += curState.weight_pol_perp;
+				iter->weight_pol_full += curState.weight_pol_full;
+			}
+
+			iter->degeneracy += curState.degeneracy;
+#ifdef MAGDYN_COMPAT
+			iter->weight = iter->weight_perp;
+#endif
 		}
 	}
 

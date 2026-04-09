@@ -25,9 +25,13 @@
 
 %module magpy
 %{
+	#ifndef MAGDYN_COMPAT
+		#define MAGDYN_COMPAT
+	#endif
 	#include "../../tlibs2/libs/magdyn.h"
 %}
 
+#define MAGDYN_COMPAT
 
 %include "std_vector.i"
 %include "std_list.i"

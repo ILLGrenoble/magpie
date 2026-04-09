@@ -592,6 +592,13 @@ MAGDYN_TEMPL void MAGDYN_INST::SetCalcHamiltonian(bool H, bool Hp, bool Hm)
 
 
 
+MAGDYN_TEMPL void MAGDYN_INST::SetCalcPolarisation(bool b)
+{
+	m_calc_pol  = b;
+}
+
+
+
 MAGDYN_TEMPL void MAGDYN_INST::AddVariable(MAGDYN_TYPE::Variable&& var)
 {
 	m_variables.emplace_back(std::forward<Variable&&>(var));
