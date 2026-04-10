@@ -80,8 +80,9 @@ QSurfaceFormat gl_format(bool bCore, int iMajorVer, int iMinorVer,
 	surf.setSwapInterval(1);
 	surf.setSamples(iSamples);  // multisampling
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 	surf.setColorSpace(QColorSpace(QColorSpace::SRgb));
-
+#endif
 	return surf;
 }
 

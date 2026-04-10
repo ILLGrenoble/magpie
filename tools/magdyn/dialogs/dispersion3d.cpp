@@ -417,10 +417,12 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	connect(m_perspective, &QCheckBox::toggled, this, &Dispersion3DDlg::SetPlotPerspectiveProjection);
 	connect(m_enable_E_range[0], &QCheckBox::toggled, [this](bool enabled) { m_E_range[0]->setEnabled(enabled); Plot(true); });
 	connect(m_enable_E_range[1], &QCheckBox::toggled, [this](bool enabled) { m_E_range[1]->setEnabled(enabled); Plot(true); });
-	connect(m_E_range[0], &QDoubleSpinBox::valueChanged, [this]() { Plot(true); });
-	connect(m_E_range[1], &QDoubleSpinBox::valueChanged, [this]() { Plot(true); });
 	connect(btnMainQ, &QAbstractButton::clicked, this, &Dispersion3DDlg::FromMainQ);
 	connect(m_S_filter_enable, &QCheckBox::toggled, m_S_filter, &QDoubleSpinBox::setEnabled);
+	connect(m_E_range[0], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		[this]() { Plot(true); });
+	connect(m_E_range[1], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		[this]() { Plot(true); });
 
 	for(QDoubleSpinBox *box : { m_Q_scale1, m_Q_scale2, m_E_scale })
 	{
