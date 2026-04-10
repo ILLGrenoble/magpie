@@ -74,7 +74,10 @@ bool benchmark(const std::string& model_file,
 	if(!magdyn.Load(model_file))
 		return false;
 
+	// settings
 	magdyn.SetSilent(true);
+	magdyn.SetPerformChecks(false);
+
 	stopwatch.stop();
 	const t_real startup_time = stopwatch.GetDur();
 
