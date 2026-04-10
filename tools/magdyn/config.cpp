@@ -31,9 +31,7 @@ namespace pt = boost::property_tree;
 
 #include <QtCore/QString>
 
-#include <iostream>
 #include <fstream>
-#include <vector>
 #include <cstdlib>
 
 #include "tlibs2/libs/str.h"
@@ -208,6 +206,12 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 
 		// load from file
 		std::ifstream ifstr{filename.toStdString()};
+		if(!ifstr)
+		{
+			ShowError(QString("Cannot load magdyn file \"%1\".").arg(filename).toStdString().c_str());
+			return false;
+		}
+
 		pt::read_xml(ifstr, node);
 
 		// check signature
@@ -354,7 +358,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 
 		if(!m_dyn.Load(magdyn))
 		{
-			ShowError("Cannot load magdyn file.");
+			ShowError(QString("Cannot load magdyn file \"%1\".").arg(filename).toStdString().c_str());
 			return false;
 		}
 
@@ -531,6 +535,12 @@ bool MagDynDlg::ImportStructure(const QString& filename)
 
 		// load from file
 		std::ifstream ifstr{filename.toStdString()};
+		if(!ifstr)
+		{
+			ShowError(QString("Cannot load structure file \"%1\".").arg(filename).toStdString().c_str());
+			return false;
+		}
+
 		pt::read_xml(ifstr, node);
 
 		// check signature
@@ -667,7 +677,7 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 			load_cif<t_vec_real, t_mat_real>(filename.toStdString(), g_eps);
 		if(errstr != "")
 		{
-			ShowError(("Could not load CIF: " + errstr).c_str());
+			ShowError(("Cannot not load CIF: " + errstr).c_str());
 			return false;
 		}
 
