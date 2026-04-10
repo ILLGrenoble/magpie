@@ -151,6 +151,7 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 
 	if(Qlist_file != "")
 	{
+		// load the Q positions from a file
 		std::ifstream ifstr_Qs(Qlist_file);
 		if(!ifstr_Qs)
 		{
@@ -197,7 +198,7 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 	else
 	{
 		// calculate the dispersion along the given Q_i and Q_f positions
-		t_real h_start =  magdyn_node.get<t_real>("config.h_start", 0.);
+		t_real h_start = magdyn_node.get<t_real>("config.h_start", 0.);
 		t_real k_start = magdyn_node.get<t_real>("config.k_start", 0.);
 		t_real l_start = magdyn_node.get<t_real>("config.l_start", 0.);
 		t_real h_end = magdyn_node.get<t_real>("config.h_end", 1.);
@@ -308,6 +309,7 @@ int main(int argc, char** argv)
 
 		bool show_help = false;
 		bool healthcheck = false;
+		bool benchmark = false;
 		bool silent = false;
 		bool use_cli = false;
 		bool show_timing = false;
@@ -328,6 +330,7 @@ int main(int argc, char** argv)
 		arg_descr.add_options()
 			("help,h", args::bool_switch(&show_help), "show help")
 			("healthcheck", args::bool_switch(&healthcheck), "check program integrity")
+			("benchmark", args::bool_switch(&benchmark), "run a system benchmark")
 #ifndef DONT_USE_QT
 			("cli,c", args::bool_switch(&use_cli), "use command-line interface")
 #endif
@@ -370,7 +373,7 @@ int main(int argc, char** argv)
 		if(show_help)
 		{
 			std::cout << "This is Magpie " << MAGPIE_VER
-				<< ", written 2022-2025 by Tobias Weber <tweber@ill.fr>.\n\n"
+				<< ", written 2022-2026 by Tobias Weber <tweber@ill.fr>.\n\n"
 				<< arg_descr
 				<< R"BLOCK(
 This program is free software: you can redistribute it and/or modify
@@ -400,6 +403,26 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 			}
 
 			CERR_OPT << "Magpie: All OK." << std::endl;
+			return 0;
+		}
+
+
+		if(benchmark)
+		{
+			extern bool benchmark(const std::string& model_file, t_size max_threads, t_size num_Qs);
+
+			if(model_file == "")
+			{
+				CERR_OPT << "Magpie: Please give a model file." << std::endl;
+				return -1;
+			}
+
+			if(!benchmark(model_file, g_num_threads, num_Q_pts))
+			{
+				CERR_OPT << "Magpie error: Benchmark failed!" << std::endl;
+				return -1;
+			}
+
 			return 0;
 		}
 

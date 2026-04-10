@@ -173,7 +173,7 @@ if(USE_QT)
 
 	add_executable(magpie
 		# main program
-		main.cpp main_gui.cpp
+		startup/main.cpp startup/main_gui.cpp
 		magdyn.cpp magdyn.h
 		dialogs.cpp panels.cpp
 		structure.cpp tables.cpp
@@ -183,7 +183,10 @@ if(USE_QT)
 		kernel.cpp dispersion.cpp
 		graph.cpp graph.h
 		defs.cpp defs.h gui_defs.h
-		healthcheck.cpp
+
+		# cli tools
+		startup/healthcheck.cpp
+		startup/benchmark.cpp
 
 		# bz calculator
 		../bz/bz_lib.h ../bz/plot_cut.h

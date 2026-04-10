@@ -36,6 +36,7 @@
 
 #include "../algos.h"
 #include "../str.h"
+#include "../file.h"
 
 #include "magdyn.h"
 
@@ -52,6 +53,14 @@ bool MAGDYN_INST::Load(const std::string& filename)
 {
 	try
 	{
+		if(!tl2::file_exists(filename))
+		{
+			TL2_CERR_OPT << "Magdyn error: File \""
+				<< filename << "\" does not exist."
+				<< std::endl;
+			return false;
+		}
+
 		// properties tree
 		boost::property_tree::ptree node;
 

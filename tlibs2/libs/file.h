@@ -245,7 +245,7 @@ bool dir_exists(const std::basic_string<t_char>& strDir)
 }
 
 
-template<typename t_char=char>
+template<typename t_char = char>
 bool file_exists(const std::basic_string<t_char>& strDir)
 {
 	fs::path path(strDir);
