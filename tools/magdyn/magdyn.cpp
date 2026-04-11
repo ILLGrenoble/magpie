@@ -879,8 +879,7 @@ void MagDynDlg::EnableInput(bool enable)
 }
 
 
-
-void MagDynDlg::ShowError(const char* msg, bool critical) const
+void MagDynDlg::ShowError(const QString& msg, bool critical) const
 {
 	MagDynDlg *dlg = const_cast<MagDynDlg*>(this);
 
@@ -888,4 +887,10 @@ void MagDynDlg::ShowError(const char* msg, bool critical) const
 		QMessageBox::critical(dlg, windowTitle() + " -- Error", msg);
 	else
 		QMessageBox::warning(dlg, windowTitle() + " -- Warning", msg);
+}
+
+
+void MagDynDlg::ShowError(const char* msg, bool critical) const
+{
+	ShowError(QString(msg), critical);
 }

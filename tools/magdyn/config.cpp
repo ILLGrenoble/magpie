@@ -208,7 +208,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 		std::ifstream ifstr{filename.toStdString()};
 		if(!ifstr)
 		{
-			ShowError(QString("Cannot load magdyn file \"%1\".").arg(filename).toStdString().c_str());
+			ShowError(QString("Cannot load magdyn file \"%1\".").arg(filename));
 			return false;
 		}
 
@@ -218,7 +218,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 		if(auto optInfo = node.get_optional<std::string>("magdyn.meta.info");
 			!optInfo || !(*optInfo == std::string{"magdyn_tool"}))
 		{
-			ShowError("Unrecognised file format.");
+			ShowError(QString("Unrecognised file format in \"%1\".").arg(filename));
 			return false;
 		}
 
@@ -347,8 +347,8 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 		{
 			if(!m_allow_general_J && *optVal)
 			{
-				ShowError("This file requires support for general exchange matrices J, "
-					"please activate them in the preferences and reload.", false);
+				ShowError(QString("File \"%1\" requires support for general exchange matrices J, "
+					"please activate them in the preferences and reload.").arg(filename), false);
 			}
 			else if(m_allow_general_J)
 			{
@@ -358,7 +358,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 
 		if(!m_dyn.Load(magdyn))
 		{
-			ShowError(QString("Cannot load magdyn file \"%1\".").arg(filename).toStdString().c_str());
+			ShowError(QString("Cannot load magdyn file \"%1\".").arg(filename));
 			return false;
 		}
 
@@ -472,7 +472,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 	}
 	catch(const std::exception& ex)
 	{
-		ShowError(ex.what());
+		ShowError(QString("File \"%1\": %2").arg(filename).arg(ex.what()));
 		return false;
 	}
 
@@ -537,7 +537,7 @@ bool MagDynDlg::ImportStructure(const QString& filename)
 		std::ifstream ifstr{filename.toStdString()};
 		if(!ifstr)
 		{
-			ShowError(QString("Cannot load structure file \"%1\".").arg(filename).toStdString().c_str());
+			ShowError(QString("Cannot load structure file \"%1\".").arg(filename));
 			return false;
 		}
 
@@ -547,7 +547,7 @@ bool MagDynDlg::ImportStructure(const QString& filename)
 		if(auto optInfo = node.get_optional<std::string>("sfact.meta.info");
 		   !optInfo || !(*optInfo==std::string{"magsfact_tool"} || *optInfo==std::string{"sfact_tool"}))
 		{
-			ShowError("Unrecognised structure file format.");
+			ShowError(QString("Unrecognised structure file format in file \"%1\".").arg(filename));
 			return false;
 		}
 
@@ -609,12 +609,12 @@ bool MagDynDlg::ImportStructure(const QString& filename)
 			}
 
 			if(propvecs->size() > 1)
-				ShowError("Only one propagation vector is supported.", false);
+				ShowError(QString("Only one propagation vector is supported. File: \"%1\".").arg(filename), false);
 		}
 	}
 	catch(const std::exception& ex)
 	{
-		ShowError(ex.what());
+		ShowError(QString("File \"%1\": %2").arg(filename).arg(ex.what()));
 		return false;
 	}
 
@@ -677,7 +677,7 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 			load_cif<t_vec_real, t_mat_real>(filename.toStdString(), g_eps);
 		if(errstr != "")
 		{
-			ShowError(("Cannot load CIF: " + errstr).c_str());
+			ShowError(QString("Cannot load CIF \"%1\": %2").arg(filename).arg(errstr));
 			return false;
 		}
 
@@ -731,7 +731,7 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 	}
 	catch(const std::exception& ex)
 	{
-		ShowError(ex.what());
+		ShowError(QString("File \"%1\": %2").arg(filename).arg(ex.what()));
 		return false;
 	}
 
@@ -855,7 +855,7 @@ bool MagDynDlg::Save(const QString& filename)
 		// save magnon calculator configuration
 		if(!m_dyn.Save(magdyn))
 		{
-			ShowError("Cannot save magdyn file.");
+			ShowError(QString("Cannot save magdyn file \"%1\".").arg(filename));
 			return false;
 		}
 
@@ -940,7 +940,7 @@ bool MagDynDlg::Save(const QString& filename)
 		std::ofstream ofstr{filename.toStdString()};
 		if(!ofstr)
 		{
-			ShowError("Cannot open file for writing.");
+			ShowError(QString("Cannot open file \"%1\" for writing.").arg(filename));
 			return false;
 		}
 
@@ -950,7 +950,7 @@ bool MagDynDlg::Save(const QString& filename)
 	}
 	catch(const std::exception& ex)
 	{
-		ShowError(ex.what());
+		ShowError(QString("File \"%1\": %2").arg(filename).arg(ex.what()));
 		return false;
 	}
 

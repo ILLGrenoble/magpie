@@ -439,6 +439,7 @@ protected:
 	// get the coupling corresponding to the given table index
 	const t_term* GetTermFromTableIndex(int idx) const;
 
+	void ShowError(const QString& msg, bool critical = true) const;
 	void ShowError(const char* msg, bool critical = true) const;
 
 

@@ -137,7 +137,7 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 
 	if(!file_opened)
 	{
-		ShowError("Cannot open file for writing.");
+		ShowError(QString("Cannot open file \"%1\" for writing.").arg(filename));
 		return false;
 	}
 

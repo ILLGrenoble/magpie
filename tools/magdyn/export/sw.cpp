@@ -81,7 +81,7 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 	std::ofstream ofstr(filename);
 	if(!ofstr)
 	{
-		ShowError("Cannot open file for writing.");
+		ShowError(QString("Cannot open file \"%1\" for writing.").arg(filename));
 		return false;
 	}
 
