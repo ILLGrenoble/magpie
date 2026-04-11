@@ -275,7 +275,7 @@ MAGDYN_INST::CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 			(*result_fkt)(&result);
 
 		if(return_results)
-			results.push_back(result);
+			results.emplace_back(std::move(result));
 		++Qs_finished;
 	}
 
@@ -344,7 +344,7 @@ MAGDYN_INST::CalcDispersion(const std::vector<t_vec_real>& Qs,
 			(*result_fkt)(&result);
 
 		if(return_results)
-			results.push_back(result);
+			results.emplace_back(std::move(result));
 		++Qs_finished;
 	}
 
@@ -430,7 +430,7 @@ MAGDYN_INST::CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 			(*result_fkt)(&result);
 
 		if(return_results)
-			results.push_back(result);
+			results.emplace_back(std::move(result));
 		++Qs_finished;
 	}
 

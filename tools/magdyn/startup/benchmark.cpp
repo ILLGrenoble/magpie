@@ -43,10 +43,14 @@ static bool benchmark(t_magdyn& magdyn,
   t_real h_end, t_real k_end, t_real l_end,
 	t_size num_Qs, t_size num_threads)
 {
+	// ignore results
+	std::function<void(const typename t_magdyn::SofQE*)> results_fkt =
+		[](const typename t_magdyn::SofQE*) -> void {};
+
 	//magdyn.CalcEnergies(h, k, l, false);
 	magdyn.CalcDispersion(h_start, k_start, l_start,
 		h_end, k_end, l_end, num_Qs, num_threads,
-		true, nullptr, nullptr);
+		true, nullptr, &results_fkt);
 
 	return true;
 }
