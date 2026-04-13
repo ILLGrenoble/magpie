@@ -267,7 +267,7 @@ def get_correlations(Qvec, states, H, C, signs, sites):
 	std::ofstream ofstr(filename);
 	if(!ofstr)
 	{
-		ShowError(QString("Cannot open file \"%1\" for writing.").arg(filename));
+		ShowError(QString("Cannot open file \"%1\" for writing.").arg(filename.c_str()));
 		return false;
 	}
 

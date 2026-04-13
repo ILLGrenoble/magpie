@@ -80,7 +80,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	std::ofstream ofstr(filename);
 	if(!ofstr)
 	{
-		ShowError(QString("Cannot open file \"%1\" for writing.").arg(filename));
+		ShowError(QString("Cannot open file \"%1\" for writing.").arg(filename.c_str()));
 		return false;
 	}
 

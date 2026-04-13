@@ -677,7 +677,7 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 			load_cif<t_vec_real, t_mat_real>(filename.toStdString(), g_eps);
 		if(errstr != "")
 		{
-			ShowError(QString("Cannot load CIF \"%1\": %2").arg(filename).arg(errstr));
+			ShowError(QString("Cannot load CIF \"%1\": %2").arg(filename).arg(errstr.c_str()));
 			return false;
 		}
 
