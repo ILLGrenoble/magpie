@@ -107,7 +107,10 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "plot_structure   = true\n";
 	ofstr << "plot_dynamics    = true\n";
 	ofstr << "save_dynamics    = true\n";
+	if(m_dyn.IsIncommensurate())
+		ofstr << "use_supercell    = true\n";
 	ofstr << "datfile          = \"" << dispname_rel << "\"\n";
+	ofstr << "phys_units       = Units(:meV, :angstrom)\n";
 	// --------------------------------------------------------------------
 
 
@@ -126,15 +129,16 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	if(std::abs(l2 - l1) > std::abs(k2 - k1))
 		q_idx = 3;
 
-	ofstr << "\n# variables\n";
-
 	// internal constants and variables
-	ofstr << "g_e     = " << tl2::g_e<t_real> << "\n";
-	ofstr << "Qstart  = [ " << h1 << ", " << k1 << ", " << l1 << " ]\n";
-	ofstr << "Qend    = [ " << h2 << ", " << k2 << ", " << l2 << " ]\n";
-	ofstr << "Qpts    = " << m_num_points->value() << "\n";
+	ofstr << "\n# variables\n";
+	ofstr << "g_e    = " << tl2::g_e<t_real> << "\n";
+	ofstr << "Qstart = [ " << h1 << ", " << k1 << ", " << l1 << " ]\n";
+	ofstr << "Qend   = [ " << h2 << ", " << k2 << ", " << l2 << " ]\n";
+	ofstr << "Qpts   = " << m_num_points->value() << "\n";
 
-	// user variables
+	// user (model) variables
+	if(m_dyn.GetVariables().size())
+		ofstr << "\n# model parameters\n";
 	for(const auto &var : m_dyn.GetVariables())
 	{
 		ofstr << var.name << " = " << var.value.real();
@@ -282,7 +286,6 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	if(!tl2::equals_0<t_real>(field.mag, g_eps))
 	{
 		ofstr << "\n# external field\n";
-		ofstr << "phys_units = Units(:meV, :angstrom)\n";
 		ofstr << "set_field!(magsys, -[ "
 			<< field.dir[0] << ", "
 			<< field.dir[1] << ", "
@@ -321,8 +324,10 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 		const t_vec_real& prop = m_dyn.GetOrderingWavevector();
 		const t_vec_real& axis = m_dyn.GetRotationAxis();
-		t_vec_real s0 = tl2::cross(prop, axis);
-		s0 /= tl2::norm(s0);
+		//t_vec_real s0 = tl2::cross(prop, axis);
+		//t_real s0_len = tl2::norm(s0);
+		//if(!tl2::equals_0<t_real>(s0_len, g_eps))
+		//	s0 /= s0_len;
 
 		int sc_x = tl2::equals_0(prop[0], g_eps)
 			? 1 : int(std::ceil(t_real(1) / prop[0]));
@@ -331,14 +336,20 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 		int sc_z = tl2::equals_0(prop[2], g_eps)
 			? 1 : int(std::ceil(t_real(1) / prop[2]));
 
-		ofstr << "magsys = reshape_supercell(magsys, [ "
+		ofstr << "if use_supercell\n";
+		ofstr << "\tmagsys = reshape_supercell(magsys, [ "
 			<< sc_x << " 0 0; 0 " << sc_y << " 0; 0 0 " << sc_z
 			<< " ])\n";
 
-		ofstr << "set_spiral_order!(magsys; "
+		//ofstr << "set_spiral_order!(magsys; "
+		//	<< "k = [ " << prop[0] << ", " << prop[1] << ", " << prop[2] << " ], "
+		//	<< "axis = [ " << axis[0] << ", " << axis[1] << ", " << axis[2] << " ], "
+		//	<< "S0 = [ " << s0[0] << ", " << s0[1] << ", " << s0[2] << " ])\n";
+		ofstr << "\trepeat_periodically_as_spiral(magsys, "
+			<< "( " << sc_x << ", " << sc_y << ", " << sc_z << " ); "
 			<< "k = [ " << prop[0] << ", " << prop[1] << ", " << prop[2] << " ], "
-			<< "axis = [ " << axis[0] << ", " << axis[1] << ", " << axis[2] << " ], "
-			<< "S0 = [ " << s0[0] << ", " << s0[1] << ", " << s0[2] << " ])\n";
+			<< "axis = [ " << axis[0] << ", " << axis[1] << ", " << axis[2] << " ])\n";
+		ofstr << "end\n";
 	}
 
 	ofstr << "\n@printf(\"%s\\n\", magsys)\n";
@@ -369,9 +380,27 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	// magnon energies and spin-spin correlations
 	ofstr << "cholesky_eps = 1e-8\n";
 	std::string proj = m_use_projector->isChecked() ? "ssf_perp" : "ssf_trace";
+
+	if(m_dyn.IsIncommensurate())
+	{
+		const t_vec_real& prop = m_dyn.GetOrderingWavevector();
+		const t_vec_real& axis = m_dyn.GetRotationAxis();
+
+		ofstr << "if !use_supercell\n";
+		ofstr << "\tcalc = SpinWaveTheorySpiral(magsys; measure = "
+			<< proj << "(magsys; formfactors = ffacts), "
+			<< "k = [ " << prop[0] << ", " << prop[1] << ", " << prop[2] << " ], "
+			<< "axis = [ " << axis[0] << ", " << axis[1] << ", " << axis[2] << " ], "
+			<< "regularization = cholesky_eps)\n";
+		ofstr << "else\n\t";
+	}
+
 	ofstr << "calc = SpinWaveTheory(magsys; measure = "
-		<< proj << "(magsys; formfactors = ffacts)"
-		<< ", regularization = cholesky_eps)\n";
+		<< proj << "(magsys; formfactors = ffacts), "
+		<< "regularization = cholesky_eps)\n";
+
+	if(m_dyn.IsIncommensurate())
+		ofstr << "end\n";
 
 	//ofstr << "momenta = collect(range(Qstart, Qend, Qpts))\n";
 	ofstr << "momenta = q_space_path(magsys.crystal, [ Qstart, Qend ], Qpts)\n";
