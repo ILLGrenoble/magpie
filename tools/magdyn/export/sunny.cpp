@@ -320,14 +320,16 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	// --------------------------------------------------------------------
 	if(m_dyn.IsIncommensurate())
 	{
-		ofstr << "\n# supercell for incommensurate structure\n";
-
 		const t_vec_real& prop = m_dyn.GetOrderingWavevector();
 		const t_vec_real& axis = m_dyn.GetRotationAxis();
 		//t_vec_real s0 = tl2::cross(prop, axis);
 		//t_real s0_len = tl2::norm(s0);
 		//if(!tl2::equals_0<t_real>(s0_len, g_eps))
 		//	s0 /= s0_len;
+
+		ofstr << "\n# incommensurate structure\n";
+		ofstr << "prop = [ " << prop[0] << ", " << prop[1] << ", " << prop[2] << " ]\n";
+		ofstr << "axis = [ " << axis[0] << ", " << axis[1] << ", " << axis[2] << " ]\n";
 
 		int sc_x = tl2::equals_0(prop[0], g_eps)
 			? 1 : int(std::ceil(t_real(1) / prop[0]));
@@ -336,6 +338,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 		int sc_z = tl2::equals_0(prop[2], g_eps)
 			? 1 : int(std::ceil(t_real(1) / prop[2]));
 
+		ofstr << "\n# supercell for incommensurate structure\n";
 		ofstr << "if use_supercell\n";
 		ofstr << "\tmagsys = reshape_supercell(magsys, [ "
 			<< sc_x << " 0 0; 0 " << sc_y << " 0; 0 0 " << sc_z
@@ -347,8 +350,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 		//	<< "S0 = [ " << s0[0] << ", " << s0[1] << ", " << s0[2] << " ])\n";
 		ofstr << "\trepeat_periodically_as_spiral(magsys, "
 			<< "( " << sc_x << ", " << sc_y << ", " << sc_z << " ); "
-			<< "k = [ " << prop[0] << ", " << prop[1] << ", " << prop[2] << " ], "
-			<< "axis = [ " << axis[0] << ", " << axis[1] << ", " << axis[2] << " ])\n";
+			<< "k = prop, axis = axis)\n";
 		ofstr << "end\n";
 	}
 
@@ -383,14 +385,10 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 	if(m_dyn.IsIncommensurate())
 	{
-		const t_vec_real& prop = m_dyn.GetOrderingWavevector();
-		const t_vec_real& axis = m_dyn.GetRotationAxis();
-
 		ofstr << "if !use_supercell\n";
 		ofstr << "\tcalc = SpinWaveTheorySpiral(magsys; measure = "
 			<< proj << "(magsys; formfactors = ffacts), "
-			<< "k = [ " << prop[0] << ", " << prop[1] << ", " << prop[2] << " ], "
-			<< "axis = [ " << axis[0] << ", " << axis[1] << ", " << axis[2] << " ], "
+			<< "k = prop, axis = axis, "
 			<< "regularization = cholesky_eps)\n";
 		ofstr << "else\n\t";
 	}
