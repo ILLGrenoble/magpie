@@ -239,7 +239,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 		if(is_aniso)
 		{
 			ofstr << "set_onsite_coupling!(magsys, S -> "
-			    << get_str_var(term.J, true) << "*(S[1]^2 + S[2]^2 + S[3]^2), "
+				<< get_str_var(term.J, true) << "*(S[1]^2 + S[2]^2 + S[3]^2), "
 				<< idx1 << ");\n";
 
 			// TODO: also treat dmi vector and general matrix
