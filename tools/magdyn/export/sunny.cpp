@@ -108,7 +108,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "plot_dynamics    = true\n";
 	ofstr << "save_dynamics    = true\n";
 	if(m_dyn.IsIncommensurate())
-		ofstr << "use_supercell    = true\n";
+		ofstr << "use_supercell    = false\n";
 	ofstr << "datfile          = \"" << dispname_rel << "\"\n";
 	ofstr << "phys_units       = Units(:meV, :angstrom)\n";
 	// --------------------------------------------------------------------
