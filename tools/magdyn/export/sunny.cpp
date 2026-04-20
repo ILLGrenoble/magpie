@@ -421,7 +421,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "if save_dynamics\n";
 	ofstr << "\t@printf(\"Outputting dispersion data to \\\"%s\\\", plot with:\\n"
 		<< "\\tgnuplot -p -e \\\"plot \\\\\\\"%s\\\\\\\" u " << q_idx
-		<< ":4:(\\\\\\$5) w p pt 7 ps var\\\"\\n\", "
+		<< ":4:(sqrt(abs(\\\\\\$5))) w p pt 7 ps var\\\"\\n\", "
 		<< "datfile, datfile)\n";
 
 	ofstr << "\tenergies = bands.disp\n";
