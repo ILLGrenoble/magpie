@@ -267,6 +267,39 @@ requires is_vec<t_vec>
 
 
 /**
+ * create a line, z = f(x)
+ * @returns vertices
+ */
+template<class t_func, class t_mat, class t_vec,
+	template<class...> class t_cont = std::vector,
+	class t_real = typename t_vec::value_type>
+t_cont<t_vec> create_line(const t_func& func,
+	t_real width = 1., std::size_t num_points_x = 16)
+requires is_vec<t_vec>
+{
+	t_cont<t_vec> vertices;
+	vertices.reserve(num_points_x);
+
+	// TODO
+	t_real y = 0.;
+	//t_real y = -height*0.5 + height *
+	//	static_cast<t_real>(j)/static_cast<t_real>(num_points_y - 1);
+
+	for(std::size_t i = 0; i < num_points_x; ++i)
+	{
+		// create vertices
+		t_real x = -width*0.5 + width *
+			static_cast<t_real>(i)/static_cast<t_real>(num_points_x - 1);
+
+		auto [z, valid] = func(x, i);
+		vertices.emplace_back(tl2::create<t_vec>({ x, y, z }));
+	}
+
+	return vertices;
+}
+
+
+/**
  * create a disk
  * @returns [vertices, face vertex indices, face normals, face uvs]
  */

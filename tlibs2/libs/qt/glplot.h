@@ -247,13 +247,21 @@ public:
 		t_real_gl x = 0, t_real_gl y = 0, t_real_gl z = 1, t_real_gl size = 10,
 		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);
 	std::size_t AddPatch(
-		std::function<std::pair<t_real_gl, bool>(t_real_gl, t_real_gl, std::size_t, std::size_t)> fkt,
+		std::function<std::pair<t_real_gl /*z*/, bool /*valid*/>(
+			t_real_gl, t_real_gl, std::size_t, std::size_t)> fkt,
 		t_real_gl x = 0, t_real_gl y = 0, t_real_gl z = 0,
 		t_real_gl w = 10, t_real_gl h = 10, std::size_t pts_x = 16, std::size_t pts_y = 16,
+		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);
+	std::size_t AddLine(
+		std::function<std::pair<t_real_gl /*z*/, bool /*valid*/>(t_real_gl, std::size_t)> fkt,
+		t_real_gl x = 0, t_real_gl y = 0, t_real_gl z = 0,
+		t_real_gl w = 10, std::size_t pts_x = 16,
 		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);
 
 	std::size_t AddTriangleObject(const std::vector<t_vec3_gl>& triag_verts,
 		const std::vector<t_vec3_gl>& triag_norms,
+		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);
+	std::size_t AddLineObject(const std::vector<t_vec3_gl>& verts,
 		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);
 
 	void SetObjectMatrix(std::size_t idx, const t_mat_gl& mat);
