@@ -2212,7 +2212,11 @@ GlPlot::GlPlot(QWidget *pParent) : QOpenGLWidget(pParent),
 	m_renderer(std::make_unique<GlPlotRenderer>(this)),
 	m_thread_impl(std::make_unique<QThread>(this))
 {
+#if defined(_GL_MAJ_VER) && defined(_GL_MIN_VER)
+	tl2::set_gl_format(true, _GL_MAJ_VER, _GL_MIN_VER);
+#endif
 	qRegisterMetaType<std::size_t>("std::size_t");
+	setAttribute(Qt::WA_DeleteOnClose);
 
 	if constexpr(m_isthreaded)
 	{

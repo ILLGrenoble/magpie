@@ -63,7 +63,25 @@ if [ $create_appdir -ne 0 ]; then
 	echo -e "Description: A Graphical Magnon Software" >>   ${APPDIRNAME}/DEBIAN/control
 	echo -e "Maintainer: tweber@ill.fr" >>                  ${APPDIRNAME}/DEBIAN/control
 
-	if [ "$1" == "noble" ] || [  "$1" == "" ]; then
+	if [ "$1" == "resolute" ]; then
+		echo -e "Choosing debendencies for Resolute..."
+
+		echo -e "Depends:" \
+			"libstdc++6 (>=10.0.0)," \
+			"libboost-program-options1.90.0 (>=1.90.0)," "libboost-container1.90.0 (>=1.90.0)," \
+			"libqhull-r8.0 (>=2020.2)," "libqhullcpp8.0 (>=2020.2)," \
+			"libqt6core6 (>=6.0.0)," "libqt6gui6 (>=6.0.0)," \
+			"libqt6widgets6 (>=6.0.0)," "libqt6svg6 (>=6.0.0)," \
+			"libqt6opengl6 (>=6.0.0)," "libqt6openglwidgets6 (>=6.0.0)," \
+			"libqt6printsupport6 (>=6.0.0),"\
+			"libqcustomplot2.1 (>=2.0.0)," \
+			"libhdf5-310," "libhdf5-cpp-310," \
+			"python3 (>=3.10.0)," "python3-numpy," "python3-matplotlib," \
+			"liblapacke (>=3.11)," \
+			"libgmp10 (>=2:6.2)," \
+			"libopengl0 (>=1.3.0)\n" \
+				>> ${APPDIRNAME}/DEBIAN/control
+	elif [ "$1" == "noble" ] || [  "$1" == "" ]; then
 		echo -e "Choosing debendencies for Noble..."
 
 		echo -e "Depends:" \
