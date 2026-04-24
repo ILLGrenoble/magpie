@@ -733,9 +733,13 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 			std::ostringstream objLabel;
 			objLabel << "Band #" << (band_idx + 1);
 
+			// colours
 			t_real_gl r = t_real_gl(col[0]) / t_real_gl(255.);
 			t_real_gl g = t_real_gl(col[1]) / t_real_gl(255.);
 			t_real_gl b = t_real_gl(col[2]) / t_real_gl(255.);
+			t_real_gl r_line = r * t_real_gl(0.2);
+			t_real_gl g_line = g * t_real_gl(0.2);
+			t_real_gl b_line = b * t_real_gl(0.2);
 
 			// surface
 			std::size_t obj = m_dispplot->GetRenderer()->AddPatch(patch_fkt, 0., 0., 0.,
@@ -746,22 +750,22 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 			// border line 1
 			t_real_gl y1 = -Q_scale2*0.5;
 			/*std::size_t objLine1 =*/ m_dispplot->GetRenderer()->AddLine(line1_fkt, 0., 0., 0.,
-				Q_scale1, m_Q_count_1, r, g, b, 1., y1, false);
+				Q_scale1, m_Q_count_1, r_line, g_line, b_line, 1., y1, false);
 
 			// border line 2
 			t_real_gl y2 = -Q_scale2*0.5 + Q_scale2;
 			/*std::size_t objLine2 =*/ m_dispplot->GetRenderer()->AddLine(line2_fkt, 0., 0., 0.,
-				Q_scale1, m_Q_count_1, r, g, b, 1., y2, false);
+				Q_scale1, m_Q_count_1, r_line, g_line, b_line, 1., y2, false);
 
 			// border line 3
 			t_real_gl x1 = -Q_scale1*0.5;
 			/*std::size_t objLine3 =*/ m_dispplot->GetRenderer()->AddLine(line3_fkt, 0., 0., 0.,
-				Q_scale2, m_Q_count_2, r, g, b, 1., x1, true);
-	
+				Q_scale2, m_Q_count_2, r_line, g_line, b_line, 1., x1, true);
+
 			// border line 4
 			t_real_gl x2 = -Q_scale1*0.5 + Q_scale1;
 			/*std::size_t objLine4 =*/ m_dispplot->GetRenderer()->AddLine(line4_fkt, 0., 0., 0.,
-				Q_scale2, m_Q_count_2, r, g, b, 1., x2, true);
+				Q_scale2, m_Q_count_2, r_line, g_line, b_line, 1., x2, true);
 
 			m_cam_centre[2] += GetMeanEnergy(band_idx);
 			++num_active_bands;

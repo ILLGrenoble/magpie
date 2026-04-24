@@ -306,6 +306,7 @@ bool create_line_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 
 	obj.m_type = GlRenderObjType::LINES;
 	obj.m_colour = colour;
+	obj.m_lighting = 3;
 
 	// flatten vertex array into raw float array
 	auto to_float_array = [](const std::vector<t_vec3_gl>& verts, int iElems = 3)
@@ -329,8 +330,7 @@ bool create_line_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 	obj.m_vertex_array->bind();
 
 	{	// vertices
-		obj.m_vertex_buffer = std::make_shared<QOpenGLBuffer>(
-			QOpenGLBuffer::VertexBuffer);
+		obj.m_vertex_buffer = std::make_shared<QOpenGLBuffer>(QOpenGLBuffer::VertexBuffer);
 
 		BOOST_SCOPE_EXIT(&obj)
 		{
@@ -348,8 +348,7 @@ bool create_line_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 	}
 
 	{	// colours
-		obj.m_colour_buffer = std::make_shared<QOpenGLBuffer>(
-			QOpenGLBuffer::VertexBuffer);
+		obj.m_colour_buffer = std::make_shared<QOpenGLBuffer>(QOpenGLBuffer::VertexBuffer);
 
 		BOOST_SCOPE_EXIT(&obj)
 		{

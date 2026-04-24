@@ -230,7 +230,7 @@ struct GlRenderObj
 	bool m_intersect      = true;    // object can be intersected by picker
 	bool m_cull_back      = true;    // cull back or front faces
 	bool m_force_cull     = false;   // cull enabled (otherwise use global setting)
-	int m_lighting        = 1;       // lighting model
+	int m_lighting        = 1;       // lighting model (1: phong, 2: flat, 3: none)
 	int m_priority        = 1;       // object rendering priority
 
 	t_vec3_gl m_label_pos = tl2::create<t_vec3_gl>({ 0., 0., 0. });

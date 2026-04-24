@@ -776,10 +776,7 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 	m_coordCubeTicks[1] = y_tick;
 	m_coordCubeTicks[2] = z_tick;
 
-	if(!m_pPlot)
-		return;
-
-	if(m_coordCubeLab.size() != 6)
+	if(!m_pPlot || m_coordCubeLab.size() != 6)
 		return;
 
 	for(std::size_t idx : m_coordCubeLab)
@@ -1669,6 +1666,10 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 	pGl->glEnable(GL_POLYGON_SMOOTH);
 	pGl->glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	pGl->glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+
+	/*t_real_gl lwrange[2];
+	pGl->glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, lwrange);
+	pGl->glLineWidth(lwrange[1]);*/
 
 	// clear
 	pGl->glClearColor(1., 1., 1., 1.);
