@@ -679,6 +679,7 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 		{
 			t_data_Qs& data = m_data[band_idx];
 
+			// dispersion surface function
 			auto patch_fkt = [this, &data, E_scale](
 				t_real_gl /*x2*/, t_real_gl /*x1*/, t_size idx_1, t_size idx_2)
 					-> std::pair<t_real_gl, bool>
@@ -701,6 +702,34 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 				return std::make_pair(E * E_scale, valid);
 			};
 
+			// dispersion surface border line 1
+			auto line1_fkt = [&patch_fkt](
+				t_real_gl x, t_size idx) -> std::pair<t_real_gl, bool>
+			{
+				return patch_fkt(x, 0., idx, 0);
+			};
+
+			// dispersion surface border line 2
+			auto line2_fkt = [this, &patch_fkt](
+				t_real_gl x, t_size idx) -> std::pair<t_real_gl, bool>
+			{
+				return patch_fkt(x, 0., idx, m_Q_count_2 - 1);
+			};
+
+			// dispersion surface border line 3
+			auto line3_fkt = [&patch_fkt](
+				t_real_gl y, t_size idx) -> std::pair<t_real_gl, bool>
+			{
+				return patch_fkt(0., y, 0, idx);
+			};
+
+			// dispersion surface border line 4
+			auto line4_fkt = [this, &patch_fkt](
+				t_real_gl y, t_size idx) -> std::pair<t_real_gl, bool>
+			{
+				return patch_fkt(0., y, m_Q_count_1 - 1, idx);
+			};
+
 			std::ostringstream objLabel;
 			objLabel << "Band #" << (band_idx + 1);
 
@@ -708,10 +737,31 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 			t_real_gl g = t_real_gl(col[1]) / t_real_gl(255.);
 			t_real_gl b = t_real_gl(col[2]) / t_real_gl(255.);
 
+			// surface
 			std::size_t obj = m_dispplot->GetRenderer()->AddPatch(patch_fkt, 0., 0., 0.,
-				Q_scale1, Q_scale2, m_Q_count_1, m_Q_count_2, r, g, b);
+				Q_scale1, Q_scale2, m_Q_count_1, m_Q_count_2, r, g, b, 1.);
 			m_dispplot->GetRenderer()->SetObjectLabel(obj, objLabel.str());
 			m_band_objs.insert(std::make_pair(obj, band_idx));
+
+			// border line 1
+			t_real_gl y1 = -Q_scale2*0.5;
+			/*std::size_t objLine1 =*/ m_dispplot->GetRenderer()->AddLine(line1_fkt, 0., 0., 0.,
+				Q_scale1, m_Q_count_1, r, g, b, 1., y1, false);
+
+			// border line 2
+			t_real_gl y2 = -Q_scale2*0.5 + Q_scale2;
+			/*std::size_t objLine2 =*/ m_dispplot->GetRenderer()->AddLine(line2_fkt, 0., 0., 0.,
+				Q_scale1, m_Q_count_1, r, g, b, 1., y2, false);
+
+			// border line 3
+			t_real_gl x1 = -Q_scale1*0.5;
+			/*std::size_t objLine3 =*/ m_dispplot->GetRenderer()->AddLine(line3_fkt, 0., 0., 0.,
+				Q_scale2, m_Q_count_2, r, g, b, 1., x1, true);
+	
+			// border line 4
+			t_real_gl x2 = -Q_scale1*0.5 + Q_scale1;
+			/*std::size_t objLine4 =*/ m_dispplot->GetRenderer()->AddLine(line4_fkt, 0., 0., 0.,
+				Q_scale2, m_Q_count_2, r, g, b, 1., x2, true);
 
 			m_cam_centre[2] += GetMeanEnergy(band_idx);
 			++num_active_bands;

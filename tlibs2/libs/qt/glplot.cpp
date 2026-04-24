@@ -622,11 +622,12 @@ std::size_t GlPlotRenderer::AddLine(
 	std::function<std::pair<t_real_gl, bool>(t_real_gl, std::size_t)> fkt,
 	t_real_gl x, t_real_gl y, t_real_gl z,
 	t_real_gl w, std::size_t pts_x,
-	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a)
+	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a,
+	t_real_gl pt_y, bool flip_xy)
 {
 	using t_fkt = std::function<std::pair<t_real_gl, bool>(t_real_gl, std::size_t)>;
 
-	auto verts = tl2::create_line<t_fkt, t_mat_gl, t_vec3_gl>(fkt, w, pts_x);
+	auto verts = tl2::create_line<t_fkt, t_mat_gl, t_vec3_gl>(fkt, w, pts_x, pt_y, flip_xy);
 	auto [boundingSpherePos, boundingSphereRad] =
 		tl2::bounding_sphere<t_vec3_gl>(verts);
 

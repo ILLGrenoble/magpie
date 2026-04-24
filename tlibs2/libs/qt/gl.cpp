@@ -277,7 +277,6 @@ bool create_triangle_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 		pGl->glVertexAttribPointer(attrTextureCoords, 2, GL_FLOAT, 0, 0, nullptr);
 	}
 
-
 	obj.m_vertices = std::move(verts);
 	obj.m_triangles = std::move(triagverts);
 	obj.m_uvs = std::move(uvs);
@@ -309,7 +308,7 @@ bool create_line_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 	obj.m_colour = colour;
 
 	// flatten vertex array into raw float array
-	auto to_float_array = [](const std::vector<t_vec3_gl>& verts, int iElems=3)
+	auto to_float_array = [](const std::vector<t_vec3_gl>& verts, int iElems = 3)
 		-> std::vector<t_real_gl>
 	{
 		std::vector<t_real_gl> vecRet;
@@ -373,7 +372,6 @@ bool create_line_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 			vecCols.size()*sizeof(typename decltype(vecCols)::value_type));
 		pGl->glVertexAttribPointer(attrVertexcolour, 4, GL_FLOAT, 0, 0, nullptr);
 	}
-
 
 	obj.m_vertices = std::move(verts);
 	LOGGLERR(pGl)

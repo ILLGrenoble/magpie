@@ -274,25 +274,36 @@ template<class t_func, class t_mat, class t_vec,
 	template<class...> class t_cont = std::vector,
 	class t_real = typename t_vec::value_type>
 t_cont<t_vec> create_line(const t_func& func,
-	t_real width = 1., std::size_t num_points_x = 16)
+	t_real width = 1., std::size_t num_points_x = 16,
+	t_real y = 0., bool flip_xy = false)
 requires is_vec<t_vec>
 {
 	t_cont<t_vec> vertices;
 	vertices.reserve(num_points_x);
 
-	// TODO
-	t_real y = 0.;
 	//t_real y = -height*0.5 + height *
 	//	static_cast<t_real>(j)/static_cast<t_real>(num_points_y - 1);
-
-	for(std::size_t i = 0; i < num_points_x; ++i)
+	for(std::size_t i = 0; i < num_points_x - 1; ++i)
 	{
 		// create vertices
-		t_real x = -width*0.5 + width *
+		t_real x1 = -width*0.5 + width *
 			static_cast<t_real>(i)/static_cast<t_real>(num_points_x - 1);
+		t_real x2 = -width*0.5 + width *
+			static_cast<t_real>(i + 1)/static_cast<t_real>(num_points_x - 1);
 
-		auto [z, valid] = func(x, i);
-		vertices.emplace_back(tl2::create<t_vec>({ x, y, z }));
+		auto [z1, valid1] = func(x1, i);
+		auto [z2, valid2] = func(x2, i + 1);
+
+		if(flip_xy)
+		{
+			vertices.emplace_back(tl2::create<t_vec>({ y, x1, z1 }));
+			vertices.emplace_back(tl2::create<t_vec>({ y, x2, z2 }));
+		}
+		else
+		{
+			vertices.emplace_back(tl2::create<t_vec>({ x1, y, z1 }));
+			vertices.emplace_back(tl2::create<t_vec>({ x2, y, z2 }));
+		}
 	}
 
 	return vertices;
