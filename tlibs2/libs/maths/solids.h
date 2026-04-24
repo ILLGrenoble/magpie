@@ -294,6 +294,9 @@ requires is_vec<t_vec>
 		auto [z1, valid1] = func(x1, i);
 		auto [z2, valid2] = func(x2, i + 1);
 
+		if(!valid1 || !valid2)
+			continue;
+
 		if(flip_xy)
 		{
 			vertices.emplace_back(tl2::create<t_vec>({ y, x1, z1 }));
