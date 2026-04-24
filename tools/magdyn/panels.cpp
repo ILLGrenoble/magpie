@@ -1625,7 +1625,7 @@ void MagDynDlg::CreateReciprocalPanel()
 	btnReduceBZ->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
 	// show 3d brillouin zone
-	QPushButton *btnShowBZ = new QPushButton("View Brillouin Zone...", this);
+	QPushButton *btnShowBZ = new QPushButton("3D Brillouin Zone...", this);
 	btnShowBZ->setIcon(QIcon::fromTheme("applications-graphics"));
 	btnShowBZ->setToolTip("Show a 3D view of the first nuclear Brillouin zone.");
 	btnShowBZ->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
