@@ -102,7 +102,7 @@ void MagDynDlg::Clear(bool recalc)
 
 	m_weight_scale->setValue(1.);
 	m_weight_min->setValue(0.);
-	m_weight_max->setValue(9999.);
+	m_weight_max->setValue(99.);
 
 	if(m_groundstate_dlg)
 		m_groundstate_dlg->SyncFromKernel();
