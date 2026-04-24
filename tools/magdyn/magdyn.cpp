@@ -225,11 +225,17 @@ void MagDynDlg::CreateMainWindow()
 	m_btnStartStop->setToolTip("Start calculation.");
 	m_btnStartStop->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
-	// show structure
-	QPushButton *btnShowStruct = new QPushButton("View Structure...", this);
+	// show 3d structure
+	QPushButton *btnShowStruct = new QPushButton("3D Structure...", this);
 	btnShowStruct->setIcon(QIcon::fromTheme("applications-graphics"));
 	btnShowStruct->setToolTip("Show a 3D view of the magnetic sites and couplings.");
 	btnShowStruct->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+
+	// show 3d dispersion
+	QPushButton *btnShowDisp3d = new QPushButton("3D Dispersion...", this);
+	btnShowDisp3d->setIcon(QIcon::fromTheme("applications-graphics"));
+	btnShowDisp3d->setToolTip("Calculate 3D dispersion.");
+	btnShowDisp3d->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
 	// splitter for input and output tabs
 	m_split_inout = new QSplitter(this);
@@ -242,12 +248,13 @@ void MagDynDlg::CreateMainWindow()
 	m_maingrid = new QGridLayout(this);
 	m_maingrid->setSpacing(4);
 	m_maingrid->setContentsMargins(8, 8, 8, 8);
-	m_maingrid->addWidget(m_split_inout, 0,0, 1,8);
+	m_maingrid->addWidget(m_split_inout, 0,0, 1,9);
 	m_maingrid->addWidget(m_statusFixed, 1,0, 1,1);
 	m_maingrid->addWidget(m_status, 1,1, 1,3);
 	m_maingrid->addWidget(m_progress, 1,4, 1,2);
 	m_maingrid->addWidget(m_btnStartStop, 1,6, 1,1);
 	m_maingrid->addWidget(btnShowStruct, 1,7, 1,1);
+	m_maingrid->addWidget(btnShowDisp3d, 1,8, 1,1);
 
 	// signals
 	connect(m_btnStartStop, &QAbstractButton::clicked, [this]()
@@ -260,6 +267,7 @@ void MagDynDlg::CreateMainWindow()
 	});
 
 	connect(btnShowStruct, &QAbstractButton::clicked, this, &MagDynDlg::ShowStructPlotDlg);
+	connect(btnShowDisp3d, &QAbstractButton::clicked, this, &MagDynDlg::ShowDispersion3DDlg);
 }
 
 
@@ -290,8 +298,8 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acStructExportSW = new QAction("Export To SpinW Code...");
 	QAction *acStructExportScript = new QAction("Export To Python Code...");
 	QAction *acStructNotes = new QAction("Notes...", menuStruct);
-	QAction *acStructView = new QAction("View Structure...", menuStruct);
-	QAction *acBZView = new QAction("View Brillouin Zone...", menuStruct);
+	QAction *acStructView = new QAction("View 3D Structure...", menuStruct);
+	QAction *acBZView = new QAction("View 3D Brillouin Zone...", menuStruct);
 	QAction *acGroundState = new QAction("Minimise Ground State...", menuStruct);
 
 	// dispersion plot menu
