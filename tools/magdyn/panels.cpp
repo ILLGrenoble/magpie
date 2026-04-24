@@ -1265,7 +1265,7 @@ void MagDynDlg::CreateDispersionPanel()
 
 	m_weight_scale->setValue(1.);
 	m_weight_min->setValue(0.);
-	m_weight_max->setValue(9999);
+	m_weight_max->setValue(99.);
 	m_weight_min->setMinimum(-1.);	// -1: disable clamping
 	m_weight_max->setMinimum(-1.);	// -1: disable clamping
 	m_weight_min->setToolTip("Minimum spectral weight for clamping.");
