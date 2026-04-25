@@ -82,6 +82,7 @@ public:
 	void SetDispersionQ(const t_vec_real& Qstart, const t_vec_real& Qend);
 
 	void SetPlotFont(const QString& font);
+	bool IsPlotterValid() const;
 
 
 protected:

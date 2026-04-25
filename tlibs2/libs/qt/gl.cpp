@@ -104,6 +104,12 @@ void set_gl_format(bool bCore, int iMajorVer, int iMinorVer, int iSamples)
  */
 qgl_funcs* get_gl_functions(QOpenGLWidget *pGLWidget)
 {
+	if(!pGLWidget || !pGLWidget->context())
+	{
+		std::cerr << "GL error: Invalid context." << std::endl;
+		return nullptr;
+	}
+
 	qgl_funcs *pGl = nullptr;
 
 	if constexpr(std::is_same_v<qgl_funcs, QOpenGLFunctions>)

@@ -514,15 +514,20 @@ requires is_vec<t_vec> && is_mat<t_mat>
 {
 	// perspective trafo and divide
 	t_vec vecPersp = matProj * matModelView * vec4;
-	vecPersp /= vecPersp[3];
+
+	if(!tl2::equals_0(vecPersp[3]))
+		vecPersp /= vecPersp[3];
 
 	// viewport trafo
 	t_vec vec = matViewport * vecPersp;
 
 	// flip y coordinate
-	if(bFlipY) vec[1] = matViewport(1,1)*2 - vec[1];
+	if(bFlipY)
+		vec[1] = matViewport(1, 1)*2 - vec[1];
+
 	// flip x coordinate
-	if(bFlipX) vec[0] = matViewport(0,0)*2 - vec[0];
+	if(bFlipX)
+		vec[0] = matViewport(0, 0)*2 - vec[0];
 
 	return std::make_tuple(vecPersp, vec);
 }
@@ -543,13 +548,17 @@ requires is_vec<t_vec> && is_mat<t_mat>
 	t_vec vecScreen = create<t_vec>({xScreen, yScreen, zPlane, 1.});
 
 	// flip y coordinate
-	if(pmatViewport && bFlipY) vecScreen[1] = (*pmatViewport)(1,1)*2 - vecScreen[1];
+	if(pmatViewport && bFlipY)
+		vecScreen[1] = (*pmatViewport)(1,1)*2 - vecScreen[1];
+
 	// flip x coordinate
-	if(pmatViewport && bFlipX) vecScreen[0] = (*pmatViewport)(0,0)*2 - vecScreen[0];
+	if(pmatViewport && bFlipX)
+		vecScreen[0] = (*pmatViewport)(0,0)*2 - vecScreen[0];
 
 	t_vec vecWorld = matModelView_inv * matProj_inv * matViewport_inv * vecScreen;
 
-	vecWorld /= vecWorld[3];
+	if(!tl2::equals_0(vecWorld[3]))
+		vecWorld /= vecWorld[3];
 	return vecWorld;
 }
 

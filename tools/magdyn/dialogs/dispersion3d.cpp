@@ -466,6 +466,16 @@ Dispersion3DDlg::~Dispersion3DDlg()
 
 
 
+bool Dispersion3DDlg::IsPlotterValid() const
+{
+	if(!m_dispplot)
+		return false;
+
+	return m_dispplot->IsValid();
+}
+
+
+
 void Dispersion3DDlg::SetPlotFont(const QString& font)
 {
 	if(!m_dispplot)

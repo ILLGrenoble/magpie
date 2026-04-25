@@ -168,6 +168,7 @@ void Dispersion3DDlg::Calculate()
 	if(!m_dyn)
 		return;
 
+	bool minmax_valid = false;
 	m_minmax_E[0] = +std::numeric_limits<t_real>::max();
 	m_minmax_E[1] = -std::numeric_limits<t_real>::max();
 	m_minmax_Q1[0] = m_minmax_Q1[1] = tl2::zero<t_vec_real>(3);
@@ -230,7 +231,7 @@ void Dispersion3DDlg::Calculate()
 	for(t_size Q_idx_1 = 0; Q_idx_1 < m_Q_count_1; ++Q_idx_1)
 	for(t_size Q_idx_2 = 0; Q_idx_2 < m_Q_count_2; ++Q_idx_2)
 	{
-		auto task = [this, &mtx, &dyn, Q_idx_1, Q_idx_2,
+		auto task = [this, &mtx, &dyn, Q_idx_1, Q_idx_2, &minmax_valid,
 			&Q_origin, &Q_step_1, &Q_step_2, expected_bands,
 			unite_degen, use_weights, use_projector, min_S]()
 		{
@@ -273,6 +274,7 @@ void Dispersion3DDlg::Calculate()
 				{
 					m_minmax_E[0] = std::min(m_minmax_E[0], E);
 					m_minmax_E[1] = std::max(m_minmax_E[1], E);
+					minmax_valid = true;
 				}
 
 				// count energy degeneracy
@@ -307,7 +309,7 @@ void Dispersion3DDlg::Calculate()
 
 					data_band_idx += degeneracy - 1;
 				}
-			}
+			}  // band iteration
 
 			// fill up band data in case some indices were skipped due to invalid hamiltonians
 			for(; data_band_idx < expected_bands; ++data_band_idx)
@@ -317,12 +319,15 @@ void Dispersion3DDlg::Calculate()
 				std::lock_guard<std::mutex> _lck{mtx};
 				m_data[data_band_idx].emplace_back(std::move(dat));
 			}
-		};
+		};  // task
 
 		t_taskptr taskptr = std::make_shared<t_task>(task);
 		tasks.push_back(taskptr);
 		asio::post(pool, [taskptr]() { (*taskptr)(); });
-	}
+	}  // Q iteration
+
+	if(!minmax_valid)
+		m_minmax_E[0] = m_minmax_E[1] = 0.;
 
 	m_status->setText(QString("Calculating dispersion in %1 threads...").arg(g_num_threads));
 

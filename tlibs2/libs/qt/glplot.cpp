@@ -183,6 +183,8 @@ const t_mat_gl& GlPlotRenderer::GetObjectMatrix(std::size_t idx) const
 	if(const GlRenderObj *obj = GetObject(idx); obj)
 		return obj->m_mat;
 
+	std::cerr << "GL error: Requested invalid matrix for object "
+		<< idx << "." << std::endl;
 	static const t_mat_gl invalid_mat;
 	return invalid_mat;
 }
@@ -374,6 +376,8 @@ void GlPlotRenderer::RemoveObjects()
  */
 void GlPlotRenderer::CollectGarbage()
 {
+	QMutexLocker _locker{&m_mutexObj};
+
 	// remove all invalid objects at the end of the list
 	for(std::ptrdiff_t idx = m_objs.size() - 1; idx >= 0; --idx)
 	{
@@ -727,8 +731,15 @@ GlPlotRenderer::CalcTickMarks(t_real_gl min, t_real_gl max, t_real_gl tick_delta
 	if(tick_delta <= 0.)  // calculate tick spacing if none given
 	{
 		t_real_gl range = max - min;
-		int power = static_cast<int>(std::log10(std::abs(range)));
-		tick_delta = std::pow(10., power);
+		if(!tl2::equals_0(range))
+		{
+			int power = static_cast<int>(std::log10(std::abs(range)));
+			tick_delta = std::pow(10., power);
+		}
+		else
+		{
+			tick_delta = 1e-4;
+		}
 
 		// if there's too little ticks, decrease the delta
 		if(range / tick_delta < 3.)
@@ -754,6 +765,8 @@ GlPlotRenderer::CalcTickMarks(t_real_gl min, t_real_gl max, t_real_gl tick_delta
  */
 t_real_gl GlPlotRenderer::TickTrafo(t_real_gl min, t_real_gl max, t_real_gl val)
 {
+	if(tl2::equals_0(max - min))
+		return 0.;
 	return (val - min) / (max - min);
 };
 
@@ -1214,29 +1227,41 @@ void main()
 	LOGGLERR(pGl);
 
 
-	// 3d objects
-	m_coordCrossLab = AddCoordinateCross(-m_CoordMax, m_CoordMax);
-	m_coordCrossXtal = AddCoordinateCross(-m_CoordMax, m_CoordMax);
-	m_coordCubeLab = AddCoordinateCube(-m_CoordMax, m_CoordMax);
-	SetObjectVisible(*m_coordCrossLab, true);
-	SetObjectVisible(*m_coordCrossXtal, false);
-	for(std::size_t i = 0; i <  m_coordCubeLab.size(); ++i)
-		SetObjectVisible(m_coordCubeLab[i], false);
+	// 3d coordinate system objects
+	if(!tl2::equals_0(m_CoordMax))
+	{
+		m_coordCrossLab = AddCoordinateCross(-m_CoordMax, m_CoordMax);
+		m_coordCrossXtal = AddCoordinateCross(-m_CoordMax, m_CoordMax);
+		m_coordCubeLab = AddCoordinateCube(-m_CoordMax, m_CoordMax);
+		SetObjectVisible(*m_coordCrossLab, true);
+		SetObjectVisible(*m_coordCrossXtal, false);
+		for(std::size_t i = 0; i <  m_coordCubeLab.size(); ++i)
+			SetObjectVisible(m_coordCubeLab[i], false);
+	}
+	else
+	{
+		std::cerr << "GL error: Invalid coordinate axis extents." << std::endl;
+	}
 
-	m_initialised = true;
-
+	// check if context is valid
+	auto *pContext = ((QOpenGLWidget*)m_pPlot)->context();
+	if(!pContext || !pContext->isValid())
+	{
+		std::cerr << "GL error: Invalid context." << std::endl;
+		return;
+	}
 
 	// check threading compatibility
 	if constexpr(m_isthreaded)
 	{
-		if(auto *pContext = ((QOpenGLWidget*)m_pPlot)->context();
-			pContext && !pContext->supportsThreadedOpenGL())
+		if(!pContext->supportsThreadedOpenGL())
 		{
-			m_platform_supported = false;
-			std::cerr << "GL error: Threading is not supported on this platform."
-				<< std::endl;
+			std::cerr << "GL error: Threading is not supported on this platform." << std::endl;
+			return;
 		}
 	}
+
+	m_initialised = true;
 }
 
 
@@ -1249,13 +1274,14 @@ void GlPlotRenderer::SetScreenDims(int w, int h)
 
 void GlPlotRenderer::UpdateViewport()
 {
-	if(!m_platform_supported || !m_initialised)
+	if(!m_initialised)
 		return;
 
 	const auto [w, h] = m_cam.GetScreenDimensions();
 	const auto [z_near, z_far] = m_cam.GetDepthRange();
 
-	if(auto *pContext = ((QOpenGLWidget*)m_pPlot)->context(); !pContext)
+	if(auto *pContext = ((QOpenGLWidget*)m_pPlot)->context();
+		!pContext || !pContext->isValid())
 		return;
 	auto *pGl = GetGlFunctions();
 	if(!pGl)
@@ -1366,6 +1392,9 @@ void GlPlotRenderer::UpdateCam()
  */
 void GlPlotRenderer::RequestPlotUpdate()
 {
+	if(!IsInitialised())
+		return;
+
 #if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
 	QMetaObject::invokeMethod((QOpenGLWidget*)m_pPlot,
 		static_cast<void (QOpenGLWidget::*)()>(&QOpenGLWidget::update),
@@ -1379,8 +1408,8 @@ void GlPlotRenderer::RequestPlotUpdate()
 
 void GlPlotRenderer::SetLight(std::size_t idx, const t_vec3_gl& pos)
 {
-	if(m_lights.size() < idx+1)
-		m_lights.resize(idx+1);
+	if(m_lights.size() < idx + 1)
+		m_lights.resize(idx + 1);
 
 	m_lights[idx] = pos;
 	m_lights_need_update = true;
@@ -1389,6 +1418,9 @@ void GlPlotRenderer::SetLight(std::size_t idx, const t_vec3_gl& pos)
 
 void GlPlotRenderer::UpdateLights()
 {
+	if(!IsInitialised())
+		return;
+
 	constexpr int MAX_LIGHTS = 4;	// max. number allowed in shader
 
 	int num_lights = std::min(MAX_LIGHTS, static_cast<int>(m_lights.size()));
@@ -1416,7 +1448,7 @@ void GlPlotRenderer::EnablePicker(bool b)
 
 void GlPlotRenderer::UpdatePicker()
 {
-	if(!m_initialised || !m_platform_supported || !m_picker_enabled)
+	if(!m_initialised || !m_picker_enabled)
 		return;
 
 	// picker ray
@@ -1908,6 +1940,8 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 
 		// assumes that the matrix is the same for all six sides of the cube
 		const t_mat_gl& matScale = GetObjectMatrix(m_coordCubeLab[0]);
+		//tl2::niceprint(std::cout, matScale);
+		//std::cout << std::endl;
 
 		t_vec_gl centre = matScale * tl2::create<t_vec_gl>({ 0., 0., 0., 1. });
 		t_vec_gl corner_mmm = matScale * tl2::create<t_vec_gl>({ -1., -1., -1., 1. });
@@ -2117,15 +2151,14 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 
 void GlPlotRenderer::paintGL()
 {
-	if(!m_platform_supported)
+	if(!m_initialised || !m_pPlot)
 		return;
-	if(!m_pPlot)
-		return;
+
 	QMutexLocker _locker{&m_mutexObj};
 
 	if constexpr(!m_isthreaded)
 	{
-		if(auto *pContext = m_pPlot->context(); !pContext)
+		if(auto *pContext = m_pPlot->context(); !pContext || !pContext->isValid())
 			return;
 		QPainter painter(m_pPlot);
 		painter.setRenderHint(QPainter::Antialiasing);
@@ -2151,7 +2184,7 @@ void GlPlotRenderer::paintGL()
 		if(!pThisThread->isRunning() || pThisThread->isInterruptionRequested())
 			return;
 
-		if(auto *pContext = m_pPlot->context(); !pContext)
+		if(auto *pContext = m_pPlot->context(); !pContext || !pContext->isValid())
 			return;
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)

@@ -304,6 +304,15 @@ void MagDynDlg::ShowDispersion3DDlg(bool only_create)
 			m_info_dlg, &InfoDlg::SetGlDeviceInfos);
 	}
 
+	if(!m_disp3d_dlg->IsPlotterValid())
+	{
+		delete m_disp3d_dlg;
+		m_disp3d_dlg = nullptr;
+
+		ShowError("Invalid plot renderer.");
+		return;
+	}
+
 	if(!only_create)
 	{
 		m_disp3d_dlg->show();

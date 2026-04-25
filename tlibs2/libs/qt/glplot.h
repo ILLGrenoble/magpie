@@ -115,7 +115,6 @@ protected:
 	t_mat_gl m_matB = tl2::unit<t_mat_gl>();
 	t_real_gl m_CoordMax = 2.5;       // extent of coordinate axes
 
-	std::atomic<bool> m_platform_supported = true;
 	std::atomic<bool> m_initialised = false;
 	std::atomic<bool> m_viewport_needs_update = false;
 	std::atomic<bool> m_picker_enabled = true;
@@ -425,6 +424,13 @@ public:
 	GlPlotRenderer* GetRenderer()
 	{
 		return m_renderer.get();
+	}
+
+	bool IsValid() const
+	{
+		if(!m_renderer /*|| !context()*/)
+			return false;
+		return true;
 	}
 
 
