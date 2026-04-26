@@ -41,24 +41,21 @@ namespace asio = boost::asio;
 
 
 /**
- * calculate the surfaces
+ * calculate the surfaces via the given formulas
  */
 void Plot3DDlg::Calculate()
 {
-	m_minmax_z[0] = +std::numeric_limits<t_real>::max();
-	m_minmax_z[1] = -std::numeric_limits<t_real>::max();
-	m_minmax_x[0] = m_minmax_x[1] = 0.;
-	m_minmax_y[0] = m_minmax_y[1] = 0.;
-	m_data.clear();
-
-	BOOST_SCOPE_EXIT(this_)
-	{
-		this_->EnableCalculation(true);
-	} BOOST_SCOPE_EXIT_END
-	EnableCalculation(false);
-
 	// get formulas
-	std::string all_formulas = m_formulas->toPlainText().toStdString();
+	QString _formulas = m_formulas->toPlainText();
+
+	// if no variables are given, treat it as data grid
+	if(_formulas.indexOf("x") == -1 && _formulas.indexOf("y") == -1)
+	{
+		CalculateGrid();
+		return;
+	}
+
+	std::string all_formulas = _formulas.toStdString();
 	std::vector<std::string> formulas;
 	tl2::get_tokens<std::string, std::string>(all_formulas, ";", formulas);
 	if(formulas.size() == 0)
@@ -82,6 +79,18 @@ void Plot3DDlg::Calculate()
 
 		parsers.emplace_back(std::move(parser));
 	}
+
+	BOOST_SCOPE_EXIT(this_)
+	{
+		this_->EnableCalculation(true);
+	} BOOST_SCOPE_EXIT_END
+	EnableCalculation(false);
+
+	m_minmax_z[0] = +std::numeric_limits<t_real>::max();
+	m_minmax_z[1] = -std::numeric_limits<t_real>::max();
+	m_minmax_x[0] = m_minmax_x[1] = 0.;
+	m_minmax_y[0] = m_minmax_y[1] = 0.;
+	m_data.clear();
 
 	m_x_count = m_num_points[0]->value();
 	m_y_count = m_num_points[1]->value();

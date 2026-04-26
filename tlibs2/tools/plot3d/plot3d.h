@@ -85,6 +85,7 @@ protected:
 	// calculation functions
 	void EnableCalculation(bool enable = true);
 	void Calculate();
+	void CalculateGrid();
 	void Plot(bool clear_settings = true);
 
 	// calculation helper functions

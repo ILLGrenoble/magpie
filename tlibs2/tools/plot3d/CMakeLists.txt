@@ -126,9 +126,9 @@ set(CMAKE_AUTOUIC TRUE)
 set(CMAKE_AUTOMOC TRUE)
 
 add_executable(plot3d
-	main.cpp
+	main.cpp plot3d.h
 	plot3d.cpp plot3d_file.cpp
-	plot3d_calc.cpp plot3d.h
+	plot3d_calc.cpp plot3d_grid.cpp
 	defs.cpp defs.h
 
 	# library

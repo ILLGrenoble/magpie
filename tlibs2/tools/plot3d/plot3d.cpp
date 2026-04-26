@@ -128,7 +128,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 	m_context_surf->addAction(acSaveImage);
 
 	// formulas
-	QGroupBox *groupFormulas = new QGroupBox("Formulas", this);
+	QGroupBox *groupFormulas = new QGroupBox("Formulas or Data", this);
 	m_formulas = new QTextEdit(groupFormulas);
 	m_formulas->setPlaceholderText("Enter formulas separated by ';'."
 		" Variables are 'x' and 'y'.");

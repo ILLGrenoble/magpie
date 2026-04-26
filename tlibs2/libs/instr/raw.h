@@ -45,6 +45,7 @@ class DatFile
 		using t_dat = std::vector<t_col>;
 		using t_map = std::unordered_map<t_str, t_str>;
 
+
 	protected:
 		bool m_bOk = false;
 
@@ -57,6 +58,7 @@ class DatFile
 
 		t_map m_mapHdr{};
 		std::vector<t_str> m_vecRawHdr{};
+
 
 	protected:
 		void ReadHeaderLine(const t_str& _strLine)
@@ -80,6 +82,7 @@ class DatFile
 				m_mapHdr.insert(std::move(pair));
 			m_vecRawHdr.emplace_back(std::move(strLine));
 		}
+
 
 		void ReadDataLine(const t_str& strLine)
 		{
@@ -122,6 +125,7 @@ class DatFile
 				m_vecCols[iCol].push_back(t_real(0));
 		}
 
+
 	public:
 		void Unload()
 		{
@@ -131,6 +135,7 @@ class DatFile
 			m_mapHdr.clear();
 			m_vecCols.clear();
 		}
+
 
 		bool Save(std::basic_ostream<t_char>& ostr)
 		{
@@ -153,6 +158,7 @@ class DatFile
 			return true;
 		}
 
+
 		bool Save(const t_str& strFile)
 		{
 			std::ofstream ofstr(strFile);
@@ -160,6 +166,7 @@ class DatFile
 				return false;
 			return Save(ofstr);
 		}
+
 
 		bool Load(std::basic_istream<t_char>& istr)
 		{
@@ -183,6 +190,7 @@ class DatFile
 			return true;
 		}
 
+
 		bool Load(const t_str& strFile)
 		{
 			//std::cout << "File: " << strFile << std::endl;
@@ -192,6 +200,7 @@ class DatFile
 			std::basic_istream<t_char> *pIstr = &ifstr;
 			return Load(*pIstr);
 		}
+
 
 		bool IsOk() const { return m_bOk; }
 		operator bool() const { return IsOk(); }
@@ -209,6 +218,25 @@ class DatFile
 
 		const std::vector<t_str>& GetRawHeader() const { return m_vecRawHdr; }
 		const t_map& GetHeader() const { return m_mapHdr; }
+
+
+		t_real GetData(std::size_t row, std::size_t col) const
+		{
+			if(row >= GetRowCount() || col >= GetColumnCount())
+				return 0.;
+	
+			return GetColumn(col)[row];
+		}
+
+
+		void SetData(std::size_t row, std::size_t col, t_real val)
+		{
+			if(row >= GetRowCount() || col >= GetColumnCount())
+				return;
+
+			GetColumn(col)[row] = val;
+		}
+
 
 	public:
 		DatFile() = default;
