@@ -1,7 +1,7 @@
 /**
- * 3d plotter calculation
+ * 3d grid data plotter
  * @author Tobias Weber <tweber@ill.fr>
- * @date January 2025
+ * @date 26 April 2026
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
