@@ -247,8 +247,14 @@ else()
 	add_definitions(-DDONT_USE_QT)
 
 	add_executable(magpie
-		main.cpp
+		startup/main.cpp
 		defs.cpp defs.h
+
+		# cli tools
+		startup/healthcheck.cpp
+		startup/benchmark.cpp
+
+		# library
 		../../tlibs2/libs/magdyn.h
 	)
 
