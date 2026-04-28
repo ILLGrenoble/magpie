@@ -118,30 +118,6 @@ MAGDYN_TEMPL
 MAGDYN_TYPE::SofQE
 MAGDYN_INST::CalcEnergies(const t_vec_real& Q_rlu, bool only_energies) const
 {
-	// look for cached S(Q, E) value
-	t_rtree_vertex rtree_vert;
-	static std::mutex rtree_mutex;
-	if(m_rtree_cache_S)
-	{
-		tl2::to_geo_vertex<t_rtree_vertex, t_vec_real>(
-			rtree_vert, Q_rlu, std::make_index_sequence<3>());
-
-		std::lock_guard<std::mutex> _lck{rtree_mutex};
-		std::vector<t_rtree_leaf> rtree_nearest;
-		m_rtree_S.query(boost::geometry::index::nearest(rtree_vert, 1), std::back_inserter(rtree_nearest));
-		if(rtree_nearest.size() > 0)
-		{
-			t_vec_real nearest_point =
-				tl2::from_geo_vertex<t_vec_real, t_rtree_vertex>(
-					std::get<0>(rtree_nearest[0]), std::make_index_sequence<3>());
-
-			// use cached value if within epsilon distance
-			if(tl2::norm(Q_rlu - nearest_point) < m_rtree_rlu_eps)
-				return std::get<1>(rtree_nearest[0]);
-		}
-	}
-
-
 	auto calc_EandS = [only_energies, this](const t_vec_real& Q) -> SofQE
 	{
 		const t_mat H = CalcHamiltonian(Q);
@@ -212,14 +188,6 @@ MAGDYN_INST::CalcEnergies(const t_vec_real& Q_rlu, bool only_energies) const
 
 	if(!only_energies)
 		CheckImagWeights(S);
-
-
-	if(m_rtree_cache_S)
-	{
-		// cache S(Q, E) value
-		std::lock_guard<std::mutex> _lck{rtree_mutex};
-		m_rtree_S.insert(std::make_tuple(rtree_vert, S));
-	}
 
 	return S;
 }

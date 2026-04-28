@@ -40,7 +40,6 @@
  */
 MAGDYN_TEMPL void MAGDYN_INST::Clear()
 {
-	ClearCache();
 	ClearVariables();
 	ClearMagneticSites();
 	ClearExchangeTerms();
@@ -113,17 +112,6 @@ MAGDYN_TEMPL void MAGDYN_INST::ClearExternalField()
 	m_field.align_spins = false;
 	m_field.keep_signs = false;
 }
-
-
-
-/**
- * clear the rtree cache
- */
-MAGDYN_TEMPL void MAGDYN_INST::ClearCache()
-{
-	m_rtree_S.clear();
-}
-
 // --------------------------------------------------------------------
 
 
@@ -736,22 +724,6 @@ void MAGDYN_INST::SetFilterEnergies(t_real Emin, t_real Emax)
 	m_E_minmax[0] = Emin;
 	m_E_minmax[1] = Emax;
 }*/
-
-
-
-MAGDYN_TEMPL
-void MAGDYN_INST::SetSCache(bool b)
-{
-	m_rtree_cache_S = b;
-}
-
-
-
-MAGDYN_TEMPL
-void MAGDYN_INST::SetSCacheEpsilon(t_real eps)
-{
-	m_rtree_rlu_eps = eps;
-}
 // --------------------------------------------------------------------
 
 
