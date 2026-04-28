@@ -49,7 +49,7 @@ int main()
 
 	using t_vertex = geo::model::point<t_real, 3, geo::cs::cartesian>;
 	using t_rtree_leaf = std::tuple<t_vertex, std::size_t>;
-	using t_rtree = geoidx::rtree<t_rtree_leaf, geoidx::dynamic_linear>;
+	using t_rtree = geoidx::rtree<t_rtree_leaf, geoidx::/*dynamic_*/linear<16>>;
 
 	constexpr t_real eps = 1e-6;
 	constexpr t_real pi = tl2::pi<t_real>;
@@ -70,8 +70,7 @@ int main()
 
 	// rtree with B
 	t_rtree rt = tl2::make_rtree<
-		t_real, t_vec, t_mat, 3, t_vertex, t_rtree_leaf, t_rtree>(
-			points, &B);
+		t_real, t_vec, t_mat, 3, t_vertex, t_rtree_leaf, t_rtree>(points, &B);
 
 	while(true)
 	{

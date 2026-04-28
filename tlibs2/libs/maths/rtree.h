@@ -80,14 +80,14 @@ template<class t_real = double,
 	std::size_t dim = 3,
 	class t_vertex = boost::geometry::model::point<t_real, dim, boost::geometry::cs::cartesian>,
 	class t_rtree_leaf = std::tuple<t_vertex, std::size_t>,
-	class t_rtree = boost::geometry::index::rtree<t_rtree_leaf, boost::geometry::index::dynamic_linear>,
+	class t_rtree = boost::geometry::index::rtree<t_rtree_leaf, boost::geometry::index::/*dynamic_*/linear<16>>,
 	template<class...> class t_cont = std::vector>
 requires tl2::is_vec<t_vec> && tl2::is_mat<t_mat>
 t_rtree make_rtree(const t_cont<t_vec>& points, const t_mat* B = nullptr)
 {
 	using namespace tl2_ops;
 
-	t_rtree rt(typename t_rtree::parameters_type(points.size()));
+	t_rtree rt;//(typename t_rtree::parameters_type(points.size()));
 
 	for(std::size_t ptidx = 0; ptidx < points.size(); ++ptidx)
 	{
@@ -114,7 +114,7 @@ template<class t_real = double,
 	std::size_t dim = 3, std::size_t max_num = 16,
 	class t_vertex = boost::geometry::model::point<t_real, dim, boost::geometry::cs::cartesian>,
 	class t_rtree_leaf = std::tuple<t_vertex, std::size_t>,
-	class t_rtree = boost::geometry::index::rtree<t_rtree_leaf, boost::geometry::index::dynamic_linear>,
+	class t_rtree = boost::geometry::index::rtree<t_rtree_leaf, boost::geometry::index::/*dynamic_*/linear<16>>,
 	template<class...> class t_cont = std::vector>
 requires tl2::is_vec<t_vec> && tl2::is_mat<t_mat>
 t_cont<std::pair<std::size_t, t_real>> closest_point_rtree(
@@ -157,7 +157,7 @@ t_cont<std::pair<std::size_t, t_real>> closest_point_rtree(
 			return std::get<1>(elem1) < std::get<1>(elem2);
 	});
 
-	// remove all points that are furhter away than the nearest neighbour
+	// remove all points that are further away than the nearest neighbour
 	t_real closest = std::get<1>(found_points[0]);
 	for(auto iter = found_points.begin() + 1; iter != found_points.end();)
 	{

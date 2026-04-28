@@ -724,6 +724,22 @@ void MAGDYN_INST::SetFilterEnergies(t_real Emin, t_real Emax)
 	m_E_minmax[0] = Emin;
 	m_E_minmax[1] = Emax;
 }*/
+
+
+
+MAGDYN_TEMPL
+void MAGDYN_INST::SetSCache(bool b)
+{
+	m_rtree_cache_S = b;
+}
+
+
+
+MAGDYN_TEMPL
+void MAGDYN_INST::SetSCacheEpsilon(t_real eps)
+{
+	m_rtree_rlu_eps = eps;
+}
 // --------------------------------------------------------------------
 
 

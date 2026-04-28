@@ -1478,7 +1478,7 @@ void GlPlotRenderer::UpdatePicker()
 			t_vec_gl newPosTrafo = m_cam.GetTransformation() * vecInters4;
 
 			// ... it is closer.
-			if(tl2::norm(newPosTrafo) < tl2::norm(oldPosTrafo))
+			if(tl2::norm(newPosTrafo, false) < tl2::norm(oldPosTrafo, false))
 				vecClosestSphereInters = vecInters4;
 		}
 	}
@@ -1569,7 +1569,7 @@ void GlPlotRenderer::UpdatePicker()
 				t_vec_gl oldPosTrafo = m_cam.GetTransformation() * vecClosestInters;
 				t_vec_gl newPosTrafo = m_cam.GetTransformation() * vecInters4;
 
-				if(tl2::norm(newPosTrafo) < tl2::norm(oldPosTrafo))
+				if(tl2::norm(newPosTrafo, false) < tl2::norm(oldPosTrafo, false))
 				{	// ...it is closer
 					vecClosestInters = vecInters4;
 					objInters = curObj;

@@ -54,7 +54,7 @@ protected:
 	// types for peak index tree
 	using t_rtree_vertex = boost::geometry::model::point<t_real, 3, boost::geometry::cs::cartesian>;
 	using t_rtree_leaf = std::tuple<t_rtree_vertex, std::size_t>;
-	using t_rtree = boost::geometry::index::rtree<t_rtree_leaf, boost::geometry::index::dynamic_linear>;
+	using t_rtree = boost::geometry::index::rtree<t_rtree_leaf, boost::geometry::index::/*dynamic_*/linear<16>>;
 
 
 public:

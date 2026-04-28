@@ -202,7 +202,6 @@ int magpie_save_dispersion(t_magpie _mag,
 	t_real h1, t_real k1, t_real l1,
 	unsigned int num_pts)
 {
-
 	if(!_mag)
 		return false;
 
