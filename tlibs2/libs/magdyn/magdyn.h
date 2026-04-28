@@ -52,6 +52,7 @@
 #include <string_view>
 #include <iostream>
 #include <iomanip>
+#include <mutex>
 
 #include <boost/container_hash/hash.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -162,6 +163,7 @@ public:
 	void ClearMagneticSites();
 	void ClearExchangeTerms();
 	void ClearExternalField();
+	void ClearCache();
 	// --------------------------------------------------------------------
 
 
@@ -743,9 +745,9 @@ private:
 	using t_rtree_vertex = boost::geometry::model::point<t_real, 3, boost::geometry::cs::cartesian>;
 	using t_rtree_leaf = std::tuple<t_rtree_vertex, SofQE>;
 	using t_rtree = boost::geometry::index::rtree<t_rtree_leaf, boost::geometry::index::linear<16>>;
-	mutable t_rtree m_rtree_S;
-	t_real m_rtree_rlu_eps { 1e-6 };
-	bool m_rtree_cache_S { false };
+	mutable t_rtree m_rtree_S{ };
+	t_real m_rtree_rlu_eps{ 1e-6 };
+	bool m_rtree_cache_S{ true };
 
 	// constants
 	static constexpr const t_cplx s_imag { t_real(0), t_real(1) };

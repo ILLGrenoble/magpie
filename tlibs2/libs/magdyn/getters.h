@@ -40,6 +40,7 @@
  */
 MAGDYN_TEMPL void MAGDYN_INST::Clear()
 {
+	ClearCache();
 	ClearVariables();
 	ClearMagneticSites();
 	ClearExchangeTerms();
@@ -112,6 +113,17 @@ MAGDYN_TEMPL void MAGDYN_INST::ClearExternalField()
 	m_field.align_spins = false;
 	m_field.keep_signs = false;
 }
+
+
+
+/**
+ * clear the rtree cache
+ */
+MAGDYN_TEMPL void MAGDYN_INST::ClearCache()
+{
+	m_rtree_S.clear();
+}
+
 // --------------------------------------------------------------------
 
 
