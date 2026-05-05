@@ -313,11 +313,11 @@ void MagDynDlg::SyncToKernel()
 		m_dyn.SetTemperature(temp);
 	}
 
-	// transfer form factor
+	// transfer magnetic form factors
 	if(m_use_formfact->isChecked())
 	{
-		std::string ffact = m_ffact->toPlainText().toStdString();
-		m_dyn.SetMagneticFormFactor(ffact);
+		for(std::size_t i = 0; i < m_ffacts.size(); ++i)
+			m_dyn.SetMagneticFormFactor(m_ffacts[i], i);
 	}
 
 	// transfer magnetic sites

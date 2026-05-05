@@ -641,10 +641,28 @@ void MagDynDlg::CreateSamplePanel()
 	// magnetic form factor
 	m_ffact = new QPlainTextEdit(m_samplepanel);
 
+	// maximum number of form factors
+	m_num_ffacts = new QSpinBox(m_samplepanel);
+	m_num_ffacts->setMinimum(1);
+	m_num_ffacts->setMaximum(10000);
+	m_num_ffacts->setValue(1);
+	m_num_ffacts->setPrefix("num = ");
+	m_num_ffacts->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+	m_num_ffacts->setToolTip("Maximum number of magnetic form factors.");
+
+	// index of currently shown form factor
+	m_cur_ffact = new QSpinBox(m_samplepanel);
+	m_cur_ffact->setMinimum(0);
+	m_cur_ffact->setMaximum(0);
+	m_cur_ffact->setValue(0);
+	m_cur_ffact->setPrefix("cur = ");
+	m_cur_ffact->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+	m_cur_ffact->setToolTip("Index of currently shown magnetic form factor.");
+
 	QPushButton *btn_ffact_j0 = new QPushButton("<j0> Term", m_samplepanel);
 	btn_ffact_j0->setToolTip("Add a template <j0> term.");
 	btn_ffact_j0->setFocusPolicy(Qt::StrongFocus);
-	QPushButton *btn_ffact_j2 = new QPushButton("<j0> && <j2> Terms", m_samplepanel);
+	QPushButton *btn_ffact_j2 = new QPushButton("<j2> Terms", m_samplepanel);
 	btn_ffact_j2->setToolTip("Add a template <j0> and <j2> terms.");
 	btn_ffact_j2->setFocusPolicy(Qt::StrongFocus);
 
@@ -706,8 +724,10 @@ void MagDynDlg::CreateSamplePanel()
 		y++, 0, 1, 1);
 
 	// magnetic form factor formula
-	grid->addWidget(new QLabel("Magnetic Form Factor", m_samplepanel), y++, 0, 1, 4);
-	grid->addWidget(new QLabel("Enter Formula, f_M(Q or s) = ", m_samplepanel), y++, 0, 1, 1);
+	grid->addWidget(new QLabel("Magnetic Form Factors", m_samplepanel), y, 0, 1, 1);
+	grid->addWidget(m_num_ffacts, y, 2, 1, 1);
+	grid->addWidget(m_cur_ffact, y++, 3, 1, 1);
+	grid->addWidget(new QLabel("Enter Formula, f_M(Q or s) = ", m_samplepanel), y++, 0, 1, 4);
 	grid->addWidget(m_ffact, y++, 0, 1, 4);
 	grid->addWidget(btn_ffact_j0, y, 2, 1, 1);
 	grid->addWidget(btn_ffact_j2, y++, 3, 1, 1);
@@ -729,7 +749,6 @@ void MagDynDlg::CreateSamplePanel()
 		}
 	};
 
-	connect(m_ffact, &QPlainTextEdit::textChanged, calc_all);
 	connect(m_comboSG,
 		static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 		this, &MagDynDlg::CalcBZ);
@@ -788,6 +807,40 @@ void MagDynDlg::CreateSamplePanel()
 			"D2 = 0; g = 1;\n"
 			" A0*exp(-a0*s2) + B0*exp(-b0*s2) + C0*exp(-c0*s2) + D0 +\n"
 			"(A2*exp(-a2*s2) + B2*exp(-b2*s2) + C2*exp(-c2*s2) + D2) * (2/g - 1) * s2");
+	});
+
+	// maximum number of form factors changed
+	connect(m_num_ffacts,
+		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+		[this](int num)
+	{
+		m_ffacts.resize(num);
+		m_cur_ffact->setMaximum(num - 1);
+	});
+
+	// current form factor changed
+	connect(m_cur_ffact,
+		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+		[this](int idx)
+	{
+		// display selected form factor
+		if(idx < (int)m_ffacts.size())
+			m_ffact->setPlainText(m_ffacts[idx].c_str());
+		else
+			m_ffact->clear();
+	});
+
+	connect(m_ffact, &QPlainTextEdit::textChanged,
+		[this, calc_all]()
+	{
+		int cur_idx = m_cur_ffact->value();
+		if(cur_idx >= (int)m_ffacts.size())
+			return;
+
+		// save current form factor text
+		m_ffacts[cur_idx] = m_ffact->toPlainText().toStdString();
+	
+		calc_all();
 	});
 
 	m_tabs_setup->addTab(m_samplepanel, "Crystal");

@@ -202,7 +202,9 @@ protected:
 	QComboBox *m_comboSG{};
 	QCheckBox *m_checkFilterSG{};
 	QLineEdit *m_editFilterSG{};
-	QPlainTextEdit *m_ffact{};             // magnetic form factor formula
+	QPlainTextEdit *m_ffact{};                 // magnetic form factor formula
+	QSpinBox *m_cur_ffact{}, *m_num_ffacts{};  // form factor index and number
+	std::vector<std::string> m_ffacts;         // buffers for form factors
 
 	// sample environment panel
 	// external magnetic field
