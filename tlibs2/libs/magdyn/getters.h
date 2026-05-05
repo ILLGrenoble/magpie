@@ -44,12 +44,10 @@ MAGDYN_TEMPL void MAGDYN_INST::Clear()
 	ClearMagneticSites();
 	ClearExchangeTerms();
 	ClearExternalField();
+	ClearMagneticFormFactors();
 
 	// clear temperature, -1: don't use
 	m_temperature = -1.;
-
-	// clear form factors
-	m_magffacts.clear();
 
 	// clear ordering wave vector
 	m_ordering = tl2::zero<t_vec_real>(3);
@@ -111,6 +109,16 @@ MAGDYN_TEMPL void MAGDYN_INST::ClearExternalField()
 	m_field.mag = 0.;
 	m_field.align_spins = false;
 	m_field.keep_signs = false;
+}
+
+
+
+/**
+ * clear the magnetic form factors
+ */
+MAGDYN_TEMPL void MAGDYN_INST::ClearMagneticFormFactors()
+{
+	m_magffacts.clear();
 }
 // --------------------------------------------------------------------
 

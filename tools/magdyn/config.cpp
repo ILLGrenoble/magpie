@@ -397,13 +397,20 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 		if(!m_use_temperature->isChecked())
 			m_dyn.SetTemperature(-1.);
 
-		// form factor
-		std::string ffact = m_dyn.GetMagneticFormFactor();
-		if(ffact != "")
-			m_ffact->setPlainText(ffact.c_str());
-		if(!m_use_formfact->isChecked())
-			m_dyn.SetMagneticFormFactor("");
+		// magnetic form factors
+		t_size num_ffacts = m_dyn.GetMagneticFormFactorCount();
+		m_ffacts.resize(num_ffacts);
+		m_num_ffacts->setValue((int)num_ffacts);
 
+		for(t_size ffact_idx = 0; ffact_idx < num_ffacts; ++ffact_idx)
+		{
+			const std::string& ffact = m_dyn.GetMagneticFormFactor(ffact_idx);
+			m_ffacts[ffact_idx] = ffact;
+		}
+	
+		if(!m_use_formfact->isChecked())
+			m_dyn.ClearMagneticFormFactors();
+	
 		// clear old tables
 		DelTabItem(m_sitestab, -1);
 		DelTabItem(m_termstab, -1);

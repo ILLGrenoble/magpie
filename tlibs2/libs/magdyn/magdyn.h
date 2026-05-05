@@ -162,6 +162,7 @@ public:
 	void ClearMagneticSites();
 	void ClearExchangeTerms();
 	void ClearExternalField();
+	void ClearMagneticFormFactors();
 	// --------------------------------------------------------------------
 
 
