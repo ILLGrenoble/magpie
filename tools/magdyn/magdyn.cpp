@@ -293,14 +293,17 @@ void MagDynDlg::CreateMenuBar()
 	QMenu *menuStruct = new QMenu("Structure", m_menu);
 	QAction *acStructSymIdx = new QAction("Assign Symmetry Indices", menuStruct);
 	QAction *acStructSortCouplings = new QAction("Sort Couplings by Length", menuStruct);
-	QAction *acStructImport = new QAction("Import From Table...", menuStruct);
-	QAction *acStructExportSun = new QAction("Export To Sunny Code...");
-	QAction *acStructExportSW = new QAction("Export To SpinW Code...");
-	QAction *acStructExportScript = new QAction("Export To Python Code...");
 	QAction *acStructNotes = new QAction("Notes...", menuStruct);
 	QAction *acStructView = new QAction("View 3D Structure...", menuStruct);
 	QAction *acBZView = new QAction("View 3D Brillouin Zone...", menuStruct);
 	QAction *acGroundState = new QAction("Minimise Ground State...", menuStruct);
+
+	// import / export menu
+	QMenu *menuExport = new QMenu("Import / Export", m_menu);
+	QAction *acStructImport = new QAction("Import From Table...", menuExport);
+	QAction *acStructExportSun = new QAction("Export To Sunny Code...", menuExport);
+	QAction *acStructExportSW = new QAction("Export To SpinW Code...", menuExport);
+	QAction *acStructExportScript = new QAction("Export To Python Code...", menuExport);
 
 	// dispersion plot menu
 	m_menuDisp = new QMenu("Dispersion Plot", m_menu);
@@ -515,11 +518,12 @@ void MagDynDlg::CreateMenuBar()
 	menuStruct->addSeparator();
 	menuStruct->addAction(acGroundState);
 #endif
-	menuStruct->addSeparator();
-	menuStruct->addAction(acStructImport);
-	menuStruct->addAction(acStructExportSun);
-	menuStruct->addAction(acStructExportSW);
-	menuStruct->addAction(acStructExportScript);
+
+	menuExport->addAction(acStructImport);
+	menuExport->addSeparator();
+	menuExport->addAction(acStructExportSun);
+	menuExport->addAction(acStructExportSW);
+	menuExport->addAction(acStructExportScript);
 
 	m_menuDisp->addAction(m_plot_channels);
 	m_menuDisp->addMenu(m_menuChannels);
@@ -764,6 +768,7 @@ void MagDynDlg::CreateMenuBar()
 	m_menu->addMenu(m_menuDisp);
 	m_menu->addMenu(menuCalcOpt);
 	m_menu->addMenu(menuCalc);
+	m_menu->addMenu(menuExport);
 	m_menu->addMenu(menuTools);
 	m_menu->addMenu(menuHelp);
 	m_maingrid->setMenuBar(m_menu);
