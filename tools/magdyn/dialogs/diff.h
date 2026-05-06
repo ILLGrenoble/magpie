@@ -1,7 +1,7 @@
 /**
  * magnetic dynamics -- differentiation / group velocity calculations
  * @author Tobias Weber <tweber@ill.fr>
- * @date November 202t
+ * @date November 2025
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
@@ -61,7 +61,7 @@ struct GroupVelocityData
 
 
 /**
- * topology dialog
+ * differentiation dialog
  */
 class DiffDlg : public QDialog
 { Q_OBJECT
@@ -122,7 +122,7 @@ private:
 
 	// ------------------------------------------------------------------------
 	// group velocity panel
-	std::vector<GroupVelocityData> m_data_gv{};  // all (non-filtered) groupvelocity data
+	std::vector<GroupVelocityData> m_data_gv{};  // all (non-filtered) group velocity data
 
 	QCustomPlot *m_plot_gv{};           // group velocity plotter
 	std::vector<QCPCurve*> m_curves_gv{};  // group velocity plot curves

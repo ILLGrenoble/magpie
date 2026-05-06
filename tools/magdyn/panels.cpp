@@ -659,6 +659,9 @@ void MagDynDlg::CreateSamplePanel()
 	m_cur_ffact->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_cur_ffact->setToolTip("Index of currently shown magnetic form factor.");
 
+	QPushButton *btn_ffact_plot = new QPushButton("Plot...", m_samplepanel);
+	btn_ffact_plot->setToolTip("Plot the form factors.");
+	btn_ffact_plot->setFocusPolicy(Qt::StrongFocus);
 	QPushButton *btn_ffact_j0 = new QPushButton("<j0> Term", m_samplepanel);
 	btn_ffact_j0->setToolTip("Add a template <j0> term.");
 	btn_ffact_j0->setFocusPolicy(Qt::StrongFocus);
@@ -729,6 +732,7 @@ void MagDynDlg::CreateSamplePanel()
 	grid->addWidget(m_cur_ffact, y++, 3, 1, 1);
 	grid->addWidget(new QLabel("Enter Formula, f_M(Q or s) = ", m_samplepanel), y++, 0, 1, 4);
 	grid->addWidget(m_ffact, y++, 0, 1, 4);
+	grid->addWidget(btn_ffact_plot, y, 0, 1, 1);
 	grid->addWidget(btn_ffact_j0, y, 2, 1, 1);
 	grid->addWidget(btn_ffact_j2, y++, 3, 1, 1);
 
@@ -783,6 +787,9 @@ void MagDynDlg::CreateSamplePanel()
 	}
 
 	// magnetic form factors
+	m_ffacts.resize(m_num_ffacts->value());
+
+	connect(btn_ffact_plot, &QPushButton::clicked, this, &MagDynDlg::ShowFormFactorDlg);
 	connect(btn_ffact_j0, &QPushButton::clicked, [this]()
 	{
 		// for formulas (and coefficients to use), see: https://mcphase.github.io/webpage/manual/node164.html .
@@ -816,6 +823,8 @@ void MagDynDlg::CreateSamplePanel()
 	{
 		m_ffacts.resize(num);
 		m_cur_ffact->setMaximum(num - 1);
+
+		PlotFormFactors();
 	});
 
 	// current form factor changed
@@ -830,16 +839,16 @@ void MagDynDlg::CreateSamplePanel()
 			m_ffact->clear();
 	});
 
-	connect(m_ffact, &QPlainTextEdit::textChanged,
-		[this, calc_all]()
+	connect(m_ffact, &QPlainTextEdit::textChanged, [this, calc_all]()
 	{
 		int cur_idx = m_cur_ffact->value();
 		if(cur_idx >= (int)m_ffacts.size())
-			return;
+			m_ffacts.resize(cur_idx + 1);
 
 		// save current form factor text
 		m_ffacts[cur_idx] = m_ffact->toPlainText().toStdString();
-	
+
+		PlotFormFactors();
 		calc_all();
 	});
 

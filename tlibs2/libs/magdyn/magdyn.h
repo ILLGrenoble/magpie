@@ -184,7 +184,7 @@ public:
 	t_real GetTemperature() const;
 	t_real GetBoseCutoffEnergy() const;
 
-	const std::string& GetMagneticFormFactor(t_size site = 0) const;
+	const std::string& GetMagneticFormFactor(t_size idx = 0) const;
 	t_size GetMagneticFormFactorCount() const;
 
 	const t_mat_real& GetCrystalATrafo() const;
@@ -248,7 +248,7 @@ public:
 	void SetCholeskyMaxTries(t_size max_tries);
 	void SetCholeskyInc(t_real delta);
 
-	void SetMagneticFormFactor(const std::string& ffact, t_size site = 0);
+	void SetMagneticFormFactor(const std::string& ffact, t_size idx = 0);
 
 	void SetExternalField(const ExternalField& field);
 	void RotateExternalField(const t_vec_real& axis, t_real angle);

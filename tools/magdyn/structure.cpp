@@ -640,3 +640,16 @@ void MagDynDlg::ReducePathBZ()
 
 	SetCoordinates(Q_start, Q_end, true);
 }
+
+
+
+/**
+ * plot the current form factor formulas
+ */
+void MagDynDlg::PlotFormFactors()
+{
+	if(!m_ffact_dlg)
+		return;
+
+	m_ffact_dlg->PlotFormFactors(m_ffacts);
+}

@@ -284,6 +284,29 @@ void MagDynDlg::ShowDiffDlg(bool only_create)
 
 
 /**
+ * form factor plotting dialog
+ */
+void MagDynDlg::ShowFormFactorDlg(bool only_create)
+{
+	if(!m_ffact_dlg)
+	{
+		m_ffact_dlg = new FormFactorDlg(this, m_sett);
+		m_ffact_dlg->setFont(this->font());
+
+		PlotFormFactors();
+	}
+
+	if(!only_create)
+	{
+		m_ffact_dlg->show();
+		m_ffact_dlg->raise();
+		m_ffact_dlg->activateWindow();
+	}
+}
+
+
+
+/**
  * 3d dispersion dialog
  */
 void MagDynDlg::ShowDispersion3DDlg(bool only_create)

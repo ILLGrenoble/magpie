@@ -199,13 +199,13 @@ MAGDYN_TEMPL t_real MAGDYN_INST::GetBoseCutoffEnergy() const
 }
 
 
-MAGDYN_TEMPL const std::string& MAGDYN_INST::GetMagneticFormFactor(t_size site) const
+MAGDYN_TEMPL const std::string& MAGDYN_INST::GetMagneticFormFactor(t_size idx) const
 {
 	static std::string empty = "";
-	if(site >= m_magffacts.size())
+	if(idx >= m_magffacts.size())
 		return empty;
 
-	return m_magffacts[site].GetExprString();
+	return m_magffacts[idx].GetExprString();
 }
 
 
@@ -524,29 +524,29 @@ MAGDYN_TEMPL void MAGDYN_INST::SetCholeskyInc(t_real delta)
 
 
 
-MAGDYN_TEMPL void MAGDYN_INST::SetMagneticFormFactor(const std::string& ffact, t_size site)
+MAGDYN_TEMPL void MAGDYN_INST::SetMagneticFormFactor(const std::string& ffact, t_size idx)
 {
-	if(site >= m_magffacts.size())
-		m_magffacts.resize(site + 1);
+	if(idx >= m_magffacts.size())
+		m_magffacts.resize(idx + 1);
 
 	if(ffact == "")
 	{
-		m_magffacts[site].clear();
+		m_magffacts[idx].clear();
 		return;
 	}
 
 	// parse the given formula
-	m_magffacts[site] = GetExprParser();
-	m_magffacts[site].SetInvalid0(false);
-	m_magffacts[site].register_var("Q", 0.);
-	m_magffacts[site].register_var("Q2", 0.);
-	m_magffacts[site].register_var("s", 0.);
-	m_magffacts[site].register_var("s2", 0.);
+	m_magffacts[idx] = GetExprParser();
+	m_magffacts[idx].SetInvalid0(false);
+	m_magffacts[idx].register_var("Q", 0.);
+	m_magffacts[idx].register_var("Q2", 0.);
+	m_magffacts[idx].register_var("s", 0.);
+	m_magffacts[idx].register_var("s2", 0.);
 
-	if(!m_magffacts[site].parse_noexcept(ffact))
+	if(!m_magffacts[idx].parse_noexcept(ffact))
 	{
-		TL2_CERR_OPT << "Magdyn error: Magnetic form facor formula: \""
-			<< ffact << "\" for site " << site << " could not be parsed."
+		TL2_CERR_OPT << "Magdyn error: Magnetic form factor formula #" << idx
+			<< ": \"" << ffact << "\" could not be parsed."
 			<< std::endl;
 	}
 }
