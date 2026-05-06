@@ -609,8 +609,8 @@ void DiffDlg::PlotGroupVelocity(bool clear_settings)
 			{
 				t_real v_range = *max_v_iter - *min_v_iter;
 
-				v_max_gv = std::max(v_max_gv, *max_v_iter + v_range*0.05);
-				v_min_gv = std::min(v_min_gv, *min_v_iter - v_range*0.05);
+				v_max_gv = std::max<t_real>(v_max_gv, *max_v_iter + v_range*0.05);
+				v_min_gv = std::min<t_real>(v_min_gv, *min_v_iter - v_range*0.05);
 			}
 		}
 

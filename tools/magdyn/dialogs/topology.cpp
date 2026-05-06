@@ -620,8 +620,8 @@ void TopologyDlg::PlotBerryCurvature(bool clear_settings)
 			{
 				t_real B_range = *max_B_iter - *min_B_iter;
 
-				B_max_bc = std::max(B_max_bc, *max_B_iter + B_range*0.05);
-				B_min_bc = std::min(B_min_bc, *min_B_iter - B_range*0.05);
+				B_max_bc = std::max<t_real>(B_max_bc, *max_B_iter + B_range*0.05);
+				B_min_bc = std::min<t_real>(B_min_bc, *min_B_iter - B_range*0.05);
 			}
 		}
 

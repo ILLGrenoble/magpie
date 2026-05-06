@@ -638,7 +638,7 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 
 		t_mat_gl obj_scale = tl2::hom_scaling<t_mat_gl>(
 			0.5 * Q_scale1, 0.5 * Q_scale2, 0.5 * E_scale * E_range);
-		t_mat_gl obj_shift = tl2::hom_translation<t_mat_gl>(0., 0., E_scale * E_mean);
+		t_mat_gl obj_shift = tl2::hom_translation<t_mat_gl>(t_real(0.), t_real(0.), E_scale * E_mean);
 
 		for(auto obj : m_dispplot->GetRenderer()->GetCoordCube())
 		{
