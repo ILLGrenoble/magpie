@@ -795,8 +795,8 @@ void MagDynDlg::CreateSamplePanel()
 		// for formulas (and coefficients to use), see: https://mcphase.github.io/webpage/manual/node164.html .
 		m_ffact->setPlainText(
 			"A = 1; a = 0;\n"
-			"B = 1; b = 0;\n"
-			"C = 1; c = 0;\n"
+			"B = 0; b = 0;\n"
+			"C = 0; c = 0;\n"
 			"D = 0;\n"
 			"A*exp(-a*s2) + B*exp(-b*s2) + C*exp(-c*s2) + D");
 	});
@@ -805,12 +805,12 @@ void MagDynDlg::CreateSamplePanel()
 		// for formulas (and coefficients to use), see: https://mcphase.github.io/webpage/manual/node164.html .
 		m_ffact->setPlainText(
 			"A0 = 1; a0 = 0;\n"
-			"B0 = 1; b0 = 0;\n"
-			"C0 = 1; c0 = 0;\n"
+			"B0 = 0; b0 = 0;\n"
+			"C0 = 0; c0 = 0;\n"
 			"D0 = 0;\n"
-			"A2 = 1; a2 = 0;\n"
-			"B2 = 1; b2 = 0;\n"
-			"C2 = 1; c2 = 0;\n"
+			"A2 = 0; a2 = 0;\n"
+			"B2 = 0; b2 = 0;\n"
+			"C2 = 0; c2 = 0;\n"
 			"D2 = 0; g = 1;\n"
 			" A0*exp(-a0*s2) + B0*exp(-b0*s2) + C0*exp(-c0*s2) + D0 +\n"
 			"(A2*exp(-a2*s2) + B2*exp(-b2*s2) + C2*exp(-c2*s2) + D2) * (2/g - 1) * s2");
