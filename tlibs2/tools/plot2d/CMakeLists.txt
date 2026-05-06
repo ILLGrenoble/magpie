@@ -1,7 +1,7 @@
 #
-# 3d plotter
+# 2d plotter
 # @author Tobias Weber <tweber@ill.fr>
-# @date jan-2026
+# @date may-2026
 # @license GPLv3, see 'LICENSE' file
 #
 # ----------------------------------------------------------------------------
@@ -24,7 +24,7 @@
 #
 
 cmake_minimum_required(VERSION 3.10)
-project(plot3d)
+project(plot2d)
 enable_language(CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -94,11 +94,8 @@ find_package(Boost REQUIRED COMPONENTS program_options)
 set(Boost_USE_MULTITHREADED TRUE)
 add_definitions(${Boost_CXX_FLAGS})
 
-find_package(Qhull REQUIRED)
-if(Qhull_FOUND)
-	add_definitions(-DUSE_QHULL)
-	include_directories("${Qhull_INCLUDE_DIRS}")
-endif()
+find_package(QCP)
+include_directories("${QCP_INCLUDE_DIRS}")
 # -----------------------------------------------------------------------------
 
 
@@ -111,9 +108,9 @@ include_directories(SYSTEM "${Boost_INCLUDE_DIRS}" "${Boost_INCLUDE_DIRS}/..")
 message("Trying to select Qt version ${QT_VER}.")
 
 if(QT_VER EQUAL 6)
-	find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGLWidgets PrintSupport Svg)
+	find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets PrintSupport Svg)
 	include_directories("${Qt6Core_INCLUDE_DIRS}/..")
-	list(APPEND QtLibraries Qt6::Core Qt6::Gui Qt6::Widgets Qt6::OpenGLWidgets Qt6::PrintSupport Qt6::Svg)
+	list(APPEND QtLibraries Qt6::Core Qt6::Gui Qt6::Widgets Qt6::PrintSupport Qt6::Svg)
 elseif(QT_VER EQUAL 5)
 	find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets PrintSupport Svg)
 	include_directories("${Qt5Core_INCLUDE_DIRS}/..")
@@ -125,23 +122,18 @@ endif()
 set(CMAKE_AUTOUIC TRUE)
 set(CMAKE_AUTOMOC TRUE)
 
-add_executable(plot3d
-	main.cpp plot3d.h
-	plot3d.cpp plot3d_file.cpp
-	plot3d_calc.cpp plot3d_grid.cpp
+add_executable(plot2d
+	main.cpp
+	plot2d.cpp plot2d.h
 	defs.cpp defs.h
-
-	# library
-	../../libs/qt/gl.cpp ../../libs/qt/gl.h
-	../../libs/qt/glplot.cpp ../../libs/qt/glplot.h
 )
 
-target_link_libraries(plot3d
+target_link_libraries(plot2d
 	Threads::Threads
 	${QtLibraries}
-	${Qhull_LIBRARIES}
 	${Boost_LIBRARIES}
 	${MINGW_EXTRALIBS}
+	${QCP_LIBRARIES}
 )
 
 
@@ -149,13 +141,13 @@ target_link_libraries(plot3d
 # rpath
 # -----------------------------------------------------------------------------
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	target_link_options(plot3d
+	target_link_options(plot2d
 		# create an __info_plist section in the binary
-		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../../setup/osx/InfoPlot3D.plist
+		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../../setup/osx/InfoPlot2D.plist
 	)
 
-	add_custom_command(TARGET plot3d POST_BUILD
-		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:plot3d> || true
+	add_custom_command(TARGET plot2d POST_BUILD
+		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:plot2d> || true
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	)
 endif()

@@ -29,6 +29,7 @@ tmp/**
 !tmp/.dir
 build/**
 tools/script/build/**
+tools/plot2d/build/**
 tools/plot3d/build/**
 tests/build/**
 unittests/build/**

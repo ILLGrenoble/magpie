@@ -52,7 +52,7 @@ namespace asio = boost::asio;
 // ============================================================================
 
 /**
- * sets up the differentiation dialog
+ * sets up the form factor dialog
  */
 FormFactorDlg::FormFactorDlg(QWidget *parent, QSettings *sett)
 	: QDialog{parent}, m_sett{sett}
@@ -201,7 +201,7 @@ QWidget* FormFactorDlg::CreateFormFactorPanel()
 	m_table_ff->setColumnWidth(COL_FF_ACTIVE, 25);
 	m_table_ff->resizeColumnsToContents();
 
-	// splitter for plot and magnon band list
+	// splitter for plot and indices list
 	m_split_plot_ff = new QSplitter(panelFFact);
 	m_split_plot_ff->setOrientation(Qt::Horizontal);
 	m_split_plot_ff->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
@@ -226,7 +226,7 @@ QWidget* FormFactorDlg::CreateFormFactorPanel()
 	m_menuPlot_ff->addAction(acSaveFigure);
 	m_menuPlot_ff->addAction(acSaveData);
 
-	// bands panel grid
+	// indices panel grid
 	int y_indices = 0;
 	QGridLayout *grid_indices = new QGridLayout(panel_ffsel);
 	grid_indices->setSpacing(4);
@@ -548,7 +548,6 @@ void FormFactorDlg::CalculateFormFactors()
 
 	// get settings
 	t_size Q_count = m_num_Q_ff->value();
-	std::vector<t_size> *perm = nullptr;
 
 	// tread pool and mutex to protect the data vectors
 	asio::thread_pool pool{g_num_threads};
@@ -574,7 +573,7 @@ void FormFactorDlg::CalculateFormFactors()
 
 	for(t_size Q_idx = 0; Q_idx < Q_count; ++Q_idx)
 	{
-		auto task = [this, &mtx, &Q_start, &Q_end, Q_idx, Q_count, perm]()
+		auto task = [this, &mtx, &Q_start, &Q_end, Q_idx, Q_count]()
 		{
 			const t_real Q = Q_count > 1
 				? tl2::lerp(Q_start, Q_end, t_real(Q_idx) / t_real(Q_count - 1))
