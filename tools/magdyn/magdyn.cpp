@@ -467,11 +467,13 @@ void MagDynDlg::CreateMenuBar()
 	// tools menu
 	QMenu *menuTools = new QMenu("Tools", m_menu);
 	QAction *acTrafoCalc = new QAction("Transformations...", menuTools);
+	QAction *acPlot2d = new QAction("2D Plotter...", menuTools);
 	QAction *acPlot3d = new QAction("3D Plotter...", menuTools);
 	QAction *acBZTool = new QAction("Brillouin Zones...", menuTools);
 	QAction *acPolCalc = new QAction("Polarisation Vectors...", menuTools);
 	QAction *acPreferences = new QAction("Preferences...", menuTools);
 	acTrafoCalc->setIcon(QIcon::fromTheme("accessories-calculator"));
+	acPlot2d->setIcon(QIcon::fromTheme("x-office-spreadsheet"));
 	acPlot3d->setIcon(QIcon::fromTheme("x-office-spreadsheet"));
 	acPreferences->setIcon(QIcon::fromTheme("preferences-system"));
 	acPreferences->setShortcut(QKeySequence::Preferences);
@@ -563,6 +565,7 @@ void MagDynDlg::CreateMenuBar()
 	menuCalc->addAction(acDiff);
 
 	menuTools->addAction(acTrafoCalc);
+	menuTools->addAction(acPlot2d);
 	menuTools->addAction(acPlot3d);
 	menuTools->addAction(acBZTool);
 	menuTools->addAction(acBZTool);
@@ -700,6 +703,17 @@ void MagDynDlg::CreateMenuBar()
 		m_trafos->show();
 		m_trafos->raise();
 		m_trafos->activateWindow();
+	});
+
+	// show general 2d plotter dialog
+	connect(acPlot2d, &QAction::triggered, [this]()
+	{
+		if(!m_plot2d)
+			m_plot2d = new Plot2DDlg(this, m_sett);
+
+		m_plot2d->show();
+		m_plot2d->raise();
+		m_plot2d->activateWindow();
 	});
 
 	// show general 3d plotter dialog

@@ -83,6 +83,7 @@
 #include "dialogs/pol.h"
 #include "dialogs/notes.h"
 #include "dialogs/infos.h"
+#include "tlibs2/tools/plot2d/plot2d.h"
 #include "tlibs2/tools/plot3d/plot3d.h"
 #include "../bz/bz.h"
 
@@ -264,6 +265,7 @@ protected:
 	Dispersion3DDlg *m_disp3d_dlg{};       // 3d dispersion calculations
 	BZPlotDlg *m_bz_dlg{};                 // 3d brillouin zone plotter
 	TrafoCalculator *m_trafos{};           // trafo calculator
+	Plot2DDlg *m_plot2d{};                 // general 2d function plotter
 	Plot3DDlg *m_plot3d{};                 // general 3d function plotter
 	BZDlg *m_bz_tool{};                    // 3d brillouin zone tool
 

@@ -240,25 +240,30 @@ QWidget* Plot2DDlg::CreatePanel()
 	grid_indices->addWidget(m_table, y_indices++, 0, 1, 1);
 
 	// formulas field
-	m_formulas = new QTextEdit(panelMain);
+	QGroupBox *groupFormulas = new QGroupBox("Formulas f_i(x):", this);
+	m_formulas = new QTextEdit(groupFormulas);
 	m_formulas->setPlaceholderText("Enter formulas separated by ';'."
 		" The free variable is 'x'.");
 	m_formulas->setReadOnly(false);
 	m_formulas->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
-	m_formulas->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+	m_formulas->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Ignored});
 
 	// start and stop coordinates
-	m_x_start = new QDoubleSpinBox(panelMain);
-	m_x_end = new QDoubleSpinBox(panelMain);
+	QGroupBox *groupRange = new QGroupBox("Options", this);
+	m_x_start = new QDoubleSpinBox(groupRange);
+	m_x_end = new QDoubleSpinBox(groupRange);
+	m_num_x = new QSpinBox(groupRange);
 
 	m_x_start->setToolTip("Initial x value.");
 	m_x_end->setToolTip("Final x value.");
+	m_num_x->setToolTip("Number of coordinate points to calculate.");
 
 	m_x_start->setDecimals(4);
 	m_x_start->setMinimum(-9999.9999);
 	m_x_start->setMaximum(+9999.9999);
 	m_x_start->setSingleStep(0.5);
 	m_x_start->setValue(0.);
+	m_x_start->setPrefix("min = ");
 	m_x_start->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 	m_x_end->setDecimals(4);
@@ -266,15 +271,15 @@ QWidget* Plot2DDlg::CreatePanel()
 	m_x_end->setMaximum(+9999.9999);
 	m_x_end->setSingleStep(0.5);
 	m_x_end->setValue(5.);
+	m_x_end->setPrefix("max = ");
 	m_x_end->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
-	// number of x points in the plot
-	m_num_x = new QSpinBox(panelMain);
 	m_num_x->setMinimum(1);
 	m_num_x->setMaximum(99999);
+	m_num_x->setSingleStep(1);
 	m_num_x->setValue(128);
+	m_num_x->setPrefix("n = ");
 	m_num_x->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
-	m_num_x->setToolTip("Number of coordinate points to calculate.");
 
 	// progress bar
 	m_progress = new QProgressBar(panelMain);
@@ -283,21 +288,32 @@ QWidget* Plot2DDlg::CreatePanel()
 	// start/stop button
 	m_btnStartStop = new QPushButton("Calculate", panelMain);
 
-	// component grid
+	// formulas grid
+	int y = 0;
+	QGridLayout *gridFormulas = new QGridLayout(groupFormulas);
+	gridFormulas->setSpacing(4);
+	gridFormulas->setContentsMargins(6, 6, 6, 6);
+	gridFormulas->addWidget(m_formulas, y++, 0, 1, 1);
+
+	// range grid
+	y = 0;
+	QGridLayout *range_grid = new QGridLayout(groupRange);
+	range_grid->setSpacing(4);
+	range_grid->setContentsMargins(6, 6, 6, 6);
+	range_grid->addWidget(new QLabel("x Range:", groupRange), y, 0, 1, 1);
+	range_grid->addWidget(m_x_start, y, 1, 1, 1);
+	range_grid->addWidget(m_x_end, y++, 2, 1, 1);
+	range_grid->addWidget(new QLabel("x Count:", groupRange), y, 0, 1, 1);
+	range_grid->addWidget(m_num_x, y++, 1, 1, 1);
+
+	// main grid
+	y = 0;
 	auto grid = new QGridLayout(panelMain);
 	grid->setSpacing(4);
 	grid->setContentsMargins(6, 6, 6, 6);
-
-	int y = 0;
 	grid->addWidget(m_split_plot, y++, 0, 1, 4);
-	grid->addWidget(new QLabel("Formulas, f_i(x):", panelMain), y++, 0, 1, 4);
-	grid->addWidget(m_formulas, y++, 0, 1, 4);
-	grid->addWidget(new QLabel("Start x:", panelMain), y, 0, 1, 1);
-	grid->addWidget(m_x_start, y, 1, 1, 1);
-	grid->addWidget(new QLabel("End x:", panelMain), y, 2, 1, 1);
-	grid->addWidget(m_x_end, y++, 3, 1, 1);
-	grid->addWidget(new QLabel("x Count:", panelMain), y, 0, 1, 1);
-	grid->addWidget(m_num_x, y++, 1, 1, 1);
+	grid->addWidget(groupFormulas, y, 0, 1, 2);
+	grid->addWidget(groupRange, y++, 2, 1, 2);
 	grid->addWidget(m_progress, y, 0, 1, 3);
 	grid->addWidget(m_btnStartStop, y++, 3, 1, 1);
 

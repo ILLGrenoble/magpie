@@ -175,7 +175,7 @@ if(USE_QT)
 		# main program
 		startup/main.cpp startup/main_gui.cpp
 		magdyn.cpp magdyn.h
-		dialogs.cpp panels.cpp
+		dialogs.cpp
 		structure.cpp tables.cpp
 		config.cpp file.cpp
 		export/sunny.cpp export/sw.cpp
@@ -183,6 +183,13 @@ if(USE_QT)
 		kernel.cpp dispersion.cpp
 		graph.cpp graph.h
 		defs.cpp defs.h gui_defs.h
+
+		# panels
+		panels/sites.cpp panels/terms.cpp
+		panels/coordinates.cpp panels/reciprocal.cpp
+		panels/sample.cpp panels/environment.cpp
+		panels/dispersion.cpp panels/hamilton.cpp
+		panels/variables.cpp panels/export.cpp
 
 		# cli tools
 		startup/healthcheck.cpp
@@ -214,7 +221,8 @@ if(USE_QT)
 		../../tlibs2/libs/qt/recent.cpp ../../tlibs2/libs/qt/recent.h
 		../../libs/symops.h
 
-		# plotting tool
+		# plotting tools
+		../../tlibs2/tools/plot2d/plot2d.cpp ../../tlibs2/tools/plot2d/plot2d.h
 		../../tlibs2/tools/plot3d/plot3d.cpp ../../tlibs2/tools/plot3d/plot3d_file.cpp
 		../../tlibs2/tools/plot3d/plot3d_calc.cpp ../../tlibs2/tools/plot3d/plot3d_grid.cpp
 		../../tlibs2/tools/plot3d/plot3d.h
