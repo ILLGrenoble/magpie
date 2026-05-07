@@ -118,6 +118,10 @@ void MagDynDlg::Clear(bool recalc)
 		m_plot_channel[i]->setChecked(true);
 	}
 
+	m_ffact->clear();
+	m_cur_ffact->setValue(0);
+	m_num_ffacts->setValue(1);
+
 	m_statusFixed->setText("Ready.");
 	m_status->setText("");
 }
@@ -401,16 +405,21 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 		t_size num_ffacts = m_dyn.GetMagneticFormFactorCount();
 		m_ffacts.resize(num_ffacts);
 		m_num_ffacts->setValue((int)num_ffacts);
+		m_cur_ffact->setValue(0);
 
 		for(t_size ffact_idx = 0; ffact_idx < num_ffacts; ++ffact_idx)
 		{
 			const std::string& ffact = m_dyn.GetMagneticFormFactor(ffact_idx);
 			m_ffacts[ffact_idx] = ffact;
+
+			// display first formula
+			if(ffact_idx == 0)
+				m_ffact->setPlainText(ffact.c_str());
 		}
-	
+
 		if(!m_use_formfact->isChecked())
 			m_dyn.ClearMagneticFormFactors();
-	
+
 		// clear old tables
 		DelTabItem(m_sitestab, -1);
 		DelTabItem(m_termstab, -1);
