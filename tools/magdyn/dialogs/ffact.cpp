@@ -592,8 +592,8 @@ void FormFactorDlg::CalculateFormFactors()
 				{
 					parser.register_var("Q", Q);
 					parser.register_var("Q2", Q*Q);
-					parser.register_var("s", Q / (2.*tl2::pi<t_real>));
-					parser.register_var("s2", std::pow(Q / (2.*tl2::pi<t_real>), 2.));
+					parser.register_var("s", Q / (4.*tl2::pi<t_real>));
+					parser.register_var("s2", std::pow(Q / (4.*tl2::pi<t_real>), 2.));
 
 					val_ff = parser.eval_noexcept().real();
 				}
