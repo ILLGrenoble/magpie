@@ -57,7 +57,7 @@ namespace asio = boost::asio;
 FormFactorDlg::FormFactorDlg(QWidget *parent, QSettings *sett)
 	: QDialog{parent}, m_sett{sett}
 {
-	setWindowTitle("Form Factors");
+	setWindowTitle("Magnetic Form Factors");
 	setSizeGripEnabled(true);
 
 	// status bar

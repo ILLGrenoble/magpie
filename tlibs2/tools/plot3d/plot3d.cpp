@@ -246,6 +246,8 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 	btnSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
 	btnSaveScript->setIcon(QIcon::fromTheme("text-x-script"));
 	btnbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+	btnSaveData->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+	btnSaveScript->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
 	// surfaces panel grid
 	int y = 0;
