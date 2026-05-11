@@ -31,11 +31,14 @@ end
 for ffact in magnetic_ion_data
 	name = ffact[1]
 	cfg = ffact[2]
-	term = ffact[3]
+	terms = ffact[3]
 	coeffs_0 = ffact[4]
 	coeffs_2 = ffact[5]
+	#terms_parsed = parse_term_symbol(terms)
 
-	@printf(f, "\t<ion name=\"%s\" electrons=\"%s\" terms=\"%s\">\n", ffact[1], ffact[2], ffact[3])
+	#cfg = replace(cfg, "⁰" => "0")
+	#@printf("%s\n", cfg)
+	@printf(f, "\t<ion name=\"%s\" electrons=\"%s\" terms=\"%s\">\n", name, cfg, terms)
 
 	# coefficients
 	@printf(f, "\t\t<coefficients_0> ")

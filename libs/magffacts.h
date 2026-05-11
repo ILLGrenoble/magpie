@@ -32,6 +32,7 @@
 
 #include <string>
 #include <vector>
+#include <tuple>
 #include <sstream>
 #include <fstream>
 #include <iostream>
@@ -49,6 +50,7 @@ struct MagFormfactor
 {
 	std::string name{};   // ion name
 	std::string terms{};  // term symbol
+	std::tuple<t_real, t_real, t_real> SLJ;
 
 	// j_0, j_2, j_4, ... coefficients
 	std::vector<std::vector<t_real>> coefficients{};
@@ -59,13 +61,21 @@ struct MagFormfactor
 	 * @see https://mcphase.github.io/webpage/manual/node164.html
 	 * @see https://github.com/SunnySuite/Sunny.jl/blob/main/src/FormFactor.jl
 	 */
-	t_real eval(t_real Q, bool is_Q = true) const
+	t_real eval(t_real Q, t_real g = -1., bool is_Q = true) const
 	{
 		if(is_Q)
 			Q /= 4. * tl2::pi<t_real>;
 
+		if(g < 0.)  // calculate g
+		{
+			t_real S = std::get<0>(SLJ);
+			t_real L = std::get<1>(SLJ);
+			t_real J = std::get<2>(SLJ);
+
+			g = tl2::eff_gJ<t_real>(S, L, J);
+		}
+
 		t_real ffact = 0.;
-		t_real g = 2.;  // TODO
 
 		for(std::size_t coeff_idx = 0; coeff_idx < coefficients.size(); ++coeff_idx)
 		{
@@ -88,7 +98,7 @@ struct MagFormfactor
 	 * @see https://mcphase.github.io/webpage/manual/node164.html
 	 * @see https://github.com/SunnySuite/Sunny.jl/blob/main/src/FormFactor.jl
 	 */
-	std::string to_string() const
+	std::string to_string(t_real g = -1.) const
 	{
 		// add brackets around negative values
 		auto add_brackets = [](t_real val) -> std::string
@@ -101,19 +111,27 @@ struct MagFormfactor
 			return ostr.str();
 		};
 
+		if(g < 0.)  // calculate g
+		{
+			t_real S = std::get<0>(SLJ);
+			t_real L = std::get<1>(SLJ);
+			t_real J = std::get<2>(SLJ);
+
+			g = tl2::eff_gJ<t_real>(S, L, J);
+		}
+
 		std::ostringstream expr;
-		t_real g = 2.;  // TODO
+		expr << "g = " << g << ";\n\n";
 
 		for(std::size_t coeff_idx = 0; coeff_idx < coefficients.size(); ++coeff_idx)
 		{
 			const auto& coeffs = coefficients[coeff_idx];
 			std::string prefactor_start = (coeff_idx == 0 ? "" : "s*s * (");
 			std::string prefactor_end = (coeff_idx == 0 ? "" : ")");
-			t_real g_factor = (coeff_idx == 0 ? 1. : 2./g - 1.);
 
 			std::size_t i = 0;
-			if(!tl2::equals(g_factor, 1.))
-				expr << g_factor << "*";
+			if(coeff_idx != 0)
+				expr << "(2/g - 1)*";
 			expr << prefactor_start;
 			for(i = 0; i + 1 < coeffs.size(); i += 2)
 			{
@@ -178,6 +196,7 @@ public:
 				if(ffact.name == "")
 					continue;
 				ffact.terms = ion.second.get<std::string>("<xmlattr>.terms", "");
+				ffact.SLJ = tl2::from_termsymbol<t_real, std::string>(ffact.terms);
 
 				for(std::size_t coeff_idx = 0; coeff_idx < 10; coeff_idx += 2)
 				{

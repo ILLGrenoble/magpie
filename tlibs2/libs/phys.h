@@ -38,6 +38,7 @@
 
 #include "units.h"
 #include "maths.h"
+#include "string.h"
 
 #include <stdexcept>
 #include <optional>
@@ -716,9 +717,9 @@ T fermi(const t_energy<Sys, T>& E, const t_energy<Sys, T>& mu,
  */
 template<class Sys, class T = double>
 t_length_inverse<Sys, T> macro_xsect(const t_area<Sys, T>& xsect,
-	unsigned int iNumAtoms, const t_volume<Sys, T>& volUC)
+	unsigned int num_atoms, const t_volume<Sys, T>& volUC)
 {
-	return xsect * T(iNumAtoms) / volUC;
+	return xsect * T(num_atoms) / volUC;
 }
 
 
@@ -995,8 +996,7 @@ t_flux<Sys, T> larmor_B(const t_freq<Sys, T>& om)
  */
 template<class Sys, class T = double>
 t_flux<Sys, T> larmor_field(const t_length<Sys, T>& lam,
-	const t_length<Sys, T>& len,
-	const t_angle<Sys, T>& phi)
+	const t_length<Sys, T>& len, const t_angle<Sys, T>& phi)
 {
 	t_velocity<Sys, T> v = h<T> / lam / co::m_n;
 	t_freq<Sys, T> om = -T(phi/radians<T>)*v/len;
@@ -1275,6 +1275,192 @@ requires is_basic_vec<t_vec>
 	}
 
 	return F;
+}
+// ----------------------------------------------------------------------------
+
+
+
+// ----------------------------------------------------------------------------
+// term symbols
+// ----------------------------------------------------------------------------
+/**
+ * Hund's rules
+ * @return [S, L, J]
+ * @see (Khomskii 2014), ch. 2.2
+ */
+template<class t_real = double>
+std::tuple<t_real, t_real, t_real>
+hund(std::uint16_t l, std::uint16_t num_Es)
+{
+	std::uint16_t num_orbitals = 2*l + 1;
+	if(num_Es > num_orbitals*2)
+		throw std::runtime_error("Too many electrons.");
+
+	std::vector<std::uint8_t> vecOrbitals;  // orbitals
+	std::vector<std::int16_t> vec_ml;       // mag. q.number
+	vecOrbitals.resize(num_orbitals);
+	vec_ml.resize(num_orbitals);
+	std::iota(vec_ml.rbegin(), vec_ml.rend(), -l);
+
+	for(std::uint16_t iE = 0; iE < num_Es; ++iE)
+		++vecOrbitals[iE % num_orbitals];
+
+	t_real S = 0, L = 0, J = 0;
+	for(std::size_t iOrbital = 0; iOrbital < vecOrbitals.size(); ++iOrbital)
+	{
+		std::uint8_t iEs = vecOrbitals[iOrbital];
+		if(iEs == 1)  // unpaired electron
+			S += t_real(0.5);
+
+		std::int16_t ml = vec_ml[iOrbital];
+		L += t_real(std::int16_t(iEs)*ml);
+	}
+
+	if(num_Es <= num_orbitals)
+		J = std::abs(L - S);
+	else
+		J = L + S;
+
+	return std::make_tuple(S, L, J);
+}
+
+
+/**
+ * convert [S, L, J] into a term symbol, (2S+1)^L_J
+ * @see https://en.wikipedia.org/wiki/Term_symbol
+ */
+template<class t_real = double, class t_str = std::string>
+t_str to_termsymbol(t_real S, t_real L, t_real J)
+{
+	static const std::vector<t_str> vecL = {
+		"S", "P", "D", "F",
+		"G", "H", "I", "K",
+		"L", "M", "N", "O" };
+
+	t_str strS = var_to_str<t_real, t_str>(t_real(2)*S + 1);
+	t_str strL = vecL[std::size_t(L)];
+	t_str strJ = var_to_str<t_real, t_str>(J);
+
+	return strS + strL + strJ;
+}
+
+
+/**
+ * convert a term symbol, (2S+1)^L_J, into [S, L, J]
+ * @see https://en.wikipedia.org/wiki/Term_symbol
+ */
+template<class t_real = double, class t_str = std::string>
+std::tuple<t_real, t_real, t_real> from_termsymbol(const t_str& term)
+{
+	using t_ch = typename t_str::value_type;
+	static const std::unordered_map<t_ch, t_real> mapSubOrbitals =
+	{
+		{'S', 0.}, {'P', 1.}, {'D',  2.}, {'F',  3.},
+		{'G', 4.}, {'H', 5.}, {'I',  6.}, {'K',  7.},
+		{'L', 8.}, {'M', 9.}, {'N', 10.}, {'O', 11.},
+	};
+
+	t_real S0 = 1., L = 0., J = 0., div = 1.;
+	t_ch cSub = 'S', ch = 0;
+
+	std::istringstream istr(term);
+	istr >> S0 >> cSub >> J >> ch;
+	if(ch == '/')
+	{
+		istr >> div;
+		J /= div;
+	}
+
+	auto iter = mapSubOrbitals.find(cSub);
+	if(iter == mapSubOrbitals.end())
+		throw std::runtime_error("Invalid orbital.");
+	L = iter->second;
+
+	return std::make_tuple((S0 - 1.)/2., L, J);
+}
+
+
+/**
+ * transforms the electron configuration, e.g. 1s2 -> [1, 0, 2]
+ * @return [n, l, #electrons]
+ */
+template<class t_str = std::string>
+std::tuple<uint16_t, uint16_t, uint16_t>
+from_electron_config(const t_str& ecfg)
+{
+	using t_ch = typename t_str::value_type;
+	static const std::unordered_map<t_ch, uint16_t> mapSubOrbitals =
+	{
+		{'s', 0}, {'p', 1}, {'d',  2}, {'f',  3},
+		{'g', 4}, {'h', 5}, {'i',  6}, {'k',  7},
+		{'l', 8}, {'m', 9}, {'n', 10}, {'o', 11},
+	};
+
+	uint16_t n = 0, l = 0, num_E = 0;
+	t_ch cSub = 's';
+
+	std::istringstream istr(ecfg);
+	istr >> n >> cSub >> num_E;
+	auto iter = mapSubOrbitals.find(cSub);
+	if(iter == mapSubOrbitals.end())
+		throw std::runtime_error("Invalid orbital.");
+	l = iter->second;
+
+	return std::make_tuple(n, l, num_E);
+}
+
+
+/**
+ * gets term symbol from the electron configuration
+ * @return [S, L, J]
+ */
+template<class t_real = double, class t_str = std::string>
+std::tuple<t_real, t_real, t_real>
+hund(const t_str& ecfgs)
+{
+	std::vector<t_str> vecOrbitals;
+	tl2::get_tokens<t_str, t_str>(ecfgs, " ,;", vecOrbitals);
+
+	t_real S = 0, L = 0, J = 0;
+
+	// all orbitals
+	for(const t_str& ecfg : vecOrbitals)
+	{
+		auto [ n, l, e ] = from_electron_config(ecfg);
+		auto [ _S, _L, _J ] = hund(l, e);
+
+		S += _S;
+		L += _L;
+		J += _J;
+	}
+
+	return std::make_tuple(S, L, J);
+}
+
+
+/**
+ * effective g factor
+ * @see (Khomskii 2014), equ. (2.13)
+ * @see https://en.wikipedia.org/wiki/Land%C3%A9_g-factor
+ */
+template<class T = double>
+T eff_gJ(T S, T L, T J, T gL = T(1), T gS = T(2))
+{
+	T g = T(0.5) * (gL + gS) -
+		(S*(S + T(1)) - L*(L + T(1)))
+			/ (T(2)*J*(J + T(1))) * (gL - gS);
+	return g;
+}
+
+
+/**
+ * effective magneton number in units of muB
+ * @see (Khomskii 2014), p. 33
+ */
+template<class T = double>
+T eff_magnetons(T gJ, T J)
+{
+	return gJ * std::sqrt(J * (J + T(1)));
 }
 // ----------------------------------------------------------------------------
 
