@@ -23,17 +23,17 @@
  * ----------------------------------------------------------------------------
  */
 
-// clang++ -std=c++20 -I/opt/homebrew/include -I.. -o magffacts magffacts.cpp
+// clang++ -std=c++20 -I/opt/homebrew/include -I../../ -o magffacts magffacts.cpp
 
-
-#include "../libs/magffacts.h"
+#include <iostream>
+#include "libs/magffacts.h"
 
 using t_real = double;
 
 
 int main()
 {
-	const char* table = "../res/magffacts.xml";
+	const char* table = "../../res/magffacts.xml";
 
 	MagFormfactorTable<t_real> tab;
 	if(!tab.LoadTable(table))
@@ -41,6 +41,8 @@ int main()
 		std::cerr << "Loading table \"" << table << "\" failed." << std::endl;
 		return -1;
 	}
+
+	std::cout << tab.GetFormfactor("Mn2")->to_string() << std::endl;
 
 	return 0;
 }

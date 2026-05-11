@@ -32,10 +32,12 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 #include <fstream>
 #include <iostream>
 
 #include "tlibs2/libs/file.h"
+#include "tlibs2/libs/phys.h"
 
 
 
@@ -48,9 +50,88 @@ struct MagFormfactor
 	std::string name{};   // ion name
 	std::string terms{};  // term symbol
 
-	std::vector<t_real> coefficients_0{};
-	std::vector<t_real> coefficients_2{};
-	std::vector<t_real> coefficients_4{};
+	// j_0, j_2, j_4, ... coefficients
+	std::vector<std::vector<t_real>> coefficients{};
+
+
+	/**
+	 * evaluate the form factor at the given Q
+	 * @see https://mcphase.github.io/webpage/manual/node164.html
+	 * @see https://github.com/SunnySuite/Sunny.jl/blob/main/src/FormFactor.jl
+	 */
+	t_real eval(t_real Q, bool is_Q = true) const
+	{
+		if(is_Q)
+			Q /= 4. * tl2::pi<t_real>;
+
+		t_real ffact = 0.;
+		t_real g = 2.;  // TODO
+
+		for(std::size_t coeff_idx = 0; coeff_idx < coefficients.size(); ++coeff_idx)
+		{
+			const auto& coeffs = coefficients[coeff_idx];
+			t_real prefactor = (coeff_idx == 0 ? 1. : Q*Q * (2./g - 1.));
+
+			std::size_t i = 0;
+			for(i = 0; i + 1 < coeffs.size(); i += 2)
+				ffact += prefactor * coeffs[i] * std::exp(-Q*Q * coeffs[i + 1]);
+			if(i < coeffs.size())
+				ffact += prefactor * coeffs[i];
+		}
+
+		return ffact;
+	}
+
+
+	/**
+	 * evaluate the form factor at the given Q
+	 * @see https://mcphase.github.io/webpage/manual/node164.html
+	 * @see https://github.com/SunnySuite/Sunny.jl/blob/main/src/FormFactor.jl
+	 */
+	std::string to_string() const
+	{
+		// add brackets around negative values
+		auto add_brackets = [](t_real val) -> std::string
+		{
+			std::ostringstream ostr;
+			if(val >= 0.)
+				ostr << val;
+			else
+				ostr << "(" << val << ")";
+			return ostr.str();
+		};
+
+		std::ostringstream expr;
+		t_real g = 2.;  // TODO
+
+		for(std::size_t coeff_idx = 0; coeff_idx < coefficients.size(); ++coeff_idx)
+		{
+			const auto& coeffs = coefficients[coeff_idx];
+			std::string prefactor_start = (coeff_idx == 0 ? "" : "s*s * (");
+			std::string prefactor_end = (coeff_idx == 0 ? "" : ")");
+			t_real g_factor = (coeff_idx == 0 ? 1. : 2./g - 1.);
+
+			std::size_t i = 0;
+			if(!tl2::equals(g_factor, 1.))
+				expr << g_factor << "*";
+			expr << prefactor_start;
+			for(i = 0; i + 1 < coeffs.size(); i += 2)
+			{
+				expr << add_brackets(coeffs[i])
+					<< " * exp(-s*s * " << add_brackets(coeffs[i + 1]) << ")";
+				if(i < coeffs.size() - 3)
+					expr << " +\n";
+			}
+			if(i < coeffs.size())
+				expr << "\n+ " << add_brackets(coeffs[i]);
+			expr << prefactor_end;
+
+			if(coeff_idx < coefficients.size() - 1)
+				expr << "\n+\n";
+		}
+
+		return expr.str();
+	}
 };
 
 
@@ -98,12 +179,28 @@ public:
 					continue;
 				ffact.terms = ion.second.get<std::string>("<xmlattr>.terms", "");
 
-				tl2::get_tokens<t_real, std::string>(
-					ion.second.get<std::string>("coefficients_0", ""), " ", ffact.coefficients_0);
-				tl2::get_tokens<t_real, std::string>(
-					ion.second.get<std::string>("coefficients_2", ""), " ", ffact.coefficients_2);
-				tl2::get_tokens<t_real, std::string>(
-					ion.second.get<std::string>("coefficients_4", ""), " ", ffact.coefficients_4);
+				for(std::size_t coeff_idx = 0; coeff_idx < 10; coeff_idx += 2)
+				{
+					std::vector<t_real> coeffs;
+
+					tl2::get_tokens<t_real, std::string>(
+						ion.second.get<std::string>(
+						  "coefficients_" + tl2::var_to_str(coeff_idx), ""), " ", coeffs);
+
+					// remove zero terms
+					for(std::size_t i = 2; i + 1 < coeffs.size();)
+					{
+						if(tl2::equals_0(coeffs[i]))
+							coeffs.erase(coeffs.begin() + i, coeffs.begin() + i + 2);
+						else
+							i += 2;
+					}
+
+					if(!coeffs.size())
+						break;
+
+					ffact.coefficients.emplace_back(std::move(coeffs));
+				}
 
 				m_formfactors.emplace_back(std::move(ffact));
 			}
@@ -121,6 +218,18 @@ public:
 	const std::vector<t_magffact>& GetFormfactors() const
 	{
 		return m_formfactors;
+	}
+
+
+	const t_magffact* GetFormfactor(const std::string& name) const
+	{
+		for(const t_magffact& ffact : m_formfactors)
+		{
+			if(ffact.name == name)
+				return &ffact;
+		}
+
+		return nullptr;
 	}
 
 
