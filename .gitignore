@@ -20,25 +20,7 @@
 !tools_py/magdyn/tests/_magdyn_py.so
 !tools_py/magdyn/tests/_magpy.so
 
-# temporary files
-tmp/**
-build/**
-__pycache__/**
-*.pyc
-*.csv
-*.swp
-*.png
-*.pdf
-*.ico
-*.icns
-*.log
-*.aux
-*.synctex.*
-*.toc
-*.bbl
-*.blg
-*.fls
-*.fdb_latexmk
+# build dirs
 tools/structfact/build/**
 tools/bz/build/**
 tools/cif2xml/build/**
@@ -53,9 +35,30 @@ tools_py/magdyn/build/**
 tools_py/bz/build/**
 tools_py/instr/build/**
 tools_c/build/**
+build/**
+
+# temporary files
+tmp/**
+__pycache__/**
+*.pyc
+*.csv
+*.swp
+*.png
+*.pdf
+*.ico
+*.icns
+*.log
+*.aux
+*.toc
+*.bbl
+*.blg
+*.fls
+*.synctex.*
+*.fdb_latexmk
 .DS_Store
 ._.DS_Store
 local_bindings.txt
 cliparser_impl.*
 clilexer_impl.*
 stack.hh
+res/magffacts.xml
