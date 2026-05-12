@@ -178,6 +178,14 @@ void MagDynDlg::InitResources()
 		std::cerr << "Warning: Resource directory could not be found." << std::endl;
 	//std::cerr << "Resource path: " << g_resdir.toStdString() << std::endl;
 
+	// form factor table
+	m_ff.Clear();
+	if(QFileInfo{g_resdir + "magffacts.xml"}.exists())
+	{
+		if(!m_ff.LoadTable(g_resdir.toStdString() + "magffacts.xml"))
+			m_ff.Clear();
+	}
+
 	// main icon
 	if(QFileInfo{g_resdir + "magpie.svg"}.exists())
 		g_icon = QIcon{g_resdir + "magpie.svg"};

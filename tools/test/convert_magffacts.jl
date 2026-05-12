@@ -30,15 +30,13 @@ end
 # iterate form factors
 for ffact in magnetic_ion_data
 	name = ffact[1]
-	cfg = ffact[2]
+	#electron_cfg = ffact[2]
 	terms = ffact[3]
 	coeffs_0 = ffact[4]
 	coeffs_2 = ffact[5]
 	#terms_parsed = parse_term_symbol(terms)
 
-	#cfg = replace(cfg, "⁰" => "0")
-	#@printf("%s\n", cfg)
-	@printf(f, "\t<ion name=\"%s\" electrons=\"%s\" terms=\"%s\">\n", name, cfg, terms)
+	@printf(f, "\t<ion name=\"%s\" terms=\"%s\">\n", name, terms)
 
 	# coefficients
 	@printf(f, "\t\t<coefficients_0> ")

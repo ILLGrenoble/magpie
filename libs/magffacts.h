@@ -121,7 +121,7 @@ struct MagFormfactor
 		}
 
 		std::ostringstream expr;
-		expr << "g = " << g << ";\n\n";
+		expr << "g = " << g << ";\n";
 
 		for(std::size_t coeff_idx = 0; coeff_idx < coefficients.size(); ++coeff_idx)
 		{
@@ -133,6 +133,7 @@ struct MagFormfactor
 			if(coeff_idx != 0)
 				expr << "(2/g - 1)*";
 			expr << prefactor_start;
+
 			for(i = 0; i + 1 < coeffs.size(); i += 2)
 			{
 				expr << add_brackets(coeffs[i])
@@ -140,12 +141,13 @@ struct MagFormfactor
 				if(i < coeffs.size() - 3)
 					expr << " +\n";
 			}
+
 			if(i < coeffs.size())
 				expr << "\n+ " << add_brackets(coeffs[i]);
 			expr << prefactor_end;
 
 			if(coeff_idx < coefficients.size() - 1)
-				expr << "\n+\n";
+				expr << "\n+ ";
 		}
 
 		return expr.str();
@@ -240,6 +242,12 @@ public:
 	}
 
 
+	std::size_t GetFormfactorCount() const
+	{
+		return m_formfactors.size();
+	}
+
+
 	const t_magffact* GetFormfactor(const std::string& name) const
 	{
 		for(const t_magffact& ffact : m_formfactors)
@@ -249,6 +257,12 @@ public:
 		}
 
 		return nullptr;
+	}
+
+
+	void Clear()
+	{
+		m_formfactors.clear();
 	}
 
 

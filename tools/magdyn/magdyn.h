@@ -64,6 +64,7 @@
 #include "tlibs2/libs/magdyn.h"
 #include "tlibs2/libs/qt/numerictablewidgetitem.h"
 #include "tlibs2/libs/qt/recent.h"
+#include "libs/magffacts.h"
 
 #include "../bz/plot.h"
 #include "../bz/plot_cut.h"
@@ -206,6 +207,7 @@ protected:
 	QLineEdit *m_editFilterSG{};
 	QPlainTextEdit *m_ffact{};                 // magnetic form factor formula
 	QSpinBox *m_cur_ffact{}, *m_num_ffacts{};  // form factor index and number
+	QComboBox *m_combo_ffacts{};               // ions from form factor table
 	std::vector<std::string> m_ffacts{};       // buffers for form factors
 
 	// sample environment panel
@@ -247,9 +249,10 @@ protected:
 	QSpinBox *m_exportNumPoints[3]{nullptr, nullptr, nullptr};
 	QComboBox *m_exportFormat{nullptr};
 
-	// calculation kernel
+	// calculation kernels
 	t_magdyn m_dyn{};                      // magnon dynamics calculation kernel
 	t_bz m_bz{};                           // brillouin zone calculation kernel
+	MagFormfactorTable<t_real> m_ff{};     // magnetic form factor table
 
 	// dialogs
 	QDialog *m_settings_dlg{};             // settings dialog

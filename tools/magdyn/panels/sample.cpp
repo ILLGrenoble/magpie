@@ -120,13 +120,27 @@ void MagDynDlg::CreateSamplePanel()
 	m_cur_ffact->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_cur_ffact->setToolTip("Index of currently shown magnetic form factor.");
 
-	QPushButton *btn_ffact_j0 = new QPushButton("<j0> Term", m_samplepanel);
+	// form factor table
+	QPushButton *btn_set_ffact = nullptr;
+	if(m_ff.GetFormfactorCount())
+	{
+		m_combo_ffacts = new QComboBox(m_samplepanel);
+		m_combo_ffacts->setFocusPolicy(Qt::StrongFocus);
+		for(const auto& ffact : m_ff.GetFormfactors())
+			m_combo_ffacts->addItem(ffact.name.c_str());
+
+		btn_set_ffact = new QPushButton("Set", m_samplepanel);
+		btn_set_ffact->setToolTip("Set the term from the currently selected magnetic ion,");
+		btn_set_ffact->setFocusPolicy(Qt::StrongFocus);
+	}
+
+	QPushButton *btn_ffact_j0 = new QPushButton("<j0> Templ.", m_samplepanel);
 	btn_ffact_j0->setToolTip("Add a template <j0> term.");
 	btn_ffact_j0->setFocusPolicy(Qt::StrongFocus);
-	QPushButton *btn_ffact_j2 = new QPushButton("<j0-2> Terms", m_samplepanel);
+	QPushButton *btn_ffact_j2 = new QPushButton("<j0-2> Templ.", m_samplepanel);
 	btn_ffact_j2->setToolTip("Add template <j0> and <j2> terms.");
 	btn_ffact_j2->setFocusPolicy(Qt::StrongFocus);
-	QPushButton *btn_ffact_j4 = new QPushButton("<j0-4> Terms", m_samplepanel);
+	QPushButton *btn_ffact_j4 = new QPushButton("<j0-4> Templ.", m_samplepanel);
 	btn_ffact_j4->setToolTip("Add template <j0>, <j2>, and <j4> terms.");
 	btn_ffact_j4->setFocusPolicy(Qt::StrongFocus);
 	QPushButton *btn_ffact_plot = new QPushButton("Plot...", m_samplepanel);
@@ -195,6 +209,12 @@ void MagDynDlg::CreateSamplePanel()
 	grid->addWidget(m_cur_ffact, y++, 3, 1, 1);
 	grid->addWidget(new QLabel("Formula, f_M(Q or s) = ", m_samplepanel), y++, 0, 1, 4);
 	grid->addWidget(m_ffact, y++, 0, 1, 4);
+	if(m_combo_ffacts && btn_set_ffact)
+	{
+		grid->addWidget(new QLabel("Select Ion:", m_samplepanel), y, 0, 1, 1);
+		grid->addWidget(m_combo_ffacts, y, 1, 1, 1);
+		grid->addWidget(btn_set_ffact, y++, 2, 1, 1);
+	}
 	grid->addWidget(btn_ffact_j0, y, 0, 1, 1);
 	grid->addWidget(btn_ffact_j2, y, 1, 1, 1);
 	grid->addWidget(btn_ffact_j4, y, 2, 1, 1);
@@ -202,7 +222,6 @@ void MagDynDlg::CreateSamplePanel()
 	//grid->addItem(new QSpacerItem(8, 8,
 	//	QSizePolicy::Minimum, QSizePolicy::Expanding),
 	//	y++, 0, 1, 1);
-
 
 	auto calc_all = [this]()
 	{
@@ -334,6 +353,24 @@ void MagDynDlg::CreateSamplePanel()
 		PlotFormFactors();
 		calc_all();
 	});
+
+	// set the selected ion's form factor
+	if(m_combo_ffacts && btn_set_ffact)
+	{
+		connect(btn_set_ffact, &QAbstractButton::clicked, [this]()
+		{
+			std::string ion_name = m_combo_ffacts->currentText().toStdString();
+			const auto* ion = m_ff.GetFormfactor(ion_name);
+			if(!ion)
+			{
+				m_ffact->setPlainText("");
+				ShowError(("Could not find " + ion_name + " ion.").c_str(), true);
+				return;
+			}
+
+			m_ffact->setPlainText(ion->to_string().c_str());
+		});
+	}
 
 	m_tabs_setup->addTab(m_samplepanel, "Crystal");
 }

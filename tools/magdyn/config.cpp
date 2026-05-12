@@ -314,6 +314,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 		}
 		if(!found_sg)
 		{
+			// set space group by index instead
 			if(auto optVal = magdyn.get_optional<int>("config.spacegroup_index"))
 				m_comboSG->setCurrentIndex(*optVal);
 		}
@@ -358,6 +359,23 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 			{
 				m_use_genJ->setChecked(*optVal);
 			}
+		}
+		bool found_ff = false;
+		if(auto optVal = magdyn.get_optional<std::string>("config.magnetic_form_factor"))
+		{
+			// set form factor by name
+			int idx = m_combo_ffacts->findText(optVal->c_str(), Qt::MatchContains);
+			if(idx >= 0)
+			{
+				m_combo_ffacts->setCurrentIndex(idx);
+				found_ff = true;
+			}
+		}
+		if(!found_ff)
+		{
+			// set form factor by index instead
+			if(auto optVal = magdyn.get_optional<int>("config.magnetic_form_factor_index"))
+				m_combo_ffacts->setCurrentIndex(*optVal);
 		}
 
 		if(!m_dyn.Load(magdyn))
@@ -867,6 +885,11 @@ bool MagDynDlg::Save(const QString& filename)
 		magdyn.put<int>("config.sites_extcell_x", m_extCell[0]->value());
 		magdyn.put<int>("config.sites_extcell_y", m_extCell[1]->value());
 		magdyn.put<int>("config.sites_extcell_z", m_extCell[2]->value());
+		if(m_combo_ffacts)
+		{
+			magdyn.put<std::string>("config.magnetic_form_factor", m_combo_ffacts->currentText().toStdString());
+			magdyn.put<t_real>("config.magnetic_form_factor_index", m_combo_ffacts->currentIndex());
+		}
 
 		// save magnon calculator configuration
 		if(!m_dyn.Save(magdyn))

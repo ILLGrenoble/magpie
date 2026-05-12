@@ -1446,9 +1446,13 @@ hund(const t_str& ecfgs)
 template<class T = double>
 T eff_gJ(T S, T L, T J, T gL = T(1), T gS = T(2))
 {
+	T Jfact = T(2)*J*(J + T(1));
+	if(equals_0(Jfact))
+		return T(0);
+
 	T g = T(0.5) * (gL + gS) -
-		(S*(S + T(1)) - L*(L + T(1)))
-			/ (T(2)*J*(J + T(1))) * (gL - gS);
+		(S*(S + T(1)) - L*(L + T(1))) * (gL - gS) / Jfact;
+
 	return g;
 }
 
