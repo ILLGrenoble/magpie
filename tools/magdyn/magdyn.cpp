@@ -182,7 +182,7 @@ void MagDynDlg::InitResources()
 	m_ff.Clear();
 	if(QFileInfo{g_resdir + "magffacts.xml"}.exists())
 	{
-		if(!m_ff.LoadTable(g_resdir.toStdString() + "magffacts.xml"))
+		if(!m_ff.LoadTable(g_resdir.toStdString() + "magffacts.xml", true))
 			m_ff.Clear();
 	}
 

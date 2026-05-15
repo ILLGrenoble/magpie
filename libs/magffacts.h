@@ -174,7 +174,7 @@ public:
 	/**
 	 * loads form factors from an xml table
 	 */
-	bool LoadTable(const std::string& file)
+	bool LoadTable(const std::string& file, bool include_term_in_name = false)
 	{
 		try
 		{
@@ -198,6 +198,8 @@ public:
 				if(ffact.name == "")
 					continue;
 				ffact.terms = ion.second.get<std::string>("<xmlattr>.terms", "");
+				if(include_term_in_name)
+					ffact.name += " (" + ffact.terms + ")";
 				ffact.SLJ = tl2::from_termsymbol<t_real, std::string>(ffact.terms);
 
 				for(std::size_t coeff_idx = 0; coeff_idx < 10; coeff_idx += 2)
