@@ -25,6 +25,10 @@ end
 # header
 @printf(f, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 @printf(f, "<magnetic_form_factors>\n")
+@printf(f, "\t<infos>\n")
+@printf(f, "\t\t<origin>https://github.com/SunnySuite/Sunny.jl/blob/main/src/FormFactor.jl</origin>\n")
+@printf(f, "\t\t<license>https://github.com/SunnySuite/Sunny.jl/blob/main/LICENSE.md</license>\n")
+@printf(f, "\t</infos>\n")
 
 
 # iterate form factors

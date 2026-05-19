@@ -64,7 +64,7 @@ void MagDynDlg::PopulateSpaceGroups(bool init)
 
 	m_comboSG->clear();
 
-	std::string filter = m_editFilterSG->text().toStdString();
+	std::string filter = tl2::trimmed(m_editFilterSG->text().toStdString());
 	bool do_filter = m_checkFilterSG->isChecked() && filter.length();
 
 	unsigned int sg_idx = 0;
@@ -96,6 +96,51 @@ void MagDynDlg::PopulateSpaceGroups(bool init)
 
 	if(combo_idx_to_select >= 0)
 		m_comboSG->setCurrentIndex(combo_idx_to_select);
+}
+
+
+
+/**
+ * creates the entries of the form factor combo box, which might be filtered
+ */
+void MagDynDlg::PopulateFormFactors()
+{
+	// get currently selected form factor index
+	std::optional<unsigned int> selected_index;
+	if(m_combo_ffacts->count())
+		selected_index = m_combo_ffacts->itemData(m_combo_ffacts->currentIndex()).toInt();
+
+	m_combo_ffacts->clear();
+
+	std::string filter = tl2::trimmed(m_editFilterFFacts->text().toStdString());
+	bool do_filter = filter.length();
+
+	unsigned int ff_idx = 0;
+	int combo_idx_to_select = -1;
+	for(const auto& ffact : m_ff.GetFormfactors())
+	{
+		const std::string& name = ffact.name;
+
+		// filter out non-wanted form factors
+		bool ignore_ff = false;
+		if(do_filter && name.find(filter) == std::string::npos)
+			ignore_ff = true;
+
+		if(!ignore_ff)
+		{
+			// keep last selection
+			if(selected_index && ff_idx == *selected_index)
+				combo_idx_to_select = m_combo_ffacts->count();
+
+			// add new form factor
+			m_combo_ffacts->addItem(name.c_str(), ff_idx);
+		}
+
+		++ff_idx;
+	}
+
+	if(combo_idx_to_select >= 0)
+		m_combo_ffacts->setCurrentIndex(combo_idx_to_select);
 }
 
 

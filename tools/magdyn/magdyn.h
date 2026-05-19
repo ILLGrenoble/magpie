@@ -208,6 +208,7 @@ protected:
 	QPlainTextEdit *m_ffact{};                 // magnetic form factor formula
 	QSpinBox *m_cur_ffact{}, *m_num_ffacts{};  // form factor index and number
 	QComboBox *m_combo_ffacts{};               // ions from form factor table
+	QLineEdit *m_editFilterFFacts{};
 	std::vector<std::string> m_ffacts{};       // buffers for form factors
 
 	// sample environment panel
@@ -311,6 +312,7 @@ protected:
 	void CreateExportPanel();
 
 	void PopulateSpaceGroups(bool init = false);
+	void PopulateFormFactors();
 
 	// general table operations
 	void MoveTabItemUp(QTableWidget *pTab);

@@ -73,11 +73,13 @@ void MagDynDlg::CreateSamplePanel()
 	// space groups
 	m_comboSG = new QComboBox(m_samplepanel);
 	m_comboSG->setFocusPolicy(Qt::StrongFocus);
+	m_comboSG->setToolTip("List of space groups.");
 
 	m_checkFilterSG = new QCheckBox("Filter Space Groups:", m_samplepanel);
 	m_checkFilterSG->setChecked(true);
 
 	m_editFilterSG = new QLineEdit(m_samplepanel);
+	m_editFilterSG->setPlaceholderText("Space group filter.");
 
 	// scattering plane
 	static const char* recipstr[] = { "h = ", "k = ", "l = " };
@@ -126,11 +128,15 @@ void MagDynDlg::CreateSamplePanel()
 	{
 		m_combo_ffacts = new QComboBox(m_samplepanel);
 		m_combo_ffacts->setFocusPolicy(Qt::StrongFocus);
-		for(const auto& ffact : m_ff.GetFormfactors())
-			m_combo_ffacts->addItem(ffact.name.c_str());
+		m_combo_ffacts->setToolTip("List of magnetic form factors.");
+
+		m_editFilterFFacts = new QLineEdit(m_samplepanel);
+		m_editFilterFFacts->setPlaceholderText("Form factor filter.");
+
+		PopulateFormFactors();
 
 		btn_set_ffact = new QPushButton("Set", m_samplepanel);
-		btn_set_ffact->setToolTip("Set the term from the currently selected magnetic ion,");
+		btn_set_ffact->setToolTip("Set the form factor term from the currently selected magnetic ion.");
 		btn_set_ffact->setFocusPolicy(Qt::StrongFocus);
 	}
 
@@ -213,7 +219,8 @@ void MagDynDlg::CreateSamplePanel()
 	{
 		grid->addWidget(new QLabel("Select Ion:", m_samplepanel), y, 0, 1, 1);
 		grid->addWidget(m_combo_ffacts, y, 1, 1, 1);
-		grid->addWidget(btn_set_ffact, y++, 2, 1, 1);
+		grid->addWidget(m_editFilterFFacts, y, 2, 1, 1);
+		grid->addWidget(btn_set_ffact, y++, 3, 1, 1);
 	}
 	grid->addWidget(btn_ffact_j0, y, 0, 1, 1);
 	grid->addWidget(btn_ffact_j2, y, 1, 1, 1);
@@ -271,6 +278,7 @@ void MagDynDlg::CreateSamplePanel()
 	// magnetic form factors
 	m_ffacts.resize(m_num_ffacts->value());
 
+	connect(m_editFilterFFacts, &QLineEdit::textChanged, [this]() { PopulateFormFactors(); });
 	connect(btn_ffact_plot, &QPushButton::clicked, this, &MagDynDlg::ShowFormFactorDlg);
 	connect(btn_ffact_j0, &QPushButton::clicked, [this]()
 	{
