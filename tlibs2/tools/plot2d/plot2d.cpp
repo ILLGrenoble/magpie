@@ -145,6 +145,7 @@ void Plot2DDlg::Parse()
 		parser.SetAutoregisterVariables(false);
 		parser.SetInvalid0(false);
 		parser.register_var("x", 0.);
+		parser.register_var("t", 0.);
 
 		if(!parser.parse_noexcept(formula))
 		{
@@ -240,10 +241,10 @@ QWidget* Plot2DDlg::CreatePanel()
 	grid_indices->addWidget(m_table, y_indices++, 0, 1, 1);
 
 	// formulas field
-	QGroupBox *groupFormulas = new QGroupBox("Formulas f_i(x):", this);
+	QGroupBox *groupFormulas = new QGroupBox("Formulas f_i(x, t):", this);
 	m_formulas = new QTextEdit(groupFormulas);
 	m_formulas->setPlaceholderText("Enter formulas separated by ';'."
-		" The free variable is 'x'.");
+		" Variable: 'x', parameter: 't'.");
 	m_formulas->setReadOnly(false);
 	m_formulas->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
 	m_formulas->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Ignored});
@@ -252,11 +253,17 @@ QWidget* Plot2DDlg::CreatePanel()
 	QGroupBox *groupRange = new QGroupBox("Options", this);
 	m_x_start = new QDoubleSpinBox(groupRange);
 	m_x_end = new QDoubleSpinBox(groupRange);
+	m_t_start = new QDoubleSpinBox(groupRange);
+	m_t_end = new QDoubleSpinBox(groupRange);
 	m_num_x = new QSpinBox(groupRange);
+	m_num_t = new QSpinBox(groupRange);
 
 	m_x_start->setToolTip("Initial x value.");
 	m_x_end->setToolTip("Final x value.");
-	m_num_x->setToolTip("Number of coordinate points to calculate.");
+	m_t_start->setToolTip("Initial t value.");
+	m_t_end->setToolTip("Final t value.");
+	m_num_x->setToolTip("Number of x coordinate points to calculate.");
+	m_num_t->setToolTip("Number of t parameter subdivisions to calculate.");
 
 	m_x_start->setDecimals(4);
 	m_x_start->setMinimum(-9999.9999);
@@ -278,8 +285,39 @@ QWidget* Plot2DDlg::CreatePanel()
 	m_num_x->setMaximum(99999);
 	m_num_x->setSingleStep(1);
 	m_num_x->setValue(128);
-	m_num_x->setPrefix("n = ");
+	m_num_x->setPrefix("n_x = ");
 	m_num_x->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+
+	m_t_start->setDecimals(4);
+	m_t_start->setMinimum(-9999.9999);
+	m_t_start->setMaximum(+9999.9999);
+	m_t_start->setSingleStep(0.5);
+	m_t_start->setValue(0.);
+	m_t_start->setPrefix("min = ");
+	m_t_start->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+
+	m_t_end->setDecimals(4);
+	m_t_end->setMinimum(-9999.9999);
+	m_t_end->setMaximum(+9999.9999);
+	m_t_end->setSingleStep(0.5);
+	m_t_end->setValue(1.);
+	m_t_end->setPrefix("max = ");
+	m_t_end->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+
+	m_num_t->setMinimum(1);
+	m_num_t->setMaximum(99999);
+	m_num_t->setSingleStep(1);
+	m_num_t->setValue(128);
+	m_num_t->setPrefix("n_t = ");
+	m_num_t->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+
+	// t parameter slider
+	m_slider_t = new QSlider(Qt::Horizontal, groupRange);
+	m_slider_t->setTracking(false);
+	m_slider_t->setMinimum(0);
+	m_slider_t->setMaximum(m_num_t->value() - 1);
+	m_slider_t->setTickInterval(m_num_t->value());
+	m_slider_t->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
 	// progress bar
 	m_progress = new QProgressBar(panelMain);
@@ -287,6 +325,7 @@ QWidget* Plot2DDlg::CreatePanel()
 
 	// start/stop button
 	m_btnStartStop = new QPushButton("Calculate", panelMain);
+	m_btnStartStop->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 	// formulas grid
 	int y = 0;
@@ -303,8 +342,12 @@ QWidget* Plot2DDlg::CreatePanel()
 	range_grid->addWidget(new QLabel("x Range:", groupRange), y, 0, 1, 1);
 	range_grid->addWidget(m_x_start, y, 1, 1, 1);
 	range_grid->addWidget(m_x_end, y++, 2, 1, 1);
-	range_grid->addWidget(new QLabel("x Count:", groupRange), y, 0, 1, 1);
-	range_grid->addWidget(m_num_x, y++, 1, 1, 1);
+	range_grid->addWidget(new QLabel("t Range:", groupRange), y, 0, 1, 1);
+	range_grid->addWidget(m_t_start, y, 1, 1, 1);
+	range_grid->addWidget(m_t_end, y++, 2, 1, 1);
+	range_grid->addWidget(new QLabel("x, t Counts:", groupRange), y, 0, 1, 1);
+	range_grid->addWidget(m_num_x, y, 1, 1, 1);
+	range_grid->addWidget(m_num_t, y++, 2, 1, 1);
 
 	// main grid
 	y = 0;
@@ -314,8 +357,9 @@ QWidget* Plot2DDlg::CreatePanel()
 	grid->addWidget(m_split_plot, y++, 0, 1, 4);
 	grid->addWidget(groupFormulas, y, 0, 1, 2);
 	grid->addWidget(groupRange, y++, 2, 1, 2);
+	grid->addWidget(m_slider_t, y, 0, 1, 3);
+	grid->addWidget(m_btnStartStop, y++, 3, 2, 1);
 	grid->addWidget(m_progress, y, 0, 1, 3);
-	grid->addWidget(m_btnStartStop, y++, 3, 1, 1);
 
 	// restore settings
 	if(m_sett)
@@ -335,6 +379,30 @@ QWidget* Plot2DDlg::CreatePanel()
 	connect(acRescalePlot, &QAction::triggered, this, &Plot2DDlg::RescalePlot);
 	connect(acSaveFigure, &QAction::triggered, this, &Plot2DDlg::SavePlotFigure);
 	connect(acSaveData, &QAction::triggered, this, &Plot2DDlg::SaveData);
+
+	connect(m_num_t, &QSpinBox::valueChanged, [this](int num)
+	{
+		m_slider_t->setMinimum(0);
+		m_slider_t->setMaximum(num - 1);
+		m_slider_t->setTickInterval(num);
+	});
+
+	// t paramter slider moved
+	connect(m_slider_t, &QSlider::valueChanged, [this](int val)
+	{
+		if(!m_status)
+			return;
+
+		t_real t = tl2::lerp(m_t_start->value(), m_t_end->value(),
+			t_real(val) / t_real(m_num_t->value() - 1));
+
+		QString status("t = %1.");
+		status = status.arg(t, 0, 'g', g_prec_gui);
+		m_status->setText(status);
+
+		if(m_calcEnabled)
+			Calculate();  // note: formula is not reparsed
+	});
 
 	// calculation
 	connect(m_btnStartStop, &QAbstractButton::clicked, [this]()
@@ -560,6 +628,9 @@ void Plot2DDlg::Plot(bool clear_settings)
  */
 void Plot2DDlg::Calculate()
 {
+	if(m_parsers.size() == 0)
+		return;
+
 	BOOST_SCOPE_EXIT(this_)
 	{
 		this_->EnableCalculation(true);
@@ -576,8 +647,17 @@ void Plot2DDlg::Calculate()
 	if(x_start > x_end)
 		std::swap(x_start, x_end);
 
-	// get settings
+	// get x count
 	t_size x_count = m_num_x->value();
+
+	// get t parameter
+	t_real t_start = m_t_start->value();
+	t_real t_end = m_t_end->value();
+
+	// get t count
+	t_size t_count = m_num_t->value();
+	int t_idx = m_slider_t->value();
+	t_real t = tl2::lerp(t_start, t_end, t_real(t_idx) / t_real(t_count - 1));
 
 	// tread pool and mutex to protect the data vectors
 	asio::thread_pool pool{g_num_threads};
@@ -603,7 +683,7 @@ void Plot2DDlg::Calculate()
 
 	for(t_size x_idx = 0; x_idx < x_count; ++x_idx)
 	{
-		auto task = [this, &mtx, &x_start, &x_end, x_idx, x_count]()
+		auto task = [this, &mtx, &x_start, &x_end, x_idx, x_count, t]()
 		{
 			const t_real x = x_count > 1
 				? tl2::lerp(x_start, x_end, t_real(x_idx) / t_real(x_count - 1))
@@ -621,6 +701,7 @@ void Plot2DDlg::Calculate()
 				if(parser)
 				{
 					parser.register_var("x", x);
+					parser.register_var("t", t);
 					val = parser.eval_noexcept();
 				}
 
@@ -711,11 +792,17 @@ void Plot2DDlg::PlotMouseMove(QMouseEvent* evt)
 	if(!m_status)
 		return;
 
-	t_real Q = m_plot->xAxis->pixelToCoord(evt->pos().x());
-	t_real v = m_plot->yAxis->pixelToCoord(evt->pos().y());
+	t_real x = m_plot->xAxis->pixelToCoord(evt->pos().x());
+	t_real y = m_plot->yAxis->pixelToCoord(evt->pos().y());
+	t_real t = tl2::lerp(m_t_start->value(), m_t_end->value(),
+		t_real(m_slider_t->value()) / t_real(m_num_t->value() - 1));
 
-	QString status("x = %1, y = %2.");
-	status = status.arg(Q, 0, 'g', g_prec_gui).arg(v, 0, 'g', g_prec_gui);
+	QString status("x = %1, y = %2, t = %3.");
+	status = status
+		.arg(x, 0, 'g', g_prec_gui)
+		.arg(y, 0, 'g', g_prec_gui)
+		.arg(t, 0, 'g', g_prec_gui);
+
 	m_status->setText(status);
 }
 

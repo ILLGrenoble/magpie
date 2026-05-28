@@ -36,6 +36,7 @@
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QCheckBox>
+#include <QtWidgets/QSlider>
 #include <QtWidgets/QProgressBar>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 	#include <QtWidgets/QAction>
@@ -131,6 +132,11 @@ private:
 	QDoubleSpinBox *m_x_start{};     // x start coordinate
 	QDoubleSpinBox *m_x_end{};       // x end coordinate
 	QSpinBox *m_num_x{};             // number of x coordinates
+
+	QDoubleSpinBox *m_t_start{};     // t start parameter
+	QDoubleSpinBox *m_t_end{};       // t end parameter
+	QSpinBox *m_num_t{};             // number of t subdivisions
+	QSlider *m_slider_t{};           // t parameter position
 
 	QPushButton *m_btnStartStop{};   // start/stop calculation
 	bool m_calcEnabled{};            // enable calculations
