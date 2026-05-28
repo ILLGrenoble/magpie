@@ -35,6 +35,7 @@
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QTextEdit>
+#include <QtWidgets/QSlider>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMenu>
 
@@ -117,6 +118,7 @@ protected:
 	void PlotCameraHasUpdated();
 	void CentrePlotCamera();
 	void CentrePlotCameraOnObject();
+	void ToggleSurface();
 
 	void PlotMouseClick(bool left, bool mid, bool right);
 	void PlotMouseDown(bool left, bool mid, bool right);
@@ -151,7 +153,7 @@ private:
 
 	// surface options
 	QTextEdit *m_formulas{};             // formulas for the surfaces
-	QDoubleSpinBox *m_xrange[2]{}, *m_yrange[2]{};
+	QDoubleSpinBox *m_xrange[2]{}, *m_yrange[2]{}, *m_trange[2]{};
 	QSpinBox *m_num_points[2]{};         // number of points on the (x, y) grid
 
 	// context menus
@@ -164,6 +166,7 @@ private:
 	QCheckBox *m_perspective{};
 
 	QPushButton *m_btn_start_stop{};     // start/stop calculation
+	QSlider *m_slider_t{};               // t parameter position
 	QProgressBar *m_progress{};          // progress bar
 	QLabel *m_status{};                  // status bar
 

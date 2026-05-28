@@ -70,6 +70,7 @@ void Plot3DDlg::Calculate()
 		parser.SetAutoregisterVariables(false);
 		parser.register_var("x", 0.);
 		parser.register_var("y", 0.);
+		parser.register_var("t", 0.);
 
 		if(!parser.parse_noexcept(formula))
 		{
@@ -79,6 +80,9 @@ void Plot3DDlg::Calculate()
 
 		parsers.emplace_back(std::move(parser));
 	}
+
+	if(parsers.size() == 0)
+		return;
 
 	BOOST_SCOPE_EXIT(this_)
 	{
@@ -102,6 +106,11 @@ void Plot3DDlg::Calculate()
 	m_minmax_x[1] = end[0];
 	m_minmax_y[0] = start[1];
 	m_minmax_y[1] = end[1];
+
+	// get t parameter
+	int t_idx = m_slider_t->value();
+	t_real t = tl2::lerp(m_trange[0]->value(), m_trange[1]->value(),
+		t_real(t_idx) / t_real(m_slider_t->maximum() - m_slider_t->minimum()));
 
 	// tread pool and mutex to protect the data vectors
 	asio::thread_pool pool{g_num_threads};
@@ -127,7 +136,7 @@ void Plot3DDlg::Calculate()
 	for(t_size x_idx = 0; x_idx < m_x_count; ++x_idx)
 	for(t_size y_idx = 0; y_idx < m_y_count; ++y_idx)
 	{
-		auto task = [this, &parsers, &mtx, &start, &end, x_idx, y_idx]()
+		auto task = [this, &parsers, &mtx, &start, &end, x_idx, y_idx, t]()
 		{
 			// calculate the surface at the given coordinate
 			t_vec_real Q = start;
@@ -140,6 +149,7 @@ void Plot3DDlg::Calculate()
 				tl2::ExprParser<t_real> localparser = parsers[surf_idx];
 				localparser.register_var("x", Q[0]);
 				localparser.register_var("y", Q[1]);
+				localparser.register_var("t", t);
 
 				bool valid = true;
 				t_real z = localparser.eval();

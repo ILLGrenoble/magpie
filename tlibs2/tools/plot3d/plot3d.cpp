@@ -116,7 +116,10 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 
 	// context menu for surfaces
 	m_context_surf = new QMenu(this);
+	QAction *acToggleSurf = new QAction("Hide Surface", m_context_surf);
 	QAction *acCentreOnObject = new QAction("Centre Camera on Surface", m_context_surf);
+	m_context_surf->addAction(acToggleSurf);
+	m_context_surf->addSeparator();
 	m_context_surf->addAction(acCentre);
 	m_context_surf->addAction(acCentreOnObject);
 	m_context_surf->addSeparator();
@@ -131,7 +134,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 	QGroupBox *groupFormulas = new QGroupBox("Formulas or Data", this);
 	m_formulas = new QTextEdit(groupFormulas);
 	m_formulas->setPlaceholderText("Enter formulas separated by ';'."
-		" Variables are 'x' and 'y'.");
+		" Variables are 'x' and 'y', with parameter 't'.");
 	m_formulas->setReadOnly(false);
 	m_formulas->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
 	//m_formulas->setFixedHeight(QFontMetrics{m_formulas->font()}.lineSpacing() * 4);
@@ -143,6 +146,8 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 	m_xrange[1] = new QDoubleSpinBox(groupQ);
 	m_yrange[0] = new QDoubleSpinBox(groupQ);
 	m_yrange[1] = new QDoubleSpinBox(groupQ);
+	m_trange[0] = new QDoubleSpinBox(groupQ);
+	m_trange[1] = new QDoubleSpinBox(groupQ);
 
 	m_num_points[0] = new QSpinBox(groupQ);
 	m_num_points[1] = new QSpinBox(groupQ);
@@ -154,8 +159,8 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 	for(int i = 0; i < 2; ++i)
 	{
 		m_xrange[i]->setDecimals(4);
-		m_xrange[i]->setMinimum(-99.9999);
-		m_xrange[i]->setMaximum(+99.9999);
+		m_xrange[i]->setMinimum(-9999.9999);
+		m_xrange[i]->setMaximum(+9999.9999);
 		m_xrange[i]->setSingleStep(0.01);
 		m_xrange[i]->setValue(i == 1 ? 1. : -1.);
 		m_xrange[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
@@ -163,13 +168,22 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 		m_xrange[i]->setToolTip("Range of the first axis.");
 
 		m_yrange[i]->setDecimals(4);
-		m_yrange[i]->setMinimum(-99.9999);
-		m_yrange[i]->setMaximum(+99.9999);
+		m_yrange[i]->setMinimum(-9999.9999);
+		m_yrange[i]->setMaximum(+9999.9999);
 		m_yrange[i]->setSingleStep(0.01);
 		m_yrange[i]->setValue(i == 1 ? 1. : -1.);
 		m_yrange[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 		m_yrange[i]->setPrefix(prefix_minmax[i]);
 		m_yrange[i]->setToolTip("Range of the second axis.");
+
+		m_trange[i]->setDecimals(4);
+		m_trange[i]->setMinimum(-9999.9999);
+		m_trange[i]->setMaximum(+9999.9999);
+		m_trange[i]->setSingleStep(0.01);
+		m_trange[i]->setValue(i == 1 ? 1. : 0.);
+		m_trange[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+		m_trange[i]->setPrefix(prefix_minmax[i]);
+		m_trange[i]->setToolTip("Range of the parameter t.");
 
 		m_num_points[i]->setMinimum(1);
 		m_num_points[i]->setMaximum(9999);
@@ -177,6 +191,15 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 		m_num_points[i]->setPrefix(prefix[i]);
 		m_num_points[i]->setValue(64);
 	}
+
+	// t parameter slider
+	const int num_t = 256;
+	m_slider_t = new QSlider(Qt::Horizontal, groupQ);
+	m_slider_t->setTracking(false);
+	m_slider_t->setMinimum(0);
+	m_slider_t->setMaximum(num_t - 1);
+	m_slider_t->setTickInterval(num_t);
+	m_slider_t->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
 	// Q and E scale for plot
 	QGroupBox *groupPlotOptions = new QGroupBox("Plot Options", this);
@@ -230,6 +253,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 
 	// start/stop button
 	m_btn_start_stop = new QPushButton("Calculate", this);
+	m_btn_start_stop->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 	// status bar
 	m_status = new QLabel(this);
@@ -274,6 +298,9 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 	Qgrid->addWidget(new QLabel("y Range:", this), y, 0, 1, 1);
 	Qgrid->addWidget(m_yrange[0], y, 1, 1, 1);
 	Qgrid->addWidget(m_yrange[1], y++, 2, 1, 1);
+	Qgrid->addWidget(new QLabel("t Range:", this), y, 0, 1, 1);
+	Qgrid->addWidget(m_trange[0], y, 1, 1, 1);
+	Qgrid->addWidget(m_trange[1], y++, 2, 1, 1);
 	Qgrid->addWidget(new QLabel("Grid:", this), y, 0, 1, 1);
 	Qgrid->addWidget(m_num_points[0], y, 1, 1, 1);
 	Qgrid->addWidget(m_num_points[1], y++, 2, 1, 1);
@@ -309,8 +336,9 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 	maingrid->addWidget(groupFormulas, y, 0, 1, 2);
 	maingrid->addWidget(groupQ, y++, 2, 1, 2);
 	maingrid->addWidget(groupPlotOptions, y++, 0, 1, 4);
-	maingrid->addWidget(m_progress, y, 0, 1, 3);
-	maingrid->addWidget(m_btn_start_stop, y++, 3, 1, 1);
+	maingrid->addWidget(m_slider_t, y, 0, 1, 3);
+	maingrid->addWidget(m_btn_start_stop, y++, 3, 2, 1);
+	maingrid->addWidget(m_progress, y++, 0, 1, 3);
 	maingrid->addWidget(status_panel, y++, 0, 1, 4);
 
 	// restore settings
@@ -326,7 +354,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 	}
 
 	// connections
-	connect(btnbox, &QDialogButtonBox::accepted, this, &Plot3DDlg::accept);
+	connect(acToggleSurf, &QAction::triggered, this, &Plot3DDlg::ToggleSurface);
 	connect(acCentreOnObject, &QAction::triggered, this, &Plot3DDlg::CentrePlotCameraOnObject);
 	connect(acCentre, &QAction::triggered, this, &Plot3DDlg::CentrePlotCamera);
 	connect(acShowCoords, &QAction::toggled, this, &Plot3DDlg::ShowPlotCoordCube);
@@ -336,16 +364,15 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 	connect(btnSaveData, &QAbstractButton::clicked, this, &Plot3DDlg::SaveData);
 	connect(btnSaveScript, &QAbstractButton::clicked, this, &Plot3DDlg::SaveScript);
 
-	connect(m_dispplot, &tl2::GlPlot::AfterGLInitialisation,
-		this, &Plot3DDlg::AfterPlotGLInitialisation);
-	connect(m_dispplot->GetRenderer(), &tl2::GlPlotRenderer::PickerIntersection,
-		this, &Plot3DDlg::PlotPickerIntersection);
-	connect(m_dispplot->GetRenderer(), &tl2::GlPlotRenderer::CameraHasUpdated,
-		this, &Plot3DDlg::PlotCameraHasUpdated);
+	connect(m_dispplot, &tl2::GlPlot::AfterGLInitialisation, this, &Plot3DDlg::AfterPlotGLInitialisation);
+	connect(m_dispplot->GetRenderer(), &tl2::GlPlotRenderer::PickerIntersection, this, &Plot3DDlg::PlotPickerIntersection);
+	connect(m_dispplot->GetRenderer(), &tl2::GlPlotRenderer::CameraHasUpdated, this, &Plot3DDlg::PlotCameraHasUpdated);
 	connect(m_dispplot, &tl2::GlPlot::MouseClick, this, &Plot3DDlg::PlotMouseClick);
 	connect(m_dispplot, &tl2::GlPlot::MouseDown, this, &Plot3DDlg::PlotMouseDown);
 	connect(m_dispplot, &tl2::GlPlot::MouseUp, this, &Plot3DDlg::PlotMouseUp);
 	connect(m_perspective, &QCheckBox::toggled, this, &Plot3DDlg::SetPlotPerspectiveProjection);
+
+	connect(btnbox, &QDialogButtonBox::accepted, this, &Plot3DDlg::accept);
 
 	for(QDoubleSpinBox *box : { m_x_scale, m_y_scale, m_z_scale })
 	{
@@ -365,6 +392,24 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 		[this](t_real_gl theta) -> void
 	{
 		this->SetPlotCameraRotation(m_cam_phi->value(), theta);
+	});
+
+	// t paramter slider moved
+	connect(m_slider_t, &QSlider::valueChanged, [this](int val)
+	{
+		if(!m_status)
+			return;
+
+		t_real t = tl2::lerp(m_trange[0]->value(), m_trange[1]->value(),
+			t_real(val) / t_real(m_slider_t->maximum() - m_slider_t->minimum()));
+
+		QString status("t = %1.");
+		status = status.arg(t, 0, 'g', g_prec_gui);
+		m_status->setText(status);
+
+		constexpr const bool autocalc_t = true;
+		if(autocalc_t && m_calc_enabled)
+			Calculate();  // note: formula is not reparsed
 	});
 
 	// calculation
@@ -450,21 +495,28 @@ void Plot3DDlg::PlotMouseClick(
 	[[maybe_unused]] bool mid,
 	[[maybe_unused]] bool right)
 {
+	const QPointF& _pt = m_dispplot->GetRenderer()->GetMousePosition();
+	QPoint pt = m_dispplot->mapToGlobal(_pt.toPoint());
+
+	auto surf_iter = m_surf_objs.end();
+	if(m_cur_obj)
+		surf_iter = m_surf_objs.find(*m_cur_obj);
+	bool surf_selected = (surf_iter != m_surf_objs.end());
+
+	if(left && surf_selected)
+	{
+		// select current surface in list
+		t_size surf_idx = surf_iter->second;
+		if(int(surf_idx) < m_table_surfs->rowCount())
+			m_table_surfs->setCurrentCell(surf_idx, 0);
+	}
+
 	if(right)
 	{
-		const QPointF& _pt = m_dispplot->GetRenderer()->GetMousePosition();
-		QPoint pt = m_dispplot->mapToGlobal(_pt.toPoint());
-
-		if(m_cur_obj && m_surf_objs.find(*m_cur_obj) != m_surf_objs.end())
-		{
-			// surface selected
+		if(surf_selected)
 			m_context_surf->popup(pt);
-		}
 		else
-		{
-			// no surface selected
 			m_context->popup(pt);
-		}
 	}
 }
 
@@ -545,6 +597,33 @@ void Plot3DDlg::ShowPlotLabels(bool show)
 {
 	m_dispplot->GetRenderer()->SetLabelsVisible(show);
 	m_dispplot->update();
+}
+
+
+
+/**
+ * toggle the surface visibility under the cursor
+ */
+void Plot3DDlg::ToggleSurface()
+{
+	if(!m_cur_obj)
+		return;
+
+	// selected something else than a surface?
+	auto surf_iter = m_surf_objs.find(*m_cur_obj);
+	if(surf_iter == m_surf_objs.end())
+		return;
+
+	t_size surf_idx = surf_iter->second;
+	if(int(surf_idx) >= m_table_surfs->rowCount())
+		return;
+
+	QCheckBox* box = reinterpret_cast<QCheckBox*>(
+		m_table_surfs->cellWidget(int(surf_idx), COL_ACTIVE));
+	if(!box)
+		return;
+
+	box->setChecked(!box->isChecked());
 }
 
 

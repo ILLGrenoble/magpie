@@ -400,7 +400,8 @@ QWidget* Plot2DDlg::CreatePanel()
 		status = status.arg(t, 0, 'g', g_prec_gui);
 		m_status->setText(status);
 
-		if(m_calcEnabled)
+		constexpr const bool autocalc_t = true;
+		if(autocalc_t && m_calcEnabled)
 			Calculate();  // note: formula is not reparsed
 	});
 
