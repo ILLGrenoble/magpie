@@ -56,7 +56,7 @@ void MagDynDlg::CreateSamplePanel()
 		m_xtallattice[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
-	const char* anlesstr[] = { "α = ", "β = ", "γ = " };
+	static const char* anlesstr[] = { "α = ", "β = ", "γ = " };
 	for(int i = 0; i < 3; ++i)
 	{
 		m_xtalangles[i] = new QDoubleSpinBox(m_samplepanel);

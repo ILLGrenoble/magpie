@@ -209,7 +209,8 @@ requires tl2::is_mat<t_mat>
 #endif
 struct t_SofQE
 {
-	t_vec_real Q_rlu{};          // momentum transfer
+	t_vec_real Q_rlu{};          // momentum transfer in rlu
+	t_vec_real Q_invA{};         // momentum transfer in A^(-1)
 	t_mat comm{};                // commutators
 
 	t_mat H{};                   // hamiltonian

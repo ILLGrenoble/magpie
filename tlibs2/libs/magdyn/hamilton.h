@@ -284,6 +284,7 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 {
 	SofQE S;
 	S.Q_rlu = Qvec;
+	S.Q_invA = m_xtalB * Qvec;
 	S.H = _H;
 
 	using namespace tl2_ops;
