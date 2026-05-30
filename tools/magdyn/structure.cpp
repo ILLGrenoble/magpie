@@ -200,13 +200,24 @@ void MagDynDlg::RotateField(bool ccw)
 		(t_real)m_field_dir[2]->value(),
 	});
 
+	const t_mat_real& xtalB = m_dyn.GetCrystalBTrafo();
+	auto [xtalB_inv, inv_ok] = tl2::inv(xtalB);
+	if(inv_ok)
+	{
+		axis = xtalB * axis;
+		B = xtalB * B;
+	}
+
 	t_real angle = tl2::d2r<t_real>(m_rot_angle->value());
 	if(!ccw)
 		angle = -angle;
 
-	t_mat_real R = tl2::rotation<t_mat_real, t_vec_real>(
-		axis, angle, false);
+	t_mat_real R = tl2::rotation<t_mat_real, t_vec_real>(axis, angle, false);
 	B = R*B;
+
+	if(inv_ok)
+		B = xtalB_inv * B;
+
 	tl2::set_eps_0(B, g_eps);
 
 	for(int i = 0; i < 3; ++i)

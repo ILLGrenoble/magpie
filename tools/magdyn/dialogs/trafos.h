@@ -34,6 +34,8 @@
 #include <QtWidgets/QTextEdit>
 #include <QtWidgets/QDoubleSpinBox>
 
+#include "gui_defs.h"
+
 
 
 class TrafoCalculator : public QDialog
@@ -45,8 +47,13 @@ public:
 	TrafoCalculator(const TrafoCalculator&) = delete;
 	const TrafoCalculator& operator=(const TrafoCalculator&) = delete;
 
+	// set kernel from the main window
+	void SetKernel(const t_magdyn* dyn);
+
 
 private:
+	const t_magdyn *m_dyn{};  // main calculation kernel
+
 	QSettings *m_sett{};
 
 	QTextEdit *m_textRotation{};
@@ -54,11 +61,17 @@ private:
 	QDoubleSpinBox *m_spinAngle{};
 	QDoubleSpinBox *m_spinVecToRotate[3]{nullptr, nullptr, nullptr};
 
+	QTextEdit *m_textRotation_xtal{};
+	QDoubleSpinBox *m_spinAxis_xtal[3]{nullptr, nullptr, nullptr};
+	QDoubleSpinBox *m_spinAngle_xtal{};
+	QDoubleSpinBox *m_spinVecToRotate_xtal[3]{nullptr, nullptr, nullptr};
+
 
 protected slots:
 	virtual void accept() override;
 
 	void CalculateRotation();
+	void CalculateRotationXtal();
 };
 
 

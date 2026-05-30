@@ -706,7 +706,10 @@ void MagDynDlg::CreateMenuBar()
 	connect(acTrafoCalc, &QAction::triggered, [this]()
 	{
 		if(!m_trafos)
+		{
 			m_trafos = new TrafoCalculator(this, m_sett);
+			m_trafos->SetKernel(&m_dyn);
+		}
 
 		m_trafos->show();
 		m_trafos->raise();

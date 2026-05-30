@@ -368,8 +368,7 @@ void MagDynDlg::ShowBZ3DDlg(bool only_create)
 		context->insertSeparator(acFirst);
 
 		// connections
-		connect(m_bz_dlg, &BZPlotDlg::NeedRecalc,
-			[this]()
+		connect(m_bz_dlg, &BZPlotDlg::NeedRecalc, [this]()
 		{
 			this->CalcBZ();
 			this->DispersionQChanged(false);

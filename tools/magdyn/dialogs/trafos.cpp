@@ -39,6 +39,15 @@
 
 
 
+// set kernel from the main window
+void TrafoCalculator::SetKernel(const t_magdyn* dyn)
+{
+	m_dyn = dyn;
+	CalculateRotationXtal();
+}
+
+
+
 TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 	: QDialog{pParent}, m_sett(sett)
 {
@@ -48,15 +57,17 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 	// tabs
 	QTabWidget *tabs = new QTabWidget(this);
 	QWidget *rotationPanel = new QWidget(tabs);
+	QWidget *rotationPanelXtal = new QWidget(tabs);
 
 	// buttons
 	QDialogButtonBox *buttons = new QDialogButtonBox(this);
 	buttons->setStandardButtons(QDialogButtonBox::Ok);
 
 	// tab panels
-	tabs->addTab(rotationPanel, "Axis Rotation");
+	tabs->addTab(rotationPanel, "Axis Rotation (Cartesian)");
+	tabs->addTab(rotationPanelXtal, "Axis Rotation (Crystal)");
 
-	// rotation tab
+	// rotation tab (orthogonal)
 	QLabel *labelAxis = new QLabel("Axis: ");
 	QLabel *labelAngle = new QLabel("Angle (\xc2\xb0): ");
 	QLabel *labelVecToRotate = new QLabel("Vector: ");
@@ -82,7 +93,7 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 	m_spinVecToRotate[1]->setValue(0);
 	m_spinVecToRotate[2]->setValue(0);
 
-	for(int i=0; i<3; ++i)
+	for(int i = 0; i < 3; ++i)
 	{
 		m_spinAxis[i]->setMinimum(-999.);
 		m_spinAxis[i]->setMaximum(999.);
@@ -118,6 +129,72 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 	grid_rotation->addWidget(m_spinVecToRotate[2], 2, 3, 1, 1);
 	grid_rotation->addWidget(m_textRotation, 3, 0, 1, 4);
 
+	// rotation tab (crystal)
+	QLabel *labelAxisXtal = new QLabel("Axis (rlu): ");
+	QLabel *labelAngleXtal = new QLabel("Angle (\xc2\xb0): ");
+	QLabel *labelVecToRotateXtal = new QLabel("Vector (rlu): ");
+
+	m_spinAxis_xtal[0] = new QDoubleSpinBox(rotationPanelXtal);
+	m_spinAxis_xtal[1] = new QDoubleSpinBox(rotationPanelXtal);
+	m_spinAxis_xtal[2] = new QDoubleSpinBox(rotationPanelXtal);
+	m_spinAxis_xtal[0]->setValue(0);
+	m_spinAxis_xtal[1]->setValue(0);
+	m_spinAxis_xtal[2]->setValue(1);
+
+	m_spinAngle_xtal = new QDoubleSpinBox(rotationPanelXtal);
+	m_spinAngle_xtal->setMinimum(-360.);
+	m_spinAngle_xtal->setMaximum(360);
+	m_spinAngle_xtal->setDecimals(3);
+	m_spinAngle_xtal->setSingleStep(0.1);
+	//m_spinAngle_xtal->setSuffix("\xc2\xb0");
+
+	QPushButton *btnRecalcXtal = new QPushButton(rotationPanelXtal);
+	btnRecalcXtal->setText("Get Crystal");
+
+	m_spinVecToRotate_xtal[0] = new QDoubleSpinBox(rotationPanelXtal);
+	m_spinVecToRotate_xtal[1] = new QDoubleSpinBox(rotationPanelXtal);
+	m_spinVecToRotate_xtal[2] = new QDoubleSpinBox(rotationPanelXtal);
+	m_spinVecToRotate_xtal[0]->setValue(1);
+	m_spinVecToRotate_xtal[1]->setValue(0);
+	m_spinVecToRotate_xtal[2]->setValue(0);
+
+	for(int i = 0; i < 3; ++i)
+	{
+		m_spinAxis_xtal[i]->setMinimum(-999.);
+		m_spinAxis_xtal[i]->setMaximum(999.);
+		m_spinAxis_xtal[i]->setDecimals(4);
+		m_spinAxis_xtal[i]->setSingleStep(0.1);
+
+		m_spinVecToRotate_xtal[i]->setMinimum(-999.);
+		m_spinVecToRotate_xtal[i]->setMaximum(999.);
+		m_spinVecToRotate_xtal[i]->setDecimals(4);
+		m_spinVecToRotate_xtal[i]->setSingleStep(0.1);
+	}
+
+	labelAxisXtal->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
+	labelAngleXtal->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
+	labelVecToRotateXtal->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
+
+	m_textRotation_xtal = new QTextEdit(rotationPanelXtal);
+	m_textRotation_xtal->setReadOnly(true);
+
+	// rotation grid
+	auto grid_rotation_xtal = new QGridLayout(rotationPanelXtal);
+	grid_rotation_xtal->setSpacing(4);
+	grid_rotation_xtal->setContentsMargins(6, 6, 6, 6);
+	grid_rotation_xtal->addWidget(labelAxisXtal, 0, 0, 1, 1);
+	grid_rotation_xtal->addWidget(m_spinAxis_xtal[0], 0, 1, 1, 1);
+	grid_rotation_xtal->addWidget(m_spinAxis_xtal[1], 0, 2, 1, 1);
+	grid_rotation_xtal->addWidget(m_spinAxis_xtal[2], 0, 3, 1, 1);
+	grid_rotation_xtal->addWidget(labelAngleXtal, 1, 0, 1, 1);
+	grid_rotation_xtal->addWidget(m_spinAngle_xtal, 1, 1, 1, 1);
+	grid_rotation_xtal->addWidget(btnRecalcXtal, 1, 3, 1, 1);
+	grid_rotation_xtal->addWidget(labelVecToRotateXtal, 2, 0, 1, 1);
+	grid_rotation_xtal->addWidget(m_spinVecToRotate_xtal[0], 2, 1, 1, 1);
+	grid_rotation_xtal->addWidget(m_spinVecToRotate_xtal[1], 2, 2, 1, 1);
+	grid_rotation_xtal->addWidget(m_spinVecToRotate_xtal[2], 2, 3, 1, 1);
+	grid_rotation_xtal->addWidget(m_textRotation_xtal, 3, 0, 1, 4);
+
 	// main grid
 	auto grid_dlg = new QGridLayout(this);
 	grid_dlg->setSpacing(4);
@@ -148,8 +225,20 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 			this, &TrafoCalculator::CalculateRotation);
 	}
+	for(QDoubleSpinBox* spin : {
+		m_spinAxis_xtal[0], m_spinAxis_xtal[1], m_spinAxis_xtal[2], m_spinAngle_xtal,
+		m_spinVecToRotate_xtal[0], m_spinVecToRotate_xtal[1], m_spinVecToRotate_xtal[2] })
+	{
+		connect(spin,
+			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+			this, &TrafoCalculator::CalculateRotationXtal);
+	}
+
+	connect(btnRecalcXtal, &QAbstractButton::clicked,
+		this, &TrafoCalculator::CalculateRotationXtal);
 
 	CalculateRotation();
+	CalculateRotationXtal();
 }
 
 
@@ -183,10 +272,10 @@ void TrafoCalculator::CalculateRotation()
 
 	ostrResult << "<p>Transformation Matrix:\n";
 	ostrResult << "<table style=\"border:0px\">\n";
-	for(std::size_t i=0; i<mat.size1(); ++i)
+	for(std::size_t i = 0; i < mat.size1(); ++i)
 	{
 		ostrResult << "\t<tr>\n";
-		for(std::size_t j=0; j<mat.size2(); ++j)
+		for(std::size_t j = 0; j < mat.size2(); ++j)
 		{
 			ostrResult << "\t\t<td style=\"padding-right:8px\">";
 			ostrResult << mat(i, j);
@@ -220,6 +309,139 @@ void TrafoCalculator::CalculateRotation()
 	ostrResult << "</p>\n";
 
 	m_textRotation->setHtml(ostrResult.str().c_str());
+}
+
+
+
+void TrafoCalculator::CalculateRotationXtal()
+{
+	using namespace tl2_ops;
+
+	if(!m_spinAngle_xtal || !m_textRotation_xtal)
+		return;
+
+	t_vec_real axis = tl2::create<t_vec_real>({
+		(t_real)m_spinAxis_xtal[0]->value(),
+		(t_real)m_spinAxis_xtal[1]->value(),
+		(t_real)m_spinAxis_xtal[2]->value() });
+	t_real angle = tl2::d2r<t_real>(m_spinAngle_xtal->value());
+	t_vec_real vec = tl2::create<t_vec_real>({
+		(t_real)m_spinVecToRotate_xtal[0]->value(),
+		(t_real)m_spinVecToRotate_xtal[1]->value(),
+		(t_real)m_spinVecToRotate_xtal[2]->value() });
+
+	m_textRotation_xtal->clear();
+
+
+	// apply crystal B matrix
+	t_mat_real xtalB_inv;
+	bool inv_ok = false;
+	if(m_dyn)
+	{
+		const t_mat_real& xtalB = m_dyn->GetCrystalBTrafo();
+		std::tie(xtalB_inv, inv_ok) = tl2::inv(xtalB);
+		if(inv_ok)
+		{
+			axis = xtalB * axis;
+			vec = xtalB * vec;
+		}
+	}
+
+	t_mat_real mat = tl2::rotation<t_mat_real, t_vec_real>(axis, angle, false);
+	tl2::set_eps_0(mat, g_eps);
+
+
+	// print the B and the rotation matrices
+	std::ostringstream ostrResult;
+	ostrResult.precision(g_prec);
+
+	if(m_dyn)
+	{
+		t_mat_real xtalB = m_dyn->GetCrystalBTrafo();
+		tl2::set_eps_0(xtalB, g_eps);
+
+		ostrResult << "<p>Crystal B Matrix:\n";
+		ostrResult << "<table style=\"border:0px\">\n";
+		for(std::size_t i = 0; i < xtalB.size1(); ++i)
+		{
+			ostrResult << "\t<tr>\n";
+			for(std::size_t j = 0; j < xtalB.size2(); ++j)
+			{
+				ostrResult << "\t\t<td style=\"padding-right:8px\">";
+				ostrResult << xtalB(i, j);
+				ostrResult << "</td>\n";
+			}
+			ostrResult << "\t</tr>\n";
+		}
+		ostrResult << "</table>";
+		ostrResult << "</p>\n";
+
+		ostrResult << "<p>B Matrix As Single-Line String:<br>";
+		ostrResult << xtalB;
+		ostrResult << "</p>\n";
+	}
+
+	ostrResult << "<p>Transformation Matrix:\n";
+	ostrResult << "<table style=\"border:0px\">\n";
+	for(std::size_t i = 0; i < mat.size1(); ++i)
+	{
+		ostrResult << "\t<tr>\n";
+		for(std::size_t j = 0; j < mat.size2(); ++j)
+		{
+			ostrResult << "\t\t<td style=\"padding-right:8px\">";
+			ostrResult << mat(i, j);
+			ostrResult << "</td>\n";
+		}
+		ostrResult << "\t</tr>\n";
+	}
+	ostrResult << "</table>";
+	ostrResult << "</p>\n";
+
+	ostrResult << "<p>Trafo As Single-Line String:<br>";
+	ostrResult << mat;
+	ostrResult << "</p>\n";
+
+
+	using t_quat = boost::math::quaternion<t_real>;
+
+	t_quat quat = tl2::rot3_to_quat<t_mat_real, t_quat>(mat);
+	tl2::set_eps_0(quat, g_eps);
+	ostrResult << "<p>Trafo As Quaternion:<br>";
+	ostrResult << quat;
+	ostrResult << "</p>\n";
+
+	if(inv_ok)
+	{
+		tl2::set_eps_0(vec, g_eps);
+		ostrResult << "<p>Original Axis (lab): ";
+		ostrResult << axis;
+		ostrResult << "</p>\n";
+
+		tl2::set_eps_0(axis, g_eps);
+		ostrResult << "<p>Original Vector (lab): ";
+		ostrResult << vec;
+		ostrResult << "</p>\n";
+	}
+
+	// print the rotated test vector
+	t_vec_real vec_rot = mat * vec;
+
+	tl2::set_eps_0(vec_rot, g_eps);
+	ostrResult << "<p>Rotated Vector (rlu): ";
+	ostrResult << vec_rot;
+	ostrResult << "</p>\n";
+
+	if(inv_ok)
+	{	
+		vec_rot = xtalB_inv * vec_rot;
+		tl2::set_eps_0(vec_rot, g_eps);
+		ostrResult << "<p>Rotated Vector (lab): ";
+		ostrResult << vec_rot;
+		ostrResult << "</p>\n";
+	}
+
+
+	m_textRotation_xtal->setHtml(ostrResult.str().c_str());
 }
 
 
