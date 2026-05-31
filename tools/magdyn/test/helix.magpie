@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <magdyn>
 	<meta>
-		<user>t_weber</user>
-		<url>https://github.com/ILLGrenoble/takin</url>
-		<doi>https://doi.org/10.5281/zenodo.4117437</doi>
+		<user>tw</user>
+		<url>https://github.com/ILLGrenoble/magpie</url>
+		<doi>https://doi.org/10.5281/zenodo.16180814</doi>
 		<notes>__base64__</notes>
 		<info>magdyn_tool</info>
-		<date>Sat 2024-Sep-28 06:53:05 CEST</date>
-		<doi_tlibs>https://doi.org/10.5281/zenodo.5717779</doi_tlibs>
+		<date>Sun 2026-May-31 11:02:29 CEST</date>
 	</meta>
 	<config>
-		<h_start>-0</h_start>
+		<h_start>0</h_start>
 		<k_start>0</k_start>
 		<l_start>-1</l_start>
 		<h_end>0</h_end>
 		<k_end>0</k_end>
 		<l_end>1</l_end>
-		<h>0.2</h>
+		<h>0</h>
 		<k>0</k>
-		<l>0</l>
+		<l>-1</l>
 		<num_Q_points>512</num_Q_points>
 		<weight_scale>1</weight_scale>
 		<weight_min>0</weight_min>
 		<weight_max>50</weight_max>
 		<plot_channels>false</plot_channels>
+		<plot_degeneracies>false</plot_degeneracies>
 		<plot_weight_as_pointsize>true</plot_weight_as_pointsize>
 		<plot_weight_as_alpha>false</plot_weight_as_alpha>
 		<auto_calc>true</auto_calc>
@@ -65,6 +65,7 @@
 	<field>
 		<magnitude>0</magnitude>
 		<align_spins>false</align_spins>
+		<keep_signs>false</keep_signs>
 	</field>
 	<ordering>
 		<h>0</h>
@@ -77,7 +78,6 @@
 		<l>1</l>
 	</rotation_axis>
 	<temperature>-1</temperature>
-	<magnetic_form_factor/>
 	<variables>
 		<variable>
 			<name>J</name>
@@ -89,7 +89,7 @@
 		</variable>
 		<variable>
 			<name>Dy</name>
-			<value>(0,0)</value>
+			<value>(0.1,0)</value>
 		</variable>
 		<variable>
 			<name>Dz</name>
