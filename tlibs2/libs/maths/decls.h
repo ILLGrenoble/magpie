@@ -210,6 +210,25 @@ requires is_mat<t_mat>;
 template<class t_elem, template<class...> class t_cont = std::vector>
 t_elem mean(const t_cont<t_elem>& vec)
 requires is_basic_vec<t_cont<t_elem>>;
+
+template<class t_mat>
+t_mat metric(const t_mat& basis_co)
+requires is_basic_mat<t_mat>;
+
+template<class t_mat, class t_vec>
+typename t_vec::value_type norm(const t_mat& metric_co,
+	const t_vec& vec_contra, bool do_sqrt = true)
+requires is_basic_mat<t_mat> && is_basic_vec<t_vec>;
+
+template<class t_mat, class t_vec>
+t_mat outer(const t_mat& metric_co,
+	const t_vec& vec1_contra, const t_vec& vec2_contra)
+requires is_basic_mat<t_mat> && is_basic_vec<t_vec>;
+
+template<class t_mat, class t_vec>
+typename t_vec::value_type inner(const t_mat& metric_co,
+	const t_vec& vec1_contra, const t_vec& vec2_contra)
+requires is_basic_mat<t_mat> && is_basic_vec<t_vec>;
 // ----------------------------------------------------------------------------
 
 

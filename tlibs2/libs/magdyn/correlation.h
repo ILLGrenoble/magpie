@@ -296,7 +296,10 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 
 		// apply orthogonal projector for magnetic neutron scattering,
 		// see (Shirane 2002), p. 37, equation (2.64)
-		t_mat proj_neutron = tl2::ortho_projector<t_mat, t_vec>(S.Q_invA, false);
+		t_mat proj_neutron = tl2::convert<t_mat>(
+			tl2::ortho_projector<t_mat_real, t_vec_real>(S.Q_invA, false));
+		//t_mat proj_neutron = tl2::convert<t_mat>(
+		//	tl2::ortho_projector<t_mat_real, t_vec_real>(m_xtalB, S.Q_rlu, false, false));
 		E_and_S.S_perp = proj_neutron * E_and_S.S * proj_neutron;
 
 		// weights

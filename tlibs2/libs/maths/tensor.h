@@ -1,7 +1,7 @@
 /**
  * tlibs2 maths library -- operations with metric
  * @author Tobias Weber <tobias.weber@tum.de>, <tweber@ill.fr>
- * @date 2015 - 2024
+ * @date 2015 - 2026
  * @license GPLv3, see 'LICENSE' file
  *
  * @note this file is based on code from my following projects:
@@ -67,12 +67,12 @@ requires is_basic_mat<t_mat> && is_basic_vec<t_vec>
 		g_co = t_mat(N, N);
 
 	auto iter_i = basis_co.begin();
-	for(std::size_t i=0; i<N; ++i)
+	for(std::size_t i = 0; i < N; ++i)
 	{
 		auto iter_j = basis_co.begin();
-		for(std::size_t j=0; j<N; ++j)
+		for(std::size_t j = 0; j < N; ++j)
 		{
-			g_co(i,j) = inner<t_vec>(*iter_i, *iter_j);
+			g_co(i, j) = inner<t_vec>(*iter_i, *iter_j);
 			std::advance(iter_j, 1);
 		}
 		std::advance(iter_i, 1);
@@ -110,7 +110,7 @@ requires is_basic_mat<t_mat>
 
 	auto iter = indices.begin();
 	size_t maxcols = std::min(indices.size(), basis_co.size2());
-	for(size_t i=0; i<maxcols; ++i)
+	for(size_t i = 0; i < maxcols; ++i)
 	{
 		set_col<t_mat, t_vec>(
 			mat, col<t_mat, t_vec>(basis_co, *iter), i);
@@ -145,14 +145,14 @@ requires is_basic_mat<t_mat> && is_basic_vec<t_vec>
 	// cross product result vector
 	t_vec c = zero<t_vec>(l_max);
 
-	for(size_t i=0; i<i_max; ++i)
+	for(size_t i = 0; i < i_max; ++i)
 	{
-		for(size_t j=0; j<j_max; ++j)
+		for(size_t j = 0; j < j_max; ++j)
 		{
-			for(size_t k=0; k<k_max; ++k)
+			for(size_t k = 0; k < k_max; ++k)
 			{
 				t_real eps = levi<t_mat>(B, {i,j,k});
-				for(size_t l=0; l<l_max; ++l)
+				for(size_t l = 0; l < l_max; ++l)
 					c[l] += eps * G_inv(l,i) * a[j] * b[k];
 			}
 		}
@@ -173,9 +173,9 @@ requires is_basic_mat<t_mat> && is_basic_vec<t_vec>
 	const std::size_t N = vec_contra.size();
 	t_vec vec_co = zero<t_vec>(N);
 
-	for(std::size_t i=0; i<N; ++i)
-		for(std::size_t j=0; j<N; ++j)
-			vec_co[i] += metric_co(i,j) * vec_contra[j];
+	for(std::size_t i = 0; i < N; ++i)
+		for(std::size_t j = 0; j < N; ++j)
+			vec_co[i] += metric_co(i, j) * vec_contra[j];
 
 	return vec_co;
 }
@@ -192,9 +192,9 @@ requires is_basic_mat<t_mat> && is_basic_vec<t_vec>
 	const std::size_t N = vec_co.size();
 	t_vec vec_contra = zero<t_vec>(N);
 
-	for(std::size_t i=0; i<N; ++i)
-		for(std::size_t j=0; j<N; ++j)
-			vec_contra[i] += metric_contra(i,j) * vec_co[j];
+	for(std::size_t i = 0; i < N; ++i)
+		for(std::size_t j = 0; j < N; ++j)
+			vec_contra[i] += metric_contra(i, j) * vec_co[j];
 
 	return vec_contra;
 }
@@ -215,14 +215,32 @@ requires is_basic_mat<t_mat> && is_basic_vec<t_vec>
 
 
 /**
+ * outer product using metric
+ * @see (Arens 2015), p. 808
+ */
+template<class t_mat, class t_vec>
+t_mat outer(const t_mat& metric_co,
+	const t_vec& vec1_contra, const t_vec& vec2_contra)
+requires is_basic_mat<t_mat> && is_basic_vec<t_vec>
+{
+	t_vec vec2_co = lower_index<t_mat, t_vec>(metric_co, vec2_contra);
+	return outer<t_mat, t_vec>(vec1_contra, vec2_co);
+}
+
+
+/**
  * 2-norm using metric
  * @see (Arens 2015), p. 808
  */
 template<class t_mat, class t_vec>
-typename t_vec::value_type norm(const t_mat& metric_co, const t_vec& vec_contra)
+typename t_vec::value_type norm(const t_mat& metric_co, const t_vec& vec_contra,
+	bool do_sqrt /*= true*/)
 requires is_basic_mat<t_mat> && is_basic_vec<t_vec>
 {
-	return std::sqrt(inner<t_mat, t_vec>(metric_co, vec_contra, vec_contra));
+	using t_val = typename t_mat::value_type;
+	t_val val = inner<t_mat, t_vec>(metric_co, vec_contra, vec_contra);
+
+	return do_sqrt ? std::sqrt(val) : val;
 }
 
 

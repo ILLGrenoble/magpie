@@ -1514,9 +1514,9 @@ requires is_basic_vec<t_vec> && is_mat<t_mat>
 	if constexpr(is_dyn_mat<t_mat>)
 		mat = t_mat(N1, N2);
 
-	for(std::size_t n1=0; n1<N1; ++n1)
+	for(std::size_t n1 = 0; n1 < N1; ++n1)
 	{
-		for(std::size_t n2=0; n2<N2; ++n2)
+		for(std::size_t n2 = 0; n2 < N2; ++n2)
 		{
 			if constexpr(is_complex<typename t_vec::value_type>)
 				mat(n1, n2) = std::conj(vec1[n1]) * vec2[n2];
@@ -1543,8 +1543,8 @@ requires is_basic_vec<t_vec> && is_mat<t_mat>
 	if constexpr(is_dyn_mat<t_mat>)
 		mat = t_mat(N1, N2);
 
-	for(std::size_t n1=0; n1<N1; ++n1)
-		for(std::size_t n2=0; n2<N2; ++n2)
+	for(std::size_t n1 = 0; n1 < N1; ++n1)
+		for(std::size_t n2 = 0; n2 < N2; ++n2)
 			mat(n1, n2) = vec1[n1]*vec2[n2];
 
 	return mat;
@@ -1563,12 +1563,12 @@ requires is_basic_vec<t_vec>
 	t_vec vec;
 	vec.reserve(mat.size());
 
-	for(std::size_t iRow=0; iRow<iNumRows; ++iRow)
+	for(std::size_t iRow = 0; iRow < iNumRows; ++iRow)
 	{
 		if(iRow == iRemRow)
 			continue;
 
-		for(std::size_t iCol=0; iCol<iNumCols; ++iCol)
+		for(std::size_t iCol = 0; iCol < iNumCols; ++iCol)
 		{
 			if(iCol == iRemCol)
 				continue;
@@ -1591,13 +1591,13 @@ requires is_basic_mat<t_mat> && is_dyn_mat<t_mat>
 	t_mat matRet = create<t_mat>(mat.size1()-1, mat.size2()-1);
 
 	size_t iResRow = 0;
-	for(size_t iRow=0; iRow<mat.size1(); ++iRow)
+	for(size_t iRow = 0; iRow < mat.size1(); ++iRow)
 	{
 		if(iRow == iRemRow)
 			continue;
 
 		size_t iResCol = 0;
-		for(size_t iCol=0; iCol<mat.size2(); ++iCol)
+		for(size_t iCol = 0; iCol < mat.size2(); ++iCol)
 		{
 			if(iCol == iRemCol)
 				continue;
