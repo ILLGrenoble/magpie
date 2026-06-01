@@ -298,9 +298,18 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 		// see (Shirane 2002), p. 37, equation (2.64)
 		t_mat proj_neutron = tl2::convert<t_mat>(
 			tl2::ortho_projector<t_mat_real, t_vec_real>(S.Q_invA, false));
-		//t_mat proj_neutron = tl2::convert<t_mat>(
-		//	tl2::ortho_projector<t_mat_real, t_vec_real>(m_xtalB, S.Q_rlu, false, false));
 		E_and_S.S_perp = proj_neutron * E_and_S.S * proj_neutron;
+
+#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+		t_mat proj_neutron2 = tl2::convert<t_mat>(
+			tl2::ortho_projector<t_mat_real, t_vec_real>(m_xtalB, S.Q_rlu, false, false));
+
+		std::cout << "Q_proj for Q = " << S.Q_rlu << ":\n";
+		tl2::niceprint(std::cout, proj_neutron, 1e-4, 4);
+		std::cout << "Q_proj2 for Q = " << S.Q_rlu << ":\n";
+		tl2::niceprint(std::cout, proj_neutron2, 1e-4, 4);
+		std::cout << "\n";
+#endif
 
 		// weights
 		E_and_S.S_sum       = tl2::trace<t_mat>(E_and_S.S);

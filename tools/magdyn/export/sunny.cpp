@@ -92,6 +92,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 	ofstr	<< "#\n"
 		<< "# Created by Magpie\n"
+		<< "# Author: Tobias Weber\n"
 		<< "# URL: https://github.com/ILLGrenoble/magpie\n"
 		<< "# DOI: https://doi.org/10.5281/zenodo.16180814\n"
 		<< "# User: " << user << "\n"
