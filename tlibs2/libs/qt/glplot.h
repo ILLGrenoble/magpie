@@ -444,6 +444,7 @@ protected:
 	virtual void mousePressEvent(QMouseEvent *Evt) override;
 	virtual void mouseReleaseEvent(QMouseEvent *Evt) override;
 	virtual void wheelEvent(QWheelEvent *pEvt) override;
+	virtual bool event(QEvent* pEvt) override;
 
 
 private:

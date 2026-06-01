@@ -43,6 +43,10 @@
 #include <QtGui/QGuiApplication>
 #include <QtCore/QtGlobal>
 
+#include <QtWidgets/QGestureEvent>
+#include <QtWidgets/QGesture>
+#include <QtWidgets/QPinchGesture>
+
 #include <iostream>
 #include <boost/scope_exit.hpp>
 #include <boost/preprocessor/stringize.hpp>
@@ -2268,6 +2272,7 @@ GlPlot::GlPlot(QWidget *pParent) : QOpenGLWidget(pParent),
 
 	//setUpdateBehavior(QOpenGLWidget::PartialUpdate);
 	setMouseTracking(true);
+	grabGesture(Qt::PinchGesture);
 
 	if constexpr(m_isthreaded)
 		m_thread_impl->start();
@@ -2276,6 +2281,7 @@ GlPlot::GlPlot(QWidget *pParent) : QOpenGLWidget(pParent),
 
 GlPlot::~GlPlot()
 {
+	ungrabGesture(Qt::PinchGesture);
 	setMouseTracking(false);
 
 	if constexpr(m_isthreaded)
@@ -2392,6 +2398,28 @@ void GlPlot::wheelEvent(QWheelEvent *pEvt)
 		m_renderer->RequestViewportUpdate();
 
 	pEvt->accept();
+}
+
+
+bool GlPlot::event(QEvent *pEvt)
+{
+	if(pEvt->type() == QEvent::Gesture)
+	{
+		QGestureEvent *pGestureEvt = static_cast<QGestureEvent*>(pEvt);
+		for(QGesture *gesture : pGestureEvt->gestures())
+		{
+			if(gesture->gestureType() != Qt::PinchGesture)
+				continue;
+			QPinchGesture *pinch = static_cast<QPinchGesture*>(gesture);
+
+			t_real_gl zoom = pinch->scaleFactor();
+			zoom = std::log2(zoom) * 64.;
+			m_renderer->zoom(zoom);
+		}
+		pGestureEvt->accept();
+	}
+
+	return QOpenGLWidget::event(pEvt);
 }
 
 
