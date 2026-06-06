@@ -210,8 +210,10 @@ if(USE_QT)
 		dialogs/table_import.cpp dialogs/table_import.h
 		dialogs/trafos.cpp dialogs/trafos.h
 		dialogs/pol.cpp dialogs/pol.h
+		dialogs/assign.cpp dialogs/assign.h
 		dialogs/notes.cpp dialogs/notes.h
 		dialogs/infos.cpp dialogs/infos.h
+		dialogs/glinfos.cpp dialogs/glinfos.h
 		dialogs/settings.h
 
 		# library

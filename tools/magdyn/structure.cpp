@@ -318,6 +318,28 @@ void MagDynDlg::GenerateCouplingsFromSG()
 
 
 /**
+ * change all couplings of a certain symmetry index
+ */
+void MagDynDlg::AssignCouplingsBySymmetryIndex(t_size symmidx,
+	const std::string* J, const std::string* DMI, const std::string* Js)
+{
+	//m_dyn.CalcSymmetryIndices(GetSymOpsForCurrentSG());
+
+	m_dyn.AssignCouplingsBySymmetryIndex(symmidx, J, DMI, Js);
+
+	//SyncSymmetryIndicesFromKernel();
+	SyncTermsFromKernel();
+
+	if(m_autocalc->isChecked())
+	{
+		CalcDispersion();
+		CalcHamiltonian();
+	}
+}
+
+
+
+/**
  * extend the unit cell by copying the existing elements
  */
 void MagDynDlg::ExtendStructure()

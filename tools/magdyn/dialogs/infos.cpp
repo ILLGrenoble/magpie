@@ -119,27 +119,18 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 		labelLicense->setWordWrap(true);
 		labelLicense->setOpenExternalLinks(true);
 
-	// renderer infos
-	for(int i = 0; i < 4; ++i)
-	{
-		m_labelGlInfos[i] = new QLabel("", infopanel);
-		m_labelGlInfos[i]->setSizePolicy(
-			QSizePolicy::Ignored,
-			m_labelGlInfos[i]->sizePolicy().verticalPolicy());
-	}
-
 	int y = 0;
 	int w = g_icon.isNull() ? 1 : 3;
 	int x = g_icon.isNull() ? 0 : 1;
-	grid->addWidget(labelTitle, y++,x, 1,1);
-	grid->addWidget(labelVersion, y++,x, 1,1);
-	grid->addWidget(labelAuthor, y++,x, 1,1);
-	grid->addWidget(labelDate, y++,x, 1,1);
+	grid->addWidget(labelTitle, y++, x, 1, 1);
+	grid->addWidget(labelVersion, y++, x, 1, 1);
+	grid->addWidget(labelAuthor, y++, x, 1, 1);
+	grid->addWidget(labelDate, y++, x, 1, 1);
 
 	if(!g_icon.isNull())
 	{
-		grid->addWidget(labelIcon, 0,0, 4,1);
-		grid->addWidget(labelIconFlipped, 0,2, 4,1);
+		grid->addWidget(labelIcon, 0, 0, 4, 1);
+		grid->addWidget(labelIconFlipped, 0, 2, 4, 1);
 	}
 
 	auto sep1 = new QFrame(infopanel);
@@ -150,31 +141,29 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 	sep3->setFrameStyle(QFrame::HLine);
 	auto sep4 = new QFrame(infopanel);
 	sep4->setFrameStyle(QFrame::HLine);
-	auto sep5 = new QFrame(infopanel);
-	sep5->setFrameStyle(QFrame::HLine);
 
 	grid->addItem(new QSpacerItem(16, 16,
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
 		y++,0, 1,w);
-	grid->addWidget(sep1, y++,0, 1,w);
+	grid->addWidget(sep1, y++, 0, 1, w);
 
 	grid->addWidget(new QLabel(
 		QString("Compiler: ") +
 		QString(BOOST_COMPILER) + ".",
-		infopanel), y++,0, 1,w);
+		infopanel), y++, 0, 1, w);
 	grid->addWidget(new QLabel(
 		QString("C++ Library: ") +
 		QString(BOOST_STDLIB) + ".",
-		infopanel), y++,0, 1,w);
+		infopanel), y++, 0, 1, w);
 	grid->addWidget(new QLabel(
 		QString("Build Date: ") +
 		QString(__DATE__) + ", " +
 		QString(__TIME__) + ".",
-		infopanel), y++,0, 1,w);
+		infopanel), y++, 0, 1, w);
 	grid->addWidget(new QLabel(
 		QString("Using %1-bit real and %2-bit integer type.").
 			arg(sizeof(t_real)*8).arg(sizeof(t_size)*8),
-		infopanel), y++,0, 1,w);
+		infopanel), y++, 0, 1, w);
 	if(g_resdir != "")
 	{
 		auto labelRes = new QLabel(
@@ -182,33 +171,29 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 			g_resdir + ".",
 			infopanel);
 		labelRes->setWordWrap(true);
-		grid->addWidget(labelRes, y++,0, 1,w);
+		grid->addWidget(labelRes, y++, 0, 1, w);
 	}
 
-	grid->addWidget(sep2, y++,0, 1,w);
+	grid->addWidget(sep2, y++, 0, 1, w);
 
 	grid->addWidget(new QLabel(
 		QString("Qt Version: ") +
 		QString(QT_VERSION_STR) + ".",
-		infopanel), y++,0, 1,w);
+		infopanel), y++, 0, 1, w);
 	grid->addWidget(new QLabel(
 		QString("Boost Version: ") +
 		strBoost.c_str() + ".",
-		infopanel), y++,0, 1,w);
+		infopanel), y++, 0, 1, w);
 	grid->addWidget(new QLabel(
 		QString("Lapack(e) Version: ") +
 		ostrLapack.str().c_str() + ".",
-		infopanel), y++,0, 1,w);
+		infopanel), y++, 0, 1, w);
 
-	grid->addWidget(sep3, y++,0, 1,w);
-	grid->addWidget(labelPaper, y++,0, 1,w);
-	grid->addWidget(labelDoi, y++,0, 1,w);
-	grid->addWidget(sep4, y++,0, 1,w);
-	grid->addWidget(labelLicense, y++,0, 1,w);
-	grid->addWidget(sep5, y++,0, 1,w);
-
-	for(int i = 0; i < 4; ++i)
-		grid->addWidget(m_labelGlInfos[i], y++,0, 1,w);
+	grid->addWidget(sep3, y++, 0, 1, w);
+	grid->addWidget(labelPaper, y++, 0, 1, w);
+	grid->addWidget(labelDoi, y++, 0, 1, w);
+	grid->addWidget(sep4, y++, 0, 1, w);
+	grid->addWidget(labelLicense, y++, 0, 1, w);
 
 	grid->addItem(new QSpacerItem(16, 16,
 		QSizePolicy::Minimum, QSizePolicy::Expanding),
@@ -222,8 +207,8 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 	auto dlgGrid = new QGridLayout(this);
 	dlgGrid->setSpacing(4);
 	dlgGrid->setContentsMargins(8, 8, 8, 8);
-	dlgGrid->addWidget(infopanel, 0,0, 1,4);
-	dlgGrid->addWidget(btnbox, 1,3, 1,1);
+	dlgGrid->addWidget(infopanel, 0, 0, 1, 4);
+	dlgGrid->addWidget(btnbox, 1, 3, 1, 1);
 
 	// restore settings
 	if(m_sett)
@@ -234,17 +219,6 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 		else
 			resize(700, 700);
 	}
-}
-
-
-
-void InfoDlg::SetGlDeviceInfos(const std::string& ver, const std::string& shader_ver,
-	const std::string& vendor, const std::string& renderer)
-{
-	m_labelGlInfos[0]->setText(QString("GL Version: %1.").arg(ver.c_str()));
-	m_labelGlInfos[1]->setText(QString("GL Shader Version: %1.").arg(shader_ver.c_str()));
-	m_labelGlInfos[2]->setText(QString("GL Vendor: %1.").arg(vendor.c_str()));
-	m_labelGlInfos[3]->setText(QString("GL Device: %1.").arg(renderer.c_str()));
 }
 
 

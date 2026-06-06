@@ -381,6 +381,12 @@ public:
 	void CalcSymmetryIndices(const std::vector<t_mat_real>& symops);
 
 	/**
+	 * assign exchange constants to all couplings with the same symmetry index
+	 */
+	void AssignCouplingsBySymmetryIndex(t_size symmidx,
+		const std::string* J, const std::string* DMI, const std::string* Js);
+
+	/**
 	 * sort couplings by their lengths
 	 */
 	void SortExchangeTerms();

@@ -1,12 +1,12 @@
 /**
- * magnon dynamics -- info dialog
+ * magnon dynamics -- assigns multiple couplings
  * @author Tobias Weber <tweber@ill.fr>
- * @date june-2024
+ * @date 6-june-2024
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * mag-core / magdyn / magpie
+ * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,30 +23,51 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __MAGDYN_INFOS_H__
-#define __MAGDYN_INFOS_H__
+#ifndef __MAGDYN_ASSIGN_H__
+#define __MAGDYN_ASSIGN_H__
+
 
 #include <QtCore/QSettings>
+
 #include <QtWidgets/QDialog>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QSpinBox>
+
+#include "defs.h"
 
 
 
-class InfoDlg : public QDialog
+class AssignDlg : public QDialog
 { Q_OBJECT
 public:
-	InfoDlg(QWidget* pParent = nullptr, QSettings *sett = nullptr);
-	virtual ~InfoDlg() = default;
+	AssignDlg(QWidget* pParent = nullptr, QSettings *sett = nullptr);
+	virtual ~AssignDlg() = default;
 
-	InfoDlg(const InfoDlg&) = delete;
-	const InfoDlg& operator=(const InfoDlg&) = delete;
+	AssignDlg(const AssignDlg&) = delete;
+	const AssignDlg& operator=(const AssignDlg&) = delete;
 
 
 private:
 	QSettings *m_sett{};
 
+	QLineEdit *m_editJ{};
+	QLineEdit *m_editDMI[3]{};
+	QLineEdit *m_editJs[3*3]{};
+
+	QSpinBox *m_symmidx{};
+
+
+protected:
+	void AssignByIndex();
+
 
 protected slots:
 	virtual void accept() override;
+
+
+signals:
+	void AssignCouplingsBySymmetryIndex(t_size symmidx,
+		const std::string* J, const std::string* DMI, const std::string* Js);
 };
 
 

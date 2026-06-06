@@ -1,5 +1,5 @@
 /**
- * magnon dynamics -- info dialog
+ * magnon dynamics -- gl info dialog
  * @author Tobias Weber <tweber@ill.fr>
  * @date june-2024
  * @license GPLv3, see 'LICENSE' file
@@ -23,26 +23,31 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __MAGDYN_INFOS_H__
-#define __MAGDYN_INFOS_H__
+#ifndef __MAGDYN_GLINFOS_H__
+#define __MAGDYN_GLINFOS_H__
 
 #include <QtCore/QSettings>
 #include <QtWidgets/QDialog>
+#include <QtWidgets/QLabel>
 
 
 
-class InfoDlg : public QDialog
+class GlInfoDlg : public QDialog
 { Q_OBJECT
 public:
-	InfoDlg(QWidget* pParent = nullptr, QSettings *sett = nullptr);
-	virtual ~InfoDlg() = default;
+	GlInfoDlg(QWidget* pParent = nullptr, QSettings *sett = nullptr);
+	virtual ~GlInfoDlg() = default;
 
-	InfoDlg(const InfoDlg&) = delete;
-	const InfoDlg& operator=(const InfoDlg&) = delete;
+	GlInfoDlg(const GlInfoDlg&) = delete;
+	const GlInfoDlg& operator=(const GlInfoDlg&) = delete;
+
+	void SetGlDeviceInfos(const std::string& ver, const std::string& shader_ver,
+		const std::string& vendor, const std::string& renderer);
 
 
 private:
 	QSettings *m_sett{};
+	QLabel *m_labelGlInfos[4]{nullptr, nullptr, nullptr, nullptr};
 
 
 protected slots:

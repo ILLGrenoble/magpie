@@ -82,8 +82,10 @@
 #include "dialogs/dispersion3d.h"
 #include "dialogs/trafos.h"
 #include "dialogs/pol.h"
+#include "dialogs/assign.h"
 #include "dialogs/notes.h"
 #include "dialogs/infos.h"
+#include "dialogs/glinfos.h"
 #include "tlibs2/tools/plot2d/plot2d.h"
 #include "tlibs2/tools/plot3d/plot3d.h"
 #include "../bz/bz.h"
@@ -260,7 +262,9 @@ protected:
 	TableImportDlg *m_table_import_dlg{};  // table import dialog
 	NotesDlg *m_notes_dlg{};               // notes dialog
 	PolDlg *m_pol{};                       // polarisation calculator
+	AssignDlg *m_assign_dlg{};             // coupling assignments
 	InfoDlg *m_info_dlg{};                 // info dialog
+	GlInfoDlg *m_glinfo_dlg{};             // gl renderer info dialog
 	StructPlotDlg *m_structplot_dlg{};     // magnetic structure plotter
 	GroundStateDlg *m_groundstate_dlg{};   // ground state minimiser
 	TopologyDlg *m_topo_dlg{};             // topological calculations
@@ -282,7 +286,9 @@ protected:
 
 	// set up dialogs
 	void ShowInfoDlg(bool only_create = false);
+	void ShowGlInfoDlg(bool only_create = false);
 	void ShowNotesDlg(bool only_create = false);
+	void ShowAssignDlg(bool only_create = false);
 	void ShowStructPlotDlg(bool only_create = false);
 	void ShowGroundStateDlg(bool only_create = false);
 	void ShowTopologyDlg(bool only_create = false);
@@ -501,6 +507,8 @@ private:
 
 protected slots:
 	void DispersionQChanged(bool calc_dyn = true);
+	void AssignCouplingsBySymmetryIndex(t_size symmidx,
+		const std::string* J, const std::string* DMI, const std::string* Js);
 
 
 public slots:

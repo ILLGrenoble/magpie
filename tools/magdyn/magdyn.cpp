@@ -70,7 +70,7 @@ MagDynDlg::MagDynDlg(QWidget* pParent) : QDialog{pParent},
 	InitResources();
 
 	// create dialogs
-	ShowInfoDlg(true);
+	ShowGlInfoDlg(true);
 	ShowNotesDlg(true);
 
 	// create input panels
@@ -139,6 +139,12 @@ MagDynDlg::~MagDynDlg()
 		m_table_import_dlg = nullptr;
 	}
 
+	if(m_assign_dlg)
+	{
+		delete m_assign_dlg;
+		m_assign_dlg = nullptr;
+	}
+
 	if(m_notes_dlg)
 	{
 		delete m_notes_dlg;
@@ -149,6 +155,12 @@ MagDynDlg::~MagDynDlg()
 	{
 		delete m_info_dlg;
 		m_info_dlg = nullptr;
+	}
+
+	if(m_glinfo_dlg)
+	{
+		delete m_glinfo_dlg;
+		m_glinfo_dlg = nullptr;
 	}
 }
 
@@ -301,6 +313,7 @@ void MagDynDlg::CreateMenuBar()
 	QMenu *menuStruct = new QMenu("Structure", m_menu);
 	QAction *acStructSymIdx = new QAction("Assign Symmetry Indices", menuStruct);
 	QAction *acStructSortCouplings = new QAction("Sort Couplings by Length", menuStruct);
+	QAction *acStructAssignCouplings = new QAction("Assign Multiple Couplings...", menuStruct);
 	QAction *acStructNotes = new QAction("Notes...", menuStruct);
 	QAction *acStructView = new QAction("View 3D Structure...", menuStruct);
 	QAction *acBZView = new QAction("View 3D Brillouin Zone...", menuStruct);
@@ -495,6 +508,9 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acAboutQt = new QAction(
 		QIcon::fromTheme("help-about"),
 		"About Qt...", menuHelp);
+	QAction *acAboutGl = new QAction(
+		QIcon::fromTheme("help-about"),
+		"About Renderer...", menuHelp);
 	QAction *acAbout = new QAction(
 		QIcon::fromTheme("help-about"),
 		"About...", menuHelp);
@@ -519,6 +535,7 @@ void MagDynDlg::CreateMenuBar()
 
 	menuStruct->addAction(acStructSymIdx);
 	menuStruct->addAction(acStructSortCouplings);
+	menuStruct->addAction(acStructAssignCouplings);
 	menuStruct->addSeparator();
 	menuStruct->addAction(acStructNotes);
 	menuStruct->addSeparator();
@@ -584,6 +601,8 @@ void MagDynDlg::CreateMenuBar()
 	menuHelp->addAction(acHelp);
 	menuHelp->addSeparator();
 	menuHelp->addAction(acAboutQt);
+	menuHelp->addAction(acAboutGl);
+	menuHelp->addSeparator();
 	menuHelp->addAction(acAbout);
 
 	// signals
@@ -637,6 +656,7 @@ void MagDynDlg::CreateMenuBar()
 	connect(acStructNotes, &QAction::triggered, this, &MagDynDlg::ShowNotesDlg);
 	connect(acStructSymIdx, &QAction::triggered, this, &MagDynDlg::CalcSymmetryIndices);
 	connect(acStructSortCouplings, &QAction::triggered, this, &MagDynDlg::SortTerms);
+	connect(acStructAssignCouplings, &QAction::triggered, this, &MagDynDlg::ShowAssignDlg);
 	connect(acStructView, &QAction::triggered, this, &MagDynDlg::ShowStructPlotDlg);
 	connect(acBZView, &QAction::triggered, this, &MagDynDlg::ShowBZ3DDlg);
 	connect(acGroundState, &QAction::triggered, this, &MagDynDlg::ShowGroundStateDlg);
@@ -734,7 +754,7 @@ void MagDynDlg::CreateMenuBar()
 		{
 			m_plot3d = new Plot3DDlg(this, m_sett);
 			connect(m_plot3d, &Plot3DDlg::GlDeviceInfos,
-				m_info_dlg, &InfoDlg::SetGlDeviceInfos);
+				m_glinfo_dlg, &GlInfoDlg::SetGlDeviceInfos);
 		}
 
 		m_plot3d->show();
@@ -760,7 +780,7 @@ void MagDynDlg::CreateMenuBar()
 		{
 			m_pol = new PolDlg(this, m_sett);
 			connect(m_pol, &PolDlg::GlDeviceInfos,
-				m_info_dlg, &InfoDlg::SetGlDeviceInfos);
+				m_glinfo_dlg, &GlInfoDlg::SetGlDeviceInfos);
 		}
 
 		m_pol->show();
@@ -779,12 +799,9 @@ void MagDynDlg::CreateMenuBar()
 			ShowError("Could not open the wiki.");
 	});
 
-	connect(acAboutQt, &QAction::triggered, []()
-	{
-		qApp->aboutQt();
-	});
-
-	// show info dialog
+	// show info dialogs
+	connect(acAboutQt, &QAction::triggered, []() { qApp->aboutQt(); });
+	connect(acAboutGl, &QAction::triggered, this, &MagDynDlg::ShowGlInfoDlg);
 	connect(acAbout, &QAction::triggered, this, &MagDynDlg::ShowInfoDlg);
 
 	// menu bar

@@ -119,6 +119,30 @@ void MagDynDlg::ShowSettingsDlg()
 
 
 /**
+ * coupling assignment dialog
+ */
+void MagDynDlg::ShowAssignDlg(bool only_create)
+{
+	if(!m_assign_dlg)
+	{
+		m_assign_dlg = new AssignDlg(this, m_sett);
+		m_assign_dlg->setFont(this->font());
+
+		connect(m_assign_dlg, &AssignDlg::AssignCouplingsBySymmetryIndex,
+			this, &MagDynDlg::AssignCouplingsBySymmetryIndex);
+	}
+
+	if(!only_create)
+	{
+		m_assign_dlg->show();
+		m_assign_dlg->raise();
+		m_assign_dlg->activateWindow();
+	}
+}
+
+
+
+/**
  * notes dialog
  */
 void MagDynDlg::ShowNotesDlg(bool only_create)
@@ -161,6 +185,27 @@ void MagDynDlg::ShowInfoDlg(bool only_create)
 
 
 /**
+ * gl renderer info dialog
+ */
+void MagDynDlg::ShowGlInfoDlg(bool only_create)
+{
+	if(!m_glinfo_dlg)
+	{
+		m_glinfo_dlg = new GlInfoDlg(this, m_sett);
+		m_glinfo_dlg->setFont(this->font());
+	}
+
+	if(!only_create)
+	{
+		m_glinfo_dlg->show();
+		m_glinfo_dlg->raise();
+		m_glinfo_dlg->activateWindow();
+	}
+}
+
+
+
+/**
  * structure plotter dialog
  */
 void MagDynDlg::ShowStructPlotDlg(bool only_create)
@@ -187,7 +232,7 @@ void MagDynDlg::ShowStructPlotDlg(bool only_create)
 			this, &MagDynDlg::DeleteTerm);
 
 		connect(m_structplot_dlg, &StructPlotDlg::GlDeviceInfos,
-			m_info_dlg, &InfoDlg::SetGlDeviceInfos);
+			m_glinfo_dlg, &GlInfoDlg::SetGlDeviceInfos);
 	}
 
 	if(!only_create)
@@ -324,7 +369,7 @@ void MagDynDlg::ShowDispersion3DDlg(bool only_create)
 		m_disp3d_dlg->SetDispersionQ(Q_start, Q_end);
 
 		connect(m_disp3d_dlg, &Dispersion3DDlg::GlDeviceInfos,
-			m_info_dlg, &InfoDlg::SetGlDeviceInfos);
+			m_glinfo_dlg, &GlInfoDlg::SetGlDeviceInfos);
 	}
 
 	if(!m_disp3d_dlg->IsPlotterValid())
@@ -374,7 +419,7 @@ void MagDynDlg::ShowBZ3DDlg(bool only_create)
 			this->DispersionQChanged(false);
 		});
 		connect(m_bz_dlg, &BZPlotDlg::GlDeviceInfos,
-			m_info_dlg, &InfoDlg::SetGlDeviceInfos);
+			m_glinfo_dlg, &GlInfoDlg::SetGlDeviceInfos);
 
 		connect(acSetQi, &QAction::triggered, [this]()
 		{
