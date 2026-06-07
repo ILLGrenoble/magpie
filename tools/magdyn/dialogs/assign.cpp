@@ -70,6 +70,7 @@ AssignDlg::AssignDlg(QWidget* parent, QSettings *sett)
 	m_symmidx->setToolTip("Index of the symmetry group to assign.");
 
 	QPushButton *btnAssignByIdx = new QPushButton("Assign", panel);
+	btnAssignByIdx->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	btnAssignByIdx->setToolTip("Assign the given values to all couplings in the same symmetry group.");
 
 
