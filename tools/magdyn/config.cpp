@@ -871,7 +871,7 @@ bool MagDynDlg::Save(const QString& filename)
 		magdyn.put<t_real>("config.field_axis_l", m_rot_axis[2]->value());
 		magdyn.put<t_real>("config.field_angle", m_rot_angle->value());
 		magdyn.put<std::string>("config.spacegroup", m_comboSG->currentText().toStdString());
-		magdyn.put<t_real>("config.spacegroup_index", m_comboSG->currentIndex());
+		magdyn.put<int>("config.spacegroup_index", m_comboSG->currentIndex());
 		magdyn.put<t_real>("config.export_start_h", m_exportStartQ[0]->value());
 		magdyn.put<t_real>("config.export_start_k", m_exportStartQ[1]->value());
 		magdyn.put<t_real>("config.export_start_l", m_exportStartQ[2]->value());
@@ -890,7 +890,7 @@ bool MagDynDlg::Save(const QString& filename)
 		if(m_combo_ffacts)
 		{
 			magdyn.put<std::string>("config.magnetic_form_factor", m_combo_ffacts->currentText().toStdString());
-			magdyn.put<t_real>("config.magnetic_form_factor_index", m_combo_ffacts->currentIndex());
+			magdyn.put<int>("config.magnetic_form_factor_index", m_combo_ffacts->currentIndex());
 		}
 
 		// save magnon calculator configuration
