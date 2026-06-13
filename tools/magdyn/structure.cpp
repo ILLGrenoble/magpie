@@ -40,6 +40,9 @@ using t_numitem = tl2::NumericTableWidgetItem<t_real>;
  */
 void MagDynDlg::PopulateSpaceGroups(bool init)
 {
+	if(!m_comboSG)
+		return;
+
 	BOOST_SCOPE_EXIT(this_)
 	{
 		this_->m_ignoreCalc = false;
@@ -105,6 +108,9 @@ void MagDynDlg::PopulateSpaceGroups(bool init)
  */
 void MagDynDlg::PopulateFormFactors()
 {
+	if(!m_combo_ffacts)
+		return;
+
 	// get currently selected form factor index
 	std::optional<unsigned int> selected_index;
 	if(m_combo_ffacts->count())

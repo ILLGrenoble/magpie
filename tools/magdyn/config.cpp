@@ -302,7 +302,8 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 		if(auto optVal = magdyn.get_optional<t_real>("config.field_angle"))
 			m_rot_angle->setValue(*optVal);
 		bool found_sg = false;
-		if(auto optVal = magdyn.get_optional<std::string>("config.spacegroup"))
+		if(auto optVal = magdyn.get_optional<std::string>("config.spacegroup");
+			m_comboSG && optVal)
 		{
 			// set space group by name
 			int idx = m_comboSG->findText(optVal->c_str(), Qt::MatchContains);
@@ -361,7 +362,8 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 			}
 		}
 		bool found_ff = false;
-		if(auto optVal = magdyn.get_optional<std::string>("config.magnetic_form_factor"))
+		if(auto optVal = magdyn.get_optional<std::string>("config.magnetic_form_factor");
+			m_combo_ffacts && optVal)
 		{
 			// set form factor by name
 			int idx = m_combo_ffacts->findText(optVal->c_str(), Qt::MatchContains);
@@ -371,7 +373,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 				found_ff = true;
 			}
 		}
-		if(!found_ff)
+		if(!found_ff && m_combo_ffacts)
 		{
 			// set form factor by index instead
 			if(auto optVal = magdyn.get_optional<int>("config.magnetic_form_factor_index"))
