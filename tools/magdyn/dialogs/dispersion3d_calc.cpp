@@ -338,7 +338,8 @@ void Dispersion3DDlg::Calculate()
 
 		// process events to see if the stop button was clicked
 		// only do this for a fraction of the points to avoid gui overhead
-		if(task_idx % std::max<t_size>(tasks.size() / std::sqrt(g_stop_check_fraction), 1) == 0)
+		bool process_evts = (task_idx % std::max<t_size>(tasks.size() / std::sqrt(g_stop_check_fraction), 1) == 0);
+		if(process_evts)
 			qApp->processEvents();
 
 		if(m_stop_requested)
@@ -348,7 +349,9 @@ void Dispersion3DDlg::Calculate()
 		}
 
 		task->get_future().get();
-		m_progress->setValue(task_idx + 1);
+
+		if(process_evts || task_idx + 1 == tasks.size())
+			m_progress->setValue(task_idx + 1);
 	}
 
 	// finish parallel calculations

@@ -121,7 +121,8 @@ void MagDynDlg::CreateDispersionPanel()
 	grid->setContentsMargins(6, 6, 6, 6);
 
 	int y = 0;
-	grid->addWidget(m_plot, y++,0,1,4);
+	if(m_plot)
+		grid->addWidget(m_plot, y++,0,1,4);
 	grid->addWidget(new QLabel("Start Q (rlu):", m_disppanel), y,0,1,1);
 	grid->addWidget(m_Q_start[0], y,1,1,1);
 	grid->addWidget(m_Q_start[1], y,2,1,1);
@@ -169,8 +170,11 @@ void MagDynDlg::CreateDispersionPanel()
 		});
 	}
 
-	connect(m_plot, &QCustomPlot::mouseMove, this, &MagDynDlg::PlotMouseMove);
-	connect(m_plot, &QCustomPlot::mousePress, this, &MagDynDlg::PlotMousePress);
+	if(m_plot)
+	{
+		connect(m_plot, &QCustomPlot::mouseMove, this, &MagDynDlg::PlotMouseMove);
+		connect(m_plot, &QCustomPlot::mousePress, this, &MagDynDlg::PlotMousePress);
+	}
 
 
 	m_tabs_out->addTab(m_disppanel, "Dispersion");

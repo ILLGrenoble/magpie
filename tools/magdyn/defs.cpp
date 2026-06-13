@@ -112,7 +112,7 @@ t_real g_structplot_dmi_len = 0.25;
 t_real g_cam_fov = 90.;
 
 // fraction of points to check if the stop button was pressed
-unsigned int g_stop_check_fraction = 100;
+unsigned int g_stop_check_fraction = 20;
 // ----------------------------------------------------------------------------
 
 

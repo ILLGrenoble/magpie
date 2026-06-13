@@ -165,6 +165,7 @@ MagDynDlg::~MagDynDlg()
 }
 
 
+
 void MagDynDlg::InitResources()
 {
 	QString appPath = QApplication::applicationDirPath();
@@ -205,6 +206,7 @@ void MagDynDlg::InitResources()
 	if(!g_icon.isNull())
 		setWindowIcon(g_icon);
 }
+
 
 
 void MagDynDlg::CreateMainWindow()
@@ -932,6 +934,7 @@ void MagDynDlg::EnableInput(bool enable)
 		m_btnStartStop->setIcon(QIcon::fromTheme("media-playback-stop"));
 	}
 }
+
 
 
 void MagDynDlg::ShowError(const QString& msg, bool critical) const

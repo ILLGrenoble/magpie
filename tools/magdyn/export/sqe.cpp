@@ -248,7 +248,8 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 
 			// process events to see if the stop button was clicked
 			// only do this for a fraction of the points to avoid gui overhead
-			if(h_idx*k_idx % std::max<t_size>(num_pts_h*num_pts_k / g_stop_check_fraction, 1) == 0)
+			bool process_evts = (h_idx*k_idx % std::max<t_size>(num_pts_h*num_pts_k / g_stop_check_fraction, 1) == 0);
+			if(process_evts)
 				qApp->processEvents();
 
 			if(m_stopRequested)
@@ -269,7 +270,8 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 			});
 
 			++task_idx;
-			m_progress->setValue(task_idx);
+			if(process_evts || task_idx == num_pts_h*num_pts_k)
+				m_progress->setValue(task_idx);
 		}
 	}
 
@@ -305,7 +307,8 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 	{
 		// process events to see if the stop button was clicked
 		// only do this for a fraction of the points to avoid gui overhead
-		if(future_idx % std::max<t_size>(futures.size() / g_stop_check_fraction, 1) == 0)
+		bool process_evts = (future_idx % std::max<t_size>(futures.size() / g_stop_check_fraction, 1) == 0);
+		if(process_evts)
 			qApp->processEvents();
 
 		if(m_stopRequested)
@@ -387,10 +390,11 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 						<< std::setw(print_width) << std::right << j << "\n";
 				}
 			}
-		}
+		}  // result_idx
 
-		m_progress->setValue(future_idx+1);
-	}
+		if(process_evts || future_idx + 1 == futures.size())
+			m_progress->setValue(future_idx + 1);
+	}  // future_idx
 
 	pool.join();
 	EnableInput(true);

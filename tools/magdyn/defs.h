@@ -291,7 +291,7 @@ constexpr std::array<SettingsVariable, 25> g_settingsvariables
 		.editor = SettingsVariableEditor::YESNO,
 	},
 	{
-		.description = "Number of times to check for stop button press.",
+		.description = "Number of times to check for GUI events.",
 		.key = "stop_check_fraction",
 		.value = &g_stop_check_fraction,
 	},

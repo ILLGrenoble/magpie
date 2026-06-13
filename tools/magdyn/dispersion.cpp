@@ -440,19 +440,19 @@ void MagDynDlg::CalcDispersion()
 							m_qs_data_channel[channel].push_back(Q[m_Q_idx]);
 							m_ws_data_channel[channel].push_back(weight_channel);
 						}
-					}
+					}  // channel
 				}
 
 				m_qs_data.push_back(Q[m_Q_idx]);
 				m_Es_data.push_back(E);
 				m_degen_data.push_back(static_cast<int>(E_and_S.degeneracy - 1));
-			}
-		};
+			}  // E_and_S
+		};  // task
 
 		t_taskptr taskptr = std::make_shared<t_task>(task);
 		tasks.push_back(taskptr);
 		asio::post(pool, [taskptr]() { (*taskptr)(); });
-	}
+	}  // num_pts
 
 	m_status->setText(QString("Calculating dispersion in %1 threads...").arg(g_num_threads));
 
@@ -463,7 +463,8 @@ void MagDynDlg::CalcDispersion()
 
 		// process events to see if the stop button was clicked
 		// only do this for a fraction of the points to avoid gui overhead
-		if(task_idx % std::max<t_size>(tasks.size() / g_stop_check_fraction, 1) == 0)
+		bool process_evts = (task_idx % std::max<t_size>(tasks.size() / g_stop_check_fraction, 1) == 0);
+		if(process_evts)
 			qApp->processEvents();
 
 		if(m_stopRequested)
@@ -473,7 +474,9 @@ void MagDynDlg::CalcDispersion()
 		}
 
 		task->get_future().get();
-		m_progress->setValue(task_idx + 1);
+
+		if(process_evts || task_idx + 1 == tasks.size())
+			m_progress->setValue(task_idx + 1);
 	}
 
 	pool.join();
