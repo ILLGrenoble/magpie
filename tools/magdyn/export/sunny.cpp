@@ -237,15 +237,21 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 		t_size idx2 = m_dyn.GetMagneticSiteIndex(term.site2) + 1;
 		bool is_aniso = (idx1 == idx2 && tl2::equals_0(term.dist_calc, g_eps));
 
-		if(is_aniso)
+		if(is_aniso && idx1 - 1 < m_dyn.GetMagneticSites().size())
 		{
+			std::string S = get_str_var(m_dyn.GetMagneticSites()[idx1 - 1].spin_mag);
+
 			ofstr << "set_onsite_coupling!(magsys, S -> "
-				<< get_str_var(term.J, true) << "*(S[1]^2 + S[2]^2 + S[3]^2), "
-				<< idx1 << ");\n";
+				<< "2/(" << S << " - 1) * ("   // thanks to A. Hertz for pointing out the 2/(S-1) definition factor
+				<< get_str_var(term.Jgen[0][0], true) << "*S[1]^2 + "
+				<< get_str_var(term.Jgen[1][1], true) << "*S[2]^2 + "
+				<< get_str_var(term.Jgen[2][2], true) << "*S[3]^2"
+				<< "), " << idx1 << ");\n";
 
 			// TODO: also treat dmi vector and general matrix
 		}
-		else
+
+		if(!is_aniso)
 		{
 			ofstr << "set_exchange!(magsys," << " # " << term.name
 				<< "\n\t[\n"
@@ -281,7 +287,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 				<< get_str_var(term.dist[2])
 				<< " ]))\n";
 		}
-	}
+	}  // terms
 
 
 	if(!tl2::equals_0<t_real>(field.mag, g_eps))
