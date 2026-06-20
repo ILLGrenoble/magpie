@@ -242,7 +242,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 			std::string S = get_str_var(m_dyn.GetMagneticSites()[idx1 - 1].spin_mag);
 
 			ofstr << "set_onsite_coupling!(magsys, S -> "
-				<< "2/(" << S << " - 1) * ("   // thanks to A. Hertz for pointing out the 2/(S-1) definition factor
+				<< "(2*" << S << ")/(2*" << S << " - 1) * ("
 				<< get_str_var(term.Jgen[0][0], true) << "*S[1]^2 + "
 				<< get_str_var(term.Jgen[1][1], true) << "*S[2]^2 + "
 				<< get_str_var(term.Jgen[2][2], true) << "*S[3]^2"
