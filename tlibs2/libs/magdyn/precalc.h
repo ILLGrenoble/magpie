@@ -293,6 +293,14 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 			return;
 		}
 
+		// register the spin magnitude as parser variable
+		const MagneticSite& site1 = GetMagneticSite(term.site1_calc);
+		const MagneticSite& site2 = GetMagneticSite(term.site2_calc);
+		parser.register_var("_S1_mag", site1.spin_mag_calc);
+		parser.register_var("_S2_mag", site2.spin_mag_calc);
+		if(term.site1_calc == term.site2_calc)
+			parser.register_var("_S_mag", site1.spin_mag_calc);
+
 		// symmetric interaction
 		if(term.J == "")
 		{

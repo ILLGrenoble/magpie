@@ -215,6 +215,7 @@ TableImportDlg::TableImportDlg(QWidget* parent, QSettings* sett)
 	m_checkUniteIncompleteTokens = new QCheckBox(this);
 	m_checkIgnoreSymmetricCoupling = new QCheckBox(this);
 	m_checkClearExisting = new QCheckBox(this);
+	m_checkSIAScaling = new QCheckBox(this);
 
 	m_checkIndices1Based->setText("1-Based Indices");
 	m_checkIndices1Based->setToolTip("Are the indices 1-based or 0-based?");
@@ -225,14 +226,18 @@ TableImportDlg::TableImportDlg(QWidget* parent, QSettings* sett)
 	m_checkClearExisting->setText("Clear Existing");
 	m_checkClearExisting->setToolTip("Clears the existing sites or coupling before importing the new ones."
 		"\nIf unchecked, new sites or couplings will be added to the end of the respective lists.");
+	m_checkSIAScaling->setText("Scale SIA");
+	m_checkSIAScaling->setToolTip("Scale single-ion anisotropy constant by (2S - 1)/(2S)."
+	  "\nThis factor may arise due to differences in the definitions between programs.");
 
 	m_checkIndices1Based->setChecked(false);
 	m_checkUniteIncompleteTokens->setChecked(true);
 	m_checkIgnoreSymmetricCoupling->setChecked(false);
 	m_checkClearExisting->setChecked(true);
+	m_checkSIAScaling->setChecked(false);
 
 	for(QCheckBox *box : { m_checkIndices1Based, m_checkUniteIncompleteTokens,
-		m_checkIgnoreSymmetricCoupling, m_checkClearExisting })
+		m_checkIgnoreSymmetricCoupling, m_checkClearExisting, m_checkSIAScaling })
 		box->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 	QPushButton *btnImportAtoms = new QPushButton("Import Sites", this);
@@ -285,6 +290,7 @@ TableImportDlg::TableImportDlg(QWidget* parent, QSettings* sett)
 	grid->addWidget(m_checkUniteIncompleteTokens, y, 1, 1, 1);
 	grid->addWidget(m_checkIgnoreSymmetricCoupling, y, 2, 1, 1);
 	grid->addWidget(m_checkClearExisting, y++, 3, 1, 1);
+	grid->addWidget(m_checkSIAScaling, y++, 0, 1, 1);
 	grid->addWidget(btnImportAtoms, y, 0, 1, 1);
 	grid->addWidget(btnImportCouplings, y, 1, 1, 1);
 	grid->addWidget(btnHelp, y, 2, 1, 1);
@@ -344,6 +350,8 @@ TableImportDlg::TableImportDlg(QWidget* parent, QSettings* sett)
 			m_checkIgnoreSymmetricCoupling->setChecked(m_sett->value("tableimport/ignore_symmetric_couplings").toBool());
 		if(m_sett->contains("tableimport/clear_existing_items"))
 			m_checkClearExisting->setChecked(m_sett->value("tableimport/clear_existing_items").toBool());
+		if(m_sett->contains("tableimport/sia_scaling"))
+			m_checkSIAScaling->setChecked(m_sett->value("tableimport/sia_scaling").toBool());
 	}
 
 	// connections
@@ -430,6 +438,7 @@ TableImportDlg::TableImportDlg(QWidget* parent, QSettings* sett)
 		m_checkUniteIncompleteTokens->setChecked(false);
 		m_checkIgnoreSymmetricCoupling->setChecked(true);
 		m_checkClearExisting->setChecked(true);
+		m_checkSIAScaling->setChecked(true);
 	});
 	connect(acSWCouplings, &QAction::triggered, [this]()
 	{
@@ -449,6 +458,7 @@ TableImportDlg::TableImportDlg(QWidget* parent, QSettings* sett)
 		m_checkUniteIncompleteTokens->setChecked(true);
 		m_checkIgnoreSymmetricCoupling->setChecked(false);
 		m_checkClearExisting->setChecked(true);
+		m_checkSIAScaling->setChecked(true);
 	});
 	connect(acSWSIA, &QAction::triggered, [this]()
 	{
@@ -468,6 +478,7 @@ TableImportDlg::TableImportDlg(QWidget* parent, QSettings* sett)
 		m_checkUniteIncompleteTokens->setChecked(true);
 		m_checkIgnoreSymmetricCoupling->setChecked(false);
 		m_checkClearExisting->setChecked(false);
+		m_checkSIAScaling->setChecked(true);
 	});
 
 	connect(btnImportAtoms, &QAbstractButton::clicked, this, &TableImportDlg::ImportAtoms);
@@ -571,9 +582,17 @@ void TableImportDlg::ImportCouplings()
 	const bool unite_incomplete = m_checkUniteIncompleteTokens->isChecked();
 	const bool ignore_symm = m_checkIgnoreSymmetricCoupling->isChecked();
 	const bool clear_existing_couplings = m_checkClearExisting->isChecked();
+	const bool sia_scaling = m_checkSIAScaling->isChecked();
 
 	std::vector<TableImportCoupling> couplings;
 	couplings.reserve(lines.size());
+
+	std::string SIA_factor;
+	if(sia_scaling)
+	{
+		// thanks to A. Hertz for pointing out the 2S/(2S-1) definition factor
+		SIA_factor = "*(2*_S_mag - 1)/(2*_S_mag)";
+	}
 
 	for(const std::string& line : lines)
 	{
@@ -605,6 +624,13 @@ void TableImportDlg::ImportCouplings()
 			coupling.d[1] = cols[idx_dy];
 		if(idx_dz >= 0 && idx_dz < int(cols.size()))
 			coupling.d[2] = cols[idx_dz];
+
+		t_real dist_sq =
+			std::pow(tl2::str_to_var<t_real>(coupling.d[0]), 2.) +
+			std::pow(tl2::str_to_var<t_real>(coupling.d[1]), 2.) +
+			std::pow(tl2::str_to_var<t_real>(coupling.d[2]), 2.);
+		bool is_aniso = (coupling.atomidx1 == coupling.atomidx2 && tl2::equals_0(dist_sq, g_eps));
+
 		if(idx_J >= 0 && idx_J < int(cols.size()))
 			coupling.J = cols[idx_J];
 		if(idx_dmix >= 0 && idx_dmix < int(cols.size()))
@@ -616,7 +642,11 @@ void TableImportDlg::ImportCouplings()
 		if(idx_J_gen >= 0 && idx_J_gen + 8 < int(cols.size()))
 		{
 			for(std::size_t idx_j = 0; idx_j < 9; ++idx_j)
+			{
 				coupling.Jgen[idx_j] = cols[idx_J_gen + idx_j];
+				if(is_aniso && coupling.Jgen[idx_j] != "" && coupling.Jgen[idx_j] != "0")
+					coupling.Jgen[idx_j] += SIA_factor;
+			}
 		}
 
 		if(ignore_symm && HasSymmetricCoupling(couplings, coupling))
@@ -713,4 +743,5 @@ void TableImportDlg::closeEvent(QCloseEvent *)
 	m_sett->setValue("tableimport/unite_incomplete_tokens", m_checkUniteIncompleteTokens->isChecked());
 	m_sett->setValue("tableimport/ignore_symmetric_couplings", m_checkIgnoreSymmetricCoupling->isChecked());
 	m_sett->setValue("tableimport/clear_existing_items", m_checkClearExisting->isChecked());
+	m_sett->setValue("tableimport/sia_scaling", m_checkSIAScaling->isChecked());
 }

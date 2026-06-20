@@ -240,6 +240,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 		if(is_aniso && idx1 - 1 < m_dyn.GetMagneticSites().size())
 		{
 			std::string S = get_str_var(m_dyn.GetMagneticSites()[idx1 - 1].spin_mag);
+			ofstr << "_S_mag = " << S << "\n";
 
 			ofstr << "set_onsite_coupling!(magsys, S -> "
 				<< "(2*" << S << ")/(2*" << S << " - 1) * ("  // thanks to A. Hertz for pointing out the 2S/(2S-1) definition factor

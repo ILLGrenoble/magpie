@@ -108,6 +108,7 @@ private:
 	QCheckBox *m_checkUniteIncompleteTokens{};
 	QCheckBox *m_checkIgnoreSymmetricCoupling{};
 	QCheckBox *m_checkClearExisting{};
+	QCheckBox *m_checkSIAScaling{};
 
 
 signals:

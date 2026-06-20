@@ -231,6 +231,11 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 				continue;
 			seen_term_sym_indices.insert(term.sym_idx);
 		}
+		else
+		{
+			std::string S = get_str_var(m_dyn.GetMagneticSites()[idx1 - 1].spin_mag);
+			ofstr << "_S_mag = " << S << ";\n";
+		}
 
 		ofstr << "% " << term.name << "\n";
 

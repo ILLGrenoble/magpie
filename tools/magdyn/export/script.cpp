@@ -56,6 +56,7 @@ extern int g_prec;
 extern t_real g_eps;
 
 
+
 std::string get_str_var(const std::string& var, bool add_brackets = false)
 {
 	if(var == "")
@@ -436,6 +437,8 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 			<< get_str_var(term.dmi[1], true) << ", "
 			<< get_str_var(term.dmi[2], true) << " ]"
 			<< " },\n";
+
+		// TODO: also include general J and SIA scaling factor
 	}
 	ofstr << "]\n";
 	// --------------------------------------------------------------------

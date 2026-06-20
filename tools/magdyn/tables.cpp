@@ -705,7 +705,7 @@ void MagDynDlg::MoveTabItemDown(QTableWidget *pTab)
 	auto selected = GetSelectedRows(pTab, true);
 	for(int row : selected)
 	{
-		if(row == pTab->rowCount()-1)
+		if(row == pTab->rowCount() - 1)
 			continue;
 
 		auto *item = pTab->item(row, 0);
