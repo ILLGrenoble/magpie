@@ -169,6 +169,7 @@ def init(sites, couplings):
 	for coupling in couplings:
 		J = coupling["J"]
 		coupling["J_real"] = np.diag([ J, J, J ]) + skew(coupling["DMI"])
+		coupling["J_real"] += coupling["J_gen"]
 		print_infos("\nJ_real =\n%s" % coupling["J_real"])
 
 # get the energies of the dispersion at the momentum transfer Qvec
@@ -419,7 +420,38 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 	// --------------------------------------------------------------------
 	ofstr << "\n# magnetic couplings\n";
 
+	// prepare general J matrices
+	t_size term_idx = 0;
+	std::string S_mag_last = "";
+	for(const t_term& term : m_dyn.GetExchangeTerms())
+	{
+		t_size idx1 = m_dyn.GetMagneticSiteIndex(term.site1);
+		std::string S_mag = get_str_var(m_dyn.GetMagneticSites()[idx1].spin_mag);
+		if(S_mag != S_mag_last)
+		{
+			S_mag_last = S_mag;
+			ofstr << "_S_mag = " << S_mag << "\n";
+		}
+
+		ofstr << "J_gen_" << term_idx << " = np.zeros([3, 3], dtype = float)\n";
+		for(t_size i = 0; i < term.Jgen.size(); ++i)
+		{
+			for(t_size j = 0; j < term.Jgen[i].size(); ++j)
+			{
+				ofstr << "J_gen_" << term_idx
+					<< "[ " << i << ", " << j << " ] = "
+					<< get_str_var(term.Jgen[i][j])
+					<< "\n";
+			}
+		}
+
+		ofstr << "\n";
+
+		++term_idx;
+	}
+
 	ofstr << "couplings = [\n";
+	term_idx = 0;
 	for(const t_term& term : m_dyn.GetExchangeTerms())
 	{
 		t_size idx1 = m_dyn.GetMagneticSiteIndex(term.site1);
@@ -435,10 +467,11 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 			<< "\"DMI\" : [ "
 			<< get_str_var(term.dmi[0], true) << ", "
 			<< get_str_var(term.dmi[1], true) << ", "
-			<< get_str_var(term.dmi[2], true) << " ]"
+			<< get_str_var(term.dmi[2], true) << " ], "
+			<< "\"J_gen\" : J_gen_" << term_idx << ", "
 			<< " },\n";
 
-		// TODO: also include general J and SIA scaling factor
+		++term_idx;
 	}
 	ofstr << "]\n";
 	// --------------------------------------------------------------------
