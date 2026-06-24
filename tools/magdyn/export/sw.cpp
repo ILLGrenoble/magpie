@@ -111,6 +111,12 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 	t_real h2 = (t_real)m_Q_end[0]->value();
 	t_real k2 = (t_real)m_Q_end[1]->value();
 	t_real l2 = (t_real)m_Q_end[2]->value();
+	t_real peak1x = (t_real)m_scatteringplane[0]->value();
+	t_real peak1y = (t_real)m_scatteringplane[1]->value();
+	t_real peak1z = (t_real)m_scatteringplane[2]->value();
+	t_real peak2x = (t_real)m_scatteringplane[3]->value();
+	t_real peak2y = (t_real)m_scatteringplane[4]->value();
+	t_real peak2z = (t_real)m_scatteringplane[5]->value();
 
 	ofstr << "% variables\n";
 
@@ -119,6 +125,8 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 	ofstr << "Qstart  = [ " << h1 << " " << k1 << " " << l1 << " ];\n";
 	ofstr << "Qend    = [ " << h2 << " " << k2 << " " << l2 << " ];\n";
 	ofstr << "Qpts    = " << m_num_points->value() << ";\n";
+	ofstr << "plane1  = [ " << peak1x << ", " << peak1y << ", " << peak1z << " ];\n";
+	ofstr << "plane2  = [ " << peak2x << ", " << peak2y << ", " << peak2z << " ];\n";
 
 	// user variables
 	for(const auto &var : m_dyn.GetVariables())

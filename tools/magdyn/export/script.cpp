@@ -321,6 +321,12 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 	t_real h2 = (t_real)m_Q_end[0]->value();
 	t_real k2 = (t_real)m_Q_end[1]->value();
 	t_real l2 = (t_real)m_Q_end[2]->value();
+	t_real peak1x = (t_real)m_scatteringplane[0]->value();
+	t_real peak1y = (t_real)m_scatteringplane[1]->value();
+	t_real peak1z = (t_real)m_scatteringplane[2]->value();
+	t_real peak2x = (t_real)m_scatteringplane[3]->value();
+	t_real peak2y = (t_real)m_scatteringplane[4]->value();
+	t_real peak2z = (t_real)m_scatteringplane[5]->value();
 
 	ofstr << "\n# constants and variables\n";
 	ofstr << "g_e     = " << tl2::g_e<t_real> << "\n";
@@ -329,6 +335,8 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 	ofstr << "Qstart  = np.array([ " << h1 << ", " << k1 << ", " << l1 << " ])\n";
 	ofstr << "Qend    = np.array([ " << h2 << ", " << k2 << ", " << l2 << " ])\n";
 	ofstr << "Qpts    = " << m_num_points->value() << "\n\n";
+	ofstr << "plane1  = np.array([ " << peak1x << ", " << peak1y << ", " << peak1z << " ])\n";
+	ofstr << "plane2  = np.array([ " << peak2x << ", " << peak2y << ", " << peak2z << " ])\n\n";
 
 	// user variables
 	for(const auto &var : m_dyn.GetVariables())

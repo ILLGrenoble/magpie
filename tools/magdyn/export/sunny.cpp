@@ -122,6 +122,12 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	t_real h2 = (t_real)m_Q_end[0]->value();
 	t_real k2 = (t_real)m_Q_end[1]->value();
 	t_real l2 = (t_real)m_Q_end[2]->value();
+	t_real peak1x = (t_real)m_scatteringplane[0]->value();
+	t_real peak1y = (t_real)m_scatteringplane[1]->value();
+	t_real peak1z = (t_real)m_scatteringplane[2]->value();
+	t_real peak2x = (t_real)m_scatteringplane[3]->value();
+	t_real peak2y = (t_real)m_scatteringplane[4]->value();
+	t_real peak2z = (t_real)m_scatteringplane[5]->value();
 
 	// principal scan direction
 	t_size q_idx = 1;
@@ -136,6 +142,8 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "Qstart = [ " << h1 << ", " << k1 << ", " << l1 << " ]\n";
 	ofstr << "Qend   = [ " << h2 << ", " << k2 << ", " << l2 << " ]\n";
 	ofstr << "Qpts   = " << m_num_points->value() << "\n";
+	ofstr << "plane1 = [ " << peak1x << ", " << peak1y << ", " << peak1z << " ]\n";
+	ofstr << "plane2 = [ " << peak2x << ", " << peak2y << ", " << peak2z << " ]\n";
 
 	// user (model) variables
 	if(m_dyn.GetVariables().size())
@@ -394,16 +402,22 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	if(m_dyn.IsIncommensurate())
 	{
 		ofstr << "if !use_supercell\n";
-		ofstr << "\tcalc = SpinWaveTheorySpiral(magsys; measure = "
-			<< proj << "(magsys; formfactors = ffacts), "
-			<< "k = prop, axis = axis, "
+		ofstr << "\tcalc = SpinWaveTheorySpiral(magsys;\n"
+			<< "\t\tmeasure = " << proj << "(magsys; formfactors = ffacts),\n"
+			<< "\t\t#measure = ssf_custom_bm(magsys; u = plane1, v = plane2, formfactors = ffacts) do Q, S\n"
+			<< "\t\t#\treal(S[1, 1])\n"
+			<< "\t\t#end,\n"
+			<< "\t\tk = prop, axis = axis, "
 			<< "regularization = cholesky_eps)\n";
 		ofstr << "else\n\t";
 	}
 
-	ofstr << "calc = SpinWaveTheory(magsys; measure = "
-		<< proj << "(magsys; formfactors = ffacts), "
-		<< "regularization = cholesky_eps)\n";
+	ofstr << "calc = SpinWaveTheory(magsys;\n"
+		<< "\tmeasure = " << proj << "(magsys; formfactors = ffacts),\n"
+		<< "\t#measure = ssf_custom_bm(magsys; u = plane1, v = plane2, formfactors = ffacts) do Q, S\n"
+		<< "\t#\treal(S[1, 1])\n"
+		<< "\t#end,\n"
+		<< "\tregularization = cholesky_eps)\n";
 
 	if(m_dyn.IsIncommensurate())
 		ofstr << "end\n";
