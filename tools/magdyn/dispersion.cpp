@@ -421,29 +421,40 @@ void MagDynDlg::CalcDispersion()
 				// weights
 				if(use_weights)
 				{
-					t_real weight = use_polcoords
-						? (use_projector ? E_and_S.weight_pol_perp : E_and_S.weight_pol_full)
-						: (use_projector ? E_and_S.weight_perp : E_and_S.weight_full);
-					if(std::isnan(weight) || std::isinf(weight))
-						continue;
-
-					m_ws_data.push_back(weight);
-
 					const t_mat *S = &E_and_S.S_perp;
+					t_real weight = 0.;
+
 					if(use_polcoords)
 					{
 						if(use_projector)
+						{
 							S = &E_and_S.S_pol_perp;
+							weight = E_and_S.weight_pol_perp;
+						}
 						else
+						{
 							S = &E_and_S.S_pol;
+							weight = E_and_S.weight_pol_full;
+						}
 					}
 					else
 					{
 						if(use_projector)
+						{
 							S = &E_and_S.S_perp;
+							weight = E_and_S.weight_perp;
+						}
 						else
+						{
 							S = &E_and_S.S;
+							weight = E_and_S.weight_full;
+						}
 					}
+
+					if(std::isnan(weight) || std::isinf(weight))
+						continue;
+
+					m_ws_data.push_back(weight);
 
 					for(t_size channel = 0; channel < 3; ++channel)
 					{
