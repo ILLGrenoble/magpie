@@ -279,6 +279,8 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 			m_use_formfact->setChecked(*optVal);
 		if(auto optVal = magdyn.get_optional<bool>("config.use_weights"))
 			m_use_weights->setChecked(*optVal);
+		if(auto optVal = magdyn.get_optional<bool>("config.use_pol_coords"))
+			m_use_polcoords->setChecked(*optVal);
 		if(auto optVal = magdyn.get_optional<bool>("config.unite_degeneracies"))
 			m_unite_degeneracies->setChecked(*optVal);
 		if(auto optVal = magdyn.get_optional<bool>("config.ignore_annihilation"))
@@ -859,6 +861,7 @@ bool MagDynDlg::Save(const QString& filename)
 		magdyn.put<bool>("config.use_temperature", m_use_temperature->isChecked());
 		magdyn.put<bool>("config.use_magffact", m_use_formfact->isChecked());
 		magdyn.put<bool>("config.use_weights", m_use_weights->isChecked());
+		magdyn.put<bool>("config.use_pol_coords", m_use_polcoords->isChecked());
 		magdyn.put<bool>("config.unite_degeneracies", m_unite_degeneracies->isChecked());
 		magdyn.put<bool>("config.ignore_annihilation", m_ignore_annihilation->isChecked());
 		magdyn.put<bool>("config.force_incommensurate", m_force_incommensurate->isChecked());

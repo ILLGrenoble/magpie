@@ -685,7 +685,7 @@ private:
 	bool m_calc_Hp{ true };
 	bool m_calc_Hm{ true };
 
-	// calculate S for polarisation analysis
+	// calculate a rotated S for polarisation analysis
 	bool m_calc_pol{ false };
 
 	// direction to rotation spins into, usually [001]

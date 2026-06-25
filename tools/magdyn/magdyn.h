@@ -138,6 +138,7 @@ protected:
 	QAction *m_use_dmi{}, *m_use_genJ{};
 	QAction *m_use_field{}, *m_use_temperature{};
 	QAction *m_use_formfact{};
+	QAction *m_use_polcoords{};
 	QAction *m_use_weights{}, *m_use_projector{};
 	QAction *m_unite_degeneracies{};
 	QAction *m_ignore_annihilation{};

@@ -446,6 +446,10 @@ void MagDynDlg::CreateMenuBar()
 	m_use_formfact->setToolTip("Enables the magnetic form factor.");
 	m_use_formfact->setCheckable(true);
 	m_use_formfact->setChecked(false);
+	m_use_polcoords = new QAction("Use Blume-Maleev Basis", menuCalcOpt);
+	m_use_polcoords->setToolTip("Uses the Blume-Maleev coordinate basis for polarisation analysis.");
+	m_use_polcoords->setCheckable(true);
+	m_use_polcoords->setChecked(false);
 	m_use_weights = new QAction("Use Neutron Spectral Weights", menuCalcOpt);
 	m_use_weights->setToolTip("Enables calculation of the spin correlation function.");
 	m_use_weights->setCheckable(true);
@@ -575,9 +579,12 @@ void MagDynDlg::CreateMenuBar()
 	menuCalcOpt->addAction(m_use_dmi);
 	if(m_allow_general_J)
 		menuCalcOpt->addAction(m_use_genJ);
+	menuCalcOpt->addSeparator();
 	menuCalcOpt->addAction(m_use_field);
 	menuCalcOpt->addAction(m_use_temperature);
 	menuCalcOpt->addAction(m_use_formfact);
+	menuCalcOpt->addSeparator();
+	menuCalcOpt->addAction(m_use_polcoords);
 	menuCalcOpt->addSeparator();
 	menuCalcOpt->addAction(m_use_weights);
 	menuCalcOpt->addAction(m_use_projector);
@@ -672,17 +679,21 @@ void MagDynDlg::CreateMenuBar()
 		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::ExportToSpinW));
 	connect(acStructExportScript, &QAction::triggered,
 		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::ExportToScript));
-	connect(m_use_dmi, &QAction::toggled, calc_all);
 	if(m_allow_general_J)
 		connect(m_use_genJ, &QAction::toggled, calc_all);
-	connect(m_use_field, &QAction::toggled, calc_all);
-	connect(m_use_temperature, &QAction::toggled, calc_all);
-	connect(m_use_formfact, &QAction::toggled, calc_all);
-	connect(m_use_weights, &QAction::toggled, calc_all_dyn);
-	connect(m_use_projector, &QAction::toggled, calc_all_dyn);
-	connect(m_unite_degeneracies, &QAction::toggled, calc_all_dyn);
-	connect(m_ignore_annihilation, &QAction::toggled, calc_all_dyn);
-	connect(m_force_incommensurate, &QAction::toggled, calc_all_dyn);
+
+	for(QAction* action : { m_use_dmi, m_use_field, m_use_temperature,
+		m_use_formfact, m_use_polcoords })
+	{
+		connect(action, &QAction::toggled, calc_all);
+	}
+
+	for(QAction* action : { m_use_weights, m_use_projector,
+		m_unite_degeneracies, m_ignore_annihilation, m_force_incommensurate })
+	{
+		connect(action, &QAction::toggled, calc_all_dyn);
+	}
+
 	connect(m_autocalc, &QAction::toggled, [this](bool checked)
 	{
 		if(checked)

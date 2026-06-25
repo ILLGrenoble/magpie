@@ -320,6 +320,8 @@ void MagDynDlg::SyncToKernel()
 			m_dyn.SetMagneticFormFactor(m_ffacts[i], i);
 	}
 
+	m_dyn.SetCalcPolarisation(m_use_polcoords->isChecked());
+
 	// transfer magnetic sites
 	for(int row = 0; row < m_sitestab->rowCount(); ++row)
 	{

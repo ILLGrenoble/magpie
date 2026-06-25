@@ -160,7 +160,7 @@ bool equals_all(const t_vec<t_obj>& vec1, const t_vec<t_obj>& _vec2,
 			return false;
 
 		// remove already checked element
-		vec2.erase(iter.base()-1);
+		vec2.erase(iter.base() - 1);
 	}
 
 	return true;
@@ -569,7 +569,7 @@ requires is_mat<t_mat>
 
 	for(std::size_t i = 0; i < mat.size1(); ++i)
 	{
-		for(std::size_t j=i+1; j < mat.size2(); ++j)
+		for(std::size_t j = i + 1; j < mat.size2(); ++j)
 		{
 			if constexpr(is_complex<t_elem>)
 			{
@@ -605,18 +605,18 @@ requires is_mat<t_mat>
 
 	for(std::size_t i = 0; i < mat.size1(); ++i)
 	{
-		for(std::size_t j=i+1; j < mat.size2(); ++j)
+		for(std::size_t j = i + 1; j < mat.size2(); ++j)
 		{
 			if constexpr(is_complex<t_elem>)
 			{
 				// not hermitian?
-				if(!tl2::equals<t_elem>(mat(i, j), -std::conj(mat(j,i)), eps))
+				if(!tl2::equals<t_elem>(mat(i, j), -std::conj(mat(j, i)), eps))
 					return false;
 			}
 			else
 			{
 				// not skew-symmetric?
-				if(!tl2::equals<t_elem>(mat(i, j), -mat(j,i), eps))
+				if(!tl2::equals<t_elem>(mat(i, j), -mat(j, i), eps))
 					return false;
 			}
 		}
@@ -964,7 +964,7 @@ requires tl2::is_basic_vec<t_vec> /*&& tl2::is_dyn_vec<t_vec>*/
  * create a vector with given size if it is dynamic
  */
 template<class t_vec>
-t_vec create(std::size_t size=3)
+t_vec create(std::size_t size = 3)
 requires is_basic_vec<t_vec>
 {
 	t_vec vec;
@@ -1078,9 +1078,9 @@ requires is_mat<t_mat> && is_basic_vec<t_vec>
 	t_mat mat = unit<t_mat>(iRows, iCols);
 
 	auto iterCol = lst.begin();
-	for(std::size_t iCol=0; iCol<iCols; ++iCol)
+	for(std::size_t iCol = 0; iCol < iCols; ++iCol)
 	{
-		for(std::size_t iRow=0; iRow<iRows; ++iRow)
+		for(std::size_t iRow=0; iRow < iRows; ++iRow)
 			mat(iRow, iCol) = (*iterCol)[iRow];
 		std::advance(iterCol, 1);
 	}
@@ -1102,9 +1102,9 @@ requires is_mat<t_mat>
 	t_mat mat = unit<t_mat>(N, N);
 
 	auto iter = lst.begin();
-	for(std::size_t iRow=0; iRow<N; ++iRow)
+	for(std::size_t iRow = 0; iRow < N; ++iRow)
 	{
-		for(std::size_t iCol=0; iCol<N; ++iCol)
+		for(std::size_t iCol = 0; iCol < N; ++iCol)
 		{
 			mat(iRow, iCol) = *iter;
 			std::advance(iter, 1);
@@ -1139,8 +1139,8 @@ requires is_basic_vec<t_vec> && is_mat<t_mat>
 	t_vec vec;
 	vec.reserve(mat.size1()*mat.size2());
 
-	for(t_idx iRow=0; iRow<mat.size1(); ++iRow)
-		for(t_idx iCol=0; iCol<mat.size2(); ++iCol)
+	for(t_idx iRow = 0; iRow < mat.size1(); ++iRow)
+		for(t_idx iCol = 0; iCol < mat.size2(); ++iCol)
 			vec.push_back(T_dst(mat(iRow, iCol)));
 
 	return vec;
@@ -1163,8 +1163,8 @@ requires is_mat<t_mat_dst> && is_mat<t_mat_src>
 
 	t_mat_dst matdst = unit<t_mat_dst>(maxRows, maxCols);
 
-	for(t_idx iRow=0; iRow<mat.size1(); ++iRow)
-		for(t_idx iCol=0; iCol<mat.size2(); ++iCol)
+	for(t_idx iRow = 0; iRow < mat.size1(); ++iRow)
+		for(t_idx iCol = 0; iCol < mat.size2(); ++iCol)
 			matdst(iRow, iCol) = T_dst(mat(iRow, iCol));
 
 	return matdst;
@@ -1588,7 +1588,7 @@ t_mat submat(const t_mat& mat, decltype(mat.size1()) iRemRow, decltype(mat.size2
 requires is_basic_mat<t_mat> && is_dyn_mat<t_mat>
 {
 	using size_t = decltype(mat.size1());
-	t_mat matRet = create<t_mat>(mat.size1()-1, mat.size2()-1);
+	t_mat matRet = create<t_mat>(mat.size1() - 1, mat.size2() - 1);
 
 	size_t iResRow = 0;
 	for(size_t iRow = 0; iRow < mat.size1(); ++iRow)
@@ -1625,9 +1625,9 @@ requires is_basic_mat<t_mat> && is_dyn_mat<t_mat>
 	using size_t = decltype(mat.size1());
 	t_mat matRet = create<t_mat>(num_rows, num_cols);
 
-	for(size_t row=0; row<num_rows; ++row)
-		for(size_t col=0; col<num_cols; ++col)
-			matRet(row, col) = mat(row+row_start, col+col_start);
+	for(size_t row = 0; row < num_rows; ++row)
+		for(size_t col = 0; col < num_cols; ++col)
+			matRet(row, col) = mat(row + row_start, col + col_start);
 
 	return matRet;
 }
@@ -1639,7 +1639,7 @@ requires is_basic_mat<t_mat> && is_dyn_mat<t_mat>
 template<class t_mat>
 void set_submat(t_mat& mat, const t_mat& submat,
 	decltype(mat.size1()) row_start, decltype(mat.size2()) col_start,
-	decltype(mat.size1()) num_rows=9999, decltype(mat.size2()) num_cols=9999)
+	decltype(mat.size1()) num_rows = 9999, decltype(mat.size2()) num_cols = 9999)
 requires is_basic_mat<t_mat> && is_dyn_mat<t_mat>
 {
 	using size_t = decltype(mat.size1());
@@ -1647,8 +1647,8 @@ requires is_basic_mat<t_mat> && is_dyn_mat<t_mat>
 	num_rows = std::min(num_rows, submat.size1());
 	num_cols = std::min(num_cols, submat.size2());
 
-	for(size_t row=0; row<num_rows; ++row)
-		for(size_t col=0; col<num_cols; ++col)
+	for(size_t row = 0; row < num_rows; ++row)
+		for(size_t col = 0; col < num_cols; ++col)
 			mat(row+row_start, col+col_start) = submat(row, col);
 }
 
@@ -1663,9 +1663,9 @@ requires is_basic_mat<t_mat> && is_dyn_mat<t_mat>
 {
 	using size_t = decltype(mat.size1());
 
-	for(size_t row=0; row<submat.size1(); ++row)
+	for(size_t row = 0; row < submat.size1(); ++row)
 	{
-		for(size_t col=0; col<submat.size2(); ++col)
+		for(size_t col = 0; col < submat.size2(); ++col)
 			mat(row+row_start, col+col_start) += submat(row, col);
 	}
 }
@@ -1818,7 +1818,7 @@ requires is_mat<t_mat> && is_basic_vec<t_vec>
 	t_cont_out<t_vec> lstRecip;
 	lstRecip.reserve(basis_inv.size1());
 
-	for(std::size_t currow=0; currow<basis_inv.size1(); ++currow)
+	for(std::size_t currow = 0; currow < basis_inv.size1(); ++currow)
 	{
 		const t_vec rowvec = row<t_mat, t_vec>(basis_inv, currow);
 		lstRecip.emplace_back(std::move(rowvec));
@@ -1865,7 +1865,7 @@ requires is_basic_vec<t_vec>
 			t_size row_idx = 0;
 			for(const t_vec& vec : vecs)
 			{
-				for(t_size col_idx=0; col_idx<N; ++col_idx)
+				for(t_size col_idx = 0; col_idx < N; ++col_idx)
 					mat[(row_idx+1)*N + col_idx] = vec[col_idx];
 				++row_idx;
 			}

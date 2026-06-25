@@ -360,6 +360,7 @@ void MagDynDlg::CalcDispersion()
 	const bool ignore_annihilation = m_ignore_annihilation->isChecked();
 	const bool use_weights = m_use_weights->isChecked();
 	const bool use_projector = m_use_projector->isChecked();
+	const bool use_polcoords = m_use_polcoords->isChecked();;
 	const bool force_incommensurate = m_force_incommensurate->isChecked();
 
 	t_real E0 = use_min_E ? m_dyn.CalcMinimumEnergy() : 0.;
@@ -391,7 +392,7 @@ void MagDynDlg::CalcDispersion()
 	for(t_size i = 0; i < num_pts; ++i)
 	{
 		auto task = [this, &mtx, i, num_pts, E0,
-			use_projector, use_weights, ignore_annihilation, &Q_start, &Q_end]()
+			use_projector, use_weights, use_polcoords, ignore_annihilation, &Q_start, &Q_end]()
 		{
 			const t_vec_real Q = num_pts > 1
 				? tl2::create<t_vec_real>(
@@ -420,20 +421,36 @@ void MagDynDlg::CalcDispersion()
 				// weights
 				if(use_weights)
 				{
-					t_real weight = use_projector ? E_and_S.weight_perp : E_and_S.weight_full;
+					t_real weight = use_polcoords
+						? (use_projector ? E_and_S.weight_pol_perp : E_and_S.weight_pol_full)
+						: (use_projector ? E_and_S.weight_perp : E_and_S.weight_full);
 					if(std::isnan(weight) || std::isinf(weight))
 						continue;
 
 					m_ws_data.push_back(weight);
 
-					for(int channel = 0; channel < 3; ++channel)
+					const t_mat *S = &E_and_S.S_perp;
+					if(use_polcoords)
 					{
-						t_real weight_channel = use_projector
-							? E_and_S.S_perp(channel, channel).real()
-							: E_and_S.S(channel, channel).real();
+						if(use_projector)
+							S = &E_and_S.S_pol_perp;
+						else
+							S = &E_and_S.S_pol;
+					}
+					else
+					{
+						if(use_projector)
+							S = &E_and_S.S_perp;
+						else
+							S = &E_and_S.S;
+					}
 
-						weight_channel = std::abs(weight_channel);
-
+					for(t_size channel = 0; channel < 3; ++channel)
+					{
+						t_real weight_channel = 0.;
+						if(S->size1() > channel && S->size2() > channel)
+							weight_channel = std::abs((*S)(channel, channel).real());
+	
 						if(!tl2::equals_0<t_real>(weight_channel, g_eps))
 						{
 							m_Es_data_channel[channel].push_back(E);
@@ -536,6 +553,7 @@ void MagDynDlg::CalcHamiltonian()
 	// options
 	const bool only_energies = !m_use_weights->isChecked();
 	const bool use_projector = m_use_projector->isChecked();
+	const bool use_polcoords = m_use_polcoords->isChecked();;
 	const bool ignore_annihilation = m_ignore_annihilation->isChecked();
 	const bool unite_degeneracies = m_unite_degeneracies->isChecked();
 	const bool force_incommensurate = m_force_incommensurate->isChecked();
@@ -772,8 +790,9 @@ void MagDynDlg::CalcHamiltonian()
 				continue;
 
 			const t_mat& S = E_and_S.S;
-			const t_mat& S_perp = E_and_S.S_perp;
-			t_real weight = E_and_S.weight_perp;
+			const t_mat& S_perp = use_polcoords ? E_and_S.S_pol_perp : E_and_S.S_perp;
+			t_real weight = use_polcoords ? E_and_S.weight_pol_perp : E_and_S.weight_perp;
+
 			if(!use_projector)
 				weight = tl2::trace<t_mat>(S).real();
 
