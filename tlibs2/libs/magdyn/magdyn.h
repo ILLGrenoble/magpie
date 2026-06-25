@@ -475,7 +475,7 @@ public:
 	/**
 	 * calculates the polarisation matrix
 	 */
-	void CalcPolarisation(const t_vec_real& Q_rlu, EnergyAndWeight& E_and_S) const;
+	bool CalcPolarisation(const t_vec_real& Q_rlu, EnergyAndWeight& E_and_S) const;
 
 	/**
 	 * unite degenerate energies and their corresponding eigenstates

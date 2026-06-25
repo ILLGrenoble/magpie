@@ -320,9 +320,8 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 		E_and_S.weight      = E_and_S.weight_perp;
 #endif
 
-		if(m_calc_pol)
+		if(m_calc_pol && CalcPolarisation(S.Q_rlu, E_and_S))
 		{
-			CalcPolarisation(S.Q_rlu, E_and_S);
 			E_and_S.S_pol_sum       = tl2::trace<t_mat>(E_and_S.S_pol);
 			E_and_S.S_pol_perp_sum  = tl2::trace<t_mat>(E_and_S.S_pol_perp);
 			E_and_S.weight_pol_full = std::abs(E_and_S.S_pol_sum.real());

@@ -48,17 +48,22 @@
  * implements the blume-maleev formalism
  */
 MAGDYN_TEMPL
-void MAGDYN_INST::CalcPolarisation(const t_vec_real& Q_rlu,
+bool MAGDYN_INST::CalcPolarisation(const t_vec_real& Q_rlu,
 	MAGDYN_TYPE::EnergyAndWeight& E_and_S) const
 {
-	/*const t_mat_real& UB = m_xtalUB;
-	const t_mat_real& UBinv = m_xtalUBinv;
+	if(tl2::equals_0<t_vec_real>(Q_rlu, m_eps))
+	{
+		TL2_CERR_OPT << "Magdyn error: Q coordinate system cannot be calculated for Q = 0."
+			<< std::endl;
+		return false;
+	}
 
-	t_vec_real Q_lab = UB * Q_rlu;
-	t_vec_real h_lab = UB * tl2::create<t_vec_real>({ 1., 0., 0. });
-	t_vec_real l_lab = UB * tl2::create<t_vec_real>({ 0., 0., 1. });
+
+	/*t_vec_real Q_lab = m_xtalUB * Q_rlu;
+	t_vec_real h_lab = m_xtalUB * tl2::create<t_vec_real>({ 1., 0., 0. });
+	t_vec_real l_lab = m_xtalUB * tl2::create<t_vec_real>({ 0., 0., 1. });
 	t_mat_real rotQ = tl2::rotation<t_mat_real>(h_lab, Q_lab, &l_lab, m_eps, true);
-	t_mat_real rotQ_hkl = UBinv * rotQ * UB;*/
+	t_mat_real rotQ_hkl = m_xtalUBinv * rotQ * m_xtalUB;*/
 
 
 	t_vec_real Q_lab = m_xtalB * Q_rlu;
@@ -70,38 +75,36 @@ void MAGDYN_INST::CalcPolarisation(const t_vec_real& Q_rlu,
 	t_vec_real Qperp_lab = tl2::cross(up_lab, Q_lab);
 	Qperp_lab /= norm(Qperp_lab);
 
-	t_mat_real rotQ_hkl = tl2::create<t_mat_real>(3, 3);
-	tl2::set_row<t_mat_real, t_vec_real>(rotQ_hkl, Q_lab, 0);
-	tl2::set_row<t_mat_real, t_vec_real>(rotQ_hkl, Qperp_lab, 1);
-	tl2::set_row<t_mat_real, t_vec_real>(rotQ_hkl, up_lab, 2);
+	t_mat_real rotQ = tl2::create<t_mat_real>(3, 3);
+	tl2::set_row<t_mat_real, t_vec_real>(rotQ, Q_lab, 0);
+	tl2::set_row<t_mat_real, t_vec_real>(rotQ, Qperp_lab, 1);
+	tl2::set_row<t_mat_real, t_vec_real>(rotQ, up_lab, 2);
 
 
-	//t_mat_real rotQ_hkl_inv = tl2::trans<t_mat_real>(rotQ_hkl);
-	const auto [rotQ_hkl_inv, rotQ_hkl_inv_ok] = tl2::inv(rotQ_hkl);
-	if(!rotQ_hkl_inv_ok)
+	//t_mat_real rotQ_inv = tl2::trans<t_mat_real>(rotQ);
+	const auto [rotQ_inv, rotQ_inv_ok] = tl2::inv(rotQ);
+	if(!rotQ_inv_ok)
 	{
-		TL2_CERR_OPT << "Magdyn error: Cannot invert Q rotation matrix."
-			<< std::endl;
+		using namespace tl2_ops;
+		TL2_CERR_OPT << "Magdyn error: Cannot invert Q rotation matrix for Q = "
+			<< Q_rlu << "." << std::endl;
+		return false;
 	}
 
-	t_mat rotQ_hkl_cplx = tl2::convert<t_mat, t_mat_real>(rotQ_hkl);
-	t_mat rotQ_hkl_inv_cplx = tl2::convert<t_mat, t_mat_real>(rotQ_hkl_inv);
+	t_mat rotQ_cplx = tl2::convert<t_mat, t_mat_real>(rotQ);
+	t_mat rotQ_inv_cplx = tl2::convert<t_mat, t_mat_real>(rotQ_inv);
 
-	E_and_S.S_pol_perp = rotQ_hkl_cplx * E_and_S.S_perp * rotQ_hkl_inv_cplx;
-	E_and_S.S_pol = rotQ_hkl_cplx * E_and_S.S * rotQ_hkl_inv_cplx;
+	E_and_S.S_pol_perp = rotQ_cplx * E_and_S.S_perp * rotQ_inv_cplx;
+	E_and_S.S_pol = rotQ_cplx * E_and_S.S * rotQ_inv_cplx;
 
 
 	/*using namespace tl2_ops;
-	std::cout << "UB =\n";
-	tl2::niceprint(std::cout, UB, 1e-4, 4);
 	std::cout << "Q_rlu =\n";
 	tl2::niceprint(std::cout, Q_rlu, 1e-4, 4);
 	std::cout << "Q_lab =\n";
 	tl2::niceprint(std::cout, Q_lab, 1e-4, 4);
 	std::cout << "rotQ =\n";
 	tl2::niceprint(std::cout, rotQ, 1e-4, 4);
-	std::cout << "rotQ_hkl =\n";
-	tl2::niceprint(std::cout, rotQ_hkl, 1e-4, 4);
 	std::cout << std::endl;*/
 
 
@@ -116,6 +119,8 @@ void MAGDYN_INST::CalcPolarisation(const t_vec_real& Q_rlu,
 		E_and_S.S_pol(i, i) = std::abs(tl2::trace<t_mat>(S_pol).real());
 		E_and_S.S_pol_perp(i, i) = std::abs(tl2::trace<t_mat>(S_pol_perp).real());
 	}*/
+
+	return true;
 }
 
 // --------------------------------------------------------------------
