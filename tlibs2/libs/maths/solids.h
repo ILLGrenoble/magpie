@@ -92,6 +92,8 @@ spherify(const std::tuple<t_cont<t_vec>, t_cont<t_vec>, t_cont<t_vec>>& tup,
 	typename t_vec::value_type rad = 1)
 requires is_vec<t_vec>
 {
+	using t_real = typename t_vec::value_type;
+
 	const t_cont<t_vec>& vertices = std::get<0>(tup);
 	//const t_cont<t_vec>& normals = std::get<1>(tup);
 	const t_cont<t_vec>& uvs = std::get<2>(tup);
@@ -104,7 +106,9 @@ requires is_vec<t_vec>
 	// vertices
 	for(t_vec vec : vertices)
 	{
-		vec /= tl2::norm<t_vec>(vec);
+		t_real vec_len = tl2::norm<t_vec>(vec);
+		if(!tl2::equals_0<t_real>(vec_len))
+			vec /= vec_len;
 		vec *= rad;
 		vertices_new.emplace_back(std::move(vec));
 	}
@@ -126,7 +130,9 @@ requires is_vec<t_vec>
 		std::advance(itervert, 1);
 
 		t_vec vecmid = mean<t_vec>({ vec1, vec2, vec3 });
-		vecmid /= tl2::norm<t_vec>(vecmid);
+		t_real vecmid_len = tl2::norm<t_vec>(vecmid);
+		if(!tl2::equals_0<t_real>(vecmid_len))
+			vecmid /= vecmid_len;
 		normals_new.emplace_back(std::move(vecmid));
 	}
 
@@ -418,8 +424,9 @@ requires is_vec<t_vec>
 		t_vec n = tl2::cross<t_vec>({
 			vertices[idx2]-vertices[idx0],
 			vertices[idx1]-vertices[idx0] });
-		n /= tl2::norm<t_vec>(n);
-
+		t_real n_len = tl2::norm<t_vec>(n);
+		if(!tl2::equals_0<t_real>(n_len))
+			n /= n_len;
 		normals.emplace_back(std::move(n));
 	}
 
@@ -486,6 +493,7 @@ requires is_vec<t_vec>
 		vertices.emplace_back(std::move(bottom));
 
 		vertices_u.push_back(u);
+		vertices_u.push_back(u);
 	}
 
 	// faces, normals & uvs
@@ -501,19 +509,21 @@ requires is_vec<t_vec>
 	{
 		std::size_t idx0 = face*2 + 0;	// top 1
 		std::size_t idx1 = face*2 + 1;	// bottom 1
-		std::size_t idx2 = (face >= num_points-1 ? 1 : face*2 + 3);	// bottom 2
-		std::size_t idx3 = (face >= num_points-1 ? 0 : face*2 + 2);	// top 2
+		std::size_t idx2 = (face >= num_points - 1 ? 1 : face*2 + 3);	// bottom 2
+		std::size_t idx3 = (face >= num_points - 1 ? 0 : face*2 + 2);	// top 2
 
 		t_vec n = tl2::cross<t_vec>({
-			vertices[idx1]-vertices[idx0],
-			vertices[idx3]-vertices[idx0] });
-		n /= tl2::norm<t_vec>(n);
+			vertices[idx1] - vertices[idx0],
+			vertices[idx3] - vertices[idx0] });
+		t_real n_len = tl2::norm<t_vec>(n);
+		if(!tl2::equals_0<t_real>(n_len))
+			n /= n_len;
 
 		faces.push_back({ idx0, idx1, idx2, idx3 });
 		normals.emplace_back(std::move(n));
 
 		t_real u1 = vertices_u[idx0];
-		t_real u2 = (face >= num_points-1 ? 1 : vertices_u[idx3]);
+		t_real u2 = (face >= num_points - 1 ? 1 : vertices_u[idx3]);
 		uvs.push_back({
 			tl2::create<t_vec>({u1, 1}), tl2::create<t_vec>({u1, 0}),
 			tl2::create<t_vec>({u2, 0}), tl2::create<t_vec>({u2, 1})
@@ -763,7 +773,9 @@ requires is_vec<t_vec>
 			create<t_vec>({0, 0}) }});
 
 		t_vec n = tl2::cross<t_vec>({vec12, vec13});
-		n /= tl2::norm<t_vec>(n);
+		T n_len = tl2::norm<t_vec>(n);
+		if(!tl2::equals_0<T>(n_len))
+			n /= n_len;
 		normals.emplace_back(std::move(n));
 	}
 
@@ -836,7 +848,9 @@ requires is_vec<t_vec>
 			create<t_vec>({0, 0}) }});
 
 		t_vec n = tl2::cross<t_vec>({vec12, vec13});
-		n /= tl2::norm<t_vec>(n);
+		T n_len = tl2::norm<t_vec>(n);
+		if(!tl2::equals_0<T>(n_len))
+			n /= n_len;
 		normals.emplace_back(std::move(n));
 	}
 
