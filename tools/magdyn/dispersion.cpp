@@ -800,7 +800,7 @@ void MagDynDlg::CalcHamiltonian()
 			if(ignore_annihilation && E < t_real(0))
 				continue;
 
-			const t_mat& S = E_and_S.S;
+			const t_mat& S = use_polcoords ? E_and_S.S_pol : E_and_S.S;
 			const t_mat& S_perp = use_polcoords ? E_and_S.S_pol_perp : E_and_S.S_perp;
 			t_real weight = use_polcoords ? E_and_S.weight_pol_perp : E_and_S.weight_perp;
 
@@ -818,10 +818,10 @@ void MagDynDlg::CalcHamiltonian()
 			// S(Q, E)
 			ostr << "<td style=\"padding-right:16px\">";
 			ostr << "<table style=\"border:0px\">";
-			for(std::size_t i=0; i<S.size1(); ++i)
+			for(std::size_t i = 0; i < S.size1(); ++i)
 			{
 				ostr << "<tr>";
-				for(std::size_t j=0; j<S.size2(); ++j)
+				for(std::size_t j = 0; j < S.size2(); ++j)
 				{
 					t_cplx elem = S(i, j);
 					tl2::set_eps_0<t_cplx, t_real>(elem, g_eps);
@@ -836,10 +836,10 @@ void MagDynDlg::CalcHamiltonian()
 			// S_perp(Q, E)
 			ostr << "<td style=\"padding-right:16px\">";
 			ostr << "<table style=\"border:0px\">";
-			for(std::size_t i=0; i<S_perp.size1(); ++i)
+			for(std::size_t i = 0; i < S_perp.size1(); ++i)
 			{
 				ostr << "<tr>";
-				for(std::size_t j=0; j<S_perp.size2(); ++j)
+				for(std::size_t j = 0; j < S_perp.size2(); ++j)
 				{
 					t_cplx elem = S_perp(i, j);
 					tl2::set_eps_0<t_cplx, t_real>(elem, g_eps);
