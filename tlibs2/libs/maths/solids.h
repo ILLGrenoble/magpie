@@ -348,8 +348,8 @@ requires is_vec<t_vec>
 		vertices.emplace_back(std::move(vert));
 
 		t_vec uv = create<t_vec>({
-			(t_real(1)+c) / t_real(2),
-			(t_real(1)+s) / t_real(2) });
+			(t_real(1) + c) / t_real(2),
+			(t_real(1) + s) / t_real(2) });
 		all_uvs.emplace_back(std::move(uv));
 	}
 
@@ -362,7 +362,7 @@ requires is_vec<t_vec>
 	std::iota(face.begin(), face.end(), 0);
 	faces.emplace_back(std::move(face));
 
-	normals.emplace_back(create<t_vec>({0,0,1}));
+	normals.emplace_back(create<t_vec>({ 0, 0, 1 }));
 
 	t_cont<t_vec> uv;
 	uv.reserve(num_points);
@@ -509,8 +509,8 @@ requires is_vec<t_vec>
 	{
 		std::size_t idx0 = face*2 + 0;	// top 1
 		std::size_t idx1 = face*2 + 1;	// bottom 1
-		std::size_t idx2 = (face >= num_points - 1 ? 1 : face*2 + 3);	// bottom 2
-		std::size_t idx3 = (face >= num_points - 1 ? 0 : face*2 + 2);	// top 2
+		std::size_t idx2 = (face >= num_points - 1 ? 1 : (face + 1)*2 + 1);	// bottom 2
+		std::size_t idx3 = (face >= num_points - 1 ? 0 : (face + 1)*2 + 0);	// top 2
 
 		t_vec n = tl2::cross<t_vec>({
 			vertices[idx1] - vertices[idx0],
@@ -525,8 +525,8 @@ requires is_vec<t_vec>
 		t_real u1 = vertices_u[idx0];
 		t_real u2 = (face >= num_points - 1 ? 1 : vertices_u[idx3]);
 		uvs.push_back({
-			tl2::create<t_vec>({u1, 1}), tl2::create<t_vec>({u1, 0}),
-			tl2::create<t_vec>({u2, 0}), tl2::create<t_vec>({u2, 1})
+			tl2::create<t_vec>({ u1, 1 }), tl2::create<t_vec>({ u1, 0 }),
+			tl2::create<t_vec>({ u2, 0 }), tl2::create<t_vec>({ u2, 1 })
 		});
 	}
 
@@ -768,9 +768,9 @@ requires is_vec<t_vec>
 
 		// TODO
 		uvs.emplace_back(t_cont<t_vec>{{
-			create<t_vec>({0, 0}),
-			create<t_vec>({0, 0}),
-			create<t_vec>({0, 0}) }});
+			create<t_vec>({ 0, 0 }),
+			create<t_vec>({ 0, 0 }),
+			create<t_vec>({ 0, 0 }) }});
 
 		t_vec n = tl2::cross<t_vec>({vec12, vec13});
 		T n_len = tl2::norm<t_vec>(n);
@@ -841,11 +841,11 @@ requires is_vec<t_vec>
 
 		// TODO
 		uvs.emplace_back(t_cont<t_vec>{{
-			create<t_vec>({0, 0}),
-			create<t_vec>({0, 0}),
-			create<t_vec>({0, 0}),
-			create<t_vec>({0, 0}),
-			create<t_vec>({0, 0}) }});
+			create<t_vec>({ 0, 0 }),
+			create<t_vec>({ 0, 0 }),
+			create<t_vec>({ 0, 0 }),
+			create<t_vec>({ 0, 0 }),
+			create<t_vec>({ 0, 0 }) }});
 
 		t_vec n = tl2::cross<t_vec>({vec12, vec13});
 		T n_len = tl2::norm<t_vec>(n);
@@ -905,15 +905,15 @@ requires is_vec<t_vec>
 
 	t_cont<t_cont<t_vec>> uvs =
 	{
-		{ create<t_vec>({0,0}), create<t_vec>({1,0}), create<t_vec>({0.5,1}) },
-		{ create<t_vec>({0,0}), create<t_vec>({1,0}), create<t_vec>({0.5,1}) },
-		{ create<t_vec>({0,0}), create<t_vec>({1,0}), create<t_vec>({0.5,1}) },
-		{ create<t_vec>({0,0}), create<t_vec>({1,0}), create<t_vec>({0.5,1}) },
+		{ create<t_vec>({ 0, 0 }), create<t_vec>({ 1, 0 }), create<t_vec>({ 0.5, 1 }) },
+		{ create<t_vec>({ 0, 0 }), create<t_vec>({ 1, 0 }), create<t_vec>({ 0.5, 1 }) },
+		{ create<t_vec>({ 0, 0 }), create<t_vec>({ 1, 0 }), create<t_vec>({ 0.5, 1 }) },
+		{ create<t_vec>({ 0, 0 }), create<t_vec>({ 1, 0 }), create<t_vec>({ 0.5, 1 }) },
 
-		{ create<t_vec>({0,0}), create<t_vec>({1,0}), create<t_vec>({0.5,1}) },
-		{ create<t_vec>({0,0}), create<t_vec>({1,0}), create<t_vec>({0.5,1}) },
-		{ create<t_vec>({0,0}), create<t_vec>({1,0}), create<t_vec>({0.5,1}) },
-		{ create<t_vec>({0,0}), create<t_vec>({1,0}), create<t_vec>({0.5,1}) },
+		{ create<t_vec>({ 0, 0 }), create<t_vec>({ 1, 0 }), create<t_vec>({ 0.5, 1 }) },
+		{ create<t_vec>({ 0, 0 }), create<t_vec>({ 1, 0 }), create<t_vec>({ 0.5, 1 }) },
+		{ create<t_vec>({ 0, 0 }), create<t_vec>({ 1, 0 }), create<t_vec>({ 0.5, 1 }) },
+		{ create<t_vec>({ 0, 0 }), create<t_vec>({ 1, 0 }), create<t_vec>({ 0.5, 1 }) },
 	};
 
 	return std::make_tuple(vertices, faces, normals, uvs);
@@ -959,10 +959,10 @@ requires is_vec<t_vec>
 
 	t_cont<t_cont<t_vec>> uvs =
 	{
-		{ create<t_vec>({0,0}), create<t_vec>({1,0}), create<t_vec>({0.5,1}) },
-		{ create<t_vec>({0,0}), create<t_vec>({1,0}), create<t_vec>({0.5,1}) },
-		{ create<t_vec>({0,0}), create<t_vec>({1,0}), create<t_vec>({0.5,1}) },
-		{ create<t_vec>({0,0}), create<t_vec>({1,0}), create<t_vec>({0.5,1}) },
+		{ create<t_vec>({ 0, 0 }), create<t_vec>({ 1, 0 }), create<t_vec>({ 0.5, 1 }) },
+		{ create<t_vec>({ 0, 0 }), create<t_vec>({ 1, 0 }), create<t_vec>({ 0.5, 1 }) },
+		{ create<t_vec>({ 0, 0 }), create<t_vec>({ 1, 0 }), create<t_vec>({ 0.5, 1 }) },
+		{ create<t_vec>({ 0, 0 }), create<t_vec>({ 1, 0 }), create<t_vec>({ 0.5, 1 }) },
 	};
 
 	return std::make_tuple(vertices, faces, normals, uvs);
