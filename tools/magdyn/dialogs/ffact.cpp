@@ -178,7 +178,7 @@ QWidget* FormFactorDlg::CreateFormFactorPanel()
 	m_plot_ff = new QCustomPlot(panelFFact);
 	m_plot_ff->setFont(font());
 	m_plot_ff->xAxis->setLabel("Momentum Transfer Q (Å⁻¹)");
-	m_plot_ff->yAxis->setLabel("Magnetic Form Factor f_M(Q)");
+	m_plot_ff->yAxis->setLabel("Magnetic Form Factor F_M(Q)");
 	m_plot_ff->setInteraction(QCP::iRangeDrag, true);
 	m_plot_ff->setInteraction(QCP::iRangeZoom, true);
 	m_plot_ff->setSelectionRectMode(QCP::srmZoom);
@@ -264,6 +264,11 @@ QWidget* FormFactorDlg::CreateFormFactorPanel()
 	m_num_Q_ff->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_num_Q_ff->setToolTip("Number of Q points to calculate.");
 
+	// plot |F|^2
+	m_ff_squared = new QCheckBox(panelFFact);
+	m_ff_squared->setText("Plot |F(Q)|^2");
+	m_ff_squared->setChecked(false);
+
 	// progress bar
 	m_progress_ff = new QProgressBar(panelFFact);
 	m_progress_ff->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -283,7 +288,8 @@ QWidget* FormFactorDlg::CreateFormFactorPanel()
 	grid->addWidget(new QLabel("End Q (Å⁻¹):", panelFFact), y, 2, 1, 1);
 	grid->addWidget(m_Q_end_ff, y++, 3, 1, 1);
 	grid->addWidget(new QLabel("Q Count:", panelFFact), y, 0, 1, 1);
-	grid->addWidget(m_num_Q_ff, y++, 1, 1, 1);
+	grid->addWidget(m_num_Q_ff, y, 1, 1, 1);
+	grid->addWidget(m_ff_squared, y++, 2, 1, 2);
 	grid->addWidget(m_progress_ff, y, 0, 1, 3);
 	grid->addWidget(m_btnStartStop_ff, y++, 3, 1, 1);
 
@@ -300,6 +306,7 @@ QWidget* FormFactorDlg::CreateFormFactorPanel()
 	}
 
 	// connections
+	connect(m_ff_squared, &QCheckBox::toggled, [this]() { this->PlotFormFactors(false); });
 	connect(m_plot_ff, &QCustomPlot::mouseMove, this, &FormFactorDlg::FormFactorPlotMouseMove);
 	connect(m_plot_ff, &QCustomPlot::mousePress, this, &FormFactorDlg::FormFactorPlotMousePress);
 	connect(acRescalePlot, &QAction::triggered, this, &FormFactorDlg::RescaleFormFactorPlot);
@@ -413,6 +420,11 @@ void FormFactorDlg::PlotFormFactors(bool clear_settings)
 
 	t_size num_Q = m_data_ff.size();
 	t_size num_indices = m_data_ff[0].ffacts.size();
+	const bool ff_squared = m_ff_squared->isChecked();
+
+	m_plot_ff->yAxis->setLabel(ff_squared
+		? "Magnetic Form Factor |F_M(Q)|^2"
+		: "Magnetic Form Factor Re(F_M(Q))");
 
 	std::vector<QVector<qreal>> Qs_data_ff{num_indices};
 	std::vector<QVector<qreal>> ffact_data_ff{num_indices};
@@ -424,7 +436,9 @@ void FormFactorDlg::PlotFormFactors(bool clear_settings)
 		for(t_size idx = 0; idx < num_indices; ++idx)
 		{
 			Qs_data_ff[idx].push_back(Q);
-			ffact_data_ff[idx].push_back(m_data_ff[Q_idx].ffacts[idx]);
+			ffact_data_ff[idx].push_back(ff_squared
+				? m_data_ff[Q_idx].ffacts2[idx]
+				: m_data_ff[Q_idx].ffacts[idx]);
 		}
 	}
 
@@ -587,6 +601,7 @@ void FormFactorDlg::CalculateFormFactors()
 			for(tl2::ExprParser<t_cplx>& parser : parsers)
 			{
 				t_real val_ff = 0.;
+				t_real val_ff2 = 0.;
 
 				if(parser)
 				{
@@ -595,10 +610,13 @@ void FormFactorDlg::CalculateFormFactors()
 					parser.register_var("s", Q / (4.*tl2::pi<t_real>));
 					parser.register_var("s2", std::pow(Q / (4.*tl2::pi<t_real>), 2.));
 
-					val_ff = parser.eval_noexcept().real();
+					t_cplx val = parser.eval_noexcept();
+					val_ff = val.real();
+					val_ff2 = std::norm(val);
 				}
 
 				data_ff.ffacts.push_back(val_ff);
+				data_ff.ffacts2.push_back(val_ff2);
 			}
 
 			std::lock_guard<std::mutex> _lck{mtx};
@@ -691,8 +709,12 @@ void FormFactorDlg::FormFactorPlotMouseMove(QMouseEvent* evt)
 	t_real Q = m_plot_ff->xAxis->pixelToCoord(evt->pos().x());
 	t_real v = m_plot_ff->yAxis->pixelToCoord(evt->pos().y());
 
-	QString status("Q = %1 rlu, f_M(Q) = %2.");
-	status = status.arg(Q, 0, 'g', g_prec_gui).arg(v, 0, 'g', g_prec_gui);
+	QString status = m_ff_squared->isChecked()
+		? "Q = %1 rlu, |F_M(Q)|^2 = %2."
+		: "Q = %1 rlu, F_M(Q) = %2.";
+	status = status
+		.arg(Q, 0, 'g', g_prec_gui)
+		.arg(v, 0, 'g', g_prec_gui);
 	m_status->setText(status);
 }
 

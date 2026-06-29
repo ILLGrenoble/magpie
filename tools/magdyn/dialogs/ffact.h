@@ -51,8 +51,9 @@
 
 struct FormFactorData
 {
-	t_real momentum{};             // Q
-	std::vector<t_real> ffacts{};  // f_M(Q)
+	t_real momentum{};              // Q
+	std::vector<t_real> ffacts{};   // Re(f_M(Q))
+	std::vector<t_real> ffacts2{};  // |f_M(Q)|^2
 };
 
 
@@ -129,6 +130,7 @@ private:
 	QDoubleSpinBox *m_Q_start_ff{};     // Q start coordinate
 	QDoubleSpinBox *m_Q_end_ff{};       // Q end coordinate
 	QSpinBox *m_num_Q_ff{};             // number of Q coordinates
+	QCheckBox *m_ff_squared{};          // plot |F|^2 instead of F
 
 	QPushButton *m_btnStartStop_ff{};   // start/stop calculation
 	bool m_calcEnabled_ff{};            // enable calculations
