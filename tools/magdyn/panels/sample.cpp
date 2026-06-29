@@ -213,7 +213,7 @@ void MagDynDlg::CreateSamplePanel()
 	grid->addWidget(new QLabel("Magnetic Form Factors", m_samplepanel), y, 0, 1, 1);
 	grid->addWidget(m_num_ffacts, y, 2, 1, 1);
 	grid->addWidget(m_cur_ffact, y++, 3, 1, 1);
-	grid->addWidget(new QLabel("Formula, f_M(Q or s) = ", m_samplepanel), y++, 0, 1, 4);
+	grid->addWidget(new QLabel("Formula, F_M(Q or s) = ", m_samplepanel), y++, 0, 1, 4);
 	grid->addWidget(m_ffact, y++, 0, 1, 4);
 	if(m_combo_ffacts && btn_set_ffact)
 	{
