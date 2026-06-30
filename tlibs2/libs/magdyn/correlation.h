@@ -298,7 +298,19 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 		// see (Shirane 2002), p. 37, equation (2.64)
 		t_mat proj_neutron = tl2::convert<t_mat>(
 			tl2::ortho_projector<t_mat_real, t_vec_real>(S.Q_invA, false));
-		E_and_S.S_perp = proj_neutron * E_and_S.S * proj_neutron;
+		E_and_S.S_perp = proj_neutron * E_and_S.S;
+		if(m_perform_checks && !tl2::equals(tl2::trace(E_and_S.S_perp), tl2::trace(E_and_S.S_perp * proj_neutron), m_eps))
+		{
+			TL2_CERR_OPT << "Magdyn error: Wrong S_perp at Q = " << S.Q_rlu << ":";
+			TL2_CERR_OPT << "\nproj * S =\n";
+			if(!m_silent)
+				tl2::niceprint(std::cerr, E_and_S.S_perp, 1e-4, 4);
+			TL2_CERR_OPT << "\nproj * S * proj =\n";
+			if(!m_silent)
+				tl2::niceprint(std::cerr, E_and_S.S_perp * proj_neutron, 1e-4, 4);
+			TL2_CERR_OPT << std::endl;
+		}
+
 
 #ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
 		t_mat proj_neutron2 = tl2::convert<t_mat>(
