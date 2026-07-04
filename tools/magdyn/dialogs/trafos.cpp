@@ -43,7 +43,9 @@
 void TrafoCalculator::SetKernel(const t_magdyn* dyn)
 {
 	m_dyn = dyn;
-	CalculateRotationXtal();
+
+	CalculateRotation();
+	CalculateProjection();
 }
 
 
@@ -56,21 +58,54 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 
 	// tabs
 	QTabWidget *tabs = new QTabWidget(this);
-	QWidget *rotationPanel = new QWidget(tabs);
-	QWidget *rotationPanelXtal = new QWidget(tabs);
+	QWidget *rotationPanel = CreateRotationPanel();
+	QWidget *projectionPanel = CreateProjectionPanel();
+	rotationPanel->setParent(tabs);
+	projectionPanel->setParent(tabs);
 
 	// buttons
 	QDialogButtonBox *buttons = new QDialogButtonBox(this);
 	buttons->setStandardButtons(QDialogButtonBox::Ok);
 
 	// tab panels
-	tabs->addTab(rotationPanel, "Axis Rotation (Cartesian)");
-	tabs->addTab(rotationPanelXtal, "Axis Rotation (Crystal)");
+	tabs->addTab(rotationPanel, "Axis Rotation");
+	tabs->addTab(projectionPanel, "Projection");
 
-	// rotation tab (orthogonal)
-	QLabel *labelAxis = new QLabel("Axis: ");
+	// main grid
+	auto grid_dlg = new QGridLayout(this);
+	grid_dlg->setSpacing(4);
+	grid_dlg->setContentsMargins(8, 8, 8, 8);
+	grid_dlg->addWidget(tabs, 0, 0, 1, 1);
+	grid_dlg->addWidget(buttons, 1, 0, 1, 1);
+
+	// restore settings
+	if(m_sett)
+	{
+		// restore dialog geometry
+		if(m_sett->contains("trafocalc/geo"))
+			restoreGeometry(m_sett->value("trafocalc/geo").toByteArray());
+		else
+			resize(500, 500);
+	}
+
+	// connections
+	connect(buttons, &QDialogButtonBox::accepted, this, &TrafoCalculator::accept);
+	connect(buttons, &QDialogButtonBox::rejected, this, &TrafoCalculator::reject);
+
+	CalculateRotation();
+	CalculateProjection();
+}
+
+
+
+QWidget* TrafoCalculator::CreateRotationPanel()
+{
+	// rotation tab (crystal)
+	QWidget *rotationPanel = new QWidget(this);
+
+	QLabel *labelAxis = new QLabel("Axis (rlu): ");
 	QLabel *labelAngle = new QLabel("Angle (\xc2\xb0): ");
-	QLabel *labelVecToRotate = new QLabel("Vector: ");
+	QLabel *labelVecToRotate = new QLabel("Vector (rlu): ");
 
 	m_spinAxis[0] = new QDoubleSpinBox(rotationPanel);
 	m_spinAxis[1] = new QDoubleSpinBox(rotationPanel);
@@ -85,6 +120,13 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 	m_spinAngle->setDecimals(3);
 	m_spinAngle->setSingleStep(0.1);
 	//m_spinAngle->setSuffix("\xc2\xb0");
+
+	m_checkRot = new QCheckBox(rotationPanel);
+	m_checkRot->setText("Use Crystal System");
+	m_checkRot->setChecked(true);
+
+	QPushButton *btnRecalc = new QPushButton(rotationPanel);
+	btnRecalc->setText("Get Crystal");
 
 	m_spinVecToRotate[0] = new QDoubleSpinBox(rotationPanel);
 	m_spinVecToRotate[1] = new QDoubleSpinBox(rotationPanel);
@@ -123,100 +165,15 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 	grid_rotation->addWidget(m_spinAxis[2], 0, 3, 1, 1);
 	grid_rotation->addWidget(labelAngle, 1, 0, 1, 1);
 	grid_rotation->addWidget(m_spinAngle, 1, 1, 1, 1);
+	grid_rotation->addWidget(m_checkRot, 1, 2, 1, 1);
+	grid_rotation->addWidget(btnRecalc, 1, 3, 1, 1);
 	grid_rotation->addWidget(labelVecToRotate, 2, 0, 1, 1);
 	grid_rotation->addWidget(m_spinVecToRotate[0], 2, 1, 1, 1);
 	grid_rotation->addWidget(m_spinVecToRotate[1], 2, 2, 1, 1);
 	grid_rotation->addWidget(m_spinVecToRotate[2], 2, 3, 1, 1);
 	grid_rotation->addWidget(m_textRotation, 3, 0, 1, 4);
 
-	// rotation tab (crystal)
-	QLabel *labelAxisXtal = new QLabel("Axis (rlu): ");
-	QLabel *labelAngleXtal = new QLabel("Angle (\xc2\xb0): ");
-	QLabel *labelVecToRotateXtal = new QLabel("Vector (rlu): ");
-
-	m_spinAxis_xtal[0] = new QDoubleSpinBox(rotationPanelXtal);
-	m_spinAxis_xtal[1] = new QDoubleSpinBox(rotationPanelXtal);
-	m_spinAxis_xtal[2] = new QDoubleSpinBox(rotationPanelXtal);
-	m_spinAxis_xtal[0]->setValue(0);
-	m_spinAxis_xtal[1]->setValue(0);
-	m_spinAxis_xtal[2]->setValue(1);
-
-	m_spinAngle_xtal = new QDoubleSpinBox(rotationPanelXtal);
-	m_spinAngle_xtal->setMinimum(-360.);
-	m_spinAngle_xtal->setMaximum(360);
-	m_spinAngle_xtal->setDecimals(3);
-	m_spinAngle_xtal->setSingleStep(0.1);
-	//m_spinAngle_xtal->setSuffix("\xc2\xb0");
-
-	QPushButton *btnRecalcXtal = new QPushButton(rotationPanelXtal);
-	btnRecalcXtal->setText("Get Crystal");
-
-	m_spinVecToRotate_xtal[0] = new QDoubleSpinBox(rotationPanelXtal);
-	m_spinVecToRotate_xtal[1] = new QDoubleSpinBox(rotationPanelXtal);
-	m_spinVecToRotate_xtal[2] = new QDoubleSpinBox(rotationPanelXtal);
-	m_spinVecToRotate_xtal[0]->setValue(1);
-	m_spinVecToRotate_xtal[1]->setValue(0);
-	m_spinVecToRotate_xtal[2]->setValue(0);
-
-	for(int i = 0; i < 3; ++i)
-	{
-		m_spinAxis_xtal[i]->setMinimum(-999.);
-		m_spinAxis_xtal[i]->setMaximum(999.);
-		m_spinAxis_xtal[i]->setDecimals(4);
-		m_spinAxis_xtal[i]->setSingleStep(0.1);
-
-		m_spinVecToRotate_xtal[i]->setMinimum(-999.);
-		m_spinVecToRotate_xtal[i]->setMaximum(999.);
-		m_spinVecToRotate_xtal[i]->setDecimals(4);
-		m_spinVecToRotate_xtal[i]->setSingleStep(0.1);
-	}
-
-	labelAxisXtal->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
-	labelAngleXtal->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
-	labelVecToRotateXtal->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
-
-	m_textRotation_xtal = new QTextEdit(rotationPanelXtal);
-	m_textRotation_xtal->setReadOnly(true);
-
-	// rotation grid
-	auto grid_rotation_xtal = new QGridLayout(rotationPanelXtal);
-	grid_rotation_xtal->setSpacing(4);
-	grid_rotation_xtal->setContentsMargins(6, 6, 6, 6);
-	grid_rotation_xtal->addWidget(labelAxisXtal, 0, 0, 1, 1);
-	grid_rotation_xtal->addWidget(m_spinAxis_xtal[0], 0, 1, 1, 1);
-	grid_rotation_xtal->addWidget(m_spinAxis_xtal[1], 0, 2, 1, 1);
-	grid_rotation_xtal->addWidget(m_spinAxis_xtal[2], 0, 3, 1, 1);
-	grid_rotation_xtal->addWidget(labelAngleXtal, 1, 0, 1, 1);
-	grid_rotation_xtal->addWidget(m_spinAngle_xtal, 1, 1, 1, 1);
-	grid_rotation_xtal->addWidget(btnRecalcXtal, 1, 3, 1, 1);
-	grid_rotation_xtal->addWidget(labelVecToRotateXtal, 2, 0, 1, 1);
-	grid_rotation_xtal->addWidget(m_spinVecToRotate_xtal[0], 2, 1, 1, 1);
-	grid_rotation_xtal->addWidget(m_spinVecToRotate_xtal[1], 2, 2, 1, 1);
-	grid_rotation_xtal->addWidget(m_spinVecToRotate_xtal[2], 2, 3, 1, 1);
-	grid_rotation_xtal->addWidget(m_textRotation_xtal, 3, 0, 1, 4);
-
-	// main grid
-	auto grid_dlg = new QGridLayout(this);
-	grid_dlg->setSpacing(4);
-	grid_dlg->setContentsMargins(8, 8, 8, 8);
-	grid_dlg->addWidget(tabs, 0, 0, 1, 1);
-	grid_dlg->addWidget(buttons, 1, 0, 1, 1);
-
-	// restore settings
-	if(m_sett)
-	{
-		// restore dialog geometry
-		if(m_sett->contains("trafocalc/geo"))
-			restoreGeometry(m_sett->value("trafocalc/geo").toByteArray());
-		else
-			resize(500, 500);
-	}
-
 	// connections
-	connect(buttons, &QDialogButtonBox::accepted,
-		this, &TrafoCalculator::accept);
-	connect(buttons, &QDialogButtonBox::rejected,
-		this, &TrafoCalculator::reject);
 	for(QDoubleSpinBox* spin : {
 		m_spinAxis[0], m_spinAxis[1], m_spinAxis[2], m_spinAngle,
 		m_spinVecToRotate[0], m_spinVecToRotate[1], m_spinVecToRotate[2] })
@@ -225,20 +182,81 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 			this, &TrafoCalculator::CalculateRotation);
 	}
-	for(QDoubleSpinBox* spin : {
-		m_spinAxis_xtal[0], m_spinAxis_xtal[1], m_spinAxis_xtal[2], m_spinAngle_xtal,
-		m_spinVecToRotate_xtal[0], m_spinVecToRotate_xtal[1], m_spinVecToRotate_xtal[2] })
+	connect(m_checkRot, &QCheckBox::toggled, [this, btnRecalc](bool checked)
+	{
+		btnRecalc->setEnabled(checked);
+		CalculateRotation();
+	});
+	connect(btnRecalc, &QAbstractButton::clicked,
+		this, &TrafoCalculator::CalculateRotation);
+
+	return rotationPanel;
+}
+
+
+
+QWidget* TrafoCalculator::CreateProjectionPanel()
+{
+	// projection tab (crystal)
+	QWidget *projectionPanel = new QWidget(this);
+
+	QLabel *labelAxis = new QLabel("Axis (rlu): ");
+
+	m_spinProjAxis[0] = new QDoubleSpinBox(projectionPanel);
+	m_spinProjAxis[1] = new QDoubleSpinBox(projectionPanel);
+	m_spinProjAxis[2] = new QDoubleSpinBox(projectionPanel);
+	m_spinProjAxis[0]->setValue(0);
+	m_spinProjAxis[1]->setValue(0);
+	m_spinProjAxis[2]->setValue(1);
+
+	m_checkProj = new QCheckBox(projectionPanel);
+	m_checkProj->setText("Use Crystal System");
+	m_checkProj->setChecked(true);
+
+	QPushButton *btnRecalc = new QPushButton(projectionPanel);
+	btnRecalc->setText("Get Crystal");
+
+	for(int i = 0; i < 3; ++i)
+	{
+		m_spinProjAxis[i]->setMinimum(-999.);
+		m_spinProjAxis[i]->setMaximum(999.);
+		m_spinProjAxis[i]->setDecimals(4);
+		m_spinProjAxis[i]->setSingleStep(0.1);
+	}
+
+	labelAxis->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
+
+	m_textProjection = new QTextEdit(projectionPanel);
+	m_textProjection->setReadOnly(true);
+
+	// rotation grid
+	auto grid_projection = new QGridLayout(projectionPanel);
+	grid_projection->setSpacing(4);
+	grid_projection->setContentsMargins(6, 6, 6, 6);
+	grid_projection->addWidget(labelAxis, 0, 0, 1, 1);
+	grid_projection->addWidget(m_spinProjAxis[0], 0, 1, 1, 1);
+	grid_projection->addWidget(m_spinProjAxis[1], 0, 2, 1, 1);
+	grid_projection->addWidget(m_spinProjAxis[2], 0, 3, 1, 1);
+	grid_projection->addWidget(m_checkProj, 1, 2, 1, 1);
+	grid_projection->addWidget(btnRecalc, 1, 3, 1, 1);
+	grid_projection->addWidget(m_textProjection, 2, 0, 1, 4);
+
+	// connections
+	for(QDoubleSpinBox* spin : { m_spinProjAxis[0], m_spinProjAxis[1], m_spinProjAxis[2] })
 	{
 		connect(spin,
 			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-			this, &TrafoCalculator::CalculateRotationXtal);
+			this, &TrafoCalculator::CalculateProjection);
 	}
+	connect(m_checkProj, &QCheckBox::toggled, [this, btnRecalc](bool checked)
+	{
+		btnRecalc->setEnabled(checked);
+		CalculateProjection();
+	});
+	connect(btnRecalc, &QAbstractButton::clicked,
+		this, &TrafoCalculator::CalculateProjection);
 
-	connect(btnRecalcXtal, &QAbstractButton::clicked,
-		this, &TrafoCalculator::CalculateRotationXtal);
-
-	CalculateRotation();
-	CalculateRotationXtal();
+	return projectionPanel;
 }
 
 
@@ -262,81 +280,13 @@ void TrafoCalculator::CalculateRotation()
 
 	m_textRotation->clear();
 
-	t_mat_real mat = tl2::rotation<t_mat_real, t_vec_real>(axis, angle, false);
-	tl2::set_eps_0(mat, g_eps);
-
-
-	// print the rotation matrix
-	std::ostringstream ostrResult;
-	ostrResult.precision(g_prec);
-
-	ostrResult << "<p>Transformation Matrix:\n";
-	ostrResult << "<table style=\"border:0px\">\n";
-	for(std::size_t i = 0; i < mat.size1(); ++i)
-	{
-		ostrResult << "\t<tr>\n";
-		for(std::size_t j = 0; j < mat.size2(); ++j)
-		{
-			ostrResult << "\t\t<td style=\"padding-right:8px\">";
-			ostrResult << mat(i, j);
-			ostrResult << "</td>\n";
-		}
-		ostrResult << "\t</tr>\n";
-	}
-
-	ostrResult << "</table>";
-	ostrResult << "</p>\n";
-
-	ostrResult << "<p>As Single-Line String:<br>";
-	ostrResult << mat;
-	ostrResult << "</p>\n";
-
-
-	using t_quat = boost::math::quaternion<t_real>;
-
-	t_quat quat = tl2::rot3_to_quat<t_mat_real, t_quat>(mat);
-	tl2::set_eps_0(quat, g_eps);
-	ostrResult << "<p>As Quaternion:<br>";
-	ostrResult << quat;
-	ostrResult << "</p>\n";
-
-
-	// print the rotated test vector
-	t_vec_real vec_rot = mat * vec;
-	tl2::set_eps_0(vec_rot, g_eps);
-	ostrResult << "<p>Rotated Vector:<br>";
-	ostrResult << vec_rot;
-	ostrResult << "</p>\n";
-
-	m_textRotation->setHtml(ostrResult.str().c_str());
-}
-
-
-
-void TrafoCalculator::CalculateRotationXtal()
-{
-	using namespace tl2_ops;
-
-	if(!m_spinAngle_xtal || !m_textRotation_xtal)
-		return;
-
-	t_vec_real axis = tl2::create<t_vec_real>({
-		(t_real)m_spinAxis_xtal[0]->value(),
-		(t_real)m_spinAxis_xtal[1]->value(),
-		(t_real)m_spinAxis_xtal[2]->value() });
-	t_real angle = tl2::d2r<t_real>(m_spinAngle_xtal->value());
-	t_vec_real vec = tl2::create<t_vec_real>({
-		(t_real)m_spinVecToRotate_xtal[0]->value(),
-		(t_real)m_spinVecToRotate_xtal[1]->value(),
-		(t_real)m_spinVecToRotate_xtal[2]->value() });
-
-	m_textRotation_xtal->clear();
-
 
 	// apply crystal B matrix
+	bool use_B = m_checkRot->isChecked() && m_dyn;
+
 	t_mat_real xtalB_inv;
 	bool inv_ok = false;
-	if(m_dyn)
+	if(use_B)
 	{
 		const t_mat_real& xtalB = m_dyn->GetCrystalBTrafo();
 		std::tie(xtalB_inv, inv_ok) = tl2::inv(xtalB);
@@ -355,7 +305,7 @@ void TrafoCalculator::CalculateRotationXtal()
 	std::ostringstream ostrResult;
 	ostrResult.precision(g_prec);
 
-	if(m_dyn)
+	if(use_B)
 	{
 		t_mat_real xtalB = m_dyn->GetCrystalBTrafo();
 		tl2::set_eps_0(xtalB, g_eps);
@@ -410,14 +360,14 @@ void TrafoCalculator::CalculateRotationXtal()
 	ostrResult << quat;
 	ostrResult << "</p>\n";
 
-	if(inv_ok)
+	if(use_B && inv_ok)
 	{
-		tl2::set_eps_0(vec, g_eps);
+		tl2::set_eps_0(axis, g_eps);
 		ostrResult << "<p>Original Axis (lab): ";
 		ostrResult << axis;
 		ostrResult << "</p>\n";
 
-		tl2::set_eps_0(axis, g_eps);
+		tl2::set_eps_0(vec, g_eps);
 		ostrResult << "<p>Original Vector (lab): ";
 		ostrResult << vec;
 		ostrResult << "</p>\n";
@@ -431,7 +381,7 @@ void TrafoCalculator::CalculateRotationXtal()
 	ostrResult << vec_rot;
 	ostrResult << "</p>\n";
 
-	if(inv_ok)
+	if(use_B && inv_ok)
 	{	
 		vec_rot = xtalB_inv * vec_rot;
 		tl2::set_eps_0(vec_rot, g_eps);
@@ -441,7 +391,129 @@ void TrafoCalculator::CalculateRotationXtal()
 	}
 
 
-	m_textRotation_xtal->setHtml(ostrResult.str().c_str());
+	m_textRotation->setHtml(ostrResult.str().c_str());
+}
+
+
+
+void TrafoCalculator::CalculateProjection()
+{
+	using namespace tl2_ops;
+
+	if(!m_textProjection)
+		return;
+
+	t_vec_real axis = tl2::create<t_vec_real>({
+		(t_real)m_spinProjAxis[0]->value(),
+		(t_real)m_spinProjAxis[1]->value(),
+		(t_real)m_spinProjAxis[2]->value() });
+
+	m_textProjection->clear();
+
+
+	// apply crystal B matrix
+	bool use_B = m_checkProj->isChecked() && m_dyn;
+	if(use_B)
+	{
+		const t_mat_real& xtalB = m_dyn->GetCrystalBTrafo();
+		axis = xtalB * axis;
+	}
+
+	t_mat_real matProj = tl2::projector<t_mat_real, t_vec_real>(axis, false);
+	t_mat_real matOrthoProj = tl2::ortho_projector<t_mat_real, t_vec_real>(axis, false);
+	tl2::set_eps_0(matProj, g_eps);
+	tl2::set_eps_0(matOrthoProj, g_eps);
+
+
+	// print the B and the rotation matrices
+	std::ostringstream ostrResult;
+	ostrResult.precision(g_prec);
+
+	if(use_B)
+	{
+		t_mat_real xtalB = m_dyn->GetCrystalBTrafo();
+		tl2::set_eps_0(xtalB, g_eps);
+
+
+		ostrResult << "<p>Crystal B Matrix:\n";
+		ostrResult << "<table style=\"border:0px\">\n";
+		for(std::size_t i = 0; i < xtalB.size1(); ++i)
+		{
+			ostrResult << "\t<tr>\n";
+			for(std::size_t j = 0; j < xtalB.size2(); ++j)
+			{
+				ostrResult << "\t\t<td style=\"padding-right:8px\">";
+				ostrResult << xtalB(i, j);
+				ostrResult << "</td>\n";
+			}
+			ostrResult << "\t</tr>\n";
+		}
+		ostrResult << "</table>";
+		ostrResult << "</p>\n";
+
+		ostrResult << "<p>B Matrix As Single-Line String:<br>";
+		ostrResult << xtalB;
+		ostrResult << "</p>\n";
+	}
+
+
+	ostrResult << "<p>Projection Matrix:\n";
+	ostrResult << "<table style=\"border:0px\">\n";
+	for(std::size_t i = 0; i < matProj.size1(); ++i)
+	{
+		ostrResult << "\t<tr>\n";
+		for(std::size_t j = 0; j < matProj.size2(); ++j)
+		{
+			ostrResult << "\t\t<td style=\"padding-right:8px\">";
+			ostrResult << matProj(i, j);
+			ostrResult << "</td>\n";
+		}
+		ostrResult << "\t</tr>\n";
+	}
+	ostrResult << "</table>";
+	ostrResult << "</p>\n";
+
+	ostrResult << "<p>Projection Matrix Trace: ";
+	ostrResult << tl2::trace(matProj);
+	ostrResult << "</p>\n";
+
+	ostrResult << "<p>Projection Matrix As Single-Line String:<br>";
+	ostrResult << matProj;
+	ostrResult << "</p>\n";
+
+
+	ostrResult << "<p>Orthogonal Projection Matrix:\n";
+	ostrResult << "<table style=\"border:0px\">\n";
+	for(std::size_t i = 0; i < matOrthoProj.size1(); ++i)
+	{
+		ostrResult << "\t<tr>\n";
+		for(std::size_t j = 0; j < matOrthoProj.size2(); ++j)
+		{
+			ostrResult << "\t\t<td style=\"padding-right:8px\">";
+			ostrResult << matOrthoProj(i, j);
+			ostrResult << "</td>\n";
+		}
+		ostrResult << "\t</tr>\n";
+	}
+	ostrResult << "</table>";
+	ostrResult << "</p>\n";
+
+	ostrResult << "<p>Orthogonal Projection Matrix Trace: ";
+	ostrResult << tl2::trace(matOrthoProj);
+	ostrResult << "</p>\n";
+
+	ostrResult << "<p>Orthogonal Projection Matrix As Single-Line String:<br>";
+	ostrResult << matOrthoProj;
+	ostrResult << "</p>\n";
+
+
+	tl2::set_eps_0(axis, g_eps);
+	ostrResult << "<p>Original Axis (lab): ";
+	ostrResult << axis;
+	ostrResult << "</p>\n";
+
+
+	m_textProjection->setHtml(ostrResult.str().c_str());
 }
 
 

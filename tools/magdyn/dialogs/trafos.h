@@ -32,6 +32,7 @@
 #include <QtCore/QSettings>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QTextEdit>
+#include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDoubleSpinBox>
 
 #include "gui_defs.h"
@@ -51,6 +52,11 @@ public:
 	void SetKernel(const t_magdyn* dyn);
 
 
+protected:
+	QWidget* CreateRotationPanel();
+	QWidget* CreateProjectionPanel();
+
+
 private:
 	const t_magdyn *m_dyn{};  // main calculation kernel
 
@@ -60,18 +66,18 @@ private:
 	QDoubleSpinBox *m_spinAxis[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_spinAngle{};
 	QDoubleSpinBox *m_spinVecToRotate[3]{nullptr, nullptr, nullptr};
+	QCheckBox *m_checkRot{};
 
-	QTextEdit *m_textRotation_xtal{};
-	QDoubleSpinBox *m_spinAxis_xtal[3]{nullptr, nullptr, nullptr};
-	QDoubleSpinBox *m_spinAngle_xtal{};
-	QDoubleSpinBox *m_spinVecToRotate_xtal[3]{nullptr, nullptr, nullptr};
+	QTextEdit *m_textProjection{};
+	QDoubleSpinBox *m_spinProjAxis[3]{nullptr, nullptr, nullptr};
+	QCheckBox *m_checkProj{};
 
 
 protected slots:
 	virtual void accept() override;
 
 	void CalculateRotation();
-	void CalculateRotationXtal();
+	void CalculateProjection();
 };
 
 
