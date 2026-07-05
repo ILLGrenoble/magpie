@@ -201,6 +201,7 @@ QWidget* TrafoCalculator::CreateProjectionPanel()
 	QWidget *projectionPanel = new QWidget(this);
 
 	QLabel *labelAxis = new QLabel("Axis (rlu): ");
+	QLabel *labelVecToProj = new QLabel("Vector (rlu): ");
 
 	m_spinProjAxis[0] = new QDoubleSpinBox(projectionPanel);
 	m_spinProjAxis[1] = new QDoubleSpinBox(projectionPanel);
@@ -216,15 +217,28 @@ QWidget* TrafoCalculator::CreateProjectionPanel()
 	QPushButton *btnRecalc = new QPushButton(projectionPanel);
 	btnRecalc->setText("Get Crystal");
 
+	m_spinVecToProj[0] = new QDoubleSpinBox(projectionPanel);
+	m_spinVecToProj[1] = new QDoubleSpinBox(projectionPanel);
+	m_spinVecToProj[2] = new QDoubleSpinBox(projectionPanel);
+	m_spinVecToProj[0]->setValue(1);
+	m_spinVecToProj[1]->setValue(0);
+	m_spinVecToProj[2]->setValue(0);
+
 	for(int i = 0; i < 3; ++i)
 	{
 		m_spinProjAxis[i]->setMinimum(-999.);
 		m_spinProjAxis[i]->setMaximum(999.);
 		m_spinProjAxis[i]->setDecimals(4);
 		m_spinProjAxis[i]->setSingleStep(0.1);
+
+		m_spinVecToProj[i]->setMinimum(-999.);
+		m_spinVecToProj[i]->setMaximum(999.);
+		m_spinVecToProj[i]->setDecimals(4);
+		m_spinVecToProj[i]->setSingleStep(0.1);
 	}
 
 	labelAxis->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
+	labelVecToProj->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
 
 	m_textProjection = new QTextEdit(projectionPanel);
 	m_textProjection->setReadOnly(true);
@@ -239,10 +253,16 @@ QWidget* TrafoCalculator::CreateProjectionPanel()
 	grid_projection->addWidget(m_spinProjAxis[2], 0, 3, 1, 1);
 	grid_projection->addWidget(m_checkProj, 1, 2, 1, 1);
 	grid_projection->addWidget(btnRecalc, 1, 3, 1, 1);
-	grid_projection->addWidget(m_textProjection, 2, 0, 1, 4);
+	grid_projection->addWidget(labelVecToProj, 2, 0, 1, 1);
+	grid_projection->addWidget(m_spinVecToProj[0], 2, 1, 1, 1);
+	grid_projection->addWidget(m_spinVecToProj[1], 2, 2, 1, 1);
+	grid_projection->addWidget(m_spinVecToProj[2], 2, 3, 1, 1);
+	grid_projection->addWidget(m_textProjection, 3, 0, 1, 4);
 
 	// connections
-	for(QDoubleSpinBox* spin : { m_spinProjAxis[0], m_spinProjAxis[1], m_spinProjAxis[2] })
+	for(QDoubleSpinBox* spin : {
+		m_spinProjAxis[0], m_spinProjAxis[1], m_spinProjAxis[2],
+		m_spinVecToProj[0], m_spinVecToProj[1], m_spinVecToProj[2] })
 	{
 		connect(spin,
 			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
@@ -283,18 +303,16 @@ void TrafoCalculator::CalculateRotation()
 
 	// apply crystal B matrix
 	bool use_B = m_checkRot->isChecked() && m_dyn;
-
 	t_mat_real xtalB_inv;
 	bool inv_ok = false;
+
 	if(use_B)
 	{
 		const t_mat_real& xtalB = m_dyn->GetCrystalBTrafo();
 		std::tie(xtalB_inv, inv_ok) = tl2::inv(xtalB);
-		if(inv_ok)
-		{
-			axis = xtalB * axis;
-			vec = xtalB * vec;
-		}
+
+		axis = xtalB * axis;
+		vec = xtalB * vec;
 	}
 
 	t_mat_real mat = tl2::rotation<t_mat_real, t_vec_real>(axis, angle, false);
@@ -360,7 +378,7 @@ void TrafoCalculator::CalculateRotation()
 	ostrResult << quat;
 	ostrResult << "</p>\n";
 
-	if(use_B && inv_ok)
+	if(use_B)
 	{
 		tl2::set_eps_0(axis, g_eps);
 		ostrResult << "<p>Original Axis (lab): ";
@@ -377,7 +395,7 @@ void TrafoCalculator::CalculateRotation()
 	t_vec_real vec_rot = mat * vec;
 
 	tl2::set_eps_0(vec_rot, g_eps);
-	ostrResult << "<p>Rotated Vector (rlu): ";
+	ostrResult << "<p>Rotated Vector (lab): ";
 	ostrResult << vec_rot;
 	ostrResult << "</p>\n";
 
@@ -385,7 +403,7 @@ void TrafoCalculator::CalculateRotation()
 	{	
 		vec_rot = xtalB_inv * vec_rot;
 		tl2::set_eps_0(vec_rot, g_eps);
-		ostrResult << "<p>Rotated Vector (lab): ";
+		ostrResult << "<p>Rotated Vector (rlu): ";
 		ostrResult << vec_rot;
 		ostrResult << "</p>\n";
 	}
@@ -407,16 +425,26 @@ void TrafoCalculator::CalculateProjection()
 		(t_real)m_spinProjAxis[0]->value(),
 		(t_real)m_spinProjAxis[1]->value(),
 		(t_real)m_spinProjAxis[2]->value() });
+	t_vec_real vec = tl2::create<t_vec_real>({
+		(t_real)m_spinVecToProj[0]->value(),
+		(t_real)m_spinVecToProj[1]->value(),
+		(t_real)m_spinVecToProj[2]->value() });
 
 	m_textProjection->clear();
 
 
 	// apply crystal B matrix
 	bool use_B = m_checkProj->isChecked() && m_dyn;
+	t_mat_real xtalB_inv;
+	bool inv_ok = false;
+
 	if(use_B)
 	{
 		const t_mat_real& xtalB = m_dyn->GetCrystalBTrafo();
+		std::tie(xtalB_inv, inv_ok) = tl2::inv(xtalB);
+
 		axis = xtalB * axis;
+		vec = xtalB * vec;
 	}
 
 	t_mat_real matProj = tl2::projector<t_mat_real, t_vec_real>(axis, false);
@@ -511,6 +539,39 @@ void TrafoCalculator::CalculateProjection()
 	ostrResult << "<p>Original Axis (lab): ";
 	ostrResult << axis;
 	ostrResult << "</p>\n";
+
+	tl2::set_eps_0(vec, g_eps);
+	ostrResult << "<p>Original Vector (lab): ";
+	ostrResult << vec;
+	ostrResult << "</p>\n";
+
+	// print the projected test vector
+	t_vec_real vec_proj = matProj * vec;
+	t_vec_real vec_ortho_proj = matOrthoProj * vec;
+
+	tl2::set_eps_0(vec_proj, g_eps);
+	ostrResult << "<p>Projected Vector (lab): ";
+	ostrResult << vec_proj;
+	ostrResult << "</p>\n";
+
+	tl2::set_eps_0(vec_proj, g_eps);
+	ostrResult << "<p>Orthogonally Projected Vector (lab): ";
+	ostrResult << vec_ortho_proj;
+	ostrResult << "</p>\n";
+
+	if(use_B && inv_ok)
+	{	
+		vec_proj = xtalB_inv * vec_proj;
+		vec_ortho_proj = xtalB_inv * vec_ortho_proj;
+		tl2::set_eps_0(vec_proj, g_eps);
+		tl2::set_eps_0(vec_ortho_proj, g_eps);
+		ostrResult << "<p>Projected Vector (rlu): ";
+		ostrResult << vec_proj;
+		ostrResult << "</p>\n";
+		ostrResult << "<p>Orthogonally Projected Vector (rlu): ";
+		ostrResult << vec_ortho_proj;
+		ostrResult << "</p>\n";
+	}
 
 
 	m_textProjection->setHtml(ostrResult.str().c_str());

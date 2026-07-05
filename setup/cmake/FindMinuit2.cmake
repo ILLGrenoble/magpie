@@ -42,8 +42,20 @@ find_library(Minuit2_LIBRARIES
 	DOC "Root/Minuit2 library"
 )
 
+
+find_library(Minuit2Math_LIBRARIES
+	NAMES Minuit2Math
+	HINTS /usr/local/lib64 /usr/local/lib64/root /usr/local/lib /usr/local/lib/root /usr/lib64 /usr/lib64/root /usr/lib /usr/lib/root /opt/local/lib /opt/local/lib/root /usr/lib32 /usr/lib32/root
+	DOC "Root/Minuit2 math library"
+)
+
+
 if(Minuit2_INCLUDE_DIRS AND Minuit2_LIBRARIES)
 	set(Minuit2_FOUND TRUE)
+
+	if(Minuit2Math_LIBRARIES)
+		list(APPEND Minuit2_LIBRARIES "${Minuit2Math_LIBRARIES}")
+	endif()
 
 	message("Minuit include directories: ${Minuit2_INCLUDE_DIRS}")
 	message("Minuit library: ${Minuit2_LIBRARIES}")

@@ -48,14 +48,15 @@ using namespace tl2_ops;
 namespace odeint = boost::numeric::odeint;
 
 // mark custom vector as resizeable
-template<> struct odeint::is_resizeable<tl2::vec<float, std::vector>> : boost::true_type {};
-template<> struct odeint::is_resizeable<tl2::vec<double, std::vector>> : boost::true_type {};
+//template<> struct odeint::is_resizeable<tl2::vec<float, std::vector>> : boost::true_type {};
+//template<> struct odeint::is_resizeable<tl2::vec<double, std::vector>> : boost::true_type {};
 
 
 template<class t_mat, class t_vec, class t_val=typename t_vec::value_type>
 t_vec odesys(const t_mat& C, const t_vec& y0, t_val x_start, t_val x_end, t_val x_step = 0.01)
 {
 	t_vec y = y0;
+
 	odeint::integrate_adaptive(odeint::runge_kutta4<t_vec>{},
 		[&C](const t_vec& y, t_vec& y_diff, t_val x) -> void
 		{
@@ -91,7 +92,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ode, t_real, t_types)
 	const auto [coeff_re, coeff_im] = tl2::split_cplx<t_mat_cplx, t_mat>(coeff);
 	const auto [f0_re, f0_im] = tl2::split_cplx<t_vec_cplx, t_vec>(f0);
 
-
 #ifdef DEBUG_OUTPUT
 	std::cout << "coeff = " << coeff << std::endl;
 	std::cout << "x0 = " << x0 << ", f0 = " << f0 << std::endl;
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ode, t_real, t_types)
 	}
 
 
-	std::size_t idx=0;
+	std::size_t idx = 0;
 	const t_cplx fibo[] = { 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89 };
 	for(t_cplx n = 0; n.real() < 10; n += 1)
 	{
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ode, t_real, t_types)
 		std::cout << "n = " << n << std::endl;
 		std::cout << "ok = " << std::boolalpha << ok << std::endl;
 
-		for(std::size_t i=0; i<f.size(); ++i)
+		for(std::size_t i = 0; i < f.size(); ++i)
 			std::cout << "f_" << i << " = " << f[i] << std::endl;
 		std::cout << std::endl;
 #endif

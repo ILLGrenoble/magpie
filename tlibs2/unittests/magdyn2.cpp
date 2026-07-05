@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 	BOOST_TEST(Es_and_S.size() == 2);  // + and - energy branch
 	BOOST_TEST(tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps));
 	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), 0.5878, eps));
-	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].weight), 0.6513, eps));
+	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), 0.6513, eps));
 
 
 	// calculate and save a dispersion branch

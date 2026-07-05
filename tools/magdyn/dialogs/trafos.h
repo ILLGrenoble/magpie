@@ -70,6 +70,7 @@ private:
 
 	QTextEdit *m_textProjection{};
 	QDoubleSpinBox *m_spinProjAxis[3]{nullptr, nullptr, nullptr};
+	QDoubleSpinBox *m_spinVecToProj[3]{nullptr, nullptr, nullptr};
 	QCheckBox *m_checkProj{};
 
 
