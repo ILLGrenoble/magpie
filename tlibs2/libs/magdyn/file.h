@@ -52,6 +52,8 @@ pyplot.rcParams.update({
 	"font.sans-serif" : "DejaVu Sans",
 	"font.family" : "sans-serif",
 	"font.size" : 12,
+#	"axes.linewidth" : 2.,
+#	"figure.figsize" : (5., 5.),
 })
 
 
