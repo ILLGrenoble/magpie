@@ -90,6 +90,7 @@ void MagDynDlg::PopulateSpaceGroups(bool init)
 
 			// add new space group
 			m_comboSG->addItem(descr.c_str(), sg_idx);
+			m_comboSG->setItemData(sg_idx, sgnum, Qt::UserRole + 1);
 		}
 
 		if(init)

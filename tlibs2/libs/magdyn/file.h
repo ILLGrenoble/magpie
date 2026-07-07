@@ -282,6 +282,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 	if(write_header && !as_binary)
 	{
 		ostr << "#\n# Created with Magpie.\n";
+		ostr << "# Author: Tobias Weber\n";
 		ostr << "# URL: https://github.com/ILLGrenoble/magpie\n";
 		ostr << "# DOI: https://doi.org/10.5281/zenodo.16180814\n";
 		ostr << "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n";
@@ -424,6 +425,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
 	if(write_header && !as_binary)
 	{
 		ostr << "#\n# Created with Magpie.\n";
+		ostr << "# Author: Tobias Weber\n";
 		ostr << "# URL: https://github.com/ILLGrenoble/magpie\n";
 		ostr << "# DOI: https://doi.org/10.5281/zenodo.16180814\n";
 		ostr << "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n";
@@ -556,6 +558,7 @@ bool MAGDYN_INST::SaveMultiDispersion(std::ostream& ostr,
 	const t_size N = Qs.size();
 
 	ostr << "#\n# Created with Magpie.\n";
+	ostr << "# Author: Tobias Weber\n";
 	ostr << "# URL: https://github.com/ILLGrenoble/magpie\n";
 	ostr << "# DOI: https://doi.org/10.5281/zenodo.16180814\n";
 	ostr << "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n";

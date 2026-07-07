@@ -32,6 +32,7 @@ namespace pt = boost::property_tree;
 #include <QtCore/QString>
 
 #include <fstream>
+#include <unordered_set>
 #include <cstdlib>
 
 #include "tlibs2/libs/str.h"
@@ -73,6 +74,9 @@ void MagDynDlg::ExportToSunny()
  */
 bool MagDynDlg::ExportToSunny(const QString& _filename)
 {
+	// make sure the symmetry indices are up-to-date
+	CalcSymmetryIndices();
+
 	std::string filename = _filename.toStdString();
 	std::string dispname_abs = tl2::get_file_noext(filename) + ".dat";
 	std::string dispname_rel = tl2::get_file_nodir(dispname_abs);
@@ -104,6 +108,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 	// --------------------------------------------------------------------
 	ofstr << "\n# options\n";
+	ofstr << "use_spacegroup   = false\n";
 	ofstr << "calc_groundstate = false\n";
 	ofstr << "plot_structure   = true\n";
 	ofstr << "plot_dynamics    = true\n";
@@ -162,6 +167,15 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "\n# magnetic sites and xtal lattice\n";
 	ofstr << "@printf(\"Setting up magnetic sites...\\n\")\n";
 
+	// save as the P1 space group, as we have already performed the symmetry operations
+	// (you can also manually set the crystal's space group and delete all
+	//  symmetry-equivalent positions and couplings in the generated file)
+	int sgnum = m_comboSG->itemData(m_comboSG->currentIndex(), Qt::UserRole + 1).toInt();
+	ofstr << "sgnum = 1  # P1 -> manual generation of sites and couplings\n";
+	ofstr << "if use_spacegroup\n";
+	ofstr << "\tsgnum = " << sgnum << "\n";
+	ofstr << "end\n";
+
 	const auto& xtal = m_dyn.GetCrystalLattice();
 	ofstr << "magsites = Crystal(\n"
 		<< "\tlattice_vectors("
@@ -173,19 +187,22 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 		<< tl2::r2d<t_real>(xtal[5]) << "),\n\t[\n";
 
 	ofstr << "\t\t# site list\n";
+	std::unordered_set<t_size> seen_site_sym_indices;
 	for(const t_site &site : m_dyn.GetMagneticSites())
 	{
+		// TODO
+		bool seen = (seen_site_sym_indices.find(site.sym_idx) != seen_site_sym_indices.end());
+		if(!seen)
+			seen_site_sym_indices.insert(site.sym_idx);
+
 		ofstr << "\t\t[ "
 			<< get_str_var(site.pos[0]) << ", "
 			<< get_str_var(site.pos[1]) << ", "
 			<< get_str_var(site.pos[2]) << " ],"
-			<< " # " << site.name << "\n";
+			<< " # " << site.name << ", sym_idx = " << site.sym_idx << "\n";
 	}
 
-	// save as the P1 space group, as we have already performed the symmetry operations
-	// (you can also manually set the crystal's space group and delete all
-	//  symmetry-equivalent positions and couplings in the generated file)
-	ofstr << "\t], 1)\n";
+	ofstr << "\t], sgnum)\n";
 
 	ofstr << "num_sites = length(magsites.positions)\n\n";
 
@@ -199,7 +216,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 		ofstr << "\t\t" << site_idx << " => Moment("
 			<< "s = " << get_str_var(site.spin_mag) << ", "
 			<< "g = -[ g_e 0 0; 0 g_e 0; 0 0 g_e ]),"
-			<< " # " << site.name << "\n";
+			<< " # " << site.name << ", sym_idx = " << site.sym_idx << "\n";
 		++site_idx;
 	}
 	ofstr << "\t], :dipole)\n\n";
@@ -226,7 +243,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 				<< get_str_var(site.spin_dir[1]) << ", "
 				<< get_str_var(site.spin_dir[2]) << " ], "
 				<< "( 1, 1, 1, " << site_idx << " ))"
-				<< " # " << site.name << "\n";
+				<< " # " << site.name << ", sym_idx = " << site.sym_idx << "\n";
 			++site_idx;
 		}
 	}
@@ -239,6 +256,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "\n# magnetic couplings\n";
 	ofstr << "@printf(\"Setting up magnetic couplings...\\n\")\n";
 
+	std::unordered_set<t_size> seen_term_sym_indices;
 	for(const t_term& term : m_dyn.GetExchangeTerms())
 	{
 		t_size idx1 = m_dyn.GetMagneticSiteIndex(term.site1) + 1;
@@ -262,7 +280,15 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 		if(!is_aniso)
 		{
-			ofstr << "set_exchange!(magsys," << " # " << term.name
+			bool seen = (seen_term_sym_indices.find(term.sym_idx) != seen_term_sym_indices.end());
+			if(!seen)
+				seen_term_sym_indices.insert(term.sym_idx);
+
+			if(seen)
+				ofstr << "if !use_spacegroup\n\t";
+
+			ofstr << "set_exchange!(magsys,"
+				<< " # " << term.name << ", sym_idx = " << term.sym_idx
 				<< "\n\t[\n"
 				<< "\t\t" << get_str_var(term.J, true)             // 0,0
 				<< "   " << get_str_var(term.dmi[2], true)         // 0,1
@@ -295,6 +321,9 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 				<< get_str_var(term.dist[1]) << ", "
 				<< get_str_var(term.dist[2])
 				<< " ]))\n";
+
+			if(seen)
+				ofstr << "end\n";  // !use_spacegroup
 		}
 	}  // terms
 
