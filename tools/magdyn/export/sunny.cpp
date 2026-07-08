@@ -174,52 +174,72 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "sgnum = 1  # P1 -> manual generation of sites and couplings\n";
 	ofstr << "if use_spacegroup\n";
 	ofstr << "\tsgnum = " << sgnum << "\n";
-	ofstr << "end\n";
+	ofstr << "end\n\n";
 
-	const auto& xtal = m_dyn.GetCrystalLattice();
-	ofstr << "magsites = Crystal(\n"
-		<< "\tlattice_vectors("
-		<< xtal[0] << ", "
-		<< xtal[1] << ", "
-		<< xtal[2] << ", "
-		<< tl2::r2d<t_real>(xtal[3]) << ", "
-		<< tl2::r2d<t_real>(xtal[4]) << ", "
-		<< tl2::r2d<t_real>(xtal[5]) << "),\n\t[\n";
-
-	ofstr << "\t\t# site list\n";
-	std::unordered_set<t_size> seen_site_sym_indices;
-	for(const t_site &site : m_dyn.GetMagneticSites())
+	
+	auto gen_sites = [this, &ofstr](bool skip_seen)
 	{
-		// TODO
-		bool seen = (seen_site_sym_indices.find(site.sym_idx) != seen_site_sym_indices.end());
-		if(!seen)
-			seen_site_sym_indices.insert(site.sym_idx);
+		const auto& xtal = m_dyn.GetCrystalLattice();
 
-		ofstr << "\t\t[ "
-			<< get_str_var(site.pos[0]) << ", "
-			<< get_str_var(site.pos[1]) << ", "
-			<< get_str_var(site.pos[2]) << " ],"
-			<< " # " << site.name << ", sym_idx = " << site.sym_idx << "\n";
-	}
+		ofstr << "\tmagsites = Crystal(\n"
+			<< "\t\tlattice_vectors("
+			<< xtal[0] << ", " << xtal[1] << ", " << xtal[2] << ", "
+			<< tl2::r2d<t_real>(xtal[3]) << ", "
+			<< tl2::r2d<t_real>(xtal[4]) << ", "
+			<< tl2::r2d<t_real>(xtal[5]) << "),\n\t\t[\n";
 
-	ofstr << "\t], sgnum)\n";
+		ofstr << "\t\t\t# site list\n";
+		std::unordered_set<t_size> seen_site_sym_indices;
+		for(const t_site &site : m_dyn.GetMagneticSites())
+		{
+			bool seen = (seen_site_sym_indices.find(site.sym_idx) != seen_site_sym_indices.end());
+			if(!seen)
+				seen_site_sym_indices.insert(site.sym_idx);
+			if(seen && skip_seen)
+				continue;
+
+			ofstr << "\t\t\t[ "
+				<< get_str_var(site.pos[0]) << ", "
+				<< get_str_var(site.pos[1]) << ", "
+				<< get_str_var(site.pos[2]) << " ],"
+				<< " # " << site.name << ", sym_idx = " << site.sym_idx << "\n";
+		}
+
+		ofstr << "\t\t], sgnum)\n\n";
+
+
+		ofstr << "\t# spin magnitudes and magnetic system\n";
+		ofstr << "\tmagsys = System(magsites, #( 1, 1, 1 ),\n\t\t[\n";
+
+		t_size site_idx = 1;
+		seen_site_sym_indices.clear();
+		for(const t_site& site : m_dyn.GetMagneticSites())
+		{
+			bool seen = (seen_site_sym_indices.find(site.sym_idx) != seen_site_sym_indices.end());
+			if(!seen)
+				seen_site_sym_indices.insert(site.sym_idx);
+			if(seen && skip_seen)
+				continue;
+
+			ofstr << "\t\t\t" << site_idx << " => Moment("
+				<< "s = " << get_str_var(site.spin_mag) << ", "
+				<< "g = -[ g_e 0 0; 0 g_e 0; 0 0 g_e ]),"
+				<< " # " << site.name << ", sym_idx = " << site.sym_idx << "\n";
+			++site_idx;
+		}
+
+		ofstr << "\t\t], :dipole)\n";
+	};
+
+	ofstr << "if !use_spacegroup\n";
+	gen_sites(false);
+	ofstr << "else\n";  // use_spacegroup
+	gen_sites(true);
+	ofstr << "end\n\n";   // use_spacegroup
+
+
 
 	ofstr << "num_sites = length(magsites.positions)\n\n";
-
-
-	ofstr << "# spin magnitudes and magnetic system\n";
-	ofstr << "magsys = System(magsites, #( 1, 1, 1 ),\n\t[\n";
-
-	t_size site_idx = 1;
-	for(const t_site& site : m_dyn.GetMagneticSites())
-	{
-		ofstr << "\t\t" << site_idx << " => Moment("
-			<< "s = " << get_str_var(site.spin_mag) << ", "
-			<< "g = -[ g_e 0 0; 0 g_e 0; 0 0 g_e ]),"
-			<< " # " << site.name << ", sym_idx = " << site.sym_idx << "\n";
-		++site_idx;
-	}
-	ofstr << "\t], :dipole)\n\n";
 
 
 	ofstr << "# spin directions\n";
@@ -235,7 +255,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	else
 	{
 		// set individual spins
-		site_idx = 1;
+		t_size site_idx = 1;
 		for(const t_site& site : m_dyn.GetMagneticSites())
 		{
 			ofstr << "set_dipole!(magsys, [ "
@@ -411,7 +431,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "ffacts = nothing\n";
 	ofstr << "try\n";
 	ofstr << "\tglobal ffacts = [\n";
-	site_idx = 1;
+	t_size site_idx = 1;
 	for(const t_site& site : m_dyn.GetMagneticSites())
 	{
 		if(site_idx == 1)
