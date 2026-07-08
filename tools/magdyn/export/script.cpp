@@ -338,6 +338,7 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 	ofstr << "plane1  = np.array([ " << peak1x << ", " << peak1y << ", " << peak1z << " ])\n";
 	ofstr << "plane2  = np.array([ " << peak2x << ", " << peak2y << ", " << peak2z << " ])\n\n";
 
+
 	// user variables
 	for(const auto &var : m_dyn.GetVariables())
 	{
@@ -386,7 +387,8 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 	ofstr << "\t\"angles\" : np.array([ "
 		<< tl2::r2d<t_real>(xtal[3]) << ", "
 		<< tl2::r2d<t_real>(xtal[4]) << ", "
-		<< tl2::r2d<t_real>(xtal[5]) << " ]) / 180.*np.pi\n";
+		<< tl2::r2d<t_real>(xtal[5]) << " ]) / 180.*np.pi,\n";
+	ofstr << "\t\"sg_num\" : " << m_comboSG->itemData(m_comboSG->currentIndex(), Qt::UserRole + 1).toInt() << ",\n";
 	ofstr << "}\n";
 	// --------------------------------------------------------------------
 
@@ -414,7 +416,7 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 				<< get_str_var(site.spin_dir[1]) << ", "
 				<< get_str_var(site.spin_dir[2]) << " ]";
 		}
-		
+
 		ofstr << ", \"pos\" : [ "
 			<< get_str_var(site.pos[0]) << ", "
 			<< get_str_var(site.pos[1]) << ", "
@@ -503,7 +505,7 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 
 
 	// --------------------------------------------------------------------
-	
+
 	ofstr <<  R"BLOCK(
 # create magnetic structure
 init(sites, couplings)
