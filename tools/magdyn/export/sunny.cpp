@@ -103,12 +103,12 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 		<< "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n"
 		<< "#\n\n";
 
-	ofstr << "using Sunny\nusing Printf\n";
+	ofstr << "using Sunny\nusing Printf\nusing LinearAlgebra\n";
 
 
 	// --------------------------------------------------------------------
 	ofstr << "\n# options\n";
-	ofstr << "use_spacegroup   = false\n";
+	ofstr << "use_spacegroup   = false  # careful: the generated site order may be different!\n";
 	ofstr << "calc_groundstate = false\n";
 	ofstr << "plot_structure   = true\n";
 	ofstr << "plot_dynamics    = true\n";
@@ -149,6 +149,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "Qpts   = " << m_num_points->value() << "\n";
 	ofstr << "plane1 = [ " << peak1x << ", " << peak1y << ", " << peak1z << " ]\n";
 	ofstr << "plane2 = [ " << peak2x << ", " << peak2y << ", " << peak2z << " ]\n";
+	ofstr << "eps    = " << g_eps << "\n";
 
 	// user (model) variables
 	if(m_dyn.GetVariables().size())
@@ -163,8 +164,16 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	// --------------------------------------------------------------------
 
 
+	ofstr << "\n\nfunction eps_to_0(val)\n";
+	ofstr << "if abs(val) < eps\n";
+	ofstr << "\treturn 0\n";
+	ofstr << "end\n";
+	ofstr << "\treturn val\n";
+	ofstr << "end\n";
+
+
 	// --------------------------------------------------------------------
-	ofstr << "\n# magnetic sites and xtal lattice\n";
+	ofstr << "\n\n# magnetic sites and xtal lattice\n";
 	ofstr << "@printf(\"Setting up magnetic sites...\\n\")\n";
 
 	// save as the P1 space group, as we have already performed the symmetry operations
@@ -176,7 +185,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "\tsgnum = " << sgnum << "\n";
 	ofstr << "end\n\n";
 
-	
+
 	auto gen_sites = [this, &ofstr](bool skip_seen)
 	{
 		const auto& xtal = m_dyn.GetCrystalLattice();
@@ -229,6 +238,22 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 		}
 
 		ofstr << "\t\t], :dipole)\n";
+
+		if(skip_seen)
+		{
+			ofstr << "\n\t# output generated sites\n";
+			ofstr << "\tsite_idx = 1\n";
+			ofstr << "\t@printf(\"Generated magnetic sites:\\n%6s %10s %10s %10s %10s %10s %10s %10s\\n\",\n";
+			ofstr << "\t\t\"index\", \"x\", \"y\", \"z\", \"Sx\", \"Sy\", \"Sz\", \"|S|\")\n";
+			ofstr << "\tfor (r, s) in zip(magsys.crystal.positions, magsys.dipoles)\n";
+			ofstr << "\t\t@printf(\"%6d %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g\\n\",\n";
+			ofstr << "\t\t\tsite_idx,\n";
+			ofstr << "\t\t\teps_to_0(r[1]), eps_to_0(r[2]), eps_to_0(r[3]),\n";
+			ofstr << "\t\t\teps_to_0(s[1]), eps_to_0(s[2]), eps_to_0(s[3]),\n";
+			ofstr << "\t\t\teps_to_0(LinearAlgebra.norm2(s)))\n";
+			ofstr << "\t\tglobal site_idx += 1\n";
+			ofstr << "\tend\n";
+		}
 	};
 
 	ofstr << "if !use_spacegroup\n";
@@ -238,11 +263,10 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "end\n\n";   // use_spacegroup
 
 
+	ofstr << "num_sites = length(magsites.positions)\n";
 
-	ofstr << "num_sites = length(magsites.positions)\n\n";
 
-
-	ofstr << "# spin directions\n";
+	ofstr << "\n\n# spin directions\n";
 	const auto& field = m_dyn.GetExternalField();
 	if(field.align_spins)
 	{
@@ -273,7 +297,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 
 	// --------------------------------------------------------------------
-	ofstr << "\n# magnetic couplings\n";
+	ofstr << "\n\n# magnetic couplings\n";
 	ofstr << "@printf(\"Setting up magnetic couplings...\\n\")\n";
 
 	std::unordered_set<t_size> seen_term_sym_indices;
@@ -348,9 +372,41 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	}  // terms
 
 
+	ofstr << R"BLOCK(
+# output generated couplings
+if use_spacegroup
+	@printf("Generated magnetic couplings:\n")
+	@printf("%6s %6s %6s %6s %6s %6s %6s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
+		"sindex", "index", "site1", "site2", "dx", "dy", "dz",
+		"Jxx", "Jxy", "Jxz", "Jyx", "Jyy", "Jyz", "Jzx", "Jzy", "Jzz")
+
+	site_idx = 1
+	for interaction in magsys.interactions_union
+		term_idx = 1
+		for coupling in interaction.pair
+			b = coupling.bond
+			J = coupling.bilin
+
+			if length(J) == 1
+				J = [ J[1, 1] 0 0; 0 J[1, 1] 0; 0 0 J[1, 1] ]
+			end
+
+			@printf("%6d %6d %6d %6d %6d %6d %6d %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g\n",
+				site_idx, term_idx, b.i, b.j, b.n[1], b.n[2], b.n[3],
+				eps_to_0(J[1, 1]), eps_to_0(J[1, 2]), eps_to_0(J[1, 3]),
+				eps_to_0(J[2, 1]), eps_to_0(J[2, 2]), eps_to_0(J[2, 3]),
+				eps_to_0(J[3, 1]), eps_to_0(J[3, 2]), eps_to_0(J[3, 3]))
+
+			term_idx += 1
+		end
+		global site_idx += 1
+	end
+end)BLOCK" << "\n";
+
+
 	if(!tl2::equals_0<t_real>(field.mag, g_eps))
 	{
-		ofstr << "\n# external field\n";
+		ofstr << "\n\n# external field\n";
 		ofstr << "set_field!(magsys, -[ "
 			<< field.dir[0] << ", "
 			<< field.dir[1] << ", "
@@ -362,7 +418,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 
 	// --------------------------------------------------------------------
-	ofstr << "\n# optionally calculate the ground state\n";
+	ofstr << "\n\n# optionally calculate the ground state\n";
 	ofstr << "if calc_groundstate\n";
 	ofstr << "\t@printf(\"Calculating ground state...\\n\")\n";
 	ofstr << "\trandomize_spins!(magsys)\n";
@@ -372,7 +428,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 
 	// --------------------------------------------------------------------
-	ofstr << "\n# optionally plot nuclear and magnetic structure\n";
+	ofstr << "\n\n# optionally plot nuclear and magnetic structure\n";
 	ofstr << "if plot_structure\n";
 	ofstr << "\t@printf(\"Plotting structure...\\n\")\n";
 	ofstr << "\tusing GLMakie\n";
@@ -424,7 +480,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 
 	// --------------------------------------------------------------------
-	ofstr << "\n# spin-wave calculation\n";
+	ofstr << "\n\n# spin-wave calculation\n";
 	ofstr << "@printf(\"Calculating S(Q, E)...\\n\")\n";
 
 	// form factors
@@ -478,7 +534,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 
 	// --------------------------------------------------------------------
-	ofstr << "\n# plot the dispersion\n";
+	ofstr << "\n\n# plot the dispersion\n";
 	ofstr << "if plot_dynamics\n";
 	ofstr << "\t@printf(\"Plotting dispersion...\\n\")\n";
 	ofstr << "\tusing GLMakie\n";
@@ -488,7 +544,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 
 	// --------------------------------------------------------------------
-	ofstr << "\n# output the dispersion and spin-spin correlation\n";
+	ofstr << "\n\n# output the dispersion and spin-spin correlation\n";
 	ofstr << "if save_dynamics\n";
 	ofstr << "\t@printf(\"Outputting dispersion data to \\\"%s\\\", plot with:\\n"
 		<< "\\tgnuplot -p -e \\\"plot \\\\\\\"%s\\\\\\\" u " << q_idx
