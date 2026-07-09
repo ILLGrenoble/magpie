@@ -347,17 +347,41 @@ void MagDynDlg::CreateMenuBar()
 
 	// channels sub-menu
 	m_menuChannels = new QMenu("Selected Channels", m_menuDisp);
-	m_plot_channel[0] = new QAction("Channel xx", m_menuChannels);
-	m_plot_channel[1] = new QAction("Channel yy", m_menuChannels);
-	m_plot_channel[2] = new QAction("Channel zz", m_menuChannels);
+	m_plot_channel[0*3 + 0] = new QAction("Channel xx (real)", m_menuChannels);
+	m_plot_channel[0*3 + 1] = new QAction("Channel xy (real)", m_menuChannels);
+	m_plot_channel[0*3 + 2] = new QAction("Channel xz (real)", m_menuChannels);
+	m_plot_channel[1*3 + 0] = new QAction("Channel yx (real)", m_menuChannels);
+	m_plot_channel[1*3 + 1] = new QAction("Channel yy (real)", m_menuChannels);
+	m_plot_channel[1*3 + 2] = new QAction("Channel yz (real)", m_menuChannels);
+	m_plot_channel[2*3 + 0] = new QAction("Channel zx (real)", m_menuChannels);
+	m_plot_channel[2*3 + 1] = new QAction("Channel zy (real)", m_menuChannels);
+	m_plot_channel[2*3 + 2] = new QAction("Channel zz (real)", m_menuChannels);
+
+	m_plot_channel[3*3 + 0*3 + 0] = new QAction("Channel xx (imag)", m_menuChannels);
+	m_plot_channel[3*3 + 0*3 + 1] = new QAction("Channel xy (imag)", m_menuChannels);
+	m_plot_channel[3*3 + 0*3 + 2] = new QAction("Channel xz (imag)", m_menuChannels);
+	m_plot_channel[3*3 + 1*3 + 0] = new QAction("Channel yx (imag)", m_menuChannels);
+	m_plot_channel[3*3 + 1*3 + 1] = new QAction("Channel yy (imag)", m_menuChannels);
+	m_plot_channel[3*3 + 1*3 + 2] = new QAction("Channel yz (imag)", m_menuChannels);
+	m_plot_channel[3*3 + 2*3 + 0] = new QAction("Channel zx (imag)", m_menuChannels);
+	m_plot_channel[3*3 + 2*3 + 1] = new QAction("Channel zy (imag)", m_menuChannels);
+	m_plot_channel[3*3 + 2*3 + 2] = new QAction("Channel zz (imag)", m_menuChannels);
+
 	for(int i = 0; i < 3; ++i)
+	for(int j = 0; j < 3; ++j)
 	{
-		m_plot_channel[i]->setCheckable(true);
-		m_plot_channel[i]->setChecked(true);
+		m_plot_channel[i*3 + j]->setCheckable(true);
+		m_plot_channel[i*3 + j]->setChecked(i == j);
+		m_plot_channel[3*3 + i*3 + j]->setCheckable(true);
+		m_plot_channel[3*3 + i*3 + j]->setChecked(false);
 	}
-	m_menuChannels->addAction(m_plot_channel[0]);
-	m_menuChannels->addAction(m_plot_channel[1]);
-	m_menuChannels->addAction(m_plot_channel[2]);
+
+	for(int i = 0; i < 3*3; ++i)
+		m_menuChannels->addAction(m_plot_channel[i]);
+	m_menuChannels->addSeparator();
+	for(int i = 0; i < 3*3; ++i)
+		m_menuChannels->addAction(m_plot_channel[3*3 + i]);
+
 	m_menuChannels->setEnabled(m_plot_channels->isChecked());
 
 	// weight plot sub-menu
@@ -710,10 +734,17 @@ void MagDynDlg::CreateMenuBar()
 	{
 		connect(m_hamiltonian_comp[i], &QAction::toggled, calc_all_dyn);
 
-		connect(m_plot_channel[i], &QAction::toggled, [this](bool)
+		for(int j = 0; j < 3; ++j)
 		{
-			this->PlotDispersion();
-		});
+			connect(m_plot_channel[i*3 + j], &QAction::toggled, [this](bool)
+			{
+				this->PlotDispersion();
+			});
+			connect(m_plot_channel[3*3 + i*3 + j], &QAction::toggled, [this](bool)
+			{
+				this->PlotDispersion();
+			});
+		}
 	}
 
 	connect(m_plot_degeneracies, &QAction::toggled, [this](bool)

@@ -62,7 +62,7 @@ void MagDynDlg::ClearDispersion(bool replot)
 	m_ws_data.clear();
 	m_degen_data.clear();
 
-	for(int i = 0; i < 3; ++i)
+	for(int i = 0; i < 2*3*3; ++i)
 	{
 		m_qs_data_channel[i].clear();
 		m_Es_data_channel[i].clear();
@@ -169,14 +169,34 @@ void MagDynDlg::PlotDispersion()
 	{
 		// TODO: handle case if channels AND degeneracies are plotted
 
-		const QColor colChannel[3]
+		const QColor colChannel[2*3*3]
 		{
-			QColor(0xff, 0x00, 0x00),
-			QColor(0x00, 0xff, 0x00),
-			QColor(0x00, 0x00, 0xff),
+			QColor(std::lerp(0x00, 0xff, 1.),   0x00, 0x00),  // xx, real
+			QColor(std::lerp(0x00, 0xff, 0.75), 0x00, 0x00),  // xy, real
+			QColor(std::lerp(0x00, 0xff, 0.5),  0x00, 0x00),  // xz, real
+
+			QColor(0x00, std::lerp(0x00, 0xff, 0.5),  0x00),  // yx, real
+			QColor(0x00, std::lerp(0x00, 0xff, 1.),   0x00),  // yy, real
+			QColor(0x00, std::lerp(0x00, 0xff, 0.57), 0x00),  // yz, real
+
+			QColor(0x00, 0x00, std::lerp(0x00, 0xff, 0.5)),   // zx, real
+			QColor(0x00, 0x00, std::lerp(0x00, 0xff, 0.75)),  // zy, real
+			QColor(0x00, 0x00, std::lerp(0x00, 0xff, 1.)),    // zz, real
+
+			QColor(std::lerp(0x00, 0xff, 1.),   0x22, 0x22),  // xx, imag
+			QColor(std::lerp(0x00, 0xff, 0.75), 0x22, 0x22),  // xy, imag
+			QColor(std::lerp(0x00, 0xff, 0.5),  0x22, 0x22),  // xz, imag
+
+			QColor(0x22, std::lerp(0x00, 0xff, 0.5),  0x22),  // yx, imag
+			QColor(0x22, std::lerp(0x00, 0xff, 1.),   0x22),  // yy, imag
+			QColor(0x22, std::lerp(0x00, 0xff, 0.57), 0x22),  // yz, imag
+
+			QColor(0x22, 0x22, std::lerp(0x00, 0xff, 0.5)),   // zx, imag
+			QColor(0x22, 0x22, std::lerp(0x00, 0xff, 0.75)),  // zy, imag
+			QColor(0x22, 0x22, std::lerp(0x00, 0xff, 1.)),    // zz, imag
 		};
 
-		for(int i = 0; i < 3; ++i)
+		for(int i = 0; i < 2*3*3; ++i)
 		{
 			if(!m_plot_channel[i]->isChecked())
 				continue;
@@ -203,7 +223,7 @@ void MagDynDlg::PlotDispersion()
 		GraphWithWeights *graph = new GraphWithWeights(m_plot->xAxis, m_plot->yAxis);
 
 		// dispersion colour
-		int col_comp[3] = { 0, 0, 0xff };      // default colour
+		int col_comp[3] = { 0, 0, 0xff };           // default colour
 		tl2::get_colour<int>(g_colPlot, col_comp);  // get actual colour
 		const QColor colFull(col_comp[0], col_comp[1], col_comp[2]);
 
@@ -335,7 +355,7 @@ void MagDynDlg::CalcDispersion()
 	m_ws_data.reserve(num_pts*10);
 	m_degen_data.reserve(num_pts*10);
 
-	for(int i = 0; i < 3; ++i)
+	for(int i = 0; i < 2*3*3; ++i)
 	{
 		m_qs_data_channel[i].reserve(num_pts*10);
 		m_Es_data_channel[i].reserve(num_pts*10);
@@ -456,17 +476,27 @@ void MagDynDlg::CalcDispersion()
 
 					m_ws_data.push_back(weight);
 
-					for(t_size channel = 0; channel < 3; ++channel)
+					for(t_size channel_i = 0; channel_i < 3; ++channel_i)
+					for(t_size channel_j = 0; channel_j < 3; ++channel_j)
 					{
-						t_real weight_channel = 0.;
-						if(S->size1() > channel && S->size2() > channel)
-							weight_channel = std::abs((*S)(channel, channel).real());
-	
-						if(!tl2::equals_0<t_real>(weight_channel, g_eps))
+						t_real weight_channel_re = 0., weight_channel_im = 0.;
+						if(S->size1() > channel_i && S->size2() > channel_j)
 						{
-							m_Es_data_channel[channel].push_back(E);
-							m_qs_data_channel[channel].push_back(Q[m_Q_idx]);
-							m_ws_data_channel[channel].push_back(weight_channel);
+							weight_channel_re = std::abs((*S)(channel_i, channel_j).real());
+							weight_channel_im = std::abs((*S)(channel_i, channel_j).imag());
+						}
+
+						if(!tl2::equals_0<t_real>(weight_channel_re, g_eps))
+						{
+							m_qs_data_channel[channel_i*3 + channel_j].push_back(Q[m_Q_idx]);
+							m_Es_data_channel[channel_i*3 + channel_j].push_back(E);
+							m_ws_data_channel[channel_i*3 + channel_j].push_back(weight_channel_re);
+						}
+						if(!tl2::equals_0<t_real>(weight_channel_im, g_eps))
+						{
+							m_qs_data_channel[channel_i*3 + channel_j + 3*3].push_back(Q[m_Q_idx]);
+							m_Es_data_channel[channel_i*3 + channel_j + 3*3].push_back(E);
+							m_ws_data_channel[channel_i*3 + channel_j + 3*3].push_back(weight_channel_im);
 						}
 					}  // channel
 				}
@@ -524,7 +554,7 @@ void MagDynDlg::CalcDispersion()
 	auto sort_data = [](QVector<qreal>& qvec,
 		QVector<qreal>& Evec,
 		QVector<qreal>& wvec,
-		QVector<int>* dvec = nullptr)
+		QVector<int>* dvec = nullptr) -> std::vector<std::size_t>
 	{
 		// sort vectors by q component
 		std::vector<std::size_t> perm = tl2::get_perm(qvec.size(),
@@ -542,11 +572,17 @@ void MagDynDlg::CalcDispersion()
 
 		if(dvec)
 			*dvec = tl2::reorder(*dvec, perm);
+
+		return perm;
 	};
 
+	//std::vector<std::size_t> perm =
 	sort_data(m_qs_data, m_Es_data, m_ws_data, &m_degen_data);
-	for(int i = 0; i < 3; ++i)
+	for(int i = 0; i < 2*3*3; ++i)
+	{
+		//tl2::reorder(m_ws_data_channel[i], perm);
 		sort_data(m_qs_data_channel[i], m_Es_data_channel[i], m_ws_data_channel[i]);
+	}
 
 	PlotDispersion();
 }
