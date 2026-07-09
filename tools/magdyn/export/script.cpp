@@ -448,6 +448,10 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 		{
 			for(t_size j = 0; j < term.Jgen[i].size(); ++j)
 			{
+				std::string var = get_str_var(term.Jgen[i][j]);
+				if(var == "" || var == "0")
+					continue;
+
 				ofstr << "J_gen_" << term_idx
 					<< "[ " << i << ", " << j << " ] = "
 					<< get_str_var(term.Jgen[i][j])
@@ -456,7 +460,6 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 		}
 
 		ofstr << "\n";
-
 		++term_idx;
 	}
 
