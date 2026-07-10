@@ -67,6 +67,7 @@ void MagDynDlg::ClearDispersion(bool replot)
 		m_qs_data_channel[i].clear();
 		m_Es_data_channel[i].clear();
 		m_ws_data_channel[i].clear();
+		m_ws_total_channel[i] = 0.;
 	}
 
 	m_Q_idx = 0;
@@ -164,7 +165,7 @@ void MagDynDlg::PlotDispersion()
 	const bool plot_channels = m_plot_channels->isChecked();
 	const bool plot_degeneracies = m_plot_degeneracies->isChecked();
 
-	// create plot curves
+	// create plot curves for each matrix element
 	if(plot_channels)
 	{
 		// TODO: handle case if channels AND degeneracies are plotted
@@ -196,25 +197,31 @@ void MagDynDlg::PlotDispersion()
 			QColor(0x22, 0x22, std::lerp(0x00, 0xff, 1.)),    // zz, imag
 		};
 
+		// iterate channels
 		for(t_size imag_elem = 0; imag_elem < 2; ++imag_elem)
 		for(t_size i = 0; i < 3; ++i)
 		for(t_size j = 0; j < 3; ++j)
 		{
-			const int idx = imag_elem ? 3*3 : 0;  // start index
+			int idx = imag_elem ? 3*3 : 0;  // channel index
+			idx += i*3 + j;
+
+			m_matrixelems_dlg->SetActive(i, j, imag_elem == 0,
+				!tl2::equals_0(m_ws_total_channel[idx], g_eps));
+
 			if(!m_matrixelems_dlg->IsChecked(i, j, imag_elem == 0))
 				continue;
 
 			GraphWithWeights *graph = new GraphWithWeights(m_plot->xAxis, m_plot->yAxis);
 			QPen pen = graph->pen();
-			pen.setColor(colChannel[i*3 + j + idx]);
+			pen.setColor(colChannel[idx]);
 			pen.setWidthF(1.);
 			graph->setPen(pen);
 			graph->setBrush(QBrush(pen.color(), Qt::SolidPattern));
 			graph->setLineStyle(QCPGraph::lsNone);
 			graph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, m_weight_scale->value()));
 			graph->setAntialiased(true);
-			graph->setData(m_qs_data_channel[i*3 + j + idx], m_Es_data_channel[i*3 + j + idx], true /*already sorted*/);
-			graph->SetWeights(m_ws_data_channel[i*3 + j + idx]);
+			graph->setData(m_qs_data_channel[idx], m_Es_data_channel[idx], true /*already sorted*/);
+			graph->SetWeights(m_ws_data_channel[idx]);
 			graph->SetWeightScale(m_weight_scale->value(), m_weight_min->value(), m_weight_max->value());
 			graph->SetWeightAsPointSize(m_plot_weights_pointsize->isChecked());
 			graph->SetWeightAsAlpha(m_plot_weights_alpha->isChecked());
@@ -585,6 +592,10 @@ void MagDynDlg::CalcDispersion()
 	{
 		//tl2::reorder(m_ws_data_channel[i], perm);
 		sort_data(m_qs_data_channel[i], m_Es_data_channel[i], m_ws_data_channel[i]);
+
+		// total weight in channel
+		m_ws_total_channel[i] = std::accumulate(
+			m_ws_data_channel[i].begin(), m_ws_data_channel[i].end(), 0.);
 	}
 
 	PlotDispersion();

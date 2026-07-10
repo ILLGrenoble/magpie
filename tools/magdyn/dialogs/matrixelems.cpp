@@ -140,6 +140,9 @@ void MatrixElemsDlg::Reset()
 	{
 		m_elems[i*3 + j]->setChecked(i == j);
 		m_elems[i*3 + j + 3*3]->setChecked(false);
+
+		SetActive(i, j, true, true);
+		SetActive(i, j, false, true);
 	}
 
 	m_emit = true;
@@ -149,7 +152,25 @@ void MatrixElemsDlg::Reset()
 
 
 /**
- * is the given channel active?
+ * set given channel active
+ */
+void MatrixElemsDlg::SetActive(std::size_t i, std::size_t j, bool real_elem, bool active)
+{
+	if(i >= 3)
+		i = 3;
+	if(j >= 3)
+		j = 3;
+
+	std::size_t idx = real_elem ? 0 : 3*3;  // start index
+	m_elems[i*3 + j + idx]->setEnabled(active);
+	if(!active)
+		m_elems[i*3 + j + idx]->setChecked(false);
+}
+
+
+
+/**
+ * is the given channel checked?
  */
 bool MatrixElemsDlg::IsChecked(std::size_t i, std::size_t j, bool real_elem) const
 {

@@ -502,6 +502,7 @@ private:
 	// data for dispersion plot
 	QVector<qreal> m_qs_data{}, m_Es_data{}, m_ws_data{};
 	QVector<qreal> m_qs_data_channel[2*3*3]{}, m_Es_data_channel[2*3*3]{}, m_ws_data_channel[2*3*3]{};
+	t_real m_ws_total_channel[2*3*3]{};  // total weight in channel
 	QVector<int> m_degen_data{};
 	t_size m_Q_idx{};                 // plot x axis
 	t_real m_Q_min{}, m_Q_max{};      // plot x axis range

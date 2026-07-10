@@ -53,6 +53,7 @@ private:
 public:
 	void Reset();
 	bool IsChecked(std::size_t i, std::size_t j, bool real_elem = true) const;
+	void SetActive(std::size_t i, std::size_t j, bool real_elem = true, bool active = true);
 
 
 protected slots:
