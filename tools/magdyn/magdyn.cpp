@@ -69,8 +69,9 @@ MagDynDlg::MagDynDlg(QWidget* pParent) : QDialog{pParent},
 	CreateMenuBar();
 	InitResources();
 
-	// create dialogs
+	// pre-create dialogs
 	ShowGlInfoDlg(true);
+	ShowMatrixElemsDlg(true);
 	ShowNotesDlg(true);
 
 	// create input panels
@@ -334,6 +335,7 @@ void MagDynDlg::CreateMenuBar()
 	m_plot_channels->setToolTip("Plot individual polarisation channels.");
 	m_plot_channels->setCheckable(true);
 	m_plot_channels->setChecked(false);
+	QAction* acChannels = new QAction("Select Channels...", m_menuDisp);
 	m_plot_degeneracies = new QAction("Plot Degeneracies", m_menuDisp);
 	m_plot_degeneracies->setToolTip("Mark degenerate dispersion branches.");
 	m_plot_degeneracies->setCheckable(true);
@@ -345,44 +347,7 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acSaveDispScr = new QAction("Save Data As Script...", m_menuDisp);
 	QAction *acSaveMultiDispScr = new QAction("Save Data As Script For All Qs...", m_menuDisp);
 
-	// channels sub-menu
-	m_menuChannels = new QMenu("Selected Channels", m_menuDisp);
-	m_plot_channel[0*3 + 0] = new QAction("Channel xx (real)", m_menuChannels);
-	m_plot_channel[0*3 + 1] = new QAction("Channel xy (real)", m_menuChannels);
-	m_plot_channel[0*3 + 2] = new QAction("Channel xz (real)", m_menuChannels);
-	m_plot_channel[1*3 + 0] = new QAction("Channel yx (real)", m_menuChannels);
-	m_plot_channel[1*3 + 1] = new QAction("Channel yy (real)", m_menuChannels);
-	m_plot_channel[1*3 + 2] = new QAction("Channel yz (real)", m_menuChannels);
-	m_plot_channel[2*3 + 0] = new QAction("Channel zx (real)", m_menuChannels);
-	m_plot_channel[2*3 + 1] = new QAction("Channel zy (real)", m_menuChannels);
-	m_plot_channel[2*3 + 2] = new QAction("Channel zz (real)", m_menuChannels);
-
-	m_plot_channel[3*3 + 0*3 + 0] = new QAction("Channel xx (imag)", m_menuChannels);
-	m_plot_channel[3*3 + 0*3 + 1] = new QAction("Channel xy (imag)", m_menuChannels);
-	m_plot_channel[3*3 + 0*3 + 2] = new QAction("Channel xz (imag)", m_menuChannels);
-	m_plot_channel[3*3 + 1*3 + 0] = new QAction("Channel yx (imag)", m_menuChannels);
-	m_plot_channel[3*3 + 1*3 + 1] = new QAction("Channel yy (imag)", m_menuChannels);
-	m_plot_channel[3*3 + 1*3 + 2] = new QAction("Channel yz (imag)", m_menuChannels);
-	m_plot_channel[3*3 + 2*3 + 0] = new QAction("Channel zx (imag)", m_menuChannels);
-	m_plot_channel[3*3 + 2*3 + 1] = new QAction("Channel zy (imag)", m_menuChannels);
-	m_plot_channel[3*3 + 2*3 + 2] = new QAction("Channel zz (imag)", m_menuChannels);
-
-	for(int i = 0; i < 3; ++i)
-	for(int j = 0; j < 3; ++j)
-	{
-		m_plot_channel[i*3 + j]->setCheckable(true);
-		m_plot_channel[i*3 + j]->setChecked(i == j);
-		m_plot_channel[3*3 + i*3 + j]->setCheckable(true);
-		m_plot_channel[3*3 + i*3 + j]->setChecked(false);
-	}
-
-	for(int i = 0; i < 3*3; ++i)
-		m_menuChannels->addAction(m_plot_channel[i]);
-	m_menuChannels->addSeparator();
-	for(int i = 0; i < 3*3; ++i)
-		m_menuChannels->addAction(m_plot_channel[3*3 + i]);
-
-	m_menuChannels->setEnabled(m_plot_channels->isChecked());
+	acChannels->setEnabled(m_plot_channels->isChecked());
 
 	// weight plot sub-menu
 	QMenu *menuWeights = new QMenu("Plot Weights", m_menuDisp);
@@ -583,7 +548,7 @@ void MagDynDlg::CreateMenuBar()
 	menuExport->addAction(acStructExportScript);
 
 	m_menuDisp->addAction(m_plot_channels);
-	m_menuDisp->addMenu(m_menuChannels);
+	m_menuDisp->addAction(acChannels);
 	m_menuDisp->addAction(m_plot_degeneracies);
 	m_menuDisp->addSeparator();
 	m_menuDisp->addAction(acRescalePlot);
@@ -724,28 +689,19 @@ void MagDynDlg::CreateMenuBar()
 			this->CalcAll();
 	});
 
-	connect(m_plot_channels, &QAction::toggled, [this](bool checked)
+	connect(acChannels, &QAction::triggered, [this]()
 	{
-		m_menuChannels->setEnabled(checked);
+		ShowMatrixElemsDlg(false);
+	});
+
+	connect(m_plot_channels, &QAction::toggled, [this, acChannels](bool checked)
+	{
+		acChannels->setEnabled(checked);
 		this->PlotDispersion();
 	});
 
 	for(int i = 0; i < 3; ++i)
-	{
 		connect(m_hamiltonian_comp[i], &QAction::toggled, calc_all_dyn);
-
-		for(int j = 0; j < 3; ++j)
-		{
-			connect(m_plot_channel[i*3 + j], &QAction::toggled, [this](bool)
-			{
-				this->PlotDispersion();
-			});
-			connect(m_plot_channel[3*3 + i*3 + j], &QAction::toggled, [this](bool)
-			{
-				this->PlotDispersion();
-			});
-		}
-	}
 
 	connect(m_plot_degeneracies, &QAction::toggled, [this](bool)
 	{

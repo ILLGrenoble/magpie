@@ -196,22 +196,25 @@ void MagDynDlg::PlotDispersion()
 			QColor(0x22, 0x22, std::lerp(0x00, 0xff, 1.)),    // zz, imag
 		};
 
-		for(int i = 0; i < 2*3*3; ++i)
+		for(t_size imag_elem = 0; imag_elem < 2; ++imag_elem)
+		for(t_size i = 0; i < 3; ++i)
+		for(t_size j = 0; j < 3; ++j)
 		{
-			if(!m_plot_channel[i]->isChecked())
+			const int idx = imag_elem ? 3*3 : 0;  // start index
+			if(!m_matrixelems_dlg->IsChecked(i, j, imag_elem == 0))
 				continue;
 
 			GraphWithWeights *graph = new GraphWithWeights(m_plot->xAxis, m_plot->yAxis);
 			QPen pen = graph->pen();
-			pen.setColor(colChannel[i]);
+			pen.setColor(colChannel[i*3 + j + idx]);
 			pen.setWidthF(1.);
 			graph->setPen(pen);
 			graph->setBrush(QBrush(pen.color(), Qt::SolidPattern));
 			graph->setLineStyle(QCPGraph::lsNone);
 			graph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, m_weight_scale->value()));
 			graph->setAntialiased(true);
-			graph->setData(m_qs_data_channel[i], m_Es_data_channel[i], true /*already sorted*/);
-			graph->SetWeights(m_ws_data_channel[i]);
+			graph->setData(m_qs_data_channel[i*3 + j + idx], m_Es_data_channel[i*3 + j + idx], true /*already sorted*/);
+			graph->SetWeights(m_ws_data_channel[i*3 + j + idx]);
 			graph->SetWeightScale(m_weight_scale->value(), m_weight_min->value(), m_weight_max->value());
 			graph->SetWeightAsPointSize(m_plot_weights_pointsize->isChecked());
 			graph->SetWeightAsAlpha(m_plot_weights_alpha->isChecked());
@@ -355,7 +358,7 @@ void MagDynDlg::CalcDispersion()
 	m_ws_data.reserve(num_pts*10);
 	m_degen_data.reserve(num_pts*10);
 
-	for(int i = 0; i < 2*3*3; ++i)
+	for(t_size i = 0; i < 2*3*3; ++i)
 	{
 		m_qs_data_channel[i].reserve(num_pts*10);
 		m_Es_data_channel[i].reserve(num_pts*10);
@@ -578,7 +581,7 @@ void MagDynDlg::CalcDispersion()
 
 	//std::vector<std::size_t> perm =
 	sort_data(m_qs_data, m_Es_data, m_ws_data, &m_degen_data);
-	for(int i = 0; i < 2*3*3; ++i)
+	for(t_size i = 0; i < 2*3*3; ++i)
 	{
 		//tl2::reorder(m_ws_data_channel[i], perm);
 		sort_data(m_qs_data_channel[i], m_Es_data_channel[i], m_ws_data_channel[i]);

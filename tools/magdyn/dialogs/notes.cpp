@@ -73,7 +73,7 @@ NotesDlg::NotesDlg(QWidget* parent, QSettings *sett)
 			restoreGeometry(m_sett->value("notes/geo").toByteArray());
 		else
 			resize(500, 500);
-        }
+	}
 }
 
 

@@ -145,6 +145,32 @@ void MagDynDlg::ShowAssignDlg(bool only_create)
 /**
  * notes dialog
  */
+void MagDynDlg::ShowMatrixElemsDlg(bool only_create)
+{
+	if(!m_matrixelems_dlg)
+	{
+		m_matrixelems_dlg = new MatrixElemsDlg(this, m_sett);
+		m_matrixelems_dlg->setFont(this->font());
+
+		connect(m_matrixelems_dlg, &MatrixElemsDlg::StateChanged, [this]()
+		{
+			this->PlotDispersion();
+		});
+	}
+
+	if(!only_create)
+	{
+		m_matrixelems_dlg->show();
+		m_matrixelems_dlg->raise();
+		m_matrixelems_dlg->activateWindow();
+	}
+}
+
+
+
+/**
+ * notes dialog
+ */
 void MagDynDlg::ShowNotesDlg(bool only_create)
 {
 	if(!m_notes_dlg)

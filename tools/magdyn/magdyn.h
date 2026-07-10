@@ -83,6 +83,7 @@
 #include "dialogs/trafos.h"
 #include "dialogs/pol.h"
 #include "dialogs/assign.h"
+#include "dialogs/matrixelems.h"
 #include "dialogs/notes.h"
 #include "dialogs/infos.h"
 #include "dialogs/glinfos.h"
@@ -145,8 +146,6 @@ protected:
 	QAction *m_force_incommensurate{};
 	QAction *m_plot_channels{};
 	QAction *m_plot_degeneracies{};
-	QMenu *m_menuChannels{};
-	QAction *m_plot_channel[2*3*3]{};
 	QAction *m_plot_weights_pointsize{};
 	QAction *m_plot_weights_alpha{};
 	QAction *m_hamiltonian_comp[3]{};
@@ -261,6 +260,7 @@ protected:
 	// dialogs
 	QDialog *m_settings_dlg{};             // settings dialog
 	TableImportDlg *m_table_import_dlg{};  // table import dialog
+	MatrixElemsDlg *m_matrixelems_dlg{};   // dialog to choose matrix elements
 	NotesDlg *m_notes_dlg{};               // notes dialog
 	PolDlg *m_pol{};                       // polarisation calculator
 	AssignDlg *m_assign_dlg{};             // coupling assignments
@@ -288,6 +288,7 @@ protected:
 	// set up dialogs
 	void ShowInfoDlg(bool only_create = false);
 	void ShowGlInfoDlg(bool only_create = false);
+	void ShowMatrixElemsDlg(bool only_create = false);
 	void ShowNotesDlg(bool only_create = false);
 	void ShowAssignDlg(bool only_create = false);
 	void ShowStructPlotDlg(bool only_create = false);

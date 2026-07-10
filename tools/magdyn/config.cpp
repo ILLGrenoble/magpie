@@ -115,12 +115,7 @@ void MagDynDlg::Clear(bool recalc)
 	for(int i = 0; i < 3; ++i)
 		m_hamiltonian_comp[i]->setChecked(true);
 
-	for(int i = 0; i < 3; ++i)
-	for(int j = 0; j < 3; ++j)
-	{
-		m_plot_channel[i*3 + j]->setChecked(i == j);
-		m_plot_channel[3*3 + i*3 + j]->setChecked(false);
-	}
+	m_matrixelems_dlg->Reset();
 
 	m_ffact->clear();
 	m_cur_ffact->setValue(0);
