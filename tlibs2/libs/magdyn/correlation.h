@@ -294,10 +294,22 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 		if(m_temperature >= 0.)
 			E_and_S.S *= tl2::bose_cutoff(E_and_S.E, m_temperature, m_bose_cutoff);
 
-		// apply orthogonal projector for magnetic neutron scattering,
+		// calculate orthogonal projector for magnetic neutron scattering,
 		// see (Shirane 2002), p. 37, equation (2.64)
-		t_mat proj_neutron = tl2::convert<t_mat>(
-			tl2::ortho_projector<t_mat_real, t_vec_real>(S.Q_invA, false));
+		t_mat proj_neutron;
+		if(!tl2::equals_0(S.Q_invA, m_eps))
+		{
+			proj_neutron = tl2::convert<t_mat>(
+				tl2::ortho_projector<t_mat_real, t_vec_real>(S.Q_invA, false));
+		}
+		else
+		{
+			// invalid projector at Q = 0
+			proj_neutron = tl2::zero<t_mat>(3, 3);
+			TL2_CERR_OPT << "Magdyn error: Cannot calculate orthogonal projector for Q = 0." << std::endl;
+		}
+
+		// apply orthogonal projector
 		E_and_S.S_perp = proj_neutron * E_and_S.S;
 		if(m_perform_checks && !tl2::equals(tl2::trace(E_and_S.S_perp), tl2::trace(E_and_S.S_perp * proj_neutron), m_eps))
 		{
