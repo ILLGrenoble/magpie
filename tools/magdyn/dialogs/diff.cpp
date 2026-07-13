@@ -277,6 +277,7 @@ QWidget* DiffDlg::CreateGroupVelocityPanel()
 
 	// dispersion Q button
 	QPushButton *btnQ = new QPushButton("Set Main Q", panelGroupVelocity);
+	btnQ->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	btnQ->setToolTip("Set the Q start and end points from the dispersion in the main window.");
 
 	// maximum cutoff for filtering numerical artefacts in group velocity
@@ -313,6 +314,7 @@ QWidget* DiffDlg::CreateGroupVelocityPanel()
 
 	// start/stop button
 	m_btnStartStop_gv = new QPushButton("Calculate", panelGroupVelocity);
+	m_btnStartStop_gv->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 	// component grid
 	auto grid = new QGridLayout(panelGroupVelocity);

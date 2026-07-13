@@ -282,6 +282,7 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 
 	// dispersion Q button
 	QPushButton *btnQ = new QPushButton("Set Main Q", panelBerryCurvature);
+	btnQ->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	btnQ->setToolTip("Set the Q start and end points from the dispersion in the main window.");
 
 	// coordinate components
@@ -335,6 +336,7 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 
 	// start/stop button
 	m_btnStartStop_bc = new QPushButton("Calculate", panelBerryCurvature);
+	m_btnStartStop_bc->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 	// component grid
 	auto grid = new QGridLayout(panelBerryCurvature);
