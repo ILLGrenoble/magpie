@@ -1,12 +1,12 @@
 /**
  * tlibs2 -- magnetic dynamics -- getters / setters / cleanup functions
  * @author Tobias Weber <tweber@ill.fr>
- * @date 2022 - 2024
+ * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
  * tlibs
- * Copyright (C) 2017-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
@@ -60,7 +60,7 @@ MAGDYN_TEMPL void MAGDYN_INST::Clear()
 	m_xtallattice[0] = m_xtallattice[1] = m_xtallattice[2] = 0.;
 	m_xtalangles[0] = m_xtalangles[1] = m_xtalangles[2] = t_real(0.5) * tl2::pi<t_real>;
 	m_xtalA = m_xtalB = tl2::unit<t_mat_real>(3);
-	m_xtalUB = m_xtalUBinv = tl2::unit<t_mat_real>(3);
+	m_xtalUB = /*m_xtalUBinv =*/ tl2::unit<t_mat_real>(3);
 
 	// clear scattering plane
 	m_scatteringplane[0] = tl2::create<t_vec_real>({ 1., 0., 0. });
@@ -227,9 +227,9 @@ MAGDYN_TEMPL const t_mat_real& MAGDYN_INST::GetCrystalBTrafo() const
 }
 
 
-MAGDYN_TEMPL const t_mat_real& MAGDYN_INST::GetCrystalUBTrafo(bool inv) const
+MAGDYN_TEMPL const t_mat_real& MAGDYN_INST::GetCrystalUBTrafo() const
 {
-	return inv ? m_xtalUBinv : m_xtalUB;
+	return m_xtalUB;
 }
 
 
@@ -717,18 +717,19 @@ void MAGDYN_INST::SetScatteringPlane(t_real ah, t_real ak, t_real al,
 
 		m_xtalUB = tl2::UB_matrix(m_xtalB,
 			m_scatteringplane[0], m_scatteringplane[1], m_scatteringplane[2]);
-		bool inv_ok = false;
+
+		/*bool inv_ok = false;
 		std::tie(m_xtalUBinv, inv_ok) = tl2::inv(m_xtalUB);
 
 		if(!inv_ok)
 		{
 			TL2_CERR_OPT << "Magdyn error: UB matrix is not invertible."
 				<< std::endl;
-		}
+		}*/
 	}
 	catch(const std::exception& ex)
 	{
-		m_xtalUB = m_xtalUBinv = tl2::unit<t_mat_real>(3);
+		m_xtalUB = /*m_xtalUBinv =*/ tl2::unit<t_mat_real>(3);
 
 		TL2_CERR_OPT << "Magdyn error: Could not calculate scattering plane matrices."
 			<< std::endl;

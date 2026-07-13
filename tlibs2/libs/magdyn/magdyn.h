@@ -1,7 +1,7 @@
 /**
  * tlibs2 -- magnetic dynamics
  * @author Tobias Weber <tweber@ill.fr>
- * @date 2022 - 2024
+ * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
  *
  * References:
@@ -20,7 +20,7 @@
  *
  * ----------------------------------------------------------------------------
  * tlibs
- * Copyright (C) 2017-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
@@ -189,7 +189,7 @@ public:
 
 	const t_mat_real& GetCrystalATrafo() const;
 	const t_mat_real& GetCrystalBTrafo() const;
-	const t_mat_real& GetCrystalUBTrafo(bool inv = false) const;
+	const t_mat_real& GetCrystalUBTrafo() const;
 
 	const MagneticSite& GetMagneticSite(t_size idx) const;
 	const ExchangeTerm& GetExchangeTerm(t_size idx) const;
@@ -567,6 +567,19 @@ public:
 
 
 	// --------------------------------------------------------------------
+	// powder calculation
+	// --------------------------------------------------------------------
+	/**
+	 * generates the powder energies for the given Q point
+	 */
+	SofQEs CalcPowder(t_real Q_invA, t_size num_points = 4096,
+		t_size num_threads = 4, bool calc_weights = true,
+		std::function<bool(int, int)> *progress_fkt = nullptr,
+		std::function<void(const SofQE*)> *result_fkt = nullptr) const;
+	// --------------------------------------------------------------------
+
+
+	// --------------------------------------------------------------------
 	// loading and saving
 	// --------------------------------------------------------------------
 	/**
@@ -711,7 +724,7 @@ private:
 	t_mat_real m_xtalA{ tl2::unit<t_mat_real>(3) };
 	t_mat_real m_xtalB{ tl2::unit<t_mat_real>(3) };
 	t_mat_real m_xtalUB{ tl2::unit<t_mat_real>(3) };
-	t_mat_real m_xtalUBinv{ tl2::unit<t_mat_real>(3) };
+	//t_mat_real m_xtalUBinv{ tl2::unit<t_mat_real>(3) };
 
 	//scattering plane
 	t_vec_real m_scatteringplane[3]

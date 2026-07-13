@@ -1,12 +1,12 @@
 /**
  * tlibs2 -- magnetic dynamics -- saving of dispersions
  * @author Tobias Weber <tweber@ill.fr>
- * @date 2022 - 2024
+ * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
  * tlibs
- * Copyright (C) 2017-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
