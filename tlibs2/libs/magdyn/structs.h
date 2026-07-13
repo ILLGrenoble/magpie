@@ -50,6 +50,7 @@ namespace tl2_mag {
 // input- and output struct templates
 // ----------------------------------------------------------------------------
 
+// string array types
 using t_strarr3 = std::array<std::string, 3>;
 using t_strarr33 = std::array<std::array<std::string, 3>, 3>;
 

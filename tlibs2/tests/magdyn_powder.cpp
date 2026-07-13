@@ -30,9 +30,10 @@
 #include "libs/magdyn.h"
 
 
-	// types
+// types
 using t_real = double;
 using t_cplx = std::complex<t_real>;
+using t_size = std::size_t;
 
 using t_mat = tl2::mat<t_cplx>;
 using t_vec = tl2::vec<t_cplx>;
@@ -50,6 +51,8 @@ int main()
 {
 	// magnon calculator
 	t_magdyn magdyn{};
+	magdyn.SetPerformChecks(true);
+	magdyn.SetSilent(false);
 
 
 	// add a variable
@@ -105,7 +108,20 @@ int main()
 
 
 	// calculate powder spectra
-	auto Es_and_S = magdyn.CalcPowder(1., 64);
+	t_size num_E = 64;
+	t_size num_Q = 16384;
+	auto E_histo = magdyn.CalcPowderBin(0.2, 0., 1., num_E, num_Q);
+
+	int field_w = 15;
+	std::cout << "# " << std::setw(field_w - 2) << "E" << std::setw(field_w) << "S" << std::endl;
+	for(const auto& idx : boost::histogram::indexed(E_histo))
+	{
+		const auto& bin = idx.bin();
+		t_real E = bin.lower() + (bin.upper() - bin.lower()) / 2.;
+		t_real S = *idx / t_real(num_Q) / t_real(num_E);
+
+		std::cout << std::setw(field_w) << E << std::setw(field_w) << S << std::endl;
+	}
 
 
 	// calculate a point on the dispersion

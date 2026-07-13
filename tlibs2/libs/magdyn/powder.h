@@ -77,7 +77,18 @@ MAGDYN_INST::CalcPowder(t_real Q_invA,
 		const auto [ phi, theta ] = tl2::uv_to_sph<t_real>(u, v);
 		const auto [ x, y, z ] = tl2::sph_to_cart<t_real>(Q_invA, phi, theta);
 
+		// generate Q vector
 		t_vec_real Qvec_invA = tl2::create<t_vec_real>({ x, y, z });
+		if(m_perform_checks)
+		{
+			if(!tl2::equals(tl2::norm(Qvec_invA), Q_invA, m_eps))
+			{
+				TL2_CERR_OPT << "Magdyn error: Invalid Q vector length for |Q| = "
+					<< Q_invA << " / A." << std::endl;
+			}
+		}
+
+		// transform Q vector to rlu
 		t_vec_real Qvec_rlu = Binv * Qvec_invA;
 		Qvecs_rlu.emplace_back(std::move(Qvec_rlu));
 	}
@@ -85,6 +96,35 @@ MAGDYN_INST::CalcPowder(t_real Q_invA,
 	return CalcDispersion(Qvecs_rlu, num_threads, calc_weights, progress_fkt, result_fkt);
 }
 
+
+
+/**
+ * calculate powder energies for the given Q, binning the energies
+ */
+MAGDYN_TEMPL
+MAGDYN_TYPE::t_histo
+MAGDYN_INST::CalcPowderBin(t_real Q_invA,
+  t_real E_start, t_real E_end, t_size E_bins,
+	t_size num_points, t_size num_threads, bool calc_weights,
+	std::function<bool(int, int)> *progress_fkt,
+	std::function<void(const MAGDYN_TYPE::SofQE*)> *result_fkt) const
+{
+	namespace histo = boost::histogram;
+	t_histo histE = histo::make_histogram(histo::axis::regular<t_real>(E_bins, E_start, E_end));
+
+	// calculate S(Q, E)
+	auto SQEs = CalcPowder(Q_invA, num_points, num_threads, calc_weights,
+		progress_fkt, result_fkt);
+
+	// put S(Q, E) into energy bins
+	for(const auto& SQE : SQEs)
+		for(const auto& E_and_S : SQE.E_and_S)
+			histE(E_and_S.E, histo::weight(E_and_S.weight_perp));
+
+	return histE;
+}
+
 // --------------------------------------------------------------------
+
 
 #endif

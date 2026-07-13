@@ -55,6 +55,7 @@
 
 #include <boost/container_hash/hash.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/histogram.hpp>
 
 #include "../maths.h"
 #include "../expr.h"
@@ -135,6 +136,11 @@ public:
 
 	using t_indices = std::pair<t_size, t_size>;
 	using t_Jmap = std::unordered_map<t_indices, t_mat, boost::hash<t_indices>>;
+
+	// histogram type
+	using t_histo = boost::histogram::histogram<
+		std::tuple<boost::histogram::axis::regular<t_real,
+			boost::use_default, boost::use_default, boost::use_default>>>;
 	// --------------------------------------------------------------------
 
 
@@ -574,6 +580,15 @@ public:
 	 */
 	SofQEs CalcPowder(t_real Q_invA, t_size num_points = 4096,
 		t_size num_threads = 4, bool calc_weights = true,
+		std::function<bool(int, int)> *progress_fkt = nullptr,
+		std::function<void(const SofQE*)> *result_fkt = nullptr) const;
+
+	/**
+	 * generates the powder energies for the given Q point, binning the energies
+	 */
+	t_histo CalcPowderBin(t_real Q_invA,
+	  t_real E_start = 0., t_real E_end = 5., t_size E_num = 128,
+	  t_size num_points = 4096, t_size num_threads = 4, bool calc_weights = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		std::function<void(const SofQE*)> *result_fkt = nullptr) const;
 	// --------------------------------------------------------------------
