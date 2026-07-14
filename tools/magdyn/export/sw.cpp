@@ -92,7 +92,7 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 		user = "";
 
 	ofstr	<< "%\n"
-		<< "% Created by Magpie\n"
+		<< "% Created by Magpie " << MAGPIE_VER << "\n"
 		<< "% Author: Tobias Weber\n"
 		<< "% URL: https://github.com/ILLGrenoble/magpie\n"
 		<< "% DOI: https://doi.org/10.5281/zenodo.16180814\n"

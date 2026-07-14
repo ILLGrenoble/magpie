@@ -355,6 +355,33 @@ void MagDynDlg::ShowDiffDlg(bool only_create)
 
 
 /**
+ * powder spectra dialog
+ */
+void MagDynDlg::ShowPowderDlg(bool only_create)
+{
+	if(!m_powder_dlg)
+	{
+		m_powder_dlg = new PowderDlg(this, m_sett);
+		m_powder_dlg->setFont(this->font());
+
+		m_powder_dlg->SetKernel(&m_dyn);
+
+		// set Q position
+		auto [Q_start, Q_end] = GetDispersionQ();
+		m_powder_dlg->SetDispersionQ(Q_start, Q_end);
+	}
+
+	if(!only_create)
+	{
+		m_powder_dlg->show();
+		m_powder_dlg->raise();
+		m_powder_dlg->activateWindow();
+	}
+}
+
+
+
+/**
  * form factor plotting dialog
  */
 void MagDynDlg::ShowFormFactorDlg(bool only_create)

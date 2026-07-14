@@ -122,46 +122,23 @@ MagDynDlg::~MagDynDlg()
 {
 	Clear();
 
-	if(m_settings_dlg)
+	// remove dialogs
+	for(QDialog** dlg : {
+		(QDialog**)&m_settings_dlg, (QDialog**)&m_table_import_dlg,
+		(QDialog**)&m_matrixelems_dlg, (QDialog**)&m_notes_dlg,
+		(QDialog**)&m_pol, (QDialog**)&m_assign_dlg,
+		(QDialog**)&m_info_dlg, (QDialog**)&m_glinfo_dlg,
+		(QDialog**)&m_structplot_dlg, (QDialog**)&m_groundstate_dlg,
+		(QDialog**)&m_topo_dlg, (QDialog**)&m_diff_dlg,
+		(QDialog**)&m_powder_dlg, (QDialog**)&m_ffact_dlg,
+		(QDialog**)&m_disp3d_dlg, (QDialog**)&m_bz_dlg,
+		(QDialog**)&m_trafos, (QDialog**)&m_plot2d,
+		(QDialog**)&m_plot3d, (QDialog**)&m_bz_tool })
 	{
-		delete m_settings_dlg;
-		m_settings_dlg = nullptr;
-	}
-
-	if(m_structplot_dlg)
-	{
-		delete m_structplot_dlg;
-		m_structplot_dlg = nullptr;
-	}
-
-	if(m_table_import_dlg)
-	{
-		delete m_table_import_dlg;
-		m_table_import_dlg = nullptr;
-	}
-
-	if(m_assign_dlg)
-	{
-		delete m_assign_dlg;
-		m_assign_dlg = nullptr;
-	}
-
-	if(m_notes_dlg)
-	{
-		delete m_notes_dlg;
-		m_notes_dlg = nullptr;
-	}
-
-	if(m_info_dlg)
-	{
-		delete m_info_dlg;
-		m_info_dlg = nullptr;
-	}
-
-	if(m_glinfo_dlg)
-	{
-		delete m_glinfo_dlg;
-		m_glinfo_dlg = nullptr;
+		if(!dlg || !*dlg)
+			continue;
+		delete reinterpret_cast<QDialog*>(*dlg);
+		*dlg = nullptr;
 	}
 }
 
@@ -479,6 +456,7 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acDisp3D = new QAction("3D Dispersion...", menuCalc);
 	QAction *acTopo = new QAction("Topology...", menuCalc);
 	QAction *acDiff = new QAction("Differentiation...", menuCalc);
+	QAction *acPowder = new QAction("Powder Spectrum...", menuCalc);
 
 	// tools menu
 	QMenu *menuTools = new QMenu("Tools", m_menu);
@@ -584,6 +562,8 @@ void MagDynDlg::CreateMenuBar()
 	menuCalcOpt->addMenu(menuHamiltonians);
 
 	menuCalc->addAction(acDisp3D);
+	menuCalc->addAction(acPowder);
+	menuCalc->addSeparator();
 	menuCalc->addAction(acTopo);
 	menuCalc->addAction(acDiff);
 
@@ -661,6 +641,7 @@ void MagDynDlg::CreateMenuBar()
 	connect(acDisp3D, &QAction::triggered, this, &MagDynDlg::ShowDispersion3DDlg);
 	connect(acTopo, &QAction::triggered, this, &MagDynDlg::ShowTopologyDlg);
 	connect(acDiff, &QAction::triggered, this, &MagDynDlg::ShowDiffDlg);
+	connect(acPowder, &QAction::triggered, this, &MagDynDlg::ShowPowderDlg);
 	connect(acStructImport, &QAction::triggered, this, &MagDynDlg::ShowTableImporter);
 	connect(acStructExportSun, &QAction::triggered,
 		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::ExportToSunny));
