@@ -53,7 +53,8 @@
 MAGDYN_TEMPL
 MAGDYN_TYPE::SofQEs
 MAGDYN_INST::CalcPowder(t_real Q_invA,
-	t_size num_points, t_size num_threads, bool calc_weights,
+	t_size num_points, t_size num_threads,
+	bool calc_weights, bool ortho_proj,
 	std::function<bool(int, int)> *progress_fkt,
 	std::function<void(const MAGDYN_TYPE::SofQE*)> *result_fkt) const
 {
@@ -105,7 +106,8 @@ MAGDYN_TEMPL
 MAGDYN_TYPE::t_histo
 MAGDYN_INST::CalcPowderBin(t_real Q_invA,
   t_real E_start, t_real E_end, t_size E_bins,
-	t_size num_points, t_size num_threads, bool calc_weights,
+	t_size num_points, t_size num_threads,
+	bool calc_weights, bool ortho_proj,
 	std::function<bool(int, int)> *progress_fkt,
 	std::function<void(const MAGDYN_TYPE::SofQE*)> *result_fkt) const
 {
@@ -113,13 +115,13 @@ MAGDYN_INST::CalcPowderBin(t_real Q_invA,
 	t_histo histE = histo::make_histogram(histo::axis::regular<t_real>(E_bins, E_start, E_end));
 
 	// calculate S(Q, E)
-	auto SQEs = CalcPowder(Q_invA, num_points, num_threads, calc_weights,
-		progress_fkt, result_fkt);
+	auto SQEs = CalcPowder(Q_invA, num_points, num_threads,
+		calc_weights, ortho_proj, progress_fkt, result_fkt);
 
 	// put S(Q, E) into energy bins
 	for(const auto& SQE : SQEs)
 		for(const auto& E_and_S : SQE.E_and_S)
-			histE(E_and_S.E, histo::weight(E_and_S.weight_perp));
+			histE(E_and_S.E, histo::weight(ortho_proj ? E_and_S.weight_perp : E_and_S.weight_full));
 
 	return histE;
 }

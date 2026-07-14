@@ -149,7 +149,7 @@ QWidget* PowderDlg::CreatePowderPanel()
 	m_plot_powder->setFont(font());
 	m_plot_powder->xAxis->setScaleType(QCPAxis::stLinear);
 	m_plot_powder->yAxis->setScaleType(QCPAxis::stLinear);
-	m_plot_powder->xAxis->setLabel("Momentum Transfer Q (1/Å)");
+	m_plot_powder->xAxis->setLabel("Momentum Transfer Q (Å⁻¹)");
 	m_plot_powder->yAxis->setLabel("Energy Transfer E (meV)");
 	m_plot_powder->setInteraction(QCP::iRangeDrag, true);
 	m_plot_powder->setInteraction(QCP::iRangeZoom, true);
@@ -193,7 +193,7 @@ QWidget* PowderDlg::CreatePowderPanel()
 	m_Q_start_powder->setSingleStep(0.01);
 	m_Q_start_powder->setValue(0.);
 	m_Q_start_powder->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
-	m_Q_start_powder->setToolTip("Dispersion initial momentum transfer (1/Å).");
+	m_Q_start_powder->setToolTip("Dispersion initial momentum transfer (Å⁻¹).");
 
 	m_Q_end_powder = new QDoubleSpinBox(panelPowder);
 	m_Q_end_powder->setDecimals(4);
@@ -202,13 +202,13 @@ QWidget* PowderDlg::CreatePowderPanel()
 	m_Q_end_powder->setSingleStep(0.01);
 	m_Q_end_powder->setValue(1.);
 	m_Q_end_powder->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
-	m_Q_end_powder->setToolTip("Dispersion final momentum transfer (1/Å).");
+	m_Q_end_powder->setToolTip("Dispersion final momentum transfer (Å⁻¹).");
 
 	// number of Q points in the plot
 	m_num_Q_powder = new QSpinBox(panelPowder);
 	m_num_Q_powder->setMinimum(1);
 	m_num_Q_powder->setMaximum(99999);
-	m_num_Q_powder->setValue(32);
+	m_num_Q_powder->setValue(64);
 	m_num_Q_powder->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_num_Q_powder->setToolTip("Number of Q points to calculate.");
 
@@ -224,7 +224,7 @@ QWidget* PowderDlg::CreatePowderPanel()
 	m_E_start_powder = new QDoubleSpinBox(panelPowder);
 	m_E_start_powder->setDecimals(4);
 	m_E_start_powder->setMinimum(0.);
-	m_E_start_powder->setMaximum(99.9999);
+	m_E_start_powder->setMaximum(999.9999);
 	m_E_start_powder->setSingleStep(0.01);
 	m_E_start_powder->setValue(0.);
 	m_E_start_powder->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
@@ -233,7 +233,7 @@ QWidget* PowderDlg::CreatePowderPanel()
 	m_E_end_powder = new QDoubleSpinBox(panelPowder);
 	m_E_end_powder->setDecimals(4);
 	m_E_end_powder->setMinimum(0.);
-	m_E_end_powder->setMaximum(99.9999);
+	m_E_end_powder->setMaximum(999.9999);
 	m_E_end_powder->setSingleStep(0.01);
 	m_E_end_powder->setValue(1.);
 	m_E_end_powder->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
@@ -243,9 +243,15 @@ QWidget* PowderDlg::CreatePowderPanel()
 	m_num_E_powder = new QSpinBox(panelPowder);
 	m_num_E_powder->setMinimum(1);
 	m_num_E_powder->setMaximum(99999);
-	m_num_E_powder->setValue(32);
+	m_num_E_powder->setValue(64);
 	m_num_E_powder->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_num_E_powder->setToolTip("Number of E points to calculate.");
+
+	// orthogonal projector
+	m_use_proj = new QCheckBox(panelPowder);
+	m_use_proj->setText("Use Projector");
+	m_use_proj->setToolTip("Use the projector orthogonal to Q in neutron scattering.");
+	m_use_proj->setChecked(true);
 
 	// dispersion Q button
 	QPushButton *btnQ = new QPushButton("Set Main Q", panelPowder);
@@ -267,9 +273,9 @@ QWidget* PowderDlg::CreatePowderPanel()
 
 	int y = 0;
 	grid->addWidget(m_plot_powder, y++, 0, 1, 4);
-	grid->addWidget(new QLabel("Start Q (1/Å):", panelPowder), y, 0, 1, 1);
+	grid->addWidget(new QLabel("Start Q (Å⁻¹):", panelPowder), y, 0, 1, 1);
 	grid->addWidget(m_Q_start_powder, y, 1, 1, 1);
-	grid->addWidget(new QLabel("End Q (1/Å):", panelPowder), y, 2, 1, 1);
+	grid->addWidget(new QLabel("End Q (Å⁻¹):", panelPowder), y, 2, 1, 1);
 	grid->addWidget(m_Q_end_powder, y++, 3, 1, 1);
 	grid->addWidget(new QLabel("Q Count:", panelPowder), y, 0, 1, 1);
 	grid->addWidget(m_num_Q_powder, y, 1, 1, 1);
@@ -280,7 +286,8 @@ QWidget* PowderDlg::CreatePowderPanel()
 	grid->addWidget(new QLabel("End E (meV):", panelPowder), y, 2, 1, 1);
 	grid->addWidget(m_E_end_powder, y++, 3, 1, 1);
 	grid->addWidget(new QLabel("E Count:", panelPowder), y, 0, 1, 1);
-	grid->addWidget(m_num_E_powder, y, 1, 1, 1);
+	grid->addWidget(m_num_E_powder, y++, 1, 1, 1);
+	grid->addWidget(m_use_proj, y, 0, 1, 2);
 	grid->addWidget(btnQ, y++, 3, 1, 1);
 	grid->addWidget(m_progress_powder, y, 0, 1, 3);
 	grid->addWidget(m_btnStartStop_powder, y++, 3, 1, 1);
@@ -396,6 +403,7 @@ void PowderDlg::CalculatePowder()
 	t_size Q_count = m_num_Q_powder->value();
 	t_size Qvec_count = m_num_Qvecs_powder->value();
 	t_size E_count = m_num_E_powder->value();
+	bool ortho_proj = m_use_proj->isChecked();
 
 	// calculate powder spectra
 	t_magdyn dyn = *m_dyn;
@@ -426,7 +434,8 @@ void PowderDlg::CalculatePowder()
 	for(t_size Q_idx = 0; Q_idx < Q_count; ++Q_idx)
 	{
 		auto task = [this, &mtx, &dyn,
-			Q_start, Q_end, Q_idx, Q_count, Qvec_count, E_start, E_end, E_count]()
+			Q_start, Q_end, Q_idx, Q_count, Qvec_count,
+			E_start, E_end, E_count, ortho_proj]()
 		{
 			const t_real Q = Q_count > 1
 				? tl2::lerp(Q_start, Q_end, t_real(Q_idx) / t_real(Q_count - 1))
@@ -434,7 +443,8 @@ void PowderDlg::CalculatePowder()
 
 			PowderData data_powder;
 			data_powder.momentum = Q;
-			data_powder.histogram = dyn.CalcPowderBin(Q, E_start, E_end, E_count, Qvec_count, 1, true);
+			data_powder.histogram = dyn.CalcPowderBin(Q, E_start, E_end, E_count,
+				Qvec_count, 1, true, ortho_proj);
 
 			std::lock_guard<std::mutex> _lck{mtx};
 			m_data_powder.emplace_back(std::move(data_powder));
@@ -527,7 +537,7 @@ void PowderDlg::PowderPlotMouseMove(QMouseEvent* evt)
 	t_real Q = m_plot_powder->xAxis->pixelToCoord(evt->pos().x());
 	t_real E = m_plot_powder->yAxis->pixelToCoord(evt->pos().y());
 
-	QString status("Q = %1 1/Å, E = %2 meV.");
+	QString status("Q = %1 Å⁻¹, E = %2 meV.");
 	status = status.arg(Q, 0, 'g', g_prec_gui).arg(E, 0, 'g', g_prec_gui);
 	m_status->setText(status);
 }

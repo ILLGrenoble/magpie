@@ -122,7 +122,7 @@ int main()
 	t_size num_threads = 8;
 	t_real Q_invA = 0.2;
 	auto fkt = std::function<bool(int, int)>(&progress);
-	auto E_histo = magdyn.CalcPowderBin(Q_invA, 0., 1., num_E, num_Q, num_threads, true, &fkt);
+	auto E_histo = magdyn.CalcPowderBin(Q_invA, 0., 1., num_E, num_Q, num_threads, true, true, &fkt);
 	std::cout << std::endl;
 
 	int field_w = 15;

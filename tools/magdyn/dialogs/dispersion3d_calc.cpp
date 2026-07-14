@@ -873,7 +873,7 @@ void Dispersion3DDlg::PlotPickerIntersection(
 
 	m_dispplot->GetRenderer()->SetObjectsHighlight(false);
 
-	if(!pos)
+	if(!pos || !m_dyn)
 		return;
 
 	m_cur_obj = objIdx;
@@ -889,14 +889,19 @@ void Dispersion3DDlg::PlotPickerIntersection(
 	// reconstruct Q position
 	t_real_gl Q1param = (0.5*Q_scale1 + (*pos)[0]) / Q_scale1;
 	t_real_gl Q2param = (0.5*Q_scale2 + (*pos)[1]) / Q_scale2;
-	t_vec_real Q = Q_origin + Q_dir_1*Q1param + Q_dir_2*Q2param;
 
-	t_real_gl E = (*pos)[2] / E_scale;
+	const t_vec_real Q = Q_origin + Q_dir_1*Q1param + Q_dir_2*Q2param;
+	const t_mat_real& B = m_dyn->GetCrystalBTrafo();
+	const t_vec_real Qvec_invA = B * Q;
+	const t_real Q_invA = tl2::norm(Qvec_invA);
+
+	const t_real_gl E = (*pos)[2] / E_scale;
 
 	std::ostringstream ostr;
 	ostr.precision(g_prec_gui);
 	ostr
 		<< "Q = (" << Q[0] << ", " << Q[1] << ", " << Q[2] << ") rlu, "
+		<< "|Q| = " << Q_invA << " Å⁻¹, "
 		<< "E = " << E << " meV";
 
 	const std::string& label = m_dispplot->GetRenderer()->GetObjectLabel(objIdx);

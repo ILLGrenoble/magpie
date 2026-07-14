@@ -29,7 +29,6 @@
 #include <QtCore/QSettings>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMenu>
-#include <QtWidgets/QTableWidget>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QDoubleSpinBox>
@@ -129,6 +128,7 @@ private:
 	QSpinBox *m_num_Q_powder{};             // number of Q coordinates
 	QSpinBox *m_num_Qvecs_powder{};         // number of Q vectors per coordinate
 	QSpinBox *m_num_E_powder{};             // number of E coordinates
+	QCheckBox *m_use_proj{};                // use orthogonal projector
 
 	QPushButton *m_btnStartStop_powder{};   // start/stop calculation
 	bool m_calcEnabled_powder{};            // enable calculations

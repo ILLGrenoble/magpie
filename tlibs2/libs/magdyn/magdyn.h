@@ -578,8 +578,9 @@ public:
 	/**
 	 * generates the powder energies for the given Q point
 	 */
-	SofQEs CalcPowder(t_real Q_invA, t_size num_points = 4096,
-		t_size num_threads = 4, bool calc_weights = true,
+	SofQEs CalcPowder(t_real Q_invA,
+		t_size num_points = 4096, t_size num_threads = 4,
+		bool calc_weights = true, bool ortho_proj = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		std::function<void(const SofQE*)> *result_fkt = nullptr) const;
 
@@ -587,8 +588,9 @@ public:
 	 * generates the powder energies for the given Q point, binning the energies
 	 */
 	t_histo CalcPowderBin(t_real Q_invA,
-	  t_real E_start = 0., t_real E_end = 5., t_size E_num = 128,
-	  t_size num_points = 4096, t_size num_threads = 4, bool calc_weights = true,
+		t_real E_start = 0., t_real E_end = 5., t_size E_num = 128,
+		t_size num_points = 4096, t_size num_threads = 4,
+		bool calc_weights = true, bool ortho_proj = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		std::function<void(const SofQE*)> *result_fkt = nullptr) const;
 	// --------------------------------------------------------------------
