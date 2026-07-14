@@ -104,10 +104,15 @@ void PowderDlg::SetKernel(const t_magdyn* dyn)
 /**
  * set the Q start and end points from the main window's dispersion
  */
-void PowderDlg::SetDispersionQ(const t_vec_real& Qstart, const t_vec_real& Qend)
+void PowderDlg::SetDispersionQE(
+	const t_vec_real& Qstart, const t_vec_real& Qend,
+	const t_real Estart, const t_real Eend)
 {
 	m_Qstart = Qstart;
 	m_Qend = Qend;
+
+	m_Estart = Estart;
+	m_Eend = Eend;
 }
 
 
@@ -253,10 +258,15 @@ QWidget* PowderDlg::CreatePowderPanel()
 	m_use_proj->setToolTip("Use the projector orthogonal to Q in neutron scattering.");
 	m_use_proj->setChecked(true);
 
+	QCheckBox *use_log = new QCheckBox(panelPowder);
+	use_log->setText("Logarithmic");
+	use_log->setToolTip("Use logarithmic S(Q, E) scale.");
+	use_log->setChecked(false);
+
 	// dispersion Q button
-	QPushButton *btnQ = new QPushButton("Set Main Q", panelPowder);
-	btnQ->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-	btnQ->setToolTip("Set the Q start and end points from the dispersion in the main window.");
+	QPushButton *btnQE = new QPushButton("Set Main Q && E", panelPowder);
+	btnQE->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	btnQE->setToolTip("Set the Q and E start and end points from the dispersion in the main window.");
 
 	// progress bar
 	m_progress_powder = new QProgressBar(panelPowder);
@@ -286,9 +296,10 @@ QWidget* PowderDlg::CreatePowderPanel()
 	grid->addWidget(new QLabel("End E (meV):", panelPowder), y, 2, 1, 1);
 	grid->addWidget(m_E_end_powder, y++, 3, 1, 1);
 	grid->addWidget(new QLabel("E Count:", panelPowder), y, 0, 1, 1);
-	grid->addWidget(m_num_E_powder, y++, 1, 1, 1);
-	grid->addWidget(m_use_proj, y, 0, 1, 2);
-	grid->addWidget(btnQ, y++, 3, 1, 1);
+	grid->addWidget(m_num_E_powder, y, 1, 1, 1);
+	grid->addWidget(m_use_proj, y++, 2, 1, 2);
+	grid->addWidget(use_log, y, 0, 1, 2);
+	grid->addWidget(btnQE, y++, 3, 1, 1);
 	grid->addWidget(m_progress_powder, y, 0, 1, 3);
 	grid->addWidget(m_btnStartStop_powder, y++, 3, 1, 1);
 
@@ -307,7 +318,17 @@ QWidget* PowderDlg::CreatePowderPanel()
 	connect(acRescalePlot, &QAction::triggered, this, &PowderDlg::RescalePowderPlot);
 	connect(acSaveFigure, &QAction::triggered, this, &PowderDlg::SavePowderPlotFigure);
 	connect(acSaveData, &QAction::triggered, this, &PowderDlg::SavePowderData);
-	connect(btnQ, &QAbstractButton::clicked, this, &PowderDlg::SetPowderQ);
+	connect(btnQE, &QAbstractButton::clicked, this, &PowderDlg::SetPowderQE);
+
+	connect(use_log, &QCheckBox::toggled, [this](bool checked)
+	{
+		if(!m_plot_colour || !m_plot_powder)
+			return;
+
+		m_plot_colour->axis()->setScaleType(
+			checked ? QCPAxis::stLogarithmic : QCPAxis::stLinear);
+		m_plot_powder->replot();
+	});
 
 	// calculation
 	connect(m_btnStartStop_powder, &QAbstractButton::clicked, [this]()
@@ -358,9 +379,7 @@ void PowderDlg::PlotPowder()
 		}
 	}
 
-	m_plot_map->rescaleDataRange();
-	m_plot_powder->rescaleAxes();
-	m_plot_powder->replot();
+	RescalePowderPlot();
 }
 
 
@@ -571,9 +590,10 @@ void PowderDlg::PowderPlotMousePress(QMouseEvent* evt)
  */
 void PowderDlg::RescalePowderPlot()
 {
-	if(!m_plot_powder)
+	if(!m_plot_powder || !m_plot_map)
 		return;
 
+	m_plot_map->rescaleDataRange();
 	m_plot_powder->rescaleAxes();
 	m_plot_powder->replot();
 }
@@ -703,10 +723,15 @@ void PowderDlg::EnablePowderCalculation(bool enable)
 
 
 /**
- * setd the Q positions to the main window's dispersion Qs
+ * sets the Q and E ranges to the main window's dispersion
  */
-void PowderDlg::SetPowderQ()
+void PowderDlg::SetPowderQE()
 {
+	// E
+	m_E_start_powder->setValue(m_Estart);
+	m_E_end_powder->setValue(m_Eend);
+
+	// Q
 	if(m_Qstart.size() < 3 || m_Qend.size() < 3 || !m_dyn)
 		return;
 

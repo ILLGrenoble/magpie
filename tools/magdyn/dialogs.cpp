@@ -368,7 +368,8 @@ void MagDynDlg::ShowPowderDlg(bool only_create)
 
 		// set Q position
 		auto [Q_start, Q_end] = GetDispersionQ();
-		m_powder_dlg->SetDispersionQ(Q_start, Q_end);
+		auto [E_start, E_end] = GetDispersionE();
+		m_powder_dlg->SetDispersionQE(Q_start, Q_end, E_start, E_end);
 	}
 
 	if(!only_create)

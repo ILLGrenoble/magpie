@@ -69,7 +69,7 @@ public:
 
 	// set kernel and Q path from main window
 	void SetKernel(const t_magdyn* dyn);
-	void SetDispersionQ(const t_vec_real& Qstart, const t_vec_real& Qend);
+	void SetDispersionQE(const t_vec_real& Qstart, const t_vec_real& Qend, t_real Estart, t_real Eend);
 
 
 protected:
@@ -95,7 +95,7 @@ protected:
 	void CalculatePowder();
 	void SavePowderData();
 
-	void SetPowderQ();
+	void SetPowderQE();
 	// ------------------------------------------------------------------------
 
 
@@ -104,6 +104,7 @@ private:
 	// from main dialog
 	const t_magdyn *m_dyn{};            // main calculation kernel
 	t_vec_real m_Qstart{}, m_Qend{};    // Qs from main window
+	t_real m_Estart{0}, m_Eend{1};      // Es from main window
 
 	QSettings *m_sett{};                // program settings
 	QLabel *m_status{};                 // status bar

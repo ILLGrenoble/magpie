@@ -76,7 +76,7 @@ void MagDynDlg::ClearDispersion(bool replot)
 
 
 /**
- * get the dispersion's start and end points
+ * get the dispersion's start and end points in Q
  */
 std::pair<t_vec_real, t_vec_real> MagDynDlg::GetDispersionQ() const
 {
@@ -100,6 +100,21 @@ std::pair<t_vec_real, t_vec_real> MagDynDlg::GetDispersionQ() const
 
 
 /**
+ * get the dispersion's start and end points in E
+ */
+std::pair<t_real, t_real> MagDynDlg::GetDispersionE() const
+{
+	const bool ignore_annihilation = m_ignore_annihilation->isChecked();
+	t_real E_min = m_E_min;
+	if(E_min < 0. && ignore_annihilation)
+		E_min = 0.;
+
+	return std::make_pair(E_min, m_E_max);
+}
+
+
+
+/**
  * a new start or end Q coordinate has been entered
  */
 void MagDynDlg::DispersionQChanged(bool calc_dyn)
@@ -108,15 +123,19 @@ void MagDynDlg::DispersionQChanged(bool calc_dyn)
 		this->CalcDispersion();
 
 	t_vec_real Q_start, Q_end;
+	t_real E_start{0}, E_end{1};
 	if(m_topo_dlg || m_diff_dlg || m_powder_dlg || m_disp3d_dlg || m_bzscene || m_bz_dlg)
+	{
 		std::tie(Q_start, Q_end) = GetDispersionQ();
+		std::tie(E_start, E_end) = GetDispersionE();
+	}
 
 	if(m_topo_dlg)
 		m_topo_dlg->SetDispersionQ(Q_start, Q_end);
 	if(m_diff_dlg)
 		m_diff_dlg->SetDispersionQ(Q_start, Q_end);
 	if(m_powder_dlg)
-		m_powder_dlg->SetDispersionQ(Q_start, Q_end);
+		m_powder_dlg->SetDispersionQE(Q_start, Q_end, E_start, E_end);
 	if(m_disp3d_dlg)
 		m_disp3d_dlg->SetDispersionQ(Q_start, Q_end);
 
@@ -274,26 +293,28 @@ void MagDynDlg::PlotDispersion()
 	const char* Q_label[]{ "h (rlu)", "k (rlu)", "l (rlu)" };
 	m_plot->xAxis->setLabel(Q_label[m_Q_idx]);
 
-	// set x plot range
+	// set Q plot range
 	m_plot->xAxis->setRange(m_Q_min, m_Q_max);
 
-	// set y plot range
+	// set E plot range
 	auto [min_E_iter, max_E_iter] = std::minmax_element(m_Es_data.begin(), m_Es_data.end());
 	if(min_E_iter != m_Es_data.end() && max_E_iter != m_Es_data.end())
 	{
 		t_real E_range = *max_E_iter - *min_E_iter;
 
-		t_real Emin = *min_E_iter - E_range*0.05;
-		t_real Emax = *max_E_iter + E_range*0.05;
+		m_E_min = *min_E_iter - E_range*0.05;
+		m_E_max = *max_E_iter + E_range*0.05;
 		//if(ignore_annihilation)
-		//	Emin = t_real(0);
+		//	m_E_min = t_real(0);
 
-		m_plot->yAxis->setRange(Emin, Emax);
 	}
 	else
 	{
-		m_plot->yAxis->setRange(0., 1.);
+		m_E_min = 0.;
+		m_E_max = 1.;
 	}
+
+	m_plot->yAxis->setRange(m_E_min, m_E_max);
 
 	// set font
 	m_plot->setFont(font());
