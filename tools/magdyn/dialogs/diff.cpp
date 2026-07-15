@@ -80,6 +80,18 @@ DiffDlg::DiffDlg(QWidget *parent, QSettings *sett)
 	maingrid->addWidget(m_status, 1, 0, 1, 3);
 	maingrid->addWidget(btnbox, 1, 3, 1, 1);
 
+	// restore settings
+	if(m_sett)
+	{
+		if(m_sett->contains("diff/geo"))
+			restoreGeometry(m_sett->value("diff/geo").toByteArray());
+		else
+			resize(640, 800);
+
+		if(m_sett->contains("diff/splitter"))
+			m_split_plot_gv->restoreState(m_sett->value("diff/splitter").toByteArray());
+	}
+
 	// connections
 	connect(btnbox, &QDialogButtonBox::accepted, this, &DiffDlg::accept);
 }
@@ -342,18 +354,6 @@ QWidget* DiffDlg::CreateGroupVelocityPanel()
 	grid->addWidget(m_S_filter_gv, y++, 3, 1, 1);
 	grid->addWidget(m_progress_gv, y, 0, 1, 3);
 	grid->addWidget(m_btnStartStop_gv, y++, 3, 1, 1);
-
-	// restore settings
-	if(m_sett)
-	{
-		if(m_sett->contains("diff/geo"))
-			restoreGeometry(m_sett->value("diff/geo").toByteArray());
-		else
-			resize(640, 640);
-
-		if(m_sett->contains("diff/splitter"))
-			m_split_plot_gv->restoreState(m_sett->value("diff/splitter").toByteArray());
-	}
 
 	// connections
 	connect(m_plot_gv, &QCustomPlot::mouseMove, this, &DiffDlg::GroupVelocityPlotMouseMove);
