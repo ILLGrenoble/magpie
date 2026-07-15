@@ -104,9 +104,8 @@ std::pair<t_vec_real, t_vec_real> MagDynDlg::GetDispersionQ() const
  */
 std::pair<t_real, t_real> MagDynDlg::GetDispersionE() const
 {
-	const bool ignore_annihilation = m_ignore_annihilation->isChecked();
 	t_real E_min = m_E_min;
-	if(E_min < 0. && ignore_annihilation)
+	if(E_min < 0. && m_ignore_annihilation->isChecked())
 		E_min = 0.;
 
 	return std::make_pair(E_min, m_E_max);
@@ -324,6 +323,14 @@ void MagDynDlg::PlotDispersion()
 	m_plot->yAxis->setTickLabelFont(font());
 
 	m_plot->replot();
+
+	// - change of E range (due to the "ignore annihilation" option) is not handled in DispersionQChanged()
+	// - new E range is only available after CalcDispersion()
+	if(m_powder_dlg)
+	{
+		auto [ E_start, E_end ] = GetDispersionE();
+		m_powder_dlg->SetDispersionE(E_start, E_end);
+	}
 }
 
 
@@ -532,7 +539,7 @@ void MagDynDlg::CalcDispersion()
 							m_ws_data_channel[channel_i*3 + channel_j + 3*3].push_back(weight_channel_im);
 						}
 					}  // channel
-				}
+				}  // weights
 
 				m_qs_data.push_back(Q[m_Q_idx]);
 				m_Es_data.push_back(E);

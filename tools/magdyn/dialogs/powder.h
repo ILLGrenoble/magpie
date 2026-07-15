@@ -70,6 +70,7 @@ public:
 	// set kernel and Q path from main window
 	void SetKernel(const t_magdyn* dyn);
 	void SetDispersionQE(const t_vec_real& Qstart, const t_vec_real& Qend, t_real Estart, t_real Eend);
+	void SetDispersionE(t_real Estart, t_real Eend);
 
 
 protected:

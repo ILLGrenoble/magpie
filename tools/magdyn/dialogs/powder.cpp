@@ -117,7 +117,7 @@ void PowderDlg::SetKernel(const t_magdyn* dyn)
 
 
 /**
- * set the Q start and end points from the main window's dispersion
+ * set the Q and E start and end points from the main window's dispersion
  */
 void PowderDlg::SetDispersionQE(
 	const t_vec_real& Qstart, const t_vec_real& Qend,
@@ -126,6 +126,16 @@ void PowderDlg::SetDispersionQE(
 	m_Qstart = Qstart;
 	m_Qend = Qend;
 
+	SetDispersionE(Estart, Eend);
+}
+
+
+
+/**
+ * set the Q start and end points from the main window's dispersion
+ */
+void PowderDlg::SetDispersionE(const t_real Estart, const t_real Eend)
+{
 	m_Estart = Estart;
 	m_Eend = Eend;
 }
@@ -243,7 +253,7 @@ QWidget* PowderDlg::CreatePowderPanel()
 	// start and stop E
 	m_E_start_powder = new QDoubleSpinBox(panelPowder);
 	m_E_start_powder->setDecimals(4);
-	m_E_start_powder->setMinimum(0.);
+	m_E_start_powder->setMinimum(-999.9999);
 	m_E_start_powder->setMaximum(999.9999);
 	m_E_start_powder->setSingleStep(0.01);
 	m_E_start_powder->setValue(0.);
@@ -252,7 +262,7 @@ QWidget* PowderDlg::CreatePowderPanel()
 
 	m_E_end_powder = new QDoubleSpinBox(panelPowder);
 	m_E_end_powder->setDecimals(4);
-	m_E_end_powder->setMinimum(0.);
+	m_E_end_powder->setMinimum(-999.9999);
 	m_E_end_powder->setMaximum(999.9999);
 	m_E_end_powder->setSingleStep(0.01);
 	m_E_end_powder->setValue(1.);
