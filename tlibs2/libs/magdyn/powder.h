@@ -53,8 +53,7 @@
 MAGDYN_TEMPL
 MAGDYN_TYPE::SofQEs
 MAGDYN_INST::CalcPowder(t_real Q_invA,
-	t_size num_points, t_size num_threads,
-	bool calc_weights, bool ortho_proj,
+	t_size num_points, t_size num_threads, bool calc_weights,
 	std::function<bool(int, int)> *progress_fkt,
 	std::function<void(const MAGDYN_TYPE::SofQE*)> *result_fkt) const
 {
@@ -116,7 +115,7 @@ MAGDYN_INST::CalcPowderBin(t_real Q_invA,
 
 	// calculate S(Q, E)
 	auto SQEs = CalcPowder(Q_invA, num_points, num_threads,
-		calc_weights, ortho_proj, progress_fkt, result_fkt);
+		calc_weights, progress_fkt, result_fkt);
 
 	// put S(Q, E) into energy bins
 	for(const auto& SQE : SQEs)
