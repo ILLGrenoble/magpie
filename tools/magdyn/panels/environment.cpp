@@ -58,12 +58,13 @@ void MagDynDlg::CreateSampleEnvPanel()
 	btnDirs->setToolTip("Set the magnetic field direction to a predefined value.");
 	btnDirs->setSizePolicy(QSizePolicy{QSizePolicy::Preferred, QSizePolicy::Preferred});
 	QMenu *menuDirs = new QMenu(btnDirs);
-	QAction *acDirPlaneX = new QAction("Scattering Plane Vector 1", menuDirs);
-	QAction *acDirPlaneY = new QAction("Scattering Plane Vector 2", menuDirs);
-	QAction *acDirPlaneZ = new QAction("Scattering Plane Normal", menuDirs);
-	menuDirs->addAction(acDirPlaneX);
-	menuDirs->addAction(acDirPlaneY);
-	menuDirs->addAction(acDirPlaneZ);
+	QAction *acDirPlane[] = {
+		new QAction("Scattering Plane Vector 1", menuDirs),
+		new QAction("Scattering Plane Vector 2", menuDirs),
+		new QAction("Scattering Plane Normal", menuDirs) };
+	menuDirs->addAction(acDirPlane[0]);
+	menuDirs->addAction(acDirPlane[1]);
+	menuDirs->addAction(acDirPlane[2]);
 	btnDirs->setMenu(menuDirs);
 
 	// field direction
@@ -89,12 +90,13 @@ void MagDynDlg::CreateSampleEnvPanel()
 	btnAxes->setToolTip("Set the magnetic field rotation axis to a predefined value.");
 	btnAxes->setSizePolicy(QSizePolicy{QSizePolicy::Preferred, QSizePolicy::Preferred});
 	QMenu *menuAxes = new QMenu(btnAxes);
-	QAction *acPlaneX = new QAction("Scattering Plane Vector 1", menuAxes);
-	QAction *acPlaneY = new QAction("Scattering Plane Vector 2", menuAxes);
-	QAction *acPlaneZ = new QAction("Scattering Plane Normal", menuAxes);
-	menuAxes->addAction(acPlaneX);
-	menuAxes->addAction(acPlaneY);
-	menuAxes->addAction(acPlaneZ);
+	QAction *acPlane[] = {
+		new QAction("Scattering Plane Vector 1", menuAxes),
+		new QAction("Scattering Plane Vector 2", menuAxes),
+		new QAction("Scattering Plane Normal", menuAxes) };
+	menuAxes->addAction(acPlane[0]);
+	menuAxes->addAction(acPlane[1]);
+	menuAxes->addAction(acPlane[2]);
 	btnAxes->setMenu(menuAxes);
 
 	// rotation axis
@@ -402,59 +404,31 @@ void MagDynDlg::CreateSampleEnvPanel()
 	});
 
 
-	connect(acDirPlaneX, &QAction::triggered, [this]()
+	for(int i = 0; i < 3; ++i)
 	{
-		const t_vec_real& vec = m_dyn.GetScatteringPlane()[0];
+		connect(acDirPlane[i], &QAction::triggered, [this, i, calc_all]()
+		{
+			const t_vec_real& vec = m_dyn.GetScatteringPlane()[i];
 
-		m_field_dir[0]->setValue(vec[0]);
-		m_field_dir[1]->setValue(vec[1]);
-		m_field_dir[2]->setValue(vec[2]);
-	});
+			for(int j = 0; j < 3; ++j)
+			{
+				m_field_dir[j]->blockSignals(true);
+				m_field_dir[j]->setValue(vec[j]);
+				m_field_dir[j]->blockSignals(false);
+			}
 
-	connect(acDirPlaneY, &QAction::triggered, [this]()
-	{
-		const t_vec_real& vec = m_dyn.GetScatteringPlane()[1];
+			calc_all();
+		});
 
-		m_field_dir[0]->setValue(vec[0]);
-		m_field_dir[1]->setValue(vec[1]);
-		m_field_dir[2]->setValue(vec[2]);
-	});
+		connect(acPlane[i], &QAction::triggered, [this, i]()
+		{
+			const t_vec_real& vec = m_dyn.GetScatteringPlane()[i];
 
-	connect(acDirPlaneZ, &QAction::triggered, [this]()
-	{
-		const t_vec_real& vec = m_dyn.GetScatteringPlane()[2];
-
-		m_field_dir[0]->setValue(vec[0]);
-		m_field_dir[1]->setValue(vec[1]);
-		m_field_dir[2]->setValue(vec[2]);
-	});
-
-	connect(acPlaneX, &QAction::triggered, [this]()
-	{
-		const t_vec_real& vec = m_dyn.GetScatteringPlane()[0];
-
-		m_rot_axis[0]->setValue(vec[0]);
-		m_rot_axis[1]->setValue(vec[1]);
-		m_rot_axis[2]->setValue(vec[2]);
-	});
-
-	connect(acPlaneY, &QAction::triggered, [this]()
-	{
-		const t_vec_real& vec = m_dyn.GetScatteringPlane()[1];
-
-		m_rot_axis[0]->setValue(vec[0]);
-		m_rot_axis[1]->setValue(vec[1]);
-		m_rot_axis[2]->setValue(vec[2]);
-	});
-
-	connect(acPlaneZ, &QAction::triggered, [this]()
-	{
-		const t_vec_real& vec = m_dyn.GetScatteringPlane()[2];
-
-		m_rot_axis[0]->setValue(vec[0]);
-		m_rot_axis[1]->setValue(vec[1]);
-		m_rot_axis[2]->setValue(vec[2]);
-	});
+			m_rot_axis[0]->setValue(vec[0]);
+			m_rot_axis[1]->setValue(vec[1]);
+			m_rot_axis[2]->setValue(vec[2]);
+		});
+	}
 
 
 	m_tabs_in->insertTab(1, m_sampleenviropanel, "Environment");

@@ -52,12 +52,13 @@ void MagDynDlg::CreateReciprocalPanel()
 	btnAxes->setToolTip("Set the Q rotation axis to a predefined value.");
 	btnAxes->setSizePolicy(QSizePolicy{QSizePolicy::Preferred, QSizePolicy::Preferred});
 	QMenu *menuAxes = new QMenu(btnAxes);
-	QAction *acPlaneX = new QAction("Scattering Plane Vector 1", menuAxes);
-	QAction *acPlaneY = new QAction("Scattering Plane Vector 2", menuAxes);
-	QAction *acPlaneZ = new QAction("Scattering Plane Normal", menuAxes);
-	menuAxes->addAction(acPlaneX);
-	menuAxes->addAction(acPlaneY);
-	menuAxes->addAction(acPlaneZ);
+	QAction *acPlane[] = {
+		new QAction("Scattering Plane Vector 1", menuAxes),
+		new QAction("Scattering Plane Vector 2", menuAxes),
+		new QAction("Scattering Plane Normal", menuAxes) };
+	menuAxes->addAction(acPlane[0]);
+	menuAxes->addAction(acPlane[1]);
+	menuAxes->addAction(acPlane[2]);
 	btnAxes->setMenu(menuAxes);
 
 	// rotation axis
@@ -231,32 +232,17 @@ void MagDynDlg::CreateReciprocalPanel()
 		RotateDispersionQs(axis, -angle);
 	});
 
-	connect(acPlaneX, &QAction::triggered, [this]()
+	for(int i = 0; i < 3; ++i)
 	{
-		const t_vec_real& vec = m_dyn.GetScatteringPlane()[0];
+		connect(acPlane[i], &QAction::triggered, [this, i]()
+		{
+			const t_vec_real& vec = m_dyn.GetScatteringPlane()[i];
 
-		m_recip_rot_axis[0]->setValue(vec[0]);
-		m_recip_rot_axis[1]->setValue(vec[1]);
-		m_recip_rot_axis[2]->setValue(vec[2]);
-	});
-
-	connect(acPlaneY, &QAction::triggered, [this]()
-	{
-		const t_vec_real& vec = m_dyn.GetScatteringPlane()[1];
-
-		m_recip_rot_axis[0]->setValue(vec[0]);
-		m_recip_rot_axis[1]->setValue(vec[1]);
-		m_recip_rot_axis[2]->setValue(vec[2]);
-	});
-
-	connect(acPlaneZ, &QAction::triggered, [this]()
-	{
-		const t_vec_real& vec = m_dyn.GetScatteringPlane()[2];
-
-		m_recip_rot_axis[0]->setValue(vec[0]);
-		m_recip_rot_axis[1]->setValue(vec[1]);
-		m_recip_rot_axis[2]->setValue(vec[2]);
-	});
+			m_recip_rot_axis[0]->setValue(vec[0]);
+			m_recip_rot_axis[1]->setValue(vec[1]);
+			m_recip_rot_axis[2]->setValue(vec[2]);
+		});
+	}
 
 
 	m_tabs_recip->addTab(m_reciprocalpanel, "Scattering Plane");
