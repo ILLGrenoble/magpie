@@ -189,58 +189,6 @@ void MagDynDlg::MirrorAtoms()
 
 
 /**
- * rotate the direction of the magnetic field
- */
-void MagDynDlg::RotateField(bool ccw)
-{
-	t_vec_real axis = tl2::create<t_vec_real>(
-	{
-		(t_real)m_rot_axis[0]->value(),
-		(t_real)m_rot_axis[1]->value(),
-		(t_real)m_rot_axis[2]->value(),
-	});
-
-	t_vec_real B = tl2::create<t_vec_real>(
-	{
-		(t_real)m_field_dir[0]->value(),
-		(t_real)m_field_dir[1]->value(),
-		(t_real)m_field_dir[2]->value(),
-	});
-
-	const t_mat_real& xtalB = m_dyn.GetCrystalBTrafo();
-	auto [xtalB_inv, inv_ok] = tl2::inv(xtalB);
-	if(inv_ok)
-	{
-		axis = xtalB * axis;
-		B = xtalB * B;
-	}
-
-	t_real angle = tl2::d2r<t_real>(m_rot_angle->value());
-	if(!ccw)
-		angle = -angle;
-
-	t_mat_real R = tl2::rotation<t_mat_real, t_vec_real>(axis, angle, false);
-	B = R*B;
-
-	if(inv_ok)
-		B = xtalB_inv * B;
-
-	tl2::set_eps_0(B, g_eps);
-
-	for(int i = 0; i < 3; ++i)
-	{
-		m_field_dir[i]->blockSignals(true);
-		m_field_dir[i]->setValue(B[i]);
-		m_field_dir[i]->blockSignals(false);
-	}
-
-	if(m_autocalc->isChecked())
-		CalcAll();
-};
-
-
-
-/**
  * set selected field as current
  */
 void MagDynDlg::SetCurrentField()

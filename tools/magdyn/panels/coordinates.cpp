@@ -94,12 +94,14 @@ void MagDynDlg::CreateCoordinatesPanel()
 	btnSaveMultiDisp->setToolTip("Calculate the dispersion paths and save them to a data file.");
 	btnSaveMultiDispScr->setToolTip("Calculate the dispersion paths and save them to a script file.");
 
+
 	QPushButton *btnSetDispersion = new QPushButton("To Dispersion", m_coordinatespanel);
 	QPushButton *btnSetHamilton = new QPushButton("To Hamiltonian", m_coordinatespanel);
 	btnSetDispersion->setToolTip("Calculate the dispersion relation for the currently selected Q path.");
 	btnSetHamilton->setToolTip("Calculate the Hamiltonian for the currently selected Q coordinate.");
 
-	for(QPushButton *btn : { btnAddCoord, btnDelCoord, btnCoordUp, btnCoordDown })
+	for(QPushButton *btn : { btnAddCoord, btnDelCoord, btnCoordUp, btnCoordDown,
+		btnSaveMultiDisp, btnSaveMultiDispScr, btnSetDispersion, btnSetHamilton })
 	{
 		btn->setFocusPolicy(Qt::StrongFocus);
 		btn->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
