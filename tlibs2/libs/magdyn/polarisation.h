@@ -5,7 +5,7 @@
  * @license GPLv3, see 'LICENSE' file
  *
  * References:
- *   - TODO
+ *   - results checked against: https://github.com/SunnySuite/Sunny.jl/blob/main/src/Measurements/MeasureSpec.jl
  *
  * @desc For further references, see the 'LITERATURE' file.
  *
