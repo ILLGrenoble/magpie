@@ -80,6 +80,18 @@ FormFactorDlg::FormFactorDlg(QWidget *parent, QSettings *sett)
 	maingrid->addWidget(m_status, 1, 0, 1, 3);
 	maingrid->addWidget(btnbox, 1, 3, 1, 1);
 
+	// restore settings
+	if(m_sett)
+	{
+		if(m_sett->contains("ffact/geo"))
+			restoreGeometry(m_sett->value("ffact/geo").toByteArray());
+		else
+			resize(640, 800);
+
+		if(m_sett->contains("ffact/splitter"))
+			m_split_plot_ff->restoreState(m_sett->value("ffact/splitter").toByteArray());
+	}
+
 	// connections
 	connect(btnbox, &QDialogButtonBox::accepted, this, &FormFactorDlg::accept);
 }
@@ -293,18 +305,6 @@ QWidget* FormFactorDlg::CreateFormFactorPanel()
 	grid->addWidget(m_progress_ff, y, 0, 1, 3);
 	grid->addWidget(m_btnStartStop_ff, y++, 3, 1, 1);
 
-	// restore settings
-	if(m_sett)
-	{
-		if(m_sett->contains("ffact/geo"))
-			restoreGeometry(m_sett->value("ffact/geo").toByteArray());
-		else
-			resize(640, 640);
-
-		if(m_sett->contains("ffact/splitter"))
-			m_split_plot_ff->restoreState(m_sett->value("ffact/splitter").toByteArray());
-	}
-
 	// connections
 	connect(m_ff_squared, &QCheckBox::toggled, [this]() { this->PlotFormFactors(false); });
 	connect(m_plot_ff, &QCustomPlot::mouseMove, this, &FormFactorDlg::FormFactorPlotMouseMove);
@@ -324,7 +324,6 @@ QWidget* FormFactorDlg::CreateFormFactorPanel()
 	});
 
 	EnableFormFactorCalculation();
-
 	return panelFFact;
 }
 
