@@ -77,8 +77,8 @@ void MagDynDlg::CreateReciprocalPanel()
 	QPushButton *btn_rotate_cw = new QPushButton(
 		QIcon::fromTheme("object-rotate-right"),
 		"Rotate CW", m_reciprocalpanel);
-	btn_rotate_ccw->setToolTip("Rotate the magnetic field in the counter-clockwise direction.");
-	btn_rotate_cw->setToolTip("Rotate the magnetic field in the clockwise direction.");
+	btn_rotate_ccw->setToolTip("Rotate the Q start and end positions in the counter-clockwise direction.");
+	btn_rotate_cw->setToolTip("Rotate the Q start and end positions in the clockwise direction.");
 	btn_rotate_ccw->setFocusPolicy(Qt::StrongFocus);
 	btn_rotate_cw->setFocusPolicy(Qt::StrongFocus);
 
