@@ -3,7 +3,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16180814.svg)](https://doi.org/10.5281/zenodo.16180814)
 
-This project comprises:
+[This project](https://github.com/ILLGrenoble/magpie) comprises:
   - A C++ linear spin-wave library (*Magdyn*).
   - A graphical front-end (*Magpie*).
   - A Python scripting interface (*Magpy*).
