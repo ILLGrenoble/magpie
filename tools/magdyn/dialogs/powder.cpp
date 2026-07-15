@@ -84,6 +84,15 @@ PowderDlg::PowderDlg(QWidget *parent, QSettings *sett)
 	maingrid->addWidget(m_status, 1, 0, 1, 3);
 	maingrid->addWidget(btnbox, 1, 3, 1, 1);
 
+	// restore settings
+	if(m_sett)
+	{
+		if(m_sett->contains("diff/geo"))
+			restoreGeometry(m_sett->value("powder/geo").toByteArray());
+		else
+			resize(640, 800);
+	}
+
 	// connections
 	connect(btnbox, &QDialogButtonBox::accepted, this, &PowderDlg::accept);
 	connect(btnSaveData, &QAbstractButton::clicked, this, &PowderDlg::SavePowderData);
@@ -308,15 +317,6 @@ QWidget* PowderDlg::CreatePowderPanel()
 	grid->addWidget(btnQE, y++, 3, 1, 1);
 	grid->addWidget(m_progress_powder, y, 0, 1, 3);
 	grid->addWidget(m_btnStartStop_powder, y++, 3, 1, 1);
-
-	// restore settings
-	if(m_sett)
-	{
-		if(m_sett->contains("diff/geo"))
-			restoreGeometry(m_sett->value("powder/geo").toByteArray());
-		else
-			resize(640, 640);
-	}
 
 	// connections
 	connect(m_plot_powder, &QCustomPlot::mouseMove, this, &PowderDlg::PowderPlotMouseMove);
