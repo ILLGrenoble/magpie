@@ -457,6 +457,10 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acTopo = new QAction("Topology...", menuCalc);
 	QAction *acDiff = new QAction("Differentiation...", menuCalc);
 	QAction *acPowder = new QAction("Powder Spectrum...", menuCalc);
+	acDisp3D->setIcon(QIcon::fromTheme("applications-graphics"));
+	//acTopo->setIcon(QIcon::fromTheme("TODO"));
+	//acDiff->setIcon(QIcon::fromTheme("TODO"));
+	acPowder->setIcon(QIcon::fromTheme("weather-snow"));
 
 	// tools menu
 	QMenu *menuTools = new QMenu("Tools", m_menu);
@@ -466,6 +470,7 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acBZTool = new QAction("Brillouin Zones...", menuTools);
 	QAction *acPolCalc = new QAction("Polarisation Vectors...", menuTools);
 	QAction *acPreferences = new QAction("Preferences...", menuTools);
+
 	acTrafoCalc->setIcon(QIcon::fromTheme("accessories-calculator"));
 	acPlot2d->setIcon(QIcon::fromTheme("x-office-spreadsheet"));
 	acPlot3d->setIcon(QIcon::fromTheme("x-office-spreadsheet"));
