@@ -52,6 +52,20 @@ void MagDynDlg::CreateSampleEnvPanel()
 	m_field_mag->setSuffix(" T");
 	m_field_mag->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
+	// predefined field directions
+	QPushButton *btnDirs = new QPushButton(m_reciprocalpanel);
+	btnDirs->setText("Set Direction");
+	btnDirs->setToolTip("Set the magnetic field direction to a predefined value.");
+	btnDirs->setSizePolicy(QSizePolicy{QSizePolicy::Preferred, QSizePolicy::Preferred});
+	QMenu *menuDirs = new QMenu(btnDirs);
+	QAction *acDirPlaneX = new QAction("Scattering Plane Vector 1", menuDirs);
+	QAction *acDirPlaneY = new QAction("Scattering Plane Vector 2", menuDirs);
+	QAction *acDirPlaneZ = new QAction("Scattering Plane Normal", menuDirs);
+	menuDirs->addAction(acDirPlaneX);
+	menuDirs->addAction(acDirPlaneY);
+	menuDirs->addAction(acDirPlaneZ);
+	btnDirs->setMenu(menuDirs);
+
 	// field direction
 	m_field_dir[0] = new QDoubleSpinBox(m_sampleenviropanel);
 	m_field_dir[1] = new QDoubleSpinBox(m_sampleenviropanel);
@@ -68,6 +82,20 @@ void MagDynDlg::CreateSampleEnvPanel()
 		"Keep the Spin Senses", m_sampleenviropanel);
 	m_keep_spin_signs->setChecked(false);
 	m_keep_spin_signs->setFocusPolicy(Qt::StrongFocus);
+
+	// predefined rotation axes
+	QPushButton *btnAxes = new QPushButton(m_reciprocalpanel);
+	btnAxes->setText("Set Axis");
+	btnAxes->setToolTip("Set the magnetic field rotation axis to a predefined value.");
+	btnAxes->setSizePolicy(QSizePolicy{QSizePolicy::Preferred, QSizePolicy::Preferred});
+	QMenu *menuAxes = new QMenu(btnAxes);
+	QAction *acPlaneX = new QAction("Scattering Plane Vector 1", menuAxes);
+	QAction *acPlaneY = new QAction("Scattering Plane Vector 2", menuAxes);
+	QAction *acPlaneZ = new QAction("Scattering Plane Normal", menuAxes);
+	menuAxes->addAction(acPlaneX);
+	menuAxes->addAction(acPlaneY);
+	menuAxes->addAction(acPlaneZ);
+	btnAxes->setMenu(menuAxes);
 
 	// rotation axis
 	m_rot_axis[0] = new QDoubleSpinBox(m_sampleenviropanel);
@@ -94,6 +122,8 @@ void MagDynDlg::CreateSampleEnvPanel()
 	btn_rotate_cw->setToolTip("Rotate the magnetic field in the clockwise direction.");
 	btn_rotate_ccw->setFocusPolicy(Qt::StrongFocus);
 	btn_rotate_cw->setFocusPolicy(Qt::StrongFocus);
+	btn_rotate_ccw->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	btn_rotate_cw->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 
 	// table with saved fields
@@ -223,20 +253,23 @@ void MagDynDlg::CreateSampleEnvPanel()
 	m_field_dir[1]->setPrefix("Bk = ");
 	m_field_dir[2]->setPrefix("Bl = ");
 
+
+	// grid
 	QGridLayout *grid = new QGridLayout(m_sampleenviropanel);
 	grid->setSpacing(4);
 	grid->setContentsMargins(6, 6, 6, 6);
 
 	int y = 0;
-	grid->addWidget(new QLabel("Magnetic Field:", m_sampleenviropanel), y++,0,1,2);
-	grid->addWidget(new QLabel("Magnitude:", m_sampleenviropanel), y,0,1,1);
-	grid->addWidget(m_field_mag, y++,1,1,1);
-	grid->addWidget(new QLabel("Direction (rlu):", m_sampleenviropanel), y,0,1,1);
-	grid->addWidget(m_field_dir[0], y,1,1,1);
-	grid->addWidget(m_field_dir[1], y,2,1,1);
-	grid->addWidget(m_field_dir[2], y++,3,1,1);
-	grid->addWidget(m_align_spins, y,0,1,2);
-	grid->addWidget(m_keep_spin_signs, y++,2,1,2);
+	grid->addWidget(new QLabel("Magnetic Field:", m_sampleenviropanel), y++, 0, 1, 2);
+	grid->addWidget(new QLabel("Magnitude:", m_sampleenviropanel), y, 0, 1, 1);
+	grid->addWidget(m_field_mag, y, 1, 1, 1);
+	grid->addWidget(btnDirs, y++, 3, 1, 1);
+	grid->addWidget(new QLabel("Direction (rlu):", m_sampleenviropanel), y, 0, 1, 1);
+	grid->addWidget(m_field_dir[0], y, 1, 1, 1);
+	grid->addWidget(m_field_dir[1], y, 2, 1, 1);
+	grid->addWidget(m_field_dir[2], y++, 3, 1, 1);
+	grid->addWidget(m_align_spins, y, 0, 1, 2);
+	grid->addWidget(m_keep_spin_signs, y++, 2, 1, 2);
 
 	QFrame *sep1 = new QFrame(m_sampleenviropanel);
 	sep1->setFrameStyle(QFrame::HLine);
@@ -247,54 +280,56 @@ void MagDynDlg::CreateSampleEnvPanel()
 
 	grid->addItem(new QSpacerItem(8, 8,
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
-		y++,0, 1,1);
-	grid->addWidget(sep1, y++,0, 1,4);
+		y++, 0, 1, 1);
+	grid->addWidget(sep1, y++, 0, 1, 4);
 	grid->addItem(new QSpacerItem(8, 8,
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
-		y++,0, 1,1);
+		y++, 0, 1, 1);
 
-	grid->addWidget(new QLabel("Rotate Magnetic Field:", m_sampleenviropanel), y++,0,1,2);
-	grid->addWidget(new QLabel("Axis (rlu):", m_sampleenviropanel), y,0,1,1);
-	grid->addWidget(m_rot_axis[0], y,1,1,1);
-	grid->addWidget(m_rot_axis[1], y,2,1,1);
-	grid->addWidget(m_rot_axis[2], y++,3,1,1);
-	grid->addWidget(new QLabel("Angle (\xc2\xb0):", m_sampleenviropanel), y,0,1,1);
-	grid->addWidget(m_rot_angle, y,1,1,1);
-	grid->addWidget(btn_rotate_ccw, y,2,1,1);
-	grid->addWidget(btn_rotate_cw, y++,3,1,1);
-
-	grid->addItem(new QSpacerItem(8, 8,
-		QSizePolicy::Minimum, QSizePolicy::Fixed),
-		y++,0, 1,1);
-	grid->addWidget(sep2, y++,0, 1,4);
-	grid->addItem(new QSpacerItem(8, 8,
-		QSizePolicy::Minimum, QSizePolicy::Fixed),
-		y++,0, 1,1);
-
-	grid->addWidget(new QLabel("Saved Fields:", m_sampleenviropanel), y++,0,1,4);
-	grid->addWidget(m_fieldstab, y,0,1,4);
-	grid->addWidget(btnAddField, ++y,0,1,1);
-	grid->addWidget(btnDelField, y,1,1,1);
-	grid->addWidget(btnFieldUp, y,2,1,1);
-	grid->addWidget(btnFieldDown, y++,3,1,1);
-	grid->addWidget(btnSetField, y++,3,1,1);
+	grid->addWidget(new QLabel("Rotate Magnetic Field:", m_sampleenviropanel), y, 0, 1, 2);
+	grid->addWidget(btnAxes, y++, 3, 1, 1);
+	grid->addWidget(new QLabel("Axis (rlu):", m_sampleenviropanel), y, 0, 1, 1);
+	grid->addWidget(m_rot_axis[0], y, 1, 1, 1);
+	grid->addWidget(m_rot_axis[1], y, 2, 1, 1);
+	grid->addWidget(m_rot_axis[2], y++, 3, 1, 1);
+	grid->addWidget(new QLabel("Angle (\xc2\xb0):", m_sampleenviropanel), y, 0, 1, 1);
+	grid->addWidget(m_rot_angle, y, 1, 1, 1);
+	grid->addWidget(btn_rotate_ccw, y, 2, 1, 1);
+	grid->addWidget(btn_rotate_cw, y++, 3, 1, 1);
 
 	grid->addItem(new QSpacerItem(8, 8,
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
-		y++,0, 1,1);
-	grid->addWidget(sep3, y++,0, 1,4);
+		y++, 0, 1, 1);
+	grid->addWidget(sep2, y++, 0, 1, 4);
 	grid->addItem(new QSpacerItem(8, 8,
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
-		y++,0, 1,1);
+		y++, 0, 1, 1);
 
-	grid->addWidget(new QLabel("Temperature:", m_sampleenviropanel), y,0,1,1);
-	grid->addWidget(m_temperature, y++,1,1,1);
+	grid->addWidget(new QLabel("Saved Fields:", m_sampleenviropanel), y++, 0, 1, 4);
+	grid->addWidget(m_fieldstab, y, 0, 1, 4);
+	grid->addWidget(btnAddField, ++y, 0, 1, 1);
+	grid->addWidget(btnDelField, y, 1, 1, 1);
+	grid->addWidget(btnFieldUp, y, 2, 1, 1);
+	grid->addWidget(btnFieldDown, y++, 3, 1, 1);
+	grid->addWidget(btnSetField, y++, 3, 1, 1);
+
+	grid->addItem(new QSpacerItem(8, 8,
+		QSizePolicy::Minimum, QSizePolicy::Fixed),
+		y++, 0, 1, 1);
+	grid->addWidget(sep3, y++, 0, 1, 4);
+	grid->addItem(new QSpacerItem(8, 8,
+		QSizePolicy::Minimum, QSizePolicy::Fixed),
+		y++, 0, 1, 1);
+
+	grid->addWidget(new QLabel("Temperature:", m_sampleenviropanel), y, 0, 1, 1);
+	grid->addWidget(m_temperature, y++, 1, 1, 1);
 
 	auto calc_all = [this]()
 	{
 		if(this->m_autocalc->isChecked())
 			this->CalcAll();
 	};
+
 
 	// signals
 	connect(m_field_mag,
@@ -364,6 +399,61 @@ void MagDynDlg::CreateSampleEnvPanel()
 		[this, menuTableContext, menuTableContextNoItem](const QPoint& pt)
 	{
 		this->ShowTableContextMenu(m_fieldstab, menuTableContext, menuTableContextNoItem, pt);
+	});
+
+
+	connect(acDirPlaneX, &QAction::triggered, [this]()
+	{
+		const t_vec_real& vec = m_dyn.GetScatteringPlane()[0];
+
+		m_field_dir[0]->setValue(vec[0]);
+		m_field_dir[1]->setValue(vec[1]);
+		m_field_dir[2]->setValue(vec[2]);
+	});
+
+	connect(acDirPlaneY, &QAction::triggered, [this]()
+	{
+		const t_vec_real& vec = m_dyn.GetScatteringPlane()[1];
+
+		m_field_dir[0]->setValue(vec[0]);
+		m_field_dir[1]->setValue(vec[1]);
+		m_field_dir[2]->setValue(vec[2]);
+	});
+
+	connect(acDirPlaneZ, &QAction::triggered, [this]()
+	{
+		const t_vec_real& vec = m_dyn.GetScatteringPlane()[2];
+
+		m_field_dir[0]->setValue(vec[0]);
+		m_field_dir[1]->setValue(vec[1]);
+		m_field_dir[2]->setValue(vec[2]);
+	});
+
+	connect(acPlaneX, &QAction::triggered, [this]()
+	{
+		const t_vec_real& vec = m_dyn.GetScatteringPlane()[0];
+
+		m_rot_axis[0]->setValue(vec[0]);
+		m_rot_axis[1]->setValue(vec[1]);
+		m_rot_axis[2]->setValue(vec[2]);
+	});
+
+	connect(acPlaneY, &QAction::triggered, [this]()
+	{
+		const t_vec_real& vec = m_dyn.GetScatteringPlane()[1];
+
+		m_rot_axis[0]->setValue(vec[0]);
+		m_rot_axis[1]->setValue(vec[1]);
+		m_rot_axis[2]->setValue(vec[2]);
+	});
+
+	connect(acPlaneZ, &QAction::triggered, [this]()
+	{
+		const t_vec_real& vec = m_dyn.GetScatteringPlane()[2];
+
+		m_rot_axis[0]->setValue(vec[0]);
+		m_rot_axis[1]->setValue(vec[1]);
+		m_rot_axis[2]->setValue(vec[2]);
 	});
 
 

@@ -46,6 +46,20 @@ void MagDynDlg::CreateReciprocalPanel()
 	m_bzview = new BZCutView<t_vec_real, t_real>(m_bzscene, m_sett);
 
 
+	// predefined rotation axes
+	QPushButton *btnAxes = new QPushButton(m_reciprocalpanel);
+	btnAxes->setText("Set Axis");
+	btnAxes->setToolTip("Set the Q rotation axis to a predefined value.");
+	btnAxes->setSizePolicy(QSizePolicy{QSizePolicy::Preferred, QSizePolicy::Preferred});
+	QMenu *menuAxes = new QMenu(btnAxes);
+	QAction *acPlaneX = new QAction("Scattering Plane Vector 1", menuAxes);
+	QAction *acPlaneY = new QAction("Scattering Plane Vector 2", menuAxes);
+	QAction *acPlaneZ = new QAction("Scattering Plane Normal", menuAxes);
+	menuAxes->addAction(acPlaneX);
+	menuAxes->addAction(acPlaneY);
+	menuAxes->addAction(acPlaneZ);
+	btnAxes->setMenu(menuAxes);
+
 	// rotation axis
 	m_recip_rot_axis[0] = new QDoubleSpinBox(m_reciprocalpanel);
 	m_recip_rot_axis[1] = new QDoubleSpinBox(m_reciprocalpanel);
@@ -81,6 +95,8 @@ void MagDynDlg::CreateReciprocalPanel()
 	btn_rotate_cw->setToolTip("Rotate the Q start and end positions in the clockwise direction.");
 	btn_rotate_ccw->setFocusPolicy(Qt::StrongFocus);
 	btn_rotate_cw->setFocusPolicy(Qt::StrongFocus);
+	btn_rotate_ccw->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	btn_rotate_cw->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 
 	// reduce path to first brillouin zone
@@ -114,7 +130,8 @@ void MagDynDlg::CreateReciprocalPanel()
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
 		y++, 0, 1, 1);
 
-	grid->addWidget(new QLabel("Rotate Qs:", m_reciprocalpanel), y++, 0, 1, 2);
+	grid->addWidget(new QLabel("Rotate Qs:", m_reciprocalpanel), y, 0, 1, 2);
+	grid->addWidget(btnAxes, y++, 3, 1, 1);
 	grid->addWidget(new QLabel("Axis (rlu):", m_reciprocalpanel), y, 0, 1, 1);
 	grid->addWidget(m_recip_rot_axis[0], y, 1, 1, 1);
 	grid->addWidget(m_recip_rot_axis[1], y, 2, 1, 1);
@@ -212,6 +229,33 @@ void MagDynDlg::CreateReciprocalPanel()
 		t_real angle = tl2::d2r<t_real>(m_recip_rot_angle->value());
 
 		RotateDispersionQs(axis, -angle);
+	});
+
+	connect(acPlaneX, &QAction::triggered, [this]()
+	{
+		const t_vec_real& vec = m_dyn.GetScatteringPlane()[0];
+
+		m_recip_rot_axis[0]->setValue(vec[0]);
+		m_recip_rot_axis[1]->setValue(vec[1]);
+		m_recip_rot_axis[2]->setValue(vec[2]);
+	});
+
+	connect(acPlaneY, &QAction::triggered, [this]()
+	{
+		const t_vec_real& vec = m_dyn.GetScatteringPlane()[1];
+
+		m_recip_rot_axis[0]->setValue(vec[0]);
+		m_recip_rot_axis[1]->setValue(vec[1]);
+		m_recip_rot_axis[2]->setValue(vec[2]);
+	});
+
+	connect(acPlaneZ, &QAction::triggered, [this]()
+	{
+		const t_vec_real& vec = m_dyn.GetScatteringPlane()[2];
+
+		m_recip_rot_axis[0]->setValue(vec[0]);
+		m_recip_rot_axis[1]->setValue(vec[1]);
+		m_recip_rot_axis[2]->setValue(vec[2]);
 	});
 
 

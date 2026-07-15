@@ -187,7 +187,7 @@ void MagDynDlg::CreateSamplePanel()
 		y++,0, 1, 1);
 
 	// scattering plane
-	grid->addWidget(new QLabel("Scattering plane", m_samplepanel), y++, 0, 1, 4);
+	grid->addWidget(new QLabel("Scattering Plane", m_samplepanel), y++, 0, 1, 4);
 	grid->addWidget(new QLabel("Vector 1 (rlu):", m_samplepanel), y, 0, 1, 1);
 	grid->addWidget(m_scatteringplane[0], y, 1, 1, 1);
 	grid->addWidget(m_scatteringplane[1], y, 2, 1, 1);
