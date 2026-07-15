@@ -71,6 +71,11 @@ PowderDlg::PowderDlg(QWidget *parent, QSettings *sett)
 	btnbox->addButton(QDialogButtonBox::Ok);
 	btnbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
+	// save data button
+	QPushButton *btnSaveData = btnbox->addButton("Save Data...", QDialogButtonBox::ActionRole);
+	btnSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
+	btnSaveData->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+
 	// main grid
 	QGridLayout *maingrid = new QGridLayout(this);
 	maingrid->setSpacing(4);
@@ -81,6 +86,7 @@ PowderDlg::PowderDlg(QWidget *parent, QSettings *sett)
 
 	// connections
 	connect(btnbox, &QDialogButtonBox::accepted, this, &PowderDlg::accept);
+	connect(btnSaveData, &QAbstractButton::clicked, this, &PowderDlg::SavePowderData);
 }
 
 
@@ -630,7 +636,10 @@ void PowderDlg::SavePowderPlotFigure()
 void PowderDlg::SavePowderData()
 {
 	if(m_data_powder.size() == 0)
+	{
+		ShowError("No data to save.");
 		return;
+	}
 
 	QString dirLast;
 	if(m_sett)
@@ -664,17 +673,47 @@ void PowderDlg::SavePowderData()
 		<< "# DOI: https://doi.org/10.5281/zenodo.16180814\n"
 		<< "# User: " << user << "\n"
 		<< "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n"
-		<< "#\n"
 		<< "#\n\n";
 
-	// write column header
-	ofstr << std::setw(field_len) << std::left << "# Q" << " ";
-	ofstr << std::setw(field_len) << std::left << "E(Q)" << " ";
-	ofstr << std::setw(field_len) << std::left << "S(E,Q)" << " ";
+	const t_size Qvecs_count = m_num_Qvecs_powder->value();
+	const t_size Q_count = m_data_powder.size();
+	const t_size E_count = m_num_E_powder->value();
+	ofstr << "# row_label: Q (1/A)" << "\n";
+	ofstr << "# col_label: E (meV)" << "\n";
+	ofstr << "# row_count: " << Q_count << "\n";
+	ofstr << "# col_count: " << E_count << "\n";
+
+	std::vector<t_real> Qs;
+	Qs.reserve(Q_count);
+	ofstr << "# row_values: ";
+	for(const PowderData& data : m_data_powder)
+	{
+		ofstr << data.momentum << " ";
+		Qs.push_back(data.momentum);
+	}
 	ofstr << "\n";
 
-	const t_size Qvecs_count = m_num_Qvecs_powder->value();
-	const t_size E_count = m_num_E_powder->value();
+	std::vector<t_real> Es;
+	Es.reserve(E_count);
+	ofstr << "# col_values: ";
+	for(const auto& Ebinidx : boost::histogram::indexed(m_data_powder[0].histogram))
+	{
+		const auto& Ebin = Ebinidx.bin();
+		const t_real E = Ebin.lower() + (Ebin.upper() - Ebin.lower()) / 2.;
+		ofstr << E << " ";
+		Es.push_back(E);
+	}
+	ofstr << "\n";
+
+	// plot command
+	t_real E_range = *Es.rbegin() - *Es.begin();
+	t_real Q_range = *Qs.rbegin() - *Qs.begin();
+	ofstr << "# plot_with: plot \"" << QFileInfo(filename).fileName().toStdString() << "\" "
+		<< "matrix using "
+		<< "($2*" << Q_range << "/" << Q_count << "+" << Qs[0] << "):"
+		<< "($1*" << E_range << "/" << E_count << "+" << Es[0] << "):"
+		<< "($3) with image";
+	ofstr << "\n\n";
 
 	// write data
 	for(const PowderData& data : m_data_powder)
@@ -683,18 +722,14 @@ void PowderDlg::SavePowderData()
 
 		for(const auto& Ebinidx : boost::histogram::indexed(E_histo))
 		{
-			const auto& Ebin = Ebinidx.bin();
-			t_real E = Ebin.lower() + (Ebin.upper() - Ebin.lower()) / 2.;
 			t_real S = *Ebinidx / t_real(Qvecs_count) / t_real(E_count);
-
-			ofstr << std::setw(field_len) << std::left << data.momentum << " ";
-			ofstr << std::setw(field_len) << std::left << E << " ";
 			ofstr << std::setw(field_len) << std::left << S << " ";
-			ofstr << "\n";
 		}
+	
+		ofstr << "\n";
 	}
 
-	ofstr.flush();
+	ofstr << std::endl;
 }
 
 
