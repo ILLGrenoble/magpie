@@ -86,6 +86,18 @@ TopologyDlg::TopologyDlg(QWidget *parent, QSettings *sett)
 	// tab panels
 	m_tabs->addTab(CreateBerryCurvaturePanel(), "Berry Curvature");
 
+	// restore settings
+	if(m_sett)
+	{
+		if(m_sett->contains("topology/geo"))
+			restoreGeometry(m_sett->value("topology/geo").toByteArray());
+		else
+			resize(640, 640);
+
+		if(m_sett->contains("topology/splitter"))
+			m_split_plot_bc->restoreState(m_sett->value("topology/splitter").toByteArray());
+	}
+
 	// connections
 	connect(btnbox, &QDialogButtonBox::accepted, this, &TopologyDlg::accept);
 }
@@ -365,18 +377,6 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	grid->addWidget(m_S_filter_bc, y++, 3, 1, 1);
 	grid->addWidget(m_progress_bc, y, 0, 1, 3);
 	grid->addWidget(m_btnStartStop_bc, y++, 3, 1, 1);
-
-	// restore settings
-	if(m_sett)
-	{
-		if(m_sett->contains("topology/geo"))
-			restoreGeometry(m_sett->value("topology/geo").toByteArray());
-		else
-			resize(640, 640);
-
-		if(m_sett->contains("topology/splitter"))
-			m_split_plot_bc->restoreState(m_sett->value("topology/splitter").toByteArray());
-	}
 
 	// connections
 	connect(m_plot_bc, &QCustomPlot::mouseMove, this, &TopologyDlg::BerryCurvaturePlotMouseMove);
