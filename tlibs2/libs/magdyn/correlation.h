@@ -137,16 +137,16 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		S.E_and_S[i].S_perp = tl2::zero<t_mat>(3, 3);
 	}
 
-	const auto [H_chol_inv, inv_ok] = tl2::inv(S.H_chol);
+	const auto [H_triag_inv, inv_ok] = tl2::inv(S.H_triag);
 	if(!inv_ok)
 	{
-		TL2_CERR_OPT << "Magdyn error: Cholesky inversion failed"
+		TL2_CERR_OPT << "Magdyn error: Inversion of triangular Hamiltonian failed"
 			<< " at Q = " << S.Q_rlu << "." << std::endl;
 		return false;
 	}
 
 	// equation (34) from (Toth 2015)
-	const t_mat boson_ops = H_chol_inv * S.evec_mat * E_sqrt;
+	const t_mat boson_ops = H_triag_inv * S.evec_mat * E_sqrt;
 	const t_mat boson_ops_herm = tl2::herm(boson_ops);
 
 #ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__

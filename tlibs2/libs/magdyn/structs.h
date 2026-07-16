@@ -215,19 +215,19 @@ struct t_SofQE
 	t_mat comm{};                // commutators
 
 	t_mat H{};                   // hamiltonian
-	t_mat H_chol{};              // hamiltonian after cholesky correction
+	t_mat H_triag{};             // triangular hamiltonian after cholesky decomposition
 	t_mat H_comm{};              // final hamiltonian with correct commutators
 	t_mat evec_mat{};            // eigenvector matrix for H
 
 	// ------------------------------------------------------------------------
 	// incommensurate case
 	t_mat H_p{};                 // additional hamiltonian for the incommensurate case Q+O
-	t_mat H_chol_p{};            // ... after cholesky correction
+	t_mat H_triag_p{};           // ... after cholesky decomposition
 	t_mat H_comm_p{};            // ... and with correct commutators
 	t_mat evec_mat_p{};          // eigenvector matrix for H_p
 
 	t_mat H_m{};                 // additional hamiltonian for the incommensurate case Q-O
-	t_mat H_chol_m{};            // ... after cholesky correction
+	t_mat H_triag_m{};           // ... after cholesky decomposition
 	t_mat H_comm_m{};            // ... and with correct commutators
 	t_mat evec_mat_m{};          // eigenvector matrix for H_m
 	// ------------------------------------------------------------------------

@@ -302,21 +302,18 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 	bool chol_failed = false;
 	for(; chol_try < m_tries_chol; ++chol_try)
 	{
-		// upper cholesky decomposition: S.H = _C^H _C
+		// cholesky decomposition into upper triangular matrix: S.H = _C^H _C
 		const auto [chol_ok, _C] = tl2_la::chol<t_mat>(S.H);
 
 		if(chol_ok)
 		{
-			S.H_chol = std::move(_C);
+			S.H_triag = std::move(_C);
 			break;
 		}
 
 		if(chol_try >= m_tries_chol - 1)
 		{
-			TL2_CERR_OPT << "Magdyn error: Cholesky decomposition failed"
-				<< " at Q = " << Qvec << "." << std::endl;
-
-			S.H_chol = std::move(_C);
+			S.H_triag = std::move(_C);
 			chol_failed = true;
 			break;
 		}
@@ -326,27 +323,36 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 			S.H(i, i) += m_delta_chol;
 	}
 
-	if(chol_failed || S.H_chol.size1() == 0 || S.H_chol.size2() == 0)
+	if(chol_failed || S.H_triag.size1() == 0 || S.H_triag.size2() == 0)
 	{
 		TL2_CERR_OPT << "Magdyn error: Invalid Cholesky decomposition"
-			<< " at Q = " << Qvec << "." << std::endl;
+			<< " after " << chol_try << " correction(s)"
+			<< " at Q = " << Qvec << ":"
+			<< " Hamiltonian is not Hermitian and positive-definite."
+			<< std::endl;
 		return S;
 	}
 
 	if(m_perform_checks && chol_try > 0)
 	{
 		TL2_CERR_OPT << "Magdyn warning: Needed " << chol_try
-			<< " correction(s) for Cholesky decomposition"
+			<< " correction(s) to make Hamiltonian Hermitian and"
+			<< " positive-definite for Cholesky decomposition"
 			<< " at Q = " << Qvec << "." << std::endl;
 	}
 
+#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+	std::cout << "Upper-triangular Hamiltonian:\n";
+	tl2::niceprint(std::cout, S.H_triag, 1e-4, 4);
+#endif
+
 	// see p. 5 in (Toth 2015)
-	S.H_comm = S.H_chol * S.comm * tl2::herm<t_mat>(S.H_chol);
+	S.H_comm = S.H_triag * S.comm * tl2::herm<t_mat>(S.H_triag);
 
 	const bool is_herm = tl2::is_symm_or_herm<t_mat, t_real>(S.H_comm, m_eps);
 	if(m_perform_checks && !is_herm)
 	{
-		TL2_CERR_OPT << "Magdyn warning: Hamiltonian is not hermitian"
+		TL2_CERR_OPT << "Magdyn warning: Hamiltonian is not Hermitian"
 			<< " at Q = " << Qvec << "." << std::endl;
 	}
 

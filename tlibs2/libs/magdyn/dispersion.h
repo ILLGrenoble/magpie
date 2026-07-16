@@ -149,11 +149,11 @@ MAGDYN_INST::CalcEnergies(const t_vec_real& Q_rlu, bool only_energies) const
 
 		// move over additional hamiltonians for Q+-O
 		S.H_p = std::move(S_p.H);
-		S.H_chol_p = std::move(S_p.H_chol);
+		S.H_triag_p = std::move(S_p.H_triag);
 		S.H_comm_p = std::move(S_p.H_comm);
 		S.evec_mat_p = std::move(S_p.evec_mat);
 		S.H_m = std::move(S_m.H);
-		S.H_chol_m = std::move(S_m.H_chol);
+		S.H_triag_m = std::move(S_m.H_triag);
 		S.H_comm_m = std::move(S_m.H_comm);
 		S.evec_mat_m = std::move(S_m.evec_mat);
 
