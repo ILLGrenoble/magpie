@@ -498,12 +498,12 @@ protected:
 		// show context menu
 		if(buttons & 1)  // left button
 		{
-			m_cur_pos[0] = tl2::create<t_vec>({ pos.x() / scale, pos.y() / scale });
+			m_cur_pos[0] = tl2::create<t_vec>({ (t_real)pos.x() / scale, (t_real)pos.y() / scale });
 		}
 
 		if(buttons & 4)  // right button
 		{
-			m_cur_pos[1] = tl2::create<t_vec>({ pos.x() / scale, pos.y() / scale });
+			m_cur_pos[1] = tl2::create<t_vec>({ (t_real)pos.x() / scale, (t_real)pos.y() / scale });
 
 			QPointF _pt{ pos.x(), pos.y() };
 			QPoint pt = mapToGlobal(mapFromScene(_pt));
@@ -512,9 +512,9 @@ protected:
 		}
 
 #ifdef BZ_USE_QT_SIGNALS
-		emit SignalClickCoordinates(buttons, pos.x()/scale, pos.y()/scale);
+		emit SignalClickCoordinates(buttons, (t_real)pos.x() / scale, (t_real)pos.y() / scale);
 #else
-		m_sigClickCoordinates(buttons, pos.x()/scale, pos.y()/scale);
+		m_sigClickCoordinates(buttons, (t_real)pos.x() / scale, (t_real)pos.y() / scale);
 #endif
 
 		QGraphicsView::mousePressEvent(evt);
@@ -523,7 +523,7 @@ protected:
 
 	virtual void wheelEvent(QWheelEvent *evt) override
 	{
-		t_real sc = std::pow(2., evt->angleDelta().y()/8.*0.01);
+		t_real sc = std::pow(t_real(2), (t_real)evt->angleDelta().y()/8.*0.01);
 		QGraphicsView::scale(sc, sc);
 	}
 

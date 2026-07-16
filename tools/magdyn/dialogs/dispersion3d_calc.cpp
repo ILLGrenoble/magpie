@@ -94,23 +94,23 @@ std::tuple<t_vec_real, t_vec_real, t_vec_real> Dispersion3DDlg::GetQVectors() co
 {
 	t_vec_real Q_origin = tl2::create<t_vec_real>(
 	{
-		m_Q_origin[0]->value(),
-		m_Q_origin[1]->value(),
-		m_Q_origin[2]->value(),
+		(t_real)m_Q_origin[0]->value(),
+		(t_real)m_Q_origin[1]->value(),
+		(t_real)m_Q_origin[2]->value(),
 	});
 
 	t_vec_real Q_dir_1 = tl2::create<t_vec_real>(
 	{
-		m_Q_dir1[0]->value(),
-		m_Q_dir1[1]->value(),
-		m_Q_dir1[2]->value(),
+		(t_real)m_Q_dir1[0]->value(),
+		(t_real)m_Q_dir1[1]->value(),
+		(t_real)m_Q_dir1[2]->value(),
 	});
 
 	t_vec_real Q_dir_2 = tl2::create<t_vec_real>(
 	{
-		m_Q_dir2[0]->value(),
-		m_Q_dir2[1]->value(),
-		m_Q_dir2[2]->value(),
+		(t_real)m_Q_dir2[0]->value(),
+		(t_real)m_Q_dir2[1]->value(),
+		(t_real)m_Q_dir2[2]->value(),
 	});
 
 	return std::make_tuple(std::move(Q_origin), std::move(Q_dir_1), std::move(Q_dir_2));

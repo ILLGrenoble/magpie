@@ -86,8 +86,8 @@ void Plot3DDlg::CalculateGrid()
 	}
 	//std::cout << "Grid: " << m_x_count << " x " << m_y_count << std::endl;
 
-	t_vec_real start = tl2::create<t_vec_real>({ m_xrange[0]->value(), m_yrange[0]->value() });
-	t_vec_real end = tl2::create<t_vec_real>({ m_xrange[1]->value(), m_yrange[1]->value() });
+	t_vec_real start = tl2::create<t_vec_real>({ (t_real)m_xrange[0]->value(), (t_real)m_yrange[0]->value() });
+	t_vec_real end = tl2::create<t_vec_real>({ (t_real)m_xrange[1]->value(), (t_real)m_yrange[1]->value() });
 
 	m_minmax_x[0] = start[0];
 	m_minmax_x[1] = end[0];

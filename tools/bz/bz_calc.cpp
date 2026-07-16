@@ -180,14 +180,14 @@ bool BZDlg::CalcBZCut()
 
 	// get plane coordinate system
 	t_vec_bz vec1_rlu = tl2::create<t_vec_bz>({
-		m_cutX->value(),
-		m_cutY->value(),
-		m_cutZ->value()
+		(t_real)m_cutX->value(),
+		(t_real)m_cutY->value(),
+		(t_real)m_cutZ->value()
 	});
 	t_vec_bz norm_rlu = tl2::create<t_vec_bz>({
-		m_cutNX->value(),
-		m_cutNY->value(),
-		m_cutNZ->value()
+		(t_real)m_cutNX->value(),
+		(t_real)m_cutNY->value(),
+		(t_real)m_cutNZ->value()
 	});
 
 	t_real d_rlu = m_cutD->value();

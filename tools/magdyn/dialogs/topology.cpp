@@ -671,16 +671,16 @@ void TopologyDlg::CalculateBerryCurvature()
 	// get coordinates
 	t_vec_real Q_start = tl2::create<t_vec_real>(
 	{
-		m_Q_start_bc[0]->value(),
-		m_Q_start_bc[1]->value(),
-		m_Q_start_bc[2]->value(),
+		(t_real)m_Q_start_bc[0]->value(),
+		(t_real)m_Q_start_bc[1]->value(),
+		(t_real)m_Q_start_bc[2]->value(),
 	});
 
 	t_vec_real Q_end = tl2::create<t_vec_real>(
 	{
-		m_Q_end_bc[0]->value(),
-		m_Q_end_bc[1]->value(),
-		m_Q_end_bc[2]->value(),
+		(t_real)m_Q_end_bc[0]->value(),
+		(t_real)m_Q_end_bc[1]->value(),
+		(t_real)m_Q_end_bc[2]->value(),
 	});
 
 	// get Q component with maximum range

@@ -99,8 +99,8 @@ void Plot3DDlg::Calculate()
 	m_x_count = m_num_points[0]->value();
 	m_y_count = m_num_points[1]->value();
 
-	t_vec_real start = tl2::create<t_vec_real>({ m_xrange[0]->value(), m_yrange[0]->value() });
-	t_vec_real end = tl2::create<t_vec_real>({ m_xrange[1]->value(), m_yrange[1]->value() });
+	t_vec_real start = tl2::create<t_vec_real>({ (t_real)m_xrange[0]->value(), (t_real)m_yrange[0]->value() });
+	t_vec_real end = tl2::create<t_vec_real>({ (t_real)m_xrange[1]->value(), (t_real)m_yrange[1]->value() });
 
 	m_minmax_x[0] = start[0];
 	m_minmax_x[1] = end[0];
@@ -556,9 +556,11 @@ void Plot3DDlg::PlotPickerIntersection(
 	m_cur_obj = objIdx;
 
 	// coordinate trafo
-	t_real_gl x = std::lerp(m_xrange[0]->value(), m_xrange[1]->value(), (*pos)[0] / m_x_scale->value() + 0.5);
-	t_real_gl y = std::lerp(m_yrange[0]->value(), m_yrange[1]->value(), (*pos)[1] / m_y_scale->value() + 0.5);
-	t_real_gl z = (*pos)[2] / m_z_scale->value();
+	t_real_gl x = std::lerp((t_real_gl)m_xrange[0]->value(), (t_real_gl)m_xrange[1]->value(),
+		(*pos)[0] / (t_real_gl)m_x_scale->value() + t_real_gl(0.5));
+	t_real_gl y = std::lerp((t_real_gl)m_yrange[0]->value(), (t_real_gl)m_yrange[1]->value(),
+	  (*pos)[1] / (t_real_gl)m_y_scale->value() + t_real_gl(0.5));
+	t_real_gl z = (*pos)[2] / (t_real_gl)m_z_scale->value();
 
 	std::ostringstream ostr;
 	ostr.precision(g_prec_gui);

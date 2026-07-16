@@ -660,16 +660,16 @@ void DiffDlg::CalculateGroupVelocity()
 	// get coordinates
 	t_vec_real Q_start = tl2::create<t_vec_real>(
 	{
-		m_Q_start_gv[0]->value(),
-		m_Q_start_gv[1]->value(),
-		m_Q_start_gv[2]->value(),
+		(t_real)m_Q_start_gv[0]->value(),
+		(t_real)m_Q_start_gv[1]->value(),
+		(t_real)m_Q_start_gv[2]->value(),
 	});
 
 	t_vec_real Q_end = tl2::create<t_vec_real>(
 	{
-		m_Q_end_gv[0]->value(),
-		m_Q_end_gv[1]->value(),
-		m_Q_end_gv[2]->value(),
+		(t_real)m_Q_end_gv[0]->value(),
+		(t_real)m_Q_end_gv[1]->value(),
+		(t_real)m_Q_end_gv[2]->value(),
 	});
 
 	// get Q component with maximum range
