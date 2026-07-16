@@ -1524,7 +1524,7 @@ void GlPlotRenderer::UpdatePicker()
 		const t_mat_gl& matTrafo = (*coordTrafo) * obj.m_mat * coordTrafoInv;
 
 		// scaling factor, TODO: maximum factor for non-uniform scaling
-		auto scale = std::cbrt(std::abs(tl2::det(matTrafo)));
+		auto scale = std::abs(tl2::det(matTrafo));
 
 		// intersection with bounding sphere?
 		auto boundingInters =
@@ -1539,9 +1539,9 @@ void GlPlotRenderer::UpdatePicker()
 		for(std::size_t startidx = 0; startidx + 2 < linkedObj->m_triangles.size(); startidx += 3)
 		{
 			std::vector<t_vec3_gl> poly{ {
-				linkedObj->m_triangles[startidx+0],
-				linkedObj->m_triangles[startidx+1],
-				linkedObj->m_triangles[startidx+2]
+				linkedObj->m_triangles[startidx + 0],
+				linkedObj->m_triangles[startidx + 1],
+				linkedObj->m_triangles[startidx + 2]
 			} };
 
 			/*std::vector<t_vec3_gl> polyuv{ {
@@ -1557,7 +1557,6 @@ void GlPlotRenderer::UpdatePicker()
 					org3, dir3, poly, matTrafo);
 			if(!bInters)  // no intersection?
 				continue;
-
 			t_vec_gl vecInters4 = tl2::create<t_vec_gl>(
 				{ vecInters[0], vecInters[1], vecInters[2], 1 });
 

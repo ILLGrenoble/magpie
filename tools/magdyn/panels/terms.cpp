@@ -275,19 +275,19 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	QMenu *menuTableContext = new QMenu(m_termstab);
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
-		"Add Term Before", this,
+		"Add Coupling Before", this,
 		[this]() { this->AddTermTabItem(-2); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
-		"Add Term After", this,
+		"Add Coupling After", this,
 		[this]() { this->AddTermTabItem(-3); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("edit-copy"),
-		"Clone Term", this,
+		"Clone Coupling", this,
 		[this]() { this->AddTermTabItem(-4); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-remove"),
-		"Delete Term", this,
+		"Delete Coupling", this,
 		[this]() { this->DelTabItem(m_termstab); });
 
 
@@ -295,11 +295,11 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	QMenu *menuTableContextNoItem = new QMenu(m_termstab);
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-add"),
-		"Add Term", this,
+		"Add Coupling", this,
 		[this]() { this->AddTermTabItem(); });
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-remove"),
-		"Delete Term", this,
+		"Delete Coupling", this,
 		[this]() { this->DelTabItem(m_termstab); });
 
 
