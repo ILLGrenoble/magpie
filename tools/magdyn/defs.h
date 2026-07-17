@@ -141,9 +141,6 @@ extern unsigned int g_stop_check_fraction;
 	// gui theme and font
 	extern QString g_theme, g_font, g_font3d;
 
-	// resource directory
-	extern QString g_resdir;
-
 	// application icon
 	extern QIcon g_icon;
 

@@ -164,7 +164,7 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 		QString("Using %1-bit real and %2-bit integer type.").
 			arg(sizeof(t_real)*8).arg(sizeof(t_size)*8),
 		infopanel), y++, 0, 1, w);
-	if(g_resdir != "")
+	/*if(g_resdir != "")
 	{
 		auto labelRes = new QLabel(
 			QString("Resource directory: ") +
@@ -172,7 +172,7 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 			infopanel);
 		labelRes->setWordWrap(true);
 		grid->addWidget(labelRes, y++, 0, 1, w);
-	}
+	}*/
 
 	grid->addWidget(sep2, y++, 0, 1, w);
 

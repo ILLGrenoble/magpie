@@ -82,9 +82,6 @@ int g_checks = 0;
 // gui theme
 QString g_theme = "Fusion";
 
-// resource directory
-QString g_resdir;
-
 // application icon
 QIcon g_icon;
 

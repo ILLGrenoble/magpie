@@ -147,39 +147,46 @@ MagDynDlg::~MagDynDlg()
 void MagDynDlg::InitResources()
 {
 	QString appPath = QApplication::applicationDirPath();
+	QString homePath = QDir::homePath() + "/.magpie";
 
 	// find resource directory
+	std::vector<QString> resdirs;
 	if(QDir{appPath + "/res"}.exists())
-		g_resdir = appPath + "/res/";
-	else if(QDir{appPath + "/../res"}.exists())
-		g_resdir = appPath + "/../res/";
-	else if(QDir{appPath + "/resources"}.exists())
-		g_resdir = appPath + "/resources/";
-	else if(QDir{appPath + "/../resources"}.exists())
-		g_resdir = appPath + "/../resources/";
-	else if(QDir{"res"}.exists())
-		g_resdir = "res/";
-	else if(QDir{"../res"}.exists())
-		g_resdir = "../res/";
-	else if(QDir{"/usr/local/share/magpie/res"}.exists())
-		g_resdir = "/usr/local/share/magpie/res/";
-	else if(QDir{"/usr/share/magpie/res"}.exists())
-		g_resdir = "/usr/share/magpie/res/";
-	else
+		resdirs.emplace_back(appPath + "/res/");
+	if(QDir{appPath + "/../res"}.exists())
+		resdirs.emplace_back(appPath + "/../res/");
+	if(QDir{appPath + "/resources"}.exists())
+		resdirs.emplace_back(appPath + "/resources/");
+	if(QDir{appPath + "/../resources"}.exists())
+		resdirs.emplace_back(appPath + "/../resources/");
+	if(QDir{"res"}.exists())
+		resdirs.emplace_back("res/");
+	if(QDir{"../res"}.exists())
+		resdirs.emplace_back("../res/");
+	if(QDir{homePath}.exists())
+		resdirs.emplace_back(homePath);
+	if(QDir{"/usr/local/share/magpie/res"}.exists())
+		resdirs.emplace_back("/usr/local/share/magpie/res/");
+	if(QDir{"/usr/share/magpie/res"}.exists())
+		resdirs.emplace_back("/usr/share/magpie/res/");
+	if(resdirs.size() == 0)
 		std::cerr << "Warning: Resource directory could not be found." << std::endl;
-	//std::cerr << "Resource path: " << g_resdir.toStdString() << std::endl;
+	//std::cerr << "Resource path: " << resdir.toStdString() << std::endl;
 
-	// form factor table
 	m_ff.Clear();
-	if(QFileInfo{g_resdir + "magffacts.xml"}.exists())
+	for(const QString& resdir : resdirs)  // iterate resource directories
 	{
-		if(!m_ff.LoadTable(g_resdir.toStdString() + "magffacts.xml", true))
-			m_ff.Clear();
-	}
+		// form factor table
+		if(m_ff.GetFormfactorCount() == 0 && QFileInfo{resdir + "magffacts.xml"}.exists())
+		{
+			if(!m_ff.LoadTable(resdir.toStdString() + "magffacts.xml", true))
+				m_ff.Clear();
+		}
 
-	// main icon
-	if(QFileInfo{g_resdir + "magpie.svg"}.exists())
-		g_icon = QIcon{g_resdir + "magpie.svg"};
+		// main icon
+		if(g_icon.isNull() && QFileInfo{resdir + "magpie.svg"}.exists())
+			g_icon = QIcon{resdir + "magpie.svg"};
+	}
 
 	if(!g_icon.isNull())
 		setWindowIcon(g_icon);
