@@ -240,6 +240,7 @@ public:
 			m_editFont->setReadOnly(true);
 
 			QPushButton *btnFont = new QPushButton("Select...", panelGui);
+			btnFont->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 			connect(btnFont, &QPushButton::clicked, [this]()
 			{
 				// current font
@@ -282,6 +283,7 @@ public:
 			m_editFont3d->setReadOnly(true);
 
 			QPushButton *btnFont3d = new QPushButton("Select...", panelGui);
+			btnFont3d->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 			connect(btnFont3d, &QPushButton::clicked, [this]()
 			{
 				// current font
@@ -360,6 +362,7 @@ public:
 		grid->addWidget(labelRestart, y++,0,1,1);
 
 		QDialogButtonBox *buttons = new QDialogButtonBox(this);
+		buttons->setSizePolicy(QSizePolicy{QSizePolicy::Preferred, QSizePolicy::Preferred});
 		buttons->setStandardButtons(
 			QDialogButtonBox::Ok |
 			QDialogButtonBox::Apply |

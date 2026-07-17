@@ -215,7 +215,7 @@ struct t_SofQE
 	t_mat comm{};                // commutators
 
 	t_mat H{};                   // hamiltonian
-	t_mat H_triag{};             // triangular hamiltonian after cholesky decomposition
+	t_mat H_triag{};             // triangulised hamiltonian after cholesky decomposition
 	t_mat H_comm{};              // final hamiltonian with correct commutators
 	t_mat evec_mat{};            // eigenvector matrix for H
 

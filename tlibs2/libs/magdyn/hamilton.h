@@ -347,7 +347,7 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 	}
 
 #ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
-	std::cout << "Upper-triangular Hamiltonian:\n";
+	std::cout << "Upper-triangulised Hamiltonian:\n";
 	tl2::niceprint(std::cout, S.H_triag, 1e-4, 4);
 #endif
 

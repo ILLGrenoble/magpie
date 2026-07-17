@@ -137,21 +137,22 @@ void MagDynDlg::CreateSamplePanel()
 
 		btn_set_ffact = new QPushButton("Set", m_samplepanel);
 		btn_set_ffact->setToolTip("Set the form factor term from the currently selected magnetic ion.");
-		btn_set_ffact->setFocusPolicy(Qt::StrongFocus);
 	}
 
 	QPushButton *btn_ffact_j0 = new QPushButton("<j0> Templ.", m_samplepanel);
-	btn_ffact_j0->setToolTip("Add a template <j0> term.");
-	btn_ffact_j0->setFocusPolicy(Qt::StrongFocus);
 	QPushButton *btn_ffact_j2 = new QPushButton("<j0-2> Templ.", m_samplepanel);
-	btn_ffact_j2->setToolTip("Add template <j0> and <j2> terms.");
-	btn_ffact_j2->setFocusPolicy(Qt::StrongFocus);
 	QPushButton *btn_ffact_j4 = new QPushButton("<j0-4> Templ.", m_samplepanel);
-	btn_ffact_j4->setToolTip("Add template <j0>, <j2>, and <j4> terms.");
-	btn_ffact_j4->setFocusPolicy(Qt::StrongFocus);
 	QPushButton *btn_ffact_plot = new QPushButton("Plot...", m_samplepanel);
+	btn_ffact_j0->setToolTip("Add a template <j0> term.");
+	btn_ffact_j2->setToolTip("Add template <j0> and <j2> terms.");
+	btn_ffact_j4->setToolTip("Add template <j0>, <j2>, and <j4> terms.");
 	btn_ffact_plot->setToolTip("Plot the form factors.");
-	btn_ffact_plot->setFocusPolicy(Qt::StrongFocus);
+
+	for(QPushButton *btn : { btn_set_ffact, btn_ffact_j0, btn_ffact_j2, btn_ffact_j4, btn_ffact_plot })
+	{
+		btn->setFocusPolicy(Qt::StrongFocus);
+		btn->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+	}
 
 	QGridLayout *grid = new QGridLayout(m_samplepanel);
 	grid->setSpacing(4);

@@ -140,7 +140,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	const auto [H_triag_inv, inv_ok] = tl2::inv(S.H_triag);
 	if(!inv_ok)
 	{
-		TL2_CERR_OPT << "Magdyn error: Inversion of triangular Hamiltonian failed"
+		TL2_CERR_OPT << "Magdyn error: Inversion of triangulised Hamiltonian failed"
 			<< " at Q = " << S.Q_rlu << "." << std::endl;
 		return false;
 	}

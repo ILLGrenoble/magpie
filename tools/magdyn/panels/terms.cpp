@@ -179,7 +179,6 @@ void MagDynDlg::CreateExchangeTermsPanel()
 		"Generate", m_termspanel);
 	btnGenBySG->setToolTip("Create couplings from space group"
 		" symmetry operators and existing couplings.");
-
 	btnGenBySG->setFocusPolicy(Qt::StrongFocus);
 	btnGenBySG->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
