@@ -147,31 +147,28 @@ MagDynDlg::~MagDynDlg()
 void MagDynDlg::InitResources()
 {
 	QString appPath = QApplication::applicationDirPath();
-	QString homePath = QDir::homePath() + "/.magpie";
 
-	// find resource directory
+	// find resource directories
 	std::vector<QString> resdirs;
-	if(QDir{appPath + "/res"}.exists())
-		resdirs.emplace_back(appPath + "/res/");
-	if(QDir{appPath + "/../res"}.exists())
-		resdirs.emplace_back(appPath + "/../res/");
-	if(QDir{appPath + "/resources"}.exists())
-		resdirs.emplace_back(appPath + "/resources/");
-	if(QDir{appPath + "/../resources"}.exists())
-		resdirs.emplace_back(appPath + "/../resources/");
-	if(QDir{"res"}.exists())
-		resdirs.emplace_back("res/");
-	if(QDir{"../res"}.exists())
-		resdirs.emplace_back("../res/");
-	if(QDir{homePath}.exists())
-		resdirs.emplace_back(homePath);
-	if(QDir{"/usr/local/share/magpie/res"}.exists())
-		resdirs.emplace_back("/usr/local/share/magpie/res/");
-	if(QDir{"/usr/share/magpie/res"}.exists())
-		resdirs.emplace_back("/usr/share/magpie/res/");
+
+	auto add_path = [&resdirs](const QString& path)
+	{
+		if(QDir{path}.exists())
+			resdirs.push_back(path);
+	};
+
+	add_path(appPath + "/res/");
+	add_path(appPath + "/../res/");
+	add_path(appPath + "/resources/");
+	add_path(appPath + "/../resources/");
+	add_path("res/");
+	add_path("../res/");
+	add_path(QDir::homePath() + "/.magpie");
+	add_path("/usr/local/share/magpie/res/");
+	add_path("/usr/share/magpie/res/");
+
 	if(resdirs.size() == 0)
 		std::cerr << "Warning: Resource directory could not be found." << std::endl;
-	//std::cerr << "Resource path: " << resdir.toStdString() << std::endl;
 
 	m_ff.Clear();
 	for(const QString& resdir : resdirs)  // iterate resource directories
