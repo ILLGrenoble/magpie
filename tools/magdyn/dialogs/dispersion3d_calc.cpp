@@ -186,9 +186,11 @@ void Dispersion3DDlg::Calculate()
 
 	m_Q_count_1 = m_num_Q_points[0]->value();
 	m_Q_count_2 = m_num_Q_points[1]->value();
+	if(m_Q_count_1 < 2 || m_Q_count_2 < 2)
+		return;
 
-	t_vec_real Q_step_1 = Q_dir_1 / t_real(m_Q_count_1);
-	t_vec_real Q_step_2 = Q_dir_2 / t_real(m_Q_count_2);
+	t_vec_real Q_step_1 = Q_dir_1 / t_real(m_Q_count_1 - 1);
+	t_vec_real Q_step_2 = Q_dir_2 / t_real(m_Q_count_2 - 1);
 
 	m_minmax_Q1[0] = Q_origin;
 	m_minmax_Q1[1] = Q_origin + Q_step_1*t_real(m_Q_count_1 - 1);
