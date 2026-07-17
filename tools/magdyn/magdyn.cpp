@@ -154,7 +154,13 @@ void MagDynDlg::InitResources()
 	auto add_path = [&resdirs](const QString& path)
 	{
 		if(QDir{path}.exists())
+		{
 			resdirs.push_back(path);
+#ifndef NDEBUG
+			std::cerr << "Added resource directory: \""
+				<< path.toStdString() << "\"." << std::endl;
+#endif
+		}
 	};
 
 	add_path(appPath + "/res/");
