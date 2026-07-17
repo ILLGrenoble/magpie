@@ -253,6 +253,7 @@ public:
 	void SetPhaseSign(t_real sign);
 	void SetCholeskyMaxTries(t_size max_tries);
 	void SetCholeskyInc(t_real delta);
+	void SetCholeskyFailOnWrong(bool fail);
 
 	void SetMagneticFormFactor(const std::string& ffact, t_size idx = 0);
 
@@ -764,6 +765,7 @@ private:
 	// settings for cholesky decomposition
 	t_size m_tries_chol{ 50 };
 	t_real m_delta_chol{ 0.0025 };
+	bool m_fail_wrong_chol { true };            // return on cholesky failure
 
 	// precisions
 	t_real m_eps{ 1e-6 };

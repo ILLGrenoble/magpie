@@ -245,11 +245,23 @@ void Dispersion3DDlg::Calculate()
 			{
 				const auto& E_and_S = Es_and_S[band_idx];
 
+				// energies
 				bool valid = true;
 				t_real E = E_and_S.E;
 				if(std::isnan(E) || std::isinf(E))
+				{
+					E = 0.;
 					valid = false;
+				}
+				else
+				{
+					m_minmax_E[0] = std::min(m_minmax_E[0], E);
+					m_minmax_E[1] = std::max(m_minmax_E[1], E);
+					minmax_valid = true;
+				}
 
+
+				// weights
 				t_real weight = -1;
 				if(use_weights)
 				{
@@ -268,14 +280,8 @@ void Dispersion3DDlg::Calculate()
 					// filter minimum S(Q, E)
 					if(min_S >= 0. && std::abs(weight) <= min_S)
 						valid = false;
-				}
+				}  // weights
 
-				if(valid)
-				{
-					m_minmax_E[0] = std::min(m_minmax_E[0], E);
-					m_minmax_E[1] = std::max(m_minmax_E[1], E);
-					minmax_valid = true;
-				}
 
 				// count energy degeneracy
 				t_size degeneracy = E_and_S.degeneracy;
@@ -295,6 +301,7 @@ void Dispersion3DDlg::Calculate()
 						<< "): " << E << " meV (" << degeneracy << "x)" << std::endl;
 				}*/
 
+
 				// generate and add data point
 				t_data_Q dat{std::make_tuple(Q, E, weight, Q_idx_1, Q_idx_2, degeneracy, valid)};
 
@@ -310,6 +317,7 @@ void Dispersion3DDlg::Calculate()
 					data_band_idx += degeneracy - 1;
 				}
 			}  // band iteration
+
 
 			// fill up band data in case some indices were skipped due to invalid hamiltonians
 			for(; data_band_idx < expected_bands; ++data_band_idx)
@@ -631,6 +639,7 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 		{ static_cast<t_real_gl>(1.5 * Q_scale1), static_cast<t_real_gl>(1.5 * Q_scale2),
 			static_cast<t_real_gl>(2.5 * (m_minmax_E[1] + 4.) * E_scale) }));
 
+
 	// set coordinate cube size
 	if(m_dispplot->GetRenderer()->GetCoordCube().size())
 	{
@@ -666,6 +675,7 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 				E_min, E_max, -1.);
 		}
 	}
+
 
 	// plot the magnon bands
 	m_first_band = 0;
@@ -777,10 +787,11 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 
 			m_cam_centre[2] += GetMeanEnergy(band_idx);
 			++num_active_bands;
-		}
+		}  // band active
 
 		AddBand("#" + tl2::var_to_str(band_idx + 1 - m_first_band), colFull, band_active);
-	}
+	}  // bands
+
 
 	if(num_active_bands)
 		m_cam_centre[2] /= static_cast<t_real>(num_active_bands);

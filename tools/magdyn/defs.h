@@ -102,6 +102,7 @@ extern t_real g_bose_cutoff;
 // settings for cholesky decomposition
 extern unsigned int g_cholesky_maxtries;
 extern t_real g_cholesky_delta;
+extern int g_cholesky_fail_when_wrong;
 
 // brillouin zone calculation settings
 extern unsigned int g_bz_calc_order;
@@ -157,7 +158,7 @@ extern unsigned int g_stop_check_fraction;
 // ----------------------------------------------------------------------------
 #include "dialogs/settings.h"
 
-constexpr std::array<SettingsVariable, 25> g_settingsvariables
+constexpr std::array<SettingsVariable, 26> g_settingsvariables
 {{
 	// threads
 	{
@@ -204,6 +205,12 @@ constexpr std::array<SettingsVariable, 25> g_settingsvariables
 		.description = "Cholesky delta per trial.",
 		.key = "cholesky_delta",
 		.value = &g_cholesky_delta,
+	},
+	{
+		.description = "Cholesky exits when wrong (keep enabled!).",
+		.key = "cholesky_fail_wrong",
+		.value = &g_cholesky_fail_when_wrong,
+		.editor = SettingsVariableEditor::YESNO,
 	},
 
 	// settings for brillouin zone calculation

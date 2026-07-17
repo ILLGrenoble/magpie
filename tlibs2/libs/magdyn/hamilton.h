@@ -325,12 +325,17 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 
 	if(chol_failed || S.H_triag.size1() == 0 || S.H_triag.size2() == 0)
 	{
+		chol_failed = true;
+		S.H_triag = tl2::unit<t_mat>(S.H.size1());
+
 		TL2_CERR_OPT << "Magdyn error: Invalid Cholesky decomposition"
 			<< " after " << chol_try << " correction(s)"
 			<< " at Q = " << Qvec << ":"
 			<< " Hamiltonian is not Hermitian and positive-definite."
 			<< std::endl;
-		return S;
+
+		if(m_fail_wrong_chol)
+			return S;
 	}
 
 	if(m_perform_checks && chol_try > 0)
@@ -347,7 +352,10 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 #endif
 
 	// see p. 5 in (Toth 2015)
-	S.H_comm = S.H_triag * S.comm * tl2::herm<t_mat>(S.H_triag);
+	if(!chol_failed)
+		S.H_comm = S.H_triag * S.comm * tl2::herm<t_mat>(S.H_triag);
+	else
+		S.H_comm = S.H * S.comm;  // try to approximate
 
 	const bool is_herm = tl2::is_symm_or_herm<t_mat, t_real>(S.H_comm, m_eps);
 	if(m_perform_checks && !is_herm)

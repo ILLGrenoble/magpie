@@ -60,6 +60,7 @@ t_real g_bose_cutoff = 0.025;
 // settings for cholesky decomposition
 unsigned int g_cholesky_maxtries = 50;
 t_real g_cholesky_delta = 0.0025;
+int g_cholesky_fail_when_wrong = 1;
 
 // brillouin zone calculation settings
 unsigned int g_bz_calc_order = 4;

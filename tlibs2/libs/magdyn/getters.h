@@ -522,6 +522,12 @@ MAGDYN_TEMPL void MAGDYN_INST::SetCholeskyInc(t_real delta)
 	m_delta_chol = delta;
 }
 
+MAGDYN_TEMPL void MAGDYN_INST::SetCholeskyFailOnWrong(bool fail)
+{
+	m_fail_wrong_chol = fail;
+}
+
+
 
 
 MAGDYN_TEMPL void MAGDYN_INST::SetMagneticFormFactor(const std::string& ffact, t_size idx)
