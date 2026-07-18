@@ -1,5 +1,5 @@
 /**
- * magnetic dynamics -- 3d dispersion calculation
+ * magnetic dynamics -- 3d dispersion plotting
  * @author Tobias Weber <tweber@ill.fr>
  * @date January 2025
  * @license GPLv3, see 'LICENSE' file
