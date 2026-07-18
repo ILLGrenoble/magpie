@@ -126,17 +126,21 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	m_context = new QMenu(this);
 	QAction *acCentre = new QAction("Centre Camera", m_context);
 	QAction *acShowCoords = new QAction("Show Coordinate Planes", m_context);
+	QAction *acShowMainQ = new QAction("Show Main Scan Area", m_context);
 	QAction *acSaveData = new QAction("Save Data...", m_context);
 	QAction *acSaveScript = new QAction("Save Data As Script...", m_context);
 	QAction *acSaveImage = new QAction("Save Image...", m_context);
 	acShowCoords->setCheckable(true);
 	acShowCoords->setChecked(SHOW_COORD_CUBE);
+	acShowMainQ->setCheckable(true);
+	acShowMainQ->setChecked(m_show_main_Q);
 	acSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
 	acSaveScript->setIcon(QIcon::fromTheme("text-x-script"));
 	acSaveImage->setIcon(QIcon::fromTheme("image-x-generic"));
 	m_context->addAction(acCentre);
 	m_context->addSeparator();
 	m_context->addAction(acShowCoords);
+	m_context->addAction(acShowMainQ);
 	m_context->addSeparator();
 	m_context->addAction(acSaveData);
 	m_context->addAction(acSaveScript);
@@ -153,6 +157,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	m_context_band->addAction(acCentreOnObject);
 	m_context_band->addSeparator();
 	m_context_band->addAction(acShowCoords);
+	m_context_band->addAction(acShowMainQ);
 	m_context_band->addSeparator();
 	m_context_band->addAction(acSaveData);
 	m_context_band->addAction(acSaveScript);
@@ -399,6 +404,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	connect(acCentreOnObject, &QAction::triggered, this, &Dispersion3DDlg::CentrePlotCameraOnObject);
 	connect(acCentre, &QAction::triggered, this, &Dispersion3DDlg::CentrePlotCamera);
 	connect(acShowCoords, &QAction::toggled, this, &Dispersion3DDlg::ShowPlotCoordCube);
+	connect(acShowMainQ, &QAction::toggled, this, &Dispersion3DDlg::ShowMainQ);
 	connect(acSaveData, &QAction::triggered, this, &Dispersion3DDlg::SaveData);
 	connect(acSaveScript, &QAction::triggered, this, &Dispersion3DDlg::SaveScript);
 	connect(acSaveImage, &QAction::triggered, this, &Dispersion3DDlg::SaveImage);
@@ -521,6 +527,9 @@ void Dispersion3DDlg::EnableCalculation(bool enable)
  */
 void Dispersion3DDlg::PlotCameraHasUpdated()
 {
+	if(!m_dispplot)
+		return;
+
 	auto [phi, theta] = m_dispplot->GetRenderer()->GetCamera().GetRotation();
 
 	phi = tl2::r2d<t_real>(phi);
@@ -548,6 +557,9 @@ void Dispersion3DDlg::PlotMouseClick(
 	[[maybe_unused]] bool mid,
 	[[maybe_unused]] bool right)
 {
+	if(!m_dispplot)
+		return;
+
 	const QPointF& _pt = m_dispplot->GetRenderer()->GetMousePosition();
 	QPoint pt = m_dispplot->mapToGlobal(_pt.toPoint());
 
@@ -630,6 +642,9 @@ void Dispersion3DDlg::AfterPlotGLInitialisation()
  */
 void Dispersion3DDlg::ShowPlotCoordCube(bool show)
 {
+	if(!m_dispplot)
+		return;
+
 	// always hide coordinate cross
 	if(auto obj = m_dispplot->GetRenderer()->GetCoordCross(); obj)
 		m_dispplot->GetRenderer()->SetObjectVisible(*obj, false);
@@ -644,10 +659,29 @@ void Dispersion3DDlg::ShowPlotCoordCube(bool show)
 
 
 /**
+ * indicate the plane of the main dialog's scan
+ */
+void Dispersion3DDlg::ShowMainQ(bool show)
+{
+	if(!m_dispplot)
+		return;
+
+	m_dispplot->GetRenderer()->SetBlend(show);
+	m_show_main_Q = show;
+
+	Plot(false);
+}
+
+
+
+/**
  * show or hide the object labels
  */
 void Dispersion3DDlg::ShowPlotLabels(bool show)
 {
+	if(!m_dispplot)
+		return;
+
 	m_dispplot->GetRenderer()->SetLabelsVisible(show);
 	m_dispplot->update();
 }
@@ -659,6 +693,9 @@ void Dispersion3DDlg::ShowPlotLabels(bool show)
  */
 void Dispersion3DDlg::SetPlotPerspectiveProjection(bool proj)
 {
+	if(!m_dispplot)
+		return;
+
 	m_dispplot->GetRenderer()->GetCamera().SetPerspectiveProjection(proj);
 	m_dispplot->GetRenderer()->RequestViewportUpdate();
 	m_dispplot->GetRenderer()->GetCamera().UpdateTransformation();
@@ -672,6 +709,9 @@ void Dispersion3DDlg::SetPlotPerspectiveProjection(bool proj)
  */
 void Dispersion3DDlg::SetPlotCameraRotation(t_real_gl phi, t_real_gl theta)
 {
+	if(!m_dispplot)
+		return;
+
 	phi = tl2::d2r<t_real>(phi);
 	theta = tl2::d2r<t_real>(theta);
 
@@ -715,7 +755,7 @@ void Dispersion3DDlg::ToggleBand()
  */
 void Dispersion3DDlg::CentrePlotCameraOnObject()
 {
-	if(!m_cur_obj)
+	if(!m_cur_obj || !m_dispplot)
 		return;
 
 	t_mat_gl mat = m_dispplot->GetRenderer()->GetObjectMatrix(*m_cur_obj);
@@ -741,6 +781,9 @@ void Dispersion3DDlg::CentrePlotCameraOnObject()
  */
 void Dispersion3DDlg::CentrePlotCamera()
 {
+	if(!m_dispplot)
+		return;
+
 	t_mat_gl matCentre = tl2::hom_translation<t_mat_gl>(
 		m_cam_centre[0] * m_Q_scale2->value(),
 		m_cam_centre[1] * m_Q_scale1->value(),
@@ -758,6 +801,9 @@ void Dispersion3DDlg::CentrePlotCamera()
  */
 void Dispersion3DDlg::SetPlotCoordinateSystem(int which)
 {
+	if(!m_dispplot)
+		return;
+
 	m_dispplot->GetRenderer()->SetCoordSys(which);
 }
 

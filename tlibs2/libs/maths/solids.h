@@ -155,10 +155,6 @@ std::tuple<t_cont<t_vec>, t_cont<t_cont<std::size_t>>, t_cont<t_vec>, t_cont<t_c
 create_plane(const t_vec& norm, typename t_vec::value_type lx = 1, typename t_vec::value_type ly = 1)
 requires is_vec<t_vec>
 {
-	t_vec norm_old = create<t_vec>({ 0, 0, -1 });
-	t_vec rot_vec = create<t_vec>({ 1, 0, 0 });
-	t_mat rot = rotation<t_mat, t_vec>(norm_old, norm, &rot_vec);
-
 	t_cont<t_vec> vertices =
 	{{
 		create<t_vec>({ -lx, -ly, 0. }),	// vertex 0
@@ -168,8 +164,19 @@ requires is_vec<t_vec>
 	}};
 
 	// rotate according to given normal
-	for(t_vec& vec : vertices)
-		vec = tl2::prod_mv<t_mat, t_vec>(rot, vec);
+	t_vec norm_old = create<t_vec>({ 0, 0, -1 });
+	if(!equals<t_vec>(norm, norm_old) || equals<t_vec>(norm, -norm_old))
+	{
+		t_vec rot_vec;
+		if(equals<t_vec>(norm, -norm_old))
+			rot_vec = create<t_vec>({ 1, 0, 0 });
+		else
+			rot_vec = cross<t_vec>(norm_old, norm);
+		t_mat rot = rotation<t_mat, t_vec>(norm_old, norm, &rot_vec);
+
+		for(t_vec& vec : vertices)
+			vec = tl2::prod_mv<t_mat, t_vec>(rot, vec);
+	}
 
 	t_cont<t_cont<std::size_t>> faces = { { 0, 1, 2, 3 } };
 	t_cont<t_vec> normals = { norm };

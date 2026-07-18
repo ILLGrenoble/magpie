@@ -660,7 +660,7 @@ void BZPlotDlg::AfterGLInitialisation()
 
 	// reference sphere and plane for linked objects
 	m_sphere = m_plot->GetRenderer()->AddSphere(0.05, 0.,0.,0., 1.,1.,1.,1.);
-	m_plane = m_plot->GetRenderer()->AddPlane(0.,0.,1., 0.,0.,0., 5., 0.75,0.75,0.75,0.5);
+	m_plane = m_plot->GetRenderer()->AddPlane(0.,0.,1., 0.,0.,0., 5.,5., 0.75,0.75,0.75,0.5);
 	m_plot->GetRenderer()->SetObjectVisible(m_sphere, false);
 	m_plot->GetRenderer()->SetObjectIntersectable(m_sphere, false);
 	m_plot->GetRenderer()->SetObjectVisible(m_plane, true);

@@ -134,6 +134,7 @@ protected:
 
 	void SetPlotCoordinateSystem(int which);
 	void ShowPlotCoordCube(bool show);
+	void ShowMainQ(bool show);
 	void ShowPlotLabels(bool show);
 	void SetPlotPerspectiveProjection(bool proj);
 	void SetPlotCameraRotation(t_real_gl phi, t_real_gl theta);
@@ -169,6 +170,7 @@ private:
 	QSpinBox *m_num_Q_points[2]{};       // number of points on the Q grid
 	QDoubleSpinBox *m_E_range[2]{};
 	QCheckBox *m_enable_E_range[2]{};
+	bool m_show_main_Q{false};           // indicate the main dialog's scan
 
 	// correlation options
 	QCheckBox *m_S_filter_enable{};      // switch to enable minimum S(Q,E) value
