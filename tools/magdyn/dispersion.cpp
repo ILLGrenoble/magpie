@@ -196,26 +196,12 @@ void MagDynDlg::CalcDispersion()
 		ClearDispersion(false);
 	}
 
-	t_real Q_start[]
-	{
-		(t_real)m_Q_start[0]->value(),
-		(t_real)m_Q_start[1]->value(),
-		(t_real)m_Q_start[2]->value(),
-	};
 
-	t_real Q_end[]
-	{
-		(t_real)m_Q_end[0]->value(),
-		(t_real)m_Q_end[1]->value(),
-		(t_real)m_Q_end[2]->value(),
-	};
-
-	const t_real Q_range[]
-	{
-		std::abs(Q_end[0] - Q_start[0]),
-		std::abs(Q_end[1] - Q_start[1]),
-		std::abs(Q_end[2] - Q_start[2]),
-	};
+	// get Qs
+	auto [Q_start, Q_end] = GetDispersionQ();
+	t_vec_real Q_range = Q_end - Q_start;
+	for(int i = 0; i < 3; ++i)
+		Q_range[i] =  std::abs(Q_range[i]);
 
 	// Q component with maximum range
 	m_Q_idx = 0;
@@ -224,6 +210,15 @@ void MagDynDlg::CalcDispersion()
 	if(Q_range[2] > Q_range[m_Q_idx])
 		m_Q_idx = 2;
 
+	m_Q_min = Q_start[m_Q_idx];
+	m_Q_max = Q_end[m_Q_idx];
+
+	// keep the scanned Q component in ascending order
+	if(Q_start[m_Q_idx] > Q_end[m_Q_idx])
+		std::swap(Q_start, Q_end);
+
+
+	// reserve vector memory
 	t_size num_pts = m_num_points->value();
 
 	m_qs_data.reserve(num_pts*10);
@@ -238,16 +233,6 @@ void MagDynDlg::CalcDispersion()
 		m_ws_data_channel[i].reserve(num_pts*10);
 	}
 
-	m_Q_min = Q_start[m_Q_idx];
-	m_Q_max = Q_end[m_Q_idx];
-
-	// keep the scanned Q component in ascending order
-	if(Q_start[m_Q_idx] > Q_end[m_Q_idx])
-	{
-		std::swap(Q_start[0], Q_end[0]);
-		std::swap(Q_start[1], Q_end[1]);
-		std::swap(Q_start[2], Q_end[2]);
-	}
 
 	// options
 	const bool is_comm = !m_dyn.IsIncommensurate();
@@ -287,8 +272,8 @@ void MagDynDlg::CalcDispersion()
 
 	for(t_size i = 0; i < num_pts; ++i)
 	{
-		auto task = [this, &mtx, i, num_pts, E0,
-			use_projector, use_weights, use_polcoords, ignore_annihilation, &Q_start, &Q_end]()
+		auto task = [this, &mtx, i, num_pts, E0, &Q_start, &Q_end,
+			use_projector, use_weights, use_polcoords, ignore_annihilation]()
 		{
 			const t_vec_real Q = num_pts > 1
 				? tl2::create<t_vec_real>(

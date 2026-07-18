@@ -164,8 +164,9 @@ void MagDynDlg::CreateDispersionPanel()
 
 	connect(m_num_points,
 		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-		[this]()
+		[this](int val)
 		{
+			m_Qidx->setMaximum(val - 1);
 			DispersionQChanged(true);
 		});
 	
@@ -367,21 +368,7 @@ void MagDynDlg::PlotMouseMove(QMouseEvent* evt)
 	if(!m_status)
 		return;
 
-	// range minimum
-	const t_real Q1[] =
-	{
-		(t_real)m_Q_start[0]->value(),
-		(t_real)m_Q_start[1]->value(),
-		(t_real)m_Q_start[2]->value()
-	};
-
-	// range maximum
-	const t_real Q2[] =
-	{
-		(t_real)m_Q_end[0]->value(),
-		(t_real)m_Q_end[1]->value(),
-		(t_real)m_Q_end[2]->value()
-	};
+	auto [Q1, Q2] = GetDispersionQ();
 
 	// plot (Q, E)
 	const t_real Q = m_plot->xAxis->pixelToCoord(evt->pos().x());

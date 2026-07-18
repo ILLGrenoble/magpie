@@ -84,6 +84,8 @@ public:
 	void SetPlotFont(const QString& font);
 	bool IsPlotterValid() const;
 
+	std::pair<t_vec_real, t_real> PlotXYZToQE(t_real x, t_real y, t_real z) const;
+
 
 protected:
 	virtual void accept() override;

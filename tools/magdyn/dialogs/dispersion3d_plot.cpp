@@ -241,27 +241,34 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 	}  // bands
 
 
-	if(m_show_main_Q)
+	if(m_show_main_Q && m_Qstart.size() == 3 && m_Qend.size() == 3)
 	{
 		// indicate dispersion from main dialog
 		t_vec_real mainDir = m_Qend - m_Qstart;
 		mainDir /= tl2::norm(mainDir);
 
+		//const t_mat_real& xtalB = m_dyn->GetCrystalBTrafo();
+		//const t_vec_real* plane = m_dyn->GetScatteringPlane();
+
 		auto [Q_origin, Q_dir_1, Q_dir_2] = GetQVectors();
 		Q_dir_1 /= tl2::norm(Q_dir_1);
 		Q_dir_2 /= tl2::norm(Q_dir_2);
 
-		t_real Q_scale = tl2::inner(mainDir, Q_dir_1)*Q_scale1 + tl2::inner(mainDir, Q_dir_2)*Q_scale2;
+		t_real proj1 = tl2::inner(mainDir, Q_dir_1);
+		t_real proj2 = tl2::inner(mainDir, Q_dir_2);
+		t_real posproj1 = tl2::inner(m_Qstart - Q_origin, Q_dir_1);
+		t_real posproj2 = tl2::inner(m_Qstart - Q_origin, Q_dir_2);
+		t_real Q_scale = proj1*Q_scale1 + proj2*Q_scale2;
 
 		t_real E_min = use_E_min ? E_min_sel : m_minmax_E[0];
 		t_real E_max = use_E_max ? E_max_sel : m_minmax_E[1];
 		t_real E_range = E_max - E_min;
 
 		std::size_t plane = m_dispplot->GetRenderer()->AddPlane(
-		  tl2::inner(mainDir, Q_dir_2), -tl2::inner(mainDir, Q_dir_1), 0.,  // flipping components for normal
-			tl2::inner(m_Qstart - Q_origin, Q_dir_1)*Q_scale1 - tl2::inner(mainDir, Q_dir_2)*Q_scale1/2.,
-			tl2::inner(m_Qstart - Q_origin, Q_dir_2)*Q_scale2 - tl2::inner(mainDir, Q_dir_1)*Q_scale2/2.,
-			E_min*E_scale + E_scale*E_range/2.,
+		  proj2, -proj1, 0.,  // flipping components for normal
+			(posproj1 - 0.5*proj2) * Q_scale1,  // x
+			(posproj2 - 0.5*proj1) * Q_scale2,  // y
+			(E_min + 0.5*E_range) * E_scale,    // z
 			Q_scale/2., E_scale*E_range/2., 0.75, 0.75, 0.75, 0.5);
 
 		m_dispplot->GetRenderer()->SetObjectVisible(plane, true);
@@ -276,6 +283,31 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 		CentrePlotCamera();    // centre camera and update
 	else
 		m_dispplot->update();  // only update renderer
+}
+
+
+
+/**
+ * conversion from plot position to (Q, E)
+ */
+std::pair<t_vec_real, t_real> Dispersion3DDlg::PlotXYZToQE(t_real x, t_real y, t_real z) const
+{
+	// coordinate scaling
+	t_real E_scale = m_E_scale->value();
+	t_real Q_scale1 = m_Q_scale1->value();
+	t_real Q_scale2 = m_Q_scale2->value();
+
+	// get plot coordinate system
+	auto [Q_origin, Q_dir_1, Q_dir_2] = GetQVectors();
+
+	// reconstruct Q position
+	t_real Q1param = (0.5*Q_scale1 + x) / Q_scale1;
+	t_real Q2param = (0.5*Q_scale2 + y) / Q_scale2;
+
+	const t_vec_real Q = Q_origin + Q_dir_1*Q1param + Q_dir_2*Q2param;
+	const t_real E = z / E_scale;
+
+	return std::make_pair(Q, E);
 }
 
 
@@ -299,24 +331,11 @@ void Dispersion3DDlg::PlotPickerIntersection(
 
 	m_cur_obj = objIdx;
 
-	// coordinate scaling
-	t_real E_scale = m_E_scale->value();
-	t_real Q_scale1 = m_Q_scale1->value();
-	t_real Q_scale2 = m_Q_scale2->value();
+	auto [Q, E] = PlotXYZToQE((*pos)[0], (*pos)[1], (*pos)[2]);
 
-	// get Q and E position at cursor intersection
-	auto [Q_origin, Q_dir_1, Q_dir_2] = GetQVectors();
-
-	// reconstruct Q position
-	t_real_gl Q1param = (0.5*Q_scale1 + (*pos)[0]) / Q_scale1;
-	t_real_gl Q2param = (0.5*Q_scale2 + (*pos)[1]) / Q_scale2;
-
-	const t_vec_real Q = Q_origin + Q_dir_1*Q1param + Q_dir_2*Q2param;
 	const t_mat_real& B = m_dyn->GetCrystalBTrafo();
 	const t_vec_real Qvec_invA = B * Q;
 	const t_real Q_invA = tl2::norm(Qvec_invA);
-
-	const t_real_gl E = (*pos)[2] / E_scale;
 
 	std::ostringstream ostr;
 	ostr.precision(g_prec_gui);

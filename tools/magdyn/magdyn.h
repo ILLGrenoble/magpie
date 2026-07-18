@@ -248,6 +248,7 @@ protected:
 	// hamiltonian panel
 	QTextEdit *m_hamiltonian{};
 	QDoubleSpinBox *m_Q[3]{nullptr, nullptr, nullptr};
+	QSpinBox *m_Qidx{};
 
 	// export panel
 	QDoubleSpinBox *m_exportStartQ[3]{nullptr, nullptr, nullptr};

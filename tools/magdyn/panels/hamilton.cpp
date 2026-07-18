@@ -76,21 +76,37 @@ void MagDynDlg::CreateHamiltonPanel()
 		m_Q[i]->setMaximum(+99.9999);
 		m_Q[i]->setSingleStep(0.01);
 		m_Q[i]->setValue(0.);
-		m_Q[i]->setSuffix(" rlu");
+		//m_Q[i]->setSuffix(" rlu");
 		m_Q[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 		m_Q[i]->setPrefix(hklPrefix[i]);
 	}
+
+	// main Q index
+	m_Qidx = new QSpinBox(m_hamiltonianpanel);
+	m_Qidx->setMinimum(0);
+	m_Qidx->setMaximum(m_num_points->value() - 1);
+	m_Qidx->setValue(0);
+	m_Qidx->setPrefix("Q_idx = ");
+	m_Qidx->setToolTip("Q index from the dispersion panel.");
+	m_Qidx->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+
+	QPushButton *btnFromDispersion = new QPushButton(m_hamiltonianpanel);
+	btnFromDispersion->setText("From Dispersion");
+	btnFromDispersion->setToolTip("Set the Q position with the given index from the dispersion panel.");
+	btnFromDispersion->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 	QGridLayout *grid = new QGridLayout(m_hamiltonianpanel);
 	grid->setSpacing(4);
 	grid->setContentsMargins(6, 6, 6, 6);
 
 	int y = 0;
-	grid->addWidget(m_hamiltonian, y++,0,1,4);
-	grid->addWidget(new QLabel("Q:", m_hamiltonianpanel), y,0,1,1);
-	grid->addWidget(m_Q[0], y,1,1,1);
-	grid->addWidget(m_Q[1], y,2,1,1);
-	grid->addWidget(m_Q[2], y++,3,1,1);
+	grid->addWidget(m_hamiltonian, y++, 0, 1, 4);
+	grid->addWidget(new QLabel("Q (rlu):", m_hamiltonianpanel), y, 0, 1, 1);
+	grid->addWidget(m_Q[0], y, 1, 1, 1);
+	grid->addWidget(m_Q[1], y, 2, 1, 1);
+	grid->addWidget(m_Q[2], y++, 3, 1, 1);
+	grid->addWidget(m_Qidx, y, 2, 1, 1);
+	grid->addWidget(btnFromDispersion, y++, 3, 1, 1);
 
 	// signals
 	for(int i = 0; i < 3; ++i)
@@ -103,6 +119,29 @@ void MagDynDlg::CreateHamiltonPanel()
 				this->CalcHamiltonian();
 		});
 	}
+
+	connect(btnFromDispersion, &QAbstractButton::clicked, [this]()
+	{
+		// Q range from main dispersion
+		auto [Q_start, Q_end] = GetDispersionQ();
+
+		int idx = m_Qidx->value();
+		int num_pts = m_num_points->value();
+
+		// interpolate Q
+		const t_vec_real Q = num_pts > 1
+			? tl2::create<t_vec_real>(
+			{
+				std::lerp(Q_start[0], Q_end[0], t_real(idx) / t_real(num_pts - 1)),
+				std::lerp(Q_start[1], Q_end[1], t_real(idx) / t_real(num_pts - 1)),
+				std::lerp(Q_start[2], Q_end[2], t_real(idx) / t_real(num_pts - 1)),
+			})
+			: tl2::create<t_vec_real>({ Q_start[0], Q_start[1], Q_start[2] });
+
+		// set Q
+		for(int i = 0; i < 3; ++i)
+			m_Q[i]->setValue(Q[i]);
+	});
 
 
 	m_tabs_out->addTab(m_hamiltonianpanel, "Hamiltonian");
