@@ -247,6 +247,9 @@ public:
 		t_real_gl size1 = 10, t_real_gl size2 = 10,
 		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1,
 		bool in_xz = false /*for rotation direction*/);
+	std::size_t AddRectangle(const t_vec3_gl& pt_lb, const t_vec3_gl& pt_lt,
+	  const t_vec3_gl& pt_rt, const t_vec3_gl& pt_rb,
+		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);
 	std::size_t AddPatch(
 		std::function<std::pair<t_real_gl /*z*/, bool /*valid*/>(
 			t_real_gl, t_real_gl, std::size_t, std::size_t)> fkt,

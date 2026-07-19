@@ -600,6 +600,29 @@ std::size_t GlPlotRenderer::AddPlane(
 }
 
 
+std::size_t GlPlotRenderer::AddRectangle(const t_vec3_gl& pt_lb, const t_vec3_gl& pt_lt,
+	const t_vec3_gl& pt_rt, const t_vec3_gl& pt_rb,
+	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a)
+{
+	auto solid = tl2::create_rectangle<t_vec3_gl>(pt_lb, pt_lt, pt_rt, pt_rb);
+	auto [triagverts, norms, uvs] = tl2::create_triangles<t_vec3_gl>(solid);
+	auto [boundingSpherePos, boundingSphereRad] =
+		tl2::bounding_sphere<t_vec3_gl>(triagverts);
+
+	QMutexLocker _locker{&m_mutexObj};
+
+	auto obj = CreateTriangleObject(std::get<0>(solid),
+		triagverts, norms, tl2::create<t_vec_gl>({ r, g, b, a }),
+		false, &uvs);
+	obj.m_mat = tl2::unit<t_mat_gl>(4);
+	obj.m_boundingSpherePos = std::move(boundingSpherePos);
+	obj.m_boundingSphereRad = boundingSphereRad;
+	m_objs.emplace_back(std::move(obj));
+
+	return m_objs.size() - 1;		// object handle
+}
+
+
 std::size_t GlPlotRenderer::AddPatch(
 	std::function<std::pair<t_real_gl, bool>(
 		t_real_gl, t_real_gl, std::size_t, std::size_t)> fkt,

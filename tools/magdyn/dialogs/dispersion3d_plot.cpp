@@ -241,36 +241,21 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 	}  // bands
 
 
+	// indicate dispersion from main dialog
 	if(m_show_main_Q && m_Qstart.size() == 3 && m_Qend.size() == 3)
 	{
-		// indicate dispersion from main dialog
-		t_vec_real mainDir = m_Qend - m_Qstart;
-		mainDir /= tl2::norm(mainDir);
-
-		//const t_mat_real& xtalB = m_dyn->GetCrystalBTrafo();
-		//const t_vec_real* plane = m_dyn->GetScatteringPlane();
-
-		auto [Q_origin, Q_dir_1, Q_dir_2] = GetQVectors();
-		Q_dir_1 /= tl2::norm(Q_dir_1);
-		Q_dir_2 /= tl2::norm(Q_dir_2);
-
-		t_real proj1 = tl2::inner(mainDir, Q_dir_1);
-		t_real proj2 = tl2::inner(mainDir, Q_dir_2);
-		t_real posproj1 = tl2::inner(m_Qstart - Q_origin, Q_dir_1);
-		t_real posproj2 = tl2::inner(m_Qstart - Q_origin, Q_dir_2);
-		t_real Q_scale = proj1*Q_scale1 + proj2*Q_scale2;
-
 		t_real E_min = use_E_min ? E_min_sel : m_minmax_E[0];
 		t_real E_max = use_E_max ? E_max_sel : m_minmax_E[1];
-		t_real E_range = E_max - E_min;
 
-		std::size_t plane = m_dispplot->GetRenderer()->AddPlane(
-		  proj2, -proj1, 0.,  // flipping components for normal
-			(posproj1 - 0.5*proj2) * Q_scale1,  // x
-			(posproj2 - 0.5*proj1) * Q_scale2,  // y
-			(E_min + 0.5*E_range) * E_scale,    // z
-			Q_scale/2., E_scale*E_range/2., 0.75, 0.75, 0.75, 0.5,
-			true);
+		t_vec_real Qmin_Emin = QEToPlotXYZ(m_Qstart, E_min);
+		t_vec_real Qmin_Emax = QEToPlotXYZ(m_Qstart, E_max);
+		t_vec_real Qmax_Emin = QEToPlotXYZ(m_Qend, E_min);
+		t_vec_real Qmax_Emax = QEToPlotXYZ(m_Qend, E_max);
+
+		std::size_t plane = m_dispplot->GetRenderer()->AddRectangle(
+			tl2::convert<t_vec3_gl>(Qmin_Emin), tl2::convert<t_vec3_gl>(Qmin_Emax),
+			tl2::convert<t_vec3_gl>(Qmax_Emax), tl2::convert<t_vec3_gl>(Qmax_Emin),
+			0.65, 0.65, 0.65, 0.5);
 
 		m_dispplot->GetRenderer()->SetObjectVisible(plane, true);
 		m_dispplot->GetRenderer()->SetObjectPriority(plane, 0);

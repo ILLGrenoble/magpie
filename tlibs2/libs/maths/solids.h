@@ -147,7 +147,7 @@ requires is_vec<t_vec>
 // ----------------------------------------------------------------------------
 
 /**
- * create a plane
+ * creates a plane
  * @returns [vertices, face vertex indices, face normals, face uvs]
  */
 template<class t_mat, class t_vec, template<class...> class t_cont = std::vector>
@@ -199,10 +199,35 @@ requires is_vec<t_vec>
 
 	t_cont<t_cont<t_vec>> uvs =
 	{{
-		create<t_vec>({ 0, 0 }),
-		create<t_vec>({ 0, 1 }),
-		create<t_vec>({ 1, 1 }),
-		create<t_vec>({ 1, 0 }),
+		create<t_vec>({ 0., 0. }),
+		create<t_vec>({ 0., 1. }),
+		create<t_vec>({ 1., 1. }),
+		create<t_vec>({ 1., 0. }),
+	}};
+
+	return std::make_tuple(vertices, faces, normals, uvs);
+}
+
+
+/**
+ * creates a rectangle
+ * @returns [vertices, face vertex indices, face normals, face uvs]
+ */
+template<class t_vec, template<class...> class t_cont = std::vector>
+std::tuple<t_cont<t_vec>, t_cont<t_cont<std::size_t>>, t_cont<t_vec>, t_cont<t_cont<t_vec>>>
+create_rectangle(const t_vec& pt_lb, const t_vec& pt_lt, const t_vec& pt_rt, const t_vec& pt_rb)
+requires is_vec<t_vec>
+{
+	t_cont<t_vec> vertices = {{ pt_lb, pt_lt, pt_rt, pt_rb }};
+	t_cont<t_cont<std::size_t>> faces = {{ 0, 1, 2, 3 }};
+	t_cont<t_vec> normals{{ cross<t_vec>(pt_rt - pt_lt, pt_rt - pt_rb) }};
+
+	t_cont<t_cont<t_vec>> uvs =
+	{{
+		create<t_vec>({ 0., 0. }),
+		create<t_vec>({ 0., 1. }),
+		create<t_vec>({ 1., 1. }),
+		create<t_vec>({ 1., 0. }),
 	}};
 
 	return std::make_tuple(vertices, faces, normals, uvs);
@@ -296,7 +321,7 @@ requires is_vec<t_vec>
 
 
 /**
- * create a line, z = f(x)
+ * creates a line, z = f(x)
  * @returns vertices
  */
 template<class t_func, class t_mat, class t_vec,
@@ -343,7 +368,7 @@ requires is_vec<t_vec>
 
 
 /**
- * create a disk
+ * creates a disk
  * @returns [vertices, face vertex indices, face normals, face uvs]
  */
 template<class t_vec, template<class...> class t_cont = std::vector>
@@ -398,7 +423,7 @@ requires is_vec<t_vec>
 
 
 /**
- * create a cone
+ * creates a cone
  * @returns [vertices, face vertex indices, face normals, face uvs]
  */
 template<class t_vec, template<class...> class t_cont = std::vector>
@@ -482,7 +507,7 @@ requires is_vec<t_vec>
 
 
 /**
- * create a cylinder
+ * creates a cylinder
  * cyltype: 0 (no caps), 1 (with caps), 2 (arrow)
  * @returns [vertices, face vertex indices, face normals, face uvs]
  */
@@ -628,7 +653,7 @@ requires is_vec<t_vec>
 
 
 /**
- * create the faces of a cuboid
+ * creates the faces of a cuboid
  * @returns [vertices, face vertex indices, face normals, face uvs]
  * @see https://en.wikipedia.org/wiki/Platonic_solid
  */
@@ -726,7 +751,7 @@ requires is_vec<t_vec>
 
 
 /**
- * create the faces of a cube
+ * creates the faces of a cube
  * @returns [vertices, face vertex indices, face normals, face uvs]
  * @see https://en.wikipedia.org/wiki/Platonic_solid
  */
@@ -740,7 +765,7 @@ requires is_vec<t_vec>
 
 
 /**
- * create the faces of a icosahedron
+ * creates the faces of a icosahedron
  * @returns [vertices, face vertex indices, face normals, face uvs]
  * @see https://en.wikipedia.org/wiki/Platonic_solid
  */
@@ -807,7 +832,7 @@ requires is_vec<t_vec>
 
 
 /**
- * create the faces of a dodecahedron
+ * creates the faces of a dodecahedron
  * @returns [vertices, face vertex indices, face normals, face uvs]
  * @see https://en.wikipedia.org/wiki/Platonic_solid
  */
@@ -882,7 +907,7 @@ requires is_vec<t_vec>
 
 
 /**
- * create the faces of a octahedron
+ * creates the faces of a octahedron
  * @returns [vertices, face vertex indices, face normals, face uvs]
  * @see https://en.wikipedia.org/wiki/Platonic_solid
  */
@@ -944,7 +969,7 @@ requires is_vec<t_vec>
 
 
 /**
- * create the faces of a tetrahedron
+ * creates the faces of a tetrahedron
  * @returns [vertices, face vertex indices, face normals, face uvs]
  * @see https://en.wikipedia.org/wiki/Platonic_solid
  */
