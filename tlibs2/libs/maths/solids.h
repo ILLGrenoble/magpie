@@ -152,24 +152,40 @@ requires is_vec<t_vec>
  */
 template<class t_mat, class t_vec, template<class...> class t_cont = std::vector>
 std::tuple<t_cont<t_vec>, t_cont<t_cont<std::size_t>>, t_cont<t_vec>, t_cont<t_cont<t_vec>>>
-create_plane(const t_vec& norm, typename t_vec::value_type lx = 1, typename t_vec::value_type ly = 1)
+create_plane(const t_vec& norm,
+  typename t_vec::value_type lx = 1, typename t_vec::value_type ly = 1,
+	bool in_xz = false /*for rotation direction*/)
 requires is_vec<t_vec>
 {
-	t_cont<t_vec> vertices =
-	{{
-		create<t_vec>({ -lx, -ly, 0. }),	// vertex 0
-		create<t_vec>({ -lx, +ly, 0. }),	// vertex 1
-		create<t_vec>({ +lx, +ly, 0. }),	// vertex 2
-		create<t_vec>({ +lx, -ly, 0. }),	// vertex 3
-	}};
+	t_cont<t_vec> vertices;
+	if(in_xz)
+	{
+		vertices = {{
+			create<t_vec>({ -lx, 0., -ly, }),  // vertex 0
+			create<t_vec>({ -lx, 0., +ly, }),  // vertex 1
+			create<t_vec>({ +lx, 0., +ly, }),  // vertex 2
+			create<t_vec>({ +lx, 0., -ly, }),  // vertex 3
+		}};
+	}
+	else
+	{
+		vertices = {{
+			create<t_vec>({ -lx, -ly, 0. }),  // vertex 0
+			create<t_vec>({ -lx, +ly, 0. }),  // vertex 1
+			create<t_vec>({ +lx, +ly, 0. }),  // vertex 2
+			create<t_vec>({ +lx, -ly, 0. }),  // vertex 3
+		}};
+	}
 
 	// rotate according to given normal
-	t_vec norm_old = create<t_vec>({ 0, 0, -1 });
+	t_vec norm_old = in_xz
+		? create<t_vec>({ 0, -1,  0 })
+		: create<t_vec>({ 0,  0, -1 });
 	if(!equals<t_vec>(norm, norm_old) || equals<t_vec>(norm, -norm_old))
 	{
 		t_vec rot_vec;
 		if(equals<t_vec>(norm, -norm_old))
-			rot_vec = create<t_vec>({ 1, 0, 0 });
+			rot_vec = in_xz ? create<t_vec>({ 0, 0, 1 }) : create<t_vec>({ 1, 0, 0 });
 		else
 			rot_vec = cross<t_vec>(norm_old, norm);
 		t_mat rot = rotation<t_mat, t_vec>(norm_old, norm, &rot_vec);

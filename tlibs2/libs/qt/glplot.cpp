@@ -575,12 +575,13 @@ std::size_t GlPlotRenderer::AddPlane(
 	t_real_gl nx, t_real_gl ny, t_real_gl nz,
 	t_real_gl x, t_real_gl y, t_real_gl z,
 	t_real_gl size1, t_real_gl size2,
-	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a)
+	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a,
+	bool in_xz)
 {
 	t_vec3_gl norm = tl2::create<t_vec3_gl>({ nx, ny, nz });
 	norm /= tl2::norm<t_vec3_gl>(norm);
 
-	auto solid = tl2::create_plane<t_mat_gl, t_vec3_gl>(norm, size1, size2);
+	auto solid = tl2::create_plane<t_mat_gl, t_vec3_gl>(norm, size1, size2, in_xz);
 	auto [triagverts, norms, uvs] = tl2::create_triangles<t_vec3_gl>(solid);
 	auto [boundingSpherePos, boundingSphereRad] =
 		tl2::bounding_sphere<t_vec3_gl>(triagverts);

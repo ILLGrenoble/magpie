@@ -245,7 +245,8 @@ public:
 	std::size_t AddPlane(t_real_gl nx = 0, t_real_gl ny = 0, t_real_gl nz = 1,
 		t_real_gl x = 0, t_real_gl y = 0, t_real_gl z = 1,
 		t_real_gl size1 = 10, t_real_gl size2 = 10,
-		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);
+		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1,
+		bool in_xz = false /*for rotation direction*/);
 	std::size_t AddPatch(
 		std::function<std::pair<t_real_gl /*z*/, bool /*valid*/>(
 			t_real_gl, t_real_gl, std::size_t, std::size_t)> fkt,

@@ -269,7 +269,8 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 			(posproj1 - 0.5*proj2) * Q_scale1,  // x
 			(posproj2 - 0.5*proj1) * Q_scale2,  // y
 			(E_min + 0.5*E_range) * E_scale,    // z
-			Q_scale/2., E_scale*E_range/2., 0.75, 0.75, 0.75, 0.5);
+			Q_scale/2., E_scale*E_range/2., 0.75, 0.75, 0.75, 0.5,
+			true);
 
 		m_dispplot->GetRenderer()->SetObjectVisible(plane, true);
 		m_dispplot->GetRenderer()->SetObjectPriority(plane, 0);
