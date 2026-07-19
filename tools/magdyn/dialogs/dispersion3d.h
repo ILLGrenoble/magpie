@@ -85,6 +85,7 @@ public:
 	bool IsPlotterValid() const;
 
 	std::pair<t_vec_real, t_real> PlotXYZToQE(t_real x, t_real y, t_real z) const;
+	t_vec_real QEToPlotXYZ(const t_vec_real& Q, t_real E) const;
 
 
 protected:

@@ -2076,7 +2076,7 @@ requires is_mat<t_mat>
  * 	v = inv(R^tR) X^t y
  */
 template<class t_vec, class t_mat = mat<typename t_vec::value_type, std::vector>>
-std::tuple<t_vec, bool> leastsq(const t_vec& x, const t_vec& y, std::size_t order,
+std::tuple<t_vec, bool> leastsq(const t_mat& X, const t_vec& y,
 	bool use_qr = true, bool use_pseudoinv = false)
 requires is_vec<t_vec> && is_dyn_mat<t_mat>
 {
@@ -2084,17 +2084,7 @@ requires is_vec<t_vec> && is_dyn_mat<t_mat>
 	if constexpr(tl2::is_dyn_vec<t_vec>)
 		assert((x.size() == y.size()));
 
-
 	using namespace tl2_ops;
-	using T = typename t_vec::value_type;
-
-	const std::size_t N = x.size();
-	t_mat X{N, order+1};
-
-	for(std::size_t j = 0; j <= order; ++j)
-		for(std::size_t i = 0; i < N; ++i)
-			X(i, j) = std::pow(x[i], static_cast<T>(j));
-
 
 	t_mat XtX;
 
@@ -2132,6 +2122,46 @@ requires is_vec<t_vec> && is_dyn_mat<t_mat>
 	t_vec v = Y * Xty;
 
 	return std::make_tuple(v, ok);
+}
+
+
+/**
+ * least-squares regression, solves for parameters v
+ * @see https://en.wikipedia.org/wiki/Least_squares
+ * @see (Arens 2015), p. 793
+ *
+ * exact equation:
+ * 	X v = y
+ *
+ * approx. equation (normal equation):
+ * 	X^t X v = X^t y
+ * 	v = inv(X^t X) X^t y
+ *
+ * 	(QR)^t QR v = X^t y
+ * 	R^tQ^t QR v = X^t y
+ * 	R^tR v = X^t y
+ * 	v = inv(R^tR) X^t y
+ */
+template<class t_vec, class t_mat = mat<typename t_vec::value_type, std::vector>>
+std::tuple<t_vec, bool> leastsq(const t_vec& x, const t_vec& y, std::size_t order,
+	bool use_qr = true, bool use_pseudoinv = false)
+requires is_vec<t_vec> && is_dyn_mat<t_mat>
+{
+	// check array sizes, TODO: fix
+	if constexpr(tl2::is_dyn_vec<t_vec>)
+		assert((x.size() == y.size()));
+
+	using namespace tl2_ops;
+	using T = typename t_vec::value_type;
+
+	const std::size_t N = x.size();
+	t_mat X{N, order + 1};
+
+	for(std::size_t j = 0; j <= order; ++j)
+		for(std::size_t i = 0; i < N; ++i)
+			X(i, j) = std::pow(x[i], static_cast<T>(j));
+
+	return leastsq<t_vec, t_mat>(X, y, use_qr, use_pseudoinv);
 }
 // ----------------------------------------------------------------------------
 

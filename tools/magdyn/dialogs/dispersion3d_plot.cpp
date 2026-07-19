@@ -289,6 +289,39 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 
 
 /**
+ * conversion from (Q, E) to plot position
+ */
+t_vec_real Dispersion3DDlg::QEToPlotXYZ(const t_vec_real& Q, t_real E) const
+{
+	// coordinate scaling
+	t_real E_scale = m_E_scale->value();
+	t_real Q_scale1 = m_Q_scale1->value();
+	t_real Q_scale2 = m_Q_scale2->value();
+
+	// get plot coordinate system
+	auto [Q_origin, Q_dir_1, Q_dir_2] = GetQVectors();
+
+	// Q = Q_origin + Q_dir_1*(0.5*Q_scale1 + x) / Q_scale1 + Q_dir_2*(0.5*Q_scale2 + y) / Q_scale2;
+	// Q - Q_origin = Q_dir_1*(0.5*Q_scale1 + x) / Q_scale1 + Q_dir_2*(0.5*Q_scale2 + y) / Q_scale2;
+	// Q - Q_origin = Q_dir_1*(0.5 + x/Q_scale1) + Q_dir_2*(0.5 + y/Q_scale2);
+	// Q - Q_origin = Q_dir_1*0.5 + x/Q_scale1*Q_dir1 + Q_dir_2*0.5 + y/Q_scale2*Q_dir2;
+	// Q - Q_origin - Q_dir_1*0.5 - Q_dir_2*0.5 = x*Q_dir1/Q_scale1 + y*Q_dir2/Q_scale2;
+	// Q - Q_origin - Q_dir_1*0.5 - Q_dir_2*0.5 = (Q_dir1/Q_scale1, Q_dir2/Q_scale2) * (x y)^T
+	// (Q_dir1/Q_scale1, Q_dir2/Q_scale2)^(-1) (Q - Q_origin - Q_dir_1*0.5 - Q_dir_2*0.5) = (x y)^T
+
+	t_mat_real mat = tl2::create<t_mat_real, t_vec_real>({ Q_dir_1/Q_scale1, Q_dir_2/Q_scale2 });
+	t_vec_real vec = Q - Q_origin - Q_dir_1*0.5 - Q_dir_2*0.5;
+
+	auto [xy, ok] = tl2::leastsq<t_vec_real, t_mat_real>(mat, vec);
+	if(!ok)
+		return t_vec_real{};
+
+	return tl2::create<t_vec_real>({ xy[0], xy[1], E * E_scale });
+}
+
+
+
+/**
  * conversion from plot position to (Q, E)
  */
 std::pair<t_vec_real, t_real> Dispersion3DDlg::PlotXYZToQE(t_real x, t_real y, t_real z) const
@@ -333,6 +366,11 @@ void Dispersion3DDlg::PlotPickerIntersection(
 	m_cur_obj = objIdx;
 
 	auto [Q, E] = PlotXYZToQE((*pos)[0], (*pos)[1], (*pos)[2]);
+
+	// test
+	//using namespace tl2_ops;
+	//t_vec_real xyz = QEToPlotXYZ(Q, E);
+	//std::cout << xyz << "; " << (*pos)[0] << " " << (*pos)[1] << " " << (*pos)[2] << std::endl;
 
 	const t_mat_real& B = m_dyn->GetCrystalBTrafo();
 	const t_vec_real Qvec_invA = B * Q;
