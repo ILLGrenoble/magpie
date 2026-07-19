@@ -252,13 +252,17 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 		t_vec_real Qmax_Emin = QEToPlotXYZ(m_Qend, E_min);
 		t_vec_real Qmax_Emax = QEToPlotXYZ(m_Qend, E_max);
 
-		std::size_t plane = m_dispplot->GetRenderer()->AddRectangle(
-			tl2::convert<t_vec3_gl>(Qmin_Emin), tl2::convert<t_vec3_gl>(Qmin_Emax),
-			tl2::convert<t_vec3_gl>(Qmax_Emax), tl2::convert<t_vec3_gl>(Qmax_Emin),
-			0.65, 0.65, 0.65, 0.5);
+		if(Qmin_Emin.size() == 3 && Qmin_Emax.size() == 3 &&
+			Qmax_Emin.size() == 3 && Qmax_Emax.size() == 3)
+		{
+			std::size_t plane = m_dispplot->GetRenderer()->AddRectangle(
+				tl2::convert<t_vec3_gl>(Qmin_Emin), tl2::convert<t_vec3_gl>(Qmin_Emax),
+				tl2::convert<t_vec3_gl>(Qmax_Emax), tl2::convert<t_vec3_gl>(Qmax_Emin),
+				0.65, 0.65, 0.65, 0.5);
 
-		m_dispplot->GetRenderer()->SetObjectVisible(plane, true);
-		m_dispplot->GetRenderer()->SetObjectPriority(plane, 0);
+			m_dispplot->GetRenderer()->SetObjectVisible(plane, true);
+			m_dispplot->GetRenderer()->SetObjectPriority(plane, 0);
+		}
 	}
 
 
