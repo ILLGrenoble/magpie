@@ -150,6 +150,8 @@ void MagDynDlg::CreateSamplePanel()
 
 	for(QPushButton *btn : { btn_set_ffact, btn_ffact_j0, btn_ffact_j2, btn_ffact_j4, btn_ffact_plot })
 	{
+		if(!btn)
+			continue;
 		btn->setFocusPolicy(Qt::StrongFocus);
 		btn->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}

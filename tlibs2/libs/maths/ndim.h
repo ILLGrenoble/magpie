@@ -2080,10 +2080,6 @@ std::tuple<t_vec, bool> leastsq(const t_mat& X, const t_vec& y,
 	bool use_qr = true, bool use_pseudoinv = false)
 requires is_vec<t_vec> && is_dyn_mat<t_mat>
 {
-	// check array sizes, TODO: fix
-	if constexpr(tl2::is_dyn_vec<t_vec>)
-		assert((x.size() == y.size()));
-
 	using namespace tl2_ops;
 
 	t_mat XtX;

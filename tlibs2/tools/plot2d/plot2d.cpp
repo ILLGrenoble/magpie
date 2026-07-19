@@ -380,7 +380,7 @@ QWidget* Plot2DDlg::CreatePanel()
 	connect(acSaveFigure, &QAction::triggered, this, &Plot2DDlg::SavePlotFigure);
 	connect(acSaveData, &QAction::triggered, this, &Plot2DDlg::SaveData);
 
-	connect(m_num_t, &QSpinBox::valueChanged, [this](int num)
+	connect(m_num_t, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [this](int num)
 	{
 		m_slider_t->setMinimum(0);
 		m_slider_t->setMaximum(num - 1);
