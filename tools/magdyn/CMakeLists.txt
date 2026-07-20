@@ -229,7 +229,8 @@ if(USE_QT)
 		# plotting tools
 		../../tlibs2/tools/plot2d/plot2d.cpp ../../tlibs2/tools/plot2d/plot2d.h
 		../../tlibs2/tools/plot3d/plot3d.cpp ../../tlibs2/tools/plot3d/plot3d_file.cpp
-		../../tlibs2/tools/plot3d/plot3d_calc.cpp ../../tlibs2/tools/plot3d/plot3d_grid.cpp
+		../../tlibs2/tools/plot3d/plot3d_calc.cpp ../../tlibs2/tools/plot3d/plot3d_render.cpp
+		../../tlibs2/tools/plot3d/plot3d_grid.cpp
 		../../tlibs2/tools/plot3d/plot3d.h
 
 		# bz tool
