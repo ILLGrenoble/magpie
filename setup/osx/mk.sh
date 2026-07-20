@@ -273,6 +273,7 @@ if [ $create_appdir -ne 0 ]; then
 	cp -v LICENSE               "${APPDIRNAME}/Contents/Resources/LICENSE.txt"
 	cp -v LICENSES              "${APPDIRNAME}/Contents/Resources/LICENSES.txt"
 	cp -v LITERATURE            "${APPDIRNAME}/Contents/Resources/LITERATURE.txt"
+	cp -rv examples             "${APPDIRNAME}/Contents/Resources/"
 
 	# local libraries
 	for (( libidx=0; libidx<${#LOCAL_LIBS[@]}; ++libidx )); do

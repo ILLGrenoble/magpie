@@ -103,8 +103,8 @@ magick "${APPICON_PNG}" "${APPICON_ICO}"
 
 # copy program files
 cp -v  tools/magdyn/build/*.exe  "${APPDIRNAME}/"
-cp -rv tools/magdyn/test         "${APPDIRNAME}/"
 cp -rv tools/magdyn/scripts      "${APPDIRNAME}/"
+cp -rv examples                  "${APPDIRNAME}/"
 cp -rv res                       "${APPDIRNAME}/"
 cp -v  "${APPICON_ICO}"          "${APPDIRNAME}/"
 cp -v  AUTHORS                   "${APPDIRNAME}/"
