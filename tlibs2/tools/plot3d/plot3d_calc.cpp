@@ -40,6 +40,65 @@ namespace asio = boost::asio;
 
 
 
+void Plot3DDlg::ClearData()
+{
+	m_minmax_z[0] = +std::numeric_limits<t_real>::max();
+	m_minmax_z[1] = -std::numeric_limits<t_real>::max();
+	m_minmax_x[0] = m_minmax_x[1] = 0.;
+	m_minmax_y[0] = m_minmax_y[1] = 0.;
+	m_data.clear();
+}
+
+
+
+/**
+ * calculates the (x, y) extents
+ */
+void Plot3DDlg::SetMinMaxXY()
+{
+	m_x_count = m_num_points[0]->value();
+	m_y_count = m_num_points[1]->value();
+
+	t_vec_real start = tl2::create<t_vec_real>({
+		(t_real)m_xrange[0]->value(),
+		(t_real)m_yrange[0]->value()
+	});
+	t_vec_real end = tl2::create<t_vec_real>({
+		(t_real)m_xrange[1]->value(),
+		(t_real)m_yrange[1]->value()
+	});
+
+	m_minmax_x[0] = start[0];
+	m_minmax_x[1] = end[0];
+	m_minmax_y[0] = start[1];
+	m_minmax_y[1] = end[1];
+}
+
+
+
+/**
+ * get (x, y) position from the array indices
+ */
+t_vec_real Plot3DDlg::GetPosFromIndices(std::size_t x_idx, std::size_t y_idx) const
+{
+	t_vec_real start = tl2::create<t_vec_real>({
+		(t_real)m_xrange[0]->value(),
+		(t_real)m_yrange[0]->value()
+	});
+	t_vec_real end = tl2::create<t_vec_real>({
+		(t_real)m_xrange[1]->value(),
+		(t_real)m_yrange[1]->value()
+	});
+
+	t_vec_real pos = start;
+	pos[0] += (end[0] - start[0]) / t_real(m_x_count) * t_real(x_idx);
+	pos[1] += (end[1] - start[1]) / t_real(m_y_count) * t_real(y_idx);
+
+	return pos;
+}
+
+
+
 /**
  * calculate the surfaces via the given formulas
  */
@@ -90,22 +149,8 @@ void Plot3DDlg::Calculate()
 	} BOOST_SCOPE_EXIT_END
 	EnableCalculation(false);
 
-	m_minmax_z[0] = +std::numeric_limits<t_real>::max();
-	m_minmax_z[1] = -std::numeric_limits<t_real>::max();
-	m_minmax_x[0] = m_minmax_x[1] = 0.;
-	m_minmax_y[0] = m_minmax_y[1] = 0.;
-	m_data.clear();
-
-	m_x_count = m_num_points[0]->value();
-	m_y_count = m_num_points[1]->value();
-
-	t_vec_real start = tl2::create<t_vec_real>({ (t_real)m_xrange[0]->value(), (t_real)m_yrange[0]->value() });
-	t_vec_real end = tl2::create<t_vec_real>({ (t_real)m_xrange[1]->value(), (t_real)m_yrange[1]->value() });
-
-	m_minmax_x[0] = start[0];
-	m_minmax_x[1] = end[0];
-	m_minmax_y[0] = start[1];
-	m_minmax_y[1] = end[1];
+	ClearData();
+	SetMinMaxXY();
 
 	// get t parameter
 	int t_idx = m_slider_t->value();
@@ -136,12 +181,10 @@ void Plot3DDlg::Calculate()
 	for(t_size x_idx = 0; x_idx < m_x_count; ++x_idx)
 	for(t_size y_idx = 0; y_idx < m_y_count; ++y_idx)
 	{
-		auto task = [this, &parsers, &mtx, &start, &end, x_idx, y_idx, t]()
+		auto task = [this, &parsers, &mtx, x_idx, y_idx, t]()
 		{
 			// calculate the surface at the given coordinate
-			t_vec_real pos = start;
-			pos[0] += (end[0] - start[0]) / t_real(m_x_count) * t_real(x_idx);
-			pos[1] += (end[1] - start[1]) / t_real(m_y_count) * t_real(y_idx);
+			t_vec_real pos = GetPosFromIndices(x_idx, y_idx);
 
 			// iterate the z components for this position
 			for(t_size surf_idx = 0; surf_idx < parsers.size(); ++surf_idx)

@@ -161,26 +161,26 @@ std::tuple<t_size, t_size> Dispersion3DDlg::GetQIndices() const
 
 
 /**
- * calculate the dispersion
+ * converts array indices to Q position
  */
-void Dispersion3DDlg::Calculate()
+t_vec_real Dispersion3DDlg::GetQFromIndices(std::size_t idx1, std::size_t idx2) const
 {
-	if(!m_dyn)
-		return;
+	// get coordinates
+	auto [Q_origin, Q_dir_1, Q_dir_2] = GetQVectors();
 
-	bool minmax_valid = false;
-	m_minmax_E[0] = +std::numeric_limits<t_real>::max();
-	m_minmax_E[1] = -std::numeric_limits<t_real>::max();
-	m_minmax_Q1[0] = m_minmax_Q1[1] = tl2::zero<t_vec_real>(3);
-	m_minmax_Q2[0] = m_minmax_Q2[1] = tl2::zero<t_vec_real>(3);
-	m_data.clear();
+	t_vec_real Q_step_1 = Q_dir_1 / t_real(m_Q_count_1 - 1);
+	t_vec_real Q_step_2 = Q_dir_2 / t_real(m_Q_count_2 - 1);
 
-	BOOST_SCOPE_EXIT(this_)
-	{
-		this_->EnableCalculation(true);
-	} BOOST_SCOPE_EXIT_END
-	EnableCalculation(false);
+	return Q_origin + Q_step_1*t_real(idx1) + Q_step_2*t_real(idx2);
+}
 
+
+
+/**
+ * calculates the Q extents
+ */
+void Dispersion3DDlg::SetMinMaxQ()
+{
 	// get coordinates
 	auto [Q_origin, Q_dir_1, Q_dir_2] = GetQVectors();
 
@@ -196,6 +196,39 @@ void Dispersion3DDlg::Calculate()
 	m_minmax_Q1[1] = Q_origin + Q_step_1*t_real(m_Q_count_1 - 1);
 	m_minmax_Q2[0] = Q_origin;
 	m_minmax_Q2[1] = Q_origin + Q_step_2*t_real(m_Q_count_2 - 1);
+}
+
+
+
+void Dispersion3DDlg::ClearData()
+{
+	m_minmax_E[0] = +std::numeric_limits<t_real>::max();
+	m_minmax_E[1] = -std::numeric_limits<t_real>::max();
+	m_minmax_Q1[0] = m_minmax_Q1[1] = tl2::zero<t_vec_real>(3);
+	m_minmax_Q2[0] = m_minmax_Q2[1] = tl2::zero<t_vec_real>(3);
+	m_data.clear();
+}
+
+
+
+/**
+ * calculate the dispersion
+ */
+void Dispersion3DDlg::Calculate()
+{
+	if(!m_dyn)
+		return;
+
+	ClearData();
+
+	BOOST_SCOPE_EXIT(this_)
+	{
+		this_->EnableCalculation(true);
+	} BOOST_SCOPE_EXIT_END
+	EnableCalculation(false);
+
+	SetMinMaxQ();
+	bool E_minmax_valid = false;
 
 	t_real min_S = m_S_filter->value();
 	bool use_weights = m_S_filter_enable->isChecked();
@@ -233,12 +266,11 @@ void Dispersion3DDlg::Calculate()
 	for(t_size Q_idx_1 = 0; Q_idx_1 < m_Q_count_1; ++Q_idx_1)
 	for(t_size Q_idx_2 = 0; Q_idx_2 < m_Q_count_2; ++Q_idx_2)
 	{
-		auto task = [this, &mtx, &dyn, Q_idx_1, Q_idx_2, &minmax_valid,
-			&Q_origin, &Q_step_1, &Q_step_2, expected_bands,
-			unite_degen, use_weights, use_projector, min_S]()
+		auto task = [this, &mtx, &dyn, Q_idx_1, Q_idx_2, &E_minmax_valid,
+			expected_bands, unite_degen, use_weights, use_projector, min_S]()
 		{
 			// calculate the dispersion at the given Q point
-			t_vec_real Q = Q_origin + Q_step_1*t_real(Q_idx_1) + Q_step_2*t_real(Q_idx_2);
+			t_vec_real Q = GetQFromIndices(Q_idx_1, Q_idx_2);
 			auto Es_and_S = dyn.CalcEnergies(Q, !use_weights).E_and_S;
 
 			// iterate the energies for this Q point
@@ -259,7 +291,7 @@ void Dispersion3DDlg::Calculate()
 				{
 					m_minmax_E[0] = std::min(m_minmax_E[0], E);
 					m_minmax_E[1] = std::max(m_minmax_E[1], E);
-					minmax_valid = true;
+					E_minmax_valid = true;
 				}
 
 
@@ -336,7 +368,7 @@ void Dispersion3DDlg::Calculate()
 		asio::post(pool, [taskptr]() { (*taskptr)(); });
 	}  // Q iteration
 
-	if(!minmax_valid)
+	if(!E_minmax_valid)
 		m_minmax_E[0] = m_minmax_E[1] = 0.;
 
 	m_status->setText(QString("Calculating dispersion in %1 threads...").arg(g_num_threads));

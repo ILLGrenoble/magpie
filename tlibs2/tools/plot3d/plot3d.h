@@ -79,6 +79,10 @@ public:
 	Plot3DDlg(const Plot3DDlg&) = delete;
 	Plot3DDlg& operator=(const Plot3DDlg&) = delete;
 
+	// coordinate conversion
+	std::tuple<t_real, t_real, t_real> PlotToGraphCoords(t_real x, t_real y, t_real z) const;
+	std::tuple<t_real, t_real, t_real> GraphToPlotCoords(t_real gx, t_real gy, t_real gz) const;
+	t_vec_real GetPosFromIndices(std::size_t idx1, std::size_t idx2) const;
 
 protected:
 	virtual void accept() override;
@@ -88,6 +92,9 @@ protected:
 	void Calculate();
 	void CalculateGrid();
 	void Plot(bool clear_settings = true);
+
+	void ClearData();
+	void SetMinMaxXY();
 
 	// calculation helper functions
 	std::pair<t_size, t_size> NumValid(const t_data_vec& data) const;
@@ -129,9 +136,6 @@ protected:
 	void ShowPlotLabels(bool show);
 	void SetPlotPerspectiveProjection(bool proj);
 	void SetPlotCameraRotation(t_real_gl phi, t_real_gl theta);
-
-	std::tuple<t_real, t_real, t_real> PlotToGraphCoords(t_real x, t_real y, t_real z) const;
-	std::tuple<t_real, t_real, t_real> GraphToPlotCoords(t_real gx, t_real gy, t_real gz) const;
 	// ------------------------------------------------------------------------
 
 
