@@ -129,6 +129,9 @@ protected:
 	void ShowPlotLabels(bool show);
 	void SetPlotPerspectiveProjection(bool proj);
 	void SetPlotCameraRotation(t_real_gl phi, t_real_gl theta);
+
+	std::tuple<t_real, t_real, t_real> PlotToGraphCoords(t_real x, t_real y, t_real z) const;
+	std::tuple<t_real, t_real, t_real> GraphToPlotCoords(t_real gx, t_real gy, t_real gz) const;
 	// ------------------------------------------------------------------------
 
 
