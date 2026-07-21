@@ -218,7 +218,7 @@ void MagDynDlg::CreateSitesPanel()
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-remove"),
 		"Delete Symmetry-Equivalent Sites", this,
-		[this]() { this->DelIdentTabItems(m_termstab, COL_SITE_SYM_IDX); });
+		[this]() { this->DelIdentTabItems(m_sitestab, COL_SITE_SYM_IDX); });
 
 
 
