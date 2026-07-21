@@ -213,7 +213,7 @@ void MagDynDlg::CreateSitesPanel()
 		[this]() { this->AddSiteTabItem(-4); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-remove"),
-		"Delete Site",this,
+		"Delete Site(s)",this,
 		[this]() { this->DelTabItem(m_sitestab); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-remove"),
@@ -230,7 +230,7 @@ void MagDynDlg::CreateSitesPanel()
 		[this]() { this->AddSiteTabItem(); });
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-remove"),
-		"Delete Sites", this,
+		"Delete Site(s)", this,
 		[this]() { this->DelTabItem(m_sitestab); });
 
 

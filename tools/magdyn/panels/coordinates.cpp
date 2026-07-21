@@ -132,7 +132,7 @@ void MagDynDlg::CreateCoordinatesPanel()
 		[this]() { this->AddCoordinateTabItem(-4); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-remove"),
-		"Delete Coordinate", this,
+		"Delete Coordinate(s)", this,
 		[this]() { this->DelTabItem(m_coordinatestab); });
 	menuTableContext->addSeparator();
 	menuTableContext->addAction(
@@ -166,7 +166,7 @@ void MagDynDlg::CreateCoordinatesPanel()
 	menuTableContextNoItem->addSeparator();
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-remove"),
-		"Delete Coordinate", this,
+		"Delete Coordinate(s)", this,
 		[this]() { this->DelTabItem(m_coordinatestab); });
 
 

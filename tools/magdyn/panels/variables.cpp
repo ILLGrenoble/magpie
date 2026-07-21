@@ -126,7 +126,7 @@ void MagDynDlg::CreateVariablesPanel()
 		[this]() { this->AddVariableTabItem(-4); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-remove"),
-		"Delete Variable", this,
+		"Delete Variable(s)", this,
 		[this]() { this->DelTabItem(m_varstab); });
 
 
@@ -138,7 +138,7 @@ void MagDynDlg::CreateVariablesPanel()
 		[this]() { this->AddVariableTabItem(); });
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-remove"),
-		"Delete Variables", this,
+		"Delete Variable(s)", this,
 		[this]() { this->DelTabItem(m_varstab); });
 
 

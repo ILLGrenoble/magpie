@@ -286,7 +286,7 @@ void MagDynDlg::CreateExchangeTermsPanel()
 		[this]() { this->AddTermTabItem(-4); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-remove"),
-		"Delete Coupling", this,
+		"Delete Coupling(s)", this,
 		[this]() { this->DelTabItem(m_termstab); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-remove"),
@@ -306,7 +306,7 @@ void MagDynDlg::CreateExchangeTermsPanel()
 		[this]() { this->AddTermTabItem(); });
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-remove"),
-		"Delete Couplings", this,
+		"Delete Coupling(s)", this,
 		[this]() { this->DelTabItem(m_termstab); });
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-remove"),

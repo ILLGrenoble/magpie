@@ -198,7 +198,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 		[this]() { this->AddFieldTabItem(-4); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-remove"),
-		"Delete Field", this,
+		"Delete Field(s)", this,
 		[this]() { this->DelTabItem(m_fieldstab); });
 	menuTableContext->addSeparator();
 	menuTableContext->addAction(
@@ -219,7 +219,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 			m_field_mag->value()); });
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-remove"),
-		"Delete Field", this,
+		"Delete Field(s)", this,
 		[this]() { this->DelTabItem(m_fieldstab); });
 
 
