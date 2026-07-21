@@ -175,6 +175,9 @@ public:
 	// --------------------------------------------------------------------
 	// getter
 	// --------------------------------------------------------------------
+	t_real GetEpsilon() const;
+	int GetPrecision() const;
+
 	const Variables& GetVariables() const;
 	const MagneticSites& GetMagneticSites() const;
 	MagneticSites& GetMagneticSites();
@@ -198,7 +201,9 @@ public:
 	const t_mat_real& GetCrystalUBTrafo() const;
 
 	const MagneticSite& GetMagneticSite(t_size idx) const;
+	MagneticSite& GetMagneticSite(t_size idx);
 	const ExchangeTerm& GetExchangeTerm(t_size idx) const;
+	ExchangeTerm& GetExchangeTerm(t_size idx);
 
 	bool IsIncommensurate() const;
 	bool GetPerformChecks() const;
@@ -391,12 +396,17 @@ public:
 	 * assign exchange constants to all couplings with the same symmetry index
 	 */
 	void AssignCouplingsBySymmetryIndex(t_size symmidx,
-		const std::string* J, const std::string* DMI, const std::string* Js);
+		const std::string* J, const std::string* DMI = nullptr, const std::string* Js = nullptr);
 
 	/**
 	 * sort couplings by their lengths
 	 */
 	void SortExchangeTerms();
+
+	/**
+	 * remove terms that don't have a coupling constant
+	 */
+	void RemoveUnusedExchangeTerms();
 	// --------------------------------------------------------------------
 
 

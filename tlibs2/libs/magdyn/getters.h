@@ -127,6 +127,17 @@ MAGDYN_TEMPL void MAGDYN_INST::ClearMagneticFormFactors()
 // --------------------------------------------------------------------
 // getter
 // --------------------------------------------------------------------
+MAGDYN_TEMPL t_real MAGDYN_INST::GetEpsilon() const
+{
+	return m_eps;
+}
+
+
+MAGDYN_TEMPL int MAGDYN_INST::GetPrecision() const
+{
+	return m_prec;
+}
+
 MAGDYN_TEMPL const MAGDYN_TYPE::Variables& MAGDYN_INST::GetVariables() const
 {
 	return m_variables;
@@ -247,6 +258,18 @@ MAGDYN_INST::GetMagneticSite(t_size idx) const
 }
 
 
+MAGDYN_TEMPL MAGDYN_TYPE::MagneticSite&
+MAGDYN_INST::GetMagneticSite(t_size idx)
+{
+	if(!CheckMagneticSite(idx))
+	{
+		static MagneticSite null_site{};
+		return null_site;
+	}
+
+	return m_sites[idx];
+}
+
 
 MAGDYN_TEMPL const MAGDYN_TYPE::ExchangeTerm&
 MAGDYN_INST::GetExchangeTerm(t_size idx) const
@@ -260,6 +283,18 @@ MAGDYN_INST::GetExchangeTerm(t_size idx) const
 	return m_exchange_terms[idx];
 }
 
+
+MAGDYN_TEMPL MAGDYN_TYPE::ExchangeTerm&
+MAGDYN_INST::GetExchangeTerm(t_size idx)
+{
+	if(!CheckExchangeTerm(idx))
+	{
+		static ExchangeTerm null_term{};
+		return null_term;
+	}
+
+	return m_exchange_terms[idx];
+}
 
 
 MAGDYN_TEMPL bool MAGDYN_INST::IsIncommensurate() const
@@ -526,7 +561,6 @@ MAGDYN_TEMPL void MAGDYN_INST::SetCholeskyFailOnWrong(bool fail)
 {
 	m_fail_wrong_chol = fail;
 }
-
 
 
 

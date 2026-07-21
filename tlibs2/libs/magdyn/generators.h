@@ -366,6 +366,49 @@ void MAGDYN_INST::SortExchangeTerms()
 
 
 /**
+ * remove terms that don't have a coupling constant
+ */
+MAGDYN_TEMPL
+void MAGDYN_INST::RemoveUnusedExchangeTerms()
+{
+	ExchangeTerms& couplings = GetExchangeTerms();
+
+	for(auto iter = couplings.begin(); iter != couplings.end();)
+	{
+		ExchangeTerm& term = *iter;
+
+		bool no_J = false;
+		if(term.J == "" || term.J == "0")
+			no_J = true;
+
+		bool no_dmi = false;
+		if((term.dmi[0] == "" || term.dmi[0] == "0") &&
+			(term.dmi[1] == "" || term.dmi[1] == "0") &&
+			(term.dmi[2] == "" || term.dmi[2] == "0"))
+			no_dmi = true;
+
+		bool no_genJ = false;
+		if((term.Jgen[0][0] == "" || term.Jgen[0][0] == "0") &&
+			(term.Jgen[0][1] == "" || term.Jgen[0][1] == "0") &&
+			(term.Jgen[0][2] == "" || term.Jgen[0][2] == "0") &&
+			(term.Jgen[1][0] == "" || term.Jgen[1][0] == "0") &&
+			(term.Jgen[1][1] == "" || term.Jgen[1][1] == "0") &&
+			(term.Jgen[1][2] == "" || term.Jgen[1][2] == "0") &&
+			(term.Jgen[2][0] == "" || term.Jgen[2][0] == "0") &&
+			(term.Jgen[2][1] == "" || term.Jgen[2][1] == "0") &&
+			(term.Jgen[2][2] == "" || term.Jgen[2][2] == "0"))
+			no_genJ = true;
+
+		if(no_J && no_dmi && no_genJ)
+			iter = couplings.erase(iter);
+		else
+			++iter;
+	}
+}
+
+
+
+/**
  * extend the magnetic structure
  */
 MAGDYN_TEMPL
@@ -625,7 +668,7 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
 		sites_uc[term1.site2_calc] + dist_sc, symops, m_eps,
 		false /*keep in uc*/, true /*ignore occupied*/,
 		true /*return homogeneous*/);
-	
+
 #ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
 	using namespace tl2_ops;
 	std::cout << "term1:     " << term1.site1_calc << ", " << term1.site2_calc

@@ -343,6 +343,27 @@
 
 
 	/**
+	 * sets a site's spin
+	 */
+	void set_spin(t_MagDyn& magdyn,
+		const t_str& name,
+		t_real sx = 0., t_real sy = 0., t_real sz = 1.)
+	{
+		std::size_t idx = magdyn.GetMagneticSiteIndex(name);
+		if(idx >= magdyn.GetMagneticSitesCount())
+			return;
+		typename t_MagDyn::MagneticSite& site = magdyn.GetMagneticSite(idx);
+
+		site.spin_dir[0] = tl2::var_to_str(sx);
+		site.spin_dir[1] = tl2::var_to_str(sy);
+		site.spin_dir[2] = tl2::var_to_str(sz);
+		//site.spin_mag = tl2::var_to_str(S);
+
+		magdyn.CalcMagneticSite(site);
+	}
+
+
+	/**
 	 * adds a coupling term between two magnetic sites
 	 * (using strings with expressions)
 	 */
@@ -478,6 +499,41 @@
 	 }
 
 
+	 /**
+	  * output the list of magnetic sites
+	  */
+	 void print_sites(t_MagDyn& magdyn)
+	 {
+		int w = magdyn.GetPrecision()*1.5;
+		std::cout.precision(magdyn.GetPrecision());
+
+		std::cout
+			<< std::setw(24) << std::left << "site" << " "
+			<< std::setw(w) << std::left << "x" << " "
+			<< std::setw(w) << std::left << "y" << " "
+			<< std::setw(w) << std::left << "z" << " "
+			<< std::setw(w) << std::left << "sx" << " "
+			<< std::setw(w) << std::left << "sy" << " "
+			<< std::setw(w) << std::left << "sz" << " "
+			<< std::setw(w) << std::left << "|S|"
+			<< std::endl;
+
+		for(const auto& site : magdyn.GetMagneticSites())
+		{
+			std::cout
+				<< std::setw(24) << std::left << site.name << " "
+				<< std::setw(w) << std::left << site.pos_calc[0] << " "
+				<< std::setw(w) << std::left << site.pos_calc[1] << " "
+				<< std::setw(w) << std::left << site.pos_calc[2] << " "
+				<< std::setw(w) << std::left << site.spin_dir_calc[0] << " "
+				<< std::setw(w) << std::left << site.spin_dir_calc[1] << " "
+				<< std::setw(w) << std::left << site.spin_dir_calc[2] << " "
+				<< std::setw(w) << std::left << site.spin_mag_calc
+				<< std::endl;
+		}
+	}
+
+
 	/**
 	 * create symmetry equivalent exchange couplings using a space group
 	 */
@@ -493,6 +549,71 @@
 		}
 
 		magdyn.SymmetriseExchangeTerms(ops);
+	 }
+
+
+ 	/**
+	 * create couplings up to a certain distance
+	 */
+	 void generate_couplings(t_MagDyn& magdyn,
+		t_real dist_max, std::size_t sc_max, std::size_t couplings_max,
+		const std::string& spacegroup)
+	 {
+		std::vector<t_mat_real> ops = get_sg_ops<t_mat_real>(spacegroup);
+		if(ops.size() == 0)
+		{
+			std::cerr << "Error: Space group \"" << spacegroup << "\" was not found. "
+				<< "Please use get_spacegroups() to get a list."
+				<< std::endl;
+			return;
+		}
+
+		magdyn.GeneratePossibleExchangeTerms(dist_max, sc_max, couplings_max);
+		magdyn.CalcSymmetryIndices(ops);
+	 }
+
+
+	 /**
+	  * output the list of magnetic couplings
+	  */
+	 void print_couplings(t_MagDyn& magdyn)
+	 {
+		int w = magdyn.GetPrecision()*1.5;
+		std::cout.precision(magdyn.GetPrecision());
+
+		std::cout
+			<< std::setw(24) << std::left << "coupling" << " "
+			<< std::setw(w) << std::left << "site1" << " "
+			<< std::setw(w) << std::left << "site2" << " "
+			<< std::setw(w) << std::left << "dx" << " "
+			<< std::setw(w) << std::left << "dy" << " "
+			<< std::setw(w) << std::left << "dz" << " "
+			<< std::setw(w) << std::left << "length" << " "
+			<< std::setw(w) << std::left << "J" << " "
+			<< std::endl;
+
+		for(const auto& coupling : magdyn.GetExchangeTerms())
+		{
+			std::cout
+				<< std::setw(24) << std::left << coupling.name << " "
+				<< std::setw(w) << std::left << coupling.site1_calc << " "
+				<< std::setw(w) << std::left << coupling.site2_calc << " "
+				<< std::setw(w) << std::left << coupling.dist_calc[0] << " "
+				<< std::setw(w) << std::left << coupling.dist_calc[1] << " "
+				<< std::setw(w) << std::left << coupling.dist_calc[2] << " "
+				<< std::setw(w) << std::left << coupling.length_calc << " "
+				<< std::setw(w) << std::left << coupling.J_calc << " "
+				<< std::endl;
+		}
+	}
+
+
+ 	/**
+	 * assign the couplings correponsing to a given symmetry index
+	 */
+	 void assign_couplings_by_symmetry(t_MagDyn& magdyn, std::size_t sym_idx, const std::string& J)
+	 {
+		magdyn.AssignCouplingsBySymmetryIndex(sym_idx, &J);
 	 }
 
 
