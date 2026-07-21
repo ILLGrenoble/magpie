@@ -168,7 +168,7 @@ def plot_disp(data):
 		if branch_idx == num_branches / 2 - 1:
 			axes[branch_idx].set_xlabel("Q (rlu)")
 
-		# plot only degenerate energies
+		# only plot degenerate energies
 		if only_degen_E:
 			data_x = numpy.array([x for (x, d) in zip(data_x, data_degen) if d > 1])
 			data_E = numpy.array([E for (E, d) in zip(data_E, data_degen) if d > 1])
