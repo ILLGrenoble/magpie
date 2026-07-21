@@ -308,7 +308,7 @@ void MagDynDlg::CreateExchangeTermsPanel()
 		QIcon::fromTheme("list-remove"),
 		"Delete Couplings", this,
 		[this]() { this->DelTabItem(m_termstab); });
-	menuTableContext->addAction(
+	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-remove"),
 		"Delete Unused Couplings", this,
 		[this]() { this->RemoveUnusedTerms(); });
