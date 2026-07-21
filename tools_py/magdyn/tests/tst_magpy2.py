@@ -1,1 +1,0 @@
-../../../examples_py/tst_magpy2.py

@@ -1,0 +1,1 @@
+../../../examples_py/ferromagnetic2.py
