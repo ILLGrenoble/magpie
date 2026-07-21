@@ -642,10 +642,7 @@ void MagDynDlg::DelIdentTabItems(QTableWidget *pTab, int idx_col)
 	{
 		auto *sym_idx = static_cast<t_sizeitem*>(pTab->item(row, idx_col));
 		if(sym_idx)
-		{
 			symindices.insert(sym_idx->GetValue());
-			std::cout << sym_idx->GetValue() << std::endl;
-		}
 	}
 
 	if(symindices.size() == 0)
