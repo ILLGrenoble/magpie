@@ -186,11 +186,11 @@ void MagDynDlg::CreateSampleEnvPanel()
 	QMenu *menuTableContext = new QMenu(m_fieldstab);
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
-		"Add Field Before", this,
+		"Add Field Before Current", this,
 		[this]() { this->AddFieldTabItem(-2); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
-		"Add Field After", this,
+		"Add Field After Current", this,
 		[this]() { this->AddFieldTabItem(-3); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("edit-copy"),

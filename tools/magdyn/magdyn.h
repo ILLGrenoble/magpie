@@ -383,7 +383,8 @@ protected:
 	t_size ReplaceValueWithVariable(const std::string& var, const t_cplx& val);
 	t_size ReplaceValuesWithVariables();
 
-	void DelTabItem(QTableWidget *pTab, int begin=-2, int end=-2);
+	void DelTabItem(QTableWidget *pTab, int begin = -2, int end = -2);
+	void DelIdentTabItems(QTableWidget *pTab, int idx_col);
 	void UpdateVerticalHeader(QTableWidget *pTab);
 
 	void SitesSelectionChanged();
@@ -432,6 +433,7 @@ protected:
 	void SyncToKernel();         // transfer all data to the kernel
 	void CalcSymmetryIndices();  // assign symmetry groups to sites and couplings
 	void SortTerms();            // sort couplings by their lengths
+	void RemoveUnusedTerms();    // remove terms without coupling constants
 	void CalcAll();              // syncs sites and terms and calculates all dynamics
 	void CalcBZ();               // calculate brillouin zone and cut
 	void SetKernel(const t_magdyn* dyn, bool sync_sites = true, bool sync_terms = true, bool sync_idx = true);

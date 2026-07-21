@@ -112,7 +112,7 @@ void MagDynDlg::CreateCoordinatesPanel()
 	QMenu *menuTableContext = new QMenu(m_coordinatestab);
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
-		"Add Coordinate Before", this,
+		"Add Coordinate Before Current", this,
 		[this]()
 	{
 		this->AddCoordinateTabItem(-2, "",
@@ -120,7 +120,7 @@ void MagDynDlg::CreateCoordinatesPanel()
 	});
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
-		"Add Coordinate After", this,
+		"Add Coordinate After Current", this,
 		[this]()
 	{
 		this->AddCoordinateTabItem(-3, "",

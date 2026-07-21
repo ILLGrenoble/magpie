@@ -114,11 +114,11 @@ void MagDynDlg::CreateVariablesPanel()
 	QMenu *menuTableContext = new QMenu(m_varstab);
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
-		"Add Variable Before", this,
+		"Add Variable Before Current", this,
 		[this]() { this->AddVariableTabItem(-2); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
-		"Add Variable After", this,
+		"Add Variable After Current", this,
 		[this]() { this->AddVariableTabItem(-3); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("edit-copy"),
@@ -138,7 +138,7 @@ void MagDynDlg::CreateVariablesPanel()
 		[this]() { this->AddVariableTabItem(); });
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-remove"),
-		"Delete Variable", this,
+		"Delete Variables", this,
 		[this]() { this->DelTabItem(m_varstab); });
 
 

@@ -201,11 +201,11 @@ void MagDynDlg::CreateSitesPanel()
 	QMenu *menuTableContext = new QMenu(m_sitestab);
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
-		"Add Site Before", this,
+		"Add Site Before Current", this,
 		[this]() { this->AddSiteTabItem(-2); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
-		"Add Site After", this,
+		"Add Site After Current", this,
 		[this]() { this->AddSiteTabItem(-3); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("edit-copy"),
@@ -215,6 +215,11 @@ void MagDynDlg::CreateSitesPanel()
 		QIcon::fromTheme("list-remove"),
 		"Delete Site",this,
 		[this]() { this->DelTabItem(m_sitestab); });
+	menuTableContext->addAction(
+		QIcon::fromTheme("list-remove"),
+		"Delete Symmetry-Equivalent Sites", this,
+		[this]() { this->DelIdentTabItems(m_termstab, COL_SITE_SYM_IDX); });
+
 
 
 	// table context menu in case nothing is selected
@@ -225,7 +230,7 @@ void MagDynDlg::CreateSitesPanel()
 		[this]() { this->AddSiteTabItem(); });
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-remove"),
-		"Delete Site", this,
+		"Delete Sites", this,
 		[this]() { this->DelTabItem(m_sitestab); });
 
 

@@ -520,6 +520,17 @@ void MagDynDlg::SortTerms()
 
 
 /**
+ * remove terms without coupling constants
+ */
+void MagDynDlg::RemoveUnusedTerms()
+{
+	m_dyn.RemoveUnusedExchangeTerms();
+	SyncTermsFromKernel();
+}
+
+
+
+/**
  * calculate brillouin zone and cut
  */
 void MagDynDlg::CalcBZ()

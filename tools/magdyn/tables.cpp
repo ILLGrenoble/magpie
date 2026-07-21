@@ -602,14 +602,60 @@ void MagDynDlg::DelTabItem(QTableWidget *pTab, int begin, int end)
 		pTab->clearContents();
 		pTab->setRowCount(0);
 	}
-	else if(begin == -2)	// clear selected
+	else if(begin == -2)  // clear selected
 	{
 		for(int row : GetSelectedRows(pTab, true))
 			pTab->removeRow(row);
 	}
-	else if(begin >= 0 && end >= 0)		// clear given range
+	else if(begin >= 0 && end >= 0)  // clear given range
 	{
-		for(int row=end-1; row>=begin; --row)
+		for(int row = end - 1; row >= begin; --row)
+			pTab->removeRow(row);
+	}
+
+	UpdateVerticalHeader(pTab);
+	if(pTab == m_sitestab)
+		SyncSiteComboBoxes();
+}
+
+
+
+/**
+ * delete table items with the same (symmetry) index
+ */
+void MagDynDlg::DelIdentTabItems(QTableWidget *pTab, int idx_col)
+{
+	if(!m_inputEnabled)
+		return;
+
+	pTab->blockSignals(true);
+	BOOST_SCOPE_EXIT(this_, pTab)
+	{
+		pTab->blockSignals(false);
+		if(this_->m_autocalc->isChecked())
+			this_->CalcAll();
+	} BOOST_SCOPE_EXIT_END
+
+	// get all selected symmetry indices
+	std::unordered_set<t_size> symindices;
+	for(int row : GetSelectedRows(pTab, true))
+	{
+		auto *sym_idx = static_cast<t_sizeitem*>(pTab->item(row, idx_col));
+		if(sym_idx)
+		{
+			symindices.insert(sym_idx->GetValue());
+			std::cout << sym_idx->GetValue() << std::endl;
+		}
+	}
+
+	if(symindices.size() == 0)
+		return;
+
+	// remove all rows having the same symmetry indices
+	for(int row = pTab->rowCount() - 1; row >= 0; --row)
+	{
+		auto *sym_idx = static_cast<t_sizeitem*>(pTab->item(row, idx_col));
+		if(sym_idx && symindices.find(sym_idx->GetValue()) != symindices.end())
 			pTab->removeRow(row);
 	}
 
@@ -652,7 +698,7 @@ void MagDynDlg::MoveTabItemUp(QTableWidget *pTab)
 		pTab->insertRow(row-1);
 		for(int col = 0; col < pTab->columnCount(); ++col)
 		{
-			pTab->setItem(row-1, col, pTab->item(row+1, col)->clone());
+			pTab->setItem(row - 1, col, pTab->item(row + 1, col)->clone());
 
 			// also clone site selection combo boxes
 			if(pTab == m_termstab && (col == COL_XCH_ATOM1_IDX || col == COL_XCH_ATOM2_IDX))
@@ -768,7 +814,7 @@ std::vector<int> MagDynDlg::GetSelectedRows(QTableWidget *pTab, bool sort_revers
 	std::vector<int> vec;
 	vec.reserve(pTab->selectedItems().size());
 
-	for(int row=0; row<pTab->rowCount(); ++row)
+	for(int row = 0; row < pTab->rowCount(); ++row)
 	{
 		if(auto *item = pTab->item(row, 0); item && item->isSelected())
 			vec.push_back(row);

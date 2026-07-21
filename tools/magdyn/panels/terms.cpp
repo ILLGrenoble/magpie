@@ -274,11 +274,11 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	QMenu *menuTableContext = new QMenu(m_termstab);
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
-		"Add Coupling Before", this,
+		"Add Coupling Before Current", this,
 		[this]() { this->AddTermTabItem(-2); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("list-add"),
-		"Add Coupling After", this,
+		"Add Coupling After Current", this,
 		[this]() { this->AddTermTabItem(-3); });
 	menuTableContext->addAction(
 		QIcon::fromTheme("edit-copy"),
@@ -288,6 +288,14 @@ void MagDynDlg::CreateExchangeTermsPanel()
 		QIcon::fromTheme("list-remove"),
 		"Delete Coupling", this,
 		[this]() { this->DelTabItem(m_termstab); });
+	menuTableContext->addAction(
+		QIcon::fromTheme("list-remove"),
+		"Delete Symmetry-Equivalent Couplings", this,
+		[this]() { this->DelIdentTabItems(m_termstab, COL_XCH_SYM_IDX); });
+	menuTableContext->addAction(
+		QIcon::fromTheme("list-remove"),
+		"Delete Unused Couplings", this,
+		[this]() { this->RemoveUnusedTerms(); });
 
 
 	// table context menu in case nothing is selected
@@ -298,8 +306,12 @@ void MagDynDlg::CreateExchangeTermsPanel()
 		[this]() { this->AddTermTabItem(); });
 	menuTableContextNoItem->addAction(
 		QIcon::fromTheme("list-remove"),
-		"Delete Coupling", this,
+		"Delete Couplings", this,
 		[this]() { this->DelTabItem(m_termstab); });
+	menuTableContext->addAction(
+		QIcon::fromTheme("list-remove"),
+		"Delete Unused Couplings", this,
+		[this]() { this->RemoveUnusedTerms(); });
 
 
 	// signals
