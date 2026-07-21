@@ -37,8 +37,7 @@ print_dispersion       = False  # write dispersion to console
 only_positive_energies = True   # ignore magnon annihilation?
 
 use_pointwise          = False  # use point-wise dispersion calculation
-use_procpool           = True   # parallelise calculation
-threads_instead        = True   # multi-threading instead of multi-processing?
+use_threadpool         = True   # parallelise calculation
 max_threads            = 0      # number of worker threads or processes, 0: automatic determination
 
 show_dividers          = False  # show vertical bars between dispersion branches
@@ -128,7 +127,7 @@ def setup_struct():
 
 
 # -----------------------------------------------------------------------------
-# calculate the dispersion branches
+# calculate the dispersion branches along straight lines
 # -----------------------------------------------------------------------------
 def calc_disp(mag):
 	# calculate the dispersion branches
@@ -269,16 +268,14 @@ def calc_disp_pointwise(mag):
 			data_S.append(weight)
 
 
-		if use_procpool:
+		if use_threadpool:
 			import concurrent.futures as fut
 
 			if print_progress:
-				print(f"Using {max_threads} processes.")
+				print(f"Using {max_threads} threads.")
 
-			if threads_instead:
-				executor = fut.ThreadPoolExecutor
-			else:
-				executor = fut.ProcessPoolExecutor
+			executor = fut.ThreadPoolExecutor
+			#executor = fut.ProcessPoolExecutor
 
 			# calculate a branch
 			with executor(max_workers = max_threads) as exe:
@@ -321,7 +318,7 @@ def calc_disp_pointwise(mag):
 							print("{:15.4f} {:15.4f} {:15.4f} {:15.4f} {:15.4g}".format(
 								h, k, l, E, weight))
 
-		else:  # no proc pool
+		else:  # no thread pool
 			for hkl in numpy.linspace(hkl_start, hkl_end, num_Q_points):
 				for S in mag.CalcEnergies(hkl[0], hkl[1], hkl[2], False):
 					if only_positive_energies and S.E < 0.:
