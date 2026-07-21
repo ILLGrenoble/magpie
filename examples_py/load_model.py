@@ -24,6 +24,8 @@
 # ----------------------------------------------------------------------------
 #
 
+import sys
+import time
 import numpy
 import magpy
 
@@ -45,7 +47,6 @@ S_clamp_min            = 1.     #
 S_clamp_max            = 500.   #
 S_filter_min           = -1.    # don't filter
 
-modelfile              = "model.magpie"
 dispfile               = "disp.dat"
 
 # dispersion plotting range
@@ -60,6 +61,11 @@ hkl_end                = numpy.array([ 1., 1., 0.5 ])
 # create the magpy object
 mag = magpy.MagDyn()
 
+if len(sys.argv) < 2:
+	print("Please specify a magpie file.")
+	exit(-1)
+
+modelfile = sys.argv[1]
 
 # load the model file
 print("Loading {}...".format(modelfile))
@@ -91,6 +97,8 @@ if save_dispersion:
 print("\nCalculating dispersion...")
 if print_dispersion:
 	print("{:>15} {:>15} {:>15} {:>15} {:>15}".format("h", "k", "l", "E", "S(Q,E)"))
+
+tick = time.time()
 
 
 #
@@ -195,6 +203,10 @@ else:
 			if print_dispersion:
 				print("{:15.4f} {:15.4f} {:15.4f} {:15.4f} {:15.4g}".format(
 					hkl[0], hkl[1], hkl[2], S.E, S.weight))
+
+
+time_needed = time.time() - tick
+print("Calculation took %.4g s." % time_needed)
 # -----------------------------------------------------------------------------
 
 

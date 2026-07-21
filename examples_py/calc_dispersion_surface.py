@@ -25,6 +25,7 @@
 #
 
 import os
+import sys
 import time
 import numpy
 import magpy
@@ -43,7 +44,6 @@ S_clamp_min            = 1.     #
 S_clamp_max            = 500.   #
 S_filter_min           = -1.    # don't filter
 
-modelfile              = "model.magpie"
 plot_file              = ""     # file to save plot to
 
 max_threads            = 0      # number of worker threads, 0: automatic determination
@@ -69,17 +69,17 @@ if max_threads < 1:
 # -----------------------------------------------------------------------------
 # load the magnetic model
 # -----------------------------------------------------------------------------
-def load_model(modfile):
+def load_model(modelfile):
 	# create the magpy object
 	mag = magpy.MagDyn()
 
 
 	# load the model file
-	print("Loading {}...".format(modfile))
-	if mag.Load(modfile):
-		print("Loaded {}.".format(modfile))
+	print("Loading {}...".format(modelfile))
+	if mag.Load(modelfile):
+		print("Loaded {}.".format(modelfile))
 	else:
-		print("Failed loading {}.".format(modfile))
+		print("Failed loading {}.".format(modelfile))
 		return None
 
 	# minimum energy
@@ -255,11 +255,20 @@ def plot_disp_2d(data, Q_idx1 = -1, Q_idx2 = -1):
 
 
 if __name__ == "__main__":
+	if len(sys.argv) < 2:
+		print("Please specify a magpie file.")
+		exit(-1)
+
+	modelfile = sys.argv[1]
+
 	tick = time.time()
+
 	mag = load_model(modelfile)
 	if mag == None:
 		exit(-1)
+
 	data = numpy.array(calc_disp(mag))
+
 	time_needed = time.time() - tick
 	print("Calculation took %.4g s." % time_needed)
 

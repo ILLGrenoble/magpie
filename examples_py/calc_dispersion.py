@@ -24,6 +24,7 @@
 #
 
 import os
+import sys
 import time
 import numpy
 import numpy.linalg
@@ -53,9 +54,7 @@ S_clamp_min            = 1.     #
 S_clamp_max            = 500.   #
 S_filter_min           = -1.    # don't filter
 
-modelfile              = "model.magpie"
 plotfile               = ""     # file to save plot to
-
 print_progress         = False  # show progress of calculation
 
 # cubic high-symmetry points
@@ -108,7 +107,7 @@ def calc_Es(mag, h, k, l):
 	return Es
 
 
-def setup_struct():
+def setup_struct(modelfile):
 	# create the magpy object
 	mag = magpy.MagDyn()
 
@@ -437,7 +436,12 @@ def plot_disp(data, dispersion_plot_indices):
 
 
 if __name__ == "__main__":
-	mag = setup_struct()
+	if len(sys.argv) < 2:
+		print("Please specify a magpie file.")
+		exit(-1)
+
+	modelfile = sys.argv[1]
+	mag = setup_struct(modelfile)
 
 	tick = time.time()
 	if use_pointwise:
