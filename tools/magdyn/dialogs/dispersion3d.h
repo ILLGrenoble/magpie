@@ -171,6 +171,7 @@ private:
 	std::unordered_map<std::size_t /*plot object*/, t_size /*band index*/> m_band_objs{};
 	t_vec_gl m_cam_centre{tl2::zero<t_vec_gl>(3)};
 
+	QSplitter *m_split_controls{};
 	QSplitter *m_split_plot{};
 	QTableWidget *m_table_bands{};       // table listing the magnon bands
 
