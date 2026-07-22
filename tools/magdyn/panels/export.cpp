@@ -141,7 +141,7 @@ void MagDynDlg::CreateExportPanel()
 	QLabel* labelBoseInfo = new QLabel(QString(
 		"Info: If this grid file is to be used in Takin's "
 		"resolution convolution module (\"Model Source: Uniform Grid\"), "
-		"please disable the Bose factor (\"Calculation\" -> \"Use Bose Factor\" [off]). "
+		"please disable the Bose factor (\"Calculation Options\" -> \"Use Bose Factor\" [off]). "
 		"The Bose factor is already managed by the convolution module."),
 		m_exportpanel);
 	labelBoseInfo->setWordWrap(true);
@@ -171,5 +171,5 @@ void MagDynDlg::CreateExportPanel()
 		static_cast<void (MagDynDlg::*)()>(&MagDynDlg::ExportSQE));
 
 
-	m_tabs_out->addTab(m_exportpanel, "Export");
+	m_tabs_out->addTab(m_exportpanel, "Export Data");
 }
