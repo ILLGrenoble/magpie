@@ -35,14 +35,20 @@
 #endif
 
 #include <QtCore/QSettings>
+
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QGraphicsScene>
 #include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QGraphicsItem>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMenu>
+#include <QtWidgets/QGestureEvent>
+#include <QtWidgets/QGesture>
+#include <QtWidgets/QPinchGesture>
+
 #include <QtGui/QMouseEvent>
 #include <QtGui/QWheelEvent>
+
 #include <QtSvg/QSvgGenerator>
 
 #include <sstream>
@@ -435,6 +441,7 @@ public:
 		setDragMode(QGraphicsView::ScrollHandDrag);
 		setInteractive(true);
 		setMouseTracking(true);
+		grabGesture(Qt::PinchGesture);
 		scale(1., -1.);
 	}
 
@@ -445,6 +452,8 @@ public:
 
 	virtual ~BZCutView()
 	{
+		ungrabGesture(Qt::PinchGesture);
+		setMouseTracking(false);
 	}
 
 
@@ -558,6 +567,27 @@ protected:
 	{
 		t_real sc = std::pow(t_real(2), (t_real)evt->angleDelta().y()/8.*0.01);
 		QGraphicsView::scale(sc, sc);
+	}
+
+
+	virtual bool event(QEvent *evt) override
+	{
+		if(evt->type() == QEvent::Gesture)
+		{
+			QGestureEvent *pGestureEvt = static_cast<QGestureEvent*>(evt);
+			for(QGesture *gesture : pGestureEvt->gestures())
+			{
+				if(gesture->gestureType() != Qt::PinchGesture)
+					continue;
+				QPinchGesture *pinch = static_cast<QPinchGesture*>(gesture);
+
+				t_real zoom = pinch->scaleFactor();
+				QGraphicsView::scale(zoom, zoom);
+			}
+			pGestureEvt->accept();
+		}
+
+		return QGraphicsView::event(evt);
 	}
 
 
