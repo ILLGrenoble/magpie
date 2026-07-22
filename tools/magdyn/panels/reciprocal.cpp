@@ -45,6 +45,8 @@ void MagDynDlg::CreateReciprocalPanel()
 	m_bzscene = new BZCutScene<t_vec_real, t_real>(m_reciprocalpanel);
 	m_bzview = new BZCutView<t_vec_real, t_real>(m_bzscene, m_sett);
 
+	m_bzscene->setFont(this->font());
+	m_bzview->setFont(this->font());
 
 	// predefined rotation axes
 	QPushButton *btnAxes = new QPushButton(m_reciprocalpanel);

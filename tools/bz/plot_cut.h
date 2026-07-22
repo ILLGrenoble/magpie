@@ -140,6 +140,7 @@ public:
 		brush.setColor(col);
 
 		m_peaks.reserve(m_peaks.size() + peaks.size());
+		m_peak_labels.reserve(m_peaks.size() + peaks.size());
 		const t_real w = 6.;
 
 		for(std::size_t Q_idx = 0; Q_idx < peaks.size(); ++Q_idx)
@@ -159,6 +160,12 @@ public:
 
 				ostr << "(" << Q_rlu[0] << " " << Q_rlu[1] << " " << Q_rlu[2] << ")";
 				ell->setToolTip(ostr.str().c_str());
+
+				QGraphicsTextItem *txt = addText(ostr.str().c_str());
+				txt->setTransform(QTransform(1., 0., 0., -1.,
+					Q[0]*m_scale - w/4., Q[1]*m_scale - w/4.));
+				txt->setVisible(m_show_labels);
+				m_peak_labels.push_back(txt);
 			}
 
 			m_peaks.push_back(ell);
@@ -278,6 +285,10 @@ public:
 		for(QGraphicsItem *item : m_peaks)
 			delete item;
 		m_peaks.clear();
+
+		for(QGraphicsItem *item : m_peak_labels)
+			delete item;
+		m_peak_labels.clear();
 	}
 
 
@@ -339,6 +350,21 @@ public:
 	}
 
 
+	void SetShowLabels(bool b)
+	{
+		m_show_labels = b;
+
+		for(QGraphicsItem *txt : m_peak_labels)
+			txt->setVisible(m_show_labels);
+	}
+
+
+	bool GetShowLabels() const
+	{
+		return m_show_labels;
+	}
+
+
 	/**
 	 * save the current plot as image
 	 */
@@ -367,9 +393,10 @@ private:
 	t_real m_eps{ 1e-7 };
 	int m_prec_gui{ 4 };
 
+	bool m_show_labels{ true };
 	t_real m_scale{ 100. };
 
-	std::vector<QGraphicsItem*> m_bzcut{}, m_peaks{};
+	std::vector<QGraphicsItem*> m_bzcut{}, m_peaks{}, m_peak_labels{};
 	std::vector<QGraphicsItem*> m_curves{};
 	std::vector<QGraphicsItem*> m_lines{}, m_line_verts{};
 };
@@ -391,11 +418,17 @@ public:
 	{
 		// context menu
 		m_context = new QMenu(this);
+		QAction *acShowLabels = new QAction("Show Labels", m_context);
 		QAction *acSaveImage = new QAction("Save Image...", m_context);
+		acShowLabels->setCheckable(true);
+		acShowLabels->setChecked(m_scene->GetShowLabels());
 		acSaveImage->setIcon(QIcon::fromTheme("image-x-generic"));
+		m_context->addAction(acShowLabels);
+		m_context->addSeparator();
 		m_context->addAction(acSaveImage);
 
 		// connections
+		connect(acShowLabels, &QAction::toggled, m_scene, &BZCutScene<t_vec, t_real>::SetShowLabels);
 		connect(acSaveImage, &QAction::triggered, this, &BZCutView::SaveImage);
 
 		setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
