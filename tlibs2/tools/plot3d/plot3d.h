@@ -155,6 +155,7 @@ private:
 	std::unordered_map<std::size_t /*plot object*/, t_size /*surface index*/> m_surf_objs{};
 	t_vec_gl m_cam_centre{tl2::zero<t_vec_gl>(3)};
 
+	QSplitter *m_split_controls{};
 	QSplitter *m_split_plot{};
 	QTableWidget *m_table_surfs{};       // table listing the surfaces
 

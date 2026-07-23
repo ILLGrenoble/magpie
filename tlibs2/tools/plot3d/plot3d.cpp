@@ -93,6 +93,18 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 	m_split_plot->setStretchFactor(m_split_plot->indexOf(m_dispplot), 24);
 	m_split_plot->setStretchFactor(m_split_plot->indexOf(surfs_panel), 1);
 
+	// splitter for plot and the controls
+	QWidget *control_panel = new QWidget(this);
+	m_split_controls = new QSplitter(this);
+	m_split_controls->setOrientation(Qt::Vertical);
+	m_split_controls->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
+	m_split_controls->addWidget(m_split_plot);
+	m_split_controls->addWidget(control_panel);
+	m_split_controls->setCollapsible(0, false);
+	m_split_controls->setCollapsible(1, true);
+	m_split_controls->setStretchFactor(m_split_controls->indexOf(m_split_plot), 8);
+	m_split_controls->setStretchFactor(m_split_controls->indexOf(control_panel), 0);
+
 	// general plot context menu
 	m_context = new QMenu(this);
 	QAction *acCentre = new QAction("Centre Camera", m_context);
@@ -319,6 +331,15 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 	plot_options_grid->addWidget(m_cam_theta, y, 2, 1, 1);
 	plot_options_grid->addWidget(m_perspective, y++, 3, 1, 1);
 
+	QGridLayout *control_grid = new QGridLayout(control_panel);
+	QSpacerItem *spacer = new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
+	control_grid->setSpacing(4);
+	control_grid->setContentsMargins(6, 6, 6, 6);
+	control_grid->addWidget(groupFormulas, y, 0, 1, 2);
+	control_grid->addWidget(groupQ, y++, 2, 1, 2);
+	control_grid->addWidget(groupPlotOptions, y++, 0, 1, 4);
+	control_grid->addItem(spacer, y++, 0, 1, 4);
+
 	// status grid
 	QWidget *status_panel = new QWidget(this);
 	QGridLayout *status_grid = new QGridLayout(status_panel);
@@ -332,10 +353,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 	QGridLayout *maingrid = new QGridLayout(this);
 	maingrid->setSpacing(4);
 	maingrid->setContentsMargins(8, 8, 8, 8);
-	maingrid->addWidget(m_split_plot, y++, 0, 1, 4);
-	maingrid->addWidget(groupFormulas, y, 0, 1, 2);
-	maingrid->addWidget(groupQ, y++, 2, 1, 2);
-	maingrid->addWidget(groupPlotOptions, y++, 0, 1, 4);
+	maingrid->addWidget(m_split_controls, y++, 0, 1, 4);
 	maingrid->addWidget(m_slider_t, y, 0, 1, 3);
 	maingrid->addWidget(m_btn_start_stop, y++, 3, 2, 1);
 	maingrid->addWidget(m_progress, y++, 0, 1, 3);
@@ -347,10 +365,12 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 		if(m_sett->contains("plot3d/geo"))
 			restoreGeometry(m_sett->value("plot3d/geo").toByteArray());
 		else
-			resize(640, 640);
+			resize(800, 800);
 
-		if(m_sett->contains("plot3d/splitter"))
-			m_split_plot->restoreState(m_sett->value("plot3d/splitter").toByteArray());
+		if(m_sett->contains("plot3d/splitter_h"))
+			m_split_plot->restoreState(m_sett->value("plot3d/splitter_h").toByteArray());
+		if(m_sett->contains("plot3d/splitter_v"))
+			m_split_controls->restoreState(m_sett->value("plot3d/splitter_v").toByteArray());
 	}
 
 	// connections
@@ -718,7 +738,8 @@ void Plot3DDlg::accept()
 	if(m_sett)
 	{
 		m_sett->setValue("plot3d/geo", saveGeometry());
-		m_sett->setValue("plot3d/splitter", m_split_plot->saveState());
+		m_sett->setValue("plot3d/splitter_h", m_split_plot->saveState());
+		m_sett->setValue("plot3d/splitter_v", m_split_controls->saveState());
 	}
 
 	QDialog::accept();
