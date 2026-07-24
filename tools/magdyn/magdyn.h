@@ -99,7 +99,11 @@
  */
 struct SitesComboBox : public QComboBox, QTableWidgetItem
 {
-	SitesComboBox() = default;
+	SitesComboBox(QWidget* parent = nullptr)
+		: QComboBox(parent), QTableWidgetItem()
+	{
+	}
+
 	virtual ~SitesComboBox() = default;
 
 

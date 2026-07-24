@@ -281,7 +281,8 @@ void MagDynDlg::CreateSamplePanel()
 	// magnetic form factors
 	m_ffacts.resize(m_num_ffacts->value());
 
-	connect(m_editFilterFFacts, &QLineEdit::textChanged, [this]() { PopulateFormFactors(); });
+	if(m_editFilterFFacts)
+		connect(m_editFilterFFacts, &QLineEdit::textChanged, [this]() { PopulateFormFactors(); });
 	connect(btn_ffact_plot, &QPushButton::clicked, this, &MagDynDlg::ShowFormFactorDlg);
 	connect(btn_ffact_j0, &QPushButton::clicked, [this]()
 	{

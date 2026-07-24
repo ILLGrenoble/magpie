@@ -280,8 +280,7 @@ SitesComboBox* MagDynDlg::CreateSitesComboBox(const std::string& selected_site)
 	};
 
 
-	SitesComboBox* combo = new SitesComboBox();
-	combo->setParent(m_termstab);
+	SitesComboBox* combo = new SitesComboBox(m_termstab);
 	combo->installEventFilter(new WheelEventFilter(combo));
 	SyncSiteComboBox(combo, selected_site);
 
@@ -692,7 +691,7 @@ void MagDynDlg::MoveTabItemUp(QTableWidget *pTab)
 		if(!item || !item->isSelected())
 			continue;
 
-		pTab->insertRow(row-1);
+		pTab->insertRow(row - 1);
 		for(int col = 0; col < pTab->columnCount(); ++col)
 		{
 			pTab->setItem(row - 1, col, pTab->item(row + 1, col)->clone());
@@ -701,14 +700,14 @@ void MagDynDlg::MoveTabItemUp(QTableWidget *pTab)
 			if(pTab == m_termstab && (col == COL_XCH_ATOM1_IDX || col == COL_XCH_ATOM2_IDX))
 			{
 				SitesComboBox *combo_old = reinterpret_cast<SitesComboBox*>(
-					pTab->cellWidget(row+1, col));
+					pTab->cellWidget(row + 1, col));
 				SitesComboBox *combo = CreateSitesComboBox(
 					combo_old->currentText().toStdString());
-				pTab->setCellWidget(row-1, col, combo);
-				pTab->setItem(row-1, col, combo);
+				pTab->setCellWidget(row - 1, col, combo);
+				pTab->setItem(row - 1, col, combo);
 			}
 		}
-		pTab->removeRow(row+1);
+		pTab->removeRow(row + 1);
 	}
 
 	for(int row = 0; row < pTab->rowCount(); ++row)
@@ -755,10 +754,10 @@ void MagDynDlg::MoveTabItemDown(QTableWidget *pTab)
 		if(!item || !item->isSelected())
 			continue;
 
-		pTab->insertRow(row+2);
+		pTab->insertRow(row + 2);
 		for(int col = 0; col < pTab->columnCount(); ++col)
 		{
-			pTab->setItem(row+2, col, pTab->item(row, col)->clone());
+			pTab->setItem(row + 2, col, pTab->item(row, col)->clone());
 
 			// also clone site selection combo boxes
 			if(pTab == m_termstab && (col == COL_XCH_ATOM1_IDX || col == COL_XCH_ATOM2_IDX))
@@ -767,8 +766,8 @@ void MagDynDlg::MoveTabItemDown(QTableWidget *pTab)
 					pTab->cellWidget(row, col));
 				SitesComboBox *combo = CreateSitesComboBox(
 					combo_old->currentText().toStdString());
-				pTab->setCellWidget(row+2, col, combo);
-				pTab->setItem(row+2, col, combo);
+				pTab->setCellWidget(row + 2, col, combo);
+				pTab->setItem(row + 2, col, combo);
 			}
 		}
 		pTab->removeRow(row);
