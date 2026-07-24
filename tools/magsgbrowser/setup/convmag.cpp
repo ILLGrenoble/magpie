@@ -147,7 +147,7 @@ T get_num(std::istream& istr)
 std::string get_string(std::istream& istr)
 {
 	// skip whitespace
-	while(1)
+	while(true)
 	{
 		char c = istr.get();
 		if(c!=' ' && c!='\t')
@@ -167,7 +167,7 @@ std::string get_string(std::istream& istr)
 
 	// read string
 	std::string str;
-	while(1)
+	while(true)
 	{
 		c = istr.get();
 		// end of string?

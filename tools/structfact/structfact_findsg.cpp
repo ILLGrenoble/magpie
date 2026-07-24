@@ -256,7 +256,7 @@ void StructFactDlg::FindSG()
 	ostr << "\n";
 	std::vector<t_vec> vecInit = vecFinal;
 
-	while(1)
+	while(true)
 	{
 		ostr << "\n--------------------------------------------------------------------------------\n";
 		ostr << "Base set of nuclear positions:\n";

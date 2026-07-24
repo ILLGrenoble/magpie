@@ -218,7 +218,7 @@ t_vec perp(const t_vec& vec, t_scalar eps = std::numeric_limits<t_scalar>::epsil
 
 	else if(vec.size() == 3 || vec.size() == 4)
 	{
-		while(1)
+		while(true)
 		{
 			t_vec rand = tl2::rand<t_vec>(3);
 			t_vec perp = tl2::cross<t_vec>({ vec, rand });

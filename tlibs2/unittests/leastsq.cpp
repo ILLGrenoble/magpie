@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_leastsq, t_real, t_types)
 {
 	//using t_cplx = std::complex<t_real>;
 	using t_vec = tl2::vec<t_real, std::vector>;
-	//using t_mat = tl2::mat<t_real, std::vector>;
+	using t_mat = tl2::mat<t_real, std::vector>;
 	//using t_vec_cplx = tl2::vec<t_cplx, std::vector>;
 	//using t_mat_cplx = tl2::mat<t_cplx, std::vector>;
 
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_leastsq, t_real, t_types)
 	auto x = tl2::create<t_vec>({1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
 	auto y = tl2::create<t_vec>({5, 5, 7, 9, 9.5, 10.5, 10.5, 12, 13.5, 14});
 
-	auto [params, ok] = tl2::leastsq<t_vec>(x, y, 1);
+	auto [params, ok] = tl2::leastsq<t_vec, t_mat>(x, y, 1);
 	std::cout << "ok: " << ok << ", params: " << params << std::endl;
 
 	BOOST_TEST(ok);

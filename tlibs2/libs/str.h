@@ -223,7 +223,7 @@ std::size_t string_rm(t_str& str, const t_str& strStart, const t_str& strEnd)
 {
 	std::size_t iNumFound = 0;
 
-	while(1)
+	while(true)
 	{
 		std::size_t iStart = str.find(strStart);
 		std::size_t iEnd = str.find(strEnd);
