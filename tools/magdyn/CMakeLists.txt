@@ -181,8 +181,11 @@ if(USE_QT)
 		export/sunny.cpp export/sw.cpp
 		export/script.cpp export/sqe.cpp
 		kernel.cpp dispersion.cpp
-		graph.cpp graph.h
 		defs.cpp defs.h gui_defs.h
+
+		# widgets
+		widgets/graph.cpp widgets/graph.h
+		widgets/siteitem.h
 
 		# panels
 		panels/sites.cpp panels/terms.cpp

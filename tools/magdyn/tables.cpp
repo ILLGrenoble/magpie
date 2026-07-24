@@ -352,7 +352,7 @@ void MagDynDlg::AddTermTabItem(
 				SitesComboBox *combo = CreateSitesComboBox(
 					combo_old->currentText().toStdString());
 				m_termstab->setCellWidget(row, thecol, combo);
-				m_termstab->setItem(row, thecol, combo);
+				m_termstab->setItem(row, thecol, combo->GetItem());
 			}
 		}
 
@@ -367,8 +367,8 @@ void MagDynDlg::AddTermTabItem(
 		SitesComboBox* combo2 = CreateSitesComboBox(atom_2);
 		m_termstab->setCellWidget(row, COL_XCH_ATOM1_IDX, combo1);
 		m_termstab->setCellWidget(row, COL_XCH_ATOM2_IDX, combo2);
-		m_termstab->setItem(row, COL_XCH_ATOM1_IDX, combo1);
-		m_termstab->setItem(row, COL_XCH_ATOM2_IDX, combo2);
+		m_termstab->setItem(row, COL_XCH_ATOM1_IDX, combo1->GetItem());
+		m_termstab->setItem(row, COL_XCH_ATOM2_IDX, combo2->GetItem());
 
 		m_termstab->setItem(row, COL_XCH_DIST_X, new t_numitem(dist_x));
 		m_termstab->setItem(row, COL_XCH_DIST_Y, new t_numitem(dist_y));
@@ -595,9 +595,43 @@ void MagDynDlg::DelTabItem(QTableWidget *pTab, int begin, int end)
 		}
 	} BOOST_SCOPE_EXIT_END
 
+
+	auto clear_sites_comboboxes = [this](int row, QTableWidget *tab)
+	{
+		if(tab != m_termstab)
+			return;
+
+		SitesComboBox *combo1 = reinterpret_cast<SitesComboBox*>(
+			tab->cellWidget(row, COL_XCH_ATOM1_IDX));
+		SitesComboBox *combo2 = reinterpret_cast<SitesComboBox*>(
+			tab->cellWidget(row, COL_XCH_ATOM2_IDX));
+
+		if(combo1)
+		{
+			tab->setCellWidget(row, COL_XCH_ATOM1_IDX, nullptr);
+			tab->setItem(row, COL_XCH_ATOM1_IDX, nullptr);
+
+			combo1->clear();
+			delete combo1;
+		}
+
+		if(combo2)
+		{
+			tab->setCellWidget(row, COL_XCH_ATOM2_IDX, nullptr);
+			tab->setItem(row, COL_XCH_ATOM2_IDX, nullptr);
+
+			combo2->clear();
+			delete combo2;
+		}
+	};
+
+
 	// if nothing is selected, clear all items
 	if(begin == -1 || pTab->selectedItems().count() == 0)
 	{
+		for(int row = 0; row < pTab->rowCount(); ++row)
+			clear_sites_comboboxes(row, pTab);
+
 		pTab->clearContents();
 		pTab->setRowCount(0);
 	}
@@ -609,7 +643,10 @@ void MagDynDlg::DelTabItem(QTableWidget *pTab, int begin, int end)
 	else if(begin >= 0 && end >= 0)  // clear given range
 	{
 		for(int row = end - 1; row >= begin; --row)
+		{
+			clear_sites_comboboxes(row, pTab);
 			pTab->removeRow(row);
+		}
 	}
 
 	UpdateVerticalHeader(pTab);
@@ -694,9 +731,7 @@ void MagDynDlg::MoveTabItemUp(QTableWidget *pTab)
 		pTab->insertRow(row - 1);
 		for(int col = 0; col < pTab->columnCount(); ++col)
 		{
-			pTab->setItem(row - 1, col, pTab->item(row + 1, col)->clone());
-
-			// also clone site selection combo boxes
+			// clone site selection combo boxes
 			if(pTab == m_termstab && (col == COL_XCH_ATOM1_IDX || col == COL_XCH_ATOM2_IDX))
 			{
 				SitesComboBox *combo_old = reinterpret_cast<SitesComboBox*>(
@@ -704,7 +739,12 @@ void MagDynDlg::MoveTabItemUp(QTableWidget *pTab)
 				SitesComboBox *combo = CreateSitesComboBox(
 					combo_old->currentText().toStdString());
 				pTab->setCellWidget(row - 1, col, combo);
-				pTab->setItem(row - 1, col, combo);
+				pTab->setItem(row - 1, col, combo->GetItem());
+			}
+			// clone table item
+			else
+			{
+				pTab->setItem(row - 1, col, pTab->item(row + 1, col)->clone());
 			}
 		}
 		pTab->removeRow(row + 1);
@@ -713,10 +753,13 @@ void MagDynDlg::MoveTabItemUp(QTableWidget *pTab)
 	for(int row = 0; row < pTab->rowCount(); ++row)
 	{
 		if(auto *item = pTab->item(row, 0);
-			item && std::find(selected.begin(), selected.end(), row+1) != selected.end())
+			item && std::find(selected.begin(), selected.end(), row + 1) != selected.end())
 		{
-			for(int col=0; col<pTab->columnCount(); ++col)
-				pTab->item(row, col)->setSelected(true);
+			for(int col = 0; col < pTab->columnCount(); ++col)
+			{
+				if(pTab->item(row, col))
+					pTab->item(row, col)->setSelected(true);
+			}
 		}
 	}
 
@@ -757,9 +800,7 @@ void MagDynDlg::MoveTabItemDown(QTableWidget *pTab)
 		pTab->insertRow(row + 2);
 		for(int col = 0; col < pTab->columnCount(); ++col)
 		{
-			pTab->setItem(row + 2, col, pTab->item(row, col)->clone());
-
-			// also clone site selection combo boxes
+			// clone site selection combo boxes
 			if(pTab == m_termstab && (col == COL_XCH_ATOM1_IDX || col == COL_XCH_ATOM2_IDX))
 			{
 				SitesComboBox *combo_old = reinterpret_cast<SitesComboBox*>(
@@ -767,7 +808,12 @@ void MagDynDlg::MoveTabItemDown(QTableWidget *pTab)
 				SitesComboBox *combo = CreateSitesComboBox(
 					combo_old->currentText().toStdString());
 				pTab->setCellWidget(row + 2, col, combo);
-				pTab->setItem(row + 2, col, combo);
+				pTab->setItem(row + 2, col, combo->GetItem());
+			}
+			// clone table item
+			else
+			{
+				pTab->setItem(row + 2, col, pTab->item(row, col)->clone());
 			}
 		}
 		pTab->removeRow(row);
@@ -776,10 +822,13 @@ void MagDynDlg::MoveTabItemDown(QTableWidget *pTab)
 	for(int row = 0; row < pTab->rowCount(); ++row)
 	{
 		if(auto *item = pTab->item(row, 0);
-			item && std::find(selected.begin(), selected.end(), row-1) != selected.end())
+			item && std::find(selected.begin(), selected.end(), row - 1) != selected.end())
 		{
-			for(int col=0; col<pTab->columnCount(); ++col)
-				pTab->item(row, col)->setSelected(true);
+			for(int col = 0; col < pTab->columnCount(); ++col)
+			{
+				if(pTab->item(row, col))
+					pTab->item(row, col)->setSelected(true);
+			}
 		}
 	}
 

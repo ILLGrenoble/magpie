@@ -70,7 +70,8 @@
 #include "../bz/plot_cut.h"
 
 #include "gui_defs.h"
-#include "graph.h"
+#include "widgets/graph.h"
+#include "widgets/siteitem.h"
 
 // dialogs
 #include "dialogs/table_import.h"
@@ -91,31 +92,6 @@
 #include "tlibs2/tools/plot2d/plot2d.h"
 #include "tlibs2/tools/plot3d/plot3d.h"
 #include "../bz/bz.h"
-
-
-
-/**
- * combo box showing the magnetic sites and sorting according to their index
- */
-struct SitesComboBox : public QComboBox, QTableWidgetItem
-{
-	SitesComboBox(QWidget* parent = nullptr)
-		: QComboBox(parent), QTableWidgetItem()
-	{
-	}
-
-	virtual ~SitesComboBox() = default;
-
-
-	virtual bool operator<(const QTableWidgetItem& item) const override
-	{
-		const SitesComboBox* combo = dynamic_cast<const SitesComboBox*>(&item);
-		if(!combo)
-			return true;
-
-		return currentIndex() < combo->currentIndex();
-	}
-};
 
 
 
