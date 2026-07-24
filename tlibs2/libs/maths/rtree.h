@@ -12,7 +12,7 @@
  *
  * ----------------------------------------------------------------------------
  * tlibs
- * Copyright (C) 2017-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
@@ -122,7 +122,7 @@ t_cont<std::pair<std::size_t, t_real>> closest_point_rtree(
 	const t_mat* B = nullptr, t_real eps = 1e-6)
 {
 	using namespace tl2_ops;
-	
+
 	using t_elem = std::pair<std::size_t, t_real>;
 	t_cont<t_rtree_leaf> query_answers;
 	t_cont<t_elem> found_points;

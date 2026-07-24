@@ -6,8 +6,8 @@
  * @desc Forked on 7-sep-2023 from my privately developed "gl" project: https://github.com/t-weber/gl .
  *
  * ----------------------------------------------------------------------------
- * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * magpie & mag-core
+ * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * "gl" project
  * Copyright (C) 2021-2023  Tobias WEBER (privately developed).

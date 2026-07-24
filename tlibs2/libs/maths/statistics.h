@@ -1,7 +1,7 @@
 /**
  * tlibs2 maths library -- statistical functions
  * @author Tobias Weber <tobias.weber@tum.de>, <tweber@ill.fr>
- * @date 2015 - 2024
+ * @date 2015 - 2026
  * @license GPLv3, see 'LICENSE' file
  *
  * @note this file is based on code from my following projects:
@@ -15,7 +15,7 @@
  *
  * ----------------------------------------------------------------------------
  * tlibs
- * Copyright (C) 2017-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
@@ -274,7 +274,7 @@ requires is_mat<t_mat> && is_vec<t_vec>
  *
  * @see (Arfken 2013), p. 1170
  */
-template<class T, class t_func, class t_iter_dat=T*>
+template<class T, class t_func, class t_iter_dat = T*>
 T chi2(const t_func& func, std::size_t N,
 	const t_iter_dat x, const t_iter_dat y, const t_iter_dat dy)
 {

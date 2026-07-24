@@ -5,7 +5,7 @@
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * mag-core (part of the Takin software suite)
+ * magpie & mag-core
  * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  *
@@ -735,7 +735,7 @@ void PowderDlg::SavePowderData()
 			t_real S = *Ebinidx / t_real(Qvecs_count) / t_real(E_count);
 			ofstr << std::setw(field_len) << std::left << S << " ";
 		}
-	
+
 		ofstr << "\n";
 	}
 

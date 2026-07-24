@@ -1,14 +1,13 @@
 /**
- * tlibs2
- * magnetic space group library
+ * tlibs2 -- magnetic space group library
  * @author Tobias Weber <tweber@ill.fr>
- * @date 2018-2021
+ * @date 2018-2026
  * @note The present version was forked on 8-Nov-2018 from my privately developed "magtools" project (https://github.com/t-weber/magtools).
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
  * tlibs
- * Copyright (C) 2017-2021  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).

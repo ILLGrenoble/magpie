@@ -7,7 +7,7 @@
 #
 # ----------------------------------------------------------------------------
 # magpie
-# Copyright (C) 2022-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
+# Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
 #                          Grenoble, France).
 #
 # This program is free software: you can redistribute it and/or modify

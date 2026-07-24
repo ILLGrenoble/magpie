@@ -1,7 +1,7 @@
 /**
  * tlibs2 maths library -- numerical differentiation and integration
  * @author Tobias Weber <tobias.weber@tum.de>, <tweber@ill.fr>
- * @date 2015 - 2024
+ * @date 2015 - 2026
  * @license GPLv3, see 'LICENSE' file
  *
  * @note this file is based on code from my following projects:
@@ -15,7 +15,7 @@
  *
  * ----------------------------------------------------------------------------
  * tlibs
- * Copyright (C) 2017-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).

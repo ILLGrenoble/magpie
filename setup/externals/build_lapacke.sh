@@ -7,6 +7,9 @@
 # @license GPLv2
 #
 # ----------------------------------------------------------------------------
+# Magpie
+# Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
+#                          Grenoble, France).
 # Takin (inelastic neutron scattering software package)
 # Copyright (C) 2017-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
 #                          Grenoble, France).

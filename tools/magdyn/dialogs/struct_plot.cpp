@@ -6,8 +6,8 @@
  * @desc The present version was forked on 28-Dec-2018 from my privately developed "misc" project (https://github.com/t-weber/misc).
  *
  * ----------------------------------------------------------------------------
- * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * magpie & mag-core
+ * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * "misc" project
  * Copyright (C) 2017-2022  Tobias WEBER (privately developed).

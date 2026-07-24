@@ -15,7 +15,7 @@
  *                 ISBN: 978-3-642-09681-5 (http://dx.doi.org/10.1007/978-3-540-77974-2).
  *
  * ----------------------------------------------------------------------------
- * TAS-Paths (part of the Takin software suite)
+ * TAS-Paths
  * Copyright (C) 2021-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * "geo" project

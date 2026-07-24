@@ -6,7 +6,7 @@
 #
 # ----------------------------------------------------------------------------
 # magpie
-# Copyright (C) 2022-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
+# Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
 #                          Grenoble, France).
 # takin / magcore
 # Copyright (C) 2018-2025  Tobias WEBER (Institut Laue-Langevin (ILL),

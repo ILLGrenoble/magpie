@@ -9,7 +9,7 @@
 # Magpie
 # Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
 #                          Grenoble, France).
-# TAS-Paths (part of the Takin software suite)
+# TAS-Paths
 # Copyright (C) 2021  Tobias WEBER (Institut Laue-Langevin (ILL),
 #                     Grenoble, France).
 #

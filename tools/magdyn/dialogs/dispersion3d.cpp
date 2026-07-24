@@ -5,8 +5,8 @@
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * magpie & mag-core
+ * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -123,7 +123,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	m_split_plot->setStretchFactor(m_split_plot->indexOf(bands_panel), 1);
 
 	// splitter for plot and the controls
-	QWidget *control_panel = new QWidget(this);	
+	QWidget *control_panel = new QWidget(this);
 	m_split_controls = new QSplitter(this);
 	m_split_controls->setOrientation(Qt::Vertical);
 	m_split_controls->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
@@ -132,7 +132,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	m_split_controls->setCollapsible(0, false);
 	m_split_controls->setCollapsible(1, true);
 	m_split_controls->setStretchFactor(m_split_controls->indexOf(m_split_plot), 8);
-	m_split_controls->setStretchFactor(m_split_controls->indexOf(control_panel), 0);	
+	m_split_controls->setStretchFactor(m_split_controls->indexOf(control_panel), 0);
 
 	// general plot context menu
 	m_context = new QMenu(this);

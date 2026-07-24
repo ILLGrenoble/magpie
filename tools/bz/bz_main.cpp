@@ -5,8 +5,8 @@
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * magpie & mag-core
+ * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * "misc" project
  * Copyright (C) 2017-2021  Tobias WEBER (privately developed).
@@ -105,7 +105,7 @@ static int cli_main(const std::string& cfg_file, const std::string& results_file
 				*cfg.cut_ny,
 				*cfg.cut_nz
 			});
-			
+
 			bzcalc.CalcPeaks(cfg.cut_order ? *cfg.cut_order : 5, false, true);
 
 			// calculate cut

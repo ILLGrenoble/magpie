@@ -5,8 +5,11 @@
 # @license GPLv3
 #
 # ----------------------------------------------------------------------------
-# mag-core (part of the Takin software suite)
-# Copyright (C) 2018-2021  Tobias WEBER (Institut Laue-Langevin (ILL),
+# Magpie
+# Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
+#                          Grenoble, France).
+# Takin (inelastic neutron scattering software package)
+# Copyright (C) 2017-2025  Tobias WEBER (Institut Laue-Langevin (ILL),
 #                          Grenoble, France).
 #
 # This program is free software: you can redistribute it and/or modify
@@ -23,14 +26,14 @@
 # ----------------------------------------------------------------------------
 #
 
-PROGDIR=~/.wine/drive_c/moldyn
+PROGDIR=~/.wine/drive_c/magpie
 MINGWDIR=/usr/x86_64-w64-mingw32/sys-root/mingw/bin
 MINGWQTDIR=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/qt5
 
 mkdir ${PROGDIR}
 mkdir -p ${PROGDIR}/qtplugins/platforms
 
-cp -v build/moldyn.exe ${PROGDIR}/
+cp -v build/magpie.exe ${PROGDIR}/
 
 cp -v ${MINGWDIR}/Qt5Core.dll		${PROGDIR}/
 cp -v ${MINGWDIR}/Qt5Gui.dll		${PROGDIR}/

@@ -5,7 +5,7 @@
 # @license GPLv3, see 'LICENSE' file
 #
 # ----------------------------------------------------------------------------
-# mag-core (part of the Takin software suite)
+# magpie & mag-core
 # Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
 #                          Grenoble, France).
 #

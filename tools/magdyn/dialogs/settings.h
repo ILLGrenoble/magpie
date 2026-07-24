@@ -6,8 +6,8 @@
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * magpie & mag-core
+ * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * TAS-Paths
  * Copyright (C) 2021  Tobias WEBER (Institut Laue-Langevin (ILL),
@@ -966,7 +966,7 @@ protected:
 			if constexpr (!std::is_same_v<t_value, std::string>)
 				sett->setValue(var.key, *value);
 			else
-				sett->setValue(var.key, value->c_str());				
+				sett->setValue(var.key, value->c_str());
 		}
 	}
 

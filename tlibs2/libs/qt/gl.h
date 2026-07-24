@@ -1,7 +1,7 @@
 /**
  * tlibs2 -- common gl functions
  * @author Tobias Weber <tweber@ill.fr>
- * @date 2017-2021
+ * @date 2017 - 2026
  * @license GPLv3, see 'LICENSE' file
  *
  * @note this file is based on code from my following projects:
