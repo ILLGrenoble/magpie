@@ -32,12 +32,12 @@
 
 #if __has_include(<filesystem>)
 	#include <filesystem>
-	namespace fs = std::filesystem;
+	namespace __fs = std::filesystem;
 #else
 	#pragma message("tlibs2: Standard filesystem header not found, using boost.filesystem.")
 	#include <boost/filesystem/path.hpp>
 	#include <boost/filesystem/operations.hpp>
-	namespace fs = boost::filesystem;
+	namespace __fs = boost::filesystem;
 #endif
 
 #include <boost/version.hpp>
@@ -60,10 +60,11 @@
 #include "traits.h"
 
 
-namespace prop = ::boost::property_tree;
-
-
 namespace tl2 {
+
+namespace prop = ::boost::property_tree;
+namespace fs = ::__fs;
+
 
 template<typename t_char=char>
 std::streampos get_file_size(std::basic_istream<t_char>& istr)

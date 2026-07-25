@@ -34,7 +34,6 @@ namespace test = boost::unit_test;
 namespace testtools = boost::test_tools;
 
 #include <iostream>
-#include <vector>
 
 #include "libs/maths.h"
 using namespace tl2_ops;
@@ -48,11 +47,11 @@ using namespace tl2_ops;
 namespace odeint = boost::numeric::odeint;
 
 // mark custom vector as resizeable
-//template<> struct odeint::is_resizeable<tl2::vec<float, std::vector>> : boost::true_type {};
-//template<> struct odeint::is_resizeable<tl2::vec<double, std::vector>> : boost::true_type {};
+template<> struct odeint::is_resizeable<tl2::vec<float>> : std::true_type { };
+template<> struct odeint::is_resizeable<tl2::vec<double>> : std::true_type { };
 
 
-template<class t_mat, class t_vec, class t_val=typename t_vec::value_type>
+template<class t_mat, class t_vec, class t_val = typename t_vec::value_type>
 t_vec odesys(const t_mat& C, const t_vec& y0, t_val x_start, t_val x_end, t_val x_step = 0.01)
 {
 	t_vec y = y0;
@@ -60,7 +59,7 @@ t_vec odesys(const t_mat& C, const t_vec& y0, t_val x_start, t_val x_end, t_val 
 	odeint::integrate_adaptive(odeint::runge_kutta4<t_vec>{},
 		[&C](const t_vec& y, t_vec& y_diff, t_val x) -> void
 		{
-			y_diff = C*y;
+				y_diff = C*y;
 		}, y, x_start, x_end, x_step);
 
 	return y;
@@ -75,10 +74,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ode, t_real, t_types)
 	const t_real eps = 1e-3;
 
 	using t_cplx = std::complex<t_real>;
-	using t_vec_cplx = tl2::vec<t_cplx, std::vector>;
-	using t_mat_cplx = tl2::mat<t_cplx, std::vector>;
-	using t_vec = tl2::vec<t_real, std::vector>;
-	using t_mat = tl2::mat<t_real, std::vector>;
+	using t_vec_cplx = tl2::vec<t_cplx>;
+	using t_mat_cplx = tl2::mat<t_cplx>;
+	using t_vec = tl2::vec<t_real>;
+	using t_mat = tl2::mat<t_real>;
 
 
 	t_mat_cplx coeff = tl2::create<t_mat_cplx>({

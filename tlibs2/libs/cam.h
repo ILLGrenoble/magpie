@@ -720,63 +720,63 @@ public:
 
 private:
 	// full transformation matrix and its inverse
-	t_mat m_mat = tl2::unit<t_mat>();
-	t_mat m_mat_inv = tl2::unit<t_mat>();
+	t_mat m_mat { tl2::unit<t_mat>() };
+	t_mat m_mat_inv { tl2::unit<t_mat>() };
 
 	// rotation and translation matrices
-	t_mat m_matRot = tl2::unit<t_mat>();
-	t_mat m_matTrans = tl2::unit<t_mat>();
+	t_mat m_matRot { tl2::unit<t_mat>() };
+	t_mat m_matTrans { tl2::unit<t_mat>() };
 
 	// field of view
-	t_real m_FOV = tl2::pi<t_real>*t_real(0.5);
+	t_real m_FOV { tl2::pi<t_real>*t_real(0.5) };
 
 	// camera frustum near and far planes
-	t_real m_nearPlane = 0.1;
-	t_real m_farPlane = 1000.;
+	t_real m_nearPlane { 0.1 };
+	t_real m_farPlane { 1000. };
 
 	// range for parallel projection
-	t_real m_parallel_range = 20.;
+	t_real m_parallel_range { 20. };
 
 	// camera rotation
-	t_real m_phi = pi<t_real>*t_real(0.25);
-	t_real m_theta = -pi<t_real>*(0.25);
-	t_real m_phi_saved = pi<t_real>*t_real(0.25);
-	t_real m_theta_saved = -pi<t_real>*(0.25);
+	t_real m_phi { pi<t_real>*t_real(0.25) };
+	t_real m_theta { -pi<t_real>*(0.25) };
+	t_real m_phi_saved { pi<t_real>*t_real(0.25) };
+	t_real m_theta_saved { -pi<t_real>*(0.25) };
 
 	// camera zoom (giving the fraction of m_dist towards the translation centre)
-	t_real m_zoom = 1.;
+	t_real m_zoom { 1. };
 
 	// distance from camera centre
-	t_real m_dist = 15.;
+	t_real m_dist { 15. };
 
 	// perspective matrix and its inverse
-	t_mat m_matPerspective = tl2::unit<t_mat>();
-	t_mat m_matPerspective_inv = tl2::unit<t_mat>();
+	t_mat m_matPerspective { tl2::unit<t_mat>() };
+	t_mat m_matPerspective_inv { tl2::unit<t_mat>() };
 
 	// perspective or parallel projection?
-	bool m_persp_proj = true;
+	bool m_persp_proj { true };
 
 	// screen aspect ratio
-	t_real m_aspect = 1.;
+	t_real m_aspect { 1. };
 
 	// screen viewport
-	t_mat m_matViewport = tl2::unit<t_mat>();
-	t_mat m_matViewport_inv = tl2::unit<t_mat>();
+	t_mat m_matViewport { tl2::unit<t_mat>() };
+	t_mat m_matViewport_inv { tl2::unit<t_mat>() };
 
 	// z buffer range
-	t_real m_z_near{0}, m_z_far{1};
+	t_real m_z_near{ 0 }, m_z_far{ 1 };
 
 	// screen dimensions
 	std::array<int, 2> m_screenDims = { 800, 600 };
 
 	// does the transformation matrix need an update?
-	bool m_trafo_needs_update = true;
+	bool m_trafo_needs_update { true };
 
 	// does the perspective matrix need an update?
-	bool m_persp_needs_update = true;
+	bool m_persp_needs_update { true };
 
 	// does the perspective matrix need an update?
-	bool m_viewport_needs_update = true;
+	bool m_viewport_needs_update { true };
 };
 
 }

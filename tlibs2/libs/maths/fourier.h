@@ -69,7 +69,7 @@ t_cplx dft_coeff(int k, const t_cont<t_cplx>& invec, bool bInv = false)
 	t_cplx imag(0., 1.);
 	t_cplx f(0., 0.);
 
-	for(std::size_t j=0; j<N; ++j)
+	for(std::size_t j = 0; j < N; ++j)
 	{
 		T dv = T(-2)*pi < T>*T(j)*T(k)/T(N);
 		if(bInv) dv = -dv;
@@ -94,7 +94,7 @@ t_cont<t_cplx> dft(const t_cont<t_cplx>& invec,
 	t_cont<t_cplx> outvec;
 	outvec.resize(N);
 
-	for(std::size_t k=0; k<N; ++k)
+	for(std::size_t k = 0; k < N; ++k)
 	{
 		outvec[k] = dft_coeff<T, t_cplx, t_cont>(k, invec, bInv);
 

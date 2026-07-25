@@ -2294,7 +2294,9 @@ GlPlot::GlPlot(QWidget *pParent) : QOpenGLWidget(pParent),
 	connect(this, &QOpenGLWidget::aboutToResize, this, &GlPlot::beforeResizing);
 	connect(this, &QOpenGLWidget::resized, this, &GlPlot::afterResizing);
 
+	setFocusPolicy(Qt::StrongFocus);
 	//setUpdateBehavior(QOpenGLWidget::PartialUpdate);
+	//grabKeyboard();
 	setMouseTracking(true);
 	grabGesture(Qt::PinchGesture);
 
@@ -2307,6 +2309,7 @@ GlPlot::~GlPlot()
 {
 	ungrabGesture(Qt::PinchGesture);
 	setMouseTracking(false);
+	//releaseKeyboard();
 
 	if constexpr(m_isthreaded)
 	{
@@ -2422,6 +2425,42 @@ void GlPlot::wheelEvent(QWheelEvent *pEvt)
 		m_renderer->RequestViewportUpdate();
 
 	pEvt->accept();
+}
+
+
+void GlPlot::keyPressEvent(QKeyEvent *pEvt)
+{
+	bool handled = false;
+
+	switch(pEvt->key())
+	{
+		case Qt::Key_Up:
+			m_renderer->GetCamera().Translate(0., -0.05, 0.);
+			handled = true;
+			break;
+		case Qt::Key_Down:
+			m_renderer->GetCamera().Translate(0., 0.05, 0.);
+			handled = true;
+			break;
+		case Qt::Key_Left:
+			m_renderer->GetCamera().Translate(0.05, 0., 0.);
+			handled = true;
+			break;
+		case Qt::Key_Right:
+			m_renderer->GetCamera().Translate(-0.05, 0., 0.);
+			handled = true;
+			break;
+	}
+
+	if(handled)
+	{
+		m_renderer->UpdateCam();
+		pEvt->accept();
+	}
+	else
+	{
+		pEvt->ignore();
+	}
 }
 
 

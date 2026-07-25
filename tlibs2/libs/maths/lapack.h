@@ -530,7 +530,7 @@ requires tl2::is_mat<t_mat>
 	const std::size_t N = mat.size1();
 	int err = -1;
 
-	std::vector<t_scalar> outmat(N*(N+1)/2);
+	std::vector<t_scalar> outmat(N*(N + 1)/2);
 	std::vector<int> outvec(N);
 
 	std::size_t lin_idx = 0;
@@ -574,7 +574,7 @@ requires tl2::is_mat<t_mat>
 	}
 
 	t_mat C = tl2::unit<t_mat>(N, N);
-	t_mat D = tl2::unit<t_mat>(N);
+	t_mat D = tl2::unit<t_mat>(N, N);
 
 	lin_idx = 0;
 	for(std::size_t i = 0; i < N; ++i)
@@ -590,7 +590,7 @@ requires tl2::is_mat<t_mat>
 
 	// TODO: only correct for unit permutation so far...
 	for(int& i : outvec)
-		i = std::abs(i)-1;
+		i = std::abs(i) - 1;
 	t_mat perm = tl2::perm<t_mat>(outvec);
 	C = perm * C;
 

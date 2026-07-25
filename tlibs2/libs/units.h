@@ -47,11 +47,11 @@
 
 #include <boost/math/constants/constants.hpp>
 
-namespace units = boost::units;
-namespace co = boost::units::si::constants::codata;
-
 
 namespace tl2 {
+
+namespace units = boost::units;
+namespace co = boost::units::si::constants::codata;
 
 
 template<typename T = double> constexpr T __pi = boost::math::constants::pi<T>();

@@ -60,19 +60,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_chol, t_real, t_types)
 	{
 		std::cout << "--------------------------------------------------------------------------------" << std::endl;
 		auto mat = tl2::zero<t_mat>(dim, dim);
-		for(std::size_t i=0; i<dim; ++i)
-			for(std::size_t j=i; j<dim; ++j)
+		for(std::size_t i = 0; i < dim; ++i)
+			for(std::size_t j = i; j < dim; ++j)
 				mat(j, i) = mat(i, j) = rnddist(rndgen);
 
 		std::cout << "M    = " << mat << std::endl;
 
-		bool sym = 1;
-		auto [ok, C, D] =
-			tl2_la::chol_herm<t_mat, t_vec>(mat);
+		auto [ok, C, D] = tl2_la::chol_herm<t_mat, t_vec>(mat);
 		std::cout << "ok = " << std::boolalpha << ok << std::endl;
 
 		t_mat CDCt = C * D * tl2::trans(C);
 		std::cout << "C     = " << C << std::endl;
+		std::cout << "D     = " << D << std::endl;
 		std::cout << "CDC^t = " << CDCt << std::endl;
 
 		BOOST_TEST(ok);
@@ -87,9 +86,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_chol, t_real, t_types)
 		std::cout << "--------------------------------------------------------------------------------" << std::endl;
 
 		auto mat = tl2::zero<t_mat_cplx>(dim, dim);
-		for(std::size_t i=0; i<dim; ++i)
+		for(std::size_t i = 0; i < dim; ++i)
 		{
-			for(std::size_t j=i; j<dim; ++j)
+			for(std::size_t j = i; j < dim; ++j)
 			{
 				mat(i,j) = rnddist(rndgen);
 				if(i != j)
@@ -100,12 +99,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_chol, t_real, t_types)
 
 		std::cout << "M    = " << mat << std::endl;
 
-		auto [ok, C, D] =
-			tl2_la::chol_herm<t_mat_cplx, t_vec_cplx>(mat);
+		auto [ok, C, D] = tl2_la::chol_herm<t_mat_cplx, t_vec_cplx>(mat);
 		std::cout << "ok = " << std::boolalpha << ok << std::endl;
 
 		t_mat_cplx CDCh = C * D * tl2::herm(C);
 		std::cout << "C     = " << C << std::endl;
+		std::cout << "D     = " << D << std::endl;
 		std::cout << "CDC^h = " << CDCh << std::endl;
 
 		BOOST_TEST(ok);

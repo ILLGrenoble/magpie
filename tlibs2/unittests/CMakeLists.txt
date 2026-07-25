@@ -69,6 +69,13 @@ add_definitions(-DUSE_LAPACK)
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
+# qhull
+find_package(Qhull REQUIRED)
+add_definitions(-DUSE_QHULL)
+include_directories("${Qhull_INCLUDE_DIRS}")
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 # further packages
 find_package(Minuit2 REQUIRED)
 find_package(Threads REQUIRED)
@@ -100,6 +107,7 @@ add_executable(cryst cryst.cpp)
 add_executable(leastsq leastsq.cpp)
 add_executable(eig eig.cpp)
 add_executable(chol chol.cpp)
+add_executable(chol2 chol2.cpp)
 add_executable(ode ode.cpp)
 add_executable(min0 min0.cpp)
 add_executable(min1 min1.cpp)
@@ -109,6 +117,8 @@ add_executable(cov cov.cpp)
 add_executable(fft fft.cpp)
 add_executable(magdyn magdyn.cpp)
 add_executable(magdyn2 magdyn2.cpp)
+add_executable(units units.cpp)
+add_executable(hull1 hull1.cpp)
 
 target_link_libraries(expr Threads::Threads)
 target_link_libraries(magdyn ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES}
@@ -124,11 +134,13 @@ target_link_libraries(cryst ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBR
 target_link_libraries(leastsq ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES})
 target_link_libraries(eig ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES})
 target_link_libraries(chol ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES})
+target_link_libraries(chol2 ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES})
 target_link_libraries(ode ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES})
 target_link_libraries(min0 ${Minuit2_LIBRARIES} Threads::Threads) #OpenMP::OpenMP_CXX)
 target_link_libraries(min1 ${Minuit2_LIBRARIES} Threads::Threads) #OpenMP::OpenMP_CXX)
 target_link_libraries(fit0 ${Minuit2_LIBRARIES} Threads::Threads) #OpenMP::OpenMP_CXX)
 target_link_libraries(fit1 ${Minuit2_LIBRARIES}) #OpenMP::OpenMP_CXX)
+target_link_libraries(hull1 ${Qhull_LIBRARIES})
 # -----------------------------------------------------------------------------
 
 
@@ -151,6 +163,7 @@ add_test(quat1 quat1)
 add_test(leastsq leastsq)
 add_test(eig eig)
 add_test(chol chol)
+add_test(chol2 chol2)
 add_test(ode ode)
 add_test(min0 min0)
 add_test(min1 min1)
@@ -158,6 +171,8 @@ add_test(fit0 fit0)
 add_test(fit1 fit1)
 add_test(cov cov)
 add_test(fft fft)
+add_test(units units)
+add_test(hull1 hull1)
 # -----------------------------------------------------------------------------
 
 
