@@ -59,7 +59,7 @@ t_vec odesys(const t_mat& C, const t_vec& y0, t_val x_start, t_val x_end, t_val 
 	odeint::integrate_adaptive(odeint::runge_kutta4<t_vec>{},
 		[&C](const t_vec& y, t_vec& y_diff, t_val x) -> void
 		{
-				y_diff = C*y;
+			y_diff = C*y;
 		}, y, x_start, x_end, x_step);
 
 	return y;
