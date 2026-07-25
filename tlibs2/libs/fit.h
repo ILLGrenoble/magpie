@@ -145,6 +145,7 @@ protected:
 	std::vector<t_real> m_vals{};
 	bool m_separate_free_param{true};  // separate "x" from parameters (for fitter)
 
+
 public:
 	FitterLamFuncModel(t_func func, bool bSeparateX = true)
 		: m_func{func}, m_vals{}, m_separate_free_param{bSeparateX}
@@ -204,6 +205,7 @@ protected:
 	t_func m_func{};
 	std::vector<t_real> m_vals{};
 	bool m_separate_free_param{true};  // separate "x" from parameters (for fitter)
+
 
 public:
 	/**
@@ -325,15 +327,15 @@ template<class t_real = t_real_min>
 class Chi2Function : public ROOT::Minuit2::FCNBase, public StopRequest
 {
 protected:
-	const FitterFuncModel<t_real_min> *m_fkt = nullptr;
+	const FitterFuncModel<t_real_min> *m_fkt{};
 
-	std::size_t m_num_pts = 0;
-	const t_real *m_x = nullptr;
-	const t_real *m_y = nullptr;
-	const t_real *m_dy = nullptr;
+	std::size_t m_num_pts{};
+	const t_real *m_x{};
+	const t_real *m_y{};
+	const t_real *m_dy{};
 
-	t_real_min m_sigma = 1.;
-	bool m_debug = false;
+	t_real_min m_sigma{ 1. };
+	bool m_debug{ false };
 
 
 public:
@@ -351,6 +353,7 @@ public:
 		StopRequest::operator=(*this);
 
 		this->m_fkt = other.m_fkt;
+		this->m_num_pts = other.m_num_pts;
 		this->m_x = other.m_x;
 		this->m_y = other.m_y;
 		this->m_dy = other.m_dy;
@@ -424,8 +427,9 @@ template<class t_real = t_real_min>
 class MiniFunction : public ROOT::Minuit2::FCNBase, public StopRequest
 {
 protected:
-	const FitterFuncModel<t_real_min> *m_fkt = nullptr;
-	t_real_min m_sigma = 1.;
+	const FitterFuncModel<t_real_min> *m_fkt{ };
+	t_real_min m_sigma{ 1. };
+
 
 public:
 	MiniFunction(const FitterFuncModel<t_real_min>* fkt = nullptr)
