@@ -4,6 +4,9 @@
  * @date nov-2021
  * @license GPLv3, see 'LICENSE' file
  *
+ * @note this file is from my following projects:
+ *	- "TAS-Paths" (https://github.com/ILLGrenoble/taspaths).
+ *
  * ----------------------------------------------------------------------------
  * TAS-Paths
  * Copyright (C) 2021  Tobias WEBER (Institut Laue-Langevin (ILL),

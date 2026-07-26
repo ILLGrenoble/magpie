@@ -8,9 +8,10 @@
  *         - "misc" (https://github.com/t-weber/misc).
  *
  * ----------------------------------------------------------------------------
- * tlibs
+ * tlibs2
  * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
+ * tlibs1
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
  * "misc" project

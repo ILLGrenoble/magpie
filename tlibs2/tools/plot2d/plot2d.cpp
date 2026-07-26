@@ -5,8 +5,8 @@
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * magpie & mag-core
- * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * tlibs2
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -393,7 +393,7 @@ QWidget* Plot2DDlg::CreatePanel()
 		if(!m_status)
 			return;
 
-		t_real t = tl2::lerp(m_t_start->value(), m_t_end->value(),
+		t_real t = std::lerp(m_t_start->value(), m_t_end->value(),
 			t_real(val) / t_real(m_num_t->value() - 1));
 
 		QString status("t = %1.");
@@ -658,7 +658,7 @@ void Plot2DDlg::Calculate()
 	// get t count
 	t_size t_count = m_num_t->value();
 	int t_idx = m_slider_t->value();
-	t_real t = tl2::lerp(t_start, t_end, t_real(t_idx) / t_real(t_count - 1));
+	t_real t = std::lerp(t_start, t_end, t_real(t_idx) / t_real(t_count - 1));
 
 	// tread pool and mutex to protect the data vectors
 	asio::thread_pool pool{g_num_threads};
@@ -687,7 +687,7 @@ void Plot2DDlg::Calculate()
 		auto task = [this, &mtx, &x_start, &x_end, x_idx, x_count, t]()
 		{
 			const t_real x = x_count > 1
-				? tl2::lerp(x_start, x_end, t_real(x_idx) / t_real(x_count - 1))
+				? std::lerp(x_start, x_end, t_real(x_idx) / t_real(x_count - 1))
 				: x_start;
 
 			// calculate curves per index
@@ -795,7 +795,7 @@ void Plot2DDlg::PlotMouseMove(QMouseEvent* evt)
 
 	t_real x = m_plot->xAxis->pixelToCoord(evt->pos().x());
 	t_real y = m_plot->yAxis->pixelToCoord(evt->pos().y());
-	t_real t = tl2::lerp(m_t_start->value(), m_t_end->value(),
+	t_real t = std::lerp(m_t_start->value(), m_t_end->value(),
 		t_real(m_slider_t->value()) / t_real(m_num_t->value() - 1));
 
 	QString status("x = %1, y = %2, t = %3.");

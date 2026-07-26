@@ -14,9 +14,10 @@
  * @desc for the references, see the 'LITERATURE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs
+ * tlibs2
  * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
+ * tlibs1
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
  * "magtools", "geo", "misc", and "mathlibs" projects
@@ -61,8 +62,10 @@ template<class t_elem, template<class...> class t_cont /*= std::vector*/>
 t_elem mean(const t_cont<t_elem>& vec)
 requires is_basic_vec<t_cont<t_elem>>
 {
-	if(vec.size()==0) return t_elem{};
-	else if(vec.size()==1) return *vec.begin();
+	if(vec.size() == 0)
+		return t_elem{};
+	else if(vec.size() == 1)
+		return *vec.begin();
 
 	using namespace tl2_ops;
 
@@ -89,7 +92,8 @@ requires is_basic_vec<t_vec> && is_basic_vec<t_vec_prob>
 	typedef typename t_vec_prob::value_type Tprob;
 	std::size_t iSize = std::min(vecP.size(), vec.size());
 
-	if(iSize==0) return T(0);
+	if(iSize == 0)
+		return T(0);
 
 	T tMean = vecP[0]*vec[0];
 	Tprob tProbTotal = vecP[0];
@@ -113,7 +117,8 @@ typename t_vec::value_type std_dev(const t_vec& vec, bool bCorr=1)
 requires is_basic_vec<t_vec>
 {
 	typedef typename t_vec::value_type T;
-	if(vec.size()<=1) return T(0);
+	if(vec.size() <= 1)
+		return T(0);
 
 	T tProb = T(vec.size());
 	if(bCorr) tProb -= T(1);
@@ -138,7 +143,8 @@ requires is_basic_vec<t_vec> && is_basic_vec<t_vec_prob>
 {
 	typedef typename t_vec::value_type T;
 	std::size_t iSize = std::min(vecP.size(), vec.size());
-	if(iSize<=1) return T(0);
+	if(iSize <= 1)
+		return T(0);
 
 	T tMean = mean<t_vec_prob, t_vec>(vecP, vec);
 	T t = T(0);
@@ -281,7 +287,7 @@ T chi2(const t_func& func, std::size_t N,
 	using t_dat = typename std::remove_pointer<t_iter_dat>::type;
 	T tchi2 = T{0};
 
-	for(std::size_t i=0; i<N; ++i)
+	for(std::size_t i = 0; i < N; ++i)
 	{
 		T td = T(y[i]) - func(T(x[i]));
 		T tdy = dy ? T(dy[i]) : T(0.1*td);  // 10% error if none given
@@ -323,7 +329,7 @@ T chi2_idx(const t_func& func, std::size_t N, const t_iter_dat y, const t_iter_d
 	using t_dat = typename std::remove_pointer<t_iter_dat>::type;
 	T tchi2 = T(0);
 
-	for(std::size_t i=0; i<N; ++i)
+	for(std::size_t i = 0; i < N; ++i)
 	{
 		T td = T(y[i]) - func(i);
 		T tdy = dy ? T(dy[i]) : T(0.1*td);	// 10% error if none given
@@ -349,7 +355,7 @@ T chi2_direct(std::size_t N, const t_iter_dat func_y, const t_iter_dat y, const 
 	using t_dat = typename std::remove_pointer<t_iter_dat>::type;
 	T tchi2 = T(0);
 
-	for(std::size_t i=0; i<N; ++i)
+	for(std::size_t i = 0; i < N; ++i)
 	{
 		T td = T(y[i]) - T(func_y[i]);
 		T tdy = dy ? T(dy[i]) : T(0.1*td);	// 10% error if none given
@@ -376,7 +382,7 @@ T chi2_nd(const t_func& func,
 {
 	T tchi2 = T(0);
 
-	for(std::size_t i=0; i<vecvecX.size(); ++i)
+	for(std::size_t i = 0; i < vecvecX.size(); ++i)
 	{
 		T td = T(vecY[i]) - func(vecvecX[i]);
 		T tdy = vecDY[i];

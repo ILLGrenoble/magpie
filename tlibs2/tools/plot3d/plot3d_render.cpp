@@ -5,8 +5,8 @@
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs
- * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * tlibs2
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  *
  * This program is free software: you can redistribute it and/or modify

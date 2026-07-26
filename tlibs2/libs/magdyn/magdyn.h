@@ -19,11 +19,9 @@
  * as are "magnetic sites" and "atoms".
  *
  * ----------------------------------------------------------------------------
- * tlibs
+ * tlibs2
  * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
- * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
- *                          (TUM), Garching, Germany).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

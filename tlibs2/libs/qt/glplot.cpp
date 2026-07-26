@@ -14,9 +14,10 @@
  *   - http://code.qt.io/cgit/qt/qtbase.git/tree/examples/opengl/threadedqopenglwidget
  *
  * ----------------------------------------------------------------------------
- * tlibs
+ * tlibs2
  * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
+ * tlibs1
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
  * magtools
@@ -2431,23 +2432,24 @@ void GlPlot::wheelEvent(QWheelEvent *pEvt)
 void GlPlot::keyPressEvent(QKeyEvent *pEvt)
 {
 	bool handled = false;
+	const t_real_gl dx = 0.1;
 
 	switch(pEvt->key())
 	{
 		case Qt::Key_Up:
-			m_renderer->GetCamera().Translate(0., -0.05, 0.);
+			m_renderer->GetCamera().Translate(0., -dx, 0.);
 			handled = true;
 			break;
 		case Qt::Key_Down:
-			m_renderer->GetCamera().Translate(0., 0.05, 0.);
+			m_renderer->GetCamera().Translate(0., dx, 0.);
 			handled = true;
 			break;
 		case Qt::Key_Left:
-			m_renderer->GetCamera().Translate(0.05, 0., 0.);
+			m_renderer->GetCamera().Translate(dx, 0., 0.);
 			handled = true;
 			break;
 		case Qt::Key_Right:
-			m_renderer->GetCamera().Translate(-0.05, 0., 0.);
+			m_renderer->GetCamera().Translate(-dx, 0., 0.);
 			handled = true;
 			break;
 	}

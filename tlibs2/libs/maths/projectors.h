@@ -14,9 +14,10 @@
  * @desc for the references, see the 'LITERATURE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs
+ * tlibs2
  * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
+ * tlibs1
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
  * "magtools", "geo", "misc", and "mathlibs" projects
@@ -165,7 +166,7 @@ requires is_vec<t_vec>
 	// get point component with max. difference
 	t_real diff = -1.;
 	std::size_t compidx = 0;
-	for(std::size_t i=0; i<dim; ++i)
+	for(std::size_t i = 0; i < dim; ++i)
 	{
 		t_real newdiff = std::abs(linePt2[i] - linePt1[i]);
 		if(newdiff > diff)
@@ -239,7 +240,7 @@ requires is_vec<t_vec> && is_mat<t_mat>
 	const std::size_t N = vec.size();
 
 	t_vec vecSub = zero<t_vec>(N);
-	for(std::size_t i=0; i<row; ++i)
+	for(std::size_t i = 0; i < row; ++i)
 		vecSub[i] = vec[i];
 
 	// norm of rest vector

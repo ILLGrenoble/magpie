@@ -1,7 +1,7 @@
 /**
  * tlibs2 -- physics library
  * @author Tobias Weber <tobias.weber@tum.de>, <tweber@ill.fr>
- * @date 2012 - 2024
+ * @date 2012 - 2026
  * @license GPLv3, see 'LICENSE' file
  *
  * @note Forked on 7-Nov-2018 from my privately and TUM-PhD-developed "tlibs" project (https://github.com/t-weber/tlibs).
@@ -11,9 +11,10 @@
  * @note for the references, see the 'LITERATURE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs
+ * tlibs2
  * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
+ * tlibs1
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
  * "magtools", "geo", and "misc" projects

@@ -6,6 +6,9 @@
  * @note Class moved over to tlibs on 10-jan-2022 from my "TAS-Paths" project (https://code.ill.fr/scientific-software/takin/paths).
  * @license GPLv3, see 'LICENSE' file
  *
+ * @note this file is from my following projects:
+ *	- "TAS-Paths" (https://github.com/ILLGrenoble/taspaths).
+ *
  * References:
  *   - http://doc.qt.io/qt-5/qopenglwidget.html#details
  *   - http://code.qt.io/cgit/qt/qtbase.git/tree/examples/opengl/threadedqopenglwidget
@@ -14,9 +17,10 @@
  *   - (Sellers 2014) G. Sellers et al., ISBN: 978-0-321-90294-8 (2014).
  *
  * ----------------------------------------------------------------------------
- * tlibs
+ * tlibs2
  * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
+ * tlibs1
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
  * TAS-Paths

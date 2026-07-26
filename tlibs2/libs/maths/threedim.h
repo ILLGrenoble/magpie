@@ -14,9 +14,10 @@
  * @desc for the references, see the 'LITERATURE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs
+ * tlibs2
  * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
+ * tlibs1
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
  * "magtools", "geo", "misc", and "mathlibs" projects
@@ -72,7 +73,7 @@ requires is_basic_vec<t_vec>
 	if constexpr(is_dyn_vec<t_vec>)
 		vec = t_vec(3);
 
-	for(int i=0; i<3; ++i)
+	for(int i = 0; i < 3; ++i)
 		vec[i] = vec1[(i+1)%3]*vec2[(i+2)%3] - vec1[(i+2)%3]*vec2[(i+1)%3];
 
 	return vec;

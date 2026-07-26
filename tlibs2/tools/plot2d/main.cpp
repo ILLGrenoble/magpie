@@ -6,8 +6,8 @@
  * @desc The present version was forked on 28-Dec-2018 from my privately developed "misc" project (https://github.com/t-weber/misc).
  *
  * ----------------------------------------------------------------------------
- * tlibs
- * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * tlibs2
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * "misc" project
  * Copyright (C) 2017-2022  Tobias WEBER (privately developed).

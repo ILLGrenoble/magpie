@@ -14,9 +14,10 @@
  * @desc for the references, see the 'LITERATURE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs
+ * tlibs2
  * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
+ * tlibs1
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
  * "magtools", "geo", "misc", and "mathlibs" projects
@@ -77,7 +78,7 @@ requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
 	t_vec vec(vec1.size());
 
-	for(std::size_t i=0; i<vec1.size(); ++i)
+	for(std::size_t i = 0; i < vec1.size(); ++i)
 		vec[i] = -vec1[i];
 
 	return vec;
@@ -96,7 +97,7 @@ requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 
 	t_vec vec(vec1.size());
 
-	for(std::size_t i=0; i<vec1.size(); ++i)
+	for(std::size_t i = 0; i < vec1.size(); ++i)
 		vec[i] = vec1[i] + vec2[i];
 
 	return vec;
@@ -123,7 +124,7 @@ requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
 	t_vec vec(vec1.size());
 
-	for(std::size_t i=0; i<vec1.size(); ++i)
+	for(std::size_t i = 0; i < vec1.size(); ++i)
 		vec[i] = vec1[i] * d;
 
 	return vec;
@@ -151,7 +152,7 @@ requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
 	t_vec vec(vec1.size());
 
-	for(std::size_t i=0; i<vec1.size(); ++i)
+	for(std::size_t i = 0; i < vec1.size(); ++i)
 		vec[i] = vec1[i] / d;
 
 	return vec;
@@ -214,10 +215,10 @@ requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
 	const std::size_t N = vec.size();
 
-	for(std::size_t i=0; i<N; ++i)
+	for(std::size_t i = 0; i < N; ++i)
 	{
 		ostr << vec[i];
-		if(i < N-1)
+		if(i < N - 1)
 			ostr << TL2_COLSEP << " ";
 	}
 

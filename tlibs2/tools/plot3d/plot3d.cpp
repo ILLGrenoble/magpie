@@ -5,8 +5,8 @@
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs
- * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * tlibs2
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -420,7 +420,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 		if(!m_status)
 			return;
 
-		t_real t = tl2::lerp(m_trange[0]->value(), m_trange[1]->value(),
+		t_real t = std::lerp(m_trange[0]->value(), m_trange[1]->value(),
 			t_real(val) / t_real(m_slider_t->maximum() - m_slider_t->minimum()));
 
 		QString status("t = %1.");

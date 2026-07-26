@@ -1,17 +1,17 @@
 /**
- * tlibs2
- * type traits and concepts library
+ * tlibs2 -- type traits and concepts library
  * @author Tobias Weber <tobias.weber@tum.de>, <tweber@ill.fr>
- * @date 2014-2021
+ * @date 2014 - 2026
  * @note The present version was forked on 8-Nov-2018 from my privately developed "magtools" project (https://github.com/t-weber/magtools).
  * @note Forked on 7-Nov-2018 from my privately and TUM-PhD-developed "tlibs" project (https://github.com/t-weber/tlibs).
  * @note Further functions forked on 19-Apr-2021 from my privately developed "geo" project (https://github.com/t-weber/geo).
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs
+ * tlibs2
  * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
+ * tlibs1
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
  * magtools, geo, and "misc" projects

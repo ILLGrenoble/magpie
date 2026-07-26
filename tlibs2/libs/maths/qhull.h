@@ -14,9 +14,10 @@
  * @desc for the references, see the 'LITERATURE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs
+ * tlibs2
  * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
+ * tlibs1
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
  * "magtools", "geo", "misc", and "mathlibs" projects
@@ -105,7 +106,7 @@ requires tl2::is_vec<t_vec>
 	vecDists.reserve(facets.size());
 	//const t_vec vecCentre = tl2::mean(vecVerts);
 
-	for(t_facetlist_iter iter=facets.begin(); iter!=facets.end(); ++iter)
+	for(t_facetlist_iter iter = facets.begin(); iter != facets.end(); ++iter)
 	{
 		// triangulable?
 		if(iter->isUpperDelaunay())

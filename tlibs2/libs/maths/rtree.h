@@ -11,11 +11,9 @@
  * @desc for the references, see the 'LITERATURE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs
+ * tlibs2
  * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
- * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
- *                          (TUM), Garching, Germany).
  * mathlibs" and "geo" projects
  * Copyright (C) 2020-2025  Tobias WEBER (privately developed).
  *
