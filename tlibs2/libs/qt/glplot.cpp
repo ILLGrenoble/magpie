@@ -1145,8 +1145,11 @@ void main()
 	coordTrafo_inv[3][3] = 1.;
 
 	// coordTrafo_inv is needed so not to distort the object
-	vec4 objPos = coordTrafo * obj * coordTrafo_inv * vertex;
-	vec4 objNorm = normalize(coordTrafo * obj * coordTrafo_inv * normal);
+	//vec4 objPos = coordTrafo * obj * coordTrafo_inv * vertex;
+	//vec4 objNorm = normalize(coordTrafo * obj * coordTrafo_inv * normal);
+
+	vec4 objPos = coordTrafo * obj * vertex;
+	vec4 objNorm = normalize(coordTrafo * obj * normal);
 
 	if(cam_invar != 0)
 	{
@@ -1368,6 +1371,7 @@ void GlPlotRenderer::SetBTrafo(const t_mat_gl& matB, const t_mat_gl* matA,
 	}
 	else
 	{
+		// B = 2 pi A^(-t)
 		bool ok = true;
 		std::tie(m_matA, ok) = tl2::inv(tl2::trans(m_matB));
 		if(!ok)
@@ -1498,7 +1502,7 @@ void GlPlotRenderer::UpdatePicker()
 
 	auto intersUnitSphere =
 		tl2::intersect_line_sphere<t_vec3_gl, std::vector>(org3, dir3,
-			tl2::create<t_vec3_gl>({0,0,0}), t_real_gl(m_pickerSphereRadius));
+			tl2::create<t_vec3_gl>({ 0, 0, 0 }), t_real_gl(m_pickerSphereRadius));
 	for(const auto& result : intersUnitSphere)
 	{
 		t_vec_gl vecInters4 = tl2::create<t_vec_gl>(
@@ -1525,10 +1529,11 @@ void GlPlotRenderer::UpdatePicker()
 	const t_mat_gl matUnit = tl2::unit<t_mat_gl>();
 	const t_mat_gl *coordTrafo = &matUnit;
 	t_mat_gl coordTrafoInv = matUnit;
-	if(m_coordsys == 1)
+	if(m_coordsys == 1)  // lab coordinates
 	{
+		// B = 2 pi A^(-t)
 		coordTrafo = &m_matA;
-		coordTrafoInv = m_matB / (t_real_gl(2)*tl2::pi<t_real_gl>);
+		coordTrafoInv = tl2::trans(m_matB) / (t_real_gl(2)*tl2::pi<t_real_gl>);
 		coordTrafoInv(3, 3) = 1;
 	}
 
@@ -1554,7 +1559,7 @@ void GlPlotRenderer::UpdatePicker()
 			continue;
 
 
-		const t_mat_gl& matTrafo = (*coordTrafo) * obj.m_mat * coordTrafoInv;
+		const t_mat_gl matTrafo = (*coordTrafo) * obj.m_mat /** coordTrafoInv*/;
 
 		// scaling factor, TODO: maximum factor for non-uniform scaling
 		auto scale = std::abs(tl2::det(matTrafo));
@@ -1584,7 +1589,6 @@ void GlPlotRenderer::UpdatePicker()
 			} };*/
 
 
-			// coordTrafoInv only keeps 3d objects from locally distorting
 			auto [vecInters, bInters, lamInters] =
 				tl2::intersect_line_poly<t_vec3_gl, t_mat_gl>(
 					org3, dir3, poly, matTrafo);
@@ -1616,8 +1620,8 @@ void GlPlotRenderer::UpdatePicker()
 			// intersection point in uv coordinates:
 			//auto uv = tl2::poly_uv<t_mat_gl, t_vec3_gl>
 			//	(poly[0], poly[1], poly[2], polyuv[0], polyuv[1], polyuv[2], vecInters);
-		}
-	}
+		}  // polygons
+	}  // objects
 
 	// create intersection points
 	m_picker_needs_update = false;

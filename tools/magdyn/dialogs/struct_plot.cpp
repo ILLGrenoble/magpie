@@ -677,13 +677,12 @@ void StructPlotDlg::Sync()
 	const bool is_incommensurate = m_dyn->IsIncommensurate();
 	t_size total_sites = 0;
 
+
 	// crystal matrix
 	t_mat_gl matA = tl2::convert<t_mat_gl>(m_dyn->GetCrystalATrafo());
 	t_mat_gl matB = tl2::convert<t_mat_gl>(m_dyn->GetCrystalBTrafo());
 
-	// TODO: remove this hack and make the arrow matrices compatible with non-orthogonal coordinates
 	t_real_gl zscale = t_real_gl(1./m_dyn->GetCrystalLattice()[2]);
-
 	m_structplot->GetRenderer()->SetBTrafo(matB, &matA, true, zscale);
 
 
