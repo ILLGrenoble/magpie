@@ -53,6 +53,8 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 
 	// create gl plotter
 	m_dispplot = new tl2::GlPlot(this);
+	m_dispplot->SetCameraSpeed(g_cam_speed);
+	m_dispplot->SetCameraZoomScale(g_cam_zoom);
 	m_dispplot->GetRenderer()->SetAxisLabels("Q1 (rlu)", "Q2 (rlu)", "E (meV)");
 	m_dispplot->GetRenderer()->SetRestrictCamTheta(false);
 	m_dispplot->GetRenderer()->SetLight(0, tl2::create<t_vec3_gl>({ 50, 50, 50 }));

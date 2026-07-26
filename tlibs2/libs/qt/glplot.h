@@ -439,6 +439,14 @@ public:
 		return true;
 	}
 
+	t_qt_mutex* GetMutex() { return &m_mutex; }
+
+	void MoveContextToThread();
+	bool IsContextInThread() const;
+
+	void SetCameraSpeed(t_real_gl speed) { m_cam_speed = speed; }
+	void SetCameraZoomScale(t_real_gl scale) { m_cam_zoomscale = scale; }
+
 
 protected:
 	virtual void paintEvent(QPaintEvent*) override;
@@ -463,15 +471,12 @@ private:
 
 	std::unique_ptr<GlPlotRenderer> m_renderer{};
 	std::unique_ptr<QThread> m_thread_impl{};
+
 	bool m_mouseMovedBetweenDownAndUp = false;
 	bool m_mouseDown[3] = { false, false, false };
 
-
-public:
-	t_qt_mutex* GetMutex() { return &m_mutex; }
-
-	void MoveContextToThread();
-	bool IsContextInThread() const;
+	t_real_gl m_cam_speed { 0.1 };
+	t_real_gl m_cam_zoomscale { 1. };
 
 
 protected slots:

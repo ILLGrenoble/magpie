@@ -2419,7 +2419,7 @@ void GlPlot::mouseReleaseEvent(QMouseEvent *pEvt)
 
 void GlPlot::wheelEvent(QWheelEvent *pEvt)
 {
-	const t_real_gl degrees = pEvt->angleDelta().y() / 8.;
+	const t_real_gl degrees = pEvt->angleDelta().y() / 8. * m_cam_zoomscale;
 	m_renderer->zoom(degrees);
 
 	if(!m_renderer->GetCamera().GetPerspectiveProjection())
@@ -2432,24 +2432,23 @@ void GlPlot::wheelEvent(QWheelEvent *pEvt)
 void GlPlot::keyPressEvent(QKeyEvent *pEvt)
 {
 	bool handled = false;
-	const t_real_gl dx = 0.1;
 
 	switch(pEvt->key())
 	{
 		case Qt::Key_Up:
-			m_renderer->GetCamera().Translate(0., -dx, 0.);
+			m_renderer->GetCamera().Translate(0., -m_cam_speed, 0.);
 			handled = true;
 			break;
 		case Qt::Key_Down:
-			m_renderer->GetCamera().Translate(0., dx, 0.);
+			m_renderer->GetCamera().Translate(0., m_cam_speed, 0.);
 			handled = true;
 			break;
 		case Qt::Key_Left:
-			m_renderer->GetCamera().Translate(dx, 0., 0.);
+			m_renderer->GetCamera().Translate(m_cam_speed, 0., 0.);
 			handled = true;
 			break;
 		case Qt::Key_Right:
-			m_renderer->GetCamera().Translate(-dx, 0., 0.);
+			m_renderer->GetCamera().Translate(-m_cam_speed, 0., 0.);
 			handled = true;
 			break;
 	}
@@ -2477,7 +2476,7 @@ bool GlPlot::event(QEvent *pEvt)
 				continue;
 			QPinchGesture *pinch = static_cast<QPinchGesture*>(gesture);
 
-			t_real_gl zoom = pinch->scaleFactor();
+			t_real_gl zoom = pinch->scaleFactor() * m_cam_zoomscale;
 			zoom = std::log2(zoom) * 64.;
 			m_renderer->zoom(zoom);
 		}

@@ -108,6 +108,8 @@ t_real g_structplot_dmi_len = 0.25;
 
 // camera parameters
 t_real g_cam_fov = 90.;
+t_real g_cam_speed = 0.1;
+t_real g_cam_zoom = 1.;
 
 // fraction of points to check if the stop button was pressed
 unsigned int g_stop_check_fraction = 20;

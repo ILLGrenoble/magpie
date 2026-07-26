@@ -132,6 +132,8 @@ extern t_real g_structplot_dmi_len;
 
 // camera parameters
 extern t_real g_cam_fov;
+extern t_real g_cam_speed;
+extern t_real g_cam_zoom;
 
 // fraction of points to check if the stop button was pressed
 extern unsigned int g_stop_check_fraction;
@@ -155,7 +157,7 @@ extern unsigned int g_stop_check_fraction;
 // ----------------------------------------------------------------------------
 #include "dialogs/settings.h"
 
-constexpr std::array<SettingsVariable, 26> g_settingsvariables
+constexpr std::array<SettingsVariable, 28> g_settingsvariables
 {{
 	// threads
 	{
@@ -273,6 +275,16 @@ constexpr std::array<SettingsVariable, 26> g_settingsvariables
 		.description = "Camera field-of-view in 3d plotters.",
 		.key = "cam_fov",
 		.value = &g_cam_fov,
+	},
+	{
+		.description = "Camera movement speed.",
+		.key = "cam_speed",
+		.value = &g_cam_speed,
+	},
+	{
+		.description = "Camera zoom scaling factor.",
+		.key = "cam_zoom",
+		.value = &g_cam_zoom,
 	},
 
 	// optional features
