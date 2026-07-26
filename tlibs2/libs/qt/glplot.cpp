@@ -1379,7 +1379,7 @@ void GlPlotRenderer::SetBTrafo(const t_mat_gl& matB, const t_mat_gl* matA,
 		{
 			m_matA *= t_real_gl(2)*tl2::pi<t_real_gl>;
 			m_matA(3, 3) = 1;
-		}//
+		}
 	}
 
 	//tl2::niceprint(std::cout, m_matA); std::cout << std::endl;
