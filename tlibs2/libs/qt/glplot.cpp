@@ -1117,7 +1117,7 @@ uniform mat4 obj      = mat4(1.);  // object transformation matrix
 uniform mat4 obj_cam  = mat4(1.);  // additional trafo when invariant to camera translation
 uniform mat4 obj_proj = mat4(1.);  // additional trafo when invariant to camera translation
 uniform mat4 trafoA   = mat4(1.);  // crystal matrix
-uniform mat4 trafoB   = mat4(1.);  // B = 2 pi / A
+uniform mat4 trafoB   = mat4(1.);  // B = 2 pi A^(-t)
 
 uniform int is_real_space = 1;     // real or reciprocal space
 uniform int coordsys      = 0;     // 0: crystal system, 1: lab system
@@ -1133,15 +1133,16 @@ void main()
 	if(coordsys == 1 && is_real_space == 1)
 	{
 		coordTrafo = trafoA;
-		coordTrafo_inv = trafoB / (2.*pi);
-		coordTrafo_inv[3][3] = 1.;
+		coordTrafo_inv = transpose(trafoB) / (2.*pi);
 	}
 	else if(coordsys == 1 && is_real_space == 0)
 	{
 		coordTrafo = trafoB;
-		coordTrafo_inv = trafoA / (2.*pi);
-		coordTrafo_inv[3][3] = 1.;
+		coordTrafo_inv = transpose(trafoA) / (2.*pi);
 	}
+
+	coordTrafo[3][3] = 1.;
+	coordTrafo_inv[3][3] = 1.;
 
 	// coordTrafo_inv is needed so not to distort the object
 	vec4 objPos = coordTrafo * obj * coordTrafo_inv * vertex;
@@ -1149,9 +1150,11 @@ void main()
 
 	if(cam_invar != 0)
 	{
+		// rotational part of camera trafo
 		mat4 cam_rot = cam;
 		cam_rot[3][0] = cam_rot[3][1] = cam_rot[3][2] = 0.;
 		cam_rot[0][3] = cam_rot[1][3] = cam_rot[2][3] = 0.;
+		cam_rot[3][3] = 1.;
 
 		gl_Position = obj_proj * proj * obj_cam * cam_rot * objPos;
 	}
@@ -1352,20 +1355,21 @@ void GlPlotRenderer::RequestViewportUpdate()
 /**
  * set up a (crystal) B matrix
  */
-void GlPlotRenderer::SetBTrafo(const t_mat_gl& matB, const t_mat_gl* matA, bool is_real_space)
+void GlPlotRenderer::SetBTrafo(const t_mat_gl& matB, const t_mat_gl* matA,
+	bool is_real_space, t_real_gl scale)
 {
-	m_matB = matB;
+	m_matB = matB / scale;
 	m_is_real_space = is_real_space;
 
 	// if A matix is not given, calculate it
 	if(matA)
 	{
-		m_matA = *matA;
+		m_matA = *matA * scale;
 	}
 	else
 	{
 		bool ok = true;
-		std::tie(m_matA, ok) = tl2::inv(m_matB);
+		std::tie(m_matA, ok) = tl2::inv(tl2::trans(m_matB));
 		if(!ok)
 		{
 			m_matA = tl2::unit<t_mat_gl>();
@@ -1374,9 +1378,12 @@ void GlPlotRenderer::SetBTrafo(const t_mat_gl& matB, const t_mat_gl* matA, bool 
 		else
 		{
 			m_matA *= t_real_gl(2)*tl2::pi<t_real_gl>;
-			m_matA(3,3) = 1;
-		}
+			m_matA(3, 3) = 1;
+		}//
 	}
+
+	//tl2::niceprint(std::cout, m_matA); std::cout << std::endl;
+	//tl2::niceprint(std::cout, m_matB); std::cout << std::endl;
 
 	if(m_coordCrossXtal)
 		SetObjectMatrix(*m_coordCrossXtal, m_matB);

@@ -107,7 +107,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	m_coordsys->addItem("Fractional Units (rlu)");
 	m_coordsys->addItem("Lab Units (\xe2\x84\xab)");
 	m_coordsys->setCurrentIndex(0);
-	m_coordsys->setEnabled(false);
+	//m_coordsys->setEnabled(false);
 
 	m_coordcross = new QCheckBox("Show Coordinates", this);
 	m_coordcross->setToolTip("Show the coordinate system cross.");
@@ -681,7 +681,10 @@ void StructPlotDlg::Sync()
 	t_mat_gl matA = tl2::convert<t_mat_gl>(m_dyn->GetCrystalATrafo());
 	t_mat_gl matB = tl2::convert<t_mat_gl>(m_dyn->GetCrystalBTrafo());
 
-	m_structplot->GetRenderer()->SetBTrafo(matB, &matA);
+	// TODO: remove this hack and make the arrow matrices compatible with non-orthogonal coordinates
+	t_real_gl zscale = t_real_gl(1./m_dyn->GetCrystalLattice()[2]);
+
+	m_structplot->GetRenderer()->SetBTrafo(matB, &matA, true, zscale);
 
 
 	// hashes of already seen magnetic sites

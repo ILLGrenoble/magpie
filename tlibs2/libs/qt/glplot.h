@@ -330,7 +330,8 @@ public:
 		m_restrict_cam_theta = b;
 	}
 
-	void SetBTrafo(const t_mat_gl& matB, const t_mat_gl* matA = nullptr, bool is_real_space = true);
+	void SetBTrafo(const t_mat_gl& matB, const t_mat_gl* matA = nullptr,
+		bool is_real_space = true, t_real_gl scale = 1.);
 	void SetCoordSys(int iSys);
 
 	bool IsInitialised() const
