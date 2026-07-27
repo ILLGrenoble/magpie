@@ -470,7 +470,7 @@ requires is_basic_mat<t_mat> && is_basic_vec<t_vec>
 		assert(mat.size1() == mat.size1() && mat.size1() == N);
 
 	for(std::size_t i = 0; i < std::min(mat.size1(), N); ++i)
-		mat(i,i) = vals[i];
+		mat(i, i) = vals[i];
 
 	return mat;
 }
@@ -2159,6 +2159,44 @@ requires is_vec<t_vec> && is_dyn_mat<t_mat>
 			X(i, j) = std::pow(x[i], static_cast<T>(j));
 
 	return leastsq<t_vec, t_mat>(X, y, use_qr, use_pseudoinv);
+}
+
+
+/**
+ * find the dominant eigenvector and -value
+ * @see https://en.wikipedia.org/wiki/Power_iteration
+ */
+template<class t_mat, class t_vec, class t_real = typename t_mat::value_type>
+std::pair<t_real, t_vec> dominant_eigenval(const t_mat& mat,
+	t_real eps = 1e-6, std::size_t max_iter = 32)
+requires is_basic_vec<t_vec> && is_basic_mat<t_mat>
+{
+	if constexpr(tl2::is_dyn_mat<t_mat>)
+		assert((mat.size2() == mat.size1()));
+	else
+		static_assert(t_mat::size2() == t_mat::size1());
+
+	// arbitrary starting vector
+	t_vec vec = tl2::rand<t_vec>(mat.size1());
+
+	t_real val = 0.;
+	for(std::size_t iter = 0; iter < max_iter; ++iter)
+	{
+		t_vec vec_prev = vec;
+		vec = prod_mv(mat, vec);
+		val = tl2::norm<t_vec>(vec);
+		vec /= val;
+
+		if(tl2::equals<t_vec>(vec, vec_prev, eps))
+			break;
+		else if(tl2::equals<t_vec>(vec, -vec_prev, eps))
+		{
+			val = -val;
+			break;
+		}
+	}
+
+	return std::make_pair(val, vec);
 }
 // ----------------------------------------------------------------------------
 

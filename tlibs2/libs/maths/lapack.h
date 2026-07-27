@@ -320,7 +320,7 @@ requires tl2::is_mat<t_mat>
 
 	for(std::size_t i = 0; i < rows; ++i)
 		for(std::size_t j = 0; j < cols; ++j)
-			R(i, j) = (j>=i ? outmat[i*cols + j] : t_real{0});
+			R(i, j) = (j >= i ? outmat[i*cols + j] : t_real{0});
 
 
 	t_vec v = tl2::zero<t_vec>(minor);
@@ -823,7 +823,7 @@ eigenvec(const t_mat& mat, bool only_evals, bool is_symmetric, bool normalise,
 		for(std::size_t j = 0; j < N; ++j)
 		{
 			if(is_symmetric)
-				inmat[i*N + j] = (j>=i ? mat(j,i) : t_real{0});
+				inmat[i*N + j] = (j >= i ? mat(j,i) : t_real{0});
 			else
 				inmat[i*N + j] = mat(j,i);
 		}
@@ -1193,7 +1193,7 @@ requires (tl2::is_mat<t_mat> && tl2::is_vec<t_vec>)
 
 	t_vec f = tl2::zero<t_vec>(cols);
 	for(std::size_t i = 0; i < cols; ++i)
-		f += norm[i] * evecs[i] * std::pow(evals[i], n-n0);
+		f += norm[i] * evecs[i] * std::pow(evals[i], n - n0);
 
 	return std::make_tuple(true, f);
 }

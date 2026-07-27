@@ -1561,8 +1561,8 @@ void GlPlotRenderer::UpdatePicker()
 
 		const t_mat_gl matTrafo = (*coordTrafo) * obj.m_mat /** coordTrafoInv*/;
 
-		// scaling factor, TODO: maximum factor for non-uniform scaling
-		auto scale = std::abs(tl2::det(matTrafo));
+		// maximum scaling factor for non-uniform scaling
+		auto scale = std::abs(tl2::dominant_eigenval<t_mat_gl, t_vec_gl, t_real_gl>(matTrafo, 1e-3).first);
 
 		// intersection with bounding sphere?
 		auto boundingInters =
