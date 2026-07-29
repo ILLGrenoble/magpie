@@ -68,6 +68,7 @@
 #endif
 
 #include "traits.h"
+#include "maths/scalar.h"
 
 
 namespace tl2 {
@@ -923,6 +924,9 @@ protected:
 #endif
 
 			register_func2("atan2", std::atan2);
+			register_func2("log", [](t_num base, t_num val) -> t_num
+				{ return tl2::log(base, val); });
+
 		}
 
 		// integer functions
