@@ -48,7 +48,7 @@ set(CMAKE_CXX_STANDARD 20)
 add_compile_options(-std=c++20)
 add_compile_options(-Wall -Wextra)
 
-add_definitions(-D__TLIBS2_MAGDYN_USE_MINUIT__)
+add_definitions(-D__TLIBS2_USE_MINUIT__)
 
 
 # -----------------------------------------------------------------------------
@@ -115,16 +115,10 @@ add_executable(fit0 fit0.cpp)
 add_executable(fit1 fit1.cpp)
 add_executable(cov cov.cpp)
 add_executable(fft fft.cpp)
-add_executable(magdyn magdyn.cpp)
-add_executable(magdyn2 magdyn2.cpp)
 add_executable(units units.cpp)
 add_executable(hull1 hull1.cpp)
 
 target_link_libraries(expr Threads::Threads)
-target_link_libraries(magdyn ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES}
-	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
-target_link_libraries(magdyn2 ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES}
-	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
 target_link_libraries(mat0 ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES})
 target_link_libraries(mat2 ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES})
 target_link_libraries(mat3 ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES})
@@ -147,8 +141,6 @@ target_link_libraries(hull1 ${Qhull_LIBRARIES})
 # -----------------------------------------------------------------------------
 # run individual test cases
 add_test(expr expr)
-add_test(magdyn magdyn)
-add_test(magdyn2 magdyn2)
 add_test(cryst cryst)
 add_test(mat0 mat0)
 add_test(mat1 mat1)
@@ -179,7 +171,7 @@ add_test(hull1 hull1)
 # -----------------------------------------------------------------------------
 # add rpaths
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	foreach(tool IN ITEMS magdyn magdyn2 eig chol ode cryst leastsq rotation mat0 mat1 mat2 mat3 proj)
+	foreach(tool IN ITEMS eig chol ode cryst leastsq rotation mat0 mat1 mat2 mat3 proj)
 		message(STATUS "Setting rpath for ${tool}...")
 
 		add_custom_command(TARGET ${tool} POST_BUILD

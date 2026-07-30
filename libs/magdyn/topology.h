@@ -1,5 +1,5 @@
 /**
- * tlibs2 -- magnetic dynamics -- topological calculations
+ * magnetic dynamics -- topological calculations
  * @author Tobias Weber <tweber@ill.fr>
  * @date November 2024
  * @license GPLv3, see 'LICENSE' file
@@ -11,9 +11,8 @@
  * @desc For references, see the 'LITERATURE' file.
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,11 +28,11 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_TOPO_H__
-#define __TLIBS2_MAGDYN_TOPO_H__
+#ifndef __MAGDYN_TOPO_H__
+#define __MAGDYN_TOPO_H__
 
 
-#include "../algos.h"
+#include "tlibs2/libs/algos.h"
 
 #include "magdyn.h"
 
@@ -43,7 +42,7 @@
 // topological calculations
 // --------------------------------------------------------------------
 
-namespace tl2_mag {
+namespace magdyn {
 
 /**
  * calculates the berry connections
@@ -370,7 +369,7 @@ get_evec_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
 	};
 }
 
-}   // namespace tl2_mag
+}   // namespace magdyn
 
 
 

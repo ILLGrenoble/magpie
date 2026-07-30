@@ -1,5 +1,5 @@
 /**
- * tlibs2 -- magnetic dynamics -- hamiltonian
+ * magnetic dynamics -- hamiltonian
  * @author Tobias Weber <tweber@ill.fr>
  * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
@@ -15,9 +15,8 @@
  * @desc For further references, see the 'LITERATURE' file.
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,11 +32,11 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_HAM_H__
-#define __TLIBS2_MAGDYN_HAM_H__
+#ifndef __MAGDYN_HAM_H__
+#define __MAGDYN_HAM_H__
 
 
-#include "../units.h"
+#include "tlibs2/libs/units.h"
 
 #include "magdyn.h"
 
@@ -80,14 +79,14 @@ t_mat MAGDYN_INST::CalcRealJ(const MAGDYN_TYPE::ExchangeTerm& term) const
 					m_rotaxis, rot_UC_angle));
 			J = J * rot_UC;
 
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 			std::cout << "Coupling " << term.name << ": rot_UC =\n";
 			tl2::niceprint(std::cout, rot_UC, 1e-4, 4);
 #endif
 		}
 	}
 
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 	std::cout << "Coupling " << term.name << ": J =\n";
 	tl2::niceprint(std::cout, J, 1e-4, 4);
 #endif
@@ -141,7 +140,7 @@ MAGDYN_INST::CalcReciprocalJs(const t_vec_real& Qvec) const
 		insert_or_add(J_Q0, indices_t, tl2::herm(J));
 	}  // end of iteration over couplings
 
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 	for(const auto& pair : J_Q)
 	{
 		std::cout << "Coupling J_Q[" << pair.first.first << ", " << pair.first.second << "] =\n";
@@ -262,7 +261,7 @@ t_mat MAGDYN_INST::CalcHamiltonian(const t_vec_real& Qvec) const
 	// equation (25) from (Toth 2015)
 	tl2::set_submat(H, tl2::herm(tl2::submat(H, 0, N, N, N)), N, 0);
 
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 	using namespace tl2_ops;
 	std::cout << "H[ Q = " << Qvec << " ] =\n";
 	tl2::niceprint(std::cout, H, 1e-4, 4);
@@ -326,7 +325,7 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 		chol_failed = true;
 		S.H_triag = tl2::unit<t_mat>(S.H.size1());
 
-		TL2_CERR_OPT << "Magdyn error: Invalid Cholesky decomposition"
+		MAGDYN_CERR_OPT << "Magdyn error: Invalid Cholesky decomposition"
 			<< " after " << chol_try << " correction(s)"
 			<< " at Q = " << Qvec << ":"
 			<< " Hamiltonian is not Hermitian and positive-definite."
@@ -338,13 +337,13 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 
 	if(m_perform_checks && chol_try > 0)
 	{
-		TL2_CERR_OPT << "Magdyn warning: Needed " << chol_try
+		MAGDYN_CERR_OPT << "Magdyn warning: Needed " << chol_try
 			<< " correction(s) to make Hamiltonian Hermitian and"
 			<< " positive-definite for Cholesky decomposition"
 			<< " at Q = " << Qvec << "." << std::endl;
 	}
 
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 	std::cout << "Upper-triangulised Hamiltonian:\n";
 	tl2::niceprint(std::cout, S.H_triag, 1e-4, 4);
 #endif
@@ -358,7 +357,7 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 	const bool is_herm = tl2::is_symm_or_herm<t_mat, t_real>(S.H_comm, m_eps);
 	if(m_perform_checks && !is_herm)
 	{
-		TL2_CERR_OPT << "Magdyn warning: Hamiltonian is not Hermitian"
+		MAGDYN_CERR_OPT << "Magdyn warning: Hamiltonian is not Hermitian"
 			<< " at Q = " << Qvec << "." << std::endl;
 	}
 
@@ -368,7 +367,7 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 			S.H_comm, only_energies, is_herm, true);
 	if(!evecs_ok)
 	{
-		TL2_CERR_OPT << "Magdyn error: Eigensystem calculation failed"
+		MAGDYN_CERR_OPT << "Magdyn error: Eigensystem calculation failed"
 			<< " at Q = " << Qvec << "." << std::endl;
 		return S;
 	}
@@ -385,7 +384,7 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 
 		if(m_perform_checks && !tl2::equals_0(eval.imag(), m_eps))
 		{
-			TL2_CERR_OPT << "Magdyn warning: Remaining imaginary energy component at Q = "
+			MAGDYN_CERR_OPT << "Magdyn warning: Remaining imaginary energy component at Q = "
 				<< Qvec << " and E = " << eval
 				<< "." << std::endl;
 		}
@@ -414,7 +413,7 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 		bool corr_ok = CalcCorrelationsFromHamiltonian(S);
 		if(!corr_ok)
 		{
-			TL2_CERR_OPT << "Magdyn warning: Invalid correlations"
+			MAGDYN_CERR_OPT << "Magdyn warning: Invalid correlations"
 				<< " at Q = " << Qvec << "." << std::endl;
 		}
 	}

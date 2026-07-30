@@ -51,7 +51,8 @@
 #include "globals.h"
 #include "plot_cut.h"
 #include "plot.h"
-#include "bz_lib.h"
+
+#include "libs/bz.h"
 
 #include "tlibs2/libs/qt/recent.h"
 #include "tlibs2/libs/qt/glplot.h"

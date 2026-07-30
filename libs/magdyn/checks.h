@@ -1,13 +1,12 @@
 /**
- * tlibs2 -- magnetic dynamics -- sanity checks
+ * magnetic dynamics -- sanity checks
  * @author Tobias Weber <tweber@ill.fr>
  * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +22,8 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_CHECKS_H__
-#define __TLIBS2_MAGDYN_CHECKS_H__
+#ifndef __MAGDYN_CHECKS_H__
+#define __MAGDYN_CHECKS_H__
 
 
 #include "magdyn.h"
@@ -46,14 +45,14 @@ bool MAGDYN_INST::CheckMagneticSite(t_size idx, bool print_error) const
 	{
 		if(print_error)
 		{
-			TL2_CERR_OPT << "Magdyn error: Site index " << idx
+			MAGDYN_CERR_OPT << "Magdyn error: Site index " << idx
 				<< " is out of bounds. Number of sites: " << N
 				<< "." << std::endl;
 		}
 
 		return false;
 	}
-	
+
 	if(!m_perform_checks)
 		return true;
 
@@ -67,7 +66,7 @@ bool MAGDYN_INST::CheckMagneticSite(t_size idx, bool print_error) const
 			if(print_error)
 			{
 				using namespace tl2_ops;
-				TL2_CERR_OPT << "Magdyn error: Site " << idx
+				MAGDYN_CERR_OPT << "Magdyn error: Site " << idx
 					<< " position is out of the unit cell extents."
 					<< " Position: " << site.pos_calc
 					<< ", unit cell: [" << m_uc_min << ", " << m_uc_max << "]"
@@ -97,7 +96,7 @@ bool MAGDYN_INST::CheckExchangeTerm(t_size idx, bool print_error) const
 	{
 		if(print_error)
 		{
-			TL2_CERR_OPT << "Magdyn error: Coupling index " << idx
+			MAGDYN_CERR_OPT << "Magdyn error: Coupling index " << idx
 				<< " is out of bounds. Number of couplings: " << N
 				<< "." << std::endl;
 		}
@@ -130,7 +129,7 @@ bool MAGDYN_INST::CheckImagWeights(const MAGDYN_TYPE::SofQE& S) const
 		{
 			ok = false;
 
-			TL2_CERR_OPT << "Magdyn warning: Remaining imaginary S(Q, E) component at Q = "
+			MAGDYN_CERR_OPT << "Magdyn warning: Remaining imaginary S(Q, E) component at Q = "
 				<< S.Q_rlu << " and E = " << EandS.E
 				<< ": imag(S) = " << EandS.S_sum.imag()
 				<< ", imag(S_perp) = " << EandS.S_perp_sum.imag()

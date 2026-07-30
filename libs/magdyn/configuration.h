@@ -1,13 +1,12 @@
 /**
- * tlibs2 -- magnetic dynamics -- loading and saving
+ * magnetic dynamics -- loading and saving
  * @author Tobias Weber <tweber@ill.fr>
  * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +22,8 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_CFG_FILE_H__
-#define __TLIBS2_MAGDYN_CFG_FILE_H__
+#ifndef __MAGDYN_CFG_FILE_H__
+#define __MAGDYN_CFG_FILE_H__
 
 
 #include <fstream>
@@ -32,12 +31,12 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include "../algos.h"
-#include "../str.h"
-#include "../file.h"
+#include "tlibs2/libs/algos.h"
+#include "tlibs2/libs/str.h"
+#include "tlibs2/libs/file.h"
 
-#if __has_include("../../../libs/vers.h")
-	#include "../../../libs/vers.h"
+#if __has_include("../libs/vers.h")
+	#include "../libs/vers.h"
 #endif
 
 #include "magdyn.h"
@@ -57,7 +56,7 @@ bool MAGDYN_INST::Load(const std::string& filename)
 	{
 		if(!tl2::file_exists(filename))
 		{
-			TL2_CERR_OPT << "Magdyn error: File \""
+			MAGDYN_CERR_OPT << "Magdyn error: File \""
 				<< filename << "\" does not exist."
 				<< std::endl;
 			return false;
@@ -75,7 +74,7 @@ bool MAGDYN_INST::Load(const std::string& filename)
 	}
 	catch(const std::exception& ex)
 	{
-		TL2_CERR_OPT << "Magdyn error: Could not load \""
+		MAGDYN_CERR_OPT << "Magdyn error: Could not load \""
 			<< filename << "\"."
 			<< " Reason: " << ex.what()
 			<< std::endl;
@@ -258,7 +257,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 				}
 				else
 				{
-					TL2_CERR_OPT << "Magdyn error: Site 1 name \"" << *name1 << "\" "
+					MAGDYN_CERR_OPT << "Magdyn error: Site 1 name \"" << *name1 << "\" "
 						<< "was not found in coupling \"" << exchange_term.name
 						<< "\"." << std::endl;
 				}
@@ -277,7 +276,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 				}
 				else
 				{
-					TL2_CERR_OPT << "Magdyn error: Site 2 name \"" << *name2 << "\" "
+					MAGDYN_CERR_OPT << "Magdyn error: Site 2 name \"" << *name2 << "\" "
 						<< "was not found in coupling \"" << exchange_term.name
 						<< "\"." << std::endl;
 				}

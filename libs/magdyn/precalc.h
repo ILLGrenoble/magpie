@@ -1,5 +1,5 @@
 /**
- * tlibs2 -- magnetic dynamics
+ * magnetic dynamics
  * @author Tobias Weber <tweber@ill.fr>
  * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
@@ -15,9 +15,8 @@
  * @desc For further references, see the 'LITERATURE' file.
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,11 +32,11 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_PRECALC_H__
-#define __TLIBS2_MAGDYN_PRECALC_H__
+#ifndef __MAGDYN_PRECALC_H__
+#define __MAGDYN_PRECALC_H__
 
 
-#include "../units.h"
+#include "tlibs2/libs/units.h"
 
 #include "magdyn.h"
 
@@ -70,7 +69,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExternalField()
 					tl2::rotation<t_mat_real, t_vec_real>(
 						m_field.dir, m_zdir, &m_rotaxis, m_eps)));
 		}
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 		std::cout << "Field rotation from:\n";
 		tl2::niceprint(std::cout, -m_field.dir, 1e-4, 4);
 		std::cout << "\nto:\n";
@@ -113,7 +112,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 		}
 		else
 		{
-			TL2_CERR_OPT << "Magdyn error: Parsing spin magnitude \""
+			MAGDYN_CERR_OPT << "Magdyn error: Parsing spin magnitude \""
 				<< site.spin_mag << "\""
 				<< " for site \"" << site.name << "\""
 				<< "." << std::endl;
@@ -130,7 +129,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 				}
 				else
 				{
-					TL2_CERR_OPT << "Magdyn error: Parsing position \""
+					MAGDYN_CERR_OPT << "Magdyn error: Parsing position \""
 						<< site.pos[idx] << "\""
 						<< " for site \"" << site.name << "\""
 						<< " and component " << int(idx)
@@ -147,7 +146,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 				}
 				else
 				{
-					TL2_CERR_OPT << "Magdyn error: Parsing spin direction \""
+					MAGDYN_CERR_OPT << "Magdyn error: Parsing spin direction \""
 						<< site.spin_dir[idx] << "\""
 						<< " for site \"" << site.name << "\""
 						<< " and component " << int(idx)
@@ -168,7 +167,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 				{
 					has_explicit_trafo = false;
 
-					TL2_CERR_OPT << "Magdyn error: Parsing spin orthogonal plane \""
+					MAGDYN_CERR_OPT << "Magdyn error: Parsing spin orthogonal plane \""
 						<< site.spin_ortho[idx] << "\""
 						<< " for site \"" << site.name << "\""
 						<< " and component " << int(idx)
@@ -207,7 +206,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 			// TODO: normalise the v vector as well as the real and imaginary u vectors
 			// in case they are explicitly given
 
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 			std::cout << "Site " << site.name << ": u = "
 				<< site.trafo_plane_calc[0] << " "
 				<< site.trafo_plane_calc[1] << " "
@@ -232,7 +231,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 	}
 	catch(const std::exception& ex)
 	{
-		TL2_CERR_OPT << "Magdyn error: Calculating site \"" << site.name << "\"."
+		MAGDYN_CERR_OPT << "Magdyn error: Calculating site \"" << site.name << "\"."
 			<< " Reason: " << ex.what()
 			<< std::endl;
 	}
@@ -270,7 +269,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 		term.site1_calc = GetMagneticSiteIndex(term.site1);
 		term.site2_calc = GetMagneticSiteIndex(term.site2);
 
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 		std::cout << "Coupling: "
 			<< term.name << ": " << term.site1 << " (" << term.site1_calc << ") -> "
 			<< term.site2 << " (" << term.site2_calc << ")." << std::endl;
@@ -278,14 +277,14 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 
 		if(term.site1_calc >= GetMagneticSitesCount())
 		{
-			TL2_CERR_OPT << "Magdyn error: Unknown site 1 name \"" << term.site1 << "\"."
+			MAGDYN_CERR_OPT << "Magdyn error: Unknown site 1 name \"" << term.site1 << "\"."
 				<< " in coupling \"" << term.name << "\"."
 				<< std::endl;
 			return;
 		}
 		if(term.site2_calc >= GetMagneticSitesCount())
 		{
-			TL2_CERR_OPT << "Magdyn error: Unknown site 2 name \"" << term.site2 << "\"."
+			MAGDYN_CERR_OPT << "Magdyn error: Unknown site 2 name \"" << term.site2 << "\"."
 				<< " in coupling \"" << term.name << "\"."
 				<< std::endl;
 			return;
@@ -310,7 +309,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 		}
 		else
 		{
-			TL2_CERR_OPT << "Magdyn error: Parsing J term \""
+			MAGDYN_CERR_OPT << "Magdyn error: Parsing J term \""
 				<< term.J << "\"." << std::endl;
 		}
 
@@ -325,7 +324,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 				}
 				else
 				{
-					TL2_CERR_OPT << "Magdyn error: Parsing distance term \""
+					MAGDYN_CERR_OPT << "Magdyn error: Parsing distance term \""
 						<< term.dist[i]
 						<< "\" (index " << int(i) << ")"
 						<< "." << std::endl;
@@ -341,7 +340,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 				}
 				else
 				{
-					TL2_CERR_OPT << "Magdyn error: Parsing DMI term \""
+					MAGDYN_CERR_OPT << "Magdyn error: Parsing DMI term \""
 						<< term.dmi[i]
 						<< "\" (index " << int(i) << ")"
 						<< "." << std::endl;
@@ -360,7 +359,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 				}
 				else
 				{
-					TL2_CERR_OPT << "Magdyn error: Parsing general term \""
+					MAGDYN_CERR_OPT << "Magdyn error: Parsing general term \""
 						<< term.Jgen[i][j]
 						<< "\" (indices " << int(i) << ", "
 						<< int(j) << ")" << "." << std::endl;
@@ -380,7 +379,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 	}
 	catch(const std::exception& ex)
 	{
-		TL2_CERR_OPT << "Magdyn error: Calculating coupling \""
+		MAGDYN_CERR_OPT << "Magdyn error: Calculating coupling \""
 			<< term.name << "\"."
 			<< " Reason: " << ex.what() << "."
 			<< std::endl;

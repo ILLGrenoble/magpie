@@ -822,7 +822,7 @@ void StructPlotDlg::Sync()
 				else
 					sc_vec = tl2::zero<t_vec_gl>(3);
 
-				tl2_mag::rotate_spin_incommensurate<t_mat_gl, t_vec_gl, t_real_gl>(
+				magdyn::rotate_spin_incommensurate<t_mat_gl, t_vec_gl, t_real_gl>(
 					spin_vec, sc_vec,
 					tl2::convert<t_vec_gl>(ordering),
 					tl2::convert<t_vec_gl>(rotaxis),

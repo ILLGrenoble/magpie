@@ -34,7 +34,7 @@
 	#include <QtWidgets/QApplication>
 #endif
 
-#include "bz_lib.h"
+#include "libs/bz.h"
 #include "bz_conf.h"
 
 #include <iostream>

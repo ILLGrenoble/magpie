@@ -1,5 +1,5 @@
 /**
- * tlibs2 -- magnetic dynamics
+ * magnetic dynamics
  * @author Tobias Weber <tweber@ill.fr>
  * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
@@ -19,9 +19,8 @@
  * as are "magnetic sites" and "atoms".
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +36,8 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_DECL_H__
-#define __TLIBS2_MAGDYN_DECL_H__
+#ifndef __MAGDYN_DECL_H__
+#define __MAGDYN_DECL_H__
 
 #include <vector>
 #include <array>
@@ -55,8 +54,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/histogram.hpp>
 
-#include "../maths.h"
-#include "../expr.h"
+#include "tlibs2/libs/maths.h"
+#include "tlibs2/libs/expr.h"
 
 #include "structs.h"
 #include "helpers.h"
@@ -80,7 +79,7 @@
 #endif  // SWIG
 
 #define MAGDYN_INST                                           \
-	tl2_mag::MagDyn<t_mat, t_vec, t_mat_real, t_vec_real, \
+	magdyn::MagDyn<t_mat, t_vec, t_mat_real, t_vec_real, \
 		t_cplx, t_real, t_size>
 
 #define MAGDYN_TYPE typename MAGDYN_INST
@@ -89,10 +88,10 @@
 
 
 // only print if it's not set to silent mode
-#define TL2_CERR_OPT if(!m_silent) std::cerr
+#define MAGDYN_CERR_OPT if(!m_silent) std::cerr
 
 
-namespace tl2_mag {
+namespace magdyn {
 
 
 /**

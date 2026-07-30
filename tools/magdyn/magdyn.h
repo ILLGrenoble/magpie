@@ -61,9 +61,10 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "tlibs2/libs/magdyn.h"
 #include "tlibs2/libs/qt/numerictablewidgetitem.h"
 #include "tlibs2/libs/qt/recent.h"
+
+#include "libs/magdyn.h"
 #include "libs/magffacts.h"
 
 #include "../bz/plot.h"

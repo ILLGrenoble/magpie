@@ -117,7 +117,7 @@ endif()
 if(Minuit2_FOUND)
 	message("Using Minuit 2.")
 	include_directories("${Minuit2_INCLUDE_DIRS}")
-	add_definitions(-D__TLIBS2_MAGDYN_USE_MINUIT__)
+	add_definitions(-D__TLIBS2_USE_MINUIT__ -D__MAGDYN_USE_MINUIT__)
 else()
 	message("Disabling Minuit support.")
 	set(Minuit2_LIBRARIES "")
@@ -199,7 +199,7 @@ if(USE_QT)
 		startup/benchmark.cpp
 
 		# bz calculator
-		../bz/bz_lib.h ../bz/plot_cut.h
+		../../libs/bz.h ../bz/plot_cut.h
 		../bz/plot.cpp ../bz/plot.h
 
 		# dialogs
@@ -223,11 +223,11 @@ if(USE_QT)
 		dialogs/settings.h
 
 		# library
-		../../tlibs2/libs/magdyn.h
+		../../libs/magdyn.h ../../libs/magffacts.h
+		../../libs/symops.h
 		../../tlibs2/libs/qt/gl.cpp ../../tlibs2/libs/qt/gl.h
 		../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h
 		../../tlibs2/libs/qt/recent.cpp ../../tlibs2/libs/qt/recent.h
-		../../libs/symops.h
 
 		# plotting tools
 		../../tlibs2/tools/plot2d/plot2d.cpp ../../tlibs2/tools/plot2d/plot2d.h
@@ -273,7 +273,7 @@ else()
 		startup/benchmark.cpp
 
 		# library
-		../../tlibs2/libs/magdyn.h
+		../../libs/magdyn.h
 	)
 
 	target_link_libraries(magpie

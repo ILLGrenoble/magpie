@@ -39,14 +39,14 @@
 #include <variant>
 #include <optional>
 
+#include "libs/magdyn.h"
+#include "libs/bz.h"
+#include "libs/defs.h"
+
 #include "tlibs2/libs/maths.h"
-#include "tlibs2/libs/magdyn.h"
 #ifndef DONT_USE_QT
 	#include "tlibs2/libs/qt/gl.h"
 #endif
-
-#include "libs/defs.h"
-#include "../bz/bz_lib.h"
 
 
 
@@ -68,7 +68,7 @@ using t_mat_gl = tl2::t_mat_gl;
 #endif
 
 // magnon calculation kernel
-using t_magdyn = tl2_mag::MagDyn<t_mat, t_vec, t_mat_real, t_vec_real, t_cplx, t_real, t_size>;
+using t_magdyn = magdyn::MagDyn<t_mat, t_vec, t_mat_real, t_vec_real, t_cplx, t_real, t_size>;
 using t_site = typename t_magdyn::MagneticSite;
 using t_term = typename t_magdyn::ExchangeTerm;;
 

@@ -1,5 +1,5 @@
 /**
- * tlibs2 -- magnetic dynamics -- spin-spin correlation
+ * magnetic dynamics -- spin-spin correlation
  * @author Tobias Weber <tweber@ill.fr>
  * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
@@ -16,9 +16,8 @@
  * @desc For further references, see the 'LITERATURE' file.
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,12 +33,12 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_CORREL_H__
-#define __TLIBS2_MAGDYN_CORREL_H__
+#ifndef __MAGDYN_CORREL_H__
+#define __MAGDYN_CORREL_H__
 
 
-#include "../algos.h"
-#include "../phys.h"
+#include "tlibs2/libs/algos.h"
+#include "tlibs2/libs/phys.h"
 
 #include "magdyn.h"
 
@@ -77,7 +76,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		t_mat check_comm = S.evec_mat * tl2::herm(S.evec_mat);
 		if(!tl2::equals(/*S.comm*/ tl2::unit<t_mat>(2*N), check_comm, m_eps))
 		{
-			TL2_CERR_OPT << "Magdyn error: Wrong commutator at Q = "
+			MAGDYN_CERR_OPT << "Magdyn error: Wrong commutator at Q = "
 				<< S.Q_rlu << ": " << check_comm
 				<< "." << std::endl;
 		}
@@ -86,7 +85,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	// equation (32) from (Toth 2015)
 	const t_mat energy_mat = tl2::herm(S.evec_mat) * S.H_comm * S.evec_mat;  // energies
 
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 	std::cout << "E_mat =\n";
 	tl2::niceprint(std::cout, energy_mat, 1e-4, 4);
 #endif
@@ -94,7 +93,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	// check that the energy matrix is diagonal
 	if(m_perform_checks && !tl2::is_diag(energy_mat, m_eps))
 	{
-		TL2_CERR_OPT << "Magdyn error: Energy matrix is not diagonal at Q = "
+		MAGDYN_CERR_OPT << "Magdyn error: Energy matrix is not diagonal at Q = "
 			<< S.Q_rlu << ": " << energy_mat
 			<< "." << std::endl;
 	}
@@ -105,7 +104,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 
 	if(energy_mat.size1() != S.E_and_S.size())
 	{
-		TL2_CERR_OPT << "Magdyn warning: Expected " << S.E_and_S.size() << " energies at Q = "
+		MAGDYN_CERR_OPT << "Magdyn warning: Expected " << S.E_and_S.size() << " energies at Q = "
 			<< S.Q_rlu << ", but got " << energy_mat.size1() << " energies"
 			<< "." << std::endl;
 
@@ -117,14 +116,14 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	{
 		if(m_perform_checks && !tl2::equals_0(energy_mat(i, i).imag(), m_eps))
 		{
-			TL2_CERR_OPT << "Magdyn warning: Remaining imaginary energy component at Q = "
+			MAGDYN_CERR_OPT << "Magdyn warning: Remaining imaginary energy component at Q = "
 				<< S.Q_rlu << " and E = " << energy_mat(i, i)
 				<< "." << std::endl;
 		}
 
 		if(m_perform_checks && !tl2::equals(energy_mat(i, i).real(), S.E_and_S[i].E, m_eps))
 		{
-			TL2_CERR_OPT << "Magdyn warning: Mismatching energy at Q = "
+			MAGDYN_CERR_OPT << "Magdyn warning: Mismatching energy at Q = "
 				<< S.Q_rlu << " and E = " << energy_mat(i, i).real()
 				<< ", expected E = " << S.E_and_S[i].E
 				<< "." << std::endl;
@@ -138,7 +137,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	const auto [H_triag_inv, inv_ok] = tl2::inv(S.H_triag);
 	if(!inv_ok)
 	{
-		TL2_CERR_OPT << "Magdyn error: Inversion of triangulised Hamiltonian failed"
+		MAGDYN_CERR_OPT << "Magdyn error: Inversion of triangulised Hamiltonian failed"
 			<< " at Q = " << S.Q_rlu << "." << std::endl;
 		return false;
 	}
@@ -147,7 +146,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	const t_mat boson_ops = H_triag_inv * S.evec_mat * E_sqrt;
 	const t_mat boson_ops_herm = tl2::herm(boson_ops);
 
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 	t_mat D_mat = boson_ops_herm * S.H_comm * boson_ops;
 	std::cout << "D =\n";
 	tl2::niceprint(std::cout, D_mat, 1e-4, 4);
@@ -172,7 +171,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 
 			if(magffacts[ffact_idx].GetExprString() != "")
 			{
-				TL2_CERR_OPT << "Magdyn error: Invalid form factor #"
+				MAGDYN_CERR_OPT << "Magdyn error: Invalid form factor #"
 					<< ffact_idx << " at Q = " << S.Q_rlu << ", "
 					<< "formula: \"" << magffacts[ffact_idx].GetExprString() << "\"."
 					<< std::endl;
@@ -246,7 +245,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 
 					if(!tl2::equals<t_cplx>(phase, phase_chk, m_eps))
 					{
-						TL2_CERR_OPT << "Magdyn error: Wrong phase at Q = "
+						MAGDYN_CERR_OPT << "Magdyn error: Wrong phase at Q = "
 							<< S.Q_rlu << ": " << phase << " != " << phase_chk
 							<< "." << std::endl;
 					}
@@ -263,7 +262,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		// multiply with boson operators
 		const t_mat M_xy = boson_ops_herm * M * boson_ops;
 
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 		std::cout << "M_{" << int(x_idx) << ", " << int(y_idx) << "}:\n";
 		tl2::niceprint(std::cout, M_xy, 1e-4, 4);
 #endif
@@ -304,25 +303,25 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 		{
 			// invalid projector at Q = 0
 			proj_neutron = tl2::zero<t_mat>(3, 3);
-			TL2_CERR_OPT << "Magdyn error: Cannot calculate orthogonal projector for Q = 0." << std::endl;
+			MAGDYN_CERR_OPT << "Magdyn error: Cannot calculate orthogonal projector for Q = 0." << std::endl;
 		}
 
 		// apply orthogonal projector
 		E_and_S.S_perp = proj_neutron * E_and_S.S;
 		if(m_perform_checks && !tl2::equals(tl2::trace(E_and_S.S_perp), tl2::trace(E_and_S.S_perp * proj_neutron), m_eps))
 		{
-			TL2_CERR_OPT << "Magdyn error: Wrong S_perp at Q = " << S.Q_rlu << ":";
-			TL2_CERR_OPT << "\nproj * S =\n";
+			MAGDYN_CERR_OPT << "Magdyn error: Wrong S_perp at Q = " << S.Q_rlu << ":";
+			MAGDYN_CERR_OPT << "\nproj * S =\n";
 			if(!m_silent)
 				tl2::niceprint(std::cerr, E_and_S.S_perp, 1e-4, 4);
-			TL2_CERR_OPT << "\nproj * S * proj =\n";
+			MAGDYN_CERR_OPT << "\nproj * S * proj =\n";
 			if(!m_silent)
 				tl2::niceprint(std::cerr, E_and_S.S_perp * proj_neutron, 1e-4, 4);
-			TL2_CERR_OPT << std::endl;
+			MAGDYN_CERR_OPT << std::endl;
 		}
 
 
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 		t_mat proj_neutron2 = tl2::convert<t_mat>(
 			tl2::ortho_projector<t_mat_real, t_vec_real>(m_xtalB, S.Q_rlu, false, false));
 

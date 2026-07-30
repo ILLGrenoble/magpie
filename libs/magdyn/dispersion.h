@@ -1,5 +1,5 @@
 /**
- * tlibs2 -- magnetic dynamics
+ * magnetic dynamics
  * @author Tobias Weber <tweber@ill.fr>
  * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
@@ -15,9 +15,8 @@
  * @desc For further references, see the 'LITERATURE' file.
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +32,8 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_DISP_H__
-#define __TLIBS2_MAGDYN_DISP_H__
+#ifndef __MAGDYN_DISP_H__
+#define __MAGDYN_DISP_H__
 
 
 #include <numeric>

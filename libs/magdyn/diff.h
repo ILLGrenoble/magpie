@@ -1,13 +1,12 @@
 /**
- * tlibs2 -- magnetic dynamics -- differentiation / group velocity calculations
+ * magnetic dynamics -- differentiation / group velocity calculations
  * @author Tobias Weber <tweber@ill.fr>
  * @date November 2025
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +22,8 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_DIFF_H__
-#define __TLIBS2_MAGDYN_DIFF_H__
+#ifndef __MAGDYN_DIFF_H__
+#define __MAGDYN_DIFF_H__
 
 
 #include "magdyn.h"
@@ -35,7 +34,7 @@
 // differentiation / group velocity calculations
 // --------------------------------------------------------------------
 
-namespace tl2_mag {
+namespace magdyn {
 
 
 /**

@@ -1,5 +1,5 @@
 /**
- * tlibs2 -- magnetic dynamics -- powder calculation
+ * magnetic dynamics -- powder calculation
  * @author Tobias Weber <tweber@ill.fr>
  * @date july-2026
  * @license GPLv3, see 'LICENSE' file
@@ -15,9 +15,8 @@
  * @desc For further references, see the 'LITERATURE' file.
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +32,8 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_POWDER_H__
-#define __TLIBS2_MAGDYN_POWDER_H__
+#ifndef __MAGDYN_POWDER_H__
+#define __MAGDYN_POWDER_H__
 
 
 #include "magdyn.h"
@@ -59,7 +58,7 @@ MAGDYN_INST::CalcPowder(t_real Q_invA,
 
 	if(!inv_ok)
 	{
-		TL2_CERR_OPT << "Magdyn error: B matrix is not invertible."
+		MAGDYN_CERR_OPT << "Magdyn error: B matrix is not invertible."
 			<< std::endl;
 	}
 
@@ -81,7 +80,7 @@ MAGDYN_INST::CalcPowder(t_real Q_invA,
 		{
 			if(!tl2::equals(tl2::norm(Qvec_invA), Q_invA, m_eps))
 			{
-				TL2_CERR_OPT << "Magdyn error: Invalid Q vector length for |Q| = "
+				MAGDYN_CERR_OPT << "Magdyn error: Invalid Q vector length for |Q| = "
 					<< Q_invA << " / A." << std::endl;
 			}
 		}

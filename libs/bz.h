@@ -26,15 +26,15 @@
  */
 
 
-#ifndef __TAKIN_BZLIB_H__
-#define __TAKIN_BZLIB_H__
+#ifndef __MAGPIE_BZLIB_H__
+#define __MAGPIE_BZLIB_H__
 
 #include <vector>
 #include <optional>
 
 #include "tlibs2/libs/maths.h"
-#include "libs/symops.h"
-#include "libs/loadcif.h"
+#include "symops.h"
+#include "loadcif.h"
 
 #if __has_include("pathslib/libs/voronoi.h")
 	#include "pathslib/libs/voronoi.h"

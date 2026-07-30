@@ -531,7 +531,7 @@ void MagDynDlg::CreateMenuBar()
 	menuStruct->addSeparator();
 	menuStruct->addAction(acStructView);
 	menuStruct->addAction(acBZView);
-#ifdef __TLIBS2_MAGDYN_USE_MINUIT__
+#ifdef __MAGDYN_USE_MINUIT__
 	menuStruct->addSeparator();
 	menuStruct->addAction(acGroundState);
 #endif

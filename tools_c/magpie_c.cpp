@@ -52,7 +52,7 @@ using t_rtree_leaf = std::tuple<t_rtree_vertex, t_E_and_S>;
 using t_rtree = boost::geometry::index::rtree<t_rtree_leaf, boost::geometry::index::linear<16>>;
 
 // magpie core
-using t_magdyn = tl2_mag::MagDyn<
+using t_magdyn = magdyn::MagDyn<
 	t_mat, t_vec,
 	t_mat_real, t_vec_real,
 	t_cplx, t_real,

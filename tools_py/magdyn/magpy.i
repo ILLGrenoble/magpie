@@ -28,7 +28,7 @@
 	#ifndef MAGDYN_COMPAT
 		#define MAGDYN_COMPAT
 	#endif
-	#include "../../tlibs2/libs/magdyn.h"
+	#include "../../libs/magdyn.h"
 %}
 
 #define MAGDYN_COMPAT
@@ -69,34 +69,34 @@
 // ----------------------------------------------------------------------------
 
 
-%include "../../tlibs2/libs/magdyn.h"
-%include "../../tlibs2/libs/magdyn/magdyn.h"
-%include "../../tlibs2/libs/magdyn/structs.h"
-%include "../../tlibs2/libs/magdyn/helpers.h"
-%include "../../tlibs2/libs/magdyn/getters.h"
-%include "../../tlibs2/libs/magdyn/generators.h"
-%include "../../tlibs2/libs/magdyn/file.h"
-%include "../../tlibs2/libs/magdyn/configuration.h"
-%include "../../tlibs2/libs/magdyn/groundstate.h"
-%include "../../tlibs2/libs/magdyn/precalc.h"
-%include "../../tlibs2/libs/magdyn/hamilton.h"
-%include "../../tlibs2/libs/magdyn/correlation.h"
-%include "../../tlibs2/libs/magdyn/polarisation.h"
-%include "../../tlibs2/libs/magdyn/dispersion.h"
-%include "../../tlibs2/libs/magdyn/topology.h"
+%include "../../libs/magdyn.h"
+%include "../../libs/magdyn/magdyn.h"
+%include "../../libs/magdyn/structs.h"
+%include "../../libs/magdyn/helpers.h"
+%include "../../libs/magdyn/getters.h"
+%include "../../libs/magdyn/generators.h"
+%include "../../libs/magdyn/file.h"
+%include "../../libs/magdyn/configuration.h"
+%include "../../libs/magdyn/groundstate.h"
+%include "../../libs/magdyn/precalc.h"
+%include "../../libs/magdyn/hamilton.h"
+%include "../../libs/magdyn/correlation.h"
+%include "../../libs/magdyn/polarisation.h"
+%include "../../libs/magdyn/dispersion.h"
+%include "../../libs/magdyn/topology.h"
 
 
 // ----------------------------------------------------------------------------
 // input- and output structs (and vectors of them)
 // ----------------------------------------------------------------------------
-%template(MagneticSite) tl2_mag::t_MagneticSite<
+%template(MagneticSite) magdyn::t_MagneticSite<
 	tl2::mat<std::complex<double>>,
 	tl2::vec<std::complex<double>>,
 	tl2::vec<double>,
 	std::size_t,
 	double>;
 %template(VecMagneticSite) std::vector<
-	tl2_mag::t_MagneticSite<
+	magdyn::t_MagneticSite<
 		tl2::mat<std::complex<double>>,
 		tl2::vec<std::complex<double>>,
 		tl2::vec<double>,
@@ -104,7 +104,7 @@
 		double>
 	>;
 %template(VecMagneticSitePtr) std::vector<
-	const tl2_mag::t_MagneticSite<
+	const magdyn::t_MagneticSite<
 		tl2::mat<std::complex<double>>,
 		tl2::vec<std::complex<double>>,
 		tl2::vec<double>,
@@ -112,7 +112,7 @@
 		double>*
 	>;
 
-%template(ExchangeTerm) tl2_mag::t_ExchangeTerm<
+%template(ExchangeTerm) magdyn::t_ExchangeTerm<
 	tl2::mat<std::complex<double>>,
 	tl2::vec<std::complex<double>>,
 	tl2::vec<double>,
@@ -120,7 +120,7 @@
 	std::complex<double>,
 	double>;
 %template(VecExchangeTerm) std::vector<
-	tl2_mag::t_ExchangeTerm<
+	magdyn::t_ExchangeTerm<
 		tl2::mat<std::complex<double>>,
 		tl2::vec<std::complex<double>>,
 		tl2::vec<double>,
@@ -129,31 +129,31 @@
 		double>
 	>;
 
-%template(ExternalField) tl2_mag::t_ExternalField<
+%template(ExternalField) magdyn::t_ExternalField<
 	tl2::vec<double>,
 	double>;
 
-%template(EnergyAndWeight) tl2_mag::t_EnergyAndWeight<
+%template(EnergyAndWeight) magdyn::t_EnergyAndWeight<
 	tl2::mat<std::complex<double>>,
 	tl2::vec<std::complex<double>>,
 	double, std::size_t,
 	std::complex<double>>;
 %template(VecEnergyAndWeight) std::vector<
-	tl2_mag::t_EnergyAndWeight<
+	magdyn::t_EnergyAndWeight<
 		tl2::mat<std::complex<double>>,
 		tl2::vec<std::complex<double>>,
 		double, std::size_t,
 		std::complex<double>>
 	>;
 
-%template(SofQE) tl2_mag::t_SofQE<
+%template(SofQE) magdyn::t_SofQE<
 	tl2::mat<std::complex<double>>,
 	tl2::vec<std::complex<double>>,
 	tl2::vec<double>,
 	double, std::size_t,
 	std::complex<double>>;
 %template(VecSofQE) std::vector<
-	tl2_mag::t_SofQE<
+	magdyn::t_SofQE<
 		tl2::mat<std::complex<double>>,
 		tl2::vec<std::complex<double>>,
 		tl2::vec<double>,
@@ -161,10 +161,10 @@
 		std::complex<double>>
 	>;
 
-%template(Variable) tl2_mag::t_Variable<
+%template(Variable) magdyn::t_Variable<
 	std::complex<double>>;
 %template(VecVariable) std::vector<
-	tl2_mag::t_Variable<
+	magdyn::t_Variable<
 		std::complex<double>>
 	>;
 // ----------------------------------------------------------------------------
@@ -174,7 +174,7 @@
 /**
  * main magdyn class
  */
-%template(MagDyn) tl2_mag::MagDyn<
+%template(MagDyn) magdyn::MagDyn<
 	tl2::mat<std::complex<double>>,
 	tl2::vec<std::complex<double>>,
 	tl2::mat<double>,
@@ -205,7 +205,7 @@
 	using t_vec_real = tl2::vec<double>;
 	using t_cplx = std::complex<double>;
 
-	using t_MagDyn = tl2_mag::MagDyn<
+	using t_MagDyn = magdyn::MagDyn<
 		t_mat, t_vec, t_mat_real, t_vec_real,
 		t_cplx, t_real, std::size_t>;
 

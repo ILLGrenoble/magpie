@@ -1,13 +1,12 @@
 /**
- * tlibs2 -- magnetic dynamics -- generators
+ * magnetic dynamics -- generators
  * @author Tobias Weber <tweber@ill.fr>
  * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +22,8 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_GEN_H__
-#define __TLIBS2_MAGDYN_GEN_H__
+#ifndef __MAGDYN_GEN_H__
+#define __MAGDYN_GEN_H__
 
 
 #include "magdyn.h"
@@ -126,7 +125,7 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 			}
 			else
 			{
-				TL2_CERR_OPT << "Magdyn error: Parsing DMI component "
+				MAGDYN_CERR_OPT << "Magdyn error: Parsing DMI component "
 					<< int(dmi_idx) << " of term \"" << term.name
 					<< "\"." << std::endl;
 			}
@@ -154,7 +153,7 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 				}
 				else
 				{
-					TL2_CERR_OPT << "Magdyn error: Parsing general J component ("
+					MAGDYN_CERR_OPT << "Magdyn error: Parsing general J component ("
 						<< int(J_idx1) << ", " << int(J_idx2)
 						<< ") of term \"" << term.name << "\"."
 						<< std::endl;
@@ -181,7 +180,7 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 
 			if(!sc1_ok || !sc2_ok)
 			{
-				TL2_CERR_OPT << "Magdyn error: Could not find supercell"
+				MAGDYN_CERR_OPT << "Magdyn error: Could not find supercell"
 					<< " for position generated from symop "
 					<< op_idx << "." << std::endl;
 			}
@@ -667,7 +666,7 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
 		false /*keep in uc*/, true /*ignore occupied*/,
 		true /*return homogeneous*/);
 
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 	using namespace tl2_ops;
 	std::cout << "term1:     " << term1.site1_calc << ", " << term1.site2_calc
 		<< ", dist: " << term1.dist_calc << ", " << term1.name << std::endl;
@@ -686,7 +685,7 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
 		if(!sc1_ok || !sc2_ok)
 			continue;
 
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 		std::cout << "term1_op" << op_idx << ": " << site1_sc_idx << ", " << site2_sc_idx
 			<< ", dist: " << to_3vec<t_vec_real>(sc2 - sc1) << std::endl;
 #endif

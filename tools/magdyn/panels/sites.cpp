@@ -125,7 +125,7 @@ void MagDynDlg::CreateSitesPanel()
 	btnMirrorAtoms->setToolTip("Flip the coordinates of the sites.");
 	btnShowNotes->setToolTip("Add notes or comments describing the magnetic structure.");
 	btnGroundState->setToolTip("Minimise ground state energy.");
-#ifndef __TLIBS2_MAGDYN_USE_MINUIT__
+#ifndef __MAGDYN_USE_MINUIT__
 	btnGroundState->setEnabled(false);
 #endif
 

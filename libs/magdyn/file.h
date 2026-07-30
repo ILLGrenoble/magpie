@@ -1,13 +1,12 @@
 /**
- * tlibs2 -- magnetic dynamics -- saving of dispersions
+ * magnetic dynamics -- saving of dispersions
  * @author Tobias Weber <tweber@ill.fr>
  * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +22,8 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_FILE_H__
-#define __TLIBS2_MAGDYN_FILE_H__
+#ifndef __MAGDYN_FILE_H__
+#define __MAGDYN_FILE_H__
 
 
 #include <fstream>
@@ -32,11 +31,11 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "../algos.h"
+#include "tlibs2/libs/algos.h"
 #include "magdyn.h"
 
 
-namespace tl2_mag {
+namespace magdyn {
 
 // ============================================================================
 // py plotting script template
@@ -201,7 +200,7 @@ if __name__ == "__main__":
 )RAW";
 // ============================================================================
 
-}  // tl2_mag
+}  // magdyn
 
 
 // --------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /**
- * tlibs2 -- magnetic dynamics -- polarisation
+ * magnetic dynamics -- polarisation
  * @author Tobias Weber <tweber@ill.fr>
  * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
@@ -10,9 +10,8 @@
  * @desc For further references, see the 'LITERATURE' file.
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,11 +27,11 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_POLARISATION_H__
-#define __TLIBS2_MAGDYN_POLARISATION_H__
+#ifndef __MAGDYN_POLARISATION_H__
+#define __MAGDYN_POLARISATION_H__
 
 
-#include "../phys.h"
+#include "tlibs2/libs/phys.h"
 
 #include "magdyn.h"
 
@@ -51,7 +50,7 @@ bool MAGDYN_INST::CalcPolarisation(const t_vec_real& Q_rlu,
 {
 	if(tl2::equals_0<t_vec_real>(Q_rlu, m_eps))
 	{
-		TL2_CERR_OPT << "Magdyn error: Q coordinate system cannot be calculated for Q = 0."
+		MAGDYN_CERR_OPT << "Magdyn error: Q coordinate system cannot be calculated for Q = 0."
 			<< std::endl;
 		return false;
 	}
@@ -84,7 +83,7 @@ bool MAGDYN_INST::CalcPolarisation(const t_vec_real& Q_rlu,
 	if(!rotQ_inv_ok)
 	{
 		using namespace tl2_ops;
-		TL2_CERR_OPT << "Magdyn error: Cannot invert Q rotation matrix for Q = "
+		MAGDYN_CERR_OPT << "Magdyn error: Cannot invert Q rotation matrix for Q = "
 			<< Q_rlu << "." << std::endl;
 		return false;
 	}

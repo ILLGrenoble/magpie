@@ -1,13 +1,12 @@
 /**
- * tlibs2 -- magnetic dynamics -- getters / setters / cleanup functions
+ * magnetic dynamics -- getters / setters / cleanup functions
  * @author Tobias Weber <tweber@ill.fr>
  * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +22,8 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_GETTERS_H__
-#define __TLIBS2_MAGDYN_GETTERS_H__
+#ifndef __MAGDYN_GETTERS_H__
+#define __MAGDYN_GETTERS_H__
 
 
 #include "magdyn.h"
@@ -375,7 +374,7 @@ MAGDYN_TEMPL t_size MAGDYN_INST::GetMagneticSiteIndex(const std::string& name) c
 	}
 	else
 	{
-		TL2_CERR_OPT << "Magdyn error: "
+		MAGDYN_CERR_OPT << "Magdyn error: "
 			<< "Invalid site name \"" << name << "\"."
 			<< std::endl;
 	}
@@ -409,7 +408,7 @@ MAGDYN_TEMPL t_size MAGDYN_INST::GetExchangeTermIndex(const std::string& name) c
 	}
 	else
 	{
-		TL2_CERR_OPT << "Magdyn error: Invalid coupling name \"" << name << "\"."
+		MAGDYN_CERR_OPT << "Magdyn error: Invalid coupling name \"" << name << "\"."
 			<< std::endl;
 	}
 
@@ -583,7 +582,7 @@ MAGDYN_TEMPL void MAGDYN_INST::SetMagneticFormFactor(const std::string& ffact, t
 
 	if(!m_magffacts[idx].parse_noexcept(ffact))
 	{
-		TL2_CERR_OPT << "Magdyn error: Magnetic form factor formula #" << idx
+		MAGDYN_CERR_OPT << "Magdyn error: Magnetic form factor formula #" << idx
 			<< ": \"" << ffact << "\" could not be parsed."
 			<< std::endl;
 	}
@@ -729,7 +728,7 @@ void MAGDYN_INST::SetCrystalLattice(t_real a, t_real b, t_real c,
 	{
 		m_xtalA = m_xtalB = tl2::unit<t_mat_real>(3);
 
-		TL2_CERR_OPT << "Magdyn error: Could not calculate crystal matrices."
+		MAGDYN_CERR_OPT << "Magdyn error: Could not calculate crystal matrices."
 			<< std::endl;
 	}
 }
@@ -761,7 +760,7 @@ void MAGDYN_INST::SetScatteringPlane(t_real ah, t_real ak, t_real al,
 
 		if(!inv_ok)
 		{
-			TL2_CERR_OPT << "Magdyn error: UB matrix is not invertible."
+			MAGDYN_CERR_OPT << "Magdyn error: UB matrix is not invertible."
 				<< std::endl;
 		}*/
 	}
@@ -769,7 +768,7 @@ void MAGDYN_INST::SetScatteringPlane(t_real ah, t_real ak, t_real al,
 	{
 		m_xtalUB = /*m_xtalUBinv =*/ tl2::unit<t_mat_real>(3);
 
-		TL2_CERR_OPT << "Magdyn error: Could not calculate scattering plane matrices."
+		MAGDYN_CERR_OPT << "Magdyn error: Could not calculate scattering plane matrices."
 			<< std::endl;
 	}
 }

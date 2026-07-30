@@ -1,15 +1,12 @@
 /**
  * magnetic dynamics test
  * @author Tobias Weber <tweber@ill.fr>
- * @date 10-june-2024
+ * @date 25-july-2024
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs
- * Copyright (C) 2017-2024  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
- * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
- *                          (TUM), Garching, Germany).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +22,7 @@
  * ----------------------------------------------------------------------------
  */
 
-#define BOOST_TEST_MODULE Magdyn Test
+#define BOOST_TEST_MODULE Magdyn Test2
 
 #include <boost/test/included/unit_test.hpp>
 #include <boost/type_index.hpp>
@@ -39,7 +36,7 @@ namespace ty = boost::typeindex;
 using t_types_real = std::tuple<double, float>;
 
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn, t_real, t_types_real)
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 {
 	// real type name
 	const std::string real_name = ty::type_id_with_cvr<t_real>().pretty_name();
@@ -58,7 +55,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn, t_real, t_types_real)
 	using t_mat_real = tl2::mat<t_real>;
 	using t_vec_real = tl2::vec<t_real>;
 
-	using t_magdyn = tl2_mag::MagDyn<
+	using t_magdyn = magdyn::MagDyn<
 		t_mat, t_vec,
 		t_mat_real, t_vec_real,
 		t_cplx, t_real,
@@ -69,59 +66,116 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn, t_real, t_types_real)
 
 
 	// add a variable
-	typename t_magdyn::Variable var{};
-	var.name = "J";
-	var.value = 0.5;
+	{
+		typename t_magdyn::Variable var{};
+		var.name = "J";
+		var.value = 0.5;
 
-	magdyn.AddVariable(std::move(var));
-
-
-	// add a site
-	typename t_magdyn::MagneticSite site{};
-	site.name = "site";
-
-	site.pos[0] = "0";
-	site.pos[1] = "0";
-	site.pos[2] = "0";
-
-	site.spin_dir[0] = "0";
-	site.spin_dir[1] = "0";
-	site.spin_dir[2] = "1";
-
-	site.spin_mag = "1";
-
-	magdyn.CalcMagneticSite(site);
-	magdyn.AddMagneticSite(std::move(site));
+		magdyn.AddVariable(std::move(var));
+	}
 
 
-	// add a coupling
-	typename t_magdyn::ExchangeTerm coupling{};
+	// add sites
+	{
+		typename t_magdyn::MagneticSite site{};
+		site.name = "site1";
 
-	coupling.name = "coupling";
+		site.pos[0] = "0";
+		site.pos[1] = "0";
+		site.pos[2] = "0";
 
-	coupling.site1 = "site";
-	coupling.site2 = "site";
+		site.spin_dir[0] = "0";
+		site.spin_dir[1] = "0";
+		site.spin_dir[2] = "1";
 
-	coupling.dist[0] = "1";
-	coupling.dist[1] = "0";
-	coupling.dist[2] = "0";
+		site.spin_mag = "1";
 
-	coupling.J = "J";
+		magdyn.CalcMagneticSite(site);
+		magdyn.AddMagneticSite(std::move(site));
+	}
+	{
+		typename t_magdyn::MagneticSite site{};
+		site.name = "site2";
 
-	magdyn.CalcExchangeTerm(coupling);
-	magdyn.AddExchangeTerm(std::move(coupling));
+		site.pos[0] = "0.5";
+		site.pos[1] = "0";
+		site.pos[2] = "0";
+
+		site.spin_dir[0] = "0";
+		site.spin_dir[1] = "0";
+		//site.spin_dir[2] = "-1"; // correct spin component
+		site.spin_dir[2] = "1";    // set wrong spin to test minimiser
+
+		site.spin_mag = "1";
+
+		magdyn.CalcMagneticSite(site);
+		magdyn.AddMagneticSite(std::move(site));
+	}
 
 
-	// set propagation vector
-	t_vec_real prop = tl2::create<t_vec_real>({ 0.5, 0., 0. });
-	magdyn.SetOrderingWavevector(prop);
+	// add couplings
+	{
+		typename t_magdyn::ExchangeTerm coupling{};
 
-	t_vec_real rotax = tl2::create<t_vec_real>({ 0., 1., 0. });
-	magdyn.SetRotationAxis(rotax);
+		coupling.name = "coupling1";
+
+		coupling.site1 = "site1";
+		coupling.site2 = "site2";
+
+		coupling.dist[0] = "0";
+		coupling.dist[1] = "0";
+		coupling.dist[2] = "0";
+
+		coupling.J = "J";
+
+		magdyn.CalcExchangeTerm(coupling);
+		magdyn.AddExchangeTerm(std::move(coupling));
+	}
+	{
+		typename t_magdyn::ExchangeTerm coupling{};
+
+		coupling.name = "coupling2";
+
+		coupling.site1 = "site1";
+		coupling.site2 = "site2";
+
+		coupling.dist[0] = "-1";
+		coupling.dist[1] = "0";
+		coupling.dist[2] = "0";
+
+		coupling.J = "J";
+
+		magdyn.CalcExchangeTerm(coupling);
+		magdyn.AddExchangeTerm(std::move(coupling));
+	}
+
+
+	std::cout << "Calculating ground state..." << std::endl;
+	std::unordered_set<std::string> fixed_params
+	{{
+		"site1_phi", "site1_theta",
+		"site2_phi",
+	}};
+
+	if(magdyn.CalcGroundState(&fixed_params), true)
+	{
+		std::cout << "Found ground state spins:" << std::endl;
+
+		using namespace tl2_ops;
+		for(const auto& site : magdyn.GetMagneticSites())
+		{
+			std::cout << "\t" << site.name << ": " <<
+				site.spin_dir_calc << std::endl;
+		}
+	}
+	else
+	{
+		std::cerr << "Error: Couldn't find ground state." << std::endl;
+	}
 
 
 	// calculate a point on the dispersion
-	auto Es_and_S = magdyn.CalcEnergies(0.1, 0., 0., false);
+	auto Es_and_S = magdyn.CalcEnergies(0.2, 0., 0., false);
 	BOOST_TEST(Es_and_S.size() == 2);  // + and - energy branch
 	BOOST_TEST(tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps));
 	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), 0.5878, eps));

@@ -25,7 +25,7 @@
  * ----------------------------------------------------------------------------
  */
 
-#include "tlibs2/libs/magdyn.h"
+#include "libs/magdyn.h"
 #include "defs.h"
 
 

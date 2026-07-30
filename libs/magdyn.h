@@ -1,5 +1,5 @@
 /**
- * tlibs2 -- magnetic dynamics
+ * magnetic dynamics
  * @author Tobias Weber <tweber@ill.fr>
  * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
@@ -16,12 +16,8 @@
  * @desc For further references, see the 'LITERATURE' file.
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
- * tlibs1
- * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
- *                          (TUM), Garching, Germany).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +33,8 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_H__
-#define __TLIBS2_MAGDYN_H__
+#ifndef __MAGDYN_H__
+#define __MAGDYN_H__
 
 
 #ifndef USE_LAPACK
@@ -46,10 +42,10 @@
 #endif
 
 // enables debug output
-//#define __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+//#define __MAGDYN_DEBUG_OUTPUT__
 
 // enables ground state minimisation
-//#define __TLIBS2_MAGDYN_USE_MINUIT__
+//#define __MAGDYN_USE_MINUIT__
 
 
 #include "magdyn/magdyn.h"

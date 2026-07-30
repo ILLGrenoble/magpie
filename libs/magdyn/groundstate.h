@@ -1,5 +1,5 @@
 /**
- * tlibs2 -- magnetic dynamics
+ * magnetic dynamics
  * @author Tobias Weber <tweber@ill.fr>
  * @date 2022 - 2026
  * @license GPLv3, see 'LICENSE' file
@@ -15,9 +15,8 @@
  * @desc For further references, see the 'LITERATURE' file.
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
- *                          Grenoble, France).
+ * Magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,12 +32,12 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TLIBS2_MAGDYN_GS_H__
-#define __TLIBS2_MAGDYN_GS_H__
+#ifndef __MAGDYN_GS_H__
+#define __MAGDYN_GS_H__
 
 
-#include "../str.h"
-#include "../fit.h"
+#include "tlibs2/libs/str.h"
+#include "tlibs2/libs/fit.h"
 
 #include "magdyn.h"
 
@@ -106,7 +105,7 @@ t_real MAGDYN_INST::CalcGroundStateEnergy() const
 	{
 		t_cplx E_field = CalcFieldEnergy(i);
 		E += E_field.real();
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 		std::cout << "Field energy for site " << i << ": "
 			<< E_field << " meV." << std::endl;
 #endif
@@ -120,7 +119,7 @@ t_real MAGDYN_INST::CalcGroundStateEnergy() const
 /**
  * minimise energy to find ground state
  */
-#if defined(__TLIBS2_USE_MINUIT__) && defined(__TLIBS2_MAGDYN_USE_MINUIT__)
+#if defined(__TLIBS2_USE_MINUIT__) && defined(__MAGDYN_USE_MINUIT__)
 MAGDYN_TEMPL
 bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_params,
 	bool verbose, const bool *stop_request)
@@ -153,7 +152,7 @@ bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_p
 
 			dyn.CalcMagneticSite(site);
 
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 			using namespace tl2_ops;
 			std::cout << site.name
 				<< ": u = " << u << ", v = " << v << ", "
@@ -240,7 +239,7 @@ bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_p
 
 			CalcMagneticSite(site);
 
-#ifdef __TLIBS2_MAGDYN_DEBUG_OUTPUT__
+#ifdef __MAGDYN_DEBUG_OUTPUT__
 			using namespace tl2_ops;
 			std::cout << site.name
 				<< ": u = " << u << ", v = " << v << ", "
@@ -253,13 +252,13 @@ bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_p
 	}
 	else
 	{
-		TL2_CERR_OPT << "Magdyn error: Ground state minimisation did not converge."
+		MAGDYN_CERR_OPT << "Magdyn error: Ground state minimisation did not converge."
 			<< std::endl;
 
 		return false;
 	}
 }
-#else  // __TLIBS2_USE_MINUIT__
+#else  // __MAGDYN_USE_MINUIT__
 MAGDYN_TEMPL
 bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>*, bool, const bool*)
 {

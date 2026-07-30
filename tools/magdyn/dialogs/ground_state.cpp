@@ -348,7 +348,7 @@ void GroundStateDlg::SyncFromKernel(const t_magdyn *dyn,
 		return;
 
 	// copy the data (if it's not the same structure anyway)
-	if(dyn != &*m_dyn)
+	if(!m_dyn || dyn != &*m_dyn)
 		m_dyn = *dyn;
 
 	BOOST_SCOPE_EXIT(this_)

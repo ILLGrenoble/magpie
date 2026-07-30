@@ -106,7 +106,8 @@ if(USE_QT)
 		globals.cpp globals.h
 		bz_formulas.cpp
 		plot.cpp plot.h
-		plot_cut.h bz_lib.h
+		plot_cut.h
+		../../libs/bz.h
 		../../tlibs2/libs/qt/recent.cpp ../../tlibs2/libs/qt/recent.h
 		../../tlibs2/libs/qt/gl.cpp ../../tlibs2/libs/qt/gl.h
 		../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h
@@ -124,7 +125,7 @@ else()
 	add_definitions(-DDONT_USE_QT)
 
 	add_executable(takin_bz
-		bz_main.cpp bz_lib.h
+		bz_main.cpp ../../libs/bz.h
 		bz_conf.cpp bz_conf.h
 		globals.cpp globals.h
 
@@ -156,7 +157,7 @@ if(MAKE_LIB)
 	message("Compiling as library.")
 
 	add_library(takinbz
-		bz_lib.cpp bz_lib.h
+		bz_lib.cpp ../../libs/bz.h
 		bz_conf.cpp bz_conf.h
 		globals.cpp globals.h
 
