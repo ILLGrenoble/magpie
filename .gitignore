@@ -35,6 +35,7 @@ tools_py/magdyn/build/**
 tools_py/bz/build/**
 tools_py/instr/build/**
 tools_c/build/**
+unittests/build/**
 build/**
 
 # temporary files
