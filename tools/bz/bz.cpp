@@ -41,7 +41,7 @@
 #include <boost/algorithm/string/replace.hpp>
 namespace algo = boost::algorithm;
 
-#include "libs/loadcif.h"
+#include "libs/sym/loadcif.h"
 
 
 BZDlg::BZDlg(QWidget* pParent) : QDialog{pParent},
@@ -223,7 +223,7 @@ void BZDlg::CreateSymopsPanel()
 
 
 	// get space groups and symops
-	auto spacegroups = get_sgs<t_mat_bz>();
+	auto spacegroups = sym::get_sgs<t_mat_bz>();
 	m_sg_ops.reserve(spacegroups.size());
 	for(auto [sgnum, descr, ops] : spacegroups)
 	{
@@ -767,7 +767,7 @@ void BZDlg::CreateInfoDialog()
 
 	auto labelGemmi = new QLabel(QString(
 		"<a href=\"https://github.com/project-gemmi/gemmi\">Gemmi</a>"
-		" Version: %1.").arg(get_gemmi_version<QString>()),
+		" Version: %1.").arg(sym::get_gemmi_version<QString>()),
 		infopanel);
 	labelGemmi->setOpenExternalLinks(true);
 	grid->addWidget(labelGemmi, y++,0, 1,1);

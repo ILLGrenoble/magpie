@@ -25,8 +25,8 @@
  * ----------------------------------------------------------------------------
  */
 
-#include "libs/bz.h"
+#include "libs/sym/bz.h"
 #include "globals.h"
 
 
-template class BZCalc<t_mat_bz, t_vec_bz, t_real>;
+template class sym::BZCalc<t_mat_bz, t_vec_bz, t_real>;

@@ -38,7 +38,8 @@ namespace pt = boost::property_tree;
 #include "tlibs2/libs/str.h"
 #include "tlibs2/libs/file.h"
 #include "tlibs2/libs/units.h"
-#include "libs/symops.h"
+
+#include "libs/sym/symops.h"
 
 
 // precision
@@ -148,7 +149,7 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 	for(t_size opidx = 0; opidx < symops.size(); ++opidx)
 	{
 		std::string symops_xyz =
-			symop_to_xyz<t_mat_real, t_real>(symops[opidx], g_prec, g_eps);
+			sym::symop_to_xyz<t_mat_real, t_real>(symops[opidx], g_prec, g_eps);
 
 		ofstr << symops_xyz;
 

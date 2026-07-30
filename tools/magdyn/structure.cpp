@@ -57,7 +57,7 @@ void MagDynDlg::PopulateSpaceGroups(bool init)
 		selected_index = m_comboSG->itemData(m_comboSG->currentIndex()).toInt();
 
 	// get space groups and symops
-	auto spacegroups = get_sgs<t_mat_real>();
+	auto spacegroups = sym::get_sgs<t_mat_real>();
 
 	if(init)
 	{

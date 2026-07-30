@@ -43,6 +43,8 @@
 #endif
 
 
+namespace sym {
+
 /**
  * brillouin zone calculation
  */
@@ -1362,6 +1364,8 @@ private:
 
 	static const std::size_t s_erridx{0xffffffff}; // index for reporting errors
 };
+
+}  // namespace sym
 
 
 #endif

@@ -40,7 +40,7 @@
 #include <optional>
 
 #include "libs/magdyn.h"
-#include "libs/bz.h"
+#include "libs/sym/bz.h"
 #include "libs/defs.h"
 
 #include "tlibs2/libs/maths.h"
@@ -73,7 +73,7 @@ using t_site = typename t_magdyn::MagneticSite;
 using t_term = typename t_magdyn::ExchangeTerm;;
 
 // brillouin zone calculation kernel
-using t_bz = BZCalc<t_mat_real, t_vec_real, t_real>;
+using t_bz = sym::BZCalc<t_mat_real, t_vec_real, t_real>;
 // ----------------------------------------------------------------------------
 
 

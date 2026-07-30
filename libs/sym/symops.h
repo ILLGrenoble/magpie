@@ -40,6 +40,8 @@
 
 
 
+namespace sym {
+
 /**
  * converts a symmetry operation matrix to a string
  */
@@ -351,5 +353,8 @@ requires tl2::is_mat<t_mat>
 
 	return idx;
 }
+
+}  // namespace sym
+
 
 #endif

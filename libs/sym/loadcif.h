@@ -41,6 +41,8 @@
 #include "tlibs2/libs/maths.h"
 
 
+namespace sym {
+
 
 template<class t_str = std::string>
 t_str get_gemmi_version()
@@ -412,6 +414,7 @@ find_matching_sgs(
 	return matchingSGs;
 }
 
+}  // namespace sym
 
 
 #endif

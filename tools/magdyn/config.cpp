@@ -719,7 +719,7 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 		m_needsBZCalc = true;
 
 		auto [errstr, atoms, generatedatoms, atomnames, lattice, symops] =
-			load_cif<t_vec_real, t_mat_real>(filename.toStdString(), g_eps);
+			sym::load_cif<t_vec_real, t_mat_real>(filename.toStdString(), g_eps);
 		if(errstr != "")
 		{
 			ShowError(QString("Cannot load CIF \"%1\": %2").arg(filename).arg(errstr.c_str()));
@@ -744,7 +744,7 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 				std::cout << std::get<1>(matching_sgs[0]) << std::endl;
 			}
 		}*/
-		if(t_size sgidx = match_symops<t_mat_real, t_real, t_size>(
+		if(t_size sgidx = sym::match_symops<t_mat_real, t_real, t_size>(
 			symops, m_SGops, g_eps); sgidx < m_SGops.size())
 		{
 			m_comboSG->setCurrentIndex(sgidx);

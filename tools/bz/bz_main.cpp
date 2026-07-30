@@ -34,7 +34,7 @@
 	#include <QtWidgets/QApplication>
 #endif
 
-#include "libs/bz.h"
+#include "libs/sym/bz.h"
 #include "bz_conf.h"
 
 #include <iostream>
@@ -70,7 +70,7 @@ static int cli_main(const std::string& cfg_file, const std::string& results_file
 	{
 		BZConfig cfg = load_bz_config(cfg_file, use_stdin);
 
-		BZCalc<t_mat_bz, t_vec_bz, t_real> bzcalc;
+		sym::BZCalc<t_mat_bz, t_vec_bz, t_real> bzcalc;
 		bzcalc.SetEps(g_eps_bz);
 		bzcalc.SetSymOps(cfg.symops, false);
 		if(cfg.xtal_a && cfg.xtal_b && cfg.xtal_c &&

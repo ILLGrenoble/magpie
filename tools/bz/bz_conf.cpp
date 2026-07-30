@@ -26,7 +26,7 @@
  */
 
 #include "bz_conf.h"
-#include "libs/symops.h"
+#include "libs/sym/symops.h"
 #include "tlibs2/libs/maths.h"
 
 #include <iostream>
@@ -136,7 +136,7 @@ BZConfig load_bz_config(const std::string& filename, bool use_stdin)
 			std::string op = symop.second.get<std::string>(
 				"", "1 0 0 0  0 1 0 0  0 0 1 0  0 0 0 1");
 
-			cfg.symops.emplace_back(str_to_op<t_mat_bz>(op));
+			cfg.symops.emplace_back(sym::str_to_op<t_mat_bz>(op));
 		}
 	}
 

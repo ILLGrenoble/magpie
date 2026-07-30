@@ -29,7 +29,7 @@
 #include <boost/scope_exit.hpp>
 
 #include "magdyn.h"
-#include "libs/loadcif.h"
+#include "libs/sym/loadcif.h"
 
 #include <QtCore/QMimeData>
 #include <QtWidgets/QMessageBox>

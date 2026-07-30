@@ -46,7 +46,8 @@ namespace algo = boost::algorithm;
 
 #include <boost/scope_exit.hpp>
 
-#include "libs/loadcif.h"
+#include "libs/sym/loadcif.h"
+
 #include "tlibs2/libs/algos.h"
 
 using namespace tl2_ops;
@@ -277,12 +278,12 @@ void BZDlg::ImportCIF()
 		QString dirLast = m_sett->value("dir_cif", "").toString();
 		QString filename = QFileDialog::getOpenFileName(
 			this, "Import CIF", dirLast, "CIF Files (*.cif *.CIF)");
-		if(filename=="" || !QFile::exists(filename))
+		if(filename == "" || !QFile::exists(filename))
 			return;
 		m_sett->setValue("dir_cif", QFileInfo(filename).path());
 
 		auto [errstr, atoms, generatedatoms, atomnames, lattice, symops] =
-			load_cif<t_vec_bz, t_mat_bz>(filename.toStdString(), g_eps_bz);
+			sym::load_cif<t_vec_bz, t_mat_bz>(filename.toStdString(), g_eps_bz);
 		if(errstr != "")
 		{
 			QMessageBox::critical(this, "CIF Importer", errstr.c_str());

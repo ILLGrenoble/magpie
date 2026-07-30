@@ -199,7 +199,7 @@ if(USE_QT)
 		startup/benchmark.cpp
 
 		# bz calculator
-		../../libs/bz.h ../bz/plot_cut.h
+		../bz/plot_cut.h
 		../bz/plot.cpp ../bz/plot.h
 
 		# dialogs
@@ -224,7 +224,7 @@ if(USE_QT)
 
 		# library
 		../../libs/magdyn.h ../../libs/magffacts.h
-		../../libs/symops.h
+		../../libs/sym/symops.h ../../libs/sym/bz.h
 		../../tlibs2/libs/qt/gl.cpp ../../tlibs2/libs/qt/gl.h
 		../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h
 		../../tlibs2/libs/qt/recent.cpp ../../tlibs2/libs/qt/recent.h

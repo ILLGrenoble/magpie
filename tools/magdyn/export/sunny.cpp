@@ -38,7 +38,8 @@ namespace pt = boost::property_tree;
 #include "tlibs2/libs/str.h"
 #include "tlibs2/libs/file.h"
 #include "tlibs2/libs/units.h"
-#include "libs/symops.h"
+
+#include "libs/sym/symops.h"
 
 
 // precision

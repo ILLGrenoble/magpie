@@ -36,7 +36,8 @@
 
 #include <boost/scope_exit.hpp>
 
-#include "libs/symops.h"
+#include "libs/sym/symops.h"
+
 #include "tlibs2/libs/phys.h"
 #include "tlibs2/libs/algos.h"
 #include "tlibs2/libs/qt/helper.h"
@@ -81,12 +82,12 @@ void BZDlg::AddSymOpTabItem(int row, const t_mat_bz& op)
 	}
 	else
 	{
-		std::string prop = get_op_properties<t_mat_bz, t_vec_bz>(op, g_eps_bz);
+		std::string prop = sym::get_op_properties<t_mat_bz, t_vec_bz>(op, g_eps_bz);
 		t_real det = tl2::det(op);
 		//t_real det_rot = tl2::det(tl2::submat(op, 3, 3));
 
 		m_symops->setItem(row, COL_OP,
-			new QTableWidgetItem(op_to_str<t_mat_bz>(op, g_prec_bz, g_eps_bz).c_str()));
+			new QTableWidgetItem(sym::op_to_str<t_mat_bz>(op, g_prec_bz, g_eps_bz).c_str()));
 		m_symops->setItem(row, COL_PROP,
 			new QTableWidgetItem(prop.c_str()));
 		m_symops->setItem(row, COL_DET,
@@ -199,7 +200,7 @@ void BZDlg::MoveSymOpTabItemDown()
 			item && std::find(selected.begin(), selected.end(), row-1)
 				!= selected.end())
 		{
-			for(int col=0; col<m_symops->columnCount(); ++col)
+			for(int col = 0; col < m_symops->columnCount(); ++col)
 				m_symops->item(row, col)->setSelected(true);
 		}
 	}
@@ -237,8 +238,8 @@ void BZDlg::SymOpTableItemChanged(QTableWidgetItem *item)
 	// update properties
 	if(item->column() == COL_OP)
 	{
-		t_mat_bz op = str_to_op<t_mat_bz>(item->text().toStdString());
-		std::string prop = get_op_properties<t_mat_bz, t_vec_bz>(op, g_eps_bz);
+		t_mat_bz op = sym::str_to_op<t_mat_bz>(item->text().toStdString());
+		std::string prop = sym::get_op_properties<t_mat_bz, t_vec_bz>(op, g_eps_bz);
 		t_real det = tl2::det(op);
 		//t_real det_rot = tl2::det(tl2::submat(op, 3, 3));
 
@@ -312,7 +313,6 @@ void BZDlg::GetSymOpsFromSG()
 		QMessageBox::critical(this, "Space Group Conversion", ex.what());
 	}
 
-
 	m_ignoreCalc = false;
 	CalcB(true);
 }
@@ -335,7 +335,7 @@ std::vector<t_mat_bz> BZDlg::GetSymOps(bool only_centring) const
 			continue;
 		}
 
-		t_mat_bz op = str_to_op<t_mat_bz>(op_item->text().toStdString());
+		t_mat_bz op = sym::str_to_op<t_mat_bz>(op_item->text().toStdString());
 
 		bool add_op = true;
 		if(only_centring)

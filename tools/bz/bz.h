@@ -52,7 +52,7 @@
 #include "plot_cut.h"
 #include "plot.h"
 
-#include "libs/bz.h"
+#include "libs/sym/bz.h"
 
 #include "tlibs2/libs/qt/recent.h"
 #include "tlibs2/libs/qt/glplot.h"
@@ -169,14 +169,14 @@ private:
 	t_mat_bz m_crystA = tl2::unit<t_mat_bz>(3);     // crystal A matrix
 	t_mat_bz m_crystB = tl2::unit<t_mat_bz>(3);     // crystal B matrix
 
-	std::vector<std::vector<t_mat_bz>> m_sg_ops{};  // symops per space group
-	BZCalc<t_mat_bz, t_vec_bz, t_real> m_bzcalc{};  // calculation kernel
+	std::vector<std::vector<t_mat_bz>> m_sg_ops{};       // symops per space group
+	sym::BZCalc<t_mat_bz, t_vec_bz, t_real> m_bzcalc{};  // calculation kernel
 
 
 protected:
 	// space group / symops tab
 	void AddSymOpTabItem(int row = -1, const t_mat_bz& op = tl2::unit<t_mat_bz>(4));
-	void DelSymOpTabItem(int begin=-2, int end=-2);
+	void DelSymOpTabItem(int begin = -2, int end = -2);
 	void MoveSymOpTabItemUp();
 	void MoveSymOpTabItemDown();
 	void SymOpTableItemChanged(QTableWidgetItem *item);
@@ -186,7 +186,7 @@ protected:
 
 	// formulas tab
 	void AddFormulaTabItem(int row = -1, const std::string& formula = "");
-	void DelFormulaTabItem(int begin=-2, int end=-2);
+	void DelFormulaTabItem(int begin = -2, int end = -2);
 	void MoveFormulaTabItemUp();
 	void MoveFormulaTabItemDown();
 	void FormulaTableItemChanged(QTableWidgetItem *item);
