@@ -208,6 +208,7 @@ protected:
 	// scattering plane panel
 	BZCutScene<t_vec_real, t_real> *m_bzscene{};
 	BZCutView<t_vec_real, t_real> *m_bzview{};
+	QComboBox *m_recip_trafo_mode{};
 	QDoubleSpinBox *m_recip_rot_axis[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_recip_rot_angle{};
 
@@ -401,6 +402,7 @@ protected:
 	void MirrorAtoms();
 	void RotateField(const t_vec_real& axis, t_real angle);
 	void RotateDispersionQs(const t_vec_real& axis, t_real angle);
+	void TranslateDispersionQs(const t_vec_real& axis, t_real delta);
 	void GenerateSitesFromSG();
 	void GenerateCouplingsFromSG();
 	void GeneratePossibleCouplings();
