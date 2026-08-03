@@ -117,6 +117,7 @@ protected:
 	QProgressBar *m_progress{};
 	QPushButton* m_btnStartStop{};
 
+	// menu items
 	QAction *m_autocalc{};
 	QAction *m_use_dmi{}, *m_use_genJ{};
 	QAction *m_use_field{}, *m_use_temperature{};
@@ -203,14 +204,14 @@ protected:
 	QDoubleSpinBox *m_rot_axis[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_rot_angle{};
 	QTableWidget *m_fieldstab{};
-	QDoubleSpinBox *m_temperature{};       // temperature
+	QDoubleSpinBox *m_temperature{};           // temperature
 
 	// scattering plane panel
 	BZCutScene<t_vec_real, t_real> *m_bzscene{};
 	BZCutView<t_vec_real, t_real> *m_bzview{};
 	QComboBox *m_recip_trafo_mode{};
-	QDoubleSpinBox *m_recip_rot_axis[3]{nullptr, nullptr, nullptr};
-	QDoubleSpinBox *m_recip_rot_angle{};
+	QDoubleSpinBox *m_recip_trafo_axis[3]{nullptr, nullptr, nullptr};
+	QDoubleSpinBox *m_recip_trafo_delta{};
 
 	// coordinates panel
 	QTableWidget *m_coordinatestab{};
@@ -290,8 +291,6 @@ protected:
 	void InitSettingsDlg();
 	void InitSettings();
 
-	void PlotFormFactors();
-
 	// set up input panels
 	void CreateSitesPanel();
 	void CreateExchangeTermsPanel();
@@ -307,8 +306,64 @@ protected:
 	void CreateHamiltonPanel();
 	void CreateExportPanel();
 
+	// actions
 	void PopulateSpaceGroups(bool init = false);
 	void PopulateFormFactors();
+	void PlotFormFactors();
+
+	void SyncSiteComboBoxes();
+	void SyncSiteComboBox(SitesComboBox* combo, const std::string& selected_site);
+	SitesComboBox* CreateSitesComboBox(const std::string& selected_site);
+
+	void SetCurrentField();
+	void SetCurrentCoordinate(int which = 0);
+
+	std::vector<t_magdyn::Variable> GetVariables() const;
+	t_size ReplaceValueWithVariable(const std::string& var, const t_cplx& val);
+	t_size ReplaceValuesWithVariables();
+
+	std::pair<t_vec_real, t_vec_real> GetDispersionQ() const;
+	std::pair<t_real, t_real> GetDispersionE() const;
+	void ClearDispersion(bool replot = false);
+	void Clear(bool recalc = true);
+
+	void Load();
+	void Save();
+	void SaveAs();
+
+	void ImportCIF();
+	void ImportStructure();
+	void ExportToSunny();
+	void ExportToSpinW();
+	void ExportToScript();
+	void ExportSQE();
+
+	void SavePlotFigure();
+	void SaveDispersion(bool as_scr = false);
+	void SaveMultiDispersion(bool as_scr = false);
+
+	void MirrorAtoms();
+	void RotateField(const t_vec_real& axis, t_real angle);
+	void RotateDispersionQs(const t_vec_real& axis, t_real angle);
+	void TranslateDispersionQs(const t_vec_real& axis, t_real delta);
+	void ScaleDispersionQs(t_real factor);
+	void GenerateSitesFromSG();
+	void GenerateCouplingsFromSG();
+	void GeneratePossibleCouplings();
+	void ExtendStructure();
+	const std::vector<t_mat_real>& GetSymOpsForCurrentSG(bool show_err = true) const;
+
+	// transfer sites and terms from the kernel
+	void SyncSitesFromKernel(boost::optional<const boost::property_tree::ptree&> extra_infos = boost::none);
+	void SyncTermsFromKernel(boost::optional<const boost::property_tree::ptree&> extra_infos = boost::none);
+	void SyncSymmetryIndicesFromKernel();
+	void SyncToKernel();         // transfer all data to the kernel
+	void CalcSymmetryIndices();  // assign symmetry groups to sites and couplings
+	void SortTerms();            // sort couplings by their lengths
+	void RemoveUnusedTerms();    // remove terms without coupling constants
+	void CalcAll();              // syncs sites and terms and calculates all dynamics
+	void CalcBZ();               // calculate brillouin zone and cut
+	void SetKernel(const t_magdyn* dyn, bool sync_sites = true, bool sync_terms = true, bool sync_idx = true);
 
 	// general table operations
 	void MoveTabItemUp(QTableWidget *pTab);
@@ -339,10 +394,6 @@ protected:
 		const std::string& gen_zx = "0", const std::string& gen_zy = "0", const std::string& gen_zz = "0",
 		const std::string& rgb = "#00bf00");
 
-	void SyncSiteComboBoxes();
-	void SyncSiteComboBox(SitesComboBox* combo, const std::string& selected_site);
-	SitesComboBox* CreateSitesComboBox(const std::string& selected_site);
-
 	// add a variable to the table
 	void AddVariableTabItem(int row = -1,
 		const std::string& name = "",
@@ -358,13 +409,6 @@ protected:
 		t_real Bh = 0., t_real Bk = 0., t_real Bl = 1.,
 		t_real Bmag = 1.);
 
-	void SetCurrentField();
-	void SetCurrentCoordinate(int which = 0);
-
-	std::vector<t_magdyn::Variable> GetVariables() const;
-	t_size ReplaceValueWithVariable(const std::string& var, const t_cplx& val);
-	t_size ReplaceValuesWithVariables();
-
 	void DelTabItem(QTableWidget *pTab, int begin = -2, int end = -2);
 	void DelIdentTabItems(QTableWidget *pTab, int idx_col);
 	void UpdateVerticalHeader(QTableWidget *pTab);
@@ -378,48 +422,6 @@ protected:
 	void SitesTableItemChanged(QTableWidgetItem *item);
 	void TermsTableItemChanged(QTableWidgetItem *item);
 	void VariablesTableItemChanged(QTableWidgetItem *item);
-
-	std::pair<t_vec_real, t_vec_real> GetDispersionQ() const;
-	std::pair<t_real, t_real> GetDispersionE() const;
-	void ClearDispersion(bool replot = false);
-	void Clear(bool recalc = true);
-
-	void Load();
-	void Save();
-	void SaveAs();
-
-	void ImportCIF();
-	void ImportStructure();
-	void ExportToSunny();
-	void ExportToSpinW();
-	void ExportToScript();
-	void ExportSQE();
-
-	void SavePlotFigure();
-	void SaveDispersion(bool as_scr = false);
-	void SaveMultiDispersion(bool as_scr = false);
-
-	void MirrorAtoms();
-	void RotateField(const t_vec_real& axis, t_real angle);
-	void RotateDispersionQs(const t_vec_real& axis, t_real angle);
-	void TranslateDispersionQs(const t_vec_real& axis, t_real delta);
-	void GenerateSitesFromSG();
-	void GenerateCouplingsFromSG();
-	void GeneratePossibleCouplings();
-	void ExtendStructure();
-	const std::vector<t_mat_real>& GetSymOpsForCurrentSG(bool show_err = true) const;
-
-	// transfer sites from the kernel
-	void SyncSitesFromKernel(boost::optional<const boost::property_tree::ptree&> extra_infos = boost::none);
-	void SyncTermsFromKernel(boost::optional<const boost::property_tree::ptree&> extra_infos = boost::none);
-	void SyncSymmetryIndicesFromKernel();
-	void SyncToKernel();         // transfer all data to the kernel
-	void CalcSymmetryIndices();  // assign symmetry groups to sites and couplings
-	void SortTerms();            // sort couplings by their lengths
-	void RemoveUnusedTerms();    // remove terms without coupling constants
-	void CalcAll();              // syncs sites and terms and calculates all dynamics
-	void CalcBZ();               // calculate brillouin zone and cut
-	void SetKernel(const t_magdyn* dyn, bool sync_sites = true, bool sync_terms = true, bool sync_idx = true);
 
 	// reciprocal space plot
 	void BZCutMouseMoved(t_real x, t_real y);

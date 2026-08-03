@@ -73,6 +73,10 @@ public:
 	}
 
 
+	BZCutScene(const BZCutScene<t_vec, t_real>&) = delete;
+	BZCutScene<t_vec, t_real>& operator=(const BZCutScene<t_vec, t_real>&) = delete;
+
+
 	/**
 	 * adds the line segments of a brillouin zone cut
 	 * @arg [start, end, Q]
@@ -608,7 +612,6 @@ signals:
 		return m_sigMouseCoordinates.connect(slot);
 	}
 
-
 	template<class t_slot>
 	boost::signals2::connection AddClickCoordinatesSlot(const t_slot& slot)
 	{
@@ -618,7 +621,7 @@ signals:
 
 
 private:
-	BZCutScene<t_vec, t_real>* m_scene{ };
+	BZCutScene<t_vec, t_real>* m_scene{};
 	QSettings *m_sett{};
 
 	QMenu *m_context{};     // right-click context menu

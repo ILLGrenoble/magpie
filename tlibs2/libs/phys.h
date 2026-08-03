@@ -641,7 +641,7 @@ t_real bose(t_real E, t_real T)
  * @see https://en.wikipedia.org/wiki/Bose%E2%80%93Einstein_statistics
  */
 template<class t_real = double>
-t_real bose_cutoff(t_real E, t_real T, t_real E_cutoff=t_real(0.02))
+t_real bose_cutoff(t_real E, t_real T, t_real E_cutoff = t_real(0.02))
 {
 	t_real dB;
 

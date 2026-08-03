@@ -288,7 +288,7 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 	for(EnergyAndWeight& E_and_S : S.E_and_S)
 	{
 		// apply bose factor
-		if(m_temperature >= 0.)
+		if(m_temperature >= m_eps)
 			E_and_S.S *= tl2::bose_cutoff(E_and_S.E, m_temperature, m_bose_cutoff);
 
 		// calculate orthogonal projector for magnetic neutron scattering,

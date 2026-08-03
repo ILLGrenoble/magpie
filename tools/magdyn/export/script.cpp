@@ -103,14 +103,15 @@ void MagDynDlg::ExportToScript()
 bool MagDynDlg::ExportToScript(const QString& _filename)
 {
 	std::string scr = R"BLOCK(
-only_pos_E    = True     # hide magnon annihilation?
-verbose_print = False    # print intermediate results
-weight_scale  = 16.      # S(q, E) scaling factor for plotting
+use_bose      = True     # use bose factor
+weight_scale  = 16.      # S(Q, E) scaling factor for plotting
+print_results = False    # output final results
+print_verbose = False    # output intermediate results
 
 
 # debug output
 def print_infos(str):
-	if verbose_print:
+	if print_verbose:
 		print(str)
 
 # skew-symmetric (cross-product) matrix, see: https://en.wikipedia.org/wiki/Skew-symmetric_matrix
@@ -135,6 +136,17 @@ def xtalA(lengths, angles):
 # get reciprocal matrix
 def reciprocal(mat):
 	return 2.*np.pi * np.transpose(la.inv(mat))
+
+# bose occupation factor
+def bose(E, T, E_cutoff):
+	if np.abs(E) < E_cutoff:
+		E = np.sign(E) * E_cutoff;
+
+	n = 1./(np.exp(np.abs(E)/(k_B*T)) - 1.);
+	if E >= 0.:
+		n += 1.;
+
+	return n;
 
 # calculate structure properties
 def init(sites, couplings):
@@ -331,7 +343,8 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 
 	ofstr << "\n# constants and variables\n";
 	ofstr << "g_e     = " << tl2::g_e<t_real> << "\n";
-	ofstr << "mu_B    = " << t_real(tl2::mu_B<t_real> / tl2::meV<t_real> * tl2::tesla<t_real>) << "\n\n";
+	ofstr << "mu_B    = " << t_real(tl2::mu_B<t_real> / tl2::meV<t_real> * tl2::tesla<t_real>) << "\n";
+	ofstr << "k_B     = " << t_real(tl2::kB<t_real> * tl2::kelvin<t_real> / tl2::meV<t_real>) << "\n\n";
 
 	ofstr << "Qstart  = np.array([ " << h1 << ", " << k1 << ", " << l1 << " ])\n";
 	ofstr << "Qend    = np.array([ " << h2 << ", " << k2 << ", " << l2 << " ])\n";
@@ -339,8 +352,10 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 	ofstr << "plane1  = np.array([ " << peak1x << ", " << peak1y << ", " << peak1z << " ])\n";
 	ofstr << "plane2  = np.array([ " << peak2x << ", " << peak2y << ", " << peak2z << " ])\n\n";
 
+	ofstr << "only_pos_E = " << (m_ignore_annihilation->isChecked() ? "True" : "False");
+	ofstr << "  # ignore magnon annihilation?\n";
 
-	// user variables
+	ofstr << "\n# user variables\n";
 	for(const auto &var : m_dyn.GetVariables())
 	{
 		ofstr << var.name << " = " << var.value.real();
@@ -374,6 +389,22 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 	{
 		ofstr << "\n# no external field\n";
 		ofstr << "field = None\n";
+	}
+	// --------------------------------------------------------------------
+
+
+	// --------------------------------------------------------------------
+	if(t_real T = m_dyn.GetTemperature(); T > g_eps)
+	{
+		ofstr << "\n# temperature\n";
+		ofstr << "temperature   = " << T << "\n";
+		ofstr << "bose_cutoff_E = " << g_bose_cutoff << "\n";
+	}
+	else
+	{
+		ofstr << "\n# no temperature defined -> no bose factor\n";
+		ofstr << "temperature   = None\n";
+		ofstr << "bose_cutoff_E = " << g_bose_cutoff << "\n";
 	}
 	// --------------------------------------------------------------------
 
@@ -514,9 +545,11 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 # create magnetic structure
 init(sites, couplings)
 
-# plot the dispersion branch
+# plot the dispersion branches
 import matplotlib.pyplot as plt
 
+if print_results:
+	print("%16s %16s %16s %16s %16s" % ("h (rlu)", "k (rlu)", "l (rlu)", "E (meV)", "S (a.u.)"))
 hs, ks, ls, Es, ws = [], [], [], [], []
 for Qidx in range(Qpts):
 	try:
@@ -526,11 +559,17 @@ for Qidx in range(Qpts):
 		for E, state, w in zip(allEs, allstates, allws):
 			if only_pos_E and E < 0.:
 				continue
+			if use_bose and temperature != None:
+				w *= bose(E, temperature, bose_cutoff_E)
+
 			hs.append(Qvec[0])
 			ks.append(Qvec[1])
 			ls.append(Qvec[2])
 			Es.append(E)
 			ws.append(w * weight_scale)
+
+			if print_results:
+				print("%16.4g %16.4g %16.4g %16.4g %16.4g" % (Qvec[0], Qvec[1], Qvec[2], E, w))
 	except la.LinAlgError:
 		pass
 

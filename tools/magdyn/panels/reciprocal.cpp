@@ -67,32 +67,33 @@ void MagDynDlg::CreateReciprocalPanel()
 	m_recip_trafo_mode = new QComboBox(m_reciprocalpanel);
 	m_recip_trafo_mode->addItem("Rotate Qs");
 	m_recip_trafo_mode->addItem("Translate Qs");
+	m_recip_trafo_mode->addItem("Scale Qs");
 	m_recip_trafo_mode->setCurrentIndex(0);
 
 	// rotation axis
-	m_recip_rot_axis[0] = new QDoubleSpinBox(m_reciprocalpanel);
-	m_recip_rot_axis[1] = new QDoubleSpinBox(m_reciprocalpanel);
-	m_recip_rot_axis[2] = new QDoubleSpinBox(m_reciprocalpanel);
+	m_recip_trafo_axis[0] = new QDoubleSpinBox(m_reciprocalpanel);
+	m_recip_trafo_axis[1] = new QDoubleSpinBox(m_reciprocalpanel);
+	m_recip_trafo_axis[2] = new QDoubleSpinBox(m_reciprocalpanel);
 
 	// rotation angle
 	QLabel *labelDelta = new QLabel("Angle (\xc2\xb0):", m_reciprocalpanel);
-	m_recip_rot_angle = new QDoubleSpinBox(m_reciprocalpanel);
-	m_recip_rot_angle->setDecimals(3);
-	m_recip_rot_angle->setMinimum(-360);
-	m_recip_rot_angle->setMaximum(+360);
-	m_recip_rot_angle->setSingleStep(0.1);
-	m_recip_rot_angle->setValue(1.);
-	//m_recip_rot_angle->setSuffix("\xc2\xb0");
-	m_recip_rot_angle->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+	m_recip_trafo_delta = new QDoubleSpinBox(m_reciprocalpanel);
+	m_recip_trafo_delta->setDecimals(3);
+	m_recip_trafo_delta->setMinimum(-360);
+	m_recip_trafo_delta->setMaximum(+360);
+	m_recip_trafo_delta->setSingleStep(0.1);
+	m_recip_trafo_delta->setValue(1.);
+	//m_recip_trafo_delta->setSuffix("\xc2\xb0");
+	m_recip_trafo_delta->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 	for(int i = 0; i < 3; ++i)
 	{
-		m_recip_rot_axis[i]->setDecimals(4);
-		m_recip_rot_axis[i]->setMinimum(-99.9999);
-		m_recip_rot_axis[i]->setMaximum(+99.9999);
-		m_recip_rot_axis[i]->setSingleStep(0.1);
-		m_recip_rot_axis[i]->setValue(i == 2 ? 1. : 0.);
-		m_recip_rot_axis[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+		m_recip_trafo_axis[i]->setDecimals(4);
+		m_recip_trafo_axis[i]->setMinimum(-99.9999);
+		m_recip_trafo_axis[i]->setMaximum(+99.9999);
+		m_recip_trafo_axis[i]->setSingleStep(0.1);
+		m_recip_trafo_axis[i]->setValue(i == 2 ? 1. : 0.);
+		m_recip_trafo_axis[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
 	QPushButton *btn_rotate_ccw = new QPushButton(
@@ -141,11 +142,11 @@ void MagDynDlg::CreateReciprocalPanel()
 	grid->addWidget(m_recip_trafo_mode, y, 0, 1, 2);
 	grid->addWidget(btnAxes, y++, 3, 1, 1);
 	grid->addWidget(new QLabel("Axis (rlu):", m_reciprocalpanel), y, 0, 1, 1);
-	grid->addWidget(m_recip_rot_axis[0], y, 1, 1, 1);
-	grid->addWidget(m_recip_rot_axis[1], y, 2, 1, 1);
-	grid->addWidget(m_recip_rot_axis[2], y++, 3, 1, 1);
+	grid->addWidget(m_recip_trafo_axis[0], y, 1, 1, 1);
+	grid->addWidget(m_recip_trafo_axis[1], y, 2, 1, 1);
+	grid->addWidget(m_recip_trafo_axis[2], y++, 3, 1, 1);
 	grid->addWidget(labelDelta, y, 0, 1, 1);
-	grid->addWidget(m_recip_rot_angle, y, 1, 1, 1);
+	grid->addWidget(m_recip_trafo_delta, y, 1, 1, 1);
 	grid->addWidget(btn_rotate_ccw, y, 2, 1, 1);
 	grid->addWidget(btn_rotate_cw, y++, 3, 1, 1);
 
@@ -215,22 +216,28 @@ void MagDynDlg::CreateReciprocalPanel()
 	{
 		t_vec_real axis = tl2::create<t_vec_real>(
 		{
-			(t_real)m_recip_rot_axis[0]->value(),
-			(t_real)m_recip_rot_axis[1]->value(),
-			(t_real)m_recip_rot_axis[2]->value(),
+			(t_real)m_recip_trafo_axis[0]->value(),
+			(t_real)m_recip_trafo_axis[1]->value(),
+			(t_real)m_recip_trafo_axis[2]->value(),
 		});
 
 		if(m_recip_trafo_mode->currentIndex() == 0)
 		{
 			// rotation
-			t_real angle = tl2::d2r<t_real>(m_recip_rot_angle->value());
+			t_real angle = tl2::d2r<t_real>(m_recip_trafo_delta->value());
 			RotateDispersionQs(axis, angle);
 		}
-		else
+		else if(m_recip_trafo_mode->currentIndex() == 1)
 		{
 			// translation
-			t_real delta = m_recip_rot_angle->value();
+			t_real delta = m_recip_trafo_delta->value();
 			TranslateDispersionQs(axis, -delta);
+		}
+		else if(m_recip_trafo_mode->currentIndex() == 2)
+		{
+			// scaling
+			t_real scale = m_recip_trafo_delta->value();
+			ScaleDispersionQs(1./scale);
 		}
 	});
 
@@ -238,22 +245,28 @@ void MagDynDlg::CreateReciprocalPanel()
 	{
 		t_vec_real axis = tl2::create<t_vec_real>(
 		{
-			(t_real)m_recip_rot_axis[0]->value(),
-			(t_real)m_recip_rot_axis[1]->value(),
-			(t_real)m_recip_rot_axis[2]->value(),
+			(t_real)m_recip_trafo_axis[0]->value(),
+			(t_real)m_recip_trafo_axis[1]->value(),
+			(t_real)m_recip_trafo_axis[2]->value(),
 		});
 
 		if(m_recip_trafo_mode->currentIndex() == 0)
 		{
 			// rotation
-			t_real angle = tl2::d2r<t_real>(m_recip_rot_angle->value());
-			RotateDispersionQs(axis, angle);
+			t_real angle = tl2::d2r<t_real>(m_recip_trafo_delta->value());
+			RotateDispersionQs(axis, -angle);
 		}
-		else
+		else if(m_recip_trafo_mode->currentIndex() == 1)
 		{
 			// translation
-			t_real delta = m_recip_rot_angle->value();
+			t_real delta = m_recip_trafo_delta->value();
 			TranslateDispersionQs(axis, delta);
+		}
+		else if(m_recip_trafo_mode->currentIndex() == 2)
+		{
+			// scaling
+			t_real scale = m_recip_trafo_delta->value();
+			ScaleDispersionQs(scale);
 		}
 	});
 
@@ -263,20 +276,23 @@ void MagDynDlg::CreateReciprocalPanel()
 		{
 			const t_vec_real& vec = m_dyn.GetScatteringPlane()[i];
 
-			m_recip_rot_axis[0]->setValue(vec[0]);
-			m_recip_rot_axis[1]->setValue(vec[1]);
-			m_recip_rot_axis[2]->setValue(vec[2]);
+			m_recip_trafo_axis[0]->setValue(vec[0]);
+			m_recip_trafo_axis[1]->setValue(vec[1]);
+			m_recip_trafo_axis[2]->setValue(vec[2]);
 		});
 	}
 
 	// trafo mode changed
 	auto set_recip_trafo_mode = [this, btn_rotate_cw, btn_rotate_ccw, labelDelta](int mode)
 	{
-		if(mode == 0)  // rotation
+		if(mode == 0)       // rotation
 		{
+			for(int i = 0; i < 3; ++i)
+				m_recip_trafo_axis[i]->setEnabled(true);
+
 			labelDelta->setText("Angle (\xc2\xb0):");
-			m_recip_rot_angle->setMinimum(-360);
-			m_recip_rot_angle->setMaximum(+360);
+			m_recip_trafo_delta->setMinimum(-360);
+			m_recip_trafo_delta->setMaximum(+360);
 
 			btn_rotate_ccw->setText("Rotate CCW");
 			btn_rotate_cw->setText("Rotate CW");
@@ -284,17 +300,35 @@ void MagDynDlg::CreateReciprocalPanel()
 			btn_rotate_ccw->setToolTip("Rotate the Q start and end positions in the counter-clockwise direction around the selected axis.");
 			btn_rotate_cw->setToolTip("Rotate the Q start and end positions in the clockwise direction around the selected axis.");
 		}
-		else  // translation
+		else if(mode == 1)  // translation
 		{
-			labelDelta->setText("Delta (rlu):");
-			m_recip_rot_angle->setMinimum(-999);
-			m_recip_rot_angle->setMaximum(+999);
+			for(int i = 0; i < 3; ++i)
+				m_recip_trafo_axis[i]->setEnabled(true);
 
-			btn_rotate_ccw->setText("Move Negative");
-			btn_rotate_cw->setText("Move Positive");
+			labelDelta->setText("Delta (rlu):");
+			m_recip_trafo_delta->setMinimum(-999);
+			m_recip_trafo_delta->setMaximum(+999);
+
+			btn_rotate_ccw->setText("Move Left");
+			btn_rotate_cw->setText("Move Right");
 
 			btn_rotate_ccw->setToolTip("Move the Q start and end positions against the selecte axis.");
-			btn_rotate_cw->setToolTip("Move the Q start and end positions along the selected axis..");
+			btn_rotate_cw->setToolTip("Move the Q start and end positions along the selected axis.");
+		}
+		else if(mode == 2)  // scaling
+		{
+			for(int i = 0; i < 3; ++i)
+				m_recip_trafo_axis[i]->setEnabled(false);
+	
+			labelDelta->setText("Scale:");
+			m_recip_trafo_delta->setMinimum(-999);
+			m_recip_trafo_delta->setMaximum(+999);
+
+			btn_rotate_ccw->setText("Scale Down");
+			btn_rotate_cw->setText("Scale Up");
+
+			btn_rotate_ccw->setToolTip("Scale down the Q start and end positions by the given factor.");
+			btn_rotate_cw->setToolTip("Scale up the Q start and end positions by the given factor.");
 		}
 	};
 	connect(m_recip_trafo_mode, &QComboBox::currentIndexChanged, [set_recip_trafo_mode](int mode)
@@ -365,6 +399,35 @@ void MagDynDlg::TranslateDispersionQs(const t_vec_real& axis_rlu, t_real delta)
 
 	Q_start += axis_rlu*delta;
 	Q_end += axis_rlu*delta;
+
+	tl2::set_eps_0(Q_start, g_eps);
+	tl2::set_eps_0(Q_end, g_eps);
+
+	for(int i = 0; i < 3; ++i)
+	{
+		m_Q_start[i]->blockSignals(true);
+		m_Q_start[i]->setValue(Q_start[i]);
+		m_Q_start[i]->blockSignals(false);
+
+		m_Q_end[i]->blockSignals(true);
+		m_Q_end[i]->setValue(Q_end[i]);
+		m_Q_end[i]->blockSignals(false);
+	}
+
+	DispersionQChanged(true);
+};
+
+
+
+/**
+ * scale the Q start and end vectors
+ */
+void MagDynDlg::ScaleDispersionQs(t_real factor)
+{
+	auto [Q_start, Q_end] = GetDispersionQ();
+
+	Q_start *= factor;
+	Q_end *= factor;
 
 	tl2::set_eps_0(Q_start, g_eps);
 	tl2::set_eps_0(Q_end, g_eps);

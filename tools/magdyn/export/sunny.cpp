@@ -114,6 +114,9 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "plot_structure   = true\n";
 	ofstr << "plot_dynamics    = true\n";
 	ofstr << "save_dynamics    = true\n";
+	ofstr << "only_pos_E       = true   # ignore magnon annihilation?\n";
+	//ofstr << "only_pos_E       = " << (m_ignore_annihilation->isChecked() ? "true" : "false") << "\n";
+
 	if(m_dyn.IsIncommensurate())
 		ofstr << "use_supercell    = false\n";
 	ofstr << "datfile          = \"" << dispname_rel << "\"\n";
@@ -292,6 +295,12 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 			++site_idx;
 		}
 	}
+
+	// set temperature
+	if(t_real T = m_dyn.GetTemperature(); T >= g_eps)
+		ofstr << "\ntemperature = " << T << " * phys_units.K\n";
+	else
+		ofstr << "\ntemperature = 0\n";
 
 	ofstr << "\n@printf(\"%s\", magsites)\n";
 	// --------------------------------------------------------------------
@@ -530,7 +539,7 @@ end)BLOCK" << "\n";
 
 	//ofstr << "momenta = collect(range(Qstart, Qend, Qpts))\n";
 	ofstr << "momenta = q_space_path(magsys.crystal, [ Qstart, Qend ], Qpts)\n";
-	ofstr << "bands = intensities_bands(calc, momenta)\n";
+	ofstr << "bands = intensities_bands(calc, momenta; kT = temperature, with_negative = !only_pos_E)\n";
 	// --------------------------------------------------------------------
 
 
@@ -559,8 +568,8 @@ end)BLOCK" << "\n";
 	ofstr <<
 		R"BLOCK(		@printf(ostr, "# %8s %10s %10s %10s %10s\n",
 			"h (rlu)", "k (rlu)", "l (rlu)", "E (meV)", "S(Q, E)")
-		for q_idx in 1:length(momenta.qs)
-			for e_idx in 1:length(energies[:, q_idx])
+		for q_idx in 1 : length(momenta.qs)
+			for e_idx in 1 : length(energies[:, q_idx])
 				@printf(ostr, "%10.4f %10.4f %10.4f %10.4f %10.4f\n",
 					momenta.qs[q_idx][1], momenta.qs[q_idx][2], momenta.qs[q_idx][3],
 					energies[e_idx, q_idx],

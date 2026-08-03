@@ -303,13 +303,13 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 		if(auto optVal = magdyn.get_optional<t_real>("config.field_angle"))
 			m_rot_angle->setValue(*optVal);
 		if(auto optVal = magdyn.get_optional<t_real>("config.recip_axis_h"))
-			m_recip_rot_axis[0]->setValue(*optVal);
+			m_recip_trafo_axis[0]->setValue(*optVal);
 		if(auto optVal = magdyn.get_optional<t_real>("config.recip_axis_k"))
-			m_recip_rot_axis[1]->setValue(*optVal);
+			m_recip_trafo_axis[1]->setValue(*optVal);
 		if(auto optVal = magdyn.get_optional<t_real>("config.recip_axis_l"))
-			m_recip_rot_axis[2]->setValue(*optVal);
-		if(auto optVal = magdyn.get_optional<t_real>("config.recip_angle"))
-			m_recip_rot_angle->setValue(*optVal);
+			m_recip_trafo_axis[2]->setValue(*optVal);
+		if(auto optVal = magdyn.get_optional<t_real>("config.recip_delta"))
+			m_recip_trafo_delta->setValue(*optVal);
 		if(auto optVal = magdyn.get_optional<int>("config.recip_trafo"))
 			m_recip_trafo_mode->setCurrentIndex(*optVal);
 		bool found_sg = false;
@@ -882,10 +882,10 @@ bool MagDynDlg::Save(const QString& filename)
 		magdyn.put<t_real>("config.field_axis_k", m_rot_axis[1]->value());
 		magdyn.put<t_real>("config.field_axis_l", m_rot_axis[2]->value());
 		magdyn.put<t_real>("config.field_angle", m_rot_angle->value());
-		magdyn.put<t_real>("config.recip_axis_h", m_recip_rot_axis[0]->value());
-		magdyn.put<t_real>("config.recip_axis_k", m_recip_rot_axis[1]->value());
-		magdyn.put<t_real>("config.recip_axis_l", m_recip_rot_axis[2]->value());
-		magdyn.put<t_real>("config.recip_angle", m_recip_rot_angle->value());
+		magdyn.put<t_real>("config.recip_axis_h", m_recip_trafo_axis[0]->value());
+		magdyn.put<t_real>("config.recip_axis_k", m_recip_trafo_axis[1]->value());
+		magdyn.put<t_real>("config.recip_axis_l", m_recip_trafo_axis[2]->value());
+		magdyn.put<t_real>("config.recip_delta", m_recip_trafo_delta->value());
 		magdyn.put<int>("config.recip_trafo", m_recip_trafo_mode->currentIndex());
 		magdyn.put<std::string>("config.spacegroup", m_comboSG->currentText().toStdString());
 		magdyn.put<int>("config.spacegroup_index", m_comboSG->currentIndex());
