@@ -179,6 +179,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	// --------------------------------------------------------------------
 	ofstr << "\n\n# magnetic sites and xtal lattice\n";
 	ofstr << "@printf(\"Setting up magnetic sites...\\n\")\n";
+	ofstr << "time_setup_begin = time_ns()\n";
 
 	// save as the P1 space group, as we have already performed the symmetry operations
 	// (you can also manually set the crystal's space group and delete all
@@ -438,17 +439,6 @@ end)BLOCK" << "\n";
 
 
 	// --------------------------------------------------------------------
-	ofstr << "\n\n# optionally plot nuclear and magnetic structure\n";
-	ofstr << "if plot_structure\n";
-	ofstr << "\t@printf(\"Plotting structure...\\n\")\n";
-	ofstr << "\tusing GLMakie\n";
-	ofstr << "\tview_crystal(magsys, refbonds = 15, compass = true)\n";
-	ofstr << "\tplot_spins(magsys, compass = true)\n";
-	ofstr << "end\n";
-	// --------------------------------------------------------------------
-
-
-	// --------------------------------------------------------------------
 	if(m_dyn.IsIncommensurate())
 	{
 		const t_vec_real& prop = m_dyn.GetOrderingWavevector();
@@ -485,13 +475,29 @@ end)BLOCK" << "\n";
 		ofstr << "end\n";
 	}
 
+	ofstr << "\ntime_setup_end = time_ns()\n";
+	ofstr << "time_setup = (time_setup_end - time_setup_begin) / 1e9\n";
+	ofstr << "@printf(\"Setup took %.6f seconds.\\n\", time_setup)\n";
+
 	ofstr << "\n@printf(\"%s\\n\", magsys)\n";
+	// --------------------------------------------------------------------
+
+
+	// --------------------------------------------------------------------
+	ofstr << "\n\n# optionally plot nuclear and magnetic structure\n";
+	ofstr << "if plot_structure\n";
+	ofstr << "\t@printf(\"Plotting structure...\\n\")\n";
+	ofstr << "\tusing GLMakie\n";
+	ofstr << "\tview_crystal(magsys, refbonds = 15, compass = true)\n";
+	ofstr << "\tplot_spins(magsys, compass = true)\n";
+	ofstr << "end\n";
 	// --------------------------------------------------------------------
 
 
 	// --------------------------------------------------------------------
 	ofstr << "\n\n# spin-wave calculation\n";
 	ofstr << "@printf(\"Calculating S(Q, E)...\\n\")\n";
+	ofstr << "time_calc_begin = time_ns()\n";
 
 	// form factors
 	ofstr << "ffacts = nothing\n";
@@ -507,7 +513,7 @@ end)BLOCK" << "\n";
 	}
 	ofstr << "\t]\n";
 	ofstr << "catch err\n";
-	ofstr << "\t#println(\"Error: Invalid form factors.\")\n";
+	ofstr << "\t#@printf(\"Error: Invalid form factors.\\n\")\n";
 	ofstr << "end\n";
 
 	// magnon energies and spin-spin correlations
@@ -540,6 +546,11 @@ end)BLOCK" << "\n";
 	//ofstr << "momenta = collect(range(Qstart, Qend, Qpts))\n";
 	ofstr << "momenta = q_space_path(magsys.crystal, [ Qstart, Qend ], Qpts)\n";
 	ofstr << "bands = intensities_bands(calc, momenta; kT = temperature, with_negative = !only_pos_E)\n";
+
+	ofstr << "\ntime_calc_end = time_ns()\n";
+	ofstr << "time_calc = (time_calc_end - time_calc_begin) / 1e9\n";
+	ofstr << "@printf(\"Calculation took %.6f seconds, \", time_calc)\n";
+	ofstr << "@printf(\"total run took %.6f seconds.\\n\", time_setup + time_calc)\n";
 	// --------------------------------------------------------------------
 
 

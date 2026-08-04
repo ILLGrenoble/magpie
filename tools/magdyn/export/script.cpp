@@ -324,7 +324,8 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 
 	// imports
 	ofstr << "import numpy as np\n";
-	ofstr << "import numpy.linalg as la\n\n";
+	ofstr << "import numpy.linalg as la\n";
+	ofstr << "import time\n\n";
 
 
 	// --------------------------------------------------------------------
@@ -542,12 +543,14 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 	// --------------------------------------------------------------------
 
 	ofstr <<  R"BLOCK(
-# create magnetic structure
+print("Setting up magnetic sites...")
+time_setup_begin = time.perf_counter()
 init(sites, couplings)
+time_setup = time.perf_counter() - time_setup_begin
+print("Setup took %.6f seconds." % time_setup)
 
-# plot the dispersion branches
-import matplotlib.pyplot as plt
-
+print("Calculating S(Q, E)...")
+time_calc_begin = time.perf_counter()
 if print_results:
 	print("%16s %16s %16s %16s %16s" % ("h (rlu)", "k (rlu)", "l (rlu)", "E (meV)", "S (a.u.)"))
 hs, ks, ls, Es, ws = [], [], [], [], []
@@ -572,6 +575,8 @@ for Qidx in range(Qpts):
 				print("%16.4g %16.4g %16.4g %16.4g %16.4g" % (Qvec[0], Qvec[1], Qvec[2], E, w))
 	except la.LinAlgError:
 		pass
+time_calc = time.perf_counter() - time_calc_begin
+print("Calculation took %.6f seconds, total run took %.6f seconds." % (time_calc, time_setup + time_calc))
 
 # choose the Q component with the most change
 qs = hs
@@ -579,6 +584,9 @@ if np.std(ks) > np.std(qs):
 	qs = ks
 if np.std(ls) > np.std(qs):
 	qs = ls
+
+print("Plotting dispersion...")
+import matplotlib.pyplot as plt
 
 plt.plot()
 plt.xlabel("q (rlu)")
