@@ -517,6 +517,11 @@ public slots:
 
 	void SelectTerm(const std::string& term);
 	void DeleteTerm(const std::string& term);
+
+
+signals:
+	void HighlightSites(const std::vector<std::string>& sites);
+	void HighlightTerms(const std::vector<std::string>& terms);
 };
 
 

@@ -281,8 +281,7 @@ void StructPlotDlg::PickerIntersection(
 	m_cur_obj = objIdx;
 
 	// look for magnetic sites
-	if(auto iter_sites = m_sites.find(objIdx);
-		iter_sites != m_sites.end())
+	if(auto iter_sites = m_sites.find(objIdx); iter_sites != m_sites.end())
 	{
 		m_cur_site = iter_sites->second.name;
 		HighlightSite(*m_cur_site);
@@ -300,8 +299,7 @@ void StructPlotDlg::PickerIntersection(
 	}
 
 	// look for exchange terms
-	else if(auto iter_terms = m_terms.find(objIdx);
-		iter_terms != m_terms.end())
+	else if(auto iter_terms = m_terms.find(objIdx); iter_terms != m_terms.end())
 	{
 		m_cur_term = iter_terms->second.name;
 		HighlightTerm(*m_cur_term);
@@ -318,7 +316,7 @@ void StructPlotDlg::PickerIntersection(
 
 
 
-void StructPlotDlg::HighlightSite(const std::string& name)
+void StructPlotDlg::HighlightSite(const std::string& name, bool on, bool update)
 {
 	bool highlighted = false;
 
@@ -327,18 +325,18 @@ void StructPlotDlg::HighlightSite(const std::string& name)
 	{
 		if(pair.second.name == name)
 		{
-			m_structplot->GetRenderer()->SetObjectHighlight(pair.first, true);
+			m_structplot->GetRenderer()->SetObjectHighlight(pair.first, on);
 			highlighted = true;
 		}
 	}
 
-	if(highlighted)
+	if(highlighted && update)
 		m_structplot->update();
 }
 
 
 
-void StructPlotDlg::HighlightTerm(const std::string& name)
+void StructPlotDlg::HighlightTerm(const std::string& name, bool on, bool update)
 {
 	bool highlighted = false;
 
@@ -347,13 +345,44 @@ void StructPlotDlg::HighlightTerm(const std::string& name)
 	{
 		if(pair.second.name == name)
 		{
-			m_structplot->GetRenderer()->SetObjectHighlight(pair.first, true);
+			m_structplot->GetRenderer()->SetObjectHighlight(pair.first, on);
 			highlighted = true;
 		}
 	}
 
-	if(highlighted)
+	if(highlighted && update)
 		m_structplot->update();
+}
+
+
+
+
+void StructPlotDlg::HighlightSites(const std::vector<std::string>& sites)
+{
+	// un-highlight all sites
+	for(const auto& pair : m_sites)
+		m_structplot->GetRenderer()->SetObjectHighlight(pair.first, false);
+
+	// highlight selected sites
+	for(const std::string& site : sites)
+		HighlightSite(site, true, false);
+
+	m_structplot->update();
+}
+
+
+
+void StructPlotDlg::HighlightTerms(const std::vector<std::string>& terms)
+{
+	// un-highlight all terms
+	for(const auto& pair : m_terms)
+		m_structplot->GetRenderer()->SetObjectHighlight(pair.first, false);
+
+	// highlight selected terms
+	for(const std::string& term : terms)
+		HighlightTerm(term, true, false);
+
+	m_structplot->update();
 }
 
 

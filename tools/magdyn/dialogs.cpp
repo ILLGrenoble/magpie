@@ -246,17 +246,15 @@ void MagDynDlg::ShowStructPlotDlg(bool only_create)
 		m_structplot_dlg->SetKernel(&m_dyn);
 		m_structplot_dlg->SetTables(m_sitestab, m_termstab);
 
-		connect(m_structplot_dlg, &StructPlotDlg::SelectSite,
-			this, &MagDynDlg::SelectSite);
-		connect(m_structplot_dlg, &StructPlotDlg::DeleteSite,
-			this, &MagDynDlg::DeleteSite);
-		connect(m_structplot_dlg, &StructPlotDlg::FlipSiteSpin,
-			this, &MagDynDlg::FlipSiteSpin);
+		connect(this, &MagDynDlg::HighlightSites, m_structplot_dlg, &StructPlotDlg::HighlightSites);
+		connect(this, &MagDynDlg::HighlightTerms, m_structplot_dlg, &StructPlotDlg::HighlightTerms);
 
-		connect(m_structplot_dlg, &StructPlotDlg::SelectTerm,
-			this, &MagDynDlg::SelectTerm);
-		connect(m_structplot_dlg, &StructPlotDlg::DeleteTerm,
-			this, &MagDynDlg::DeleteTerm);
+		connect(m_structplot_dlg, &StructPlotDlg::SelectSite, this, &MagDynDlg::SelectSite);
+		connect(m_structplot_dlg, &StructPlotDlg::DeleteSite, this, &MagDynDlg::DeleteSite);
+		connect(m_structplot_dlg, &StructPlotDlg::FlipSiteSpin, this, &MagDynDlg::FlipSiteSpin);
+
+		connect(m_structplot_dlg, &StructPlotDlg::SelectTerm, this, &MagDynDlg::SelectTerm);
+		connect(m_structplot_dlg, &StructPlotDlg::DeleteTerm, this, &MagDynDlg::DeleteTerm);
 
 		connect(m_structplot_dlg, &StructPlotDlg::GlDeviceInfos,
 			m_glinfo_dlg, &GlInfoDlg::SetGlDeviceInfos);

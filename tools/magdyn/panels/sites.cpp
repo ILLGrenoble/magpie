@@ -275,10 +275,25 @@ void MagDynDlg::SitesSelectionChanged()
 	if(selected.size() == 0)
 		return;
 
+
+	// highlight all selected sites
+	std::vector<std::string> selected_sites;
+	for(const QTableWidgetItem* item : selected)
+	{
+		const t_site* site = GetSiteFromTableIndex(item->row());
+		if(!site)
+			continue;
+
+		selected_sites.push_back(site->name);
+	}
+
+	emit HighlightSites(selected_sites);
+
+
+	// indicate the first site of the selection
 	const QTableWidgetItem* item = *selected.begin();
 	m_sites_cursor_row = item->row();
-	if(m_sites_cursor_row < 0 ||
-		std::size_t(m_sites_cursor_row) >= m_dyn.GetMagneticSitesCount())
+	if(m_sites_cursor_row < 0 || std::size_t(m_sites_cursor_row) >= m_dyn.GetMagneticSitesCount())
 	{
 		m_status->setText("");
 		return;

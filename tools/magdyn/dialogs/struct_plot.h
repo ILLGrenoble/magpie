@@ -118,8 +118,8 @@ protected:
 	void CentreCameraOnObject();
 	void CentreCameraOnUC();
 
-	void HighlightSite(const std::string& name);
-	void HighlightTerm(const std::string& name);
+	void HighlightSite(const std::string& name, bool on = true, bool update = true);
+	void HighlightTerm(const std::string& name, bool on = true, bool update = true);
 
 	void SaveImage();
 
@@ -154,6 +154,11 @@ private:
 	std::size_t m_arrow{};
 	std::size_t m_cyl{};
 	std::optional<std::size_t> m_field{};
+
+
+public slots:
+	void HighlightSites(const std::vector<std::string>& sites);
+	void HighlightTerms(const std::vector<std::string>& terms);
 
 
 signals:

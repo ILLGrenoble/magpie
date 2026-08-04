@@ -368,6 +368,22 @@ void MagDynDlg::TermsSelectionChanged()
 	if(selected.size() == 0)
 		return;
 
+
+	// highlight all selected terms
+	std::vector<std::string> selected_terms;
+	for(const QTableWidgetItem* item : selected)
+	{
+		const t_term* term = GetTermFromTableIndex(item->row());
+		if(!term)
+			continue;
+
+		selected_terms.push_back(term->name);
+	}
+
+	emit HighlightTerms(selected_terms);
+
+
+	// indicate the first term of the selection
 	const QTableWidgetItem* item = *selected.begin();
 	m_terms_cursor_row = item->row();
 	if(m_terms_cursor_row < 0 ||
