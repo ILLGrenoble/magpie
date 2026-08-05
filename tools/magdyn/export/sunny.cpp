@@ -476,8 +476,8 @@ end)BLOCK" << "\n";
 	}
 
 	ofstr << "\ntime_setup_end = time_ns()\n";
-	ofstr << "time_setup = (time_setup_end - time_setup_begin) / 1e9\n";
-	ofstr << "@printf(\"Setup took %.6f seconds.\\n\", time_setup)\n";
+	ofstr << "time_setup = (time_setup_end - time_setup_begin) / 1e6\n";
+	ofstr << "@printf(\"Setup took %.6f milliseconds.\\n\", time_setup)\n";
 
 	ofstr << "\n@printf(\"%s\\n\", magsys)\n";
 	// --------------------------------------------------------------------
@@ -497,7 +497,7 @@ end)BLOCK" << "\n";
 	// --------------------------------------------------------------------
 	ofstr << "\n\n# spin-wave calculation\n";
 	ofstr << "@printf(\"Calculating S(Q, E)...\\n\")\n";
-	ofstr << "time_calc_begin = time_ns()\n";
+	ofstr << "time_calc_begin = time_ns()\n\n";
 
 	// form factors
 	ofstr << "ffacts = nothing\n";
@@ -514,7 +514,7 @@ end)BLOCK" << "\n";
 	ofstr << "\t]\n";
 	ofstr << "catch err\n";
 	ofstr << "\t#@printf(\"Error: Invalid form factors.\\n\")\n";
-	ofstr << "end\n";
+	ofstr << "end\n\n";
 
 	// magnon energies and spin-spin correlations
 	ofstr << "cholesky_eps = 1e-8\n";
@@ -548,9 +548,9 @@ end)BLOCK" << "\n";
 	ofstr << "bands = intensities_bands(calc, momenta; kT = temperature, with_negative = !only_pos_E)\n";
 
 	ofstr << "\ntime_calc_end = time_ns()\n";
-	ofstr << "time_calc = (time_calc_end - time_calc_begin) / 1e9\n";
-	ofstr << "@printf(\"Calculation took %.6f seconds, \", time_calc)\n";
-	ofstr << "@printf(\"total run took %.6f seconds.\\n\", time_setup + time_calc)\n";
+	ofstr << "time_calc = (time_calc_end - time_calc_begin) / 1e6\n";
+	ofstr << "@printf(\"Calculation took %.6f milliseconds, \", time_calc)\n";
+	ofstr << "@printf(\"total run took %.6f milliseconds.\\n\", time_setup + time_calc)\n";
 	// --------------------------------------------------------------------
 
 
