@@ -75,6 +75,10 @@ T gauss_model(T x, T x0, T sigma, T amp, T offs)
 }
 
 
+/**
+ * gaussian
+ * @see https://en.wikipedia.org/wiki/Gaussian_function
+ */
 template<class T = double>
 T gauss_model_amp(T x, T x0, T sigma, T amp, T offs)
 {
@@ -82,10 +86,25 @@ T gauss_model_amp(T x, T x0, T sigma, T amp, T offs)
 }
 
 
+/**
+ * gaussian
+ * @see https://en.wikipedia.org/wiki/Gaussian_function
+ */
 template<class T = double>
 T gauss_model_amp_slope(T x, T x0, T sigma, T amp, T offs, T slope)
 {
 	return amp * std::exp(-0.5 * ((x-x0)/sigma)*((x-x0)/sigma)) + (x-x0)*slope + offs;
+}
+
+
+/**
+ * lorentzian
+ * @see https://en.wikipedia.org/wiki/Cauchy_distribution
+ */
+template<class T = double>
+T lorentz_model(T x, T x0, T hwhm, T amp, T offs)
+{
+	return amp*hwhm/pi<T> / ((x-x0)*(x-x0) + hwhm*hwhm) + offs;
 }
 
 
@@ -100,6 +119,10 @@ T lorentz_model_amp(T x, T x0, T hwhm, T amp, T offs)
 }
 
 
+/**
+ * lorentzian
+ * @see https://en.wikipedia.org/wiki/Cauchy_distribution
+ */
 template<class T = double>
 T lorentz_model_amp_slope(T x, T x0, T hwhm, T amp, T offs, T slope)
 {

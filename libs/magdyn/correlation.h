@@ -74,7 +74,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		// check commutator relations, see before equ. 7 in (McClarty 2022)
 		//t_mat check_comm = S.evec_mat * S.comm * tl2::herm(S.evec_mat);
 		t_mat check_comm = S.evec_mat * tl2::herm(S.evec_mat);
-		if(!tl2::equals(/*S.comm*/ tl2::unit<t_mat>(2*N), check_comm, m_eps))
+		if(!tl2::equals(tl2::unit<t_mat>(S.comm.size1()), check_comm, m_eps))
 		{
 			MAGDYN_CERR_OPT << "Magdyn error: Wrong commutator at Q = "
 				<< S.Q_rlu << ": " << check_comm

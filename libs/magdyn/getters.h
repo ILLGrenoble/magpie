@@ -772,19 +772,6 @@ void MAGDYN_INST::SetScatteringPlane(t_real ah, t_real ak, t_real al,
 			<< std::endl;
 	}
 }
-
-
-
-/**
- * restrict energies to given range,
- * deactivate by setting Emax smaller than Emin
- */
-/*MAGDYN_TEMPL
-void MAGDYN_INST::SetFilterEnergies(t_real Emin, t_real Emax)
-{
-	m_E_minmax[0] = Emin;
-	m_E_minmax[1] = Emax;
-}*/
 // --------------------------------------------------------------------
 
 
