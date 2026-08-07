@@ -111,7 +111,15 @@ template<class t_vec>
 t_vec operator-(const t_vec& vec1, const t_vec& vec2)
 requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
-	return vec1 + (-vec2);
+	if constexpr(tl2::is_dyn_vec<t_vec>)
+		assert((vec1.size() == vec2.size()));
+
+	t_vec vec(vec1.size());
+
+	for(std::size_t i = 0; i < vec1.size(); ++i)
+		vec[i] = vec1[i] - vec2[i];
+
+	return vec;
 }
 
 
@@ -166,7 +174,12 @@ template<class t_vec>
 t_vec& operator+=(t_vec& vec1, const t_vec& vec2)
 requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
-	vec1 = vec1 + vec2;
+	if constexpr(tl2::is_dyn_vec<t_vec>)
+		assert((vec1.size() == vec2.size()));
+
+	for(std::size_t i = 0; i < vec1.size(); ++i)
+		vec1[i] += vec2[i];
+
 	return vec1;
 }
 
@@ -178,7 +191,12 @@ template<class t_vec>
 t_vec& operator-=(t_vec& vec1, const t_vec& vec2)
 requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
-	vec1 = vec1 - vec2;
+	if constexpr(tl2::is_dyn_vec<t_vec>)
+		assert((vec1.size() == vec2.size()));
+
+	for(std::size_t i = 0; i < vec1.size(); ++i)
+		vec1[i] -= vec2[i];
+
 	return vec1;
 }
 
@@ -190,7 +208,9 @@ template<class t_vec>
 t_vec& operator*=(t_vec& vec1, typename t_vec::value_type d)
 requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
-	vec1 = vec1 * d;
+	for(std::size_t i = 0; i < vec1.size(); ++i)
+		vec1[i] *= d;
+
 	return vec1;
 }
 
@@ -201,7 +221,9 @@ template<class t_vec>
 t_vec& operator/=(t_vec& vec1, typename t_vec::value_type d)
 requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
-	vec1 = vec1 / d;
+	for(std::size_t i = 0; i < vec1.size(); ++i)
+		vec1[i] /= d;
+
 	return vec1;
 }
 
@@ -316,7 +338,16 @@ template<class t_mat>
 t_mat operator-(const t_mat& mat1, const t_mat& mat2)
 requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 {
-	return mat1 + (-mat2);
+	if constexpr(tl2::is_dyn_mat<t_mat>)
+		assert((mat1.size1() == mat2.size1() && mat1.size2() == mat2.size2()));
+
+	t_mat mat(mat1.size1(), mat1.size2());
+
+	for(std::size_t i = 0; i < mat1.size1(); ++i)
+		for(std::size_t j = 0; j < mat1.size2(); ++j)
+			mat(i,j) = mat1(i,j) - mat2(i,j);
+
+	return mat;
 }
 
 
@@ -331,7 +362,7 @@ requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 
 	for(std::size_t i = 0; i < mat1.size1(); ++i)
 		for(std::size_t j = 0; j < mat1.size2(); ++j)
-			mat(i,j) = mat1(i,j) * d;
+			mat(i, j) = mat1(i, j) * d;
 
 	return mat;
 }
@@ -374,11 +405,14 @@ requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
  * matrix *= scalar
  */
 template<class t_mat>
-t_mat& operator*=(t_mat& mat1, typename t_mat::value_type d)
+t_mat& operator*=(t_mat& mat, typename t_mat::value_type d)
 requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 {
-	mat1 = mat1 * d;
-	return mat1;
+	for(std::size_t i = 0; i < mat.size1(); ++i)
+		for(std::size_t j = 0; j < mat.size2(); ++j)
+			mat(i, j) *= d;
+
+	return mat;
 }
 
 
@@ -401,7 +435,13 @@ template<class t_mat>
 t_mat& operator+=(t_mat& mat1, const t_mat& mat2)
 requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 {
-	mat1 = mat1 + mat2;
+	if constexpr(tl2::is_dyn_mat<t_mat>)
+		assert((mat1.size1() == mat2.size1() && mat1.size2() == mat2.size2()));
+
+	for(std::size_t i = 0; i < mat1.size1(); ++i)
+		for(std::size_t j = 0; j < mat1.size2(); ++j)
+			mat1(i, j) += mat2(i, j);
+
 	return mat1;
 }
 
@@ -413,7 +453,13 @@ template<class t_mat>
 t_mat& operator-=(t_mat& mat1, const t_mat& mat2)
 requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 {
-	mat1 = mat1 - mat2;
+	if constexpr(tl2::is_dyn_mat<t_mat>)
+		assert((mat1.size1() == mat2.size1() && mat1.size2() == mat2.size2()));
+
+	for(std::size_t i = 0; i < mat1.size1(); ++i)
+		for(std::size_t j = 0; j < mat1.size2(); ++j)
+			mat1(i, j) -= mat2(i, j);
+
 	return mat1;
 }
 
@@ -422,11 +468,14 @@ requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
  * matrix /= scalar
  */
 template<class t_mat>
-t_mat& operator/=(t_mat& mat1, typename t_mat::value_type d)
+t_mat& operator/=(t_mat& mat, typename t_mat::value_type d)
 requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 {
-	mat1 = mat1 / d;
-	return mat1;
+	for(std::size_t i = 0; i < mat.size1(); ++i)
+		for(std::size_t j = 0; j < mat.size2(); ++j)
+			mat(i, j) /= d;
+
+	return mat;
 }
 
 
