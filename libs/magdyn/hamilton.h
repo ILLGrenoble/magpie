@@ -77,7 +77,7 @@ t_mat MAGDYN_INST::CalcRealJ(const MAGDYN_TYPE::ExchangeTerm& term) const
 			t_mat rot_UC = tl2::convert<t_mat>(
 				tl2::rotation<t_mat_real, t_vec_real>(
 					m_rotaxis, rot_UC_angle));
-			J = J * rot_UC;
+			J *= rot_UC;
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
 			std::cout << "Coupling " << term.name << ": rot_UC =\n";

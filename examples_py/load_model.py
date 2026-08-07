@@ -139,7 +139,7 @@ if use_threadpool:
 
 		Es = []
 		for Es_dict in Es_dicts:
-			Es.append(( h, k, l, Es_dict.E, Es_dict.weight ))
+			Es.append(( h, k, l, Es_dict.E, Es_dict.weight_perp ))
 
 		return Es
 
@@ -182,12 +182,12 @@ elif max_threads > 0:
 
 			append_data(
 				magpy.get_h(S), magpy.get_k(S), magpy.get_l(S),
-				data_EandS.E, data_EandS.weight)
+				data_EandS.E, data_EandS.weight_perp)
 
 			if print_dispersion:
 				print("{:15.4f} {:15.4f} {:15.4f} {:15.4f} {:15.4g}".format(
 					magpy.get_h(S), magpy.get_k(S), magpy.get_l(S),
-					data_EandS.E, data_EandS.weight))
+					data_EandS.E, data_EandS.weight_perp))
 
 # manual pointwise calculation
 else:
@@ -198,11 +198,11 @@ else:
 			if only_positive_energies and S.E < 0.:
 				continue
 
-			append_data(hkl[0], hkl[1], hkl[2], S.E, S.weight)
+			append_data(hkl[0], hkl[1], hkl[2], S.E, S.weight_perp)
 
 			if print_dispersion:
 				print("{:15.4f} {:15.4f} {:15.4f} {:15.4f} {:15.4g}".format(
-					hkl[0], hkl[1], hkl[2], S.E, S.weight))
+					hkl[0], hkl[1], hkl[2], S.E, S.weight_perp))
 
 
 time_needed = time.time() - tick

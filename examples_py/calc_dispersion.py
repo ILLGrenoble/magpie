@@ -102,7 +102,7 @@ def calc_Es(mag, h, k, l):
 
 	Es = []
 	for Es_dict in Es_dicts:
-		Es.append(( h, k, l, Es_dict.E, Es_dict.weight ))
+		Es.append(( h, k, l, Es_dict.E, Es_dict.weight_perp ))
 
 	return Es
 
@@ -195,12 +195,12 @@ def calc_disp(mag):
 					continue
 
 				append_data(magpy.get_h(S), magpy.get_k(S), magpy.get_l(S),
-					data_EandS.E, data_EandS.weight)
+					data_EandS.E, data_EandS.weight_perp)
 
 				if print_dispersion:
 					print("{:15.4f} {:15.4f} {:15.4f} {:15.4f} {:15.4g}".format(
 						magpy.get_h(S), magpy.get_k(S), magpy.get_l(S),
-						data_EandS.E, data_EandS.weight))
+						data_EandS.E, data_EandS.weight_perp))
 
 		data.append([ branch_idx, data_h, data_k, data_l, data_E, data_S ])
 
@@ -323,11 +323,11 @@ def calc_disp_pointwise(mag):
 					if only_positive_energies and S.E < 0.:
 						continue
 
-					append_data(hkl[0], hkl[1], hkl[2], S.E, S.weight)
+					append_data(hkl[0], hkl[1], hkl[2], S.E, S.weight_perp)
 
 					if print_dispersion:
 						print("{:15.4f} {:15.4f} {:15.4f} {:15.4f} {:15.4g}".format(
-							hkl[0], hkl[1], hkl[2], S.E, S.weight))
+							hkl[0], hkl[1], hkl[2], S.E, S.weight_perp))
 
 		data.append([ branch_idx, data_h, data_k, data_l, data_E, data_S ])
 

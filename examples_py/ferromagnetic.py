@@ -128,7 +128,7 @@ for hkl in numpy.linspace(hkl_start, hkl_end, num_Q_points):
 
 		if print_dispersion:
 			print("{:15.4f} {:15.4f} {:15.4f} {:15.4f} {:15.4g}".format(
-				hkl[0], hkl[1], hkl[2], S.E, S.weight))
+				hkl[0], hkl[1], hkl[2], S.E, S.weight_perp))
 
 
 # plot the results

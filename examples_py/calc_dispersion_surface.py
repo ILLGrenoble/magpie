@@ -141,12 +141,12 @@ def calc_disp(mag):
 
 			append_data(
 				magpy.get_h(S), magpy.get_k(S), magpy.get_l(S),
-				data_EandS.E, data_EandS.weight, branch_idx)
+				data_EandS.E, data_EandS.weight_perp, branch_idx)
 
 			if print_dispersion:
 				print("{:15.4f} {:15.4f} {:15.4f} {:15.4f} {:15.4g} {:8d}".format(
 					magpy.get_h(S), magpy.get_k(S), magpy.get_l(S),
-					data_EandS.E, data_EandS.weight, branch_idx))
+					data_EandS.E, data_EandS.weight_perp, branch_idx))
 
 			branch_idx += 1
 
