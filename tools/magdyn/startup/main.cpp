@@ -310,6 +310,7 @@ int main(int argc, char** argv)
 		bool show_help = false;
 		bool healthcheck = false;
 		bool benchmark = false;
+		bool benchmark_no_thread_loop = false;
 		bool silent = false;
 		bool use_cli = false;
 		bool show_timing = false;
@@ -343,6 +344,7 @@ int main(int argc, char** argv)
 			("no_weights", args::bool_switch(&no_weights), "don't calculate spectral weights")
 			("timing", args::bool_switch(&show_timing), "show time needed for calculation")
 			("threads,t", args::value(&g_num_threads), "number of threads for calculation")
+			("benchmark_no_thread_loop", args::bool_switch(&benchmark_no_thread_loop), "do not loop over thread numbers")
 			("points,p", args::value(&num_Q_pts), "number of Q points")
 			("points2", args::value(&num_Q_pts2), "number of Q points in second direction")
 			("hi", args::value<t_real>(), "initial h coordinate")
@@ -409,7 +411,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 		if(benchmark)
 		{
-			extern bool benchmark(const std::string& model_file, t_size max_threads, t_size num_Qs);
+			extern bool benchmark(const std::string& model_file,
+				t_size max_threads, bool no_thread_loop, t_size num_Qs);
 
 			if(model_file == "")
 			{
@@ -417,7 +420,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 				return -1;
 			}
 
-			if(!benchmark(model_file, g_num_threads, num_Q_pts))
+			if(!benchmark(model_file, g_num_threads, benchmark_no_thread_loop, num_Q_pts))
 			{
 				CERR_OPT << "Magpie error: Benchmark failed!" << std::endl;
 				return -1;

@@ -61,7 +61,8 @@ static bool benchmark(t_magdyn& magdyn,
  * runs all benchmarks
  */
 bool benchmark(const std::string& model_file,
-	t_size max_threads = 4, t_size max_Qs = 65536)
+	t_size max_threads = 4, bool no_threadloop = false,
+	t_size max_Qs = 65536)
 {
 	if(max_threads == 0)
 		max_threads = 4;
@@ -108,7 +109,7 @@ bool benchmark(const std::string& model_file,
 
 	// calculate benchmarks for different Q and thread counts
 	int field_w = g_prec * 2.5;
-	for(t_size num_threads = 1; num_threads <= max_threads; num_threads *= 2)
+	for(t_size num_threads = no_threadloop ? max_threads : 1; num_threads <= max_threads; num_threads *= 2)
 	{
 		std::cout << "\n# benchmark for " << num_threads << " thread(s)" << std::endl;
 		std::cout

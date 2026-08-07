@@ -133,7 +133,7 @@ std::tuple<t_vec, t_real, t_real> project_line(const t_vec& vec,
 	const t_vec& lineOrigin, const t_vec& _lineDir, bool is_normalised = true)
 requires is_vec<t_vec>
 {
-	const t_real lenDir = is_normalised ? 1 : norm<t_vec>(_lineDir);
+	const t_real lenDir = is_normalised ? t_real(1) : norm<t_vec>(_lineDir);
 	const t_vec lineDir = _lineDir / lenDir;
 	const t_vec ptShifted = vec - lineOrigin;
 
@@ -142,7 +142,7 @@ requires is_vec<t_vec>
 
 	const t_vec ptNearest = lineOrigin + ptProj;
 	const t_real dist = norm<t_vec>(vec - ptNearest);
-	return std::make_tuple(ptNearest, dist, paramProj);
+	return std::make_tuple(std::move(ptNearest), dist, paramProj);
 }
 
 
@@ -285,7 +285,7 @@ t_vec ortho_project_plane(const t_vec& vec,
 requires is_vec<t_vec>
 {
 	// project onto plane through origin
-	t_vec vecProj0 = ortho_project<t_vec>(vec, vecNorm, 1);
+	t_vec vecProj0 = ortho_project<t_vec>(vec, vecNorm, true);
 	// add distance of plane to origin
 	return vecProj0 + d*vecNorm;
 }

@@ -48,8 +48,6 @@ set(CMAKE_CXX_STANDARD 20)
 add_compile_options(-std=c++20)
 add_compile_options(-Wall -Wextra)
 
-add_definitions(-D__TLIBS2_USE_MINUIT__)
-
 
 # -----------------------------------------------------------------------------
 # Boost

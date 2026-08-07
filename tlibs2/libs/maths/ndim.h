@@ -679,7 +679,7 @@ requires is_mat<t_mat>
 
 	for(t_idxtype i = 0; i < mat.size1(); ++i)
 		for(t_idxtype j = 0; j < mat.size2(); ++j)
-			mat2(j,i) = mat(i, j);
+			mat2(j, i) = mat(i, j);
 
 	return mat2;
 }
@@ -1337,14 +1337,14 @@ template<class t_vec1, class t_vec2>
 typename t_vec1::value_type inner(const t_vec1& vec1, const t_vec2& vec2)
 requires is_basic_vec<t_vec1> && is_basic_vec<t_vec2>
 {
-	if(vec1.size()==0 || vec2.size()==0)
+	if(vec1.size() == 0 || vec2.size() == 0)
 		return typename t_vec1::value_type{};
 
 	// first element
 	auto val = vec1[0]*vec2[0];
 
 	// remaining elements
-	for(std::size_t i=1; i < std::min(vec1.size(), vec2.size()); ++i)
+	for(std::size_t i = 1; i < std::min(vec1.size(), vec2.size()); ++i)
 	{
 		if constexpr(is_complex<typename t_vec1::value_type>)
 		{
@@ -1456,7 +1456,7 @@ requires tl2::is_basic_mat<t_mat> && tl2::is_basic_vec<t_vec>
  * element-wise division
  */
 template<class t_mat>
-t_mat div_perelem(const t_mat& mat1, const t_mat& mat2, bool assert_sizes=true)
+t_mat div_perelem(const t_mat& mat1, const t_mat& mat2, bool assert_sizes = true)
 requires tl2::is_basic_mat<t_mat>
 {
 	if(assert_sizes)
@@ -1467,8 +1467,8 @@ requires tl2::is_basic_mat<t_mat>
 
 	t_mat matRet = zero<t_mat>(mat1.size1(), mat1.size2());
 
-	for(std::size_t row=0; row<matRet.size1(); ++row)
-		for(std::size_t col=0; col<matRet.size2(); ++col)
+	for(std::size_t row = 0; row<matRet.size1(); ++row)
+		for(std::size_t col = 0; col<matRet.size2(); ++col)
 			matRet(row, col) = mat1(row, col) / mat2(row,col);
 
 	return matRet;
@@ -1667,7 +1667,7 @@ requires is_basic_mat<t_mat> && is_dyn_mat<t_mat>
 	for(size_t row = 0; row < submat.size1(); ++row)
 	{
 		for(size_t col = 0; col < submat.size2(); ++col)
-			mat(row+row_start, col+col_start) += submat(row, col);
+			mat(row + row_start, col + col_start) += submat(row, col);
 	}
 }
 
@@ -1858,7 +1858,7 @@ requires is_basic_vec<t_vec>
 	// general case
 	else
 	{
-		for(t_size iComp=0; iComp<N; ++iComp)
+		for(t_size iComp = 0; iComp < N; ++iComp)
 		{
 			std::vector<T> mat = zero<std::vector<T>>(N*N);
 			mat[0*N + iComp] = T(1);
@@ -1867,7 +1867,7 @@ requires is_basic_vec<t_vec>
 			for(const t_vec& vec : vecs)
 			{
 				for(t_size col_idx = 0; col_idx < N; ++col_idx)
-					mat[(row_idx+1)*N + col_idx] = vec[col_idx];
+					mat[(row_idx + 1)*N + col_idx] = vec[col_idx];
 				++row_idx;
 			}
 
@@ -1924,7 +1924,7 @@ requires is_mat<t_mat> && is_vec<t_vec>
 	t_mat R = prod(trans(Q), mat);
 #endif
 
-	return std::make_tuple(true, Q, R);
+	return std::make_tuple(true, std::move(Q), std::move(R));
 
 #endif  // __TLIBS2_USE_LAPACK__
 }
@@ -1960,7 +1960,7 @@ requires is_mat<t_mat>
 
 	// fail if determinant is zero
 	if(equals<T>(fullDet, 0))
-		return std::make_tuple(t_mat(), false);
+		return std::make_tuple(t_mat{}, false);
 
 	t_mat matInv;
 	if constexpr(is_dyn_mat<t_mat>)
@@ -1977,7 +1977,7 @@ requires is_mat<t_mat>
 	}
 
 	matInv = matInv / fullDet;
-	return std::make_tuple(matInv, true);
+	return std::make_tuple(std::move(matInv), true);
 
 #endif
 }
@@ -2043,10 +2043,10 @@ requires is_mat<t_mat>
 {
 	t_mat themat;
 	if(mat.size1() != mat.size2())
-		return std::make_tuple(themat, false);
+		return std::make_tuple(std::move(themat), false);
 
 	bool ok = true;
-	int ipow_pos = ipow<0 ? -ipow : ipow;
+	int ipow_pos = ipow < 0 ? -ipow : ipow;
 
 	themat = unit<t_mat>(mat.size1());
 	for(int i = 0; i < ipow_pos; ++i)
@@ -2055,7 +2055,7 @@ requires is_mat<t_mat>
 	if(ipow < 0)
 		std::tie(themat, ok) = tl2::inv<t_mat>(themat);
 
-	return std::make_tuple(themat, ok);
+	return std::make_tuple(std::move(themat), ok);
 }
 
 
@@ -2118,7 +2118,7 @@ requires is_vec<t_vec> && is_dyn_mat<t_mat>
 
 	t_vec v = Y * Xty;
 
-	return std::make_tuple(v, ok);
+	return std::make_tuple(std::move(v), ok);
 }
 
 
@@ -2196,7 +2196,7 @@ requires is_basic_vec<t_vec> && is_basic_mat<t_mat>
 		}
 	}
 
-	return std::make_pair(val, vec);
+	return std::make_pair(val, std::move(vec));
 }
 // ----------------------------------------------------------------------------
 

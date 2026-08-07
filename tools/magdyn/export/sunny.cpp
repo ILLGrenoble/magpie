@@ -565,7 +565,7 @@ end)BLOCK" << "\n";
 
 	ofstr << "\ntime_calc_end = time_ns()\n";
 	ofstr << "time_calc = (time_calc_end - time_calc_begin) / 1e6\n";
-	ofstr << "@printf(\"Calculation took %.6f milliseconds, \", time_calc)\n";
+	ofstr << "@printf(\"Calculation of %d Q points took %.6f milliseconds, \", Qpts, time_calc)\n";
 	ofstr << "@printf(\"total run took %.6f milliseconds.\\n\", time_setup + time_calc)\n";
 	// --------------------------------------------------------------------
 
