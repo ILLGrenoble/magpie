@@ -168,15 +168,16 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	// --------------------------------------------------------------------
 
 
-	ofstr << "\n\nfunction eps_to_0(val)\n";
-	ofstr << "if abs(val) < eps\n";
-	ofstr << "\treturn 0\n";
-	ofstr << "end\n";
-	ofstr << "\treturn val\n";
-	ofstr << "end\n\n";
+	ofstr << "\n" << R"BLOCK(
+# set values below epsilon to zero
+function eps_to_0(val)
+	if abs(val) < eps
+		return 0
+	end
+	return val
+end
 
 
-	ofstr << R"BLOCK(
 # output the list of magnetic sites
 function print_sites(magsys, title)
 	site_idx = 1
