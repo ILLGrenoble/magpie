@@ -57,6 +57,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	using namespace tl2_ops;
 
 	const t_size N = GetMagneticSitesCount();
+	const t_size num_branches = 2*N;
 	if(N == 0)
 		return false;
 
@@ -197,7 +198,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	for(std::uint8_t y_idx = 0; y_idx < 3; ++y_idx)
 	{
 		// equations (44) and (47) from (Toth 2015)
-		t_mat M = tl2::create<t_mat>(2*N, 2*N);
+		t_mat M = tl2::create<t_mat>(num_branches, num_branches);
 
 		for(t_size i = 0; i < N; ++i)
 		{
@@ -268,7 +269,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 #endif
 
 		for(t_size i = 0; i < S.E_and_S.size(); ++i)
-			S.E_and_S[i].S(x_idx, y_idx) += M_xy(i, i) / t_real(M.size1());
+			S.E_and_S[i].S(x_idx, y_idx) += M_xy(i, i) / t_real(2*N);
 	} // end of coordinate iteration
 
 	return true;

@@ -202,7 +202,8 @@ t_mat MAGDYN_INST::CalcHamiltonian(const t_vec_real& Qvec) const
 	const auto [J_Q, J_Q0] = CalcReciprocalJs(Qvec);
 
 	// create the hamiltonian of equation (25) and (26) from (Toth 2015)
-	t_mat H = tl2::create<t_mat>(2*N, 2*N);
+	const t_size num_branches = 2*N;
+	t_mat H = tl2::create<t_mat>(num_branches, num_branches);
 
 	// iterate magnetic sites
 	for(t_size i = 0; i < N; ++i)
@@ -290,7 +291,8 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 		return S;
 
 	// equation (30) from (Toth 2015), to ensure correct commutators
-	S.comm = tl2::unit<t_mat>(2*N);
+	const t_size num_branches = 2*N;
+	S.comm = tl2::unit<t_mat>(num_branches);
 	for(t_size i = N; i < S.comm.size1(); ++i)
 		S.comm(i, i) = -1.;
 

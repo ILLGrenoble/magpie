@@ -173,7 +173,55 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "\treturn 0\n";
 	ofstr << "end\n";
 	ofstr << "\treturn val\n";
-	ofstr << "end\n";
+	ofstr << "end\n\n";
+
+
+	ofstr << R"BLOCK(
+# output the list of magnetic sites
+function print_sites(magsys, title)
+	site_idx = 1
+	@printf("%s:\n%6s %10s %10s %10s %10s %10s %10s %10s\n",
+		title, "index", "x", "y", "z", "Sx", "Sy", "Sz", "|S|")
+	for (r, s) in zip(magsys.crystal.positions, magsys.dipoles)
+		@printf("%6d %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g\n",
+			site_idx,
+			eps_to_0(r[1]), eps_to_0(r[2]), eps_to_0(r[3]),
+			eps_to_0(s[1]), eps_to_0(s[2]), eps_to_0(s[3]),
+			eps_to_0(LinearAlgebra.norm2(s)))
+		site_idx += 1
+	end
+end
+
+
+# output the list of magnetic couplings
+function print_couplings(magsys, title)
+	@printf("%s:\n", title)
+	@printf("%6s %6s %6s %6s %6s %6s %6s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
+		"sindex", "index", "site1", "site2", "dx", "dy", "dz",
+		"Jxx", "Jxy", "Jxz", "Jyx", "Jyy", "Jyz", "Jzx", "Jzy", "Jzz")
+
+	site_idx = 1
+	for interaction in magsys.interactions_union
+		term_idx = 1
+		for coupling in interaction.pair
+			b = coupling.bond
+			J = coupling.bilin
+
+			if length(J) == 1
+				J = [ J[1, 1] 0 0; 0 J[1, 1] 0; 0 0 J[1, 1] ]
+			end
+
+			@printf("%6d %6d %6d %6d %6d %6d %6d %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g\n",
+				site_idx, term_idx, b.i, b.j, b.n[1], b.n[2], b.n[3],
+				eps_to_0(J[1, 1]), eps_to_0(J[1, 2]), eps_to_0(J[1, 3]),
+				eps_to_0(J[2, 1]), eps_to_0(J[2, 2]), eps_to_0(J[2, 3]),
+				eps_to_0(J[3, 1]), eps_to_0(J[3, 2]), eps_to_0(J[3, 3]))
+
+			term_idx += 1
+		end  # coupling
+		site_idx += 1
+	end  # interaction
+end)BLOCK" << "\n";
 
 
 	// --------------------------------------------------------------------
@@ -247,17 +295,7 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 		if(skip_seen)
 		{
 			ofstr << "\n\t# output generated sites\n";
-			ofstr << "\tsite_idx = 1\n";
-			ofstr << "\t@printf(\"Generated magnetic sites:\\n%6s %10s %10s %10s %10s %10s %10s %10s\\n\",\n";
-			ofstr << "\t\t\"index\", \"x\", \"y\", \"z\", \"Sx\", \"Sy\", \"Sz\", \"|S|\")\n";
-			ofstr << "\tfor (r, s) in zip(magsys.crystal.positions, magsys.dipoles)\n";
-			ofstr << "\t\t@printf(\"%6d %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g\\n\",\n";
-			ofstr << "\t\t\tsite_idx,\n";
-			ofstr << "\t\t\teps_to_0(r[1]), eps_to_0(r[2]), eps_to_0(r[3]),\n";
-			ofstr << "\t\t\teps_to_0(s[1]), eps_to_0(s[2]), eps_to_0(s[3]),\n";
-			ofstr << "\t\t\teps_to_0(LinearAlgebra.norm2(s)))\n";
-			ofstr << "\t\tglobal site_idx += 1\n";
-			ofstr << "\tend\n";
+			ofstr << "\tprint_sites(magsys, \"Generated magnetic sites\")\n";
 		}
 	};
 
@@ -384,34 +422,9 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 
 	ofstr << R"BLOCK(
-# output generated couplings
 if use_spacegroup
-	@printf("Generated magnetic couplings:\n")
-	@printf("%6s %6s %6s %6s %6s %6s %6s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
-		"sindex", "index", "site1", "site2", "dx", "dy", "dz",
-		"Jxx", "Jxy", "Jxz", "Jyx", "Jyy", "Jyz", "Jzx", "Jzy", "Jzz")
-
-	site_idx = 1
-	for interaction in magsys.interactions_union
-		term_idx = 1
-		for coupling in interaction.pair
-			b = coupling.bond
-			J = coupling.bilin
-
-			if length(J) == 1
-				J = [ J[1, 1] 0 0; 0 J[1, 1] 0; 0 0 J[1, 1] ]
-			end
-
-			@printf("%6d %6d %6d %6d %6d %6d %6d %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g\n",
-				site_idx, term_idx, b.i, b.j, b.n[1], b.n[2], b.n[3],
-				eps_to_0(J[1, 1]), eps_to_0(J[1, 2]), eps_to_0(J[1, 3]),
-				eps_to_0(J[2, 1]), eps_to_0(J[2, 2]), eps_to_0(J[2, 3]),
-				eps_to_0(J[3, 1]), eps_to_0(J[3, 2]), eps_to_0(J[3, 3]))
-
-			term_idx += 1
-		end
-		global site_idx += 1
-	end
+	# output generated couplings
+	print_couplings(magsys, "Generated magnetic couplings")
 end)BLOCK" << "\n";
 
 
@@ -432,8 +445,10 @@ end)BLOCK" << "\n";
 	ofstr << "\n\n# optionally calculate the ground state\n";
 	ofstr << "if calc_groundstate\n";
 	ofstr << "\t@printf(\"Calculating ground state...\\n\")\n";
+	ofstr << "\tprint_sites(magsys, \"Old ground state\")\n";
 	ofstr << "\trandomize_spins!(magsys)\n";
 	ofstr << "\tminimize_energy!(magsys; maxiters = 1024)\n";
+	ofstr << "\tprint_sites(magsys, \"New ground state\")\n";
 	ofstr << "end\n";
 	// --------------------------------------------------------------------
 
