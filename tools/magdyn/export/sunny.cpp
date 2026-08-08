@@ -104,11 +104,13 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 		<< "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n"
 		<< "#\n\n";
 
-	ofstr << "using Sunny\nusing Printf\nusing LinearAlgebra\n";
+	ofstr << "using Sunny\nusing LinearAlgebra\n";
+	ofstr << "using Printf\nusing Dates\n\n";
 
 
 	// --------------------------------------------------------------------
 	ofstr << "\n# options\n";
+	ofstr << "verbose          = true\n";
 	ofstr << "use_spacegroup   = false  # careful: the generated site order may be different!\n";
 	ofstr << "calc_groundstate = false\n";
 	ofstr << "plot_structure   = true\n";
@@ -147,13 +149,25 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 	// internal constants and variables
 	ofstr << "\n# variables\n";
-	ofstr << "g_e    = " << tl2::g_e<t_real> << "\n";
-	ofstr << "Qstart = [ " << h1 << ", " << k1 << ", " << l1 << " ]\n";
-	ofstr << "Qend   = [ " << h2 << ", " << k2 << ", " << l2 << " ]\n";
-	ofstr << "Qpts   = " << m_num_points->value() << "\n";
-	ofstr << "plane1 = [ " << peak1x << ", " << peak1y << ", " << peak1z << " ]\n";
-	ofstr << "plane2 = [ " << peak2x << ", " << peak2y << ", " << peak2z << " ]\n";
-	ofstr << "eps    = " << g_eps << "\n";
+	ofstr << "g_e         = " << tl2::g_e<t_real> << "\n";
+	ofstr << "Qstart      = [ " << h1 << ", " << k1 << ", " << l1 << " ]\n";
+	ofstr << "Qend        = [ " << h2 << ", " << k2 << ", " << l2 << " ]\n";
+	ofstr << "Qpts        = " << m_num_points->value() << "\n";
+	ofstr << "plane1      = [ " << peak1x << ", " << peak1y << ", " << peak1z << " ]\n";
+	ofstr << "plane2      = [ " << peak2x << ", " << peak2y << ", " << peak2z << " ]\n";
+	ofstr << "eps         = " << g_eps << "\n";
+
+	// field
+	const auto& field = m_dyn.GetExternalField();
+	bool use_field = !tl2::equals_0<t_real>(field.mag, g_eps);
+	if(use_field)
+		ofstr << "magfield    = " << field.mag << " * phys_units.T\n";
+
+	// temperature
+	if(t_real T = m_dyn.GetTemperature(); T >= g_eps)
+		ofstr << "temperature = " << T << " * phys_units.K\n";
+	else
+		ofstr << "temperature = 0  # don't use bose factor\n";
 
 	// user (model) variables
 	if(m_dyn.GetVariables().size())
@@ -169,6 +183,16 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 
 
 	ofstr << "\n" << R"BLOCK(
+# print a string
+function logprint(fmtstr :: String, args...)
+	if verbose
+		timestamp = Dates.format(Dates.now(), Dates.ISOTimeFormat)
+		fmt = Printf.Format("[%s] " * fmtstr)
+		Printf.format(stdout, fmt, timestamp, args...)
+	end
+end
+
+
 # set values below epsilon to zero
 function eps_to_0(val)
 	if abs(val) < eps
@@ -181,10 +205,10 @@ end
 # output the list of magnetic sites
 function print_sites(magsys, title)
 	site_idx = 1
-	@printf("%s:\n%6s %10s %10s %10s %10s %10s %10s %10s\n",
+	logprint("%s:\n%6s %10s %10s %10s %10s %10s %10s %10s\n",
 		title, "index", "x", "y", "z", "Sx", "Sy", "Sz", "|S|")
 	for (r, s) in zip(magsys.crystal.positions, magsys.dipoles)
-		@printf("%6d %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g\n",
+		logprint("%6d %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g\n",
 			site_idx,
 			eps_to_0(r[1]), eps_to_0(r[2]), eps_to_0(r[3]),
 			eps_to_0(s[1]), eps_to_0(s[2]), eps_to_0(s[3]),
@@ -196,8 +220,8 @@ end
 
 # output the list of magnetic couplings
 function print_couplings(magsys, title)
-	@printf("%s:\n", title)
-	@printf("%6s %6s %6s %6s %6s %6s %6s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
+	logprint("%s:\n", title)
+	logprint("%6s %6s %6s %6s %6s %6s %6s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
 		"sindex", "index", "site1", "site2", "dx", "dy", "dz",
 		"Jxx", "Jxy", "Jxz", "Jyx", "Jyy", "Jyz", "Jzx", "Jzy", "Jzz")
 
@@ -212,7 +236,7 @@ function print_couplings(magsys, title)
 				J = [ J[1, 1] 0 0; 0 J[1, 1] 0; 0 0 J[1, 1] ]
 			end
 
-			@printf("%6d %6d %6d %6d %6d %6d %6d %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g\n",
+			logprint("%6d %6d %6d %6d %6d %6d %6d %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g\n",
 				site_idx, term_idx, b.i, b.j, b.n[1], b.n[2], b.n[3],
 				eps_to_0(J[1, 1]), eps_to_0(J[1, 2]), eps_to_0(J[1, 3]),
 				eps_to_0(J[2, 1]), eps_to_0(J[2, 2]), eps_to_0(J[2, 3]),
@@ -222,12 +246,18 @@ function print_couplings(magsys, title)
 		end  # coupling
 		site_idx += 1
 	end  # interaction
-end)BLOCK" << "\n";
+end
+
+
+# print version infos
+logprint("Using Sunny version %s running on interpreter version %s.\n",
+	pkgversion(Sunny), VERSION)
+)BLOCK";
 
 
 	// --------------------------------------------------------------------
 	ofstr << "\n\n# magnetic sites and xtal lattice\n";
-	ofstr << "@printf(\"Setting up magnetic sites...\\n\")\n";
+	ofstr << "logprint(\"Setting up magnetic sites...\\n\")\n";
 	ofstr << "time_setup_begin = time_ns()\n";
 
 	// save as the P1 space group, as we have already performed the symmetry operations
@@ -302,16 +332,15 @@ end)BLOCK" << "\n";
 
 	ofstr << "if !use_spacegroup\n";
 	gen_sites(false);
-	ofstr << "else\n";  // use_spacegroup
+	ofstr << "else\n";   // use_spacegroup
 	gen_sites(true);
-	ofstr << "end\n\n";   // use_spacegroup
+	ofstr << "end\n\n";  // use_spacegroup
 
 
 	ofstr << "num_sites = length(magsites.positions)\n";
 
 
 	ofstr << "\n\n# spin directions\n";
-	const auto& field = m_dyn.GetExternalField();
 	if(field.align_spins)
 	{
 		// set all spins to field direction
@@ -326,7 +355,7 @@ end)BLOCK" << "\n";
 		t_size site_idx = 1;
 		for(const t_site& site : m_dyn.GetMagneticSites())
 		{
-			ofstr << "set_dipole!(magsys, [ "
+			ofstr << "set_dipole!(magsys, -[ "
 				<< get_str_var(site.spin_dir[0]) << ", "
 				<< get_str_var(site.spin_dir[1]) << ", "
 				<< get_str_var(site.spin_dir[2]) << " ], "
@@ -336,19 +365,13 @@ end)BLOCK" << "\n";
 		}
 	}
 
-	// set temperature
-	if(t_real T = m_dyn.GetTemperature(); T >= g_eps)
-		ofstr << "\ntemperature = " << T << " * phys_units.K\n";
-	else
-		ofstr << "\ntemperature = 0\n";
-
-	ofstr << "\n@printf(\"%s\", magsites)\n";
+	ofstr << "\nlogprint(\"%s\", magsites)\n";
 	// --------------------------------------------------------------------
 
 
 	// --------------------------------------------------------------------
 	ofstr << "\n\n# magnetic couplings\n";
-	ofstr << "@printf(\"Setting up magnetic couplings...\\n\")\n";
+	ofstr << "logprint(\"Setting up magnetic couplings...\\n\")\n";
 
 	std::unordered_set<t_size> seen_term_sym_indices;
 	for(const t_term& term : m_dyn.GetExchangeTerms())
@@ -429,14 +452,13 @@ if use_spacegroup
 end)BLOCK" << "\n";
 
 
-	if(!tl2::equals_0<t_real>(field.mag, g_eps))
+	if(use_field)
 	{
 		ofstr << "\n\n# external field\n";
 		ofstr << "set_field!(magsys, -[ "
 			<< field.dir[0] << ", "
 			<< field.dir[1] << ", "
-			<< field.dir[2] << " ] * " << field.mag
-			<< " * phys_units.T"
+			<< field.dir[2] << " ] * magfield"
 			<< ")\n";
 	}
 	// --------------------------------------------------------------------
@@ -445,7 +467,7 @@ end)BLOCK" << "\n";
 	// --------------------------------------------------------------------
 	ofstr << "\n\n# optionally calculate the ground state\n";
 	ofstr << "if calc_groundstate\n";
-	ofstr << "\t@printf(\"Calculating ground state...\\n\")\n";
+	ofstr << "\tlogprint(\"Calculating ground state...\\n\")\n";
 	ofstr << "\tprint_sites(magsys, \"Old ground state\")\n";
 	ofstr << "\trandomize_spins!(magsys)\n";
 	ofstr << "\tminimize_energy!(magsys; maxiters = 1024)\n";
@@ -493,16 +515,16 @@ end)BLOCK" << "\n";
 
 	ofstr << "\ntime_setup_end = time_ns()\n";
 	ofstr << "time_setup = (time_setup_end - time_setup_begin) / 1e6\n";
-	ofstr << "@printf(\"Setup took %.6f milliseconds.\\n\", time_setup)\n";
+	ofstr << "logprint(\"Setup took %.6f ms.\\n\", time_setup)\n";
 
-	ofstr << "\n@printf(\"%s\\n\", magsys)\n";
+	ofstr << "\nlogprint(\"%s\\n\", magsys)\n";
 	// --------------------------------------------------------------------
 
 
 	// --------------------------------------------------------------------
 	ofstr << "\n\n# optionally plot nuclear and magnetic structure\n";
 	ofstr << "if plot_structure\n";
-	ofstr << "\t@printf(\"Plotting structure...\\n\")\n";
+	ofstr << "\tlogprint(\"Plotting structure...\\n\")\n";
 	ofstr << "\tusing GLMakie\n";
 	ofstr << "\tview_crystal(magsys, refbonds = 15, compass = true)\n";
 	ofstr << "\tplot_spins(magsys, compass = true)\n";
@@ -512,7 +534,7 @@ end)BLOCK" << "\n";
 
 	// --------------------------------------------------------------------
 	ofstr << "\n\n# spin-wave calculation\n";
-	ofstr << "@printf(\"Calculating S(Q, E)...\\n\")\n";
+	ofstr << "logprint(\"Calculating S(Q, E)...\\n\")\n";
 	ofstr << "time_calc_begin = time_ns()\n\n";
 
 	// form factors
@@ -529,7 +551,7 @@ end)BLOCK" << "\n";
 	}
 	ofstr << "\t]\n";
 	ofstr << "catch err\n";
-	ofstr << "\t#@printf(\"Error: Invalid form factors.\\n\")\n";
+	ofstr << "\t#logprint(\"Error: Invalid form factors.\\n\")\n";
 	ofstr << "end\n\n";
 
 	// magnon energies and spin-spin correlations
@@ -565,15 +587,15 @@ end)BLOCK" << "\n";
 
 	ofstr << "\ntime_calc_end = time_ns()\n";
 	ofstr << "time_calc = (time_calc_end - time_calc_begin) / 1e6\n";
-	ofstr << "@printf(\"Calculation of %d Q points took %.6f milliseconds, \", Qpts, time_calc)\n";
-	ofstr << "@printf(\"total run took %.6f milliseconds.\\n\", time_setup + time_calc)\n";
+	ofstr << "logprint(\"Calculation of %d Q points took %.6f ms, total run took %.6f ms.\\n\"";
+	ofstr << ",\n\tQpts, time_calc, time_setup + time_calc)\n";
 	// --------------------------------------------------------------------
 
 
 	// --------------------------------------------------------------------
 	ofstr << "\n\n# plot the dispersion\n";
 	ofstr << "if plot_dynamics\n";
-	ofstr << "\t@printf(\"Plotting dispersion...\\n\")\n";
+	ofstr << "\tlogprint(\"Plotting dispersion...\\n\")\n";
 	ofstr << "\tusing GLMakie\n";
 	ofstr << "\tplot_intensities(bands; fwhm = 0.1, units = phys_units)\n";
 	ofstr << "end\n";
@@ -583,7 +605,7 @@ end)BLOCK" << "\n";
 	// --------------------------------------------------------------------
 	ofstr << "\n\n# output the dispersion and spin-spin correlation\n";
 	ofstr << "if save_dynamics\n";
-	ofstr << "\t@printf(\"Outputting dispersion data to \\\"%s\\\", plot with:\\n"
+	ofstr << "\tlogprint(\"Outputting dispersion data to \\\"%s\\\", plot with:\\n"
 		<< "\\tgnuplot -p -e \\\"plot \\\\\\\"%s\\\\\\\" u " << q_idx
 		<< ":4:(sqrt(abs(\\\\\\$5))) w p pt 7 ps var\\\"\\n\", "
 		<< "datfile, datfile)\n";
