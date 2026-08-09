@@ -104,8 +104,10 @@ find_package(Gemmi REQUIRED)
 
 find_package(GFortran)
 find_package(Lapacke REQUIRED)
-add_definitions(-DUSE_LAPACK=1)
 include_directories("${Lapacke_INCLUDE_DIRS}")
+#set(BLA_VENDOR OpenBLAS)
+#find_package(BLAS REQUIRED)
+add_definitions(-DUSE_LAPACK=1)
 
 find_package(Qhull REQUIRED)
 if(Qhull_FOUND)
@@ -255,6 +257,7 @@ if(USE_QT)
 		${QtLibraries}
 		${Boost_LIBRARIES}
 		${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES}
+		#BLAS::BLAS ${GFortran_LIBRARIES}
 		${HDF5_CXX_LIBRARIES}
 		${Minuit2_LIBRARIES}
 		${MINGW_EXTRALIBS}
@@ -283,6 +286,7 @@ else()
 		Threads::Threads
 		${Boost_LIBRARIES}
 		${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES}
+		#BLAS::BLAS ${GFortran_LIBRARIES}
 		${HDF5_CXX_LIBRARIES}
 		${Minuit2_LIBRARIES}
 		${MINGW_EXTRALIBS}
