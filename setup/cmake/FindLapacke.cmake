@@ -47,7 +47,7 @@ find_library(Lapack_LIBRARIES
 )
 
 
-find_library(BLAS_LIBRARIES
+find_library(Blas_LIBRARIES
 	NAMES blas
 	HINTS /usr/local/lib64 /usr/local/lib /usr/lib64 /usr/lib /opt/local/lib /usr/local/opt/lapack/lib /usr/local/Cellar/lapack/*/lib
 	DOC "BLAS libraries"
@@ -67,12 +67,12 @@ else()
 endif()
 
 
-if(BLAS_LIBRARIES)
-	set(BLAS_FOUND TRUE)
-
-	message("BLAS library: ${BLAS_LIBRARIES}")
-else()
-	set(BLAS_FOUND FALSE)
-
-	message("Error: BLAS could not be found!")
-endif()
+#if(Blas_LIBRARIES)
+#	set(Blas_FOUND TRUE)
+#
+#	message("Blas library: ${Blas_LIBRARIES}")
+#else()
+#	set(Blas_FOUND FALSE)
+#
+#	message("Error: BLAS could not be found!")
+#endif()

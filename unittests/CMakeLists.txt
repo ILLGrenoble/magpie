@@ -86,9 +86,9 @@ include_directories(
 add_executable(magdyn magdyn.cpp)
 add_executable(magdyn2 magdyn2.cpp)
 
-target_link_libraries(magdyn ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES}
+target_link_libraries(magdyn ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
 	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
-target_link_libraries(magdyn2 ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES}
+target_link_libraries(magdyn2 ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
 	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
 # -----------------------------------------------------------------------------
 

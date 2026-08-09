@@ -101,5 +101,5 @@ add_library(mcalc_rt SHARED
 
 set(TARGET mcalc_rt PROPTERTY CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-target_link_libraries(mcalc_rt ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES})
+target_link_libraries(mcalc_rt ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES} ${GFortran_LIBRARIES})
 

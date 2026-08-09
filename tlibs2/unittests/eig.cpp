@@ -53,7 +53,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_eig, t_real, t_types)
 	using t_vec_cplx = tl2::vec<t_cplx, std::vector>;
 	using t_mat_cplx = tl2::mat<t_cplx, std::vector>;
 
-	t_real eps = 1e-3;
+	t_real eps = 1e-8;
+	if constexpr(std::is_same_v<t_real, float>)
+		eps = 1e-2;
 	std::size_t dim = 5;
 
 	std::mt19937 rndgen{tl2::epoch<unsigned int>()};

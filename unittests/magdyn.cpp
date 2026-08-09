@@ -45,8 +45,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn, t_real, t_types_real)
 	std::cout << "Running tests with " << real_name << " data type." << std::endl;
 	std::cout << "================================================================================" << std::endl;
 
-
-	static constexpr t_real eps = 1e-4;
+	static constexpr t_real eps = 1e-4; //std::is_same_v<t_real, float> ? 1e-4 : 1e-8;
 
 	// types
 	using t_cplx = std::complex<t_real>;

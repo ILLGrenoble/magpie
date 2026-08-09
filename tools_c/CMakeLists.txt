@@ -96,7 +96,7 @@ target_compile_definitions(magpie_c PRIVATE -DUSE_LAPACK=1)
 target_compile_definitions(magpie_c PRIVATE ${Boost_CXX_FLAGS})
 
 target_link_libraries(magpie_c
-	${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES}
+	${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES} ${GFortran_LIBRARIES}
 	#/usr/local/lib/libgemmi_cpp.a
 	gemmi::gemmi_cpp
 )

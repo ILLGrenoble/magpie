@@ -118,7 +118,7 @@ set_source_files_properties(magpy.i PROPERTIES SWIG_FLAGS "-I ${PROJECT_SOURCE_D
 swig_add_library(magpy LANGUAGE python SOURCES magpy.i)
 target_link_libraries(magpy
 	Python3::Python
-	${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES}
+	${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES} ${GFortran_LIBRARIES}
 	#/usr/local/lib/libgemmi_cpp.a
 	gemmi::gemmi_cpp
 )
@@ -143,7 +143,7 @@ install(TARGETS magpy LIBRARY DESTINATION "${Python3_SITEARCH}")
 #swig_add_library(magpy_java LANGUAGE java SOURCES magpy.i)
 #target_link_libraries(magpy_java
 #	${JNI_LIBRARIES}
-#	${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES}
+#	${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES} ${GFortran_LIBRARIES}
 #	gemmi::gemmi_cpp
 #)
 # -----------------------------------------------------------------------------

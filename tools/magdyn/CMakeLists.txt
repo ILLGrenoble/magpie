@@ -31,7 +31,7 @@ enable_language(CXX)
 set(CMAKE_CXX_STANDARD 20)
 add_compile_options(-std=c++20)
 add_compile_options(-Wall -Wextra -Weffc++)
-#add_compile_options(-march=native)
+add_compile_options(-march=native)
 
 
 # -----------------------------------------------------------------------------
@@ -256,7 +256,7 @@ if(USE_QT)
 		${QCP_LIBRARIES}
 		${QtLibraries}
 		${Boost_LIBRARIES}
-		${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES}
+		${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES} ${GFortran_LIBRARIES}
 		#BLAS::BLAS ${GFortran_LIBRARIES}
 		${HDF5_CXX_LIBRARIES}
 		${Minuit2_LIBRARIES}
@@ -285,7 +285,7 @@ else()
 	target_link_libraries(magpie
 		Threads::Threads
 		${Boost_LIBRARIES}
-		${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${BLAS_LIBRARIES} ${GFortran_LIBRARIES}
+		${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES} ${GFortran_LIBRARIES}
 		#BLAS::BLAS ${GFortran_LIBRARIES}
 		${HDF5_CXX_LIBRARIES}
 		${Minuit2_LIBRARIES}
