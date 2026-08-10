@@ -614,7 +614,6 @@ eigenvec(const t_mat_cplx& mat,
 {
 	bool only_selected_evals = (mineval <= maxeval);
 	bool use_selective_func = only_selected_evals;
-	//use_selective_func = true;
 
 	std::vector<t_cplx> evals;
 	std::vector<t_vec_cplx> evecs;
@@ -797,7 +796,6 @@ eigenvec(const t_mat& mat, bool only_evals, bool is_symmetric, bool normalise,
 {
 	bool only_selected_evals = (mineval <= maxeval);
 	bool use_selective_func = only_selected_evals;
-	//use_selective_func = true;
 
 	std::vector<t_real> evals_re, evals_im;
 	std::vector<t_vec> evecs_re, evecs_im;

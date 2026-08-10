@@ -206,7 +206,7 @@ requires is_basic_mat<t_mat>
 {
 	for(std::size_t i = rows_begin; i < rows_end; ++i)
 		for(std::size_t j = cols_begin; j < cols_end; ++j)
-			mat(i, j) = (i==j ? 1 : 0);
+			mat(i, j) = (i == j ? 1 : 0);
 }
 
 
@@ -221,7 +221,7 @@ requires is_basic_mat<t_mat>
 	if constexpr(is_dyn_mat<t_mat>)
 		mat = t_mat(N1, N2);
 
-	unit<t_mat>(mat, 0,0, mat.size1(),mat.size2());
+	unit<t_mat>(mat, 0, 0, mat.size1(), mat.size2());
 	return mat;
 }
 
@@ -249,9 +249,9 @@ requires is_mat<t_mat>
 	{
 		for(std::size_t j = 0; j < mat.size2(); ++j)
 		{
-			if(i==j && !tl2::equals<t_scalar>(mat(i, j), t_scalar(1), eps))
+			if(i == j && !tl2::equals<t_scalar>(mat(i, j), t_scalar(1), eps))
 				return false;
-			if(i!=j && !tl2::equals<t_scalar>(mat(i, j), t_scalar(0), eps))
+			if(i != j && !tl2::equals<t_scalar>(mat(i, j), t_scalar(0), eps))
 				return false;
 		}
 	}
@@ -503,7 +503,7 @@ requires is_vec<t_vec> && is_mat<t_mat>
 
 	t_vec vec = zero<t_vec>(N);
 	for(std::size_t i = 0; i < N; ++i)
-		vec[i] = mat(i,i);
+		vec[i] = mat(i, i);
 
 	return vec;
 }
@@ -1081,7 +1081,7 @@ requires is_mat<t_mat> && is_basic_vec<t_vec>
 	auto iterCol = lst.begin();
 	for(std::size_t iCol = 0; iCol < iCols; ++iCol)
 	{
-		for(std::size_t iRow=0; iRow < iRows; ++iRow)
+		for(std::size_t iRow = 0; iRow < iRows; ++iRow)
 			mat(iRow, iCol) = (*iterCol)[iRow];
 		std::advance(iterCol, 1);
 	}

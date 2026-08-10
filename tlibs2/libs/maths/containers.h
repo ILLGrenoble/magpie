@@ -63,7 +63,8 @@ public:
 	using size_type = decltype(t_mat{}.size1());
 
 public:
-	matvec_adapter(const t_mat &mat) : m_mat{mat} {}
+	matvec_adapter(const t_mat &mat) : m_mat{ mat }
+	{}
 	~matvec_adapter() = default;
 
 	size_type size() const { return m_mat.size1() * m_mat.size2(); }
@@ -96,7 +97,8 @@ public:
 
 	// constructors
 	using base_type::base_type;
-	qvec_adapter(const base_type& vec) : base_type{vec} {}
+	qvec_adapter(const base_type& vec) : base_type{ vec }
+	{}
 
 	static constexpr size_t size() { return N; }
 
@@ -127,7 +129,8 @@ public:
 
 	// constructors
 	using base_type::base_type;
-	qmat_adapter(const base_type& mat) : base_type{mat} {}
+	qmat_adapter(const base_type& mat) : base_type{ mat }
+	{}
 
 	static constexpr size_t size1() { return ROWS; }
 	static constexpr size_t size2() { return COLS; }
@@ -148,7 +151,8 @@ public:
 
 	// constructors
 	using base_type::base_type;
-	qvecN_adapter(const base_type& vec) : base_type{vec} {}
+	qvecN_adapter(const base_type& vec) : base_type{ vec }
+	{}
 
 	static constexpr size_t size() { return N; }
 
@@ -178,7 +182,8 @@ public:
 
 	// constructors
 	using base_type::base_type;
-	qmatNN_adapter(const base_type& mat) : base_type{mat} {}
+	qmatNN_adapter(const base_type& mat) : base_type{ mat }
+	{}
 
 	// convert from a different matrix type
 	template<class t_matOther> qmatNN_adapter(const t_matOther& matOther)
@@ -233,12 +238,10 @@ public:
 	vec() : container_type{}
 	{}
 
-	vec(const vec<T, t_cont>& other)
-		: container_type{other}
+	vec(const vec<T, t_cont>& other) : container_type{ other }
 	{}
 
-	vec(vec<T, t_cont>&& other)
-		: container_type{std::forward<vec<T, t_cont>&&>(other)}
+	vec(vec<T, t_cont>&& other) noexcept : container_type{ std::move(other) }
 	{}
 
 	template<class T_other, template<class...> class t_cont_other>
@@ -326,7 +329,7 @@ public:
 /**
  * generic matrix container
  */
-template<class T=double, template<class...> class t_cont = std::vector>
+template<class T = double, template<class...> class t_cont = std::vector>
 requires is_basic_vec<t_cont<T>> && is_dyn_vec<t_cont<T>>
 class mat
 {
@@ -344,6 +347,16 @@ public:
 			from_array(arr);
 	}
 
+	mat(mat<T, t_cont>&& other) noexcept
+		: m_data{ std::move(other.m_data) },
+		  m_rowsize{ other.m_rowsize }, m_colsize{ other.m_colsize }
+	{}
+
+	mat(const mat<T, t_cont>& other)
+		: m_data{ other.m_data },
+		  m_rowsize{ other.m_rowsize }, m_colsize{ other.m_colsize }
+	{}
+
 
 	template<class T_other, template<class...> class t_cont_other>
 	mat(const mat<T_other, t_cont_other>& other)
@@ -352,7 +365,7 @@ public:
 	}
 
 	template<class T_other, template<class...> class t_cont_other>
-	mat<T, t_cont>& operator=(const vec<T_other, t_cont_other>& other)
+	mat<T, t_cont>& operator=(const mat<T_other, t_cont_other>& other)
 	{
 		*this = convert<mat<T, t_cont>, mat<T_other, t_cont_other>>(other);
 
@@ -363,10 +376,29 @@ public:
 	}
 
 	template<class T_other, template<class...> class t_cont_other>
-	const mat<T, t_cont>& operator=(const vec<T_other, t_cont_other>& other) const
+	const mat<T, t_cont>& operator=(const mat<T_other, t_cont_other>& other) const
 	{
 		*this = convert<mat<T, t_cont>, mat<T_other, t_cont_other>>(other);
 
+		this->m_rowsize = other.m_rowsize;
+		this->m_colsize = other.m_colsize;
+
+		return *this;
+	}
+
+
+	mat<T, t_cont>& operator=(const mat<T, t_cont>& other)
+	{
+		this->m_data = other.m_data;
+		this->m_rowsize = other.m_rowsize;
+		this->m_colsize = other.m_colsize;
+
+		return *this;
+	}
+
+	const mat<T, t_cont>& operator=(const mat<T, t_cont>& other) const
+	{
+		this->m_data = other.m_data;
 		this->m_rowsize = other.m_rowsize;
 		this->m_colsize = other.m_colsize;
 
@@ -425,10 +457,11 @@ public:
 	mat& operator*=(value_type d) { return tl2_ops::operator*=(*this, d); }
 	mat& operator/=(value_type d) { return tl2_ops::operator/=(*this, d); }
 
+
 private:
-	container_type m_data{};
-	std::size_t m_rowsize{0};
-	std::size_t m_colsize{0};
+	container_type m_data{ };
+	std::size_t m_rowsize{ };
+	std::size_t m_colsize{ };
 };
 
 // ----------------------------------------------------------------------------
