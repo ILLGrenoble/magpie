@@ -64,17 +64,16 @@ template<class t_vec>
 t_vec cross(const t_vec& vec1, const t_vec& vec2)
 requires is_basic_vec<t_vec>
 {
-	t_vec vec;
-
 	// only valid for 3-vectors -> use first three components
 	if(vec1.size() < 3 || vec2.size() < 3)
-		return vec;
+		return t_vec{};
 
+	t_vec vec;
 	if constexpr(is_dyn_vec<t_vec>)
-		vec = t_vec(3);
+		vec = tl2::create<t_vec>(3);
 
 	for(int i = 0; i < 3; ++i)
-		vec[i] = vec1[(i+1)%3]*vec2[(i+2)%3] - vec1[(i+2)%3]*vec2[(i+1)%3];
+		vec[i] = vec1[(i + 1)%3]*vec2[(i + 2)%3] - vec1[(i + 2)%3]*vec2[(i + 1)%3];
 
 	return vec;
 }
@@ -90,7 +89,7 @@ requires is_basic_vec<t_vec> && is_mat<t_mat>
 {
 	t_mat mat;
 	if constexpr(is_dyn_mat<t_mat>)
-		mat = t_mat(3,3);
+		mat = t_mat(3, 3);
 
 	// if static matrix is larger than 3x3 (e.g. for homogeneous coordinates), initialise as identity
 	if(mat.size1() > 3 || mat.size2() > 3)
@@ -305,8 +304,13 @@ requires is_vec<t_vec>
 		// cross product gives sine and rotation axis
 		t_vec axis = cross<t_vec>({ vec0, vec1 });
 		t_real s = tl2::norm(axis);
-		if(rotaxis && s > 0.)
-			*rotaxis = axis / s;
+		if(rotaxis)
+		{
+			if(s > t_real(0))
+				*rotaxis = axis / s;
+			else
+				*rotaxis = axis;
+		}
 
 		// dot product gives cosine
 		t_real c = inner(vec0, vec1);

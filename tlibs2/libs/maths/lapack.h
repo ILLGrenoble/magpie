@@ -269,10 +269,10 @@ requires tl2::is_mat<t_mat>
 	const std::size_t minor = std::min(rows, cols);
 
 	const t_mat I = tl2::unit<t_mat>(minor);
-	t_mat Q = I, R = mat;
+	t_mat Q{I}, R{mat};
 
-
-	t_vec outmat(rows*cols), outvec(minor);
+	t_vec outmat = tl2::create<t_vec>(rows*cols);
+	t_vec outvec(minor);
 
 	for(std::size_t i = 0; i < rows; ++i)
 		for(std::size_t j = 0; j < cols; ++j)
@@ -325,16 +325,16 @@ requires tl2::is_mat<t_mat>
 
 	t_vec v = tl2::zero<t_vec>(minor);
 
-	for(std::size_t k=1; k<= minor; ++k)
+	for(std::size_t k = 1; k <= minor; ++k)
 	{
-		for(std::size_t i=1; i <= k-1; ++i)
+		for(std::size_t i = 1; i <= k-1; ++i)
 			v[i - 1] = t_real{0};
 		v[k - 1] = t_real{1};
 
-		for(std::size_t i=k+1; i <= minor; ++i)
-			v[i - 1] = outmat[(i-1)*cols + (k-1)];
+		for(std::size_t i = k + 1; i <= minor; ++i)
+			v[i - 1] = outmat[(i - 1)*cols + (k - 1)];
 
-		Q = Q * (I - outvec[k-1]*tl2::outer<t_mat, t_vec>(v, v));
+		Q *= (I - outvec[k - 1]*tl2::outer<t_mat, t_vec>(v, v));
 	}
 
 	return std::make_tuple(err == 0, std::move(Q), std::move(R));

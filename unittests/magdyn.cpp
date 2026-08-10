@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn, t_real, t_types_real)
 	magdyn.SaveDispersion("disp_" + real_name + ".dat",
 		-1. ,0., 0.,  // from
 		+1., 0., 0.,  // to
-		256);
+		256, 1);
 
 
 	// save magnetic model

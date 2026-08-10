@@ -296,7 +296,8 @@ load_cif(const std::string& filename, t_real eps = 1e-6)
 	for(t_vec atom : atoms)
 	{
 		// make homogeneuous 4-vector
-		if(atom.size() == 3) atom.push_back(1);
+		if(atom.size() == 3)
+			atom.push_back(1);
 
 		// if no ops are given, just output the raw atom position
 		if(!ops.size())

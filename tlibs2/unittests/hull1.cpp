@@ -60,6 +60,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_equals, t_real, t_types)
 
 	auto [hull, norms, dists] = tl2_qh::get_convexhull<t_vec>(vecs);
 
+
 	for(std::size_t faceidx = 0; faceidx < hull.size(); ++faceidx)
 	{
 		const auto& face = hull[faceidx];

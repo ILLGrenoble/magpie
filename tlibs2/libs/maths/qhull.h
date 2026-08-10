@@ -73,34 +73,36 @@ requires tl2::is_vec<t_vec>
 {
 	using namespace tl2_ops;
 
+	// types
 	using t_real = typename t_vec::value_type;
 	using t_real_qh = double;
 	using t_facetlist_iter = typename orgQhull::QhullLinkedList<orgQhull::QhullFacet>::iterator;
 	using t_vertexset_iter = typename orgQhull::QhullSet<orgQhull::QhullVertex>::iterator;
 
+	t_cont<t_cont<t_vec>> vecPolys;
+	t_cont<t_vec> vecNormals;
+	t_cont<t_real> vecDists;
+	if(vecVerts.size() == 0)
+		return std::make_tuple(vecPolys, vecNormals, vecDists);
 
 	// copy vertices
 	int dim = vecVerts[0].size();
 	std::size_t len = vecVerts.size()*dim;
 	std::unique_ptr<t_real_qh[]> mem{new t_real_qh[len]};
 
-	std::size_t i=0;
+	std::size_t i = 0;
 	for(const t_vec& vert : vecVerts)
 	{
-		for(int d=0; d<dim; ++d)
+		for(int d = 0; d < dim; ++d)
 		{
 			mem[i] = t_real_qh(vert[d]);
 			++i;
 		}
 	}
 
-
 	orgQhull::Qhull qhull{"tlibs2", dim, int(vecVerts.size()), mem.get(), "Qt"};
 	orgQhull::QhullFacetList facets = qhull.facetList();
 
-	t_cont<t_cont<t_vec>> vecPolys;
-	t_cont<t_vec> vecNormals;
-	t_cont<t_real> vecDists;
 	vecPolys.reserve(facets.size());
 	vecNormals.reserve(facets.size());
 	vecDists.reserve(facets.size());
@@ -120,13 +122,12 @@ requires tl2::is_vec<t_vec>
 		for(t_vertexset_iter iterVertex=vertices.begin(); iterVertex!=vertices.end(); ++iterVertex)
 		{
 			orgQhull::QhullPoint point = (*iterVertex).point();
-			t_vec vecPoint(dim);
-			for(int i=0; i<dim; ++i)
+			t_vec vecPoint = tl2::create<t_vec>(dim);
+			for(int i = 0; i < dim; ++i)
 				vecPoint[i] = t_real(point[i]);
 
 			vecPoly.emplace_back(std::move(vecPoint));
 		}
-
 
 		t_vec vecNormal; //= tl2::sort_poly_verts<t_vec, t_cont>(vecPoly, vecCentre, true);
 		vecNormal.resize(dim);

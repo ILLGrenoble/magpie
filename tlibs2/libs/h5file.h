@@ -316,9 +316,11 @@ bool set_h5_string(H5::H5File& file, const std::string& path, const t_str& val)
 /**
  * get a vector of values from an hdf5 file
  */
-template<class T, template<class...> class t_vec = std::vector>
-bool get_h5_vector(H5::H5File& file, const std::string& path, t_vec<T>& vals)
+template<class t_vec = std::vector<double>>
+bool get_h5_vector(H5::H5File& file, const std::string& path, t_vec& vals)
 {
+	using T = typename t_vec::value_type;
+
 	try
 	{
 		if(!file.nameExists(path))
@@ -353,9 +355,11 @@ bool get_h5_vector(H5::H5File& file, const std::string& path, t_vec<T>& vals)
 /**
  * write a vector of values to an hdf5 file
  */
-template<class T, template<class...> class t_vec = std::vector>
-bool set_h5_vector(H5::H5File& file, const std::string& path, const t_vec<T>& vals)
+template<class t_vec = std::vector<double>>
+bool set_h5_vector(H5::H5File& file, const std::string& path, const t_vec& vals)
 {
+	using T = typename t_vec::value_type;
+
 	try
 	{
 		H5::PredType ty = get_h5_type<T>();

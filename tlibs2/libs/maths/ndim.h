@@ -1904,7 +1904,7 @@ requires is_mat<t_mat> && is_vec<t_vec>
 	t_mat R = mat;
 	t_mat Q = unit<t_mat>(N, N);
 
-	for(std::size_t icol = 0; icol < N-1; ++icol)
+	for(std::size_t icol = 0; icol < N - 1; ++icol)
 	{
 		t_vec vecCol = col<t_mat, t_vec>(R, icol);
 		t_mat matMirror = ortho_mirror_zero_op<t_mat, t_vec>(vecCol, icol);
