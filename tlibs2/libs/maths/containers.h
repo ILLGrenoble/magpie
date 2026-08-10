@@ -250,13 +250,8 @@ public:
 		this->operator=<T_other, t_cont_other>(other);
 	}
 
-	vec<T, t_cont>& operator=(const vec<T, t_cont>& other)
-	{
-		*static_cast<container_type*>(this) = other;
-		return *this;
-	}
 
-	const vec<T, t_cont>& operator=(const vec<T, t_cont>& other) const
+	vec<T, t_cont>& operator=(const vec<T, t_cont>& other)
 	{
 		*static_cast<container_type*>(this) = other;
 		return *this;
@@ -269,12 +264,6 @@ public:
 		return *this;
 	}
 
-	template<class T_other, template<class...> class t_cont_other>
-	const vec<T, t_cont>& operator=(const vec<T_other, t_cont_other>& other) const
-	{
-		*this = convert<vec<T, t_cont>, vec<T_other, t_cont_other>>(other);
-		return *this;
-	}
 
 	vec(std::size_t SIZE, const T* arr = nullptr) : container_type(SIZE)
 	{
@@ -375,18 +364,6 @@ public:
 		return *this;
 	}
 
-	template<class T_other, template<class...> class t_cont_other>
-	const mat<T, t_cont>& operator=(const mat<T_other, t_cont_other>& other) const
-	{
-		*this = convert<mat<T, t_cont>, mat<T_other, t_cont_other>>(other);
-
-		this->m_rowsize = other.m_rowsize;
-		this->m_colsize = other.m_colsize;
-
-		return *this;
-	}
-
-
 	mat<T, t_cont>& operator=(const mat<T, t_cont>& other)
 	{
 		this->m_data = other.m_data;
@@ -395,16 +372,6 @@ public:
 
 		return *this;
 	}
-
-	const mat<T, t_cont>& operator=(const mat<T, t_cont>& other) const
-	{
-		this->m_data = other.m_data;
-		this->m_rowsize = other.m_rowsize;
-		this->m_colsize = other.m_colsize;
-
-		return *this;
-	}
-
 
 	std::size_t size1() const { return m_rowsize; }
 	std::size_t size2() const { return m_colsize; }
