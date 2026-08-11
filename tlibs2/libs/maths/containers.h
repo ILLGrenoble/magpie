@@ -42,14 +42,15 @@
 
 #include <cmath>
 #include <vector>
+#include <array>
 
 #include "decls.h"
 #include "operators.h"
 
 
 #ifndef __TLIBS2_DEFAULT_ALLOC__
-	//#define __TLIBS2_DEFAULT_ALLOC__ alloc_noinit
-	#define __TLIBS2_DEFAULT_ALLOC__ std::allocator
+	#define __TLIBS2_DEFAULT_ALLOC__ alloc_noinit
+	//#define __TLIBS2_DEFAULT_ALLOC__ std::allocator
 #endif
 
 
@@ -69,6 +70,7 @@ public:
 	using value_type = typename t_mat::value_type;
 	using size_type = decltype(t_mat{}.size1());
 
+
 public:
 	matvec_adapter(const t_mat &mat) : m_mat{ mat }
 	{}
@@ -84,9 +86,11 @@ public:
 		return m_mat(row, col);
 	}
 
+
 private:
 	const t_mat& m_mat;
 };
+
 
 
 /**
@@ -111,14 +115,15 @@ public:
 
 	T& operator[](size_t i)
 	{
-		return base_type::operator()(i,0);
+		return base_type::operator()(i, 0);
 	}
 
 	const T operator[](size_t i) const
 	{
-		return base_type::operator()(i,0);
+		return base_type::operator()(i, 0);
 	}
 };
+
 
 
 /**
@@ -142,6 +147,7 @@ public:
 	static constexpr size_t size1() { return ROWS; }
 	static constexpr size_t size2() { return COLS; }
 };
+
 
 
 /**
@@ -173,6 +179,7 @@ public:
 		return static_cast<const base_type&>(*this)[i];
 	}
 };
+
 
 
 /**
@@ -222,7 +229,7 @@ public:
  * allocator that doesn't initialise or construct its elements
  * @see https://en.cppreference.com/cpp/memory/allocator
  *
- * WARNING: without initialisation, functions like push_back also stop working
+ * WARNING: without initialisation, functions like push_back also stop working in std::vector
  */
 template<class t_elem>
 struct alloc_noinit
@@ -302,45 +309,41 @@ struct alloc_noinit
  */
 template<class T = double,
 	template<class...> class t_cont = std::vector,
-	template<class...> class t_alloc = __TLIBS2_DEFAULT_ALLOC__>
+	template<class...> class t_alloc = __TLIBS2_DEFAULT_ALLOC__,
+	unsigned int STATIC_SIZE = 4>
 requires is_basic_vec<t_cont<T, t_alloc<T>>> && is_dyn_vec<t_cont<T, t_alloc<T>>>
-class vec : public t_cont<T, t_alloc<T>>
+class vec
 {
 public:
 	using value_type = T;
 	using container_type = t_cont<T, t_alloc<T>>;
+	using static_container_type = std::array<T, STATIC_SIZE>;
 
-	using container_type::container_type;
-	using container_type::size;
-	using container_type::operator[];
-
-	using typename container_type::iterator;
-	using typename container_type::const_iterator;
-	using typename container_type::size_type;
-	using typename container_type::difference_type;
-	using typename container_type::allocator_type;
-
-
-/*private:
-	using container_type::push_back;
-	using container_type::emplace_back;*/
+	using iterator = typename container_type::iterator;
+	using const_iterator = typename container_type::const_iterator;
+	using size_type = typename container_type::size_type;
+	using difference_type = typename container_type::difference_type;
+	using allocator_type = typename container_type::allocator_type;
 
 
 public:
+	// constructors
+	vec() = default;
 	~vec() = default;
 
-	vec() : container_type{}
-	{}
-
-	vec(const vec<T, t_cont, t_alloc>& other) //: container_type{ other }
+	vec(const vec<T, t_cont, t_alloc>& other)
 	{
 		this->resize(other.size());
-		for(std::size_t i = 0; i < other.size(); ++i)
+		for(size_type i = 0; i < other.size(); ++i)
 			(*this)[i] = other[i];
 	}
 
-	vec(vec<T, t_cont, t_alloc>&& other) noexcept : container_type{ std::move(other) }
-	{}
+	vec(vec<T, t_cont, t_alloc>&& other) noexcept
+	{
+		this->m_size = other.m_size;
+		this->m_data = std::move(other.m_data);
+		this->m_static_data = std::move(other.m_static_data);
+	}
 
 	template<class T_other,
 		template<class...> class t_cont_other,
@@ -361,12 +364,19 @@ public:
 		}
 	}
 
+	vec(size_type SIZE, const T* arr = nullptr)
+	{
+		resize(SIZE);
+		if(arr)
+			from_array(arr);
+	}
 
+
+	// assignments
 	vec<T, t_cont, t_alloc>& operator=(const vec<T, t_cont, t_alloc>& other)
 	{
-		//*static_cast<container_type*>(this) = other;
-		this->resize(other.size());
-		for(std::size_t i = 0; i < other.size(); ++i)
+		resize(other.size());
+		for(size_type i = 0; i < other.size(); ++i)
 			(*this)[i] = other[i];
 
 		return *this;
@@ -382,37 +392,79 @@ public:
 	}
 
 
-	vec(std::size_t SIZE, const T* arr = nullptr) : container_type(SIZE)
+	void push_back(const T& t)
 	{
-		if(arr)
-			from_array(arr);
+		size_type num = size();
+		resize(num + 1);
+		(*this)[num] = t;
+	}
+
+	void emplace_back(T&& t)
+	{
+		size_type num = size();
+		resize(num + 1);
+		(*this)[num] = std::forward<T&&>(t);
 	}
 
 
-	const value_type& operator()(std::size_t i) const
-	{
-		return this->operator[](i);
-	}
-
-	value_type& operator()(std::size_t i)
-	{
-		return this->operator[](i);
-	}
-
-
+	// conversion from / to array
 	void from_array(const T* arr)
 	{
 		// initialise from given array data
-		for(std::size_t i = 0; i < size(); ++i)
+		for(size_type i = 0; i < size(); ++i)
 			this->operator[](i) = arr[i];
 	}
 
 	void to_array(T* arr) const
 	{
 		// write elements to array
-		for(std::size_t i = 0; i < size(); ++i)
+		for(size_type i = 0; i < size(); ++i)
 			arr[i] = this->operator[](i);
 	}
+
+
+	template<class t_vec = std::vector<T>>
+	t_vec to_stdvec() const
+	{
+		t_vec vec;
+		vec.reserve(size());
+
+		for(size_type i = 0; i < size(); ++i)
+			vec[i] = this->operator[](i);
+
+		return vec;
+	}
+
+
+	void clear()
+	{
+		m_data.clear();
+		m_size = 0;
+	}
+
+	void resize(size_type size)
+	{
+		m_size = size;
+		if(m_size > STATIC_SIZE)
+			m_data.resize(m_size - STATIC_SIZE);
+	}
+
+	void reserve(size_type size)
+	{
+		m_size = size;
+		if(m_size > STATIC_SIZE)
+			m_data.reserve(m_size - STATIC_SIZE);
+	}
+
+	size_type size() const { return m_size; }
+
+	/*const T* data() const { return m_data.data(); }
+	T* data() { return m_data.data(); }
+
+	iterator begin() { return m_data.begin(); }
+	iterator end() { return m_data.end(); }
+	const_iterator begin() const { return m_data.begin(); }
+	const_iterator end() const { return m_data.end(); }*/
 
 
 	friend vec operator+(const vec& vec1, const vec& vec2) { return tl2_ops::operator+(vec1, vec2); }
@@ -429,12 +481,35 @@ public:
 	vec& operator-=(const vec& vec2) { return tl2_ops::operator-=(*this, vec2); }
 	vec& operator*=(value_type d) { return tl2_ops::operator*=(*this, d); }
 	vec& operator/=(value_type d) { return tl2_ops::operator/=(*this, d); }
+
+	const value_type& operator()(size_type i) const { return operator[](i); }
+	value_type& operator()(size_type i) { return operator[](i); }
+
+	const value_type& operator[](size_type i) const
+	{
+		if(i < STATIC_SIZE)
+			return m_static_data[i];
+		return m_data[i - STATIC_SIZE];
+	}
+
+	value_type& operator[](size_type i)
+	{
+		if(i < STATIC_SIZE)
+			return m_static_data[i];
+		return m_data[i - STATIC_SIZE];
+	}
+
+
+private:
+	container_type m_data{ };
+	static_container_type m_static_data{ };
+	size_type m_size { };
 };
 
 
 
 /**
- * generic matrix container
+ * generic dynamic matrix container
  */
 template<class T = double,
 	template<class...> class t_cont = std::vector,

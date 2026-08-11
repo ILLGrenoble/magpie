@@ -190,7 +190,7 @@
 // ----------------------------------------------------------------------------
 %inline
 %{
-	#include "../../libs/loadcif.h"
+	#include "../../libs/sym/loadcif.h"
 	#include "../../libs/vers.h"
 
 
@@ -474,7 +474,7 @@
 	{
 		std::list<std::string> sg_names;
 
-		for(const auto& sg : get_sgs<t_mat_real>(true, false))
+		for(const auto& sg : sym::get_sgs<t_mat_real>(true, false))
 			sg_names.push_back(std::get<1>(sg));
 
 		return sg_names;
@@ -486,7 +486,7 @@
 	 */
 	 void symmetrise_sites(t_MagDyn& magdyn, const std::string& spacegroup)
 	 {
-		std::vector<t_mat_real> ops = get_sg_ops<t_mat_real>(spacegroup);
+		std::vector<t_mat_real> ops = sym::get_sg_ops<t_mat_real>(spacegroup);
 		if(ops.size() == 0)
 		{
 			std::cerr << "Error: Space group \"" << spacegroup << "\" was not found. "
@@ -539,7 +539,7 @@
 	 */
 	 void symmetrise_couplings(t_MagDyn& magdyn, const std::string& spacegroup)
 	 {
-		std::vector<t_mat_real> ops = get_sg_ops<t_mat_real>(spacegroup);
+		std::vector<t_mat_real> ops = sym::get_sg_ops<t_mat_real>(spacegroup);
 		if(ops.size() == 0)
 		{
 			std::cerr << "Error: Space group \"" << spacegroup << "\" was not found. "
@@ -559,7 +559,7 @@
 		t_real dist_max, std::size_t sc_max, std::size_t couplings_max,
 		const std::string& spacegroup)
 	 {
-		std::vector<t_mat_real> ops = get_sg_ops<t_mat_real>(spacegroup);
+		std::vector<t_mat_real> ops = sym::get_sg_ops<t_mat_real>(spacegroup);
 		if(ops.size() == 0)
 		{
 			std::cerr << "Error: Space group \"" << spacegroup << "\" was not found. "

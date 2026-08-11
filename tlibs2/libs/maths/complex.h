@@ -67,18 +67,18 @@ requires is_complex<typename t_vec_cplx::value_type> && is_vec<t_vec_cplx> && is
 	t_vec_real vecRe = zero<t_vec_real>(vec.size());
 	t_vec_real vecIm = zero<t_vec_real>(vec.size());
 
-	auto iter = vec.begin();
-	auto iterRe = vecRe.begin();
-	auto iterIm = vecIm.begin();
+	std::size_t iter = 0;
+	std::size_t iterRe = 0;
+	std::size_t iterIm = 0;
 
-	for(; iter != vec.end(); )
+	for(; iter < vec.size(); )
 	{
-		*iterRe = t_real{iter->real()};
-		*iterIm = t_real{iter->imag()};
+		vecRe[iterRe] = t_real{vec[iter].real()};
+		vecIm[iterIm] = t_real{vec[iter].imag()};
 
-		std::advance(iter, 1);
-		std::advance(iterRe, 1);
-		std::advance(iterIm, 1);
+		++iter;
+		++iterRe;
+		++iterIm;
 	}
 
 	return std::make_tuple(vecRe, vecIm);
@@ -118,18 +118,18 @@ requires is_complex<typename t_vec_cplx::value_type> && is_vec<t_vec_cplx> && is
 	using t_real = typename t_vec_real::value_type;
 	t_vec_real vecReal = zero<t_vec_real>(vec.size() * 2);
 
-	auto iter = vec.begin();
-	auto iterRe = vecReal.begin();
-	auto iterIm = std::next(vecReal.begin(), vec.size());
+	std::size_t iter = 0;
+	std::size_t iterRe = 0;
+	std::size_t iterIm = vec.size();
 
-	for(; iter != vec.end(); )
+	for(; iter < vec.size(); )
 	{
-		*iterRe = t_real{iter->real()};
-		*iterIm = t_real{iter->imag()};
+		vecReal[iterRe] = t_real{vec[iter].real()};
+		vecReal[iterIm] = t_real{vec[iter].imag()};
 
-		std::advance(iter, 1);
-		std::advance(iterRe, 1);
-		std::advance(iterIm, 1);
+		++iter;
+		++iterRe;
+		++iterIm;
 	}
 
 	return vecReal;
@@ -168,18 +168,18 @@ requires is_complex<typename t_vec_cplx::value_type> && is_vec<t_vec_cplx> && is
 	assert(vecRe.size() == vecIm.size());
 	t_vec_cplx vec = zero<t_vec_cplx>(vecRe.size());
 
-	auto iter = vec.begin();
-	auto iterRe = vecRe.begin();
-	auto iterIm = vecIm.begin();
+	std::size_t iter = 0;
+	std::size_t iterRe = 0;
+	std::size_t iterIm = 0;
 
-	for(; iterRe != vecRe.end(); )
+	for(; iterRe < vecRe.size(); )
 	{
-		(*iter).real(*iterRe);
-		(*iter).imag(*iterIm);
+		vec[iter].real(vecRe[iterRe]);
+		vec[iter].imag(vecIm[iterIm]);
 
-		std::advance(iter, 1);
-		std::advance(iterRe, 1);
-		std::advance(iterIm, 1);
+		++iter;
+		++iterRe;
+		++iterIm;
 	}
 
 	return vec;
@@ -220,18 +220,18 @@ requires is_complex<typename t_vec_cplx::value_type> && is_vec<t_vec_cplx> && is
 {
 	t_vec_cplx vec = zero<t_vec_cplx>(vecReIm.size() / 2);
 
-	auto iter = vec.begin();
-	auto iterRe = vecReIm.begin();
-	auto iterIm = std::next(vecReIm.begin(), vec.size());
+	std::size_t iter = 0;
+	std::size_t iterRe = 0;
+	std::size_t iterIm = vec.size();
 
-	for(; iter!=vec.end(); )
+	for(; iter < vec.size(); )
 	{
-		(*iter).real(*iterRe);
-		(*iter).imag(*iterIm);
+		vec[iter].real(vecReIm[iterRe]);
+		vec[iter].imag(vecReIm[iterIm]);
 
-		std::advance(iter, 1);
-		std::advance(iterRe, 1);
-		std::advance(iterIm, 1);
+		++iter;
+		++iterRe;
+		++iterIm;
 	}
 
 	return vec;

@@ -77,8 +77,8 @@ requires tl2::is_mat<t_mat>
 	const std::size_t minor = std::min(rows, cols);
 
 
-	t_vec<t_scalar> outmat(rows*cols);
-	t_vec<lapack_int> outpivots(minor);
+	std::vector<t_scalar> outmat(rows*cols);
+	std::vector<lapack_int> outpivots(minor);
 
 	for(std::size_t i = 0; i < rows; ++i)
 		for(std::size_t j = 0; j < cols; ++j)
@@ -271,8 +271,8 @@ requires tl2::is_mat<t_mat>
 	const t_mat I = tl2::unit<t_mat>(minor);
 	t_mat Q{I}, R{mat};
 
-	t_vec outmat = tl2::create<t_vec>(rows*cols);
-	t_vec outvec(minor);
+	std::vector<t_scalar> outmat(rows*cols);
+	std::vector<t_scalar> outvec(minor);
 
 	for(std::size_t i = 0; i < rows; ++i)
 		for(std::size_t j = 0; j < cols; ++j)

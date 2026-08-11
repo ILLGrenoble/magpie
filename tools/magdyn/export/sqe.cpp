@@ -433,15 +433,12 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 		tl2::set_h5_string<std::string>(*h5file, "meta_infos/doi_tlibs", "https://doi.org/10.5281/zenodo.5717779");
 
 		tl2::set_h5_string<std::string>(*h5file, "infos/shape", "cuboid");
-		tl2::set_h5_vector<typename t_vec_real::container_type>(
-			*h5file, "infos/Q_start",
-			static_cast<const typename t_vec_real::container_type&>(Qstart));
-		tl2::set_h5_vector<typename t_vec_real::container_type>(
-		  *h5file, "infos/Q_end",
-			static_cast<const typename t_vec_real::container_type&>(Qend));
-		tl2::set_h5_vector<typename t_vec_real::container_type>(
-		  *h5file, "infos/Q_steps",
-			static_cast<const typename t_vec_real::container_type&>(Qstep));
+		tl2::set_h5_vector<std::vector<t_real>>(*h5file, "infos/Q_start",
+			Qstart.to_stdvec<std::vector<t_real>>());
+		tl2::set_h5_vector<std::vector<t_real>>(*h5file, "infos/Q_end",
+			Qend.to_stdvec<std::vector<t_real>>());
+		tl2::set_h5_vector<std::vector<t_real>>(*h5file, "infos/Q_steps",
+			Qstep.to_stdvec<std::vector<t_real>>());
 		tl2::set_h5_vector(*h5file, "infos/Q_dimensions",
 			std::vector<std::size_t>{{ num_pts_h, num_pts_k, num_pts_l }});
 
