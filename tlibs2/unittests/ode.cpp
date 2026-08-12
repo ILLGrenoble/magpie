@@ -73,12 +73,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ode, t_real, t_types)
 {
 	const t_real eps = 1e-3;
 
-	using t_cplx = std::complex<t_real>;
-	using t_vec_cplx = tl2::vec<t_cplx>;
-	using t_mat_cplx = tl2::mat<t_cplx>;
-	using t_vec = tl2::vec<t_real>;
-	using t_mat = tl2::mat<t_real>;
-
+	#include "defs.h"
 
 	t_mat_cplx coeff = tl2::create<t_mat_cplx>({
 		0., 1.,

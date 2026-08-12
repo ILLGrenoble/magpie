@@ -42,8 +42,7 @@ using namespace tl2_ops;
 using t_types = std::tuple<double, float>;
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_equals, t_real, t_types)
 {
-	using t_vec = tl2::vec<t_real, std::vector>;
-	using t_mat = tl2::mat<t_real, std::vector>;
+	#include "defs.h"
 
 	std::vector<t_vec> vecs{{
 		tl2::create<t_vec>({1, 2, 3}),

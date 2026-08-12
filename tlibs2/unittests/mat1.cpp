@@ -42,7 +42,9 @@ using namespace tl2_ops;
 using t_types = std::tuple<double, float>;
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_mat1, t_real, t_types)
 {
-	using t_vec = std::vector<t_real>;
+	#include "defs.h"
+
+	static constexpr t_real eps = std::is_same_v<t_real, float> ? 1e-4 : 1e-8;
 
 
 	std::cout << tl2::stoval<unsigned int>(std::string("123")) << std::endl;
@@ -60,9 +62,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mat1, t_real, t_types)
 		tl2::create<t_vec>({5, 5, 7, 9, 9.5, 10.5, 10.5, 12, 13.5, 14, 14})
 	}};
 
+	BOOST_TEST(tl2::equals_all(vec1, vec1, eps));
+	BOOST_TEST(tl2::equals_all(vec3, vec3, eps));
+	BOOST_TEST(!tl2::equals_all(vec1, vec2, eps));
+	BOOST_TEST(!tl2::equals_all(vec1, vec3, eps));
 
-	BOOST_TEST(tl2::equals_all(vec1, vec1, 1e-5));
-	BOOST_TEST(tl2::equals_all(vec3, vec3, 1e-5));
-	BOOST_TEST(!tl2::equals_all(vec1, vec2, 1e-5));
-	BOOST_TEST(!tl2::equals_all(vec1, vec3, 1e-5));
+	t_vec vec4{ vec1[0] };
+	BOOST_TEST(tl2::equals<t_vec>(vec4, vec1[0], eps));
+
+	t_vec vec5{ std::move(vec4) };
+	BOOST_TEST(tl2::equals<t_vec>(vec5, vec1[0], eps));
+	BOOST_TEST(vec5.size() = vec1[0].size());
 }

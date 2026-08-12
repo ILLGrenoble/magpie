@@ -41,8 +41,7 @@ using namespace tl2_ops;
 using t_types = std::tuple<long double, double, float>;
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_equals, t_real, t_types)
 {
-	using t_vec = tl2::vec<t_real, std::vector>;
-	using t_mat = tl2::mat<t_real, std::vector>;
+	#include "defs.h"
 	using t_quat = boost::math::quaternion<t_real>;
 
 	t_real angle = tl2::pi<t_real>/t_real{4};

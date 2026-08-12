@@ -1,13 +1,14 @@
 /**
- * math lib test
+ * type definitions
  * @author Tobias Weber <tweber@ill.fr>
- * @date 20-aug-20
+ * @date aug-2026
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs
- * Copyright (C) 2017-2021  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * tlibs2
+ * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
+ * tlibs1
  * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
  *                          (TUM), Garching, Germany).
  *
@@ -25,36 +26,11 @@
  * ----------------------------------------------------------------------------
  */
 
-#define BOOST_TEST_MODULE Stat1
-#include <boost/test/included/unit_test.hpp>
-namespace test = boost::unit_test;
-namespace testtools = boost::test_tools;
 
-#include <iostream>
-#include <vector>
-#include <boost/math/quaternion.hpp>
+//using t_real = double;
+using t_vec = tl2::vec<t_real, std::vector, tl2::alloc_noinit, 4>;
+using t_mat = tl2::mat<t_real, t_vec>;
 
-#include "libs/maths.h"
-using namespace tl2_ops;
-
-
-using t_types = std::tuple<long double, double, float>;
-BOOST_AUTO_TEST_CASE_TEMPLATE(test_equals, t_real, t_types)
-{
-	#include "defs.h"
-
-	std::vector<t_vec> vecs = {{
-		tl2::create<t_vec>({-1, 60}),
-		tl2::create<t_vec>({20, 5}),
-		tl2::create<t_vec>({-3, 40}),
-		tl2::create<t_vec>({40, 3}),
-		tl2::create<t_vec>({-5, 20}),
-		tl2::create<t_vec>({60, 1}),
-	}};
-
-	auto [cov, cor] = tl2::covariance<t_mat, t_vec>(vecs);
-	std::cout << "cov = " << cov << std::endl;
-	std::cout << "cor = " << cor << std::endl;
-
-	//BOOST_TEST(tl2::equals(vec, vec2, 1e-5));
-}
+using t_cplx = std::complex<t_real>;
+using t_vec_cplx = tl2::vec<t_cplx, std::vector, tl2::alloc_noinit, 4>;
+using t_mat_cplx = tl2::mat<t_cplx, t_vec_cplx>;

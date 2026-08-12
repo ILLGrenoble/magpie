@@ -141,7 +141,7 @@ requires is_mat<t_mat>
 template<class t_obj, template<class...> class t_vec = std::vector>
 bool equals_all(const t_vec<t_obj>& vec1, const t_vec<t_obj>& _vec2,
 	typename t_obj::value_type eps = std::numeric_limits<typename t_obj::value_type>::epsilon(),
-	int maxSize=-1)
+	int maxSize = -1)
 {
 	auto vec2 = _vec2;
 	if(vec1.size() != vec2.size())
@@ -2076,7 +2076,7 @@ requires is_mat<t_mat>
  * 	R^tR v = X^t y
  * 	v = inv(R^tR) X^t y
  */
-template<class t_vec, class t_mat = mat<typename t_vec::value_type, std::vector>>
+template<class t_vec, class t_mat = mat<typename t_vec::value_type>>
 std::tuple<t_vec, bool> leastsq(const t_mat& X, const t_vec& y,
 	bool use_qr = true, bool use_pseudoinv = false)
 requires is_vec<t_vec> && is_dyn_mat<t_mat>
@@ -2139,7 +2139,7 @@ requires is_vec<t_vec> && is_dyn_mat<t_mat>
  * 	R^tR v = X^t y
  * 	v = inv(R^tR) X^t y
  */
-template<class t_vec, class t_mat = mat<typename t_vec::value_type, std::vector>>
+template<class t_vec, class t_mat = mat<typename t_vec::value_type>>
 std::tuple<t_vec, bool> leastsq(const t_vec& x, const t_vec& y, std::size_t order,
 	bool use_qr = true, bool use_pseudoinv = false)
 requires is_vec<t_vec> && is_dyn_mat<t_mat>

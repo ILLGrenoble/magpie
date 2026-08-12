@@ -51,8 +51,7 @@ namespace ty = boost::typeindex;
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_rotation,
 	t_real, decltype(std::tuple<float, double/*, long double*/>{}))
 {
-	using t_vec = tl2::vec<t_real, std::vector>;
-	using t_mat = tl2::mat<t_real, std::vector>;
+	#include "defs.h"
 
 	using namespace tl2_ops;
 	t_real eps = std::pow(std::numeric_limits<t_real>::epsilon(), 0.5);

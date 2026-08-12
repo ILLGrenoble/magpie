@@ -72,9 +72,7 @@ constexpr t_vec from_geo_vertex(const t_vertex& vert,
  * creates an r-tree out of a collection of points
  * the points are transformed using B if given
  */
-template<class t_real = double,
-	class t_vec = tl2::vec<t_real, std::vector>,
-	class t_mat = tl2::mat<t_real, std::vector>,
+template<class t_real = double, class t_vec = tl2::vec<t_real>, class t_mat = tl2::mat<t_real>,
 	std::size_t dim = 3,
 	class t_vertex = boost::geometry::model::point<t_real, dim, boost::geometry::cs::cartesian>,
 	class t_rtree_leaf = std::tuple<t_vertex, std::size_t>,
@@ -106,9 +104,7 @@ t_rtree make_rtree(const t_cont<t_vec>& points, const t_mat* B = nullptr)
  * the query point is transformed using B if given
  * returns indices into the array used to create the rtree and distances to the query point
  */
-template<class t_real = double,
-	class t_vec = tl2::vec<t_real, std::vector>,
-	class t_mat = tl2::mat<t_real, std::vector>,
+template<class t_real = double, class t_vec = tl2::vec<t_real>, class t_mat = tl2::mat<t_real>,
 	std::size_t dim = 3, std::size_t max_num = 16,
 	class t_vertex = boost::geometry::model::point<t_real, dim, boost::geometry::cs::cartesian>,
 	class t_rtree_leaf = std::tuple<t_vertex, std::size_t>,

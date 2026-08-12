@@ -44,23 +44,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_blume0, t_real, t_types)
 {
 	using namespace tl2_ops;
 
-	using t_cplx = std::complex<t_real>;
-	using t_vec = tl2::vec<t_cplx, std::vector>;
-	using t_mat = tl2::mat<t_cplx, std::vector>;
+	#include "defs.h"
 
 	constexpr const t_cplx imag(0, 1);
 
-	t_vec Pi = tl2::create<t_vec>({
+	t_vec_cplx Pi = tl2::create<t_vec_cplx>({
 		tl2::get_rand<t_real>(-1, 1),
 		tl2::get_rand<t_real>(-1, 1),
 		tl2::get_rand<t_real>(-1, 1) });
 	Pi /= std::sqrt((Pi[0]*Pi[0] + Pi[1]*Pi[1] + Pi[2]*Pi[2]).real());
 
-	t_vec Mperp = tl2::create<t_vec>({
+	t_vec_cplx Mperp = tl2::create<t_vec_cplx>({
 		tl2::get_rand<t_real>(-1, 1),
 		tl2::get_rand<t_real>(-1, 1),
 		tl2::get_rand<t_real>(-1, 1) }) +
-		imag * tl2::create<t_vec>({
+		imag * tl2::create<t_vec_cplx>({
 		tl2::get_rand<t_real>(-1, 1),
 		tl2::get_rand<t_real>(-1, 1),
 		tl2::get_rand<t_real>(-1, 1) });
@@ -68,9 +66,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_blume0, t_real, t_types)
 
 	//Mperp = ortho_project(Mperp, Pi);
 
-	auto [ I, Pf ] = tl2::blume_maleev<t_vec, t_cplx>(Pi, Mperp, N);	
-	auto [ I2, Pf2 ] = tl2::blume_maleev_indir<t_mat, t_vec, t_cplx>(Pi, Mperp, N);	
-	auto [ I3, Prot3, Pcreate3, Pf3 ] = tl2::blume_maleev_tensor<t_mat, t_vec, t_cplx>(Pi, Mperp, N);	
+	auto [ I, Pf ] = tl2::blume_maleev<t_vec_cplx, t_cplx>(Pi, Mperp, N);	
+	auto [ I2, Pf2 ] = tl2::blume_maleev_indir<t_mat_cplx, t_vec_cplx, t_cplx>(Pi, Mperp, N);	
+	auto [ I3, Prot3, Pcreate3, Pf3 ] = tl2::blume_maleev_tensor<t_mat_cplx, t_vec_cplx, t_cplx>(Pi, Mperp, N);	
 
 	t_real lenPf = std::sqrt((Pf[0]*Pf[0] + Pf[1]*Pf[1] + Pf[2]*Pf[2]).real());
 	t_real lenPf2 = std::sqrt((Pf2[0]*Pf2[0] + Pf2[1]*Pf2[1] + Pf2[2]*Pf2[2]).real());

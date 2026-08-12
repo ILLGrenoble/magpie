@@ -41,14 +41,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mat2, t_real, t_types)
 {
 	using namespace tl2_ops;
 
-	using t_cplx = std::complex<t_real>;
-	using t_vec = tl2::vec<t_real, std::vector>;
-	using t_mat = tl2::mat<t_real, std::vector>;
-	using t_vec_cplx = tl2::vec<t_cplx, std::vector>;
-	using t_mat_cplx = tl2::mat<t_cplx, std::vector>;
+	#include "defs.h"
 
-	const t_real eps = 1e-4;
-
+	static constexpr t_real eps = std::is_same_v<t_real, float> ? 1e-4 : 1e-8;
 
 	{
 		auto M = tl2::create<t_mat>({
@@ -110,5 +105,25 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mat2, t_real, t_types)
 		// test splitting
 		auto [M_S, M_A] = tl2::split_symm(M);
 		BOOST_TEST(tl2::equals<t_mat_cplx>(M, M_S + M_A, eps));
+	}
+
+
+	{
+		t_mat M = tl2::create<t_mat>({
+			1., 2., 3., 4., 5.,
+			6., 7., 8., 9., 10.,
+			11., 12., 13., 14., 15.,
+			16., 17., 18., 19., 20.,
+			21., 22., 23., 24., 25.,
+		});
+
+
+		t_mat M2{ M };
+		BOOST_TEST(tl2::equals<t_mat>(M, M2, eps));
+
+		t_mat M3{ std::move(M2) };
+		t_real tr = tl2::trace<t_mat>(M3);
+		BOOST_TEST(tl2::equals<t_mat>(M, M3, eps));
+		BOOST_TEST(tl2::equals<t_real>(tr, 1. + 7. + 13. + 19. + 25., eps));
 	}
 }

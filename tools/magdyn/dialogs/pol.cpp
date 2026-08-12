@@ -46,14 +46,6 @@
 
 using namespace tl2_ops;
 
-using t_vec = tl2::vec<t_cplx, std::vector>;
-using t_mat = tl2::mat<t_cplx, std::vector>;
-
-using t_real_gl = tl2::t_real_gl;
-using t_vec3_gl = tl2::t_vec3_gl;
-using t_vec_gl = tl2::t_vec_gl;
-using t_mat_gl = tl2::t_mat_gl;
-
 
 // ----------------------------------------------------------------------------
 /**

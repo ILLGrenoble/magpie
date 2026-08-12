@@ -41,8 +41,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mat3, t_real, t_types)
 {
 	using namespace tl2_ops;
 
-	using t_vec = tl2::vec<t_real, std::vector>;
-	using t_mat = tl2::mat<t_real, std::vector>;
+	#include "defs.h"
 
 	const t_real eps = 1e-6;
 

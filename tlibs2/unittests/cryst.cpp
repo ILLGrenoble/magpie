@@ -53,11 +53,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_xtal, t_real, t_types)
 {
 	std::cout << "Test 1" << std::endl;
 
-	using t_vec = tl2::vec<t_real, std::vector>;
-	using t_mat = tl2::mat<t_real, std::vector>;
-	//using t_cplx = std::complex<t_real>;
-	//using t_vec_cplx = std::vector<t_cplx>;
-	//using t_mat_cplx = tl2::mat<t_cplx, std::vector>;
+	#include "defs.h"
 
 	auto A = tl2::A_matrix<t_mat, t_real>(
 		4.56, 4.56, 4.56,
@@ -119,8 +115,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_xtal2, t_real, t_types)
 {
 	std::cout << "Test 2" << std::endl;
 
-	using t_vec = tl2::vec<t_real, std::vector>;
-	using t_mat = tl2::mat<t_real, std::vector>;
+	#include "defs.h"
 
 	auto B = tl2::B_matrix<t_mat, t_real>(
 		5., 6., 7.,
