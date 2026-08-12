@@ -319,11 +319,120 @@ public:
 	using container_type = t_cont<T, t_alloc<T>>;
 	using static_container_type = std::array<T, STATIC_SIZE>;
 
-	using iterator = typename container_type::iterator;
-	using const_iterator = typename container_type::const_iterator;
 	using size_type = typename container_type::size_type;
 	using difference_type = typename container_type::difference_type;
 	using allocator_type = typename container_type::allocator_type;
+
+	class iterator
+	{
+		public:
+			using t_vec = vec<T, t_cont, t_alloc, STATIC_SIZE>;
+			using value_type = T;
+			using difference_type = typename t_vec::difference_type;
+			using pointer = T*;
+			using reference = T&;
+
+		public:
+			explicit iterator(t_vec *vec, size_type idx)
+				: m_vec{vec}, m_idx{idx}
+			{ }
+
+		bool operator==(iterator iter) const
+		{
+			return m_vec == iter.m_vec && m_idx == iter.m_idx;
+		}
+	
+		bool operator!=(iterator iter) const
+		{
+			return !operator==(iter);
+		}
+
+		const T& operator*() const
+		{
+			return (*m_vec)[m_idx];
+		}
+
+		T& operator*()
+		{
+			return (*m_vec)[m_idx];
+		}
+
+		iterator& operator++()
+		{
+			++m_idx;
+			return *this;
+		}
+
+		iterator& operator+=(size_type num)
+		{
+			m_idx += num;
+			return *this;
+		}
+
+		iterator operator++(int)
+		{
+			iterator prev = *this;
+			operator++();
+			return prev;
+		}
+
+		private:
+			t_vec* m_vec{};
+			size_type m_idx{};
+	};
+
+	class const_iterator
+	{
+		public:
+			using t_vec = vec<T, t_cont, t_alloc, STATIC_SIZE>;
+			using value_type = T;
+			using difference_type = typename t_vec::difference_type;
+			using pointer = const T*;
+			using reference = const T&;
+
+		public:
+			explicit const_iterator(const t_vec *vec, size_type idx)
+				: m_vec{vec}, m_idx{idx}
+			{ }
+
+		bool operator==(const_iterator iter) const
+		{
+			return m_vec == iter.m_vec && m_idx == iter.m_idx;
+		}
+	
+		bool operator!=(const_iterator iter) const
+		{
+			return !operator==(iter);
+		}
+
+		const T& operator*() const
+		{
+			return (*m_vec)[m_idx];
+		}
+
+		const_iterator& operator++()
+		{
+			++m_idx;
+			return *this;
+		}
+	
+		const_iterator& operator+=(size_type num)
+		{
+			m_idx += num;
+			return *this;
+		}
+
+		const_iterator operator++(int)
+		{
+			const_iterator prev = *this;
+			operator++();
+			return prev;
+		}
+
+		private:
+			const t_vec* m_vec{};
+			size_type m_idx{};
+	};
 
 
 public:
@@ -459,12 +568,12 @@ public:
 	size_type size() const { return m_size; }
 
 	/*const T* data() const { return m_data.data(); }
-	T* data() { return m_data.data(); }
+	T* data() { return m_data.data(); }*/
 
-	iterator begin() { return m_data.begin(); }
-	iterator end() { return m_data.end(); }
-	const_iterator begin() const { return m_data.begin(); }
-	const_iterator end() const { return m_data.end(); }*/
+	iterator begin() { return iterator{this, 0}; }
+	iterator end() { return iterator(this, m_size); }
+	const_iterator begin() const { return const_iterator(this, 0); }
+	const_iterator end() const { return const_iterator(this, m_size); }
 
 
 	friend vec operator+(const vec& vec1, const vec& vec2) { return tl2_ops::operator+(vec1, vec2); }

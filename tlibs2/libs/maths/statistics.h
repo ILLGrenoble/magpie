@@ -185,7 +185,7 @@ requires is_vec<t_vec>
 	}
 
 	// iterate components
-	for(std::size_t i=0; i<vecmin.size(); ++i)
+	for(std::size_t i = 0; i < vecmin.size(); ++i)
 	{
 		// iterate vectors
 		for(const t_vec& vec : verts)
