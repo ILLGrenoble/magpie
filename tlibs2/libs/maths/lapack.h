@@ -422,7 +422,6 @@ requires tl2::is_mat<t_mat>
 	}
 
 	t_mat C = tl2::create<t_mat>(N, N);
-
 	for(std::size_t i = 0; i < N; ++i)
 		for(std::size_t j = 0; j < N; ++j)
 			C(i, j) = outmat[i*N + j];

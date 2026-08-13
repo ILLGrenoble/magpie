@@ -65,7 +65,7 @@ requires is_basic_mat<t_mat> && is_basic_vec<t_vec>
 
 	t_mat g_co;
 	if constexpr(is_dyn_mat<t_mat>)
-		g_co = t_mat(N, N);
+		g_co = t_mat{N, N};
 
 	auto iter_i = basis_co.begin();
 	for(std::size_t i = 0; i < N; ++i)

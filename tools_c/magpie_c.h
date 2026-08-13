@@ -57,6 +57,11 @@ unsigned int magpie_site_count(t_magpie _mag);
 // get the maximum number of magnon branches in the current magnetic model
 unsigned int magpie_branch_count(t_magpie _mag);
 
+// get the crystal lattice, length in angstrom, angles in radians
+void magpie_get_lattice(t_magpie _mag,
+  t_magpie_real *a, t_magpie_real *b, t_magpie_real *c,
+	t_magpie_real *alpha, t_magpie_real *beta, t_magpie_real *gamma);
+
 // set temperature
 void magpie_set_temperature(t_magpie _mag, t_magpie_real T);
 

@@ -89,7 +89,7 @@ requires is_basic_vec<t_vec> && is_mat<t_mat>
 {
 	t_mat mat;
 	if constexpr(is_dyn_mat<t_mat>)
-		mat = t_mat(3, 3);
+		mat = t_mat{3, 3};
 
 	// if static matrix is larger than 3x3 (e.g. for homogeneous coordinates), initialise as identity
 	if(mat.size1() > 3 || mat.size2() > 3)
@@ -176,11 +176,11 @@ requires is_vec<t_vec> && is_mat<t_mat>
 
 	// ----------------------------------------------------
 	// special cases: rotations around [100], [010], [001]
-	if(tl2::equals(axis, create<t_vec>({ len, 0, 0 })))
+	if(tl2::equals<t_vec, t_real>(axis, create<t_vec>({ len, 0, 0 })))
 		return tl2::create<t_mat>({{1,0,0}, {0,c,s}, {0,-s,c}});
-	else if(tl2::equals(axis, create<t_vec>({ 0, len, 0 })))
+	else if(tl2::equals<t_vec, t_real>(axis, create<t_vec>({ 0, len, 0 })))
 		return tl2::create<t_mat>({{c,0,-s}, {0,1,0}, {s,0,c}});
-	else if(tl2::equals(axis, create<t_vec>({ 0, 0, len })))
+	else if(tl2::equals<t_vec, t_real>(axis, create<t_vec>({ 0, 0, len })))
 		return tl2::create<t_mat>({{c,s,0}, {-s,c,0}, {0,0,1}});
 
 	// ----------------------------------------------------
@@ -1100,7 +1100,7 @@ requires is_vec<t_vec>
 	if(auto iter = std::find_if(uc_sites.begin(), uc_sites.end(),
 		[&uc_pos, &eps](const t_vec& site_vec) -> bool
 	{
-		return equals<t_vec>(uc_pos, site_vec, eps);
+		return equals<t_vec, t_real>(uc_pos, site_vec, eps);
 	}); iter != uc_sites.end())
 	{
 		found = true;
@@ -1156,7 +1156,7 @@ requires is_vec<t_vec> && is_mat<t_mat>
 			std::find_if(newvecs.begin(), newvecs.end(),
 				[&newvec, eps](const t_vec& vec) -> bool
 		{
-			return tl2::equals<t_vec>(vec, newvec, eps);
+			return tl2::equals<t_vec, t_real>(vec, newvec, eps);
 		}) == newvecs.end())
 		{
 			newvecs.emplace_back(std::move(newvec));

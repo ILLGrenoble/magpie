@@ -258,6 +258,32 @@ unsigned int magpie_branch_count(t_magpie _mag)
 
 
 /**
+ * get the crystal lattice, length in angstrom, angles in radians
+ */
+extern "C"
+void magpie_get_lattice(t_magpie _mag,
+  t_magpie_real *a, t_magpie_real *b, t_magpie_real *c,
+	t_magpie_real *alpha, t_magpie_real *beta, t_magpie_real *gamma)
+{
+	if(!_mag)
+		return;
+
+	MagpieData *dat = reinterpret_cast<MagpieData*>(_mag);
+
+	t_vec_real latt = dat->mag.GetCrystalLattice();
+
+	if(a) *a = latt[0];
+	if(b) *b = latt[1];
+	if(c) *c = latt[2];
+	
+	if(alpha) *alpha = latt[3];
+	if(beta) *beta = latt[4];
+	if(gamma) *gamma = latt[5];
+}
+
+
+
+/**
  * set temperature
  */
 extern "C"

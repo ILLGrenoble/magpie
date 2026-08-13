@@ -54,13 +54,15 @@
 // type definitions
 // ----------------------------------------------------------------------------
 using t_vec_real = tl2::vec<t_real, std::vector, __TLIBS2_DEFAULT_ALLOC__, 4>;
-using t_vec_real_for_mat = tl2::vec<t_real, std::vector, __TLIBS2_DEFAULT_ALLOC__, 4*4>;
+//using t_vec_real_for_mat = tl2::vec<t_real, std::vector, __TLIBS2_DEFAULT_ALLOC__, 4*4>;
+//using t_vec_real_for_mat = tl2::vec<t_real, std::vector, std::allocator, 4*4>;
 //using t_mat_real = tl2::mat<t_real, t_vec_real_for_mat>;
 //using t_mat_real = tl2::mat<t_real, std::vector<t_real, __TLIBS2_DEFAULT_ALLOC__<t_real>>>;
 using t_mat_real = tl2::mat<t_real, std::vector<t_real>>;
 
 using t_vec = tl2::vec<t_cplx, std::vector, __TLIBS2_DEFAULT_ALLOC__, 4>;
-using t_vec_for_mat = tl2::vec<t_cplx, std::vector, __TLIBS2_DEFAULT_ALLOC__, 4*4>;
+//using t_vec_for_mat = tl2::vec<t_cplx, std::vector, __TLIBS2_DEFAULT_ALLOC__, 4*4>;
+//using t_vec_for_mat = tl2::vec<t_cplx, std::vector, std::allocator, 4*4>;
 //using t_mat = tl2::mat<t_cplx, t_vec_for_mat>;
 //using t_mat = tl2::mat<t_cplx, std::vector<t_cplx, __TLIBS2_DEFAULT_ALLOC__<t_cplx>>>;
 using t_mat = tl2::mat<t_cplx, std::vector<t_cplx>>;

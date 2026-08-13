@@ -398,8 +398,14 @@ public:
 
 public:
 	// constructors
-	vec() = default;
-	~vec() = default;
+	vec()
+	{
+	}
+
+	~vec()
+	{
+		clear();
+	}
 
 	vec(const vec<T, t_cont, t_alloc>& other)
 	{
@@ -411,8 +417,9 @@ public:
 	vec(vec<T, t_cont, t_alloc>&& other) noexcept
 		: m_data{ std::move(other.m_data) },
 			m_static_data{ std::move(other.m_static_data) },
-			m_size{ other.m_size }
-	{}
+			m_size{ std::exchange(other.m_size, 0) }
+	{
+	}
 
 	template<class T_other,
 		template<class...> class t_cont_other,
@@ -455,7 +462,7 @@ public:
 	{
 		m_data = std::forward<container_type&&>(other.m_data);
 		m_static_data = std::forward<static_container_type&&>(other.m_static_data);
-		m_size = other.m_size;
+		m_size = std::exchange(other.m_size, 0);
 
 		return *this;
 	}
@@ -508,7 +515,7 @@ public:
 		vec.reserve(size());
 
 		for(size_type i = 0; i < size(); ++i)
-			vec[i] = this->operator[](i);
+			vec.push_back(this->operator[](i));
 
 		return vec;
 	}
@@ -523,16 +530,28 @@ public:
 
 	void resize(size_type size)
 	{
+		if(size == m_size)
+			return;
+
 		m_size = size;
 		if(m_size > STATIC_SIZE)
-			m_data.resize(m_size - STATIC_SIZE);
+		{
+			const size_t dyn_size = m_size - STATIC_SIZE;
+			m_data.resize(dyn_size);
+		}
 	}
 
 	void reserve(size_type size)
 	{
+		if(size <= m_size)
+			return;
+
 		m_size = size;
 		if(m_size > STATIC_SIZE)
-			m_data.reserve(m_size - STATIC_SIZE);
+		{
+			const size_t dyn_size = m_size - STATIC_SIZE;
+			m_data.reserve(dyn_size);
+		}
 	}
 
 	size_type size() const { return m_size; }
@@ -569,21 +588,29 @@ public:
 	{
 		if(i < STATIC_SIZE)
 			return m_static_data[i];
-		return m_data[i - STATIC_SIZE];
+		else if(i < m_size)
+			return m_data[i - STATIC_SIZE];
+
+		static T dummy;
+		return dummy;
 	}
 
 	value_type& operator[](size_type i)
 	{
 		if(i < STATIC_SIZE)
 			return m_static_data[i];
-		return m_data[i - STATIC_SIZE];
+		else if(i < m_size)
+			return m_data[i - STATIC_SIZE];
+
+		static T dummy;
+		return dummy;
 	}
 
 
 private:
-	container_type m_data{ };
-	static_container_type m_static_data{ };
-	size_type m_size { };
+	container_type m_data{};
+	static_container_type m_static_data{};
+	size_type m_size{};
 };
 
 
@@ -604,8 +631,13 @@ class mat
 public:
 	using value_type = T;
 
-	mat() = default;
-	~mat() = default;
+	mat()
+	{
+	}
+
+	~mat()
+	{
+	}
 
 	mat(std::size_t ROWS, std::size_t COLS, const T* arr = nullptr)
 		: m_data(ROWS*COLS), m_rowsize{ROWS}, m_colsize{COLS}
@@ -617,7 +649,8 @@ public:
 	mat(mat<T, t_cont>&& other) noexcept
 		: m_data{ std::move(other.m_data) },
 		  m_rowsize{ other.m_rowsize }, m_colsize{ other.m_colsize }
-	{}
+	{
+	}
 
 	mat(const mat<T, t_cont>& other)
 	{
@@ -637,7 +670,7 @@ public:
 		//*this = convert<mat<T, t_cont>, mat<T_other, t_cont_other>>(other);
 
 		const t_cont_other& dat = other.GetData();
-		this->m_data.resize(other.size());
+		this->m_data.resize(dat.size());
 		for(std::size_t i = 0; i < other.size(); ++i)
 			this->m_data[i] = T(dat[i]);
 
@@ -670,12 +703,20 @@ public:
 	// element access
 	const T& operator()(std::size_t row, std::size_t col) const
 	{
-		return m_data[row*m_colsize + col];
+		if(row < m_rowsize && col < m_colsize)
+			return m_data[row*m_colsize + col];
+
+		static T dummy{};
+		return dummy;
 	}
 
 	T& operator()(std::size_t row, std::size_t col)
 	{
-		return m_data[row*m_colsize + col];
+		if(row < m_rowsize && col < m_colsize)
+			return m_data[row*m_colsize + col];
+
+		static T dummy{};
+		return dummy;
 	}
 
 

@@ -25,6 +25,7 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -59,6 +60,12 @@ int main(int argc, char** argv)
 		fprintf(stderr, "Cannot load magpie model file \"%s\".\n", model_file);
 		return -3;
 	}
+
+
+	t_magpie_real a, b, c, alpha, beta, gamma;
+	magpie_get_lattice(mag, &a, &b, &c, &alpha, &beta, &gamma);
+	fprintf(stderr, "Crystal lattice: [%.4f %.4f %.4f], angles: [%.4f %.4f %.4f].\n",
+		a, b, c, alpha/M_PI*180., beta/M_PI*180., gamma/M_PI*180.);
 
 
 	// calculate the energies and weights for the given momentum transfers

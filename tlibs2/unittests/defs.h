@@ -29,8 +29,10 @@
 
 //using t_real = double;
 using t_vec = tl2::vec<t_real, std::vector, tl2::alloc_noinit, 4>;
-using t_mat = tl2::mat<t_real, t_vec>;
+using t_vec44 = tl2::vec<t_real, std::vector, tl2::alloc_noinit, 4*4>;
+using t_mat = tl2::mat<t_real, t_vec44>;
 
 using t_cplx = std::complex<t_real>;
 using t_vec_cplx = tl2::vec<t_cplx, std::vector, tl2::alloc_noinit, 4>;
-using t_mat_cplx = tl2::mat<t_cplx, t_vec_cplx>;
+using t_vec_cplx44 = tl2::vec<t_cplx, std::vector, tl2::alloc_noinit, 4*4>;
+using t_mat_cplx = tl2::mat<t_cplx, t_vec_cplx44>;

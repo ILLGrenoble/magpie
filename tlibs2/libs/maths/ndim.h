@@ -59,12 +59,14 @@ namespace tl2 {
 /**
  * are two vectors equal within an epsilon range?
  */
-template<class t_vec, class t_num = typename t_vec::value_type>
+template<class t_vec, class t_real = underlying_value_type<t_vec>>
 bool equals(const t_vec& vec1, const t_vec& vec2,
-	t_num eps = std::numeric_limits<t_num>::epsilon(),
+	t_real eps = std::numeric_limits<t_real>::epsilon(),
 	int _maxSize = -1)
 requires is_basic_vec<t_vec>
 {
+	using T = typename t_vec::value_type;
+
 	// size has to be equal
 	if(vec1.size() != vec2.size())
 		return false;
@@ -76,14 +78,14 @@ requires is_basic_vec<t_vec>
 	// check each element
 	for(std::size_t i = 0; i < maxSize; ++i)
 	{
-		if constexpr(tl2::is_complex<t_num>)
+		if constexpr(tl2::is_complex<decltype(eps)>)
 		{
-			if(!tl2::equals<t_num>(vec1[i], vec2[i], eps.real()))
+			if(!tl2::equals<T>(vec1[i], vec2[i], eps.real()))
 				return false;
 		}
-		else if constexpr(tl2::is_scalar<t_num>)
+		else
 		{
-			if(!tl2::equals<t_num>(vec1[i], vec2[i], eps))
+			if(!tl2::equals<T>(vec1[i], vec2[i], eps))
 				return false;
 		}
 	}
@@ -95,7 +97,7 @@ requires is_basic_vec<t_vec>
 /**
  * are two matrices equal within an epsilon range?
  */
-template<class t_mat, class t_real>
+template<class t_mat, class t_real = underlying_value_type<t_mat>>
 bool equals(const t_mat& mat1, const t_mat& mat2,
 	t_real eps = std::numeric_limits<t_real>::epsilon(),
 	int _maxSize = -1)
@@ -219,7 +221,7 @@ requires is_basic_mat<t_mat>
 {
 	t_mat mat;
 	if constexpr(is_dyn_mat<t_mat>)
-		mat = t_mat(N1, N2);
+		mat = t_mat{N1, N2};
 
 	unit<t_mat>(mat, 0, 0, mat.size1(), mat.size2());
 	return mat;
@@ -271,7 +273,7 @@ requires is_basic_mat<t_mat>
 
 	t_mat mat;
 	if constexpr(is_dyn_mat<t_mat>)
-		mat = t_mat(N1, N2);
+		mat = t_mat{N1, N2};
 
 	for(size_t i = 0; i < mat.size1(); ++i)
 		for(size_t j = 0; j < mat.size2(); ++j)
@@ -406,7 +408,7 @@ requires is_basic_mat<t_mat>
 
 	t_mat mat{};
 	if constexpr(is_dyn_mat<t_mat>)
-		mat = t_mat(N1, N2);
+		mat = t_mat{N1, N2};
 
 	for(size_t i = 0; i < mat.size1(); ++i)
 		for(size_t j = 0; j < mat.size2(); ++j)
@@ -426,7 +428,7 @@ requires is_basic_mat<t_mat>
 {
 	t_mat mat;
 	if constexpr(is_dyn_mat<t_mat>)
-		mat = t_mat(N1, N2);
+		mat = t_mat{N1, N2};
 
 	unit<t_mat>(mat, 0,0, mat.size1(),mat.size2());
 
@@ -675,7 +677,7 @@ requires is_mat<t_mat>
 
 	t_mat mat2;
 	if constexpr(is_dyn_mat<t_mat>)
-		mat2 = t_mat(mat.size2(), mat.size1());
+		mat2 = t_mat{mat.size2(), mat.size1()};
 
 	for(t_idxtype i = 0; i < mat.size1(); ++i)
 		for(t_idxtype j = 0; j < mat.size2(); ++j)
@@ -1380,7 +1382,8 @@ requires tl2::is_basic_mat<t_mat>
 
 	t_mat matRet;
 	if constexpr(tl2::is_dyn_mat<t_mat>)
-		matRet = t_mat(mat1.size1(), mat2.size2());
+		matRet = t_mat{mat1.size1(), mat2.size2()};
+
 	const std::size_t innersize = std::min(mat1.size2(), mat2.size1());
 
 	for(std::size_t row = 0; row < matRet.size1(); ++row)
@@ -1513,7 +1516,7 @@ requires is_basic_vec<t_vec> && is_mat<t_mat>
 
 	t_mat mat;
 	if constexpr(is_dyn_mat<t_mat>)
-		mat = t_mat(N1, N2);
+		mat = t_mat{N1, N2};
 
 	for(std::size_t n1 = 0; n1 < N1; ++n1)
 	{
@@ -1542,7 +1545,7 @@ requires is_basic_vec<t_vec> && is_mat<t_mat>
 
 	t_mat mat;
 	if constexpr(is_dyn_mat<t_mat>)
-		mat = t_mat(N1, N2);
+		mat = t_mat{N1, N2};
 
 	for(std::size_t n1 = 0; n1 < N1; ++n1)
 		for(std::size_t n2 = 0; n2 < N2; ++n2)
@@ -1964,7 +1967,7 @@ requires is_mat<t_mat>
 
 	t_mat matInv;
 	if constexpr(is_dyn_mat<t_mat>)
-		matInv = t_mat(N, N);
+		matInv = t_mat{N, N};
 
 	for(std::size_t i = 0; i < N; ++i)
 	{

@@ -416,9 +416,9 @@ requires is_basic_mat<t_mat>
 		for(std::size_t j = 0; j < mat.size2(); ++j)
 		{
 			if constexpr(is_complex<typename t_mat::value_type>)
-				mat2(i,j) = std::conj(mat(i,j));
+				mat2(i, j) = std::conj(mat(i, j));
 			else	// simply transpose non-complex matrix
-				mat2(i,j) = mat(i,j);
+				mat2(i, j) = mat(i, j);
 		}
 	}
 
@@ -442,9 +442,9 @@ requires is_basic_mat<t_mat>
 		for(std::size_t j = 0; j < mat.size2(); ++j)
 		{
 			if constexpr(is_complex<typename t_mat::value_type>)
-				mat2(j,i) = std::conj(mat(i,j));
+				mat2(j, i) = std::conj(mat(i, j));
 			else	// simply transpose non-complex matrix
-				mat2(j,i) = mat(i,j);
+				mat2(j, i) = mat(i, j);
 		}
 	}
 
