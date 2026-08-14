@@ -31,7 +31,7 @@ enable_language(CXX)
 set(CMAKE_CXX_STANDARD 20)
 add_compile_options(-std=c++20)
 add_compile_options(-Wall -Wextra -Weffc++)
-add_compile_options(-march=native)
+#add_compile_options(-march=native)
 
 
 # -----------------------------------------------------------------------------
