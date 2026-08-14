@@ -28,7 +28,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(magsgbrowser)
 
-find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -46,7 +46,7 @@ add_executable(takin_magsgbrowser
 )
 
 target_link_libraries(takin_magsgbrowser
-	Qt5::Core Qt5::Gui Qt5::Widgets
+	Qt6::Core Qt6::Gui Qt6::Widgets
 )
 # -----------------------------------------------------------------------------
 

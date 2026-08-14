@@ -37,7 +37,7 @@ set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 #find_package(Boost REQUIRED COMPONENTS system REQUIRED)
 find_package(Boost REQUIRED)
-find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGLWidgets)
 #find_package(Qhull)	# TODO
 
 
@@ -47,7 +47,7 @@ set(CMAKE_AUTOMOC TRUE)
 set(CMAKE_CXX_STANDARD 20)
 add_definitions(-std=c++20)
 add_definitions(${Boost_CXX_FLAGS})
-add_definitions(-DBOOST_SYSTEM_NO_DEPRECATED -DBOOST_ERROR_CODE_HEADER_ONLY)
+add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
 add_definitions(-D_GL_MAJ_VER=3 -D_GL_MIN_VER=2)
 
 
@@ -68,4 +68,4 @@ add_executable(takin_moldyn
 	../../tlibs2/libs/qt/gl.cpp ../../tlibs2/libs/qt/gl.h
 	../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h)
 
-target_link_libraries(takin_moldyn ${Boost_LIBRARIES} ${Qhull_LIBRARIES} Qt5::Core Qt5::Gui Qt5::Widgets)
+target_link_libraries(takin_moldyn ${Boost_LIBRARIES} ${Qhull_LIBRARIES} Qt6::Core Qt6::Gui Qt6::Widgets Qt6::OpenGLWidgets)

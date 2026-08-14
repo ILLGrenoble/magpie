@@ -114,7 +114,7 @@ if(BUILD_MODULES)
 		message("\n================================================================================")
 		message("Configuring mcalc...")
 		message("================================================================================")
-		add_subdirectory(tlibs2/script)
+		add_subdirectory(tlibs2/tools/script)
 	endif()
 endif()
 

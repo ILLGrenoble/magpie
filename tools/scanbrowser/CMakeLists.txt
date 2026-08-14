@@ -43,12 +43,11 @@ add_compile_options(-Wall -Wextra)
 
 # -----------------------------------------------------------------------------
 # Boost
-add_compile_options(-DBOOST_SYSTEM_NO_DEPRECATED)
-find_package(Boost REQUIRED COMPONENTS system filesystem iostreams REQUIRED)
+find_package(Boost REQUIRED COMPONENTS filesystem iostreams REQUIRED)
 add_compile_options(${Boost_CXX_FLAGS})
 
 # Qt
-find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets PrintSupport)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets PrintSupport)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
@@ -123,7 +122,7 @@ add_executable(takin_scanbrowser
 
 target_link_libraries(takin_scanbrowser
 	${Boost_LIBRARIES}
-	Qt5::Core Qt5::Gui Qt5::Widgets
+	Qt6::Core Qt6::Gui Qt6::Widgets
 	${QCP_LIBRARIES}
 	${Minuit2_LIBRARIES} Threads::Threads #OpenMP::OpenMP_CXX
 	-ldl

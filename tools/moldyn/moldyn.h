@@ -45,9 +45,6 @@
 #include "moldyn-loader.h"
 
 
-using t_vec = tl2::vec<t_real, std::vector>;
-using t_mat = tl2::mat<t_real, std::vector>;
-
 using t_real_gl = tl2::t_real_gl;
 using t_vec2_gl = tl2::t_vec2_gl;
 using t_vec3_gl = tl2::t_vec3_gl;
@@ -72,8 +69,8 @@ public:
 	~MolDynDlg() = default;
 
 protected:
-	std::size_t Add3DAtom(const t_vec& vec, const t_vec& col, t_real scale, const std::string& typelabel, int atomindex=-1);
-	void Change3DAtom(std::size_t obj, const t_vec* vec, const t_vec* col=nullptr, const t_real *scale=nullptr,
+	std::size_t Add3DAtom(const t_vec_real& vec, const t_vec_real& col, t_real scale, const std::string& typelabel, int atomindex=-1);
+	void Change3DAtom(std::size_t obj, const t_vec_real* vec, const t_vec_real* col=nullptr, const t_real *scale=nullptr,
 		const std::string *typelabel=nullptr, int atomindex=-1);
 
 	void SetStatusMsg(const std::string& msg);
@@ -121,9 +118,9 @@ protected:
 
 
 protected:
-	MolDyn<t_real, t_vec> m_mol;
-	t_mat m_crystA = tl2::unit<t_mat>(3);
-	t_mat m_crystB = tl2::unit<t_mat>(3);
+	MolDyn<t_real, t_vec_real> m_mol;
+	t_mat_real m_crystA = tl2::unit<t_mat_real>(3);
+	t_mat_real m_crystB = tl2::unit<t_mat_real>(3);
 
 	QSettings *m_sett = nullptr;
 	QMenuBar *m_menu = nullptr;

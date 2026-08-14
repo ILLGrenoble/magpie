@@ -327,7 +327,7 @@ MolDynDlg::MolDynDlg(QWidget* pParent) : QMainWindow{pParent},
 /**
  * add an atom
  */
-std::size_t MolDynDlg::Add3DAtom(const t_vec& vec, const t_vec& col, t_real scale, const std::string& typelabel, int atomindex)
+std::size_t MolDynDlg::Add3DAtom(const t_vec_real& vec, const t_vec_real& col, t_real scale, const std::string& typelabel, int atomindex)
 {
 	auto obj = m_plot->GetRenderer()->AddLinkedObject(m_sphere, 0,0,0, col[0],col[1],col[2],1);
 	Change3DAtom(obj, &vec, &col, &scale, &typelabel, atomindex);
@@ -338,7 +338,7 @@ std::size_t MolDynDlg::Add3DAtom(const t_vec& vec, const t_vec& col, t_real scal
 /**
  * change an atom
  */
-void MolDynDlg::Change3DAtom(std::size_t obj, const t_vec *vec, const t_vec *col, const t_real *scale,
+void MolDynDlg::Change3DAtom(std::size_t obj, const t_vec_real *vec, const t_vec_real *col, const t_real *scale,
 	const std::string *label, int atomindex)
 {
 	if(vec)
@@ -547,7 +547,7 @@ void MolDynDlg::CalculatePositionsOfAtoms()
 			for(std::size_t objIdx=0; objIdx<objs.size(); ++objIdx)
 			{
 				auto [objTypeIdx, objSubTypeIdx] = objs[objIdx];
-				const t_vec& coords = m_mol.GetAtomCoords(objTypeIdx, objSubTypeIdx, frameidx);
+				const t_vec_real& coords = m_mol.GetAtomCoords(objTypeIdx, objSubTypeIdx, frameidx);
 
 				ofstr
 					<< std::left << std::setw(g_prec*1.5) << coords[0] << " "
@@ -635,8 +635,8 @@ void MolDynDlg::CalculateDeltaDistancesOfAtoms()
 			for(std::size_t objIdx=0; objIdx<objs.size(); ++objIdx)
 			{
 				auto [objTypeIdx, objSubTypeIdx] = objs[objIdx];
-			 	const t_vec& coords = m_mol.GetAtomCoords(objTypeIdx, objSubTypeIdx, frameidx);
-				const t_vec& coordsInitial = m_mol.GetAtomCoords(objTypeIdx, objSubTypeIdx, 0);
+				const t_vec_real& coords = m_mol.GetAtomCoords(objTypeIdx, objSubTypeIdx, frameidx);
+				const t_vec_real& coordsInitial = m_mol.GetAtomCoords(objTypeIdx, objSubTypeIdx, 0);
 
 				t_real dist = tl2::get_dist_uc(m_crystA, coords, coordsInitial);
 
@@ -698,16 +698,16 @@ void MolDynDlg::CalculateConvexHulls()
 			hull.plotObj.reset();
 		}
 
-		std::vector<t_vec> vertices;
+		std::vector<t_vec_real> vertices;
 
 		for(const auto [objTypeIdx, objSubTypeIdx] : hull.vertices)
 		{
-			const t_vec& coords = m_mol.GetAtomCoords(objTypeIdx, objSubTypeIdx, frameidx);
+			const t_vec_real& coords = m_mol.GetAtomCoords(objTypeIdx, objSubTypeIdx, frameidx);
 			vertices.push_back(coords);
 		}
 
 
-		auto [polys, normals, dists] = tl2_qh::get_convexhull<t_vec>(vertices);
+		auto [polys, normals, dists] = tl2_qh::get_convexhull<t_vec_real>(vertices);
 
 
 		std::vector<t_vec3_gl> glvertices;
@@ -719,9 +719,9 @@ void MolDynDlg::CalculateConvexHulls()
 			const auto& normal = normals[polyidx];
 
 			for(const auto& vert : poly)
-				glvertices.emplace_back(tl2::convert<t_vec3_gl, t_vec>(vert));
+				glvertices.emplace_back(tl2::convert<t_vec3_gl, t_vec_real>(vert));
 
-			glnormals.emplace_back(tl2::convert<t_vec3_gl, t_vec>(normal));
+			glnormals.emplace_back(tl2::convert<t_vec3_gl, t_vec_real>(normal));
 		}
 
 		hull.plotObj = m_plot->GetRenderer()->AddTriangleObject(glvertices, glnormals, 0,0,1,0.5);
@@ -810,11 +810,11 @@ void MolDynDlg::Load()
 
 
 		// crystal A and B matrices
-		const t_vec& _a = m_mol.GetBaseA();
-		const t_vec& _b = m_mol.GetBaseB();
-		const t_vec& _c = m_mol.GetBaseC();
+		const t_vec_real& _a = m_mol.GetBaseA();
+		const t_vec_real& _b = m_mol.GetBaseB();
+		const t_vec_real& _c = m_mol.GetBaseC();
 
-		m_crystA = tl2::create<t_mat>({
+		m_crystA = tl2::create<t_mat_real>({
 			_a[0],	_b[0],	_c[0],
 			_a[1],	_b[1],	_c[1],
 			_a[2], 	_b[2],	_c[2] });
@@ -823,7 +823,7 @@ void MolDynDlg::Load()
 		std::tie(m_crystB, ok) = tl2::inv(m_crystA);
 		if(!ok)
 		{
-			m_crystB = tl2::unit<t_mat>();
+			m_crystB = tl2::unit<t_mat_real>();
 			QMessageBox::critical(this, PROG_NAME, "Error: Cannot invert A matrix.");
 		}
 
@@ -836,14 +836,14 @@ void MolDynDlg::Load()
 
 
 		// atom colors
-		std::vector<t_vec> cols =
+		std::vector<t_vec_real> cols =
 		{
-			tl2::create<t_vec>({1, 0, 0}),
-			tl2::create<t_vec>({0, 0, 1}),
-			tl2::create<t_vec>({0, 0.5, 0}),
-			tl2::create<t_vec>({0, 0.5, 0.5}),
-			tl2::create<t_vec>({0.5, 0.5, 0}),
-			tl2::create<t_vec>({0, 0, 0}),
+			tl2::create<t_vec_real>({1, 0, 0}),
+			tl2::create<t_vec_real>({0, 0, 1}),
+			tl2::create<t_vec_real>({0, 0.5, 0}),
+			tl2::create<t_vec_real>({0, 0.5, 0.5}),
+			tl2::create<t_vec_real>({0.5, 0.5, 0}),
+			tl2::create<t_vec_real>({0, 0, 0}),
 		};
 
 		// add atoms to 3d view
@@ -857,7 +857,7 @@ void MolDynDlg::Load()
 				const auto& coords = frame.GetCoords(atomtypeidx);
 
 				int atomidx = 0;
-				for(const t_vec& vec : coords)
+				for(const t_vec_real& vec : coords)
 				{
 					t_real atomscale = m_spinScale->value();
 
@@ -1095,7 +1095,7 @@ void MolDynDlg::SliderValueChanged(int val)
 		const auto& coords = frame.GetCoords(atomtypeidx);
 
 		int atomidx = 0;
-		for(const t_vec& vec : coords)
+		for(const t_vec_real& vec : coords)
 		{
 			std::size_t obj = m_sphereHandles[counter];
 			Change3DAtom(obj, &vec, nullptr, &atomscale, nullptr, atomidx);
