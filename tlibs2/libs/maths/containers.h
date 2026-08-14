@@ -911,7 +911,7 @@ protected:
 
 
 private:
-	T m_static_data[STATIC_SIZE]/*{}*/;  // static part of the data
+	T m_static_data[STATIC_SIZE]{};      // static part of the data
 	T* m_data{};                         // dynamic part of the data
 
 	size_type m_size{};                  // number of total elements

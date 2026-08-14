@@ -331,7 +331,8 @@ void MagDynDlg::CreateReciprocalPanel()
 			btn_rotate_cw->setToolTip("Scale up the Q start and end positions by the given factor.");
 		}
 	};
-	connect(m_recip_trafo_mode, &QComboBox::currentIndexChanged, [set_recip_trafo_mode](int mode)
+	connect(m_recip_trafo_mode, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+		[set_recip_trafo_mode](int mode)
 	{
 		set_recip_trafo_mode(mode);
 	});
