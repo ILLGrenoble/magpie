@@ -36,9 +36,8 @@ namespace math = boost::math;
 #include "libs/defs.h"
 
 
-using t_vec_bz = tl2::vec<t_real, std::vector, __TLIBS2_DEFAULT_ALLOC__, 4>;
-using t_vec_bz_for_mat = tl2::vec<t_real, std::vector, __TLIBS2_DEFAULT_ALLOC__, 4*4>;
-using t_mat_bz = tl2::mat<t_real, t_vec_bz_for_mat>;
+using t_vec_bz = t_vec_real;
+using t_mat_bz = t_mat_real;
 using t_quat_bz = math::quaternion<t_real>;
 
 extern t_real g_eps_bz;

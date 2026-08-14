@@ -23,17 +23,14 @@
  * ----------------------------------------------------------------------------
  */
 
-#include "libs/loadcif.h"
+#include "libs/defs.h"
+#include "libs/sym/loadcif.h"
 #include "tlibs2/libs/maths.h"
 #include "tlibs2/libs/str.h"
-#include "libs/defs.h"
 
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 
-
-using t_vec = tl2::vec<t_real, std::vector>;
-using t_mat = tl2::mat<t_real, std::vector>;
 
 constexpr t_real g_eps = 1e-6;
 
@@ -46,7 +43,7 @@ int main(int argc, char** argv)
 	std::cout << "Enter space group name: ";
 	std::getline(std::cin, sgname);
 
-	std::vector<t_mat> ops = get_sg_ops<t_mat, t_real>(sgname);
+	std::vector<t_mat_real> ops = sym::get_sg_ops<t_mat_real, t_real>(sgname);
 	if(ops.size() == 0)
 	{
 		std::cerr << "Invalid space group." << std::endl;
@@ -57,7 +54,7 @@ int main(int argc, char** argv)
 	{
 		std::cout << "Symmetry transformation " << op_idx + 1;
 		std::cout << " (det_rot: ";
-		std::cout << tl2::det<t_mat>(tl2::submat<t_mat>(ops[op_idx], 3, 3));
+		std::cout << tl2::det<t_mat_real>(tl2::submat<t_mat_real>(ops[op_idx], 3, 3));
 		std::cout  << "):\n";
 		tl2::niceprint(std::cout, ops[op_idx], g_eps);
 		std::cout << "\n";
@@ -83,7 +80,7 @@ int main(int argc, char** argv)
 
 
 		// convert to real vector
-		t_vec vec;
+		t_vec_real vec;
 		bool pseudovec = false;
 		for(const std::string& str : vecstr)
 		{
@@ -99,7 +96,7 @@ int main(int argc, char** argv)
 
 		std::cout << "Input " << (pseudovec ? "pseudo-vector: " : "vector: ") << vec << "\n";
 
-		std::vector<t_vec> vecs = tl2::apply_ops_hom<t_vec, t_mat, t_real>(
+		std::vector<t_vec_real> vecs = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(
 			vec, ops, g_eps, false /*keep in uc*/, true /*ignore occupied*/,
 			false /*return homogeneous*/, pseudovec);
 

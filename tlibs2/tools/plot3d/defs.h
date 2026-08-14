@@ -26,7 +26,7 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TL2_PLOTTER3D_DEFS__
+#if !defined(__TL2_PLOTTER3D_DEFS__) && !defined(__MAGDYN_DEFS__)
 #define __TL2_PLOTTER3D_DEFS__
 
 #include <QtCore/QString>
@@ -39,18 +39,13 @@
 
 #include "tlibs2/libs/maths.h"
 #include "tlibs2/libs/qt/gl.h"
+#include "libs/defs.h"
 
 
 
 // ----------------------------------------------------------------------------
 // type definitions
 // ----------------------------------------------------------------------------
-using t_size = std::size_t;
-
-//using t_real = float;
-using t_real = double;
-using t_vec_real = tl2::vec<t_real, std::vector>;
-
 using t_real_gl = tl2::t_real_gl;
 using t_vec2_gl = tl2::t_vec2_gl;
 using t_vec3_gl = tl2::t_vec3_gl;

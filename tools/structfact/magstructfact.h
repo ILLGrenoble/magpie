@@ -78,11 +78,6 @@ enum : int
 };
 
 
-using t_vec = tl2::vec<t_real, std::vector>;
-using t_vec_cplx = tl2::vec<t_cplx, std::vector>;
-using t_mat = tl2::mat<t_real, std::vector>;
-using t_mat_cplx = tl2::mat<t_cplx, std::vector>;
-
 using t_real_gl = tl2::t_real_gl;
 using t_vec2_gl = tl2::t_vec2_gl;
 using t_vec3_gl = tl2::t_vec3_gl;
@@ -161,14 +156,14 @@ protected:
 	QLineEdit *m_editGamma = nullptr;
 
 	QComboBox *m_comboSG = nullptr;
-	std::vector<std::vector<t_mat>> m_SGops;
+	std::vector<std::vector<t_mat_real>> m_SGops;
 
 	QSpinBox *m_maxBZ = nullptr;
 	QCheckBox *m_RemoveZeroes = nullptr;
 	QSpinBox *m_maxSC[3] = { nullptr, nullptr, nullptr };
 
-	t_mat m_crystA = tl2::unit<t_mat>(3);
-	t_mat m_crystB = tl2::unit<t_mat>(3);
+	t_mat_real m_crystA = tl2::unit<t_mat_real>(3);
+	t_mat_real m_crystB = tl2::unit<t_mat_real>(3);
 
 
 protected:

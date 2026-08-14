@@ -23,16 +23,13 @@
  * ----------------------------------------------------------------------------
  */
 
-#include "libs/loadcif.h"
+#include "libs/defs.h"
+#include "libs/sym/loadcif.h"
 #include "tlibs2/libs/maths.h"
 
 #include <iostream>
 #include <memory>
 
-
-using t_real = double;
-using t_vec = tl2::vec<t_real, std::vector>;
-using t_mat = tl2::mat<t_real, std::vector>;
 
 constexpr t_real g_eps = 1e-6;
 constexpr int g_prec = 6;
@@ -45,7 +42,7 @@ static const std::string g_strVer = "0.5";
 /**
  * print vector
  */
-std::ostream& operator<<(std::ostream& ostr, const t_vec& vec)
+std::ostream& operator<<(std::ostream& ostr, const t_vec_real& vec)
 {
 	for(std::size_t i=0; i<vec.size(); ++i)
 	{
@@ -61,7 +58,7 @@ std::ostream& operator<<(std::ostream& ostr, const t_vec& vec)
 /**
  * print matrix
  */
-std::ostream& operator<<(std::ostream& ostr, const t_mat& mat)
+std::ostream& operator<<(std::ostream& ostr, const t_mat_real& mat)
 {
 	for(std::size_t i=0; i<mat.size1(); ++i)
 	{
@@ -87,7 +84,8 @@ std::ostream& operator<<(std::ostream& ostr, const t_mat& mat)
  */
 bool convert_cif(const char* pcFileIn, const char* pcFileOut)
 {
-	auto [errstr, atoms, generatedatoms, atomnames, lattice, ops] = load_cif<t_vec, t_mat>(pcFileIn, g_eps);
+	auto [errstr, atoms, generatedatoms, atomnames, lattice, ops] =
+		sym::load_cif<t_vec_real, t_mat_real>(pcFileIn, g_eps);
 	if(errstr != "")
 		std::cerr << "CIF importer messages:\n" << errstr << std::endl;
 
@@ -186,7 +184,7 @@ static void show_infos(const char* pcProg)
 		"You should have received a copy of the GNU General Public License "
 		"along with this program. If not, see <http://www.gnu.org/licenses/>.\n\n";
 
-	std::cout << "This program uses the Gemmi library (version " << get_gemmi_version() << "), "
+	std::cout << "This program uses the Gemmi library (version " << sym::get_gemmi_version() << "), "
 		<< "which is available under: https://github.com/project-gemmi/gemmi.\n";
 	std::cout << std::endl;
 

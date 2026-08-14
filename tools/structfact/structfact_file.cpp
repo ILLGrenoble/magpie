@@ -40,7 +40,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 namespace pt = boost::property_tree;
 
-#include "libs/loadcif.h"
+#include "libs/sym/loadcif.h"
 #include "libs/rnd.h"
 #include "tlibs2/libs/maths.h"
 #include "tlibs2/libs/algos.h"
@@ -425,7 +425,7 @@ void StructFactDlg::ImportCIF()
 		m_sett->setValue("dir_cif", QFileInfo(filename).path());
 
 		auto [errstr, atoms, generatedatoms, atomnames, lattice, symops] =
-			load_cif<t_vec, t_mat>(filename.toStdString(), g_eps);
+			sym::load_cif<t_vec_real, t_mat_real>(filename.toStdString(), g_eps);
 		if(errstr != "")
 		{
 			QMessageBox::critical(this, "Structure Factors", errstr.c_str());

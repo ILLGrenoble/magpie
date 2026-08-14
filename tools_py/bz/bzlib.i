@@ -29,8 +29,8 @@
 %{
 	#include "../../libs/sym/bz.h"
 
-	using t_matD = tl2::mat<double, std::vector>;
-	using t_vecD = tl2::vec<double, std::vector>;
+	using t_matD = tl2::mat<double>;
+	using t_vecD = tl2::vec<double>;
 %}
 
 

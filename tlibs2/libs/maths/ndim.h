@@ -1181,13 +1181,12 @@ template<class t_vec_dst, class t_vec_src>
 t_vec_dst convert(const t_vec_src& vec)
 requires is_vec<t_vec_dst> && is_vec<t_vec_src>
 {
-	using T_dst = typename t_vec_dst::value_type;
 	using t_idx = decltype(vec.size());
 
 	t_vec_dst vecdst = create<t_vec_dst>(vec.size());
 
 	for(t_idx i = 0; i < vec.size(); ++i)
-		vecdst[i] = T_dst(vec[i]);
+		vecdst[i] = static_cast<typename t_vec_dst::value_type>(vec[i]);
 
 	return vecdst;
 }

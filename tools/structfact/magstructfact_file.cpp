@@ -44,7 +44,7 @@
 namespace algo = boost::algorithm;
 namespace pt = boost::property_tree;
 
-#include "libs/loadcif.h"
+#include "libs/sym/loadcif.h"
 #include "libs/rnd.h"
 #include "tlibs2/libs/maths.h"
 #include "tlibs2/libs/phys.h"
@@ -339,7 +339,7 @@ void MagStructFactDlg::ImportCIF()
 	m_sett->setValue("dir_cif", QFileInfo(filename).path());
 
 	auto [errstr, atoms, generatedatoms, atomnames, lattice, symops] =
-		load_cif<t_vec, t_mat>(filename.toStdString(), g_eps);
+		load_cif<t_vec_real, t_mat_real>(filename.toStdString(), g_eps);
 	if(errstr)
 	{
 		QMessageBox::critical(this, "Structure Factors", errstr);

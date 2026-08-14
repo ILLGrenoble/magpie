@@ -66,7 +66,7 @@
 // ----------------------------------------------------------------------------
 %inline
 %{
-	#include "../../libs/loadcif.h"
+	#include "../../libs/sym/loadcif.h"
 	#include "../../libs/vers.h"
 
 

@@ -26,23 +26,14 @@
  * ----------------------------------------------------------------------------
  */
 
-#ifndef __TL2_PLOTTER2D_DEFS__
+#if !defined(__TL2_PLOTTER2D_DEFS__) && !defined(__MAGDYN_DEFS__)
 #define __TL2_PLOTTER2D_DEFS__
 
 #include <QtCore/QString>
 
 #include <cstddef>
 
-
-
-// ----------------------------------------------------------------------------
-// type definitions
-// ----------------------------------------------------------------------------
-using t_size = std::size_t;
-
-//using t_real = float;
-using t_real = double;
-// ----------------------------------------------------------------------------
+#include "libs/defs.h"
 
 
 

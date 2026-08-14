@@ -357,8 +357,8 @@ void StructFactDlg::GenerateFromSG()
 			std::string name = m_nuclei->item(row, COL_NAME)->text().toStdString();
 			std::string col = m_nuclei->item(row, COL_COL)->text().toStdString();
 
-			t_vec nucl = tl2::create<t_vec>({x, y, z, 1});
-			auto newnuclei = tl2::apply_ops_hom<t_vec, t_mat, t_real>(nucl, ops, g_eps);
+			t_vec_real nucl = tl2::create<t_vec_real>({x, y, z, 1});
+			auto newnuclei = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(nucl, ops, g_eps);
 
 			for(const auto& newnucl : newnuclei)
 			{
@@ -451,14 +451,14 @@ void StructFactDlg::CalcB(bool bFullRecalc)
 	t_real beta = tl2::stoval<t_real>(m_editBeta->text().toStdString());
 	t_real gamma = tl2::stoval<t_real>(m_editGamma->text().toStdString());
 
-	m_crystB = tl2::B_matrix<t_mat>(a, b, c,
+	m_crystB = tl2::B_matrix<t_mat_real>(a, b, c,
 		tl2::d2r<t_real>(alpha), tl2::d2r<t_real>(beta), tl2::d2r<t_real>(gamma));
 
 	bool ok = true;
 	std::tie(m_crystA, ok) = tl2::inv(m_crystB);
 	if(!ok)
 	{
-		m_crystA = tl2::unit<t_mat>();
+		m_crystA = tl2::unit<t_mat_real>();
 		std::cerr << "Error: Cannot invert B matrix." << std::endl;
 	}
 	else
@@ -524,12 +524,12 @@ void StructFactDlg::Calc()
 
 
 	std::vector<t_cplx> bs;
-	std::vector<t_vec> pos;
+	std::vector<t_vec_real> pos;
 
 	for(const auto& nucl : GetNuclei())
 	{
 		bs.push_back(nucl.b);
-		pos.emplace_back(tl2::create<t_vec>({ nucl.pos[0], nucl.pos[1], nucl.pos[2] }));
+		pos.emplace_back(tl2::create<t_vec_real>({ nucl.pos[0], nucl.pos[1], nucl.pos[2] }));
 	}
 
 
@@ -559,12 +559,12 @@ void StructFactDlg::Calc()
 		{
 			for(t_real l=-maxBZ; l<=maxBZ; ++l)
 			{
-				auto Q = tl2::create<t_vec>({h,k,l}) /*+ prop*/;
+				auto Q = tl2::create<t_vec_real>({h,k,l}) /*+ prop*/;
 				auto Q_invA = m_crystB * Q;
 				auto Qabs_invA = tl2::norm(Q_invA);
 
 				// nuclear structure factor
-				auto Fn = tl2::structure_factor<t_vec, t_cplx>(bs, pos, Q);
+				auto Fn = tl2::structure_factor<t_vec_real, t_cplx>(bs, pos, Q);
 				if(tl2::equals<t_cplx>(Fn, t_cplx(0), g_eps)) Fn = 0.;
 				if(tl2::equals<t_real>(Fn.real(), 0, g_eps)) Fn.real(0.);
 				if(tl2::equals<t_real>(Fn.imag(), 0, g_eps)) Fn.imag(0.);

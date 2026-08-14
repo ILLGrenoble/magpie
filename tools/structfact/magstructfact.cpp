@@ -44,7 +44,7 @@
 #include <boost/algorithm/string/replace.hpp>
 namespace algo = boost::algorithm;
 
-#include "libs/loadcif.h"
+#include "libs/sym/loadcif.h"
 #include "tlibs2/libs/maths.h"
 #include "tlibs2/libs/phys.h"
 #include "tlibs2/libs/algos.h"
@@ -157,7 +157,7 @@ MagStructFactDlg::MagStructFactDlg(QWidget* pParent) : QDialog{pParent},
 
 
 		// get space groups and symops
-		auto spacegroups = get_sgs<t_mat>();
+		auto spacegroups = sym::get_sgs<t_mat_real>();
 		m_SGops.reserve(spacegroups.size());
 		for(auto [sgnum, descr, ops] : spacegroups)
 		{

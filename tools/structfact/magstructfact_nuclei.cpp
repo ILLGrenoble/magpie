@@ -39,11 +39,11 @@
 namespace si = boost::units::si;
 namespace consts = si::constants;
 
-#include "libs/loadcif.h"
 #include "tlibs2/libs/maths.h"
 #include "tlibs2/libs/phys.h"
 #include "tlibs2/libs/algos.h"
 #include "tlibs2/libs/qt/helper.h"
+#include "libs/sym/loadcif.h"
 
 using namespace tl2_ops;
 
@@ -450,8 +450,8 @@ void MagStructFactDlg::GenerateFromSG()
 			std::string name = m_nuclei->item(row, COL_NAME)->text().toStdString();
 			std::string col = m_nuclei->item(row, COL_COL)->text().toStdString();
 
-			t_vec nucl = tl2::create<t_vec>({x, y, z, 1});
-			auto newnuclei = tl2::apply_ops_hom<t_vec, t_mat, t_real>(nucl, ops, g_eps);
+			t_vec_real nucl = tl2::create<t_vec_real>({x, y, z, 1});
+			auto newnuclei = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(nucl, ops, g_eps);
 
 			for(const auto& newnucl : newnuclei)
 			{
@@ -546,14 +546,14 @@ void MagStructFactDlg::CalcB(bool bFullRecalc)
 	t_real beta = tl2::stoval<t_real>(m_editBeta->text().toStdString());
 	t_real gamma = tl2::stoval<t_real>(m_editGamma->text().toStdString());
 
-	m_crystB = tl2::B_matrix<t_mat>(a, b, c,
+	m_crystB = tl2::B_matrix<t_mat_real>(a, b, c,
 		tl2::d2r<t_real>(alpha), tl2::d2r<t_real>(beta), tl2::d2r<t_real>(gamma));
 
 	bool ok = true;
 	std::tie(m_crystA, ok) = tl2::inv(m_crystB);
 	if(!ok)
 	{
-		m_crystA = tl2::unit<t_mat>();
+		m_crystA = tl2::unit<t_mat_real>();
 		std::cerr << "Error: Cannot invert B matrix." << std::endl;
 	}
 	else
@@ -594,7 +594,7 @@ void MagStructFactDlg::Calc()
 
 
 	// propagation vectors
-	std::vector<t_vec> propvecs;
+	std::vector<t_vec_real> propvecs;
 	std::vector<bool> conjFCs;
 	propvecs.reserve(m_propvecs->rowCount());
 	conjFCs.reserve(m_propvecs->rowCount());
@@ -606,7 +606,7 @@ void MagStructFactDlg::Calc()
 		t_real z = tl2::stoval<t_real>(m_propvecs->item(row, PROP_COL_Z)->text().toStdString());
 		int iConj = tl2::stoval<int>(m_propvecs->item(row, PROP_COL_CONJ)->text().toStdString());
 
-		propvecs.emplace_back(tl2::create<t_vec>({ x, y, z }));
+		propvecs.emplace_back(tl2::create<t_vec_real>({ x, y, z }));
 		conjFCs.push_back(iConj != 0);
 	}
 
@@ -645,8 +645,8 @@ void MagStructFactDlg::Calc()
 	};
 
 
-	std::vector<t_vec> pos;
-	std::vector<t_vec_cplx> Ms;
+	std::vector<t_vec_real> pos;
+	std::vector<t_vec> Ms;
 	std::vector<std::string> names, cols;
 	std::vector<t_real> scales;
 	std::vector<t_cplx> bs;
@@ -660,8 +660,8 @@ void MagStructFactDlg::Calc()
 
 	for(const auto& nucl : nuclei)
 	{
-		pos.emplace_back(tl2::create<t_vec>({ nucl.pos[0], nucl.pos[1], nucl.pos[2] }));
-		Ms.emplace_back(nucl.MAbs * tl2::create<t_vec_cplx>({
+		pos.emplace_back(tl2::create<t_vec_real>({ nucl.pos[0], nucl.pos[1], nucl.pos[2] }));
+		Ms.emplace_back(nucl.MAbs * tl2::create<t_vec>({
 			t_cplx{nucl.ReM[0], nucl.ImM[0]},
 			t_cplx{nucl.ReM[1], nucl.ImM[1]},
 			t_cplx{nucl.ReM[2], nucl.ImM[2]} }));
@@ -706,13 +706,13 @@ void MagStructFactDlg::Calc()
 		// iterate propagation vectors
 		for(const auto& prop : propvecs)
 		{
-			auto Q = tl2::create<t_vec>({ h, k, l }) + prop;
+			auto Q = tl2::create<t_vec_real>({ h, k, l }) + prop;
 			auto Q_invA = m_crystB * Q;
 			auto Qabs_invA = tl2::norm(Q_invA);
-			auto Q_cplx = tl2::create<t_vec_cplx>({ Q[0], Q[1], Q[2] });
+			auto Q_cplx = tl2::create<t_vec>({ Q[0], Q[1], Q[2] });
 
 			// magnetic structure factor
-			auto Fm = p * tl2::structure_factor<t_vec, t_vec_cplx>(Ms, pos, Q, nullptr);
+			auto Fm = p * tl2::structure_factor<t_vec_real, t_vec>(Ms, pos, Q, nullptr);
 			bool Fm_is_zero = true;
 
 			// set small value to zero
@@ -728,11 +728,11 @@ void MagStructFactDlg::Calc()
 					Fm_is_zero = false;
 			}
 			if(Fm.size() == 0)
-				Fm = tl2::zero<t_vec_cplx>(3);
+				Fm = tl2::zero<t_vec>(3);
 
 			// neutron scattering: orthogonal projection onto plane with normal Q.
-			auto Fm_perp = tl2::ortho_project<t_vec_cplx>(Fm, Q_cplx, false);
-			//auto proj = tl2::ortho_projector<t_mat_cplx, t_vec_cplx>(Q_cplx, false);
+			auto Fm_perp = tl2::ortho_project<t_vec>(Fm, Q_cplx, false);
+			//auto proj = tl2::ortho_projector<t_mat, t_vec>(Q_cplx, false);
 			//auto Fm_perp = proj * Fm;
 
 			// set small value to zero
@@ -830,8 +830,8 @@ void MagStructFactDlg::Calc()
 		<< std::setw(g_prec*1.2) << std::right << "sc_y" << " "
 		<< std::setw(g_prec*1.2) << std::right << "sc_z" << "\n";
 
-	//std::vector<t_vec_cplx> moments;
-	auto vecCentring = tl2::create<t_vec>({0, 0, 0});
+	//std::vector<t_vec> moments;
+	auto vecCentring = tl2::create<t_vec_real>({0, 0, 0});
 
 	const t_cplx imag{0., 1.};
 	const t_real twopi = tl2::pi<t_real>*t_real{2};
@@ -841,19 +841,19 @@ void MagStructFactDlg::Calc()
 	for(t_real sc_y = -maxSCy; sc_y <= maxSCy; ++sc_y)
 	for(t_real sc_z = -maxSCz; sc_z <= maxSCz; ++sc_z)
 	{
-		auto vecCellCentre = tl2::create<t_vec>({ sc_x, sc_y, sc_z }) + vecCentring;
+		auto vecCellCentre = tl2::create<t_vec_real>({ sc_x, sc_y, sc_z }) + vecCentring;
 
 		// iterate magnetic atoms
 		for(std::size_t nuclidx = 0; nuclidx < Ms.size(); ++nuclidx)
 		{
-			const t_vec_cplx& fourier = Ms[nuclidx];
+			const t_vec& fourier = Ms[nuclidx];
 			const std::string& name = names[nuclidx];
 			const std::string& colstr = cols[nuclidx];
 			auto thepos = pos[nuclidx] + vecCellCentre;
 			auto scale = scales[nuclidx];
 
 			auto posGL = tl2::convert<t_vec_gl>(thepos);
-			auto moment = tl2::create<t_vec_cplx>({0, 0, 0});
+			auto moment = tl2::create<t_vec>({0, 0, 0});
 			auto fourier_conj = tl2::conj(fourier);
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -889,7 +889,7 @@ void MagStructFactDlg::Calc()
 				auto objArrowRe = m_plotSC->GetRenderer()->AddLinkedObject(m_arrowSC, 0,0,0, 1,1,1,1);
 				auto objArrowIm = m_plotSC->GetRenderer()->AddLinkedObject(m_arrowSC, 0,0,0, 1,1,1,1);
 
-				auto [_vecReM, _vecImM] = tl2::split_cplx<t_vec_cplx, t_vec>(moment);
+				auto [_vecReM, _vecImM] = tl2::split_cplx<t_vec, t_vec_real>(moment);
 				auto vecReM = tl2::convert<t_vec_gl>(_vecReM);
 				auto vecImM = tl2::convert<t_vec_gl>(_vecImM);
 

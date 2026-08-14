@@ -52,11 +52,6 @@
 #include "libs/defs.h"
 
 
-using t_vec = tl2::vec<t_real, std::vector>;
-using t_vec_cplx = std::vector<t_cplx>;
-using t_mat = tl2::mat<t_real, std::vector>;
-using t_mat_cplx = tl2::mat<t_cplx, std::vector>;
-
 using t_real_gl = tl2::t_real_gl;
 using t_vec2_gl = tl2::t_vec2_gl;
 using t_vec3_gl = tl2::t_vec3_gl;
@@ -120,7 +115,7 @@ protected:
 	QLineEdit *m_editGamma = nullptr;
 
 	QComboBox *m_comboSG = nullptr;
-	std::vector<std::vector<t_mat>> m_SGops, m_SGops_centr;
+	std::vector<std::vector<t_mat_real>> m_SGops, m_SGops_centr;
 
 	QSpinBox *m_maxBZ = nullptr;
 	QCheckBox *m_RemoveZeroes = nullptr;
@@ -131,8 +126,8 @@ protected:
 	QMenu *m_pTabContextMenu_FindSG = nullptr;			// menu in case a nucleus is selected
 	QMenu *m_pTabContextMenuNoItem_FindSG = nullptr;	// menu if nothing is selected
 
-	t_mat m_crystA = tl2::unit<t_mat>(3);
-	t_mat m_crystB = tl2::unit<t_mat>(3);
+	t_mat_real m_crystA = tl2::unit<t_mat_real>(3);
+	t_mat_real m_crystB = tl2::unit<t_mat_real>(3);
 
 
 protected:

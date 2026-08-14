@@ -49,21 +49,21 @@ include_directories(
 
 
 add_executable(takin_cif2xml
-	cif2xml.cpp ../../libs/loadcif.h)
+	cif2xml.cpp ../../libs/sym/loadcif.h)
 target_link_libraries(takin_cif2xml
 	gemmi::gemmi_cpp
 )
 
 
 add_executable(takin_findsg
-	findsg.cpp ../../libs/loadcif.h)
+	findsg.cpp ../../libs/sym/loadcif.h)
 target_link_libraries(takin_findsg
 	gemmi::gemmi_cpp
 )
 
 
 add_executable(symops
-	symops.cpp ../../libs/loadcif.h)
+	symops.cpp ../../libs/sym/loadcif.h)
 target_link_libraries(symops
 	gemmi::gemmi_cpp
 )

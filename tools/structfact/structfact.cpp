@@ -43,7 +43,7 @@
 #include <boost/algorithm/string/replace.hpp>
 namespace algo = boost::algorithm;
 
-#include "libs/loadcif.h"
+#include "libs/sym/loadcif.h"
 #include "tlibs2/libs/maths.h"
 #include "tlibs2/libs/phys.h"
 #include "tlibs2/libs/algos.h"
@@ -147,7 +147,7 @@ StructFactDlg::StructFactDlg(QWidget* pParent) : QDialog{pParent},
 
 
 		// get space groups and symops
-		auto spacegroups = get_sgs<t_mat>();
+		auto spacegroups = sym::get_sgs<t_mat_real>();
 		m_SGops.reserve(spacegroups.size());
 		m_SGops_centr.reserve(spacegroups.size());
 		for(auto [sgnum, descr, ops] : spacegroups)
@@ -156,10 +156,10 @@ StructFactDlg::StructFactDlg(QWidget* pParent) : QDialog{pParent},
 			m_SGops.emplace_back(std::move(ops));
 
 			// determine centring ops
-			std::vector<t_mat> ops_centr;
-			for(const t_mat& op : ops)
+			std::vector<t_mat_real> ops_centr;
+			for(const t_mat_real& op : ops)
 			{
-				if(tl2::hom_is_centring<t_mat>(op, g_eps))
+				if(tl2::hom_is_centring<t_mat_real>(op, g_eps))
 					ops_centr.push_back(op);
 			}
 			m_SGops_centr.emplace_back(std::move(ops_centr));

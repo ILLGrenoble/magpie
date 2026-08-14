@@ -30,7 +30,7 @@
 
 #include <iostream>
 
-#include "libs/loadcif.h"
+#include "libs/sym/loadcif.h"
 #include "tlibs2/libs/maths.h"
 #include "tlibs2/libs/phys.h"
 #include "tlibs2/libs/algos.h"
@@ -231,7 +231,7 @@ void StructFactDlg::FindSG()
 {
 	m_sgmatches->setPlainText("");
 
-	std::vector<t_vec> vecFinal;
+	std::vector<t_vec_real> vecFinal;
 	std::ostringstream ostr;
 	ostr.precision(g_prec);
 
@@ -250,11 +250,11 @@ void StructFactDlg::FindSG()
 		t_real posz = tl2::stoval<t_real>(itemz->text().toStdString());
 
 		ostr << "\t(" << (row+1) << "): (" << posx << ", " << posy << ", " << posz << ")\n";
-		vecFinal.emplace_back(t_vec{{posx, posy, posz}});
+		vecFinal.emplace_back(t_vec_real{{posx, posy, posz}});
 	}
 
 	ostr << "\n";
-	std::vector<t_vec> vecInit = vecFinal;
+	std::vector<t_vec_real> vecInit = vecFinal;
 
 	while(true)
 	{
@@ -265,7 +265,7 @@ void StructFactDlg::FindSG()
 			ostr << "\t(" << ctr++ << ") " << pos << "\n";
 		ostr << std::endl;
 
-		auto matchingSGs = find_matching_sgs<t_vec, t_mat, t_real>(vecInit, vecFinal, g_eps);
+		auto matchingSGs = sym::find_matching_sgs<t_vec_real, t_mat_real, t_real>(vecInit, vecFinal, g_eps);
 
 		if(matchingSGs.size())
 		{

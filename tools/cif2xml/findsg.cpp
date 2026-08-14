@@ -23,7 +23,7 @@
  * ----------------------------------------------------------------------------
  */
 
-#include "libs/loadcif.h"
+#include "libs/sym/loadcif.h"
 #include "tlibs2/libs/maths.h"
 #include "tlibs2/libs/str.h"
 #include "libs/defs.h"
@@ -32,9 +32,6 @@
 #include <iostream>
 #include <memory>
 
-
-using t_vec = tl2::vec<t_real, std::vector>;
-using t_mat = tl2::mat<t_real, std::vector>;
 
 constexpr t_real g_eps = 1e-6;
 
@@ -47,7 +44,7 @@ int main(int argc, char** argv)
 	using namespace tl2_ops;
 	std::cout << "Input atomic positions, 'e' or ENTER to end." << std::endl;
 
-	std::vector<t_vec> vecFinal;
+	std::vector<t_vec_real> vecFinal;
 	std::size_t atomnr = 1;
 
 	while(true)
@@ -69,7 +66,7 @@ int main(int argc, char** argv)
 
 
 		// convert to real vector
-		t_vec vecPos;
+		t_vec_real vecPos;
 		for(const std::string& str : vecstr)
 			vecPos.emplace_back(tl2::stoval<t_real>(str));
 
@@ -95,7 +92,7 @@ int main(int argc, char** argv)
 	std::cout << std::endl;
 
 
-	std::vector<t_vec> vecInit = vecFinal;
+	std::vector<t_vec_real> vecInit = vecFinal;
 
 
 	while(true)
@@ -107,7 +104,7 @@ int main(int argc, char** argv)
 			std::cout << "\t(" << ctr++ << ") " << pos << "\n";
 		std::cout << std::endl;
 
-		auto matchingSGs = find_matching_sgs<t_vec, t_mat, t_real>(vecInit, vecFinal, g_eps);
+		auto matchingSGs = sym::find_matching_sgs<t_vec_real, t_mat_real, t_real>(vecInit, vecFinal, g_eps);
 
 		if(matchingSGs.size())
 		{
