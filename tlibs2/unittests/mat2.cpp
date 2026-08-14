@@ -120,11 +120,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mat2, t_real, t_types)
 		std::cout << "M [ " << (void*)(&M) << " ] = " << M << std::endl;
 
 		t_mat M2{ M };
-		std::cout << "M2 = " << M2 << std::endl;
+		std::cout << "M2 [ " << (void*)(&M2) << " ] = " << M2 << std::endl;
 		BOOST_TEST(tl2::equals<t_mat>(M, M2, eps));
 
 		t_mat M3{ std::move(M2) };
-		std::cout << "M3 = " << M3 << std::endl;
+		std::cout << "M3 [ " << (void*)(&M3) << " ] = " << M3 << std::endl;
 
 		t_real tr = tl2::trace<t_mat>(M3);
 		BOOST_TEST(tl2::equals<t_mat>(M, M3, eps));
@@ -164,5 +164,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mat2, t_real, t_types)
 
 		t_mat M3{ std::move(M2) };
 		BOOST_TEST(tl2::equals<t_mat>(M, M3, eps));
+	}
+
+
+	{
+		t_mat_cplx M = tl2::rand<t_mat_cplx>(64, 64);
+		//std::cout << M << std::endl;
+
+		t_mat_cplx M2{ M };
+		BOOST_TEST(tl2::equals<t_mat_cplx>(M, M2, eps));
+
+		t_mat_cplx M3{ std::move(M2) };
+		BOOST_TEST(tl2::equals<t_mat_cplx>(M, M3, eps));
 	}
 }

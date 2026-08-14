@@ -203,7 +203,7 @@ t_mat MAGDYN_INST::CalcHamiltonian(const t_vec_real& Qvec) const
 
 	// create the hamiltonian of equation (25) and (26) from (Toth 2015)
 	const t_size num_branches = 2*N;
-	t_mat H = tl2::create<t_mat>(num_branches, num_branches);
+	t_mat H = tl2::zero<t_mat>(num_branches, num_branches);
 
 	// iterate magnetic sites
 	for(t_size i = 0; i < N; ++i)

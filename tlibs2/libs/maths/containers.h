@@ -398,33 +398,31 @@ public:
 
 public:
 	// constructors
-	vec()
-	{
-	}
+	vec() = default;
 
 	~vec()
 	{
 		clear();
 	}
 
-	vec(const vec<T, t_cont, t_alloc>& other)
+	vec(const vec<T, t_cont, t_alloc, STATIC_SIZE>& other)
 	{
 		this->resize(other.size());
 		for(size_type i = 0; i < other.size(); ++i)
 			(*this)[i] = other[i];
 	}
 
-	vec(vec<T, t_cont, t_alloc>&& other) noexcept
+	vec(vec<T, t_cont, t_alloc, STATIC_SIZE>&& other) noexcept
 		: m_data{ std::move(other.m_data) },
 			m_static_data{ std::move(other.m_static_data) },
 			m_size{ std::exchange(other.m_size, 0) }
-	{
-	}
+	{ }
 
 	template<class T_other,
 		template<class...> class t_cont_other,
-		template<class...> class t_alloc_other>
-	vec(const vec<T_other, t_cont_other, t_alloc_other>& other)
+		template<class...> class t_alloc_other,
+		std::size_t STATIC_SIZE_OTHER>
+	vec(const vec<T_other, t_cont_other, t_alloc_other, STATIC_SIZE_OTHER>& other)
 	{
 		this->operator=<T_other, t_cont_other, t_alloc_other>(other);
 	}
@@ -448,8 +446,8 @@ public:
 	}
 
 
-	// assignments
-	vec<T, t_cont, t_alloc>& operator=(const vec<T, t_cont, t_alloc>& other)
+	// assignment operators
+	vec<T, t_cont, t_alloc, STATIC_SIZE>& operator=(const vec<T, t_cont, t_alloc, STATIC_SIZE>& other)
 	{
 		resize(other.size());
 		for(size_type i = 0; i < other.size(); ++i)
@@ -458,21 +456,26 @@ public:
 		return *this;
 	}
 
-	vec<T, t_cont, t_alloc>& operator=(vec<T, t_cont, t_alloc>&& other)
+	template<class T_other,
+		template<class...> class t_cont_other,
+		template<class...> class t_alloc_other,
+		std::size_t STATIC_SIZE_OTHER>
+	vec<T, t_cont, t_alloc, STATIC_SIZE>& operator=(
+		const vec<T_other, t_cont_other, t_alloc_other, STATIC_SIZE_OTHER>& other)
 	{
-		m_data = std::forward<container_type&&>(other.m_data);
-		m_static_data = std::forward<static_container_type&&>(other.m_static_data);
-		m_size = std::exchange(other.m_size, 0);
-
+		*this = convert<vec<T, t_cont, t_alloc, STATIC_SIZE>,
+			vec<T_other, t_cont_other, t_alloc_other, STATIC_SIZE_OTHER>>(other);
 		return *this;
 	}
 
-	template<class T_other,
-		template<class...> class t_cont_other,
-		template<class...> class t_alloc_other>
-	vec<T, t_cont, t_alloc>& operator=(const vec<T_other, t_cont_other, t_alloc_other>& other)
+
+	// move operator
+	vec<T, t_cont, t_alloc, STATIC_SIZE>& operator=(vec<T, t_cont, t_alloc, STATIC_SIZE>&& other)
 	{
-		*this = convert<vec<T, t_cont, t_alloc>, vec<T_other, t_cont_other, t_alloc_other>>(other);
+		m_data = std::move(other.m_data);
+		m_static_data = std::move(other.m_static_data);
+		m_size = std::exchange(other.m_size, 0);
+
 		return *this;
 	}
 
@@ -488,7 +491,7 @@ public:
 	{
 		size_type num = size();
 		resize(num + 1);
-		(*this)[num] = std::forward<T&&>(t);
+		(*this)[num] = std::move(t);
 	}
 
 
@@ -614,30 +617,23 @@ private:
 };
 
 
-/*template<class T, template<class...> class t_cont, template<class...> class t_alloc>
-using default_vec_for_mat =
-	vec<T, t_cont, t_alloc, __TLIBS2_DEFAULT_STATIC_SIZE__*__TLIBS2_DEFAULT_STATIC_SIZE__>;*/
-
 
 /**
  * generic dynamic matrix container
  */
-template<class T, class t_cont = class std::vector<T/*, __TLIBS2_DEFAULT_ALLOC__<T>*/>
-	/*class t_cont = vec<T, std::vector,
-	__TLIBS2_DEFAULT_ALLOC__, __TLIBS2_DEFAULT_STATIC_SIZE__*__TLIBS2_DEFAULT_STATIC_SIZE__>*/>
+//template<class T, class t_cont = class std::vector<T/*, __TLIBS2_DEFAULT_ALLOC__<T>*/>>
+template<class T, class t_cont = vec<T, std::vector, __TLIBS2_DEFAULT_ALLOC__,
+	__TLIBS2_DEFAULT_STATIC_SIZE__*__TLIBS2_DEFAULT_STATIC_SIZE__>>
 requires is_basic_vec<t_cont> && is_dyn_vec<t_cont>
 class mat
 {
 public:
 	using value_type = T;
 
-	mat()
-	{
-	}
 
-	~mat()
-	{
-	}
+	// constructors
+	mat() = default;
+	~mat() = default;
 
 	mat(std::size_t ROWS, std::size_t COLS, const T* arr = nullptr)
 		: m_data(ROWS*COLS), m_rowsize{ROWS}, m_colsize{COLS}
@@ -646,17 +642,10 @@ public:
 			from_array(arr);
 	}
 
-	mat(mat<T, t_cont>&& other) noexcept
-		: m_data{ std::move(other.m_data) },
-		  m_rowsize{ other.m_rowsize }, m_colsize{ other.m_colsize }
-	{
-	}
-
 	mat(const mat<T, t_cont>& other)
 	{
 		this->operator=(other);
 	}
-
 
 	template<class T_other, class t_cont_other>
 	mat(const mat<T_other, t_cont_other>& other)
@@ -664,6 +653,14 @@ public:
 		this->operator=<T_other, t_cont_other>(other);
 	}
 
+	mat(mat<T, t_cont>&& other) noexcept
+		: m_data{ std::move(other.m_data) },
+		  m_rowsize{ std::exchange(other.m_rowsize, 0) },
+		  m_colsize{ std::exchange(other.m_colsize, 0) }
+	{ }
+
+
+	// assignment operators
 	template<class T_other, class t_cont_other>
 	mat<T, t_cont>& operator=(const mat<T_other, t_cont_other>& other)
 	{
@@ -685,16 +682,19 @@ public:
 		return operator=<T, t_cont>(other);
 	}
 
+
+	// move operator
 	mat<T, t_cont>& operator=(mat<T, t_cont>&& other)
 	{
-		m_data = std::forward<t_cont&&>(other.m_data);
-		m_rowsize = other.m_rowsize;
-		m_colsize = other.m_colsize;
+		m_data = std::move(other.m_data);
+		m_rowsize = std::exchange(other.m_rowsize, 0);
+		m_colsize = std::exchange(other.m_colsize, 0);
 
 		return *this;
 	}
 
 
+	// sizes
 	std::size_t size() const { return m_data.size(); }
 	std::size_t size1() const { return m_rowsize; }
 	std::size_t size2() const { return m_colsize; }

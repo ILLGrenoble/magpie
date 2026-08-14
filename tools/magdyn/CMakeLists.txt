@@ -47,6 +47,8 @@ if(USE_QT6)
 else()
 	set(QT_VER 5)
 endif()
+
+#add_compile_options(-D__MAGDYN_DEBUG_OUTPUT__)
 # -----------------------------------------------------------------------------
 
 
