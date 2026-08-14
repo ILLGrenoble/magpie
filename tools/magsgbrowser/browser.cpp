@@ -27,7 +27,8 @@
  */
 
 #include "browser.h"
-#include "libs/loadcif.h"
+#include "libs/sym/loadcif.h"
+
 #include <QtWidgets/QMenuBar>
 #include <sstream>
 
@@ -85,8 +86,8 @@ SgBrowserDlg::SgBrowserDlg(QWidget* pParent, QSettings *pSett)
 	{
 		switch(idx)
 		{
-			case 0: MagSpaceGroupSelected(treeMagSG->currentItem()); break;
-			case 1: NuclSpaceGroupSelected(treeNuclSG->currentItem()); break;
+			case 0: NuclSpaceGroupSelected(treeNuclSG->currentItem()); break;
+			case 1: MagSpaceGroupSelected(treeMagSG->currentItem()); break;
 		}
 	});
 	// ------------------------------------------------------------------------
@@ -104,7 +105,11 @@ void SgBrowserDlg::SetupMagSpaceGroups()
 	std::cerr << "Done." << std::endl;
 
 	const auto *pSgs = m_magsgs.GetSpacegroups();
-	if(!pSgs) return;
+	if(!pSgs || pSgs->size() == 0)
+	{
+		tabSGs->setTabEnabled(1, false);
+		return;
+	}
 
 	for(const auto& sg : *pSgs)
 	{
@@ -114,10 +119,11 @@ void SgBrowserDlg::SetupMagSpaceGroups()
 		// find top-level item with given structural sg number
 		auto get_topsg = [](QTreeWidget *pTree, int iStructNr) -> QTreeWidgetItem*
 		{
-			for(int item=0; item<pTree->topLevelItemCount(); ++item)
+			for(int item = 0; item < pTree->topLevelItemCount(); ++item)
 			{
 				QTreeWidgetItem *pItem = pTree->topLevelItem(item);
-				if(!pItem) continue;
+				if(!pItem)
+					continue;
 
 				if(pItem->data(0, Qt::UserRole) == iStructNr)
 					return pItem;
@@ -147,7 +153,7 @@ void SgBrowserDlg::SetupMagSpaceGroups()
 		auto *pSubItem = new QTreeWidgetItem();
 		pSubItem->setText(0, magname);
 		pSubItem->setData(0, Qt::UserRole, iNrStruct);
-		pSubItem->setData(0, Qt::UserRole+1, iNrMag);
+		pSubItem->setData(0, Qt::UserRole + 1, iNrMag);
 		pTopItem->addChild(pSubItem);
 	}
 }
@@ -176,7 +182,7 @@ void SgBrowserDlg::MagSpaceGroupSelected(QTreeWidgetItem *pItem)
 
 
 	int iNrStruct = pItem->data(0, Qt::UserRole).toInt();
-	int iNrMag = pItem->data(0, Qt::UserRole+1).toInt();
+	int iNrMag = pItem->data(0, Qt::UserRole + 1).toInt();
 
 	const auto* pSg = m_magsgs.GetSpacegroupByNumber(iNrStruct, iNrMag);
 	if(!pSg) return;
@@ -187,11 +193,11 @@ void SgBrowserDlg::MagSpaceGroupSelected(QTreeWidgetItem *pItem)
 	{
 		std::ostringstream ostr;
 
-		for(std::size_t i=0; i<mat.size1(); ++i)
+		for(std::size_t i = 0; i < mat.size1(); ++i)
 		{
 			// rotation matrix
 			ostr << "( ";
-			for(std::size_t j=0; j<mat.size2(); ++j)
+			for(std::size_t j = 0; j < mat.size2(); ++j)
 				ostr << std::setw(ostr.precision()*1.5) << std::right << mat(i,j);
 			ostr << " )";
 
@@ -207,7 +213,7 @@ void SgBrowserDlg::MagSpaceGroupSelected(QTreeWidgetItem *pItem)
 				ostr << inv;
 			}
 
-			if(i < mat.size1()-1)
+			if(i < mat.size1() - 1)
 				ostr << "\n";
 		}
 
@@ -220,15 +226,15 @@ void SgBrowserDlg::MagSpaceGroupSelected(QTreeWidgetItem *pItem)
 	{
 		std::ostringstream ostr;
 
-		for(std::size_t i=0; i<mat.size1(); ++i)
+		for(std::size_t i = 0; i < mat.size1(); ++i)
 		{
 			// rotation matrices
 			ostr << "( ";
-			for(std::size_t j=0; j<mat.size2(); ++j)
+			for(std::size_t j = 0; j < mat.size2(); ++j)
 				ostr << std::setw(ostr.precision()*1.5) << std::right << mat(i,j);
 
 			ostr  << " | ";
-			for(std::size_t j=0; j<matRot.size2(); ++j)
+			for(std::size_t j = 0; j < matRot.size2(); ++j)
 				ostr << std::setw(ostr.precision()*1.5) << std::right << matRot(i,j);
 			ostr << " )";
 
@@ -249,7 +255,7 @@ void SgBrowserDlg::MagSpaceGroupSelected(QTreeWidgetItem *pItem)
 	const auto *symms = pSg->GetSymmetries(m_showBNS);
 	if(symms)
 	{
-		for(std::size_t iOp=0; iOp<symms->GetRotations().size(); ++iOp)
+		for(std::size_t iOp = 0; iOp < symms->GetRotations().size(); ++iOp)
 		{
 			const auto& rot = symms->GetRotations()[iOp];
 			const auto& trans = symms->GetTranslations()[iOp];
@@ -272,7 +278,7 @@ void SgBrowserDlg::MagSpaceGroupSelected(QTreeWidgetItem *pItem)
 			pWycItem->setText(0, wyc.GetName().c_str());
 
 			// iterate over trafos
-			for(std::size_t iOp=0; iOp<wyc.GetRotations().size(); ++iOp)
+			for(std::size_t iOp = 0; iOp < wyc.GetRotations().size(); ++iOp)
 			{
 				const auto& rot = wyc.GetRotations()[iOp];
 				const auto& rotMag = wyc.GetRotationsMag()[iOp];
@@ -299,9 +305,9 @@ void SgBrowserDlg::MagSpaceGroupSelected(QTreeWidgetItem *pItem)
  */
 void SgBrowserDlg::SetupNuclSpaceGroups()
 {
-	m_nuclsgs = get_sgs<t_mat44_sg>(false, false);
+	m_nuclsgs = sym::get_sgs<t_mat44_sg>(false, false);
 
-	for(int iSG=0; iSG<static_cast<int>(m_nuclsgs.size()); ++iSG)
+	for(int iSG = 0; iSG < static_cast<int>(m_nuclsgs.size()); ++iSG)
 	{
 		int iNrStruct = std::get<0>(m_nuclsgs[iSG]);
 		const std::string& strName = std::get<1>(m_nuclsgs[iSG]);
@@ -309,7 +315,7 @@ void SgBrowserDlg::SetupNuclSpaceGroups()
 		// find top-level item with given structural sg number
 		auto get_topsg = [](QTreeWidget *pTree, int iStructNr) -> QTreeWidgetItem*
 		{
-			for(int item=0; item<pTree->topLevelItemCount(); ++item)
+			for(int item = 0; item < pTree->topLevelItemCount(); ++item)
 			{
 				QTreeWidgetItem *pItem = pTree->topLevelItem(item);
 				if(!pItem) continue;
@@ -361,9 +367,9 @@ void SgBrowserDlg::NuclSpaceGroupSelected(QTreeWidgetItem *pItem)
 	listWyc->clear();
 
 
-	int iNrStruct = pItem->data(0, Qt::UserRole).toInt();
-	int iNrSG = pItem->data(0, Qt::UserRole+1).toInt();
-	if(iNrSG < 0 || iNrSG >= m_nuclsgs.size())
+	//int iNrStruct = pItem->data(0, Qt::UserRole).toInt();
+	int iNrSG = pItem->data(0, Qt::UserRole + 1).toInt();
+	if(iNrSG < 0 || std::size_t(iNrSG) >= m_nuclsgs.size())
 		return;
 
 	const auto& sg = m_nuclsgs[iNrSG];
@@ -375,11 +381,11 @@ void SgBrowserDlg::NuclSpaceGroupSelected(QTreeWidgetItem *pItem)
 	{
 		std::ostringstream ostr;
 
-		for(std::size_t i=0; i<3; ++i)
+		for(std::size_t i = 0; i < 3; ++i)
 		{
 			// rotation matrix
 			ostr << "( ";
-			for(std::size_t j=0; j<3; ++j)
+			for(std::size_t j = 0; j < 3; ++j)
 				ostr << std::setw(ostr.precision()*1.5) << std::right << mat(i,j);
 			ostr << " )";
 
@@ -388,7 +394,7 @@ void SgBrowserDlg::NuclSpaceGroupSelected(QTreeWidgetItem *pItem)
 			ostr << std::setw(ostr.precision()*1.5) << std::right << mat(i, 3); 
 			ostr << " )";
 
-			if(i < mat.size1()-2)
+			if(i < mat.size1() - 2)
 				ostr << "\n";
 		}
 
@@ -397,7 +403,7 @@ void SgBrowserDlg::NuclSpaceGroupSelected(QTreeWidgetItem *pItem)
 
 
 	// iterate over symmetries
-	for(std::size_t iOp=0; iOp<trafos.size(); ++iOp)
+	for(std::size_t iOp = 0; iOp < trafos.size(); ++iOp)
 	{
 		const auto& trafo = trafos[iOp];
 

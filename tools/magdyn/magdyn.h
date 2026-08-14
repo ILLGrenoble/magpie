@@ -67,8 +67,10 @@
 #include "libs/magdyn.h"
 #include "libs/magffacts.h"
 
+// tools
 #include "../bz/plot.h"
 #include "../bz/plot_cut.h"
+#include "../magsgbrowser/browser.h"
 
 #include "gui_defs.h"
 #include "widgets/graph.h"
@@ -265,6 +267,7 @@ protected:
 	Plot2DDlg *m_plot2d{};                 // general 2d function plotter
 	Plot3DDlg *m_plot3d{};                 // general 3d function plotter
 	BZDlg *m_bz_tool{};                    // 3d brillouin zone tool
+	SgBrowserDlg *m_sg_browser{};          // space group browser
 
 
 protected:

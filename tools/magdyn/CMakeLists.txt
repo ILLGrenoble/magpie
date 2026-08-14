@@ -250,6 +250,9 @@ if(USE_QT)
 		../bz/globals.cpp ../bz/globals.h
 		../bz/bz_formulas.cpp
 
+		# sg tool
+		../magsgbrowser/browser.cpp ../magsgbrowser/browser.h
+
 #		../../ext/qcp/qcustomplot.cpp
 	)
 

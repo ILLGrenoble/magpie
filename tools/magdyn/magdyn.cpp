@@ -479,6 +479,7 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acPlot2d = new QAction("2D Plotter...", menuTools);
 	QAction *acPlot3d = new QAction("3D Plotter...", menuTools);
 	QAction *acBZTool = new QAction("Brillouin Zones...", menuTools);
+	QAction *acSGTool = new QAction("Space Groups...", menuTools);
 	QAction *acPolCalc = new QAction("Polarisation Vectors...", menuTools);
 	QAction *acPreferences = new QAction("Preferences...", menuTools);
 
@@ -585,10 +586,13 @@ void MagDynDlg::CreateMenuBar()
 	menuCalc->addAction(acDiff);
 
 	menuTools->addAction(acTrafoCalc);
+	menuTools->addSeparator();
 	menuTools->addAction(acPlot2d);
 	menuTools->addAction(acPlot3d);
+	menuTools->addSeparator();
 	menuTools->addAction(acBZTool);
-	menuTools->addAction(acBZTool);
+	menuTools->addAction(acSGTool);
+	menuTools->addSeparator();
 	menuTools->addAction(acPolCalc);
 	menuTools->addSeparator();
 	menuTools->addAction(acPreferences);
@@ -727,6 +731,8 @@ void MagDynDlg::CreateMenuBar()
 		if(!m_trafos)
 		{
 			m_trafos = new TrafoCalculator(this, m_sett);
+			m_trafos->setFont(this->font());
+
 			m_trafos->SetKernel(&m_dyn);
 		}
 
@@ -739,7 +745,10 @@ void MagDynDlg::CreateMenuBar()
 	connect(acPlot2d, &QAction::triggered, [this]()
 	{
 		if(!m_plot2d)
+		{
 			m_plot2d = new Plot2DDlg(this, m_sett);
+			m_plot2d->setFont(this->font());
+		}
 
 		m_plot2d->show();
 		m_plot2d->raise();
@@ -752,6 +761,8 @@ void MagDynDlg::CreateMenuBar()
 		if(!m_plot3d)
 		{
 			m_plot3d = new Plot3DDlg(this, m_sett);
+			m_plot3d->setFont(this->font());
+
 			connect(m_plot3d, &Plot3DDlg::GlDeviceInfos,
 				m_glinfo_dlg, &GlInfoDlg::SetGlDeviceInfos);
 		}
@@ -765,11 +776,28 @@ void MagDynDlg::CreateMenuBar()
 	connect(acBZTool, &QAction::triggered, [this]()
 	{
 		if(!m_bz_tool)
+		{
 			m_bz_tool = new BZDlg(this/*, m_sett*/);
+			m_bz_tool->setFont(this->font());
+		}
 
 		m_bz_tool->show();
 		m_bz_tool->raise();
 		m_bz_tool->activateWindow();
+	});
+
+	// show space group dialog
+	connect(acSGTool, &QAction::triggered, [this]()
+	{
+		if(!m_sg_browser)
+		{
+			m_sg_browser = new SgBrowserDlg(this, m_sett);
+			m_sg_browser->setFont(this->font());
+		}
+
+		m_sg_browser->show();
+		m_sg_browser->raise();
+		m_sg_browser->activateWindow();
 	});
 
 	// show polarisation calculator dialog
@@ -778,6 +806,8 @@ void MagDynDlg::CreateMenuBar()
 		if(!m_pol)
 		{
 			m_pol = new PolDlg(this, m_sett);
+			m_pol->setFont(this->font());
+
 			connect(m_pol, &PolDlg::GlDeviceInfos,
 				m_glinfo_dlg, &GlInfoDlg::SetGlDeviceInfos);
 		}

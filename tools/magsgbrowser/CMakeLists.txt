@@ -28,14 +28,27 @@
 cmake_minimum_required(VERSION 3.10)
 project(magsgbrowser)
 
+set(CMAKE_CXX_STANDARD 20)
+add_definitions(-std=c++20)
+
+
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 
-set(CMAKE_CXX_STANDARD 20)
-add_definitions(-std=c++20)
-include_directories("${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/../..")
+
+find_package(Boost REQUIRED)
+set(Boost_USE_MULTITHREADED TRUE)
+add_definitions(${Boost_CXX_FLAGS})
+
+
+find_package(Gemmi REQUIRED)
+
+
+include_directories("${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/../.."
+	"${Boost_INCLUDE_DIRS}" "${Boost_INCLUDE_DIRS}/.."
+	gemmi::headers)
 
 
 # -----------------------------------------------------------------------------
@@ -46,6 +59,8 @@ add_executable(takin_magsgbrowser
 )
 
 target_link_libraries(takin_magsgbrowser
+	${Boost_LIBRARIES}
+	gemmi::gemmi_cpp
 	Qt6::Core Qt6::Gui Qt6::Widgets
 )
 # -----------------------------------------------------------------------------

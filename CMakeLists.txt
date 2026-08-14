@@ -92,18 +92,6 @@ if(BUILD_MODULES)
 		message("================================================================================")
 		add_subdirectory(tools/scanbrowser)
 
-		# setup tools for magnetic space groups
-		message("\n================================================================================")
-		message("Configuring setup...")
-		message("================================================================================")
-		add_subdirectory(tools/magsgbrowser/setup)
-
-		# magnetic space group browser
-		message("\n================================================================================")
-		message("Configuring magsgbrowser...")
-		message("================================================================================")
-		add_subdirectory(tools/magsgbrowser)
-
 		# molecular dynamics tool
 		message("\n================================================================================")
 		message("Configuring moldyn...")

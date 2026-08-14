@@ -392,7 +392,7 @@ bool Spacegroups<t_mat, t_vec>::Load(const std::string& strFile)
 
 		// --------------------------------------------------------------------
 		// iterate symmetry trafos
-		auto load_ops = [&get_vec, &get_mat](const decltype(opsBNS)& ops)
+		auto load_ops = [&get_vec, &get_mat](decltype(opsBNS)& ops)
 		-> std::tuple<std::vector<t_mat>, std::vector<t_vec>, std::vector<t_real>>
 		{
 			std::vector<t_mat> rotations;
@@ -461,7 +461,7 @@ bool Spacegroups<t_mat, t_vec>::Load(const std::string& strFile)
 
 		// --------------------------------------------------------------------
 		// iterate over lattice vectors
-		auto load_latt = [&get_vec](const decltype(lattBNS)& latt)
+		auto load_latt = [&get_vec](decltype(lattBNS)& latt)
 			-> std::vector<t_vec>
 		{
 			std::vector<t_vec> vectors;
@@ -517,7 +517,7 @@ bool Spacegroups<t_mat, t_vec>::Load(const std::string& strFile)
 
 		// --------------------------------------------------------------------
 		// iterate wyckoff positions
-		auto load_wyc = [&get_vec, &get_mat](const decltype(wycBNS)& wycs)
+		auto load_wyc = [&get_vec, &get_mat](decltype(wycBNS)& wycs)
 		-> std::vector<WycPositions<t_mat, t_vec>>
 		{
 			std::vector<WycPositions<t_mat, t_vec>> vecWyc;
