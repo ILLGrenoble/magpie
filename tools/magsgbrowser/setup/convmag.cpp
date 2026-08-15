@@ -5,8 +5,6 @@
  * @license GPLv3, see 'LICENSE' file
  * @desc The present version was forked on 8-Nov-2018 from my privately developed "magtools" project (https://github.com/t-weber/magtools).
  *
- * g++-8 -std=c++17 -fconcepts -I../../ -o convmag convmag.cpp
- *
  * ----------------------------------------------------------------------------
  * mag-core & magpie
  * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
@@ -60,16 +58,16 @@ std::string to_str(const t_mat_real& mat)
 	// general case
 	std::ostringstream ostr;
 
-	for(std::size_t i=0; i<mat.size1(); ++i)
+	for(std::size_t i = 0; i < mat.size1(); ++i)
 	{
-		for(std::size_t j=0; j<mat.size2(); ++j)
+		for(std::size_t j = 0; j < mat.size2(); ++j)
 		{
-			ostr << mat(i,j);
-			if(j < mat.size2()-1)
+			ostr << mat(i, j);
+			if(j < mat.size2() - 1)
 				ostr << " ";
 		}
 
-		if(i < mat.size2()-1)
+		if(i < mat.size2() - 1)
 			ostr << "\t";
 	}
 
@@ -106,10 +104,10 @@ std::string to_str(const t_vec_real& vec)
 	// general case
 	std::ostringstream ostr;
 
-	for(std::size_t i=0; i<vec.size(); ++i)
+	for(std::size_t i = 0; i<vec.size(); ++i)
 	{
 		ostr << vec[i];
-		if(i < vec.size()-1)
+		if(i < vec.size() - 1)
 			ostr << " ";
 	}
 
@@ -182,9 +180,9 @@ t_mat_real get_mat_realrix(std::size_t N, std::size_t M, std::istream& istr)
 {
 	t_mat_real mat(N,M);
 
-	for(std::size_t i=0; i<N; ++i)
-		for(std::size_t j=0; j<M; ++j)
-			istr >> mat(i,j);
+	for(std::size_t i = 0; i < N; ++i)
+		for(std::size_t j = 0; j < M; ++j)
+			istr >> mat(i, j);
 
 	return mat;
 }
@@ -194,7 +192,7 @@ t_vec_real get_vec_realtor(std::size_t N, std::istream& istr)
 {
 	t_vec_real vec(N);
 
-	for(std::size_t i=0; i<N; ++i)
+	for(std::size_t i = 0; i < N; ++i)
 		istr >> vec(i);
 
 	return vec;
@@ -209,7 +207,6 @@ std::tuple<std::string, t_mat_real> get_pointgroup_op(std::istream& istr)
 	std::string strOpXYZ = get_string(istr);
 	t_mat_real matOp = get_mat_realrix(3,3, istr);
 
-	//std::cout << strName << ": " << matOp << "\n";
 	return { strName, matOp };
 }
 
@@ -221,6 +218,7 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 	int iNrBNS[2];
 	istr >> iNrBNS[0] >> iNrBNS[1];
 	std::string strNrBNS = get_string(istr);
+	std::string strSGUni = get_string(istr);
 	std::string strSGBNS = get_string(istr);
 
 	int iNrOG[3];
@@ -229,6 +227,7 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 	std::string strSGOG = get_string(istr);
 
 	prop.put(strPath + "bns.id", strSGBNS);
+	prop.put(strPath + "uni.id", strSGUni);
 	prop.put(strPath + "og.id", strSGOG);
 
 	std::ostringstream ostrNrBNS, ostrNrOG;
@@ -242,7 +241,7 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 	if(ostrNrBNS.str()!=strNrBNS || ostrNrOG.str()!=strNrOG)
 		std::cerr << "Mismatch of space group number in " << strSGBNS << "." << std::endl;
 
-	bool bIsHex = (iNrBNS[0]>=143 && iNrBNS[0]<=194);
+	bool bIsHex = (iNrBNS[0] >= 143 && iNrBNS[0] <= 194);
 
 
 	int iTy = get_num<int>(istr);
@@ -260,10 +259,9 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 
 	//std::size_t iMaxOperBNS = 0;
 	std::size_t iNumOpsBNS = get_num<std::size_t>(istr);
-	for(std::size_t iPtOp=0; iPtOp<iNumOpsBNS; ++iPtOp)
+	for(std::size_t iPtOp = 0; iPtOp < iNumOpsBNS; ++iPtOp)
 	{
 		std::size_t iOperBNS = get_num<std::size_t>(istr);
-		//iMaxOperBNS = std::max(iOperBNS, iMaxOperBNS);
 		t_vec_real vecBNS = get_vec_realtor(3, istr);
 		t_real numBNS = get_num<t_real>(istr);
 		int itInvBNS = get_num<int>(istr);
@@ -281,10 +279,9 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 		prop.put(strPath + "bns.ops.d" + std::to_string(iPtOp+1), numBNS);
 		prop.put(strPath + "bns.ops.t" + std::to_string(iPtOp+1), itInvBNS);
 	}
-	//std::cout << "\nmax op: " << iMaxOperBNS << std::endl;
 
 	std::size_t iNumLattVecsBNS = get_num<std::size_t>(istr);
-	for(std::size_t iVec=0; iVec<iNumLattVecsBNS; ++iVec)
+	for(std::size_t iVec = 0; iVec < iNumLattVecsBNS; ++iVec)
 	{
 		t_vec_real vecBNS = get_vec_realtor(3, istr);
 		t_real numBNS = get_num<t_real>(istr);
@@ -294,7 +291,7 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 	}
 
 	std::size_t iNumWycBNS = get_num<std::size_t>(istr);
-	for(std::size_t iWyc=0; iWyc<iNumWycBNS; ++iWyc)
+	for(std::size_t iWyc = 0; iWyc < iNumWycBNS; ++iWyc)
 	{
 		std::size_t iNumPos = get_num<std::size_t>(istr);
 		std::size_t iMult = get_num<std::size_t>(istr);
@@ -303,7 +300,7 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 		prop.put(strPath + "bns.wyc.s" + std::to_string(iWyc+1) + ".l", strWycName);
 		prop.put(strPath + "bns.wyc.s" + std::to_string(iWyc+1) + ".m", iMult);
 
-		for(std::size_t iPos=0; iPos<iNumPos; ++iPos)
+		for(std::size_t iPos = 0; iPos < iNumPos; ++iPos)
 		{
 			t_vec_real vecWyc = get_vec_realtor(3, istr);
 			t_real numWyc = get_num<t_real>(istr);
@@ -325,7 +322,7 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 	if(iTy == 4)	// OG
 	{
 		std::size_t iNumPtOpsOG = get_num<std::size_t>(istr);
-		for(std::size_t iPtOp=0; iPtOp<iNumPtOpsOG; ++iPtOp)
+		for(std::size_t iPtOp = 0; iPtOp < iNumPtOpsOG; ++iPtOp)
 		{
 			std::size_t iOperOG = get_num<std::size_t>(istr);
 			t_vec_real vecOG = get_vec_realtor(3, istr);
@@ -347,7 +344,7 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 		}
 
 		std::size_t iNumLattVecsOG = get_num<std::size_t>(istr);
-		for(std::size_t iVec=0; iVec<iNumLattVecsOG; ++iVec)
+		for(std::size_t iVec = 0; iVec < iNumLattVecsOG; ++iVec)
 		{
 			t_vec_real vecOG = get_vec_realtor(3, istr);
 			t_real numOG = get_num<t_real>(istr);
@@ -360,7 +357,7 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 		}
 
 		std::size_t iNumWycOG = get_num<std::size_t>(istr);
-		for(std::size_t iWyc=0; iWyc<iNumWycOG; ++iWyc)
+		for(std::size_t iWyc = 0; iWyc < iNumWycOG; ++iWyc)
 		{
 			std::size_t iNumPos = get_num<std::size_t>(istr);
 			std::size_t iMult = get_num<std::size_t>(istr);
@@ -372,7 +369,7 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 				prop.put(strPath + "og.wyc.s" + std::to_string(iWyc+1) + ".m", iMult);
 			}
 
-			for(std::size_t iPos=0; iPos<iNumPos; ++iPos)
+			for(std::size_t iPos = 0; iPos < iNumPos; ++iPos)
 			{
 				t_vec_real vecWyc = get_vec_realtor(3, istr);
 				t_real numWyc = get_num<t_real>(istr);
@@ -393,9 +390,6 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 			}
 		}
 	}
-
-	//std::cout << strSGBNS << ", " << strSGOG << "\n";
-	//std::cout << "."; std::cout.flush();
 }
 
 
@@ -412,12 +406,12 @@ bool convert_table(const char* pcInFile, const char* pcOutFile)
 
 	// read 48 point group operators
 	std::cout << "Reading point group operators...\n";
-	for(std::size_t i=0; i<48; ++i)
+	for(std::size_t i = 0; i < 48; ++i)
 		vecPtOps.emplace_back(get_pointgroup_op(istr));
 
 	// read 24 hexagonal point group operators
 	std::cout << "Reading hexagonal point group operators...\n";
-	for(std::size_t i=0; i<24; ++i)
+	for(std::size_t i = 0; i < 24; ++i)
 		vecHexPtOps.emplace_back(get_pointgroup_op(istr));
 
 
@@ -425,7 +419,7 @@ bool convert_table(const char* pcInFile, const char* pcOutFile)
 
 	// convert the 1651 3D space groups
 	std::cout << "Converting space groups...\n";
-	for(std::size_t i=0; i<1651; ++i)
+	for(std::size_t i = 0; i < 1651; ++i)
 	{
 		std::cout << "\rGroup " << (i+1) << " / 1651...     ";
 		std::cout.flush();
@@ -443,9 +437,6 @@ bool convert_table(const char* pcInFile, const char* pcOutFile)
 
 	try
 	{
-		/*ptree::write_xml(pcOutFile, prop,
-			std::locale(),
-			ptree::xml_writer_make_settings('\t', 1, std::string("utf-8")));*/
 		ptree::write_info(pcOutFile, prop,
 			std::locale(),
 			ptree::info_writer_make_settings('\t', 1));
