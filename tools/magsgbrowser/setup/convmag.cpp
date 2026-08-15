@@ -8,8 +8,8 @@
  * g++-8 -std=c++17 -fconcepts -I../../ -o convmag convmag.cpp
  *
  * ----------------------------------------------------------------------------
- * mag-core (part of the Takin software suite)
- * Copyright (C) 2018-2021  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * mag-core & magpie
+ * Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
  * "magtools" project
  * Copyright (C) 2017-2018  Tobias WEBER (privately developed).
@@ -44,21 +44,17 @@ namespace algo = boost::algorithm;
 #include "libs/defs.h"
 
 
-using t_mat = tl2::mat<t_real, std::vector>;
-using t_vec = tl2::vec<t_real, std::vector>;
-
-
 bool bSaveOG = false;
 
-std::string to_str(const t_mat& mat)
+std::string to_str(const t_mat_real& mat)
 {
 	// special cases
-	static const auto zero = tl2::zero<t_mat>(mat.size1(), mat.size2());
-	static const auto unit = tl2::unit<t_mat>(mat.size1(), mat.size2());
+	static const auto zero = tl2::zero<t_mat_real>(mat.size1(), mat.size2());
+	static const auto unit = tl2::unit<t_mat_real>(mat.size1(), mat.size2());
 
-	if(tl2::equals<t_mat, t_real>(mat, zero))
+	if(tl2::equals<t_mat_real, t_real>(mat, zero))
 		return "0";
-	else if(tl2::equals<t_mat, t_real>(mat, unit))
+	else if(tl2::equals<t_mat_real, t_real>(mat, unit))
 		return "1";
 
 	// general case
@@ -81,30 +77,30 @@ std::string to_str(const t_mat& mat)
 }
 
 
-std::string to_str(const t_vec& vec)
+std::string to_str(const t_vec_real& vec)
 {
 	// spacial cases
-	static const auto zero = tl2::zero<t_vec>(vec.size());
-	static const auto x = tl2::create<t_vec>({1,0,0});
-	static const auto y = tl2::create<t_vec>({0,1,0});
-	static const auto z = tl2::create<t_vec>({0,0,1});
-	static const auto mx = tl2::create<t_vec>({-1,0,0});
-	static const auto my = tl2::create<t_vec>({0,-1,0});
-	static const auto mz = tl2::create<t_vec>({0,0,-1});
+	static const auto zero = tl2::zero<t_vec_real>(vec.size());
+	static const auto x = tl2::create<t_vec_real>({1,0,0});
+	static const auto y = tl2::create<t_vec_real>({0,1,0});
+	static const auto z = tl2::create<t_vec_real>({0,0,1});
+	static const auto mx = tl2::create<t_vec_real>({-1,0,0});
+	static const auto my = tl2::create<t_vec_real>({0,-1,0});
+	static const auto mz = tl2::create<t_vec_real>({0,0,-1});
 
-	if(tl2::equals<t_vec>(vec, zero))
+	if(tl2::equals<t_vec_real>(vec, zero))
 		return "0";
-	else if(tl2::equals<t_vec>(vec, x))
+	else if(tl2::equals<t_vec_real>(vec, x))
 		return "x";
-	else if(tl2::equals<t_vec>(vec, y))
+	else if(tl2::equals<t_vec_real>(vec, y))
 		return "y";
-	else if(tl2::equals<t_vec>(vec, z))
+	else if(tl2::equals<t_vec_real>(vec, z))
 		return "z";
-	else if(tl2::equals<t_vec>(vec, mx))
+	else if(tl2::equals<t_vec_real>(vec, mx))
 		return "-x";
-	else if(tl2::equals<t_vec>(vec, my))
+	else if(tl2::equals<t_vec_real>(vec, my))
 		return "-y";
-	else if(tl2::equals<t_vec>(vec, mz))
+	else if(tl2::equals<t_vec_real>(vec, mz))
 		return "-z";
 
 	// general case
@@ -121,14 +117,14 @@ std::string to_str(const t_vec& vec)
 }
 
 
-std::ostream& operator<<(std::ostream& ostr, const t_mat& mat)
+std::ostream& operator<<(std::ostream& ostr, const t_mat_real& mat)
 {
 	ostr << to_str(mat);
 	return ostr;
 }
 
 
-std::ostream& operator<<(std::ostream& ostr, const t_vec& vec)
+std::ostream& operator<<(std::ostream& ostr, const t_vec_real& vec)
 {
 	ostr << to_str(vec);
 	return ostr;
@@ -182,9 +178,9 @@ std::string get_string(std::istream& istr)
 }
 
 
-t_mat get_matrix(std::size_t N, std::size_t M, std::istream& istr)
+t_mat_real get_mat_realrix(std::size_t N, std::size_t M, std::istream& istr)
 {
-	t_mat mat(N,M);
+	t_mat_real mat(N,M);
 
 	for(std::size_t i=0; i<N; ++i)
 		for(std::size_t j=0; j<M; ++j)
@@ -194,9 +190,9 @@ t_mat get_matrix(std::size_t N, std::size_t M, std::istream& istr)
 }
 
 
-t_vec get_vector(std::size_t N, std::istream& istr)
+t_vec_real get_vec_realtor(std::size_t N, std::istream& istr)
 {
-	t_vec vec(N);
+	t_vec_real vec(N);
 
 	for(std::size_t i=0; i<N; ++i)
 		istr >> vec(i);
@@ -205,13 +201,13 @@ t_vec get_vector(std::size_t N, std::istream& istr)
 }
 
 
-std::tuple<std::string, t_mat> get_pointgroup_op(std::istream& istr)
+std::tuple<std::string, t_mat_real> get_pointgroup_op(std::istream& istr)
 {
 	int iNum = get_num<int>(istr);
 
 	std::string strName = get_string(istr);
 	std::string strOpXYZ = get_string(istr);
-	t_mat matOp = get_matrix(3,3, istr);
+	t_mat_real matOp = get_mat_realrix(3,3, istr);
 
 	//std::cout << strName << ": " << matOp << "\n";
 	return { strName, matOp };
@@ -219,8 +215,8 @@ std::tuple<std::string, t_mat> get_pointgroup_op(std::istream& istr)
 
 
 void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::string& strPath,
-	const std::vector<std::tuple<std::string, t_mat>>* pPtOps = nullptr,
-	const std::vector<std::tuple<std::string, t_mat>>* pHexPtOps = nullptr)
+	const std::vector<std::tuple<std::string, t_mat_real>>* pPtOps = nullptr,
+	const std::vector<std::tuple<std::string, t_mat_real>>* pHexPtOps = nullptr)
 {
 	int iNrBNS[2];
 	istr >> iNrBNS[0] >> iNrBNS[1];
@@ -252,8 +248,8 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 	int iTy = get_num<int>(istr);
 	if(iTy == 4)	// BNS -> OG trafo
 	{
-		t_mat matBNS2OG = get_matrix(3,3, istr);
-		t_vec vecBNS2OG = get_vector(3, istr);
+		t_mat_real matBNS2OG = get_mat_realrix(3,3, istr);
+		t_vec_real vecBNS2OG = get_vec_realtor(3, istr);
 		t_real numBNS2OG = get_num<t_real>(istr);
 
 		prop.put(strPath + "bns2og.R", to_str(matBNS2OG));
@@ -268,7 +264,7 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 	{
 		std::size_t iOperBNS = get_num<std::size_t>(istr);
 		//iMaxOperBNS = std::max(iOperBNS, iMaxOperBNS);
-		t_vec vecBNS = get_vector(3, istr);
+		t_vec_real vecBNS = get_vec_realtor(3, istr);
 		t_real numBNS = get_num<t_real>(istr);
 		int itInvBNS = get_num<int>(istr);
 
@@ -290,7 +286,7 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 	std::size_t iNumLattVecsBNS = get_num<std::size_t>(istr);
 	for(std::size_t iVec=0; iVec<iNumLattVecsBNS; ++iVec)
 	{
-		t_vec vecBNS = get_vector(3, istr);
+		t_vec_real vecBNS = get_vec_realtor(3, istr);
 		t_real numBNS = get_num<t_real>(istr);
 
 		prop.put(strPath + "bns.lat.v" + std::to_string(iVec+1), to_str(vecBNS));
@@ -309,10 +305,10 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 
 		for(std::size_t iPos=0; iPos<iNumPos; ++iPos)
 		{
-			t_vec vecWyc = get_vector(3, istr);
+			t_vec_real vecWyc = get_vec_realtor(3, istr);
 			t_real numWyc = get_num<t_real>(istr);
-			t_mat matWycXYZ = get_matrix(3, 3, istr);
-			t_mat matWycMXMYMZ = get_matrix(3, 3, istr);
+			t_mat_real matWycXYZ = get_mat_realrix(3, 3, istr);
+			t_mat_real matWycMXMYMZ = get_mat_realrix(3, 3, istr);
 
 			prop.put(strPath + "bns.wyc.s" + std::to_string(iWyc+1)
 				+ ".v" + std::to_string(iPos+1), to_str(vecWyc));
@@ -332,7 +328,7 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 		for(std::size_t iPtOp=0; iPtOp<iNumPtOpsOG; ++iPtOp)
 		{
 			std::size_t iOperOG = get_num<std::size_t>(istr);
-			t_vec vecOG = get_vector(3, istr);
+			t_vec_real vecOG = get_vec_realtor(3, istr);
 			t_real numOG = get_num<t_real>(istr);
 			int itInvOG = get_num<int>(istr);
 
@@ -353,7 +349,7 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 		std::size_t iNumLattVecsOG = get_num<std::size_t>(istr);
 		for(std::size_t iVec=0; iVec<iNumLattVecsOG; ++iVec)
 		{
-			t_vec vecOG = get_vector(3, istr);
+			t_vec_real vecOG = get_vec_realtor(3, istr);
 			t_real numOG = get_num<t_real>(istr);
 
 			if(bSaveOG)
@@ -378,10 +374,10 @@ void convert_spacegroup(std::istream& istr, ptree::ptree& prop, const std::strin
 
 			for(std::size_t iPos=0; iPos<iNumPos; ++iPos)
 			{
-				t_vec vecWyc = get_vector(3, istr);
+				t_vec_real vecWyc = get_vec_realtor(3, istr);
 				t_real numWyc = get_num<t_real>(istr);
-				t_mat matWycXYZ = get_matrix(3, 3, istr);
-				t_mat matWycMXMYMZ = get_matrix(3, 3, istr);
+				t_mat_real matWycXYZ = get_mat_realrix(3, 3, istr);
+				t_mat_real matWycMXMYMZ = get_mat_realrix(3, 3, istr);
 
 				if(bSaveOG)
 				{
@@ -412,7 +408,7 @@ bool convert_table(const char* pcInFile, const char* pcOutFile)
 		return false;
 	}
 
-	std::vector<std::tuple<std::string, t_mat>> vecPtOps, vecHexPtOps;
+	std::vector<std::tuple<std::string, t_mat_real>> vecPtOps, vecHexPtOps;
 
 	// read 48 point group operators
 	std::cout << "Reading point group operators...\n";
@@ -469,7 +465,7 @@ int main(int argc, char **argv)
 	if(argc >= 3)
 		convert_table(argv[1], argv[2]);
 	else
-		convert_table("ext/magsg.dat", "res/data/magsg.info");
+		convert_table("magsg.dat", "magsg.info");
 
 	return 0;
 }

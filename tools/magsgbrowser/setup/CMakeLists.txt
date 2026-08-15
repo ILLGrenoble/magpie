@@ -25,25 +25,27 @@
 # ----------------------------------------------------------------------------
 #
 
-project(setup)
+project(magsg_setup)
 cmake_minimum_required(VERSION 3.10)
 
 set(CMAKE_CXX_STANDARD 20)
 add_definitions(-std=c++20)
-include_directories("${PROJECT_SOURCE_DIR}")
+include_directories("${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/../../..")
 
 
 message("PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}.")
 message("CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}.")
 message("CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}.")
 
+
+find_package(Boost REQUIRED)
+set(Boost_USE_MULTITHREADED TRUE)
+add_definitions(${Boost_CXX_FLAGS})
+include_directories("${Boost_INCLUDE_DIRS}" "${Boost_INCLUDE_DIRS}/..")
+
+
 # -----------------------------------------------------------------------------
 # setup tool
-add_executable(setup convmag.cpp)
-target_link_libraries(setup)
-
-
-add_custom_command(TARGET setup POST_BUILD
-	COMMAND cd ${CMAKE_SOURCE_DIR} && ${CMAKE_BINARY_DIR}/tools/setup/setup
-	MAIN_DEPENDENCY setup)
+add_executable(magsg_setup convmag.cpp)
+target_link_libraries(magsg_setup ${Boost_LIBRARIES})
 # -----------------------------------------------------------------------------

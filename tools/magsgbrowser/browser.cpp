@@ -30,13 +30,13 @@
 #include "libs/sym/loadcif.h"
 
 #include <QtWidgets/QMenuBar>
-#include <sstream>
 
 
 // ----------------------------------------------------------------------------
 
 
-SgBrowserDlg::SgBrowserDlg(QWidget* pParent, QSettings *pSett)
+SgBrowserDlg::SgBrowserDlg(QWidget* pParent, QSettings *pSett,
+  const std::string* magsgfile)
 	: QDialog{pParent}, m_pSettings{pSett}
 {
 	// ------------------------------------------------------------------------
@@ -71,7 +71,7 @@ SgBrowserDlg::SgBrowserDlg(QWidget* pParent, QSettings *pSett)
 
 
 	// load data
-	SetupMagSpaceGroups();
+	SetupMagSpaceGroups(magsgfile ? *magsgfile : "magsg.info");
 	SetupNuclSpaceGroups();
 
 
@@ -98,16 +98,20 @@ SgBrowserDlg::SgBrowserDlg(QWidget* pParent, QSettings *pSett)
 /**
  * load magnetic space group list
  */
-void SgBrowserDlg::SetupMagSpaceGroups()
+void SgBrowserDlg::SetupMagSpaceGroups(const std::string& magsgfile)
 {
-	std::cerr << "Loading magnetic space groups ... ";
-	m_magsgs.Load("res/data/magsg.info");
-	std::cerr << "Done." << std::endl;
+	if(magsgfile == "")
+	{
+		tabSGs->setTabEnabled(1, false);
+		return;
+	}
 
+	m_magsgs.Load(magsgfile);
 	const auto *pSgs = m_magsgs.GetSpacegroups();
 	if(!pSgs || pSgs->size() == 0)
 	{
 		tabSGs->setTabEnabled(1, false);
+		std::cerr << "Error: Could load magnetic space group file \"" << magsgfile << "\"." << std::endl;
 		return;
 	}
 

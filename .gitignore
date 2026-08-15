@@ -26,6 +26,7 @@ tools/bz/build/**
 tools/cif2xml/build/**
 tools/magstructfact/build/**
 tools/magsgbrowser/build/**
+tools/magsgbrowser/setup/build/**
 tools/pol/build/**
 tools/moldyn/build/**
 tools/magdyn/build/**
@@ -62,4 +63,5 @@ local_bindings.txt
 cliparser_impl.*
 clilexer_impl.*
 stack.hh
-res/magffacts.xml
+res/*.xml
+res/*.info

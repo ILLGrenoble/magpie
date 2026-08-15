@@ -197,6 +197,7 @@ protected:
 	QComboBox *m_combo_ffacts{};               // ions from form factor table
 	QLineEdit *m_editFilterFFacts{};
 	std::vector<std::string> m_ffacts{};       // buffers for form factors
+	std::string m_magsgfile{};                 // file with magnetic space groups
 
 	// sample environment panel
 	// external magnetic field

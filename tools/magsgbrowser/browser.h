@@ -36,6 +36,8 @@
 #include <QtWidgets/QTreeWidgetItem>
 #include <QtWidgets/QListWidgetItem>
 
+#include <string>
+
 #include "tlibs2/libs/magsg.h"
 #include "tlibs2/libs/maths.h"
 #include "libs/defs.h"
@@ -52,16 +54,18 @@ using t_mat44_sg = tl2::qmat_adapter<int, 4, 4, t_real_sg, QGenericMatrix>;
 class SgBrowserDlg : public QDialog, Ui::SgBrowserDlg
 {
 private:
-	QSettings *m_pSettings = nullptr;
+	QSettings *m_pSettings{};
 
-	Spacegroups<t_mat_sg, t_vec_sg> m_magsgs;
-	std::vector<std::tuple<int, std::string, std::vector<t_mat44_sg>>> m_nuclsgs;
+	Spacegroups<t_mat_sg, t_vec_sg> m_magsgs{};
+	std::vector<std::tuple<int, std::string, std::vector<t_mat44_sg>>> m_nuclsgs{};
 
-	bool m_showBNS = true;
+	bool m_showBNS{true};
+
 
 private:
-	void SetupMagSpaceGroups();
+	void SetupMagSpaceGroups(const std::string& magsgfile);
 	void SetupNuclSpaceGroups();
+
 
 protected:
 	virtual void showEvent(QShowEvent *pEvt) override;
@@ -74,9 +78,11 @@ protected:
 
 	void SwitchToBNS(bool bBNS);
 
+
 public:
 	using QDialog::QDialog;
-	SgBrowserDlg(QWidget* pParent = nullptr, QSettings* pSett = nullptr);
+	SgBrowserDlg(QWidget* pParent = nullptr, QSettings* pSett = nullptr,
+		const std::string* magsgfile = nullptr);
 	~SgBrowserDlg() = default;
 };
 

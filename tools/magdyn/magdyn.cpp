@@ -189,6 +189,9 @@ void MagDynDlg::InitResources()
 		// main icon
 		if(g_icon.isNull() && QFileInfo{resdir + "magpie.svg"}.exists())
 			g_icon = QIcon{resdir + "magpie.svg"};
+
+		if(m_magsgfile == "" && QFileInfo{resdir + "magsg.info"}.exists())
+			m_magsgfile = resdir.toStdString() + "magsg.info";
 	}
 
 	if(!g_icon.isNull())
@@ -791,7 +794,7 @@ void MagDynDlg::CreateMenuBar()
 	{
 		if(!m_sg_browser)
 		{
-			m_sg_browser = new SgBrowserDlg(this, m_sett);
+			m_sg_browser = new SgBrowserDlg(this, m_sett, &m_magsgfile);
 			m_sg_browser->setFont(this->font());
 		}
 
