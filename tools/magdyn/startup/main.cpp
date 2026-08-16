@@ -300,12 +300,16 @@ static inline void set_locales()
 }
 
 
+//extern "C" void goto_set_num_threads(int);
+//extern "C" void openblas_set_num_threads(int);
 
 int main(int argc, char** argv)
 {
 	try
 	{
 		set_locales();
+		//goto_set_num_threads(1);
+		//openblas_set_num_threads(1);
 
 		bool show_help = false;
 		bool healthcheck = false;
