@@ -27,6 +27,7 @@
 
 #include "libs/magdyn.h"
 #include "libs/maths.h"
+#include "libs/defs.h"
 #include "magpie_c.h"
 
 #include <mutex>
@@ -37,12 +38,6 @@
 // internals
 // ----------------------------------------------------------------------------
 // types
-using t_real = t_magpie_real;
-using t_cplx = std::complex<t_real>;
-using t_mat = tl2::mat<t_cplx>;
-using t_vec = tl2::vec<t_cplx>;
-using t_mat_real = tl2::mat<t_real>;
-using t_vec_real = tl2::vec<t_real>;
 
 using t_E_and_S = std::vector<std::pair<t_real, t_real>>;
 

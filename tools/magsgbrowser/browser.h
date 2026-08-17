@@ -84,6 +84,9 @@ public:
 	SgBrowserDlg(QWidget* pParent = nullptr, QSettings* pSett = nullptr,
 		const std::string* magsgfile = nullptr);
 	~SgBrowserDlg() = default;
+
+	SgBrowserDlg(const SgBrowserDlg&) = delete;
+	SgBrowserDlg& operator=(const SgBrowserDlg&) = delete;
 };
 
 

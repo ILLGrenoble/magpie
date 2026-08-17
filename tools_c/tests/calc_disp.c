@@ -32,6 +32,11 @@
 #include "magpie_c.h"
 
 
+#ifndef M_PI
+	#define M_PI 3.1415926
+#endif
+
+
 int main(int argc, char** argv)
 {
 	if(argc < 2)

@@ -197,11 +197,11 @@ void SgBrowserDlg::MagSpaceGroupSelected(QTreeWidgetItem *pItem)
 	{
 		std::ostringstream ostr;
 
-		for(std::size_t i = 0; i < mat.size1(); ++i)
+		for(std::size_t i = 0; i < (std::size_t)mat.size1(); ++i)
 		{
 			// rotation matrix
 			ostr << "( ";
-			for(std::size_t j = 0; j < mat.size2(); ++j)
+			for(std::size_t j = 0; j < (std::size_t)mat.size2(); ++j)
 				ostr << std::setw(ostr.precision()*1.5) << std::right << mat(i,j);
 			ostr << " )";
 
