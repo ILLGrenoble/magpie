@@ -63,6 +63,11 @@ INITIALIZE
 		exit(-1);
 	}
 
+	// get lattice constants
+	t_magpie_real a, b, c, alpha, beta, gamma;
+	magpie_get_lattice(mag, &a, &b, &c, &alpha, &beta, &gamma);
+	printf("Crystal lattice: [%.4f %.4f %.4f], angles: [%.4f %.4f %.4f].\n",
+		a, b, c, alpha/M_PI*180., beta/M_PI*180., gamma/M_PI*180.);
 
 	// calculate the energies and weights for the given momentum transfers
 	unsigned int max_branches = magpie_branch_count(mag);
