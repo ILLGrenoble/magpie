@@ -76,9 +76,10 @@ template<class t_vec>
 t_vec operator-(const t_vec& vec1)
 requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
-	t_vec vec(vec1.size());
+	const auto vec1_size = vec1.size();
+	t_vec vec(vec1_size);
 
-	for(std::size_t i = 0; i < vec1.size(); ++i)
+	for(std::size_t i = 0; i < vec1_size; ++i)
 		vec[i] = -vec1[i];
 
 	return vec;
@@ -92,12 +93,14 @@ template<class t_vec>
 t_vec operator+(const t_vec& vec1, const t_vec& vec2)
 requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
+	const auto vec1_size = vec1.size();
+
 	if constexpr(tl2::is_dyn_vec<t_vec>)
-		assert((vec1.size() == vec2.size()));
+		assert((vec1_size == vec2.size()));
 
-	t_vec vec(vec1.size());
+	t_vec vec(vec1_size);
 
-	for(std::size_t i = 0; i < vec1.size(); ++i)
+	for(std::size_t i = 0; i < vec1_size; ++i)
 		vec[i] = vec1[i] + vec2[i];
 
 	return vec;
@@ -111,12 +114,14 @@ template<class t_vec>
 t_vec operator-(const t_vec& vec1, const t_vec& vec2)
 requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
+	const auto vec1_size = vec1.size();
+
 	if constexpr(tl2::is_dyn_vec<t_vec>)
-		assert((vec1.size() == vec2.size()));
+		assert((vec1_size == vec2.size()));
 
-	t_vec vec(vec1.size());
+	t_vec vec(vec1_size);
 
-	for(std::size_t i = 0; i < vec1.size(); ++i)
+	for(std::size_t i = 0; i < vec1_size; ++i)
 		vec[i] = vec1[i] - vec2[i];
 
 	return vec;
@@ -130,9 +135,10 @@ template<class t_vec>
 t_vec operator*(const t_vec& vec1, typename t_vec::value_type d)
 requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
-	t_vec vec(vec1.size());
+	const auto vec1_size = vec1.size();
+	t_vec vec(vec1_size);
 
-	for(std::size_t i = 0; i < vec1.size(); ++i)
+	for(std::size_t i = 0; i < vec1_size; ++i)
 		vec[i] = vec1[i] * d;
 
 	return vec;
@@ -158,9 +164,10 @@ template<class t_vec>
 t_vec operator/(const t_vec& vec1, typename t_vec::value_type d)
 requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
-	t_vec vec(vec1.size());
+	const auto vec1_size = vec1.size();
+	t_vec vec(vec1_size);
 
-	for(std::size_t i = 0; i < vec1.size(); ++i)
+	for(std::size_t i = 0; i < vec1_size; ++i)
 		vec[i] = vec1[i] / d;
 
 	return vec;
@@ -174,10 +181,12 @@ template<class t_vec>
 t_vec& operator+=(t_vec& vec1, const t_vec& vec2)
 requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
-	if constexpr(tl2::is_dyn_vec<t_vec>)
-		assert((vec1.size() == vec2.size()));
+	const auto vec1_size = vec1.size();
 
-	for(std::size_t i = 0; i < vec1.size(); ++i)
+	if constexpr(tl2::is_dyn_vec<t_vec>)
+		assert((vec1_size == vec2.size()));
+
+	for(std::size_t i = 0; i < vec1_size; ++i)
 		vec1[i] += vec2[i];
 
 	return vec1;
@@ -191,10 +200,12 @@ template<class t_vec>
 t_vec& operator-=(t_vec& vec1, const t_vec& vec2)
 requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
-	if constexpr(tl2::is_dyn_vec<t_vec>)
-		assert((vec1.size() == vec2.size()));
+	const auto vec1_size = vec1.size();
 
-	for(std::size_t i = 0; i < vec1.size(); ++i)
+	if constexpr(tl2::is_dyn_vec<t_vec>)
+		assert((vec1_size == vec2.size()));
+
+	for(std::size_t i = 0; i < vec1_size; ++i)
 		vec1[i] -= vec2[i];
 
 	return vec1;
@@ -208,7 +219,9 @@ template<class t_vec>
 t_vec& operator*=(t_vec& vec1, typename t_vec::value_type d)
 requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
-	for(std::size_t i = 0; i < vec1.size(); ++i)
+	const auto vec1_size = vec1.size();
+
+	for(std::size_t i = 0; i < vec1_size; ++i)
 		vec1[i] *= d;
 
 	return vec1;
@@ -221,7 +234,9 @@ template<class t_vec>
 t_vec& operator/=(t_vec& vec1, typename t_vec::value_type d)
 requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 {
-	for(std::size_t i = 0; i < vec1.size(); ++i)
+	const auto vec1_size = vec1.size();
+
+	for(std::size_t i = 0; i < vec1_size; ++i)
 		vec1[i] /= d;
 
 	return vec1;
@@ -301,10 +316,13 @@ template<class t_mat>
 t_mat operator-(const t_mat& mat1)
 requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 {
-	t_mat mat(mat1.size1(), mat1.size2());
+	const auto mat1_size1 = mat1.size1();
+	const auto mat1_size2 = mat1.size2();
 
-	for(std::size_t i = 0; i < mat1.size1(); ++i)
-		for(std::size_t j = 0; j < mat1.size2(); ++j)
+	t_mat mat(mat1_size1, mat1_size2);
+
+	for(std::size_t i = 0; i < mat1_size1; ++i)
+		for(std::size_t j = 0; j < mat1_size2; ++j)
 			mat(i,j) = -mat1(i,j);
 
 	return mat;
@@ -318,13 +336,16 @@ template<class t_mat>
 t_mat operator+(const t_mat& mat1, const t_mat& mat2)
 requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 {
+	const auto mat1_size1 = mat1.size1();
+	const auto mat1_size2 = mat1.size2();
+
 	if constexpr(tl2::is_dyn_mat<t_mat>)
-		assert((mat1.size1() == mat2.size1() && mat1.size2() == mat2.size2()));
+		assert((mat1_size1 == mat2.size1() && mat1_size2 == mat2.size2()));
 
-	t_mat mat(mat1.size1(), mat1.size2());
+	t_mat mat(mat1_size1, mat1_size2);
 
-	for(std::size_t i = 0; i < mat1.size1(); ++i)
-		for(std::size_t j = 0; j < mat1.size2(); ++j)
+	for(std::size_t i = 0; i < mat1_size1; ++i)
+		for(std::size_t j = 0; j < mat1_size2; ++j)
 			mat(i,j) = mat1(i,j) + mat2(i,j);
 
 	return mat;
@@ -338,13 +359,16 @@ template<class t_mat>
 t_mat operator-(const t_mat& mat1, const t_mat& mat2)
 requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 {
+	const auto mat1_size1 = mat1.size1();
+	const auto mat1_size2 = mat1.size2();
+
 	if constexpr(tl2::is_dyn_mat<t_mat>)
-		assert((mat1.size1() == mat2.size1() && mat1.size2() == mat2.size2()));
+		assert((mat1_size1 == mat2.size1() && mat1_size2 == mat2.size2()));
 
-	t_mat mat(mat1.size1(), mat1.size2());
+	t_mat mat(mat1_size1, mat1_size2);
 
-	for(std::size_t i = 0; i < mat1.size1(); ++i)
-		for(std::size_t j = 0; j < mat1.size2(); ++j)
+	for(std::size_t i = 0; i < mat1_size1; ++i)
+		for(std::size_t j = 0; j < mat1_size2; ++j)
 			mat(i,j) = mat1(i,j) - mat2(i,j);
 
 	return mat;
@@ -358,10 +382,13 @@ template<class t_mat>
 t_mat operator*(const t_mat& mat1, typename t_mat::value_type d)
 requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 {
-	t_mat mat(mat1.size1(), mat1.size2());
+	const auto mat1_size1 = mat1.size1();
+	const auto mat1_size2 = mat1.size2();
 
-	for(std::size_t i = 0; i < mat1.size1(); ++i)
-		for(std::size_t j = 0; j < mat1.size2(); ++j)
+	t_mat mat(mat1_size1, mat1_size2);
+
+	for(std::size_t i = 0; i < mat1_size1; ++i)
+		for(std::size_t j = 0; j < mat1_size2; ++j)
 			mat(i, j) = mat1(i, j) * d;
 
 	return mat;
@@ -408,8 +435,11 @@ template<class t_mat>
 t_mat& operator*=(t_mat& mat, typename t_mat::value_type d)
 requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 {
-	for(std::size_t i = 0; i < mat.size1(); ++i)
-		for(std::size_t j = 0; j < mat.size2(); ++j)
+	const auto mat_size1 = mat.size1();
+	const auto mat_size2 = mat.size2();
+
+	for(std::size_t i = 0; i < mat_size1; ++i)
+		for(std::size_t j = 0; j < mat_size2; ++j)
 			mat(i, j) *= d;
 
 	return mat;
@@ -435,11 +465,14 @@ template<class t_mat>
 t_mat& operator+=(t_mat& mat1, const t_mat& mat2)
 requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 {
-	if constexpr(tl2::is_dyn_mat<t_mat>)
-		assert((mat1.size1() == mat2.size1() && mat1.size2() == mat2.size2()));
+	const auto mat1_size1 = mat1.size1();
+	const auto mat1_size2 = mat1.size2();
 
-	for(std::size_t i = 0; i < mat1.size1(); ++i)
-		for(std::size_t j = 0; j < mat1.size2(); ++j)
+	if constexpr(tl2::is_dyn_mat<t_mat>)
+		assert((mat1_size1 == mat2.size1() && mat1_size2 == mat2.size2()));
+
+	for(std::size_t i = 0; i < mat1_size1; ++i)
+		for(std::size_t j = 0; j < mat1_size2; ++j)
 			mat1(i, j) += mat2(i, j);
 
 	return mat1;
@@ -453,11 +486,14 @@ template<class t_mat>
 t_mat& operator-=(t_mat& mat1, const t_mat& mat2)
 requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 {
-	if constexpr(tl2::is_dyn_mat<t_mat>)
-		assert((mat1.size1() == mat2.size1() && mat1.size2() == mat2.size2()));
+	const auto mat1_size1 = mat1.size1();
+	const auto mat1_size2 = mat1.size2();
 
-	for(std::size_t i = 0; i < mat1.size1(); ++i)
-		for(std::size_t j = 0; j < mat1.size2(); ++j)
+	if constexpr(tl2::is_dyn_mat<t_mat>)
+		assert((mat1_size1 == mat2.size1() && mat1_size2 == mat2.size2()));
+
+	for(std::size_t i = 0; i < mat1_size1; ++i)
+		for(std::size_t j = 0; j < mat1_size2; ++j)
 			mat1(i, j) -= mat2(i, j);
 
 	return mat1;
@@ -471,8 +507,11 @@ template<class t_mat>
 t_mat& operator/=(t_mat& mat, typename t_mat::value_type d)
 requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 {
-	for(std::size_t i = 0; i < mat.size1(); ++i)
-		for(std::size_t j = 0; j < mat.size2(); ++j)
+	const auto mat_size1 = mat.size1();
+	const auto mat_size2 = mat.size2();
+
+	for(std::size_t i = 0; i < mat_size1; ++i)
+		for(std::size_t j = 0; j < mat_size2; ++j)
 			mat(i, j) /= d;
 
 	return mat;

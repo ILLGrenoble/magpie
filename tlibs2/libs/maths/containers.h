@@ -90,8 +90,10 @@ public:
 
 	const value_type& operator[](size_type i) const
 	{
-		size_type row = i/m_mat.size2();
-		size_type col = i%m_mat.size2();
+		size_type mat_size2 = m_mat.size2();
+
+		size_type row = i / mat_size2;
+		size_type col = i % mat_size2;
 
 		return m_mat(row, col);
 	}
@@ -437,8 +439,9 @@ public:
 
 	vec(const vec<T, t_cont, t_alloc, STATIC_SIZE>& other)
 	{
-		this->resize(other.size());
-		for(size_type i = 0; i < other.size(); ++i)
+		const size_type other_size = other.size();
+		this->resize(other_size);
+		for(size_type i = 0; i < other_size; ++i)
 			(*this)[i] = other[i];
 	}
 
@@ -479,8 +482,9 @@ public:
 	// assignment operators
 	vec<T, t_cont, t_alloc, STATIC_SIZE>& operator=(const vec<T, t_cont, t_alloc, STATIC_SIZE>& other)
 	{
-		resize(other.size());
-		for(size_type i = 0; i < other.size(); ++i)
+		const size_type other_size = other.size();
+		resize(other_size);
+		for(size_type i = 0; i < other_size; ++i)
 			(*this)[i] = other[i];
 
 		return *this;
@@ -689,8 +693,9 @@ public:
 
 	vec_raw(const vec_raw<T, STATIC_SIZE>& other)
 	{
-		resize(other.size());
-		for(size_type idx = 0; idx < other.size(); ++idx)
+		const size_type other_size = other.size();
+		resize(other_size);
+		for(size_type idx = 0; idx < other_size; ++idx)
 			(*this)[idx] = other[idx];
 	}
 
@@ -734,8 +739,9 @@ public:
 
 	vec_raw<T, STATIC_SIZE>& operator=(const vec_raw<T, STATIC_SIZE>& other)
 	{
-		resize(other.size());
-		for(size_type idx = 0; idx < other.size(); ++idx)
+		const size_type other_size = other.size();
+		resize(other_size);
+		for(size_type idx = 0; idx < other_size; ++idx)
 			(*this)[idx] = other[idx];
 
 		return *this;
@@ -745,8 +751,9 @@ public:
 	template<class T_other, std::size_t STATIC_SIZE_OTHER>
 	vec_raw<T, STATIC_SIZE>& operator=(const vec_raw<T_other, STATIC_SIZE_OTHER>& other)
 	{
-		resize(other.size());
-		for(size_type idx = 0; idx < other.size(); ++idx)
+		const size_type other_size = other.size();
+		resize(other_size);
+		for(size_type idx = 0; idx < other_size; ++idx)
 			(*this)[idx] = other[idx];
 
 		return *this;
@@ -936,13 +943,14 @@ class mat
 {
 public:
 	using value_type = T;
+	using size_type = decltype(t_cont{}.size());
 
 
 	// constructors
 	mat() = default;
 	~mat() = default;
 
-	mat(std::size_t ROWS, std::size_t COLS, const T* arr = nullptr)
+	mat(size_type ROWS, size_type COLS, const T* arr = nullptr)
 		: m_data(ROWS*COLS), m_rowsize{ROWS}, m_colsize{COLS}
 	{
 		if(arr)
@@ -974,8 +982,9 @@ public:
 		//*this = convert<mat<T, t_cont>, mat<T_other, t_cont_other>>(other);
 
 		const t_cont_other& dat = other.GetData();
-		this->m_data.resize(dat.size());
-		for(std::size_t i = 0; i < other.size(); ++i)
+		const size_type other_size = other.size();
+		this->m_data.resize(other_size);
+		for(size_type i = 0; i < other_size; ++i)
 			this->m_data[i] = T(dat[i]);
 
 		this->m_rowsize = other.size1();
@@ -1002,13 +1011,13 @@ public:
 
 
 	// sizes
-	std::size_t size() const { return m_data.size(); }
-	std::size_t size1() const { return m_rowsize; }
-	std::size_t size2() const { return m_colsize; }
+	size_type size() const { return (size_type)m_data.size(); }
+	size_type size1() const { return m_rowsize; }
+	size_type size2() const { return m_colsize; }
 
 
 	// element access
-	const T& operator()(std::size_t row, std::size_t col) const
+	const T& operator()(size_type row, size_type col) const
 	{
 		if(row < m_rowsize && col < m_colsize)
 			return m_data[row*m_colsize + col];
@@ -1017,7 +1026,7 @@ public:
 		return dummy;
 	}
 
-	T& operator()(std::size_t row, std::size_t col)
+	T& operator()(size_type row, size_type col)
 	{
 		if(row < m_rowsize && col < m_colsize)
 			return m_data[row*m_colsize + col];
@@ -1030,16 +1039,16 @@ public:
 	void from_array(const T* arr)
 	{
 		// initialise from given array data
-		for(std::size_t i = 0; i < m_rowsize; ++i)
-			for(std::size_t j = 0; j < m_colsize; ++j)
+		for(size_type i = 0; i < m_rowsize; ++i)
+			for(size_type j = 0; j < m_colsize; ++j)
 				this->operator()(i, j) = arr[i*m_colsize + j];
 	}
 
 	void to_array(T* arr) const
 	{
 		// write elements to array
-		for(std::size_t i = 0; i < m_rowsize; ++i)
-			for(std::size_t j = 0; j < m_colsize; ++j)
+		for(size_type i = 0; i < m_rowsize; ++i)
+			for(size_type j = 0; j < m_colsize; ++j)
 				arr[i*m_colsize + j] = this->operator()(i, j);
 	}
 
@@ -1068,8 +1077,8 @@ public:
 
 private:
 	t_cont m_data{ };
-	std::size_t m_rowsize{ };
-	std::size_t m_colsize{ };
+	size_type m_rowsize{ };
+	size_type m_colsize{ };
 };
 
 // ----------------------------------------------------------------------------

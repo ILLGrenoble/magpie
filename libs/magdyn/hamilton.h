@@ -287,13 +287,14 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 
 	using namespace tl2_ops;
 	const t_size N = GetMagneticSitesCount();
-	if(N == 0 || S.H.size1() == 0 || S.H.size2() == 0)
+	const t_size H_size = S.H.size1();
+	if(N == 0 || H_size == 0 || S.H.size2() == 0)
 		return S;
 
 	// equation (30) from (Toth 2015), to ensure correct commutators
 	const t_size num_branches = 2*N;
 	S.comm = tl2::unit<t_mat>(num_branches);
-	for(t_size i = N; i < S.comm.size1(); ++i)
+	for(t_size i = N; i < num_branches; ++i)
 		S.comm(i, i) = -1.;
 
 	// equation (31) from (Toth 2015)
@@ -318,14 +319,14 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 		}
 
 		// try forcing the hamiltonian to be positive definite
-		for(t_size i = 0; i < S.H.size1(); ++i)
+		for(t_size i = 0; i < H_size; ++i)
 			S.H(i, i) += m_delta_chol;
 	}
 
 	if(chol_failed || S.H_triag.size1() == 0 || S.H_triag.size2() == 0)
 	{
 		chol_failed = true;
-		S.H_triag = tl2::unit<t_mat>(S.H.size1());
+		S.H_triag = tl2::unit<t_mat>(H_size);
 
 		MAGDYN_CERR_OPT << "Magdyn error: Invalid Cholesky decomposition"
 			<< " after " << chol_try << " correction(s)"

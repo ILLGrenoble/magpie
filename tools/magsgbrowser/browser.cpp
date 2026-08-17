@@ -234,11 +234,11 @@ void SgBrowserDlg::MagSpaceGroupSelected(QTreeWidgetItem *pItem)
 		{
 			// rotation matrices
 			ostr << "( ";
-			for(std::size_t j = 0; j < mat.size2(); ++j)
+			for(std::size_t j = 0; j < (std::size_t)mat.size2(); ++j)
 				ostr << std::setw(ostr.precision()*1.5) << std::right << mat(i,j);
 
 			ostr  << " | ";
-			for(std::size_t j = 0; j < matRot.size2(); ++j)
+			for(std::size_t j = 0; j < (std::size_t)matRot.size2(); ++j)
 				ostr << std::setw(ostr.precision()*1.5) << std::right << matRot(i,j);
 			ostr << " )";
 

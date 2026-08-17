@@ -1307,7 +1307,7 @@ hund(std::uint16_t l, std::uint16_t num_Es)
 		++vecOrbitals[iE % num_orbitals];
 
 	t_real S = 0, L = 0, J = 0;
-	for(std::size_t iOrbital = 0; iOrbital < vecOrbitals.size(); ++iOrbital)
+	for(std::size_t iOrbital = 0; iOrbital < num_orbitals; ++iOrbital)
 	{
 		std::uint8_t iEs = vecOrbitals[iOrbital];
 		if(iEs == 1)  // unpaired electron

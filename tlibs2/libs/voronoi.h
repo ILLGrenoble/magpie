@@ -102,7 +102,7 @@ sort_vertices_by_angle(const std::vector<t_vec>& _verts)
 requires tl2::is_vec<t_vec> && tl2::is_quat<t_quat>
 {
 	if(_verts.size() == 0)
-			return std::make_tuple(_verts, t_vec());
+		return std::make_tuple(_verts, t_vec());
 
 	std::vector<t_vec> verts = _verts;
 	std::size_t dim = verts[0].size();
@@ -214,11 +214,12 @@ calc_delaunay(int dim, const std::vector<t_vec>& verts,
 
 
 		qh::QhullFacetList facets{qh.facetList()};
+		const auto facets_size = facets.size();
 		std::vector<void*> facetHandles{};
-		facetHandles.reserve(facets.size());
-		voronoi.reserve(facets.size());
-		triags.reserve(facets.size());
-		neighbours.reserve(facets.size());
+		facetHandles.reserve(facets_size);
+		voronoi.reserve(facets_size);
+		triags.reserve(facets_size);
+		neighbours.reserve(facets_size);
 
 
 		// use "voronoi" array for hull vertices, if not needed otherwise
@@ -360,20 +361,21 @@ std::tuple<bool, std::size_t, std::size_t> is_vert_in_hull(
 	typename t_vec::value_type eps = 1e-5)
 {
 	using t_real = typename t_vec::value_type;
+	const auto hull_size = hull.size();
 
 	// get a point inside the hull if none given
 	t_vec mean;
 	if(!vert_in_hull && check_vert_segment)
 	{
 		mean = std::accumulate(hull.begin(), hull.end(), tl2::zero<t_vec>(2));
-		mean /= t_real(hull.size());
+		mean /= t_real(hull_size);
 		vert_in_hull = &mean;
 	}
 
 	// iterate vertices
-	for(std::size_t hullvertidx1 = 0; hullvertidx1 < hull.size(); ++hullvertidx1)
+	for(std::size_t hullvertidx1 = 0; hullvertidx1 < hull_size; ++hullvertidx1)
 	{
-		std::size_t hullvertidx2 = (hullvertidx1 + 1) % hull.size();
+		std::size_t hullvertidx2 = (hullvertidx1 + 1) % hull_size;
 
 		const t_vec& hullvert1 = hull[hullvertidx1];
 		const t_vec& hullvert2 = hull[hullvertidx2];

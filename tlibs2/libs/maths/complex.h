@@ -63,15 +63,16 @@ std::tuple<t_vec_real, t_vec_real> split_cplx(const t_vec_cplx& vec)
 requires is_complex<typename t_vec_cplx::value_type> && is_vec<t_vec_cplx> && is_vec<t_vec_real>
 {
 	using t_real = typename t_vec_real::value_type;
+	const auto vec_size = vec.size();
 
-	t_vec_real vecRe = zero<t_vec_real>(vec.size());
-	t_vec_real vecIm = zero<t_vec_real>(vec.size());
+	t_vec_real vecRe = zero<t_vec_real>(vec_size);
+	t_vec_real vecIm = zero<t_vec_real>(vec_size);
 
 	std::size_t iter = 0;
 	std::size_t iterRe = 0;
 	std::size_t iterIm = 0;
 
-	for(; iter < vec.size(); )
+	for(; iter < vec_size; )
 	{
 		vecRe[iterRe] = t_real{vec[iter].real()};
 		vecIm[iterIm] = t_real{vec[iter].imag()};
@@ -92,12 +93,15 @@ template<class t_mat_cplx, class t_mat_real>
 std::tuple<t_mat_real, t_mat_real> split_cplx(const t_mat_cplx& mat)
 requires is_complex<typename t_mat_cplx::value_type> && is_mat<t_mat_cplx> && is_mat<t_mat_real>
 {
-	t_mat_real matRe = zero<t_mat_real>(mat.size1(), mat.size2());
-	t_mat_real matIm = zero<t_mat_real>(mat.size1(), mat.size2());
+	const auto mat_size1 = mat.size1();
+	const auto mat_size2 = mat.size2();
 
-	for(std::size_t i = 0; i < mat.size1(); ++i)
+	t_mat_real matRe = zero<t_mat_real>(mat_size1, mat_size2);
+	t_mat_real matIm = zero<t_mat_real>(mat_size1, mat_size2);
+
+	for(std::size_t i = 0; i < mat_size1; ++i)
 	{
-		for(std::size_t j = 0; j < mat.size2(); ++j)
+		for(std::size_t j = 0; j < mat_size2; ++j)
 		{
 			matRe(i,j) = mat(i,j).real();
 			matIm(i,j) = mat(i,j).imag();
@@ -115,14 +119,16 @@ template<class t_vec_cplx, class t_vec_real>
 t_vec_real split_cplx_real(const t_vec_cplx& vec)
 requires is_complex<typename t_vec_cplx::value_type> && is_vec<t_vec_cplx> && is_vec<t_vec_real>
 {
+	const auto vec_size = vec.size();
+
 	using t_real = typename t_vec_real::value_type;
-	t_vec_real vecReal = zero<t_vec_real>(vec.size() * 2);
+	t_vec_real vecReal = zero<t_vec_real>(vec_size * 2);
 
 	std::size_t iter = 0;
 	std::size_t iterRe = 0;
-	std::size_t iterIm = vec.size();
+	std::size_t iterIm = vec_size;
 
-	for(; iter < vec.size(); )
+	for(; iter < vec_size; )
 	{
 		vecReal[iterRe] = t_real{vec[iter].real()};
 		vecReal[iterIm] = t_real{vec[iter].imag()};
@@ -143,14 +149,17 @@ template<class t_mat_cplx, class t_mat_real>
 t_mat_real split_cplx_real(const t_mat_cplx& mat)
 requires is_complex<typename t_mat_cplx::value_type> && is_mat<t_mat_cplx> && is_mat<t_mat_real>
 {
-	t_mat_real matRe = zero<t_mat_real>(mat.size1()*2, mat.size2()*2);
+	const auto mat_size1 = mat.size1();
+	const auto mat_size2 = mat.size2();
 
-	for(std::size_t i = 0; i < mat.size1(); ++i)
+	t_mat_real matRe = zero<t_mat_real>(mat_size1*2, mat_size2*2);
+
+	for(std::size_t i = 0; i < mat_size1; ++i)
 	{
-		for(std::size_t j = 0; j < mat.size2(); ++j)
+		for(std::size_t j = 0; j < mat_size2; ++j)
 		{
-			matRe(i,j) = mat(i,j).real();
-			matRe(i + mat.size1(), j + mat.size2()) = mat(i,j).imag();
+			matRe(i, j) = mat(i,j).real();
+			matRe(i + mat_size1, j + mat_size2) = mat(i,j).imag();
 		}
 	}
 
@@ -165,14 +174,16 @@ template<class t_vec_cplx, class t_vec_real>
 t_vec_cplx unite_cplx(const t_vec_real& vecRe, const t_vec_real& vecIm)
 requires is_complex<typename t_vec_cplx::value_type> && is_vec<t_vec_cplx> && is_vec<t_vec_real>
 {
+	const auto vecRe_size = vecRe.size();
+
 	assert(vecRe.size() == vecIm.size());
-	t_vec_cplx vec = zero<t_vec_cplx>(vecRe.size());
+	t_vec_cplx vec = zero<t_vec_cplx>(vecRe_size);
 
 	std::size_t iter = 0;
 	std::size_t iterRe = 0;
 	std::size_t iterIm = 0;
 
-	for(; iterRe < vecRe.size(); )
+	for(; iterRe < vecRe_size; )
 	{
 		vec[iter].real(vecRe[iterRe]);
 		vec[iter].imag(vecIm[iterIm]);
@@ -193,14 +204,17 @@ template<class t_mat_cplx, class t_mat_real>
 t_mat_cplx unite_cplx(const t_mat_real& matRe, const t_mat_real& matIm)
 requires is_complex<typename t_mat_cplx::value_type> && is_mat<t_mat_cplx> && is_mat<t_mat_real>
 {
-	assert(matRe.size1() == matIm.size1());
-	assert(matRe.size2() == matIm.size2());
+	const auto matRe_size1 = matRe.size1();
+	const auto matRe_size2 = matRe.size2();
 
-	t_mat_cplx mat = zero<t_mat_cplx>(matRe.size1(), matRe.size2());
+	assert(matRe_size1 == matIm.size1());
+	assert(matRe_size2 == matIm.size2());
 
-	for(std::size_t i = 0; i < matRe.size1(); ++i)
+	t_mat_cplx mat = zero<t_mat_cplx>(matRe_size1, matRe_size2);
+
+	for(std::size_t i = 0; i < matRe_size1; ++i)
 	{
-		for(std::size_t j = 0; j < matRe.size2(); ++j)
+		for(std::size_t j = 0; j < matRe_size2; ++j)
 		{
 			mat(i, j).real(matRe(i, j));
 			mat(i, j).imag(matIm(i, j));
@@ -218,13 +232,14 @@ template<class t_vec_cplx, class t_vec_real>
 t_vec_cplx unite_cplx_real(const t_vec_real& vecReIm)
 requires is_complex<typename t_vec_cplx::value_type> && is_vec<t_vec_cplx> && is_vec<t_vec_real>
 {
-	t_vec_cplx vec = zero<t_vec_cplx>(vecReIm.size() / 2);
+	const auto vec_size = vecReIm.size() / 2;
+	t_vec_cplx vec = zero<t_vec_cplx>(vec_size);
 
 	std::size_t iter = 0;
 	std::size_t iterRe = 0;
-	std::size_t iterIm = vec.size();
+	std::size_t iterIm = vec_size;
 
-	for(; iter < vec.size(); )
+	for(; iter < vec_size; )
 	{
 		vec[iter].real(vecReIm[iterRe]);
 		vec[iter].imag(vecReIm[iterIm]);
@@ -245,14 +260,16 @@ template<class t_mat_cplx, class t_mat_real>
 t_mat_cplx unite_cplx_real(const t_mat_real& matReIm)
 requires is_complex<typename t_mat_cplx::value_type> && is_mat<t_mat_cplx> && is_mat<t_mat_real>
 {
-	t_mat_cplx mat = zero<t_mat_cplx>(matReIm.size1() / 2, matReIm.size2() / 2);
+	const auto mat_size1 = matReIm.size1() / 2;
+	const auto mat_size2 = matReIm.size2() / 2;
+	t_mat_cplx mat = zero<t_mat_cplx>(mat_size1, mat_size2);
 
-	for(std::size_t i = 0; i < mat.size1(); ++i)
+	for(std::size_t i = 0; i < mat_size1; ++i)
 	{
-		for(std::size_t j = 0; j < mat.size2(); ++j)
+		for(std::size_t j = 0; j < mat_size2; ++j)
 		{
 			mat(i, j).real(matReIm(i, j));
-			mat(i, j).imag(matReIm(i+mat.size1(), j+mat.size2()));
+			mat(i, j).imag(matReIm(i + mat_size1, j + mat_size2));
 		}
 	}
 
@@ -407,13 +424,16 @@ template<class t_mat>
 t_mat conj(const t_mat& mat)
 requires is_basic_mat<t_mat>
 {
+	const auto mat_size1 = mat.size1();
+	const auto mat_size2 = mat.size2();
+
 	t_mat mat2;
 	if constexpr(is_dyn_mat<t_mat>)
-		mat2 = t_mat(mat.size2(), mat.size1());
+		mat2 = t_mat(mat_size2, mat_size1);
 
-	for(std::size_t i = 0; i < mat.size1(); ++i)
+	for(std::size_t i = 0; i < mat_size1; ++i)
 	{
-		for(std::size_t j = 0; j < mat.size2(); ++j)
+		for(std::size_t j = 0; j < mat_size2; ++j)
 		{
 			if constexpr(is_complex<typename t_mat::value_type>)
 				mat2(i, j) = std::conj(mat(i, j));
@@ -433,13 +453,16 @@ template<class t_mat>
 t_mat herm(const t_mat& mat)
 requires is_basic_mat<t_mat>
 {
+	const auto mat_size1 = mat.size1();
+	const auto mat_size2 = mat.size2();
+
 	t_mat mat2;
 	if constexpr(is_dyn_mat<t_mat>)
-		mat2 = t_mat(mat.size2(), mat.size1());
+		mat2 = t_mat(mat_size2, mat_size1);
 
-	for(std::size_t i = 0; i < mat.size1(); ++i)
+	for(std::size_t i = 0; i < mat_size1; ++i)
 	{
-		for(std::size_t j = 0; j < mat.size2(); ++j)
+		for(std::size_t j = 0; j < mat_size2; ++j)
 		{
 			if constexpr(is_complex<typename t_mat::value_type>)
 				mat2(j, i) = std::conj(mat(i, j));

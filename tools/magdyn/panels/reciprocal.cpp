@@ -111,13 +111,13 @@ void MagDynDlg::CreateReciprocalPanel()
 	// reduce path to first brillouin zone
 	QPushButton *btnReduceBZ = new QPushButton("Reduce to First Zone", this);
 	btnReduceBZ->setToolTip("Reduce the scan path to the first Brillouin zone.");
-	btnReduceBZ->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+	btnReduceBZ->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 	// show 3d brillouin zone
 	QPushButton *btnShowBZ = new QPushButton("3D Brillouin Zone...", this);
 	btnShowBZ->setIcon(QIcon::fromTheme("applications-graphics"));
 	btnShowBZ->setToolTip("Show a 3D view of the first nuclear Brillouin zone.");
-	btnShowBZ->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+	btnShowBZ->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 
 	QFrame *sep1 = new QFrame(m_reciprocalpanel);
@@ -319,7 +319,7 @@ void MagDynDlg::CreateReciprocalPanel()
 		{
 			for(int i = 0; i < 3; ++i)
 				m_recip_trafo_axis[i]->setEnabled(false);
-	
+
 			labelDelta->setText("Scale:");
 			m_recip_trafo_delta->setMinimum(-999);
 			m_recip_trafo_delta->setMaximum(+999);

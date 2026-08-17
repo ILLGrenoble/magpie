@@ -99,10 +99,11 @@ requires is_vec<t_vec>
 	//const t_cont<t_vec>& normals = std::get<1>(tup);
 	const t_cont<t_vec>& uvs = std::get<2>(tup);
 
+	const auto vertices_size = vertices.size();
 	t_cont<t_vec> vertices_new;
 	t_cont<t_vec> normals_new;
-	vertices_new.reserve(vertices.size());
-	normals_new.reserve(vertices.size());
+	vertices_new.reserve(vertices_size);
+	normals_new.reserve(vertices_size);
 
 	// vertices
 	for(t_vec vec : vertices)
@@ -778,7 +779,7 @@ requires is_vec<t_vec>
 	using T = typename t_vec::value_type;
 	const T g = golden<T>;
 
-	t_cont<t_vec> vertices =
+	const t_cont<t_vec> vertices =
 	{
 		create<t_vec>({ 0, -l, -g*l }), create<t_vec>({ 0, -l, +g*l }),
 		create<t_vec>({ 0, +l, -g*l }), create<t_vec>({ 0, +l, +g*l }),
@@ -790,7 +791,7 @@ requires is_vec<t_vec>
 		create<t_vec>({ +l, -g*l, 0 }), create<t_vec>({ +l, +g*l, 0 }),
 	};
 
-	t_cont<t_cont<std::size_t>> faces =
+	const t_cont<t_cont<std::size_t>> faces =
 	{
 		{ 4, 2, 0 }, { 0, 6, 10 }, { 10, 7, 1 }, { 1, 3, 5 }, { 5, 9, 4 },
 		{ 7, 10, 6 }, { 6, 0, 2 }, { 2, 4, 9 }, { 9, 5, 3 }, { 3, 1, 7 },
@@ -798,12 +799,14 @@ requires is_vec<t_vec>
 		{ 3, 7, 11 }, { 7, 6, 11 }, { 6, 2, 11 }, { 2, 9, 11 }, { 9, 3, 11 },
 	};
 
+	const auto faces_size = faces.size();
+
 
 	t_cont<t_vec> normals;
 	t_cont<t_cont<t_vec>> uvs;
 
-	normals.reserve(faces.size());
-	uvs.reserve(faces.size());
+	normals.reserve(faces_size);
+	uvs.reserve(faces_size);
 
 	for(const auto& face : faces)
 	{
@@ -845,7 +848,7 @@ requires is_vec<t_vec>
 	using T = typename t_vec::value_type;
 	const T g = golden<T>;
 
-	t_cont<t_vec> vertices =
+	const t_cont<t_vec> vertices =
 	{
 		create<t_vec>({ l, l, l }), create<t_vec>({ l, l, -l }),
 		create<t_vec>({ l, -l, l }), create<t_vec>({ l, -l, -l }),
@@ -863,7 +866,7 @@ requires is_vec<t_vec>
 		create<t_vec>({ -T{l}/g, g*l, 0 }), create<t_vec>({ -T{l}/g, -g*l, 0 }),
 	};
 
-	t_cont<t_cont<std::size_t>> faces =
+	const t_cont<t_cont<std::size_t>> faces =
 	{
 		{ 0, 16, 18, 4, 8 }, { 0, 8, 10, 2, 12 }, { 0, 12, 13, 1, 16 },
 		{ 1, 9, 5, 18, 16 }, { 1, 13, 3, 11, 9 }, { 2, 17, 3, 13, 12 },
@@ -871,12 +874,14 @@ requires is_vec<t_vec>
 		{ 4, 18, 5, 15, 14 }, { 5, 9, 11, 7, 15 }, { 6, 14, 15, 7, 19 },
 	};
 
+	const auto faces_size = faces.size();
+
 
 	t_cont<t_vec> normals;
 	t_cont<t_cont<t_vec>> uvs;
 
-	normals.reserve(faces.size());
-	uvs.reserve(faces.size());
+	normals.reserve(faces_size);
+	uvs.reserve(faces_size);
 
 	for(const auto& face : faces)
 	{

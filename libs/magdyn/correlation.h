@@ -57,16 +57,18 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	using namespace tl2_ops;
 
 	const t_size N = GetMagneticSitesCount();
-	const t_size num_branches = 2*N;
 	if(N == 0)
 		return false;
+
+	const t_size num_branches = 2*N;
+	const t_size num_energies = S.E_and_S.size();
 
 	SortByEnergies(S);  // in descending order
 
 	// create a matrix of eigenvectors
 	std::vector<t_vec> evecs;
-	evecs.reserve(S.E_and_S.size());
-	for(t_size idx = 0; idx < S.E_and_S.size(); ++idx)
+	evecs.reserve(num_energies);
+	for(t_size idx = 0; idx < num_energies; ++idx)
 		evecs.push_back(S.E_and_S[idx].state);
 	S.evec_mat = tl2::create<t_mat>(evecs);
 
@@ -85,6 +87,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 
 	// equation (32) from (Toth 2015)
 	const t_mat energy_mat = tl2::herm(S.evec_mat) * S.H_comm * S.evec_mat;  // energies
+	const t_size energy_mat_size = energy_mat.size1();
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
 	std::cout << "E_mat =\n";
@@ -99,21 +102,22 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 			<< "." << std::endl;
 	}
 
-	t_mat E_sqrt = S.comm * energy_mat;        // abs. energies
-	for(t_size i = 0; i < E_sqrt.size1(); ++i)
-		E_sqrt(i, i) = std::sqrt(E_sqrt(i, i));  // sqrt. of abs. energies
-
-	if(energy_mat.size1() != S.E_and_S.size())
+	if(energy_mat_size != num_energies)
 	{
-		MAGDYN_CERR_OPT << "Magdyn warning: Expected " << S.E_and_S.size() << " energies at Q = "
-			<< S.Q_rlu << ", but got " << energy_mat.size1() << " energies"
+		MAGDYN_CERR_OPT << "Magdyn warning: Expected " << num_energies << " energies at Q = "
+			<< S.Q_rlu << ", but got " << energy_mat_size << " energies"
 			<< "." << std::endl;
 
-		S.E_and_S.resize(energy_mat.size1());
+		S.E_and_S.resize(energy_mat_size);
 	}
 
+	t_mat E_sqrt = S.comm * energy_mat;        // abs. energies
+	const t_size E_sqrt_size = E_sqrt.size1();
+	for(t_size i = 0; i < E_sqrt_size; ++i)
+		E_sqrt(i, i) = std::sqrt(E_sqrt(i, i));  // sqrt. of abs. energies
+
 	// re-create energies, to be consistent with the weights
-	for(t_size i = 0; i < energy_mat.size1(); ++i)
+	for(t_size i = 0; i < energy_mat_size; ++i)
 	{
 		if(m_perform_checks && !tl2::equals_0(energy_mat(i, i).imag(), m_eps))
 		{
@@ -161,9 +165,10 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 
 	// calculate form factors per site (or uniformly for all if only one is given)
 	std::vector<tl2::ExprParser<t_cplx>> magffacts = m_magffacts;
+	const t_size magffacts_size = magffacts.size();
 	std::vector<t_cplx> ffacts;
-	ffacts.reserve(magffacts.size());
-	for(t_size ffact_idx = 0; ffact_idx < magffacts.size(); ++ffact_idx)
+	ffacts.reserve(magffacts_size);
+	for(t_size ffact_idx = 0; ffact_idx < magffacts_size; ++ffact_idx)
 	{
 		if(!magffacts[ffact_idx])
 		{
@@ -268,7 +273,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		tl2::niceprint(std::cout, M_xy, 1e-4, 4);
 #endif
 
-		for(t_size i = 0; i < S.E_and_S.size(); ++i)
+		for(t_size i = 0; i < energy_mat_size; ++i)
 			S.E_and_S[i].S(x_idx, y_idx) += M_xy(i, i) / t_real(2*N);
 	} // end of coordinate iteration
 

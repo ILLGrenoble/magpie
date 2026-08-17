@@ -167,13 +167,14 @@ bool create_triangle_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 
 		for(const t_vec3_gl& vert : verts)
 		{
+			const int vert_size = (int)vert.size();
 			t_real_gl norm = bNorm ? tl2::norm<t_vec3_gl>(vert) : 1;
 
 			for(int i = 0; i < iRepeat; ++i)
 			{
 				for(int iElem = 0; iElem < iElems; ++iElem)
 				{
-					if(iElem < vert.size())
+					if(iElem < vert_size)
 						vecRet.push_back(vert[iElem] / norm);
 					else
 						vecRet.push_back(lastElem);
@@ -250,10 +251,12 @@ bool create_triangle_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 		obj.m_colour_buffer->bind();
 
 		std::vector<t_real_gl> vecCols;
-		vecCols.reserve(4*triagverts.size());
-		for(std::size_t iVert = 0; iVert < triagverts.size(); ++iVert)
+		const std::size_t triagverts_size = triagverts.size();
+		vecCols.reserve(4*triagverts_size);
+		for(std::size_t iVert = 0; iVert < triagverts_size; ++iVert)
 		{
-			for(int icol = 0; icol < obj.m_colour.size(); ++icol)
+			const int col_size = (int)obj.m_colour.size();
+			for(int icol = 0; icol < col_size; ++icol)
 				vecCols.push_back(obj.m_colour[icol]);
 		}
 
@@ -319,8 +322,9 @@ bool create_line_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 	auto to_float_array = [](const std::vector<t_vec3_gl>& verts, int iElems = 3)
 		-> std::vector<t_real_gl>
 	{
+		const std::size_t verts_size = verts.size();
 		std::vector<t_real_gl> vecRet;
-		vecRet.reserve(verts.size()*iElems);
+		vecRet.reserve(verts_size*iElems);
 
 		for(const t_vec3_gl& vert : verts)
 		{
@@ -366,10 +370,12 @@ bool create_line_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 		obj.m_colour_buffer->bind();
 
 		std::vector<t_real_gl> vecCols;
-		vecCols.reserve(4*verts.size());
-		for(std::size_t iVert = 0; iVert < verts.size(); ++iVert)
+		const std::size_t verts_size = verts.size();
+		vecCols.reserve(4*verts_size);
+		for(std::size_t iVert = 0; iVert < verts_size; ++iVert)
 		{
-			for(int icol = 0; icol < obj.m_colour.size(); ++icol)
+			const int col_size = (int)obj.m_colour.size();
+			for(int icol = 0; icol < col_size; ++icol)
 				vecCols.push_back(obj.m_colour[icol]);
 		}
 

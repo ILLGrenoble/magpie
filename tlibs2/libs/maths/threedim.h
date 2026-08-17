@@ -92,8 +92,10 @@ requires is_basic_vec<t_vec> && is_mat<t_mat>
 		mat = t_mat{3, 3};
 
 	// if static matrix is larger than 3x3 (e.g. for homogeneous coordinates), initialise as identity
-	if(mat.size1() > 3 || mat.size2() > 3)
-		mat = unit<t_mat>(mat.size1(), mat.size2());
+	const auto mat_size1 = mat.size1();
+	const auto mat_size2 = mat.size2();
+	if(mat_size1 > 3 || mat_size2 > 3)
+		mat = unit<t_mat>(mat_size1, mat_size2);
 
 	mat(0,0) = 0;       mat(0,1) = -vec[2]; mat(0,2) = vec[1];
 	mat(1,0) = vec[2];  mat(1,1) = 0;       mat(1,2) = -vec[0];
@@ -209,14 +211,16 @@ template<class t_vec, class t_scalar = typename t_vec::value_type>
 requires is_vec<t_vec>
 t_vec perp(const t_vec& vec, t_scalar eps = std::numeric_limits<t_scalar>::epsilon())
 {
-	if(vec.size() == 2)
+	const auto vec_size = vec.size();
+
+	if(vec_size == 2)
 	{
 		t_vec vecret = create<t_vec>({vec[1], vec[0]});
 		if(std::abs(vecret[0]) > std::abs(vecret[1]))
 			vecret[0] = -vecret[0];
 	}
 
-	else if(vec.size() == 3 || vec.size() == 4)
+	else if(vec_size == 3 || vec_size == 4)
 	{
 		while(true)
 		{
@@ -286,10 +290,12 @@ requires is_vec<t_vec>
 	using namespace tl2_ops;
 	using t_real = typename t_vec::value_type;
 
-	assert(vec0.size() == vec1.size());
+	const auto vec0_size = vec0.size();
+
+	assert(vec0_size == vec1.size());
 
 	// 2-dim case
-	if(vec0.size() == 2)
+	if(vec0_size == 2)
 	{
 		// signed angles wrt basis
 		t_real angle0 = std::atan2(vec0[1], vec0[0]);
@@ -299,7 +305,7 @@ requires is_vec<t_vec>
 	}
 
 	// 3-dim and 4-dim homogeneous case
-	else if(vec0.size() == 3 || (vec0.size() == 4 && force_3dim))
+	else if(vec0_size == 3 || (vec0_size == 4 && force_3dim))
 	{
 		// cross product gives sine and rotation axis
 		t_vec axis = cross<t_vec>({ vec0, vec1 });
@@ -344,10 +350,10 @@ t_mat rotation(const t_vec& vec1, const t_vec& vec2,
 	const t_vec *ortho_vec = nullptr, t_real eps = 1e-6, bool force_3dim = true)
 requires is_vec<t_vec> && is_mat<t_mat>
 {
-	assert(vec1.size() == vec2.size());
-
 	using t_size = decltype(vec1.size());
 	const t_size dim = vec1.size();
+
+	assert(dim == vec2.size());
 
 	// get rotation axis and angle
 	t_vec axis{};
@@ -366,7 +372,7 @@ requires is_vec<t_vec> && is_mat<t_mat>
 	{
 		// collinear vectors?
 		if(equals<t_real>(angle, 0, eps))
-			return tl2::unit<t_mat>(vec1.size());
+			return tl2::unit<t_mat>(dim);
 
 		// antiparallel vectors?
 		if(equals<t_real>(std::abs(angle), pi<t_real>, eps))
@@ -1040,7 +1046,7 @@ requires is_vec<t_vec>
 {
 	t_vec newatom = _atom;
 
-	for(std::size_t i = 0; i < /*newatom.size()*/ dim; ++i)
+	for(std::size_t i = 0; i < dim; ++i)
 	{
 		newatom[i] = std::fmod(newatom[i], uc_max - uc_min);
 		if(newatom[i] <= uc_min)

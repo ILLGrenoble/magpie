@@ -86,10 +86,11 @@ t_vec bezier(const t_vec* P, std::size_t N, T t)
 {
 	if(N == 0)
 		return t_vec{};
-	const int n = N-1;
+	const int n = N - 1;
 
-	t_vec vec(P[0].size());
-	for(std::size_t i = 0; i < vec.size(); ++i) vec[i] = T(0);
+	const auto size = P[0].size();
+	t_vec vec(size);
+	for(std::size_t i = 0; i < size; ++i) vec[i] = T(0);
 
 	for(int i = 0; i <= n; ++i)
 		vec += P[i]*bernstein(i, n, t);
@@ -138,8 +139,9 @@ t_vec bspline(const t_vec* P, std::size_t N, T t, const std::vector<T>& knots)
 	const int m = knots.size()-1;
 	const int degree = m-n-1;
 
-	t_vec vec(P[0].size());
-	for(std::size_t i = 0; i < vec.size(); ++i)
+	const auto size = P[0].size();
+	t_vec vec(size);
+	for(std::size_t i = 0; i < size; ++i)
 		vec[i] = T(0);
 
 	for(int i = 0; i <= n; ++i)
@@ -210,12 +212,12 @@ class BSpline
 
 
 			// set knots to uniform, nonperiodic B-Spline
-			for(unsigned int i = 0; i < m_iDegree+1; ++i)
-				m_vecKnots[i] = 0.+i*m_eps;
-			for(unsigned int i=iM-m_iDegree-1; i<iM; ++i)
-				m_vecKnots[i] = 1.-i*m_eps;
-			for(unsigned int i=m_iDegree+1; i<iM-m_iDegree-1; ++i)
-				m_vecKnots[i] = T(i+1-m_iDegree-1) / T(iM-2*m_iDegree-2 + 1);
+			for(unsigned int i = 0; i < m_iDegree + 1; ++i)
+				m_vecKnots[i] = 0. + i*m_eps;
+			for(unsigned int i = iM - m_iDegree - 1; i<iM; ++i)
+				m_vecKnots[i] = 1. - i*m_eps;
+			for(unsigned int i = m_iDegree + 1; i < iM-m_iDegree - 1; ++i)
+				m_vecKnots[i] = T(i + 1 - m_iDegree - 1) / T(iM - 2*m_iDegree - 2 + 1);
 		}
 
 
@@ -418,11 +420,12 @@ void find_peaks(std::size_t num_pts, const T* _px, const T* _py, unsigned int sp
 	std::vector<T> spline_diff2 = tl2::diff<std::vector<T>>(
 		std::span<T>(spline_x, num_spline), std::span<T>(spline_diff.data(), num_spline));
 
+
 	// find zeros
 	std::vector<std::size_t> zeros = find_zeroes(spline_diff);
+	const std::size_t zeros_size = zeros.size();
 
-
-	for(std::size_t zero_idx = 0; zero_idx < zeros.size(); ++zero_idx)
+	for(std::size_t zero_idx = 0; zero_idx < zeros_size; ++zero_idx)
 	{
 		const std::size_t cur_zero_idx = zeros[zero_idx];
 
@@ -437,7 +440,7 @@ void find_peaks(std::size_t num_pts, const T* _px, const T* _py, unsigned int sp
 		int min_idx_right = -1;
 		if(zero_idx > 0)
 			min_idx_left = zeros[zero_idx-1];
-		if(zero_idx < zeros.size() - 1)
+		if(zero_idx < zeros_size - 1)
 			min_idx_right = zeros[zero_idx+1];
 
 		T height = 0.;

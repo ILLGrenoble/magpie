@@ -97,7 +97,7 @@ requires is_scalar<t_num>
 	else
 	{
 		t_num rest = num % granularity;
-		rest_is_0 = (rest==0);
+		rest_is_0 = (rest == 0);
 	}
 
 	return rest_is_0 ? num : (div + 1) * granularity;

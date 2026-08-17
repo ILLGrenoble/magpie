@@ -83,9 +83,10 @@ t_rtree make_rtree(const t_cont<t_vec>& points, const t_mat* B = nullptr)
 {
 	using namespace tl2_ops;
 
-	t_rtree rt;//(typename t_rtree::parameters_type(points.size()));
+	const auto points_size = points.size();
+	t_rtree rt;//(typename t_rtree::parameters_type(points_size));
 
-	for(std::size_t ptidx = 0; ptidx < points.size(); ++ptidx)
+	for(std::size_t ptidx = 0; ptidx < points_size; ++ptidx)
 	{
 		t_vertex vert;
 		tl2::to_geo_vertex<t_vertex, t_vec>(vert,

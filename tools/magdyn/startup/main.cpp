@@ -311,6 +311,22 @@ int main(int argc, char** argv)
 		//goto_set_num_threads(1);
 		//openblas_set_num_threads(1);
 
+		auto print_command_line = [argc, argv]() -> std::string
+		{
+			if(!argv)
+				return "";
+
+			std::ostringstream ostr;
+			for(int arg = 0; arg < argc; ++arg)
+			{
+				if(!argv[arg])
+					continue;
+				ostr << argv[arg] << " ";
+			}
+
+			return ostr.str();
+		};
+
 		bool show_help = false;
 		bool healthcheck = false;
 		bool benchmark = false;
@@ -423,6 +439,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 				CERR_OPT << "Magpie: Please give a model file." << std::endl;
 				return -1;
 			}
+
+			std::cout << "# command: " << print_command_line() << std::endl;
 
 			if(!benchmark(model_file, g_num_threads, benchmark_no_thread_loop, num_Q_pts))
 			{

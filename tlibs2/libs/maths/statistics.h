@@ -175,17 +175,18 @@ requires is_vec<t_vec>
 		return std::make_tuple(t_vec{}, t_vec{});
 
 	// set to limit values
-	t_vec vecmin = zero<t_vec>(verts.begin()->size());
-	t_vec vecmax = zero<t_vec>(verts.begin()->size());
+	const auto dim = verts.begin()->size();
+	t_vec vecmin = zero<t_vec>(dim);
+	t_vec vecmax = zero<t_vec>(dim);
 
-	for(std::size_t i=0; i<vecmin.size(); ++i)
+	for(std::size_t i = 0; i < dim; ++i)
 	{
 		vecmin[i] = std::numeric_limits<t_real>::max();
 		vecmax[i] = std::numeric_limits<t_real>::lowest();
 	}
 
 	// iterate components
-	for(std::size_t i = 0; i < vecmin.size(); ++i)
+	for(std::size_t i = 0; i < dim; ++i)
 	{
 		// iterate vectors
 		for(const t_vec& vec : verts)
@@ -228,9 +229,10 @@ requires is_mat<t_mat> && is_vec<t_vec>
 	else
 		vecMean = mean<t_vec>(vecVals);
 
-	t_mat matCov = zero<t_mat>(vecVals[0].size(), vecVals[0].size());
-	T tSum = T{0};
 	const std::size_t N = vecVals.size();
+	const std::size_t dim = vecVals[0].size();
+	t_mat matCov = zero<t_mat>(dim, dim);
+	T tSum = T{0};
 
 	for(std::size_t i = 0; i < N; ++i)
 	{
@@ -382,7 +384,8 @@ T chi2_nd(const t_func& func,
 {
 	T tchi2 = T(0);
 
-	for(std::size_t i = 0; i < vecvecX.size(); ++i)
+	const auto vecvecX_size = vecvecX.size();
+	for(std::size_t i = 0; i < vecvecX_size; ++i)
 	{
 		T td = T(vecY[i]) - func(vecvecX[i]);
 		T tdy = vecDY[i];

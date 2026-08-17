@@ -106,9 +106,10 @@ requires is_vec<t_vec>
 	t_cont<t_vec> edgeInters;
 
 	// intersect with each polygon edge
-	for(std::size_t i = 0; i < polyVerts.size(); ++i)
+	const auto polyVerts_size = polyVerts.size();
+	for(std::size_t i = 0; i < polyVerts_size; ++i)
 	{
-		std::size_t j = (i+1) % polyVerts.size();
+		std::size_t j = (i + 1) % polyVerts_size;
 
 		t_vec lineOrg = polyVerts[i];
 		t_vec lineDir = polyVerts[j] - lineOrg;

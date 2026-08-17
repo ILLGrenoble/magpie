@@ -171,7 +171,7 @@ struct complex_cast<t_real_to, t_real_from, 0>
 /**
  * Complex error function
  */
-template<class T=double>
+template<class T = double>
 std::complex<T> erf(const std::complex<T>& z)
 {
 	complex_cast<t_real_fadd, T> cst;
@@ -182,7 +182,7 @@ std::complex<T> erf(const std::complex<T>& z)
 /**
  * Complex complementary error function
  */
-template<class T=double>
+template<class T = double>
 std::complex<T> erfc(const std::complex<T>& z)
 {
 	complex_cast<t_real_fadd, T> cst;
@@ -194,7 +194,7 @@ std::complex<T> erfc(const std::complex<T>& z)
  * Faddeeva function
  * @see https://en.wikipedia.org/wiki/Faddeeva_function
  */
-template<class T=double>
+template<class T = double>
 std::complex<T> faddeeva(const std::complex<T>& z)
 {
 	std::complex<T> i(0, 1.);
@@ -205,7 +205,7 @@ std::complex<T> faddeeva(const std::complex<T>& z)
  * Voigt profile
  * @see https://en.wikipedia.org/wiki/Voigt_profile
  */
-template<class T=double>
+template<class T = double>
 T voigt_model(T x, T x0, T sigma, T gamma, T amp, T offs)
 {
 	T norm = T(1)/(std::sqrt(T(2)*pi<T>) * sigma);
@@ -214,14 +214,14 @@ T voigt_model(T x, T x0, T sigma, T gamma, T amp, T offs)
 	return amp*norm * faddeeva<T>(z).real() + offs;
 }
 
-template<class T=double>
+template<class T = double>
 T voigt_model_amp(T x, T x0, T sigma, T gamma, T amp, T offs)
 {
 	std::complex<T> z = std::complex<T>(x-x0, gamma) / (sigma * std::sqrt(T(2)));
 	return amp * faddeeva<T>(z).real() + offs;
 }
 
-template<class T=double>
+template<class T = double>
 T voigt_model_amp_slope(T x, T x0, T sigma, T gamma, T amp, T offs, T slope)
 {
 	std::complex<T> z = std::complex<T>(x-x0, gamma) / (sigma * std::sqrt(T(2)));
@@ -240,7 +240,7 @@ T voigt_model_amp_slope(T x, T x0, T sigma, T gamma, T amp, T offs, T slope)
 /**
  * wrapper for boost's Y function
  */
-template<class T=double>
+template<class T = double>
 std::complex<T> Ylm(int l /*0..i*/, int m /*-l..l*/, T th /*0..pi*/, T ph /*0..2pi*/)
 {
 	return boost::math::spherical_harmonic<T,T>(l,m, th, ph);

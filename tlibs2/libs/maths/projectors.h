@@ -250,10 +250,11 @@ requires is_vec<t_vec> && is_mat<t_mat>
 	vecSub[row] = std::sqrt(n);
 
 	const t_vec vecOp = vec - vecSub;
+	const auto vecOp_size = vecOp.size();
 
 	// nothing to do -> return unit matrix
 	if(equals_0<t_vec>(vecOp))
-		return unit<t_mat>(vecOp.size(), vecOp.size());
+		return unit<t_mat>(vecOp_size, vecOp_size);
 
 	return ortho_mirror_op<t_mat, t_vec>(vecOp, false);
 }
@@ -353,9 +354,10 @@ t_mat orthonorm_sys(const t_mat& sys, bool use_col = true)
 requires is_mat<t_mat> && is_vec<t_vec>
 {
 	using size_t = decltype(sys.size1());
+	const size_t sys_size2 = sys.size2();
 	t_mat newsys = sys;
 
-	for(size_t colidx = 0; colidx < sys.size2(); ++colidx)
+	for(size_t colidx = 0; colidx < sys_size2; ++colidx)
 	{
 		t_vec vecSys;
 		if(use_col)

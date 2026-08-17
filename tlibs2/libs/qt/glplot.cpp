@@ -281,7 +281,8 @@ void GlPlotRenderer::SetObjectHighlight(std::size_t idx, bool highlight)
  */
 void GlPlotRenderer::SetObjectsHighlight(bool highlight)
 {
-	for(std::size_t idx = 0; idx < m_objs.size(); ++idx)
+	const std::size_t objs_size = m_objs.size();
+	for(std::size_t idx = 0; idx < objs_size; ++idx)
 		m_objs[idx].m_highlighted = highlight;
 }
 
@@ -350,7 +351,9 @@ void GlPlotRenderer::RemoveObject(std::size_t idx)
 
 void GlPlotRenderer::RemoveObjects()
 {
-	for(std::size_t obj = 0; obj < m_objs.size(); ++obj)
+	const std::size_t objs_size = m_objs.size();
+
+	for(std::size_t obj = 0; obj < objs_size; ++obj)
 	{
 		// keep coordinate crosses
 		if(m_coordCrossLab && obj == *m_coordCrossLab)
@@ -1547,7 +1550,8 @@ void GlPlotRenderer::UpdatePicker()
 
 	QMutexLocker _locker{&m_mutexObj};
 
-	for(std::size_t curObj = 0; curObj < m_objs.size(); ++curObj)
+	const std::size_t objs_size = m_objs.size();
+	for(std::size_t curObj = 0; curObj < objs_size; ++curObj)
 	{
 		const auto& obj = m_objs[curObj];
 		const GlRenderObj *linkedObj = &obj;

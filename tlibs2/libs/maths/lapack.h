@@ -617,10 +617,10 @@ eigenvec(const t_mat_cplx& mat,
 	std::vector<t_cplx> evals;
 	std::vector<t_vec_cplx> evecs;
 
-	if(mat.size1() != mat.size2() || mat.size1() == 0)
+	const auto N = mat.size1();
+	if(N != mat.size2() || N == 0)
 		return std::make_tuple(0, std::move(evals), std::move(evecs));
 
-	const std::size_t N = mat.size1();
 	evals.resize(N);
 
 	if(!only_evals)
@@ -799,13 +799,13 @@ eigenvec(const t_mat& mat, bool only_evals, bool is_symmetric, bool normalise,
 	std::vector<t_real> evals_re, evals_im;
 	std::vector<t_vec> evecs_re, evecs_im;
 
-	if(mat.size1() != mat.size2() || mat.size1() == 0)
+	const std::size_t N = mat.size1();
+	if(N != mat.size2() || N == 0)
 	{
 		return std::make_tuple(false, std::move(evals_re), std::move(evals_im),
 			std::move(evecs_re), std::move(evecs_im));
 	}
 
-	const std::size_t N = mat.size1();
 	evals_re.resize(N, t_real{0});
 	evals_im.resize(N, t_real{0});
 

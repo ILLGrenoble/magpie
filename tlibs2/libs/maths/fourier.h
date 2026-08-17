@@ -66,7 +66,6 @@ requires is_complex<t_cplx>
 t_cplx dft_coeff(int k, const t_cont<t_cplx>& invec, bool bInv = false)
 {
 	const std::size_t N = invec.size();
-
 	t_cplx imag(0., 1.);
 	t_cplx f(0., 0.);
 
@@ -133,13 +132,15 @@ template<typename T = double, class t_cplx = std::complex<T>,
 requires is_complex<t_cplx>
 t_cont<t_cplx> fft_reorder(const t_cont<t_cplx>& vecIn)
 {
+	const std::size_t N = vecIn.size();
+
 	t_cont<std::size_t> vecIdx =
-		bit_reverse_indices<std::size_t, t_cont>(vecIn.size());
+		bit_reverse_indices<std::size_t, t_cont>(N);
 
 	t_cont<t_cplx> vecInRev;
-	vecInRev.reserve(vecIn.size());
+	vecInRev.reserve(N);
 
-	for(std::size_t i = 0; i < vecIn.size(); ++i)
+	for(std::size_t i = 0; i < N; ++i)
 		vecInRev.push_back(vecIn[vecIdx[i]]);
 
 	return vecInRev;
