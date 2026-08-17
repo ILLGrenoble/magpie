@@ -1422,10 +1422,11 @@ template<class t_mat>
 t_mat prod(const t_mat& mat1, const t_mat& mat2, bool assert_sizes/*=true*/)
 requires tl2::is_basic_mat<t_mat>
 {
-	const auto mat1_size1 = mat1.size1();
-	const auto mat1_size2 = mat1.size2();
-	const auto mat2_size1 = mat2.size1();
-	const auto mat2_size2 = mat2.size2();
+	using size_t = decltype(mat1.size1());
+	const size_t mat1_size1 = mat1.size1();
+	const size_t mat1_size2 = mat1.size2();
+	const size_t mat2_size1 = mat2.size1();
+	const size_t mat2_size2 = mat2.size2();
 
 	// if not asserting sizes, the inner size will use the minimum of the two matrix sizes
 	if(assert_sizes)
@@ -1440,14 +1441,14 @@ requires tl2::is_basic_mat<t_mat>
 	if constexpr(tl2::is_dyn_mat<t_mat>)
 		matRet = t_mat{mat1_size1, mat2_size2};
 
-	const std::size_t innersize = std::min(mat1_size2, mat2_size1);
+	const size_t innersize = std::min(mat1_size2, mat2_size1);
 
-	for(std::size_t row = 0; row < mat1_size1; ++row)
+	for(size_t row = 0; row < mat1_size1; ++row)
 	{
-		for(std::size_t col = 0; col < mat2_size2; ++col)
+		for(size_t col = 0; col < mat2_size2; ++col)
 		{
 			matRet(row, col) = 0;
-			for(std::size_t i = 0; i < innersize; ++i)
+			for(size_t i = 0; i < innersize; ++i)
 				matRet(row, col) += mat1(row, i) * mat2(i, col);
 		}
 	}
