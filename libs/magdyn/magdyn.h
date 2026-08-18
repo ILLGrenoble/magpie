@@ -589,7 +589,7 @@ public:
 	// --------------------------------------------------------------------
 	// topological calculations
 	// --------------------------------------------------------------------
-	std::tuple<std::vector<t_vec>, SofQE> CalcBerryConnections(const t_vec3_real& Q_start,
+	std::tuple<std::vector<t_vec3>, SofQE> CalcBerryConnections(const t_vec3_real& Q_start,
 		t_real delta = 1e-12, const std::vector<t_size>* perm = nullptr,
 		bool evecs_ortho = true) const;
 

@@ -671,26 +671,26 @@ public:
 
 public:
 	// constructors
-	vec_static() = default;
-	~vec_static() = default;
+	constexpr vec_static() = default;
+	constexpr ~vec_static() = default;
 
-	vec_static(const vec_static<T, SIZE>& other)
+	constexpr vec_static(const vec_static<T, SIZE>& other)
 	{
 		for(size_type i = 0; i < SIZE; ++i)
 			(*this)[i] = other[i];
 	}
 
-	vec_static(vec_static<T, SIZE>&& other) noexcept
+	constexpr vec_static(vec_static<T, SIZE>&& other) noexcept
 		: m_data{ std::move(other.m_data) }
 	{ }
 
 	template<class t_vec_other> requires is_basic_vec<t_vec_other>
-	vec_static(const t_vec_other& other)
+	constexpr vec_static(const t_vec_other& other)
 	{
 		this->operator=<t_vec_other>(other);
 	}
 
-	vec_static(const std::initializer_list<T>& lst)
+	constexpr vec_static(const std::initializer_list<T>& lst)
 	{
 		size_type i = 0;
 		for(const T& elem : lst)
@@ -704,7 +704,7 @@ public:
 	}
 
 	// _SIZE is a dummy size arguments as the vector is statically sized
-	vec_static([[__maybe_unused__]] size_type _SIZE, const T* arr = nullptr)
+	constexpr vec_static([[__maybe_unused__]] size_type _SIZE, const T* arr = nullptr)
 	{
 		assert(_SIZE == SIZE);
 		if(arr)
@@ -713,7 +713,7 @@ public:
 
 
 	// assignment operators
-	vec_static<T, SIZE>& operator=(const vec_static<T, SIZE>& other)
+	constexpr vec_static<T, SIZE>& operator=(const vec_static<T, SIZE>& other)
 	{
 		for(size_type i = 0; i < SIZE; ++i)
 			(*this)[i] = other[i];
@@ -722,7 +722,7 @@ public:
 	}
 
 	template<class t_vec_other> requires is_basic_vec<t_vec_other>
-	vec_static<T, SIZE>& operator=(
+	constexpr vec_static<T, SIZE>& operator=(
 		const t_vec_other& other)
 	{
 		*this = convert<vec_static<T, SIZE>, t_vec_other>(other);
@@ -731,7 +731,7 @@ public:
 
 
 	// move operator
-	vec_static<T, SIZE>& operator=(vec_static<T, SIZE>&& other)
+	constexpr vec_static<T, SIZE>& operator=(vec_static<T, SIZE>&& other)
 	{
 		m_data = std::move(other.m_data);
 		return *this;
@@ -739,14 +739,14 @@ public:
 
 
 	// conversion from / to array
-	void from_array(const T* arr)
+	constexpr void from_array(const T* arr)
 	{
 		// initialise from given array data
 		for(size_type i = 0; i < SIZE; ++i)
 			this->operator[](i) = arr[i];
 	}
 
-	void to_array(T* arr) const
+	constexpr void to_array(T* arr) const
 	{
 		// write elements to array
 		for(size_type i = 0; i < SIZE; ++i)
@@ -754,31 +754,31 @@ public:
 	}
 
 
-	constexpr size_type size() const { return SIZE; }
+	constexpr size_type size() const noexcept { return SIZE; }
 
 
 	// iterators
-	iterator begin() { return iterator{this, 0}; }
-	iterator end() { return iterator(this, SIZE); }
-	const_iterator begin() const { return const_iterator(this, 0); }
-	const_iterator end() const { return const_iterator(this, SIZE); }
+	constexpr iterator begin() { return iterator{this, 0}; }
+	constexpr iterator end() { return iterator(this, SIZE); }
+	constexpr const_iterator begin() const { return const_iterator(this, 0); }
+	constexpr const_iterator end() const { return const_iterator(this, SIZE); }
 
 
 	// calculation operators
-	friend vec_static operator+(const vec_static& vec1, const vec_static& vec2) { return tl2_ops::operator+(vec1, vec2); }
-	friend vec_static operator-(const vec_static& vec1, const vec_static& vec2) { return tl2_ops::operator-(vec1, vec2); }
-	friend const vec_static& operator+(const vec_static& vec1) { return tl2_ops::operator+(vec1); }
-	friend vec_static operator-(const vec_static& vec1) { return tl2_ops::operator-(vec1); }
+	friend constexpr vec_static operator+(const vec_static& vec1, const vec_static& vec2) { return tl2_ops::operator+(vec1, vec2); }
+	friend constexpr vec_static operator-(const vec_static& vec1, const vec_static& vec2) { return tl2_ops::operator-(vec1, vec2); }
+	friend const constexpr vec_static& operator+(const vec_static& vec1) { return tl2_ops::operator+(vec1); }
+	friend constexpr vec_static operator-(const vec_static& vec1) { return tl2_ops::operator-(vec1); }
 
-	friend vec_static operator*(value_type d, const vec_static& vec1) { return tl2_ops::operator*(d, vec1); }
-	friend vec_static operator*(const vec_static& vec1, value_type d) { return tl2_ops::operator*(vec1, d); }
-	friend vec_static operator/(const vec_static& vec1, value_type d) { return tl2_ops::operator/(vec1, d); }
+	friend constexpr vec_static operator*(value_type d, const vec_static& vec1) { return tl2_ops::operator*(d, vec1); }
+	friend constexpr vec_static operator*(const vec_static& vec1, value_type d) { return tl2_ops::operator*(vec1, d); }
+	friend constexpr vec_static operator/(const vec_static& vec1, value_type d) { return tl2_ops::operator/(vec1, d); }
 
-	vec_static& operator*=(const vec_static& vec2) { return tl2_ops::operator*=(*this, vec2); }
-	vec_static& operator+=(const vec_static& vec2) { return tl2_ops::operator+=(*this, vec2); }
-	vec_static& operator-=(const vec_static& vec2) { return tl2_ops::operator-=(*this, vec2); }
-	vec_static& operator*=(value_type d) { return tl2_ops::operator*=(*this, d); }
-	vec_static& operator/=(value_type d) { return tl2_ops::operator/=(*this, d); }
+	constexpr vec_static& operator*=(const vec_static& vec2) { return tl2_ops::operator*=(*this, vec2); }
+	constexpr vec_static& operator+=(const vec_static& vec2) { return tl2_ops::operator+=(*this, vec2); }
+	constexpr vec_static& operator-=(const vec_static& vec2) { return tl2_ops::operator-=(*this, vec2); }
+	constexpr vec_static& operator*=(value_type d) { return tl2_ops::operator*=(*this, d); }
+	constexpr vec_static& operator/=(value_type d) { return tl2_ops::operator/=(*this, d); }
 
 
 	// element access
@@ -973,11 +973,11 @@ public:
 
 
 	// constructors
-	mat_static() = default;
-	~mat_static() = default;
+	constexpr mat_static() = default;
+	constexpr ~mat_static() = default;
 
 	// _ROWS and _COLS are dummy size arguments as the matrix is statically sized
-	mat_static(
+	constexpr mat_static(
 		[[__maybe_unused__]] size_type _ROWS,
 		[[__maybe_unused__]] size_type _COLS,
 		const T* arr = nullptr)
@@ -988,25 +988,25 @@ public:
 			from_array(arr);
 	}
 
-	mat_static(const T* arr)
+	constexpr mat_static(const T* arr)
 	{
 		if(arr)
 			from_array(arr);
 	}
 
-	mat_static(const mat_static<T, ROWS, COLS>& other)
+	constexpr mat_static(const mat_static<T, ROWS, COLS>& other)
 	{
 		this->operator=(other);
 	}
 
 	template<class t_mat_other>
 	requires is_basic_mat<t_mat_other>
-	mat_static(const t_mat_other& other)
+	constexpr mat_static(const t_mat_other& other)
 	{
 		this->operator=<t_mat_other>(other);
 	}
 
-	mat_static(mat_static<T, ROWS, COLS>&& other) noexcept
+	constexpr mat_static(mat_static<T, ROWS, COLS>&& other) noexcept
 		: m_data{ std::move(other.m_data) }
 	{ }
 
@@ -1014,20 +1014,20 @@ public:
 	// assignment operators
 	template<class t_mat_other>
 	requires is_basic_mat<t_mat_other>
-	mat_static<T, ROWS, COLS>& operator=(const t_mat_other& other)
+	constexpr mat_static<T, ROWS, COLS>& operator=(const t_mat_other& other)
 	{
 		*this = convert<mat_static<T, ROWS, COLS>, t_mat_other>(other);
 		return *this;
 	}
 
-	mat_static<T, ROWS, COLS>& operator=(const mat_static<T, ROWS, COLS>& other)
+	constexpr mat_static<T, ROWS, COLS>& operator=(const mat_static<T, ROWS, COLS>& other)
 	{
 		return operator=<mat_static<T, ROWS, COLS>>(other);
 	}
 
 
 	// move operator
-	mat_static<T, ROWS, COLS>& operator=(mat_static<T, ROWS, COLS>&& other)
+	constexpr mat_static<T, ROWS, COLS>& operator=(mat_static<T, ROWS, COLS>&& other)
 	{
 		m_data = std::move(other.m_data);
 		return *this;
@@ -1035,9 +1035,9 @@ public:
 
 
 	// sizes
-	constexpr size_type size() const { return ROWS*COLS; }
-	constexpr size_type size1() const { return ROWS; }
-	constexpr size_type size2() const { return COLS; }
+	constexpr size_type size() const noexcept { return ROWS*COLS; }
+	constexpr size_type size1() const noexcept { return ROWS; }
+	constexpr size_type size2() const noexcept { return COLS; }
 
 
 	// element access
@@ -1069,24 +1069,24 @@ public:
 	}
 
 
-	friend mat_static operator+(const mat_static& mat1, const mat_static& mat2) { return tl2_ops::operator+(mat1, mat2); }
-	friend mat_static operator-(const mat_static& mat1, const mat_static& mat2) { return tl2_ops::operator-(mat1, mat2); }
-	friend const mat_static& operator+(const mat_static& mat1) { return tl2_ops::operator+(mat1); }
-	friend mat_static operator-(const mat_static& mat1) { return tl2_ops::operator-(mat1); }
+	friend constexpr mat_static operator+(const mat_static& mat1, const mat_static& mat2) { return tl2_ops::operator+(mat1, mat2); }
+	friend constexpr mat_static operator-(const mat_static& mat1, const mat_static& mat2) { return tl2_ops::operator-(mat1, mat2); }
+	friend const constexpr mat_static& operator+(const mat_static& mat1) { return tl2_ops::operator+(mat1); }
+	friend constexpr mat_static operator-(const mat_static& mat1) { return tl2_ops::operator-(mat1); }
 
-	friend mat_static operator*(const mat_static& mat1, const mat_static& mat2) { return tl2_ops::operator*(mat1, mat2); }
-	friend mat_static operator*(const mat_static& mat1, value_type d) { return tl2_ops::operator*(mat1, d); }
-	friend mat_static operator*(value_type d, const mat_static& mat1) { return tl2_ops::operator*(d, mat1); }
-	friend mat_static operator/(const mat_static& mat1, value_type d) { return tl2_ops::operator/(mat1, d); }
+	friend constexpr mat_static operator*(const mat_static& mat1, const mat_static& mat2) { return tl2_ops::operator*(mat1, mat2); }
+	friend constexpr mat_static operator*(const mat_static& mat1, value_type d) { return tl2_ops::operator*(mat1, d); }
+	friend constexpr mat_static operator*(value_type d, const mat_static& mat1) { return tl2_ops::operator*(d, mat1); }
+	friend constexpr mat_static operator/(const mat_static& mat1, value_type d) { return tl2_ops::operator/(mat1, d); }
 
 	template<class t_vec> requires is_basic_vec<t_vec>
-	friend t_vec operator*(const mat_static& mat1, const t_vec& vec2) { return tl2_ops::operator*(mat1, vec2); }
+	friend constexpr t_vec operator*(const mat_static& mat1, const t_vec& vec2) { return tl2_ops::operator*(mat1, vec2); }
 
-	mat_static& operator*=(const mat_static& mat2) { return tl2_ops::operator*=(*this, mat2); }
-	mat_static& operator+=(const mat_static& mat2) { return tl2_ops::operator+=(*this, mat2); }
-	mat_static& operator-=(const mat_static& mat2) { return tl2_ops::operator-=(*this, mat2); }
-	mat_static& operator*=(value_type d) { return tl2_ops::operator*=(*this, d); }
-	mat_static& operator/=(value_type d) { return tl2_ops::operator/=(*this, d); }
+	constexpr mat_static& operator*=(const mat_static& mat2) { return tl2_ops::operator*=(*this, mat2); }
+	constexpr mat_static& operator+=(const mat_static& mat2) { return tl2_ops::operator+=(*this, mat2); }
+	constexpr mat_static& operator-=(const mat_static& mat2) { return tl2_ops::operator-=(*this, mat2); }
+	constexpr mat_static& operator*=(value_type d) { return tl2_ops::operator*=(*this, d); }
+	constexpr mat_static& operator/=(value_type d) { return tl2_ops::operator/=(*this, d); }
 
 	//constexpr const std::array<T, ROWS*COLS>& GetData() const { return m_data; }
 

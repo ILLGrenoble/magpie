@@ -377,7 +377,8 @@ get_evec_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
  * get the berry connection for each magnon band
  */
 MAGDYN_TEMPL
-std::tuple<std::vector<t_vec>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryConnections(
+std::tuple<std::vector<typename MAGDYN_INST::t_vec3>, MAGDYN_TYPE::SofQE>
+MAGDYN_INST::CalcBerryConnections(
 	const t_vec3_real& Q, t_real delta,
 	const std::vector<t_size>* perm, bool evecs_ortho) const
 {

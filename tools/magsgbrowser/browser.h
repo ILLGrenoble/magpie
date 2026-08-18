@@ -38,8 +38,9 @@
 
 #include <string>
 
-#include "tlibs2/libs/magsg.h"
 #include "tlibs2/libs/maths.h"
+
+#include "libs/sym/magsg.h"
 #include "libs/defs.h"
 
 #include "ui_browser.h"
@@ -56,7 +57,7 @@ class SgBrowserDlg : public QDialog, Ui::SgBrowserDlg
 private:
 	QSettings *m_pSettings{};
 
-	Spacegroups<t_mat_sg, t_vec_sg> m_magsgs{};
+	sym::Spacegroups<t_mat_sg, t_vec_sg> m_magsgs{};
 	std::vector<std::tuple<int, std::string, std::vector<t_mat44_sg>>> m_nuclsgs{};
 
 	bool m_showBNS{true};

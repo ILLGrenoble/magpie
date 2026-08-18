@@ -323,7 +323,7 @@ requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 
 	for(std::size_t i = 0; i < mat1_size1; ++i)
 		for(std::size_t j = 0; j < mat1_size2; ++j)
-			mat(i,j) = -mat1(i,j);
+			mat(i, j) = -mat1(i, j);
 
 	return mat;
 }
@@ -346,7 +346,7 @@ requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 
 	for(std::size_t i = 0; i < mat1_size1; ++i)
 		for(std::size_t j = 0; j < mat1_size2; ++j)
-			mat(i,j) = mat1(i,j) + mat2(i,j);
+			mat(i, j) = mat1(i, j) + mat2(i, j);
 
 	return mat;
 }
@@ -533,11 +533,11 @@ requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 		for(std::size_t col = 0; col < COLS; ++col)
 		{
 			ostr << mat(row, col);
-			if(col < COLS-1)
+			if(col < COLS - 1)
 				ostr << TL2_COLSEP << " ";
 		}
 
-		if(row < ROWS-1)
+		if(row < ROWS - 1)
 			ostr << TL2_ROWSEP << " ";
 	}
 
