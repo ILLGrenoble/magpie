@@ -589,11 +589,11 @@ public:
 	// --------------------------------------------------------------------
 	// topological calculations
 	// --------------------------------------------------------------------
-	std::tuple<std::vector<t_vec>, SofQE> CalcBerryConnections(const t_vec_real& Q_start,
+	std::tuple<std::vector<t_vec>, SofQE> CalcBerryConnections(const t_vec3_real& Q_start,
 		t_real delta = 1e-12, const std::vector<t_size>* perm = nullptr,
 		bool evecs_ortho = true) const;
 
-	std::tuple<std::vector<t_cplx>, SofQE> CalcBerryCurvatures(const t_vec_real& Q_start,
+	std::tuple<std::vector<t_cplx>, SofQE> CalcBerryCurvatures(const t_vec3_real& Q_start,
 		t_real delta = 1e-12, const std::vector<t_size>* perm = nullptr,
 		t_size dim1 = 0, t_size dim2 = 1, bool evecs_ortho = true) const;
 
@@ -606,8 +606,8 @@ public:
 	// --------------------------------------------------------------------
 	// differentiation / group velocity calculations
 	// --------------------------------------------------------------------
-	std::tuple<std::vector<t_real>, SofQE> CalcGroupVelocities(const t_vec_real& Q,
-		const t_vec_real& deltaQ, const std::vector<t_size>* perm = nullptr) const;
+	std::tuple<std::vector<t_real>, SofQE> CalcGroupVelocities(const t_vec3_real& Q,
+		const t_vec3_real& deltaQ, const std::vector<t_size>* perm = nullptr) const;
 	// --------------------------------------------------------------------
 
 

@@ -378,24 +378,24 @@ get_evec_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
  */
 MAGDYN_TEMPL
 std::tuple<std::vector<t_vec>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryConnections(
-	const t_vec_real& Q, t_real delta,
+	const t_vec3_real& Q, t_real delta,
 	const std::vector<t_size>* perm, bool evecs_ortho) const
 {
 	//SetUniteDegenerateEnergies(false);
 
 	if(evecs_ortho)
 	{
-		using t_vecs = std::vector<t_vec>;
-		auto evec_func = get_evec_func<t_vec, t_vec_real>(this, perm);
+		using t_vecs = std::vector<t_vec3>;
+		auto evec_func = get_evec_func<t_vec3, t_vec3_real>(this, perm);
 
-		return berry_connections<t_vec, t_vec_real, t_vecs, SofQE, t_cplx, t_real>(
+		return berry_connections<t_vec3, t_vec3_real, t_vecs, SofQE, t_cplx, t_real>(
 			evec_func, Q, delta);
 	}
 	else
 	{
-		auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec_real>(this, perm);
+		auto evec_func = get_evecmat_func<t_mat, t_vec3, t_vec3_real>(this, perm);
 
-		return berry_connections<t_vec, t_vec_real, t_mat, SofQE, t_cplx, t_real>(
+		return berry_connections<t_vec3, t_vec3_real, t_mat, SofQE, t_cplx, t_real>(
 			evec_func, Q, delta);
 	}
 }
@@ -407,7 +407,7 @@ std::tuple<std::vector<t_vec>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryConnect
  */
 MAGDYN_TEMPL
 std::tuple<std::vector<t_cplx>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryCurvatures(
-	const t_vec_real& Q, t_real delta,
+	const t_vec3_real& Q, t_real delta,
 	const std::vector<t_size>* perm,
 	t_size dim1, t_size dim2, bool evecs_ortho) const
 {
@@ -415,19 +415,19 @@ std::tuple<std::vector<t_cplx>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryCurvat
 
 	if(evecs_ortho)
 	{
-		using t_vecs = std::vector<t_vec>;
-		auto evec_func = get_evec_func<t_vec, t_vec_real>(this, perm);
+		using t_vecs = std::vector<t_vec3>;
+		auto evec_func = get_evec_func<t_vec3, t_vec3_real>(this, perm);
 
 		return berry_curvatures<
-			t_vec, t_vec_real, t_vecs, SofQE, t_cplx, t_real, t_size>(
+			t_vec3, t_vec3_real, t_vecs, SofQE, t_cplx, t_real, t_size>(
 				evec_func, Q, delta, dim1, dim2);
 	}
 	else
 	{
-		auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec_real>(this, perm);
+		auto evec_func = get_evecmat_func<t_mat, t_vec3, t_vec3_real>(this, perm);
 
 		return berry_curvatures<
-			t_vec, t_vec_real, t_mat, SofQE, t_cplx, t_real, t_size>(
+			t_vec3, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
 				evec_func, Q, delta, dim1, dim2);
 	}
 }
@@ -449,20 +449,20 @@ std::vector<t_cplx> MAGDYN_INST::CalcChernNumbers(
 
 	if(evecs_ortho)
 	{
-		using t_vecs = std::vector<t_vec>;
-		auto evec_func = get_evec_func<t_vec, t_vec_real>(this, perm);
+		using t_vecs = std::vector<t_vec3>;
+		auto evec_func = get_evec_func<t_vec3, t_vec3_real>(this, perm);
 
 		return chern_numbers<
-			t_vec, t_vec_real, t_vecs, SofQE, t_cplx, t_real, t_size>(
+			t_vec3, t_vec3_real, t_vecs, SofQE, t_cplx, t_real, t_size>(
 				evec_func, bz, delta_diff, delta_int,
 				dim1, dim2, calc_via_boundary);
 	}
 	else
 	{
-		auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec_real>(this, perm);
+		auto evec_func = get_evecmat_func<t_mat, t_vec3, t_vec3_real>(this, perm);
 
 		return chern_numbers<
-			t_vec, t_vec_real, t_mat, SofQE, t_cplx, t_real, t_size>(
+			t_vec3, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
 				evec_func, bz, delta_diff, delta_int,
 				dim1, dim2, calc_via_boundary);
 	}
