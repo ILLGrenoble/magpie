@@ -47,7 +47,7 @@ MAGDYN_TEMPL void MAGDYN_INST::Clear()
 	m_temperature = -1.;
 
 	// clear ordering wave vector
-	m_ordering = tl2::zero<t_vec_real>(3);
+	m_ordering = std::nullopt;
 	m_is_incommensurate = false;
 
 	// reset rotation axis
@@ -102,7 +102,7 @@ MAGDYN_TEMPL void MAGDYN_INST::ClearExchangeTerms()
  */
 MAGDYN_TEMPL void MAGDYN_INST::ClearExternalField()
 {
-	m_field.dir.clear();
+	m_field.dir = std::nullopt;
 	m_field.mag = 0.;
 	m_field.align_spins = false;
 	m_field.keep_signs = false;
@@ -189,9 +189,13 @@ MAGDYN_TEMPL const MAGDYN_INST::t_vec3_real& MAGDYN_INST::GetRotationAxis() cons
 }
 
 
-MAGDYN_TEMPL const t_vec_real& MAGDYN_INST::GetOrderingWavevector() const
+MAGDYN_TEMPL const typename MAGDYN_INST::t_vec3_real& MAGDYN_INST::GetOrderingWavevector() const
 {
-	return m_ordering;
+	if(m_ordering)
+		return *m_ordering;
+
+	static t_vec3_real zero = tl2::zero<t_vec3_real>(3);
+	return zero;
 }
 
 
@@ -296,7 +300,7 @@ MAGDYN_INST::GetExchangeTerm(t_size idx)
 
 MAGDYN_TEMPL bool MAGDYN_INST::IsIncommensurate() const
 {
-	return m_is_incommensurate || m_force_incommensurate;
+	return m_ordering && (m_is_incommensurate || m_force_incommensurate);
 }
 
 
@@ -461,8 +465,8 @@ MAGDYN_TEMPL const typename MAGDYN_INST::t_vec3_real* MAGDYN_INST::GetScattering
 MAGDYN_TEMPL std::tuple<t_vec_real, t_vec_real>
 MAGDYN_INST::GetSupercellMinMax() const
 {
-	t_vec_real min = tl2::zero<t_vec_real>(3);
-	t_vec_real max = tl2::zero<t_vec_real>(3);
+	t_vec3_real min = tl2::zero<t_vec3_real>(3);
+	t_vec3_real max = tl2::zero<t_vec3_real>(3);
 
 	for(const ExchangeTerm& term : GetExchangeTerms())
 	{
@@ -521,6 +525,8 @@ MAGDYN_TEMPL void MAGDYN_INST::SetUniteDegenerateEnergies(bool b)
 
 MAGDYN_TEMPL void MAGDYN_INST::SetForceIncommensurate(bool b)
 {
+	if(!m_ordering)
+		m_ordering = tl2::zero<t_vec3_real>(3);
 	m_force_incommensurate = b;
 }
 
@@ -595,17 +601,20 @@ MAGDYN_TEMPL void MAGDYN_INST::SetExternalField(const MAGDYN_TYPE::ExternalField
 	m_field = field;
 
 	// normalise direction vector
-	const t_real len = tl2::norm<t_vec_real>(m_field.dir);
+	const t_real len = tl2::norm<t_vec3_real>(*m_field.dir);
 	if(!tl2::equals_0<t_real>(len, m_eps))
-		m_field.dir /= len;
+		*m_field.dir /= len;
 }
 
 
 
-MAGDYN_TEMPL void MAGDYN_INST::RotateExternalField(const t_vec_real& axis, t_real angle)
+MAGDYN_TEMPL void MAGDYN_INST::RotateExternalField(const t_vec3_real& axis, t_real angle)
 {
-	const t_mat_real rot = tl2::rotation<t_mat_real, t_vec_real>(axis, angle, false);
-	m_field.dir = rot * m_field.dir;
+	if(!m_field.dir)
+		return;
+
+	const t_mat33_real rot = tl2::rotation<t_mat33_real, t_vec3_real>(axis, angle, false);
+	m_field.dir = rot * (*m_field.dir);
 }
 
 
@@ -620,10 +629,10 @@ MAGDYN_TEMPL void MAGDYN_INST::RotateExternalField(t_real x, t_real y, t_real z,
 /**
  * set the ordering wave vector (e.g., the helix pitch) for incommensurate structures
  */
-MAGDYN_TEMPL void MAGDYN_INST::SetOrderingWavevector(const t_vec_real& ordering)
+MAGDYN_TEMPL void MAGDYN_INST::SetOrderingWavevector(const t_vec3_real& ordering)
 {
 	m_ordering = ordering;
-	m_is_incommensurate = !tl2::equals_0<t_vec_real>(m_ordering, m_eps);
+	m_is_incommensurate = !tl2::equals_0<t_vec3_real>(*m_ordering, m_eps);
 }
 
 
@@ -745,12 +754,12 @@ void MAGDYN_INST::SetScatteringPlane(t_real ah, t_real ak, t_real al,
 {
 	try
 	{
-		m_scatteringplane[0] = tl2::create<t_vec_real>({ ah, ak, al });
-		m_scatteringplane[1] = tl2::create<t_vec_real>({ bh, bk, bl });
+		m_scatteringplane[0] = tl2::create<t_vec3_real>({ ah, ak, al });
+		m_scatteringplane[1] = tl2::create<t_vec3_real>({ bh, bk, bl });
 		m_scatteringplane[2] = tl2::cross(m_xtalB, m_scatteringplane[0], m_scatteringplane[1]);
 
 		for(std::uint8_t i = 0; i < 3; ++i)
-			m_scatteringplane[i] /= tl2::norm<t_vec_real>(m_scatteringplane[i]);
+			m_scatteringplane[i] /= tl2::norm<t_vec3_real>(m_scatteringplane[i]);
 
 		m_xtalUB = tl2::UB_matrix(m_xtalB,
 			m_scatteringplane[0], m_scatteringplane[1], m_scatteringplane[2]);

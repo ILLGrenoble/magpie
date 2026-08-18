@@ -56,12 +56,11 @@ using t_strarr33 = std::array<std::array<std::string, 3>, 3>;
 /**
  * magnetic sites
  */
-template<class t_mat33, class t_vec3, class t_vec_real,
+template<class t_mat33, class t_vec3, class t_vec3_real,
 	class t_size = std::size_t,
-	class t_real = typename t_vec_real::value_type,
-	class t_vec3_real = tl2::vec_static<typename t_vec_real::value_type, 3>>
+	class t_real = typename t_vec3_real::value_type>
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
-requires tl2::is_mat<t_mat33> && tl2::is_vec<t_vec_real> && tl2::is_vec<t_vec3>
+requires tl2::is_mat<t_mat33> && tl2::is_vec<t_vec3_real> && tl2::is_vec<t_vec3>
 #endif
 struct t_MagneticSite
 {
@@ -82,7 +81,7 @@ struct t_MagneticSite
 
 	// ------------------------------------------------------------------------
 	// calculated properties
-	t_vec_real pos_calc{};       // magnetic site position
+	t_vec3_real pos_calc{};      // magnetic site position
 
 	t_vec3_real spin_dir_calc{}; // spin vector
 	t_vec3 trafo_z_calc{};       // trafo z vector (3rd column in trafo matrix)
@@ -102,12 +101,12 @@ struct t_MagneticSite
 /**
  * couplings between magnetic sites
  */
-template<class t_mat, class t_vec, class t_vec_real,
+template<class t_mat33, class t_vec3, class t_vec3_real,
 	class t_size = std::size_t,
-	class t_cplx = typename t_mat::value_type,
-	class t_real = typename t_vec_real::value_type>
+	class t_cplx = typename t_mat33::value_type,
+	class t_real = typename t_vec3_real::value_type>
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
-requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
+requires tl2::is_mat<t_mat33> && tl2::is_vec<t_vec3>
 #endif
 struct t_ExchangeTerm
 {
@@ -129,12 +128,12 @@ struct t_ExchangeTerm
 	// calculated properties
 	t_size site1_calc{};         // index of first magnetic site
 	t_size site2_calc{};         // index of second magnetic site
-	t_vec_real dist_calc{};      // distance between unit cells
+	t_vec3_real dist_calc{};     // distance between unit cells
 	t_real length_calc{};        // length of the coupling (in lab units)
 
 	t_cplx J_calc{};             // Heisenberg interaction
-	t_vec dmi_calc{};            // Dzyaloshinskij-Moriya interaction
-	t_mat Jgen_calc{};           // general exchange interaction
+	std::optional<t_vec3> dmi_calc{};    // Dzyaloshinskij-Moriya interaction
+	std::optional<t_mat33> Jgen_calc{};  // general exchange interaction
 	// ------------------------------------------------------------------------
 };
 
@@ -143,16 +142,16 @@ struct t_ExchangeTerm
 /**
  * terms related to an external magnetic field
  */
-template<class t_vec_real, class t_real>
+template<class t_vec3_real, class t_real>
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
-requires tl2::is_vec<t_vec_real>
+requires tl2::is_vec<t_vec3_real>
 #endif
 struct t_ExternalField
 {
 	bool align_spins{};          // align spins along external field
 	bool keep_signs{};           // keep the senses of the spins
 
-	t_vec_real dir{};            // field direction
+	std::optional<t_vec3_real> dir{};  // field direction
 	t_real mag{};                // field magnitude
 };
 

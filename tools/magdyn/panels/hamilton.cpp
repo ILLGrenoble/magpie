@@ -396,12 +396,12 @@ void MagDynDlg::CalcHamiltonian()
 			if(ignore_annihilation && E < t_real(0))
 				continue;
 
-			const t_mat& S = use_polcoords ? E_and_S.S_pol : E_and_S.S;
-			const t_mat& S_perp = use_polcoords ? E_and_S.S_pol_perp : E_and_S.S_perp;
+			const t_mat33& S = use_polcoords ? E_and_S.S_pol : E_and_S.S;
+			const t_mat33& S_perp = use_polcoords ? E_and_S.S_pol_perp : E_and_S.S_perp;
 			t_real weight = use_polcoords ? E_and_S.weight_pol_perp : E_and_S.weight_perp;
 
 			if(!use_projector)
-				weight = tl2::trace<t_mat>(S).real();
+				weight = tl2::trace<t_mat33>(S).real();
 
 			tl2::set_eps_0(E);
 			tl2::set_eps_0(weight);

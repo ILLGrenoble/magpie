@@ -288,12 +288,12 @@ void TrafoCalculator::CalculateRotation()
 	if(!m_spinAngle || !m_textRotation)
 		return;
 
-	t_vec_real axis = tl2::create<t_vec_real>({
+	t_vec3_real axis = tl2::create<t_vec3_real>({
 		(t_real)m_spinAxis[0]->value(),
 		(t_real)m_spinAxis[1]->value(),
 		(t_real)m_spinAxis[2]->value() });
 	t_real angle = tl2::d2r<t_real>(m_spinAngle->value());
-	t_vec_real vec = tl2::create<t_vec_real>({
+	t_vec3_real vec = tl2::create<t_vec3_real>({
 		(t_real)m_spinVecToRotate[0]->value(),
 		(t_real)m_spinVecToRotate[1]->value(),
 		(t_real)m_spinVecToRotate[2]->value() });
@@ -303,19 +303,19 @@ void TrafoCalculator::CalculateRotation()
 
 	// apply crystal B matrix
 	bool use_B = m_checkRot->isChecked() && m_dyn;
-	t_mat_real xtalB_inv;
+	t_mat33_real xtalB_inv;
 	bool inv_ok = false;
 
 	if(use_B)
 	{
-		const t_mat_real& xtalB = m_dyn->GetCrystalBTrafo();
+		const t_mat33_real& xtalB = m_dyn->GetCrystalBTrafo();
 		std::tie(xtalB_inv, inv_ok) = tl2::inv(xtalB);
 
 		axis = xtalB * axis;
 		vec = xtalB * vec;
 	}
 
-	t_mat_real mat = tl2::rotation<t_mat_real, t_vec_real>(axis, angle, false);
+	t_mat33_real mat = tl2::rotation<t_mat33_real, t_vec3_real>(axis, angle, false);
 	tl2::set_eps_0(mat, g_eps);
 
 
@@ -325,7 +325,7 @@ void TrafoCalculator::CalculateRotation()
 
 	if(use_B)
 	{
-		t_mat_real xtalB = m_dyn->GetCrystalBTrafo();
+		t_mat33_real xtalB = m_dyn->GetCrystalBTrafo();
 		tl2::set_eps_0(xtalB, g_eps);
 
 		ostrResult << "<p>Crystal B Matrix:\n";
@@ -372,7 +372,7 @@ void TrafoCalculator::CalculateRotation()
 
 	using t_quat = boost::math::quaternion<t_real>;
 
-	t_quat quat = tl2::rot3_to_quat<t_mat_real, t_quat>(mat);
+	t_quat quat = tl2::rot3_to_quat<t_mat33_real, t_quat>(mat);
 	tl2::set_eps_0(quat, g_eps);
 	ostrResult << "<p>Trafo As Quaternion:<br>";
 	ostrResult << quat;
@@ -392,7 +392,7 @@ void TrafoCalculator::CalculateRotation()
 	}
 
 	// print the rotated test vector
-	t_vec_real vec_rot = mat * vec;
+	t_vec3_real vec_rot = mat * vec;
 
 	tl2::set_eps_0(vec_rot, g_eps);
 	ostrResult << "<p>Rotated Vector (lab): ";
@@ -421,11 +421,11 @@ void TrafoCalculator::CalculateProjection()
 	if(!m_textProjection)
 		return;
 
-	t_vec_real axis = tl2::create<t_vec_real>({
+	t_vec3_real axis = tl2::create<t_vec3_real>({
 		(t_real)m_spinProjAxis[0]->value(),
 		(t_real)m_spinProjAxis[1]->value(),
 		(t_real)m_spinProjAxis[2]->value() });
-	t_vec_real vec = tl2::create<t_vec_real>({
+	t_vec3_real vec = tl2::create<t_vec3_real>({
 		(t_real)m_spinVecToProj[0]->value(),
 		(t_real)m_spinVecToProj[1]->value(),
 		(t_real)m_spinVecToProj[2]->value() });
@@ -435,20 +435,20 @@ void TrafoCalculator::CalculateProjection()
 
 	// apply crystal B matrix
 	bool use_B = m_checkProj->isChecked() && m_dyn;
-	t_mat_real xtalB_inv;
+	t_mat33_real xtalB_inv;
 	bool inv_ok = false;
 
 	if(use_B)
 	{
-		const t_mat_real& xtalB = m_dyn->GetCrystalBTrafo();
+		const t_mat33_real& xtalB = m_dyn->GetCrystalBTrafo();
 		std::tie(xtalB_inv, inv_ok) = tl2::inv(xtalB);
 
 		axis = xtalB * axis;
 		vec = xtalB * vec;
 	}
 
-	t_mat_real matProj = tl2::projector<t_mat_real, t_vec_real>(axis, false);
-	t_mat_real matOrthoProj = tl2::ortho_projector<t_mat_real, t_vec_real>(axis, false);
+	t_mat33_real matProj = tl2::projector<t_mat33_real, t_vec3_real>(axis, false);
+	t_mat33_real matOrthoProj = tl2::ortho_projector<t_mat33_real, t_vec3_real>(axis, false);
 	tl2::set_eps_0(matProj, g_eps);
 	tl2::set_eps_0(matOrthoProj, g_eps);
 
@@ -459,7 +459,7 @@ void TrafoCalculator::CalculateProjection()
 
 	if(use_B)
 	{
-		t_mat_real xtalB = m_dyn->GetCrystalBTrafo();
+		t_mat33_real xtalB = m_dyn->GetCrystalBTrafo();
 		tl2::set_eps_0(xtalB, g_eps);
 
 
@@ -546,8 +546,8 @@ void TrafoCalculator::CalculateProjection()
 	ostrResult << "</p>\n";
 
 	// print the projected test vector
-	t_vec_real vec_proj = matProj * vec;
-	t_vec_real vec_ortho_proj = matOrthoProj * vec;
+	t_vec3_real vec_proj = matProj * vec;
+	t_vec3_real vec_ortho_proj = matOrthoProj * vec;
 
 	tl2::set_eps_0(vec_proj, g_eps);
 	ostrResult << "<p>Projected Vector (lab): ";

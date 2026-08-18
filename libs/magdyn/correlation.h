@@ -242,12 +242,12 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 				// pre-factors of equation (44) from (Toth 2015)
 				const t_real S_mag = std::sqrt(s_i.spin_mag_calc * s_j.spin_mag_calc);
 				const t_cplx phase = std::exp(-m_phase_sign * s_imag * s_twopi *
-					tl2::inner<t_vec_real>(s_j.pos_calc - s_i.pos_calc, S.Q_rlu));
+					tl2::inner<t_vec3_real>(s_j.pos_calc - s_i.pos_calc, S.Q_rlu));
 				if(m_perform_checks)
 				{
 					// because A*B^T = diag(2pi), the phase is the same as:
 					const t_cplx phase_chk = std::exp(-m_phase_sign * s_imag *
-						tl2::inner<t_vec_real>(m_xtalA*s_j.pos_calc - m_xtalA*s_i.pos_calc, S.Q_invA));
+						tl2::inner<t_vec3_real>(m_xtalA*s_j.pos_calc - m_xtalA*s_i.pos_calc, S.Q_invA));
 
 					if(!tl2::equals<t_cplx>(phase, phase_chk, m_eps))
 					{

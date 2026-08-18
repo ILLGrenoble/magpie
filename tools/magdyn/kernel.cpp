@@ -268,14 +268,14 @@ void MagDynDlg::SyncToKernel()
 
 	// transfer ordering vector and rotation axis
 	{
-		t_vec_real ordering = tl2::create<t_vec_real>(
+		t_vec3_real ordering = tl2::create<t_vec3_real>(
 		{
 			(t_real)m_ordering[0]->value(),
 			(t_real)m_ordering[1]->value(),
 			(t_real)m_ordering[2]->value(),
 		});
 
-		t_vec_real rotaxis = tl2::create<t_vec_real>(
+		t_vec3_real rotaxis = tl2::create<t_vec3_real>(
 		{
 			(t_real)m_normaxis[0]->value(),
 			(t_real)m_normaxis[1]->value(),
@@ -290,7 +290,7 @@ void MagDynDlg::SyncToKernel()
 	if(m_use_field->isChecked())
 	{
 		t_magdyn::ExternalField field;
-		field.dir = tl2::create<t_vec_real>(
+		field.dir = tl2::create<t_vec3_real>(
 		{
 			(t_real)m_field_dir[0]->value(),
 			(t_real)m_field_dir[1]->value(),
@@ -359,7 +359,7 @@ void MagDynDlg::SyncToKernel()
 
 		// TODO: make this field configurable, currently it
 		// overrides any other values in the kernel
-		site.g_e = tl2::g_e<t_real> * tl2::unit<t_mat>(3);
+		site.g_e = tl2::g_e<t_real> * tl2::unit<t_mat33>(3);
 
 		site.pos[0] = pos_x->text().toStdString();
 		site.pos[1] = pos_y->text().toStdString();

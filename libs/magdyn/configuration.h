@@ -174,7 +174,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 				seen_names.insert(magnetic_site.name);
 			}
 
-			magnetic_site.pos_calc = tl2::create<t_vec_real>(
+			magnetic_site.pos_calc = tl2::create<t_vec3_real>(
 			{
 				site.second.get<t_real>("position_x", 0.),
 				site.second.get<t_real>("position_y", 0.),
@@ -426,22 +426,22 @@ bool MAGDYN_INST::Save(boost::property_tree::ptree& node) const
 #endif
 
 	// external field
-	if(m_field.dir.size() == 3)
+	if(m_field.dir)
 	{
-		node.put<t_real>("field.direction_h", m_field.dir[0]);
-		node.put<t_real>("field.direction_k", m_field.dir[1]);
-		node.put<t_real>("field.direction_l", m_field.dir[2]);
+		node.put<t_real>("field.direction_h", (*m_field.dir)[0]);
+		node.put<t_real>("field.direction_k", (*m_field.dir)[1]);
+		node.put<t_real>("field.direction_l", (*m_field.dir)[2]);
 	}
 	node.put<t_real>("field.magnitude", m_field.mag);
 	node.put<bool>("field.align_spins", m_field.align_spins);
 	node.put<bool>("field.keep_signs", m_field.keep_signs);
 
 	// ordering vector
-	if(m_ordering.size() == 3)
+	if(m_ordering)
 	{
-		node.put<t_real>("ordering.h", m_ordering[0]);
-		node.put<t_real>("ordering.k", m_ordering[1]);
-		node.put<t_real>("ordering.l", m_ordering[2]);
+		node.put<t_real>("ordering.h", (*m_ordering)[0]);
+		node.put<t_real>("ordering.k", (*m_ordering)[1]);
+		node.put<t_real>("ordering.l", (*m_ordering)[2]);
 	}
 
 	// rotation axis

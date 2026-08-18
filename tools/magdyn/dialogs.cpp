@@ -480,7 +480,7 @@ void MagDynDlg::ShowBZ3DDlg(bool only_create)
 			if(Qrlu.size() != 3)
 				return;
 
-			SetCoordinates(Qrlu, t_vec_real{}, true);
+			SetCoordinates(Qrlu, std::nullopt, true);
 		});
 
 		connect(acSetQf, &QAction::triggered, [this]()
@@ -489,7 +489,7 @@ void MagDynDlg::ShowBZ3DDlg(bool only_create)
 			if(Qrlu.size() != 3)
 				return;
 
-			SetCoordinates(t_vec_real{}, Qrlu, true);
+			SetCoordinates(std::nullopt, Qrlu, true);
 		});
 	}
 

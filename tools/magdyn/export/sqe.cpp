@@ -196,11 +196,11 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 				if(std::isnan(E) || std::isinf(E))
 					continue;
 
-				const t_mat& S = E_and_S.S;
+				const t_mat33& S = E_and_S.S;
 				t_real weight = E_and_S.weight_perp;
 
 				if(!use_projector)
-					weight = tl2::trace<t_mat>(S).real();
+					weight = tl2::trace<t_mat33>(S).real();
 
 				if(std::isnan(weight) || std::isinf(weight))
 					weight = 0.;

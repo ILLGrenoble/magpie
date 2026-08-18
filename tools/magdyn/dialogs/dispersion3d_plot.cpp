@@ -361,8 +361,8 @@ void Dispersion3DDlg::PlotPickerIntersection(
 	//t_vec_real xyz = QEToPlotXYZ(Q, E);
 	//std::cout << xyz << "; " << (*pos)[0] << " " << (*pos)[1] << " " << (*pos)[2] << std::endl;
 
-	const t_mat_real& B = m_dyn->GetCrystalBTrafo();
-	const t_vec_real Qvec_invA = B * Q;
+	const t_mat33_real& B = m_dyn->GetCrystalBTrafo();
+	const t_vec_real Qvec_invA = tl2::convert<t_mat_real>(B) * Q;
 	const t_real Q_invA = tl2::norm(Qvec_invA);
 
 	std::ostringstream ostr;

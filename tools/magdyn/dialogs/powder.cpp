@@ -780,13 +780,13 @@ void PowderDlg::SetPowderQE()
 	if(m_Qstart.size() < 3 || m_Qend.size() < 3 || !m_dyn)
 		return;
 
-	const t_mat_real& B = m_dyn->GetCrystalBTrafo();
+	const t_mat33_real& B = m_dyn->GetCrystalBTrafo();
 
-	t_vec_real Qvec_start_invA = B * m_Qstart;
+	t_vec_real Qvec_start_invA = tl2::convert<t_mat_real>(B) * m_Qstart;
 	t_real Q_start_invA = tl2::norm(Qvec_start_invA);
 	m_Q_start_powder->setValue(Q_start_invA);
 
-	t_vec_real Qvec_end_invA = B * m_Qend;
+	t_vec_real Qvec_end_invA = tl2::convert<t_mat_real>(B) * m_Qend;
 	t_real Q_end_invA = tl2::norm(Qvec_end_invA);
 	m_Q_end_powder->setValue(Q_end_invA);
 }

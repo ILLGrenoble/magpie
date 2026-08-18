@@ -67,15 +67,15 @@ void Dispersion3DDlg::FromMainQ()
 	if(m_Qstart.size() < 3 || m_Qend.size() < 3 || !m_dyn)
 		return;
 
-	const t_mat_real& xtalB = m_dyn->GetCrystalBTrafo();
-	const t_vec_real* plane = m_dyn->GetScatteringPlane();
+	const t_mat33_real& xtalB = m_dyn->GetCrystalBTrafo();
+	const t_vec3_real* plane = m_dyn->GetScatteringPlane();
 	if(!plane)
 		return;
 
 	// direction 1 is from the start to the end point
-	t_vec_real Qdir1 = m_Qend - m_Qstart;
+	t_vec3_real Qdir1 = tl2::convert<t_vec3_real>(m_Qend - m_Qstart);
 	// direction 2 is perpendicular to direction 1 inside the scattering plane
-	t_vec_real Qdir2 = tl2::cross(xtalB, plane[2], Qdir1);
+	t_vec3_real Qdir2 = tl2::cross(xtalB, plane[2], Qdir1);
 
 	for(int i = 0; i < 3; ++i)
 	{
@@ -303,8 +303,8 @@ void Dispersion3DDlg::Calculate()
 
 					if(!use_projector)
 					{
-						const t_mat& S = E_and_S.S;
-						weight = tl2::trace<t_mat>(S).real();
+						const t_mat33& S = E_and_S.S;
+						weight = tl2::trace<t_mat33>(S).real();
 					}
 
 					// filter invalid S(Q, E)

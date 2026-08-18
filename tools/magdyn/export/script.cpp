@@ -375,14 +375,14 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 	const auto& field = m_dyn.GetExternalField();
 	bool use_field = !tl2::equals_0<t_real>(field.mag, g_eps);
 
-	if(use_field)
+	if(use_field && field.dir)
 	{
 		ofstr << "\n# external field\n";
 		ofstr << "field = { ";
 		ofstr << "\"dir\" : -np.array([ "
-			<< field.dir[0] << ", "
-			<< field.dir[1] << ", "
-			<< field.dir[2] << " ]), "
+			<< (*field.dir)[0] << ", "
+			<< (*field.dir)[1] << ", "
+			<< (*field.dir)[2] << " ]), "
 			<< "\"mag\" : " << field.mag
 			<< " }\n";
 	}
@@ -435,12 +435,12 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 		ofstr << "\t{ \"name\" : \"" << site.name << "\", "
 			<< "\"S\" : " << get_str_var(site.spin_mag);
 
-		if(field.align_spins)
+		if(field.align_spins && field.dir)
 		{
 			ofstr << ", \"Sdir\" : [ "
-				<< -field.dir[0] << ", "
-				<< -field.dir[1] << ", "
-				<< -field.dir[2] << " ]";
+				<< -(*field.dir)[0] << ", "
+				<< -(*field.dir)[1] << ", "
+				<< -(*field.dir)[2] << " ]";
 		}
 		else
 		{
@@ -528,9 +528,9 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 	{
 		ofstr << "\n# incommensurability\n";
 
-		const t_vec_real& prop = m_dyn.GetOrderingWavevector();
-		const t_vec_real& axis = m_dyn.GetRotationAxis();
-		t_vec_real s0 = tl2::cross(prop, axis);
+		const t_vec3_real& prop = m_dyn.GetOrderingWavevector();
+		const t_vec3_real& axis = m_dyn.GetRotationAxis();
+		t_vec3_real s0 = tl2::cross(prop, axis);
 		s0 /= tl2::norm(s0);
 
 		ofstr << "k = [ " << prop[0] << ", " << prop[1] << ", " << prop[2] << " ]\n"

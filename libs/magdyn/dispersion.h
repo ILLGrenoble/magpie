@@ -140,9 +140,9 @@ MAGDYN_INST::CalcEnergies(const t_vec3_real& Q_rlu, bool only_energies) const
 		// calculate additional hamiltonians for Q+-O
 		SofQE S_p{}, S_m{};
 		if(m_calc_Hp)
-			S_p = calc_EandS(Q_rlu + m_ordering);
+			S_p = calc_EandS(Q_rlu + (*m_ordering));
 		if(m_calc_Hm)
-			S_m = calc_EandS(Q_rlu - m_ordering);
+			S_m = calc_EandS(Q_rlu - (*m_ordering));
 
 		// move over additional hamiltonians for Q+-O
 		S.H_p = std::move(S_p.H);

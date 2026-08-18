@@ -47,8 +47,8 @@
 struct MagneticSiteInfo
 {
 	std::string name{};
-	t_vec_real uc_pos{};  // position in unit cell
-	t_vec_real sc_pos{};  // position in super cell
+	t_vec3_real uc_pos{};  // position in unit cell
+	t_vec3_real sc_pos{};  // position in super cell
 };
 
 

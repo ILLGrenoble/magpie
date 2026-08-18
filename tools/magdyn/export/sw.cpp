@@ -195,16 +195,16 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 	ofstr << "\n% spin directions\n";
 
 	const auto& field = m_dyn.GetExternalField();
-	const t_vec_real& prop = m_dyn.GetOrderingWavevector();
-	const t_vec_real& axis = m_dyn.GetRotationAxis();
+	const t_vec3_real& prop = m_dyn.GetOrderingWavevector();
+	const t_vec3_real& axis = m_dyn.GetRotationAxis();
 
 	ofstr << "spins = [ ";
 	for(int i = 0; i < 3; ++i)
 	{
 		for(const t_site& site : m_dyn.GetMagneticSites())
 		{
-			if(field.align_spins)
-				ofstr << field.dir[i] << " ";
+			if(field.align_spins && field.dir)
+				ofstr << (*field.dir)[i] << " ";
 			else
 				ofstr << get_str_var(site.spin_dir[i]) << " ";
 		}
@@ -268,7 +268,7 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 			}
 		}
 
-		if(!tl2::equals_0(term.dmi_calc, g_eps))
+		if(term.dmi_calc && !tl2::equals_0(*term.dmi_calc, g_eps))
 		{
 			std::string DMI = "\'DMI_" + term.name + "\'";
 
@@ -290,7 +290,7 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 			}
 		}
 
-		if(!tl2::equals_0(term.Jgen_calc, g_eps))
+		if(term.Jgen_calc && !tl2::equals_0(*term.Jgen_calc, g_eps))
 		{
 			std::string GEN = "\'GEN_" + term.name + "\'";
 
@@ -328,12 +328,12 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 		ofstr << "\nsw_obj.temperature(" << m_dyn.GetTemperature() << ");\n";
 	}
 
-	if(!tl2::equals_0<t_real>(field.mag, g_eps))
+	if(!tl2::equals_0<t_real>(field.mag, g_eps) && field.dir)
 	{
 		ofstr << "\nsw_obj.field([ "
-			<< field.dir[0] << ", "
-			<< field.dir[1] << ", "
-			<< field.dir[2] << " ] * " << field.mag
+			<< (*field.dir)[0] << ", "
+			<< (*field.dir)[1] << ", "
+			<< (*field.dir)[2] << " ] * " << field.mag
 			<< ");\n";
 	}
 	// --------------------------------------------------------------------

@@ -408,7 +408,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 	{
 		connect(acDirPlane[i], &QAction::triggered, [this, i, calc_all]()
 		{
-			const t_vec_real& vec = m_dyn.GetScatteringPlane()[i];
+			const t_vec3_real& vec = m_dyn.GetScatteringPlane()[i];
 
 			for(int j = 0; j < 3; ++j)
 			{
@@ -422,7 +422,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 
 		connect(acPlane[i], &QAction::triggered, [this, i]()
 		{
-			const t_vec_real& vec = m_dyn.GetScatteringPlane()[i];
+			const t_vec3_real& vec = m_dyn.GetScatteringPlane()[i];
 
 			m_rot_axis[0]->setValue(vec[0]);
 			m_rot_axis[1]->setValue(vec[1]);
@@ -465,7 +465,7 @@ void MagDynDlg::RotateField(const t_vec_real& axis_rlu, t_real angle)
 		(t_real)m_field_dir[2]->value(),
 	});
 
-	const t_mat_real& xtalB = m_dyn.GetCrystalBTrafo();
+	const t_mat33_real& xtalB = m_dyn.GetCrystalBTrafo();
 	auto [xtalB_inv, inv_ok] = tl2::inv(xtalB);
 	if(inv_ok)
 	{

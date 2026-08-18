@@ -398,9 +398,18 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 		}
 
 		// external field
-		m_field_dir[0]->setValue(m_dyn.GetExternalField().dir[0]);
-		m_field_dir[1]->setValue(m_dyn.GetExternalField().dir[1]);
-		m_field_dir[2]->setValue(m_dyn.GetExternalField().dir[2]);
+		if(m_dyn.GetExternalField().dir)
+		{
+			m_field_dir[0]->setValue((*m_dyn.GetExternalField().dir)[0]);
+			m_field_dir[1]->setValue((*m_dyn.GetExternalField().dir)[1]);
+			m_field_dir[2]->setValue((*m_dyn.GetExternalField().dir)[2]);
+		}
+		else
+		{
+			m_field_dir[0]->setValue(0.);
+			m_field_dir[1]->setValue(0.);
+			m_field_dir[2]->setValue(0.);
+		}
 		m_field_mag->setValue(m_dyn.GetExternalField().mag);
 		m_align_spins->setChecked(m_dyn.GetExternalField().align_spins);
 		m_keep_spin_signs->setChecked(m_dyn.GetExternalField().keep_signs);
@@ -408,7 +417,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 			m_dyn.ClearExternalField();
 
 		// ordering vector
-		const t_vec_real& ordering = m_dyn.GetOrderingWavevector();
+		const t_vec3_real& ordering = m_dyn.GetOrderingWavevector();
 		if(ordering.size() == 3)
 		{
 			m_ordering[0]->setValue(ordering[0]);
@@ -417,7 +426,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 		}
 
 		// normal axis
-		const t_vec_real& norm = m_dyn.GetRotationAxis();
+		const t_vec3_real& norm = m_dyn.GetRotationAxis();
 		if(norm.size() == 3)
 		{
 			m_normaxis[0]->setValue(norm[0]);

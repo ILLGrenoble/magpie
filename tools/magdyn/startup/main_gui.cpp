@@ -42,7 +42,8 @@
  * starts the gui program
  */
 int gui_main(int argc, char** argv, const std::string& model_file,
-	const t_vec_real& Qi, const t_vec_real& Qf, t_size num_Q_pts)
+	const std::optional<t_vec3_real>& Qi, const std::optional<t_vec3_real>& Qf,
+	t_size num_Q_pts)
 {
 	tl2::set_gl_format(true, _GL_MAJ_VER, _GL_MIN_VER);
 	//QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL);
@@ -71,8 +72,7 @@ int gui_main(int argc, char** argv, const std::string& model_file,
 	}
 
 	// override the dispersion branch to plot
-	if(Qi.size() == 3 && Qf.size() == 3)
-		magdyn->SetCoordinates(Qi, Qf, false);
+	magdyn->SetCoordinates(Qi, Qf, false);
 	if(num_Q_pts > 0)
 		magdyn->SetNumQPoints(num_Q_pts);
 

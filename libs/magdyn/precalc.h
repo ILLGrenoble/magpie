@@ -51,7 +51,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExternalField()
 {
 	bool use_field_rot =
 		(!tl2::equals_0<t_real>(m_field.mag, m_eps) || m_field.align_spins)
-		&& m_field.dir.size() == 3;
+		&& !!m_field.dir;
 
 	if(use_field_rot)
 	{
@@ -59,7 +59,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExternalField()
 		m_rot_field = tl2::convert<t_mat33>(
 			tl2::trans<t_mat33_real>(
 				tl2::rotation<t_mat33_real, t_vec3_real>(
-					-m_field.dir, m_zdir, &m_rotaxis, m_eps)));
+					-*m_field.dir, m_zdir, &m_rotaxis, m_eps)));
 
 		// rotate -field to [001] direction
 		if(m_field.keep_signs)
@@ -67,11 +67,12 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExternalField()
 			m_rot_negfield = tl2::convert<t_mat33>(
 				tl2::trans<t_mat33_real>(
 					tl2::rotation<t_mat33_real, t_vec3_real>(
-						m_field.dir, m_zdir, &m_rotaxis, m_eps)));
+						*m_field.dir, m_zdir, &m_rotaxis, m_eps)));
 		}
+
 #ifdef __MAGDYN_DEBUG_OUTPUT__
 		std::cout << "Field rotation from:\n";
-		tl2::niceprint(std::cout, -m_field.dir, 1e-4, 4);
+		tl2::niceprint(std::cout, -(*m_field.dir), 1e-4, 4);
 		std::cout << "\nto:\n";
 		tl2::niceprint(std::cout, m_zdir, 1e-4, 4);
 		std::cout << "\nmatrix:\n";
@@ -97,11 +98,11 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 		bool has_explicit_trafo = true;
 
 		// defaults
-		site.pos_calc = tl2::zero<t_vec_real>(3);
-		site.spin_dir_calc = tl2::zero<t_vec_real>(3);
-		site.trafo_z_calc = tl2::zero<t_vec>(3);
-		site.trafo_plane_calc = tl2::zero<t_vec>(3);
-		site.trafo_plane_conj_calc = tl2::zero<t_vec>(3);
+		site.pos_calc = tl2::zero<t_vec3_real>(3);
+		site.spin_dir_calc = tl2::zero<t_vec3_real>(3);
+		site.trafo_z_calc = tl2::zero<t_vec3>(3);
+		site.trafo_plane_calc = tl2::zero<t_vec3>(3);
+		site.trafo_plane_conj_calc = tl2::zero<t_vec3>(3);
 		if(!site.g_e)
 			site.g_e = tl2::g_e<t_real> * tl2::unit<t_mat33>(3);
 
@@ -181,9 +182,9 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 		}  // idx
 
 		// spin rotation of equation (9) from (Toth 2015)
-		if(m_field.align_spins)
+		if(m_field.align_spins && m_field.dir)
 		{
-			if(m_field.keep_signs && tl2::inner(site.spin_dir_calc, m_field.dir) > 0.)
+			if(m_field.keep_signs && tl2::inner(site.spin_dir_calc, *m_field.dir) > 0.)
 			{
 				std::tie(site.trafo_plane_calc, site.trafo_z_calc) =
 					rot_to_trafo(m_rot_negfield);
@@ -261,9 +262,9 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 		tl2::ExprParser<t_cplx> parser = GetExprParser();
 
 		// defaults
-		term.dist_calc = tl2::zero<t_vec_real>(3);  // distance
-		term.dmi_calc = tl2::zero<t_vec>(3);        // dmi interaction
-		term.Jgen_calc = tl2::zero<t_mat>(3, 3);    // general exchange interaction
+		term.dist_calc = tl2::zero<t_vec3_real>(3);  // distance
+		term.dmi_calc = tl2::zero<t_vec3>(3);       // dmi interaction
+		term.Jgen_calc = tl2::zero<t_mat33>(3, 3);  // general exchange interaction
 
 		// get site indices
 		term.site1_calc = GetMagneticSiteIndex(term.site1);
@@ -336,7 +337,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 			{
 				if(parser.parse_noexcept(term.dmi[i]))
 				{
-					term.dmi_calc[i] = parser.eval_noexcept();
+					(*term.dmi_calc)[i] = parser.eval_noexcept();
 				}
 				else
 				{
@@ -355,7 +356,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 
 				if(parser.parse_noexcept(term.Jgen[i][j]))
 				{
-					term.Jgen_calc(i, j) = parser.eval_noexcept();
+					(*term.Jgen_calc)(i, j) = parser.eval_noexcept();
 				}
 				else
 				{
@@ -367,15 +368,15 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 			}
 		}
 
-		const t_vec_real& pos1_uc = GetMagneticSite(term.site1_calc).pos_calc;
-		const t_vec_real& pos2_uc = GetMagneticSite(term.site2_calc).pos_calc;
-		t_vec_real pos2_sc = pos2_uc + term.dist_calc;
+		const t_vec3_real& pos1_uc = GetMagneticSite(term.site1_calc).pos_calc;
+		const t_vec3_real& pos2_uc = GetMagneticSite(term.site2_calc).pos_calc;
+		t_vec3_real pos2_sc = pos2_uc + term.dist_calc;
 
 		// transform to lab units for correct distance
-		t_vec_real pos1_uc_lab = m_xtalA * pos1_uc;
-		t_vec_real pos2_sc_lab = m_xtalA * pos2_sc;
+		t_vec3_real pos1_uc_lab = m_xtalA * pos1_uc;
+		t_vec3_real pos2_sc_lab = m_xtalA * pos2_sc;
 
-		term.length_calc = tl2::norm<t_vec_real>(pos2_sc_lab - pos1_uc_lab);
+		term.length_calc = tl2::norm<t_vec3_real>(pos2_sc_lab - pos1_uc_lab);
 	}
 	catch(const std::exception& ex)
 	{

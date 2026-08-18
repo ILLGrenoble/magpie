@@ -363,8 +363,8 @@ void GroundStateDlg::SyncFromKernel(const t_magdyn *dyn,
 
 	for(const t_site& site : m_dyn->GetMagneticSites())
 	{
-		const t_vec_real& S = site.spin_dir_calc;
-		const auto [ rho, phi, theta ] =  tl2::cart_to_sph<t_real>(S[0], S[1], S[2]);
+		const t_vec3_real& S = site.spin_dir_calc;
+		const auto [ rho, phi, theta ] = tl2::cart_to_sph<t_real>(S[0], S[1], S[2]);
 		const auto [ u, v ] = tl2::sph_to_uv<t_real>(phi, theta);
 
 		int row = m_spinstab->rowCount();

@@ -58,19 +58,19 @@ MAGDYN_INST::t_mat33 MAGDYN_INST::CalcRealJ(const MAGDYN_TYPE::ExchangeTerm& ter
 
 	// dmi as anti-symmetric part of interaction matrix
 	// using a cross product matrix, see (Toth 2015) p. 2
-	if(term.dmi_calc.size() == 3)
-		J += tl2::skewsymmetric<t_mat33, t_vec3>(-term.dmi_calc);
+	if(term.dmi_calc)
+		J += tl2::skewsymmetric<t_mat33, t_vec3>(-(*term.dmi_calc));
 
 	// general J matrix
-	if(term.Jgen_calc.size1() == 3 && term.Jgen_calc.size2() == 3)
-		J += t_mat33{term.Jgen_calc};
+	if(term.Jgen_calc)
+		J += t_mat33{*term.Jgen_calc};
 
 	// incommensurate case: rotation wrt magnetic unit cell
 	// equations (21), (6), (2) as well as section 10 from (Toth 2015)
 	if(IsIncommensurate())
 	{
 		const t_real rot_UC_angle =
-			s_twopi * tl2::inner<t_vec_real>(m_ordering, term.dist_calc);
+			s_twopi * tl2::inner<t_vec3_real>(*m_ordering, term.dist_calc);
 
 		if(!tl2::equals_0<t_real>(rot_UC_angle, m_eps))
 		{
@@ -129,7 +129,7 @@ MAGDYN_INST::CalcReciprocalJs(const t_vec3_real& Qvec) const
 		// get J in reciprocal space by fourier trafo
 		// equations (14), (12), (11), and (52) from (Toth 2015)
 		const t_mat33 J_fourier = J * std::exp(m_phase_sign * s_imag * s_twopi *
-			tl2::inner<t_vec_real>(term.dist_calc, Qvec));
+			tl2::inner<t_vec3_real>(term.dist_calc, Qvec));
 
 		// symmetry: equation (15) from (Toth 2015)
 		insert_or_add(J_Q, indices, J_fourier);
@@ -164,14 +164,14 @@ MAGDYN_INST::CalcReciprocalJs(const t_vec3_real& Qvec) const
 MAGDYN_TEMPL
 t_cplx MAGDYN_INST::CalcFieldEnergy(t_size site_idx) const
 {
-	bool use_field = !tl2::equals_0<t_real>(m_field.mag, m_eps) && m_field.dir.size() == 3;
+	bool use_field = !tl2::equals_0<t_real>(m_field.mag, m_eps) && m_field.dir;
 	if(!use_field)
 		return 0.;
 
 	const MagneticSite& s_i = GetMagneticSite(site_idx);
 
 	const t_vec3& v_i  = s_i.trafo_z_calc;
-	const t_vec3 field = tl2::convert<t_vec3>(-m_field.dir) * m_field.mag;
+	const t_vec3 field = tl2::convert<t_vec3>(-(*m_field.dir)) * m_field.mag;
 	const t_vec3 gv    = (*s_i.g_e) * v_i;
 	const t_cplx Bgv   = tl2::inner_noconj<t_vec3>(field, gv);
 

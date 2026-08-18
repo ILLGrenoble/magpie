@@ -48,8 +48,10 @@ void MAGDYN_INST::SymmetriseMagneticSites(const std::vector<t_mat_real>& symops)
 	{
 		// get symmetry-equivalent positions
 		const auto positions = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(
-			site.pos_calc, symops, m_eps, true /*keep in uc*/, false /*ignore occupied*/,
-			false /*return homogeneous*/, false /*pseudovector*/, m_uc_min, m_uc_max);
+			to_3vec<t_vec_real>(site.pos_calc), symops, m_eps,
+			true /*keep in uc*/, false /*ignore occupied*/,
+			false /*return homogeneous*/, false /*pseudovector*/,
+			m_uc_min, m_uc_max);
 
 		for(t_size idx = 0; idx < positions.size(); ++idx)
 		{
@@ -190,7 +192,7 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 			newterm.site2_calc = site2_sc_idx;
 			newterm.site1 = GetMagneticSite(newterm.site1_calc).name;
 			newterm.site2 = GetMagneticSite(newterm.site2_calc).name;
-			newterm.dist_calc = to_3vec<t_vec_real>(sc2 - sc1);
+			newterm.dist_calc = to_3vec<t_vec3_real>(sc2 - sc1);
 			newterm.dist[0] = tl2::var_to_str(newterm.dist_calc[0], m_prec);
 			newterm.dist[1] = tl2::var_to_str(newterm.dist_calc[1], m_prec);
 			newterm.dist[2] = tl2::var_to_str(newterm.dist_calc[2], m_prec);
@@ -228,16 +230,16 @@ void MAGDYN_INST::GeneratePossibleExchangeTerms(
 	struct PossibleCoupling
 	{
 		// corresponding unit cell position
-		t_vec_real pos1_uc{};
-		t_vec_real pos2_uc{};
+		t_vec3_real pos1_uc{};
+		t_vec3_real pos2_uc{};
 
 		// magnetic site position in supercell
-		t_vec_real sc_vec{};
-		t_vec_real pos2_sc{};
+		t_vec3_real sc_vec{};
+		t_vec3_real pos2_sc{};
 
 		// coordinates in orthogonal lab units
-		t_vec_real pos1_uc_lab{};
-		t_vec_real pos2_sc_lab{};
+		t_vec3_real pos1_uc_lab{};
+		t_vec3_real pos2_sc_lab{};
 
 		// corresponding unit cell index
 		t_size idx1_uc{};
@@ -287,7 +289,7 @@ void MAGDYN_INST::GeneratePossibleExchangeTerms(
 			coupling.pos1_uc_lab = m_xtalA * coupling.pos1_uc;
 			coupling.pos2_sc_lab = m_xtalA * coupling.pos2_sc;
 
-			coupling.length = tl2::norm<t_vec_real>(
+			coupling.length = tl2::norm<t_vec3_real>(
 				coupling.pos2_sc_lab - coupling.pos1_uc_lab);
 			if(coupling.length <= dist_max && coupling.length > m_eps)
 				couplings.emplace_back(std::move(coupling));
@@ -439,7 +441,7 @@ void MAGDYN_INST::ExtendStructure(t_size x_size, t_size y_size, t_size z_size,
 			MagneticSite newsite = GetMagneticSite(site_idx);
 
 			newsite.name += ext_id;
-			newsite.pos_calc += tl2::create<t_vec_real>({
+			newsite.pos_calc += tl2::create<t_vec3_real>({
 				t_real(x_idx), t_real(y_idx), t_real(z_idx) });
 			newsite.pos[0] = tl2::var_to_str(newsite.pos_calc[0], m_prec);
 			newsite.pos[1] = tl2::var_to_str(newsite.pos_calc[1], m_prec);
@@ -491,7 +493,7 @@ void MAGDYN_INST::FixExchangeTerms(t_size x_size, t_size y_size, t_size z_size)
 	for(ExchangeTerm& term : GetExchangeTerms())
 	{
 		// coupling within uc?
-		if(tl2::equals_0<t_vec_real>(term.dist_calc, m_eps))
+		if(tl2::equals_0<t_vec3_real>(term.dist_calc, m_eps))
 			continue;
 
 		// find site 2
@@ -500,14 +502,14 @@ void MAGDYN_INST::FixExchangeTerms(t_size x_size, t_size y_size, t_size z_size)
 			continue;
 
 		// get site 2 sc vector
-		t_vec_real site2_sc = site2_uc->pos_calc + term.dist_calc;
+		t_vec3_real site2_sc = site2_uc->pos_calc + term.dist_calc;
 
 		// fix couplings that are now internal:
 		// see if site 2's sc vector is now also available in the uc
 		bool fixed_coupling = false;
 		for(const MagneticSite& site : GetMagneticSites())
 		{
-			if(tl2::equals<t_vec_real>(site.pos_calc, site2_sc, m_eps))
+			if(tl2::equals<t_vec3_real>(site.pos_calc, site2_sc, m_eps))
 			{
 				// found the identical site
 				term.site2 = site.name;
@@ -521,7 +523,7 @@ void MAGDYN_INST::FixExchangeTerms(t_size x_size, t_size y_size, t_size z_size)
 			continue;
 
 		// fix external couplings
-		t_vec_real site2_newsc = site2_sc;
+		t_vec3_real site2_newsc = site2_sc;
 
 		site2_newsc[0] = std::fmod(site2_newsc[0], t_real(x_size));
 		site2_newsc[1] = std::fmod(site2_newsc[1], t_real(y_size));
@@ -536,7 +538,7 @@ void MAGDYN_INST::FixExchangeTerms(t_size x_size, t_size y_size, t_size z_size)
 
 		for(const MagneticSite& site : GetMagneticSites())
 		{
-			if(tl2::equals<t_vec_real>(site.pos_calc, site2_newsc, m_eps))
+			if(tl2::equals<t_vec3_real>(site.pos_calc, site2_newsc, m_eps))
 			{
 				// found the identical site
 				term.site2 = site.name;
@@ -561,7 +563,7 @@ void MAGDYN_INST::RemoveDuplicateMagneticSites()
 	for(auto iter1 = m_sites.begin(); iter1 != m_sites.end(); std::advance(iter1, 1))
 	for(auto iter2 = std::next(iter1, 1); iter2 != m_sites.end();)
 	{
-		if(tl2::equals<t_vec_real>(iter1->pos_calc, iter2->pos_calc, m_eps))
+		if(tl2::equals<t_vec3_real>(iter1->pos_calc, iter2->pos_calc, m_eps))
 		{
 			iter2 = m_sites.erase(iter2);
 			if(iter1 == iter2)
@@ -587,11 +589,11 @@ void MAGDYN_INST::RemoveDuplicateExchangeTerms()
 	{
 		// identical coupling
 		bool same_uc = (iter1->site1 == iter2->site1 && iter1->site2 == iter2->site2);
-		bool same_sc = tl2::equals<t_vec_real>(iter1->dist_calc, iter2->dist_calc, m_eps);
+		bool same_sc = tl2::equals<t_vec3_real>(iter1->dist_calc, iter2->dist_calc, m_eps);
 
 		// flipped coupling
 		bool inv_uc = (iter1->site1 == iter2->site2 && iter1->site2 == iter2->site1);
-		bool inv_sc = tl2::equals<t_vec_real>(iter1->dist_calc, -iter2->dist_calc, m_eps);
+		bool inv_sc = tl2::equals<t_vec3_real>(iter1->dist_calc, -iter2->dist_calc, m_eps);
 
 		if((same_uc && same_sc) || (inv_uc && inv_sc))
 		{
@@ -618,7 +620,7 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
 {
 	// get symmetry-equivalent positions
 	const auto positions = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(
-		site1.pos_calc, symops, m_eps,
+		to_3vec<t_vec_real>(site1.pos_calc), symops, m_eps,
 		true /*keep in uc*/, false /*ignore occupied*/,
 		false /*return homogeneous*/, false /*pseudovector*/,
 		m_uc_min, m_uc_max);
@@ -626,7 +628,7 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
 	for(const auto& pos : positions)
 	{
 		// symmetry-equivalent site found?
-		if(tl2::equals<t_vec_real>(site2.pos_calc, pos, m_eps))
+		if(tl2::equals<t_vec3_real>(site2.pos_calc, pos, m_eps))
 			return true;
 	}
 
@@ -691,10 +693,10 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
 #endif
 
 		// symmetry-equivalent coupling found?
-		if(tl2::equals<t_vec_real>(to_3vec<t_vec_real>(sc2 - sc1), term2.dist_calc, m_eps)
+		if(tl2::equals<t_vec3_real>(to_3vec<t_vec3_real>(sc2 - sc1), term2.dist_calc, m_eps)
 			&& site1_sc_idx == term2.site1_calc && site2_sc_idx == term2.site2_calc)
 			return true;
-		if(tl2::equals<t_vec_real>(to_3vec<t_vec_real>(sc1 - sc2), term2.dist_calc, m_eps)
+		if(tl2::equals<t_vec3_real>(to_3vec<t_vec3_real>(sc1 - sc2), term2.dist_calc, m_eps)
 			&& site1_sc_idx == term2.site2_calc && site2_sc_idx == term2.site1_calc)
 			return true;
 	}

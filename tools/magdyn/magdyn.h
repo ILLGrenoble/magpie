@@ -475,7 +475,8 @@ public:
 	void SetCurrentFile(const QString& filename);
 
 	void SetNumQPoints(t_size num_Q_pts);
-	void SetCoordinates(const t_vec_real& Qi, const t_vec_real& Qf, bool calc_dynamics = true);
+	void SetCoordinates(const std::optional<t_vec3_real>& Qi,
+		const std::optional<t_vec3_real>& Qf, bool calc_dynamics = true);
 
 	void CalcDispersion();
 	void CalcHamiltonian();

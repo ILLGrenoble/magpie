@@ -113,11 +113,11 @@ t_mat get_polarisation_incommensurate(int channel = 0, bool in_chiral_basis = tr
 /**
  * create a 3-vector from a homogeneous 4-vector
  */
-template<class t_vec>
+template<class t_vec, class t_vec_other>
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
-requires tl2::is_vec<t_vec>
+requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_other>
 #endif
-t_vec to_3vec(const t_vec& vec)
+t_vec to_3vec(const t_vec_other& vec)
 {
 	return tl2::create<t_vec>({ vec[0], vec[1], vec[2] });
 }
@@ -127,11 +127,11 @@ t_vec to_3vec(const t_vec& vec)
 /**
  * create a (homogeneous) 4-vector from a 3-vector
  */
-template<class t_vec, class t_val = typename t_vec::value_type>
+template<class t_vec, class t_vec_other, class t_val = typename t_vec::value_type>
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
-requires tl2::is_vec<t_vec>
+requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_other>
 #endif
-t_vec to_4vec(const t_vec& vec, t_val w = 0.)
+t_vec to_4vec(const t_vec_other& vec, t_val w = 0.)
 {
 	return tl2::create<t_vec>({ vec[0], vec[1], vec[2], w });
 }

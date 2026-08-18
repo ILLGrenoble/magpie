@@ -130,16 +130,16 @@ public:
 	using t_vec3_real = t_vec_static<t_real, 3>;
 	using t_mat33_real = t_mat_static<t_real, 3, 3>;
 
-	using MagneticSite = t_MagneticSite<t_mat33, t_vec3, t_vec_real, t_size, t_real, t_vec3_real>;
+	using MagneticSite = t_MagneticSite<t_mat33, t_vec3, t_vec3_real, t_size, t_real>;
 	using MagneticSites = std::vector<MagneticSite>;
 
-	using ExchangeTerm = t_ExchangeTerm<t_mat, t_vec, t_vec_real, t_size, t_cplx, t_real>;
+	using ExchangeTerm = t_ExchangeTerm<t_mat33, t_vec3, t_vec3_real, t_size, t_cplx, t_real>;
 	using ExchangeTerms = std::vector<ExchangeTerm>;
 
 	using Variable = t_Variable<t_cplx>;
 	using Variables = std::vector<Variable>;
 
-	using ExternalField = t_ExternalField<t_vec_real, t_real>;
+	using ExternalField = t_ExternalField<t_vec3_real, t_real>;
 
 	using EnergyAndWeight = t_EnergyAndWeight<t_mat33, t_vec, t_real, t_size, t_cplx>;
 	using EnergiesAndWeights = std::vector<EnergyAndWeight>;
@@ -201,7 +201,7 @@ public:
 
 	const ExternalField& GetExternalField() const;
 	const t_vec3_real& GetRotationAxis() const;
-	const t_vec_real& GetOrderingWavevector() const;
+	const t_vec3_real& GetOrderingWavevector() const;
 
 	t_real GetTemperature() const;
 	t_real GetBoseCutoffEnergy() const;
@@ -276,13 +276,13 @@ public:
 	void SetMagneticFormFactor(const std::string& ffact, t_size idx = 0);
 
 	void SetExternalField(const ExternalField& field);
-	void RotateExternalField(const t_vec_real& axis, t_real angle);
+	void RotateExternalField(const t_vec3_real& axis, t_real angle);
 	void RotateExternalField(t_real x, t_real y, t_real z, t_real angle);
 
 	/**
 	 * set the ordering wave vector (e.g., the helix pitch) for incommensurate structures
 	 */
-	void SetOrderingWavevector(const t_vec_real& ordering);
+	void SetOrderingWavevector(const t_vec3_real& ordering);
 
 	/**
 	 * set the rotation axis for the ordering wave vector
@@ -641,7 +641,7 @@ public:
 	 * generates the dispersion plot for the given Q values
 	 */
 	bool SaveDispersion(std::ostream& ostr,
-		const std::vector<t_vec_real>& Qs,
+		const std::vector<t_vec3_real>& Qs,
 		t_size num_threads = 4,
 		bool as_py = false, bool as_binary = false, bool calc_weights = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
@@ -651,7 +651,7 @@ public:
 	 * generates the dispersion plot along multiple Q paths
 	 */
 	bool SaveMultiDispersion(const std::string& filename,
-		const std::vector<t_vec_real>& Qs,
+		const std::vector<t_vec3_real>& Qs,
 		t_size num_Qs = 128, t_size num_threads = 4,
 		bool as_py = false, bool calc_weights = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
@@ -661,7 +661,7 @@ public:
 	 * generates the dispersion plot along multiple Q paths
 	 */
 	bool SaveMultiDispersion(std::ostream& ostr,
-		const std::vector<t_vec_real>& Qs,
+		const std::vector<t_vec3_real>& Qs,
 		t_size num_Qs = 128, t_size num_threads = 4,
 		bool as_py = false, bool calc_weights = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
@@ -722,7 +722,7 @@ private:
 	t_mat33 m_rot_negfield{ tl2::unit<t_mat33>(3) };
 
 	// ordering wave vector for incommensurate structures
-	t_vec_real m_ordering{ tl2::zero<t_vec_real>(3) };
+	std::optional<t_vec3_real> m_ordering{ std::nullopt };
 
 	// helix rotation axis for incommensurate structures
 	t_vec3_real m_rotaxis{ tl2::create<t_vec3_real>({ 1., 0., 0. }) };

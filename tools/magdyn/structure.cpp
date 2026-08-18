@@ -538,13 +538,13 @@ void MagDynDlg::CalcBZ()
 	if(m_ignoreCalc)
 		return;
 
-	const t_mat_real& xtalA = m_dyn.GetCrystalATrafo();
-	const t_mat_real& xtalB = m_dyn.GetCrystalBTrafo();
+	const t_mat33_real& xtalA = m_dyn.GetCrystalATrafo();
+	const t_mat33_real& xtalB = m_dyn.GetCrystalBTrafo();
 
 	m_bz.SetEps(g_eps);
 	m_bz.SetSymOps(GetSymOpsForCurrentSG(), false);
-	m_bz.SetCrystalA(xtalA);
-	m_bz.SetCrystalB(xtalB);
+	m_bz.SetCrystalA(tl2::convert<t_mat_real>(xtalA));
+	m_bz.SetCrystalB(tl2::convert<t_mat_real>(xtalB));
 
 	m_bz.CalcPeaks(g_bz_calc_order, false /*invA*/, false /*cut*/);
 	m_bz.CalcPeaks(g_bz_draw_order, false /*invA*/, true /*cut*/);
@@ -552,7 +552,7 @@ void MagDynDlg::CalcBZ()
 	m_bz.CalcPeaksRtree();
 
 	// get plane coordinate system
-	const t_vec_real* plane = m_dyn.GetScatteringPlane();
+	const t_vec3_real* plane = m_dyn.GetScatteringPlane();
 	t_real plane_d = 0.;
 
 	// calculate brillouin zone
@@ -563,7 +563,7 @@ void MagDynDlg::CalcBZ()
 	}
 
 	// calculate brillouin zone cut
-	if(!m_bz.CalcBZCut(plane[0], plane[2], plane_d, true))
+	if(!m_bz.CalcBZCut(tl2::convert<t_vec_real>(plane[0]), tl2::convert<t_vec_real>(plane[2]), plane_d, true))
 	{
 		std::cerr << "Error calculating Brillouin zone cut." << std::endl;
 		return;
@@ -572,7 +572,7 @@ void MagDynDlg::CalcBZ()
 	// draw brillouin zone
 	if(m_bz_dlg)
 	{
-		m_bz_dlg->SetABTrafo(xtalA, xtalB);
+		m_bz_dlg->SetABTrafo(tl2::convert<t_mat_real>(xtalA), tl2::convert<t_mat_real>(xtalB));
 		m_bz_dlg->SetEps(g_eps);
 		m_bz_dlg->SetPrecGui(g_prec_gui);
 
