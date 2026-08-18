@@ -201,8 +201,8 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 
 			magnetic_site.spin_mag = site.second.get<std::string>("spin_magnitude", "1");
 
-			if(magnetic_site.g_e.size1() == 0 || magnetic_site.g_e.size2() == 0)
-				magnetic_site.g_e = tl2::g_e<t_real> * tl2::unit<t_mat>(3);
+			if(!magnetic_site.g_e)
+				magnetic_site.g_e = tl2::g_e<t_real> * tl2::unit<t_mat33>(3);
 
 			for(std::uint8_t i = 0; i < 3; ++i)
 			for(std::uint8_t j = 0; j < 3; ++j)
@@ -212,7 +212,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 					std::string{g_comp_names[j]};
 
 				if(auto g_comp = site.second.get_optional<t_cplx>(g_name); g_comp)
-					magnetic_site.g_e(i, j) = *g_comp;
+					(*magnetic_site.g_e)(i, j) = *g_comp;
 			}
 
 			AddMagneticSite(std::move(magnetic_site));
@@ -501,12 +501,15 @@ bool MAGDYN_INST::Save(boost::property_tree::ptree& node) const
 
 		itemNode.put<std::string>("spin_magnitude", site.spin_mag);
 
-		for(std::uint8_t i = 0; i < site.g_e.size1(); ++i)
-		for(std::uint8_t j = 0; j < site.g_e.size2(); ++j)
+		if(site.g_e)
 		{
-			itemNode.put<t_cplx>(std::string{"gfactor_"} +
-				std::string{g_comp_names[i]} +
-				std::string{g_comp_names[j]}, site.g_e(i, j));
+			for(std::uint8_t i = 0; i < site.g_e->size1(); ++i)
+			for(std::uint8_t j = 0; j < site.g_e->size2(); ++j)
+			{
+				itemNode.put<t_cplx>(std::string{"gfactor_"} +
+					std::string{g_comp_names[i]} +
+					std::string{g_comp_names[j]}, (*site.g_e)(i, j));
+			}
 		}
 
 		node.add_child("atom_sites.site", itemNode);

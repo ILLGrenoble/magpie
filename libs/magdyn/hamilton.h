@@ -50,20 +50,20 @@
  * equations (10) - (13) from (Toth 2015)
  */
 MAGDYN_TEMPL
-t_mat MAGDYN_INST::CalcRealJ(const MAGDYN_TYPE::ExchangeTerm& term) const
+MAGDYN_INST::t_mat33 MAGDYN_INST::CalcRealJ(const MAGDYN_TYPE::ExchangeTerm& term) const
 {
 	// symmetric part of the exchange interaction matrix, see (Toth 2015) p. 2
-	t_mat J = tl2::diag<t_mat>(
-		tl2::create<t_vec>({ term.J_calc, term.J_calc, term.J_calc }));
+	t_mat33 J = tl2::diag<t_mat33>(
+		tl2::create<t_vec3>({ term.J_calc, term.J_calc, term.J_calc }));
 
 	// dmi as anti-symmetric part of interaction matrix
 	// using a cross product matrix, see (Toth 2015) p. 2
 	if(term.dmi_calc.size() == 3)
-		J += tl2::skewsymmetric<t_mat, t_vec>(-term.dmi_calc);
+		J += tl2::skewsymmetric<t_mat33, t_vec3>(-term.dmi_calc);
 
 	// general J matrix
 	if(term.Jgen_calc.size1() == 3 && term.Jgen_calc.size2() == 3)
-		J += term.Jgen_calc;
+		J += t_mat33{term.Jgen_calc};
 
 	// incommensurate case: rotation wrt magnetic unit cell
 	// equations (21), (6), (2) as well as section 10 from (Toth 2015)
@@ -74,8 +74,8 @@ t_mat MAGDYN_INST::CalcRealJ(const MAGDYN_TYPE::ExchangeTerm& term) const
 
 		if(!tl2::equals_0<t_real>(rot_UC_angle, m_eps))
 		{
-			t_mat rot_UC = tl2::convert<t_mat>(
-				tl2::rotation<t_mat_real, t_vec_real>(
+			t_mat33 rot_UC = tl2::convert<t_mat33>(
+				tl2::rotation<t_mat33_real, t_vec3_real>(
 					m_rotaxis, rot_UC_angle));
 			J *= rot_UC;
 
@@ -90,6 +90,7 @@ t_mat MAGDYN_INST::CalcRealJ(const MAGDYN_TYPE::ExchangeTerm& term) const
 	std::cout << "Coupling " << term.name << ": J =\n";
 	tl2::niceprint(std::cout, J, 1e-4, 4);
 #endif
+
 	return J;
 }
 
@@ -101,7 +102,7 @@ t_mat MAGDYN_INST::CalcRealJ(const MAGDYN_TYPE::ExchangeTerm& term) const
  */
 MAGDYN_TEMPL
 std::tuple<MAGDYN_TYPE::t_Jmap, MAGDYN_TYPE::t_Jmap>
-MAGDYN_INST::CalcReciprocalJs(const t_vec_real& Qvec) const
+MAGDYN_INST::CalcReciprocalJs(const t_vec3_real& Qvec) const
 {
 	t_Jmap J_Q{}, J_Q0{};
 
@@ -109,7 +110,7 @@ MAGDYN_INST::CalcReciprocalJs(const t_vec_real& Qvec) const
 	for(const ExchangeTerm& term : GetExchangeTerms())
 	{
 		// insert or add an exchange matrix at the given site indices
-		auto insert_or_add = [](t_Jmap& J, const t_indices& indices, const t_mat& J33)
+		auto insert_or_add = [](t_Jmap& J, const t_indices& indices, const t_mat33& J33)
 		{
 			if(auto iter = J.find(indices); iter != J.end())
 				iter->second += J33;
@@ -123,13 +124,11 @@ MAGDYN_INST::CalcReciprocalJs(const t_vec_real& Qvec) const
 		const t_indices indices = std::make_pair(term.site1_calc, term.site2_calc);
 		const t_indices indices_t = std::make_pair(term.site2_calc, term.site1_calc);
 
-		const t_mat J = CalcRealJ(term);
-		if(J.size1() == 0 || J.size2() == 0)
-			continue;
+		const t_mat33 J = CalcRealJ(term);
 
 		// get J in reciprocal space by fourier trafo
 		// equations (14), (12), (11), and (52) from (Toth 2015)
-		const t_mat J_fourier = J * std::exp(m_phase_sign * s_imag * s_twopi *
+		const t_mat33 J_fourier = J * std::exp(m_phase_sign * s_imag * s_twopi *
 			tl2::inner<t_vec_real>(term.dist_calc, Qvec));
 
 		// symmetry: equation (15) from (Toth 2015)
@@ -171,10 +170,10 @@ t_cplx MAGDYN_INST::CalcFieldEnergy(t_size site_idx) const
 
 	const MagneticSite& s_i = GetMagneticSite(site_idx);
 
-	const t_vec& v_i  = s_i.trafo_z_calc;
-	const t_vec field = tl2::convert<t_vec>(-m_field.dir) * m_field.mag;
-	const t_vec gv    = s_i.g_e * v_i;
-	const t_cplx Bgv  = tl2::inner_noconj<t_vec>(field, gv);
+	const t_vec3& v_i  = s_i.trafo_z_calc;
+	const t_vec3 field = tl2::convert<t_vec3>(-m_field.dir) * m_field.mag;
+	const t_vec3 gv    = (*s_i.g_e) * v_i;
+	const t_cplx Bgv   = tl2::inner_noconj<t_vec3>(field, gv);
 
 	// bohr magneton in [meV/T]
 	constexpr const t_real muB = tl2::mu_B<t_real>
@@ -191,7 +190,7 @@ t_cplx MAGDYN_INST::CalcFieldEnergy(t_size site_idx) const
  * @note a first version for a simplified ferromagnetic dispersion was based on (Heinsdorf 2021)
  */
 MAGDYN_TEMPL
-t_mat MAGDYN_INST::CalcHamiltonian(const t_vec_real& Qvec) const
+t_mat MAGDYN_INST::CalcHamiltonian(const t_vec3_real& Qvec) const
 {
 	const t_size N = GetMagneticSitesCount();
 	if(N == 0)
@@ -211,23 +210,23 @@ t_mat MAGDYN_INST::CalcHamiltonian(const t_vec_real& Qvec) const
 		const MagneticSite& s_i = GetMagneticSite(i);
 
 		// get the pre-calculated u and v vectors for the commensurate case
-		const t_vec& u_i  = s_i.trafo_plane_calc;
-		const t_vec& uc_i = s_i.trafo_plane_conj_calc;  // = u*_i
-		const t_vec& v_i  = s_i.trafo_z_calc;
+		const t_vec3& u_i  = s_i.trafo_plane_calc;
+		const t_vec3& uc_i = s_i.trafo_plane_conj_calc;  // = u*_i
+		const t_vec3& v_i  = s_i.trafo_z_calc;
 
 		for(t_size j = 0; j < N; ++j)
 		{
 			const MagneticSite& s_j = GetMagneticSite(j);
 
 			// get the pre-calculated u and v vectors for the commensurate case
-			const t_vec& u_j  = s_j.trafo_plane_calc;
-			const t_vec& uc_j = s_j.trafo_plane_conj_calc;  // = u*_j
-			const t_vec& v_j  = s_j.trafo_z_calc;
+			const t_vec3& u_j  = s_j.trafo_plane_calc;
+			const t_vec3& uc_j = s_j.trafo_plane_conj_calc;  // = u*_j
+			const t_vec3& v_j  = s_j.trafo_z_calc;
 
 			// get the pre-calculated exchange matrices for the (i, j) coupling
 			const t_indices indices_ij = std::make_pair(i, j);
-			const t_mat* J_Q33 = nullptr;
-			const t_mat* J_Q033 = nullptr;
+			const t_mat33* J_Q33 = nullptr;
+			const t_mat33* J_Q033 = nullptr;
 			if(auto iter = J_Q.find(indices_ij); iter != J_Q.end())
 				J_Q33 = &iter->second;
 			if(auto iter = J_Q0.find(indices_ij); iter != J_Q0.end())
@@ -238,15 +237,15 @@ t_mat MAGDYN_INST::CalcHamiltonian(const t_vec_real& Qvec) const
 				// equation (26) from (Toth 2015)
 				const t_real S_mag = 0.5 * std::sqrt(s_i.spin_mag_calc * s_j.spin_mag_calc);
 
-				H(    i,     j) += S_mag * tl2::inner<t_vec>(uc_i, (*J_Q33) * uc_j);  // b_i+ b_j terms
-				H(N + i, N + j) += S_mag * tl2::inner<t_vec>(u_i,  (*J_Q33) * u_j);   // b_i b_j+ terms
-				H(    i, N + j) += S_mag * tl2::inner<t_vec>(uc_i, (*J_Q33) * u_j);   // b_i+ b_j+ terms
+				H(    i,     j) += S_mag * tl2::inner<t_vec3>(uc_i, (*J_Q33) * uc_j);  // b_i+ b_j terms
+				H(N + i, N + j) += S_mag * tl2::inner<t_vec3>(u_i,  (*J_Q33) * u_j);   // b_i b_j+ terms
+				H(    i, N + j) += S_mag * tl2::inner<t_vec3>(uc_i, (*J_Q33) * u_j);   // b_i+ b_j+ terms
 			}
 
 			if(J_Q033)
 			{
 				// equation (26) from (Toth 2015)
-				t_cplx c = s_j.spin_mag_calc * tl2::inner_noconj<t_vec>(v_i, (*J_Q033) * v_j);
+				t_cplx c = s_j.spin_mag_calc * tl2::inner_noconj<t_vec3>(v_i, (*J_Q033) * v_j);
 
 				H(    i,     i) -= c;
 				H(N + i, N + i) -= c;
@@ -278,7 +277,7 @@ t_mat MAGDYN_INST::CalcHamiltonian(const t_vec_real& Qvec) const
  */
 MAGDYN_TEMPL
 MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
-	const t_mat& _H, const t_vec_real& Qvec, bool only_energies) const
+	const t_mat& _H, const t_vec3_real& Qvec, bool only_energies) const
 {
 	SofQE S;
 	S.Q_rlu = Qvec;

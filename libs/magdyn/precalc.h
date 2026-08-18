@@ -56,17 +56,17 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExternalField()
 	if(use_field_rot)
 	{
 		// rotate field to [001] direction
-		m_rot_field = tl2::convert<t_mat>(
-			tl2::trans<t_mat_real>(
-				tl2::rotation<t_mat_real, t_vec_real>(
+		m_rot_field = tl2::convert<t_mat33>(
+			tl2::trans<t_mat33_real>(
+				tl2::rotation<t_mat33_real, t_vec3_real>(
 					-m_field.dir, m_zdir, &m_rotaxis, m_eps)));
 
 		// rotate -field to [001] direction
 		if(m_field.keep_signs)
 		{
-			m_rot_negfield = tl2::convert<t_mat>(
-				tl2::trans<t_mat_real>(
-					tl2::rotation<t_mat_real, t_vec_real>(
+			m_rot_negfield = tl2::convert<t_mat33>(
+				tl2::trans<t_mat33_real>(
+					tl2::rotation<t_mat33_real, t_vec3_real>(
 						m_field.dir, m_zdir, &m_rotaxis, m_eps)));
 		}
 #ifdef __MAGDYN_DEBUG_OUTPUT__
@@ -102,8 +102,8 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 		site.trafo_z_calc = tl2::zero<t_vec>(3);
 		site.trafo_plane_calc = tl2::zero<t_vec>(3);
 		site.trafo_plane_conj_calc = tl2::zero<t_vec>(3);
-		if(site.g_e.size1() == 0 || site.g_e.size2() == 0)
-			site.g_e = tl2::g_e<t_real> * tl2::unit<t_mat>(3);
+		if(!site.g_e)
+			site.g_e = tl2::g_e<t_real> * tl2::unit<t_mat33>(3);
 
 		// spin magnitude
 		if(parser.parse_noexcept(site.spin_mag))
@@ -178,7 +178,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 			{
 				has_explicit_trafo = false;
 			}
-		}
+		}  // idx
 
 		// spin rotation of equation (9) from (Toth 2015)
 		if(m_field.align_spins)
@@ -224,9 +224,9 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 			site.trafo_plane_conj_calc = tl2::conj(site.trafo_plane_calc);
 
 		// multiply g factor
-		site.ge_trafo_z_calc = site.g_e * site.trafo_z_calc;
-		site.ge_trafo_plane_calc = site.g_e * site.trafo_plane_calc;
-		site.ge_trafo_plane_conj_calc = site.g_e * site.trafo_plane_conj_calc;
+		site.ge_trafo_z_calc = (*site.g_e) * site.trafo_z_calc;
+		site.ge_trafo_plane_calc = (*site.g_e) * site.trafo_plane_calc;
+		site.ge_trafo_plane_conj_calc = (*site.g_e) * site.trafo_plane_conj_calc;
 
 	}
 	catch(const std::exception& ex)
@@ -405,11 +405,12 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerms()
  * @see equation (9) and (51) from (Toth 2015)
  */
 MAGDYN_TEMPL
-std::tuple<t_vec, t_vec> MAGDYN_INST::rot_to_trafo(const t_mat& R)
+std::tuple<typename MAGDYN_INST::t_vec3, typename MAGDYN_INST::t_vec3>
+MAGDYN_INST::rot_to_trafo(const MAGDYN_INST::t_mat33& R)
 {
-	const t_vec xy_plane = tl2::col<t_mat, t_vec>(R, 0)
-		+ s_imag * tl2::col<t_mat, t_vec>(R, 1);
-	const t_vec z = tl2::col<t_mat, t_vec>(R, 2);
+	const t_vec3 xy_plane = tl2::col<t_mat33, t_vec3>(R, 0)
+		+ s_imag * tl2::col<t_mat33, t_vec3>(R, 1);
+	const t_vec3 z = tl2::col<t_mat33, t_vec3>(R, 2);
 
 	return std::make_tuple(xy_plane, z);
 }
@@ -421,12 +422,13 @@ std::tuple<t_vec, t_vec> MAGDYN_INST::rot_to_trafo(const t_mat& R)
  * @see equations (7) and (9) from (Toth 2015)
  */
 MAGDYN_TEMPL
-std::tuple<t_vec, t_vec> MAGDYN_INST::spin_to_trafo(const t_vec_real& spin_dir)
+std::tuple<typename MAGDYN_INST::t_vec3, typename MAGDYN_INST::t_vec3>
+MAGDYN_INST::spin_to_trafo(const MAGDYN_INST::t_vec3_real& spin_dir)
 {
-	const t_mat_real _rot = tl2::trans(tl2::rotation<t_mat_real, t_vec_real>(
+	const t_mat33_real _rot = tl2::trans(tl2::rotation<t_mat33_real, t_vec3_real>(
 		spin_dir, m_zdir, &m_rotaxis, m_eps));
 
-	const t_mat rot = tl2::convert<t_mat, t_mat_real>(_rot);
+	const t_mat33 rot = tl2::convert<t_mat33, t_mat33_real>(_rot);
 	return rot_to_trafo(rot);
 }
 // --------------------------------------------------------------------

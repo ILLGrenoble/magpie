@@ -71,8 +71,8 @@ concept is_scalar =
 template<class T>
 concept is_basic_vec = requires(const T& a)
 {
-	a.size();		// must have a size() member function
-	a.operator[](1);	// must have an operator[]
+	a.size();         // must have a size() member function
+	a.operator[](1);  // must have an operator[]
 } && has_value_type<T>;
 
 
@@ -82,7 +82,7 @@ concept is_basic_vec = requires(const T& a)
 template<class T>
 concept is_dyn_vec = requires(const T& a)
 {
-	T(3);			// constructor
+	T(3);  // constructor
 };
 
 
@@ -92,32 +92,32 @@ concept is_dyn_vec = requires(const T& a)
 template<class T>
 concept is_vec = requires(const T& a)
 {
-	a + a;			// operator+
-	a - a;			// operator-
-	a[0] * a;		// operator*
+	a + a;     // operator+
+	a - a;     // operator-
+	a[0] * a;  // operator*
 	a * a[0];
-	a / a[0];		// operator/
+	a / a[0];  // operator/
 } && is_basic_vec<T>;
 
 
 /**
  * requirements for a quaternion container
- * (modelled after Boost's quaternion interface)
+ * (modeled after Boost's quaternion interface)
  */
 template<class T>
 concept is_quat = requires(const T& a)
 {
-	a + a;			// operator+
-	a - a;			// operator-
-	a * a;			// operator*
-	a / a;			// operator/
+	a + a;                  // operator+
+	a - a;                  // operator-
+	a * a;                  // operator*
+	a / a;                  // operator/
 
 	a + a.R_component_1();
 	a.R_component_1() + a;
 
-	a.R_component_1() * a;	// operator*
+	a.R_component_1() * a;  // operator*
 	a * a.R_component_1();
-	a / a.R_component_1();	// operator/
+	a / a.R_component_1();  // operator/
 
 	a.R_component_1();
 	a.R_component_2();
@@ -132,9 +132,9 @@ concept is_quat = requires(const T& a)
 template<class T>
 concept is_basic_mat = requires(const T& a)
 {
-	a.size1();		// must have a size1() member function
-	a.size2();		// must have a size2() member function
-	a.operator()(1,1);	// must have an operator()
+	a.size1();           // must have a size1() member function
+	a.size2();           // must have a size2() member function
+	a.operator()(1, 1);  // must have an operator()
 } && has_value_type<T>;
 
 
@@ -144,7 +144,7 @@ concept is_basic_mat = requires(const T& a)
 template<class T>
 concept is_dyn_mat = requires(const T& a)
 {
-	T(3,3);			// constructor
+	T(3, 3);  // constructor
 };
 
 
@@ -154,11 +154,11 @@ concept is_dyn_mat = requires(const T& a)
 template<class T>
 concept is_mat = requires(const T& a)
 {
-	a + a;			// operator+
-	a - a;			// operator-
-	a(0,0) * a;		// operator*
-	a * a(0,0);
-	a / a(0,0);		// operator/
+	a + a;        // operator+
+	a - a;        // operator-
+	a(0, 0) * a;  // operator*
+	a * a(0, 0);
+	a / a(0, 0);  // operator/
 } && is_basic_mat<T>;
 
 
@@ -169,11 +169,11 @@ concept is_mat = requires(const T& a)
 template<class T>
 concept is_complex = requires(const T& a)
 {
-	T(0, 0);		// constructor
+	T(0, 0);   // constructor
 
 	std::conj(a);
-	a.real();		// must have a real() member function
-	a.imag();		// must have an imag() member function
+	a.real();  // must have a real() member function
+	a.imag();  // must have an imag() member function
 
 	a + a;
 	a - a;

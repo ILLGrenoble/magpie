@@ -63,24 +63,28 @@
 
 
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
-#define MAGDYN_TEMPL                                                \
-	template<                                                   \
+#define MAGDYN_TEMPL                                        \
+	template<                                               \
 		class t_mat, class t_vec,                           \
 		class t_mat_real, class t_vec_real,                 \
-		class t_cplx, class t_real, class t_size>           \
-	requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> &&        \
+		class t_cplx, class t_real, class t_size,           \
+		template<class, std::size_t, std::size_t> class t_mat_static,  \
+		template<class, std::size_t> class t_vec_static>    \
+	requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> &&    \
 		tl2::is_mat<t_mat_real> && tl2::is_vec<t_vec_real>
 #else  // SWIG
-#define MAGDYN_TEMPL                                          \
+#define MAGDYN_TEMPL                                      \
 	template<                                             \
-		class t_mat, class t_vec,                     \
-		class t_mat_real, class t_vec_real,           \
-		class t_cplx, class t_real, class t_size>
+		class t_mat, class t_vec,                         \
+		class t_mat_real, class t_vec_real,               \
+		class t_cplx, class t_real, class t_size,         \
+		template<class, std::size_t, std::size_t class t_mat_static,  \
+		template<class, std::size_t> class t_vec_static>
 #endif  // SWIG
 
-#define MAGDYN_INST                                           \
-	magdyn::MagDyn<t_mat, t_vec, t_mat_real, t_vec_real, \
-		t_cplx, t_real, t_size>
+#define MAGDYN_INST                                       \
+	magdyn::MagDyn<t_mat, t_vec, t_mat_real, t_vec_real,  \
+		t_cplx, t_real, t_size, t_mat_static, t_vec_static>
 
 #define MAGDYN_TYPE typename MAGDYN_INST
 
@@ -103,7 +107,9 @@ template<
 	class t_mat_real, class t_vec_real,
 	class t_cplx = typename t_mat::value_type,
 	class t_real = typename t_mat_real::value_type,
-	class t_size = std::size_t>
+	class t_size = std::size_t,
+	template<class, std::size_t, std::size_t> class t_mat_static = tl2::mat_static,
+	template<class, std::size_t> class t_vec_static = tl2::vec_static>
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> &&
 	tl2::is_mat<t_mat_real> && tl2::is_vec<t_vec_real>
@@ -114,7 +120,17 @@ public:
 	// --------------------------------------------------------------------
 	// structs and types
 	// --------------------------------------------------------------------
-	using MagneticSite = t_MagneticSite<t_mat, t_vec, t_vec_real, t_size, t_real>;
+	using t_vec4 = t_vec_static<t_cplx, 4>;
+	using t_mat44 = t_mat_static<t_cplx, 4, 4>;
+	using t_vec4_real = t_vec_static<t_real, 4>;
+	using t_mat44_real = t_mat_static<t_real, 4, 4>;
+
+	using t_vec3 = t_vec_static<t_cplx, 3>;
+	using t_mat33 = t_mat_static<t_cplx, 3, 3>;
+	using t_vec3_real = t_vec_static<t_real, 3>;
+	using t_mat33_real = t_mat_static<t_real, 3, 3>;
+
+	using MagneticSite = t_MagneticSite<t_mat33, t_vec3, t_vec_real, t_size, t_real, t_vec3_real>;
 	using MagneticSites = std::vector<MagneticSite>;
 
 	using ExchangeTerm = t_ExchangeTerm<t_mat, t_vec, t_vec_real, t_size, t_cplx, t_real>;
@@ -125,14 +141,14 @@ public:
 
 	using ExternalField = t_ExternalField<t_vec_real, t_real>;
 
-	using EnergyAndWeight = t_EnergyAndWeight<t_mat, t_vec, t_real, t_size, t_cplx>;
+	using EnergyAndWeight = t_EnergyAndWeight<t_mat33, t_vec, t_real, t_size, t_cplx>;
 	using EnergiesAndWeights = std::vector<EnergyAndWeight>;
 
-	using SofQE = t_SofQE<t_mat, t_vec, t_vec_real, t_real, t_size, t_cplx>;
+	using SofQE = t_SofQE<t_mat, t_vec, t_vec_real, t_real, t_size, t_cplx, t_vec3_real, t_mat33>;
 	using SofQEs = std::vector<SofQE>;
 
 	using t_indices = std::pair<t_size, t_size>;
-	using t_Jmap = std::unordered_map<t_indices, t_mat, boost::hash<t_indices>>;
+	using t_Jmap = std::unordered_map<t_indices, t_mat33, boost::hash<t_indices>>;
 
 	// histogram type
 	using t_histo = boost::histogram::histogram<
@@ -184,7 +200,7 @@ public:
 	t_size GetExchangeTermsCount() const;
 
 	const ExternalField& GetExternalField() const;
-	const t_vec_real& GetRotationAxis() const;
+	const t_vec3_real& GetRotationAxis() const;
 	const t_vec_real& GetOrderingWavevector() const;
 
 	t_real GetTemperature() const;
@@ -193,9 +209,9 @@ public:
 	const std::string& GetMagneticFormFactor(t_size idx = 0) const;
 	t_size GetMagneticFormFactorCount() const;
 
-	const t_mat_real& GetCrystalATrafo() const;
-	const t_mat_real& GetCrystalBTrafo() const;
-	const t_mat_real& GetCrystalUBTrafo() const;
+	const t_mat33_real& GetCrystalATrafo() const;
+	const t_mat33_real& GetCrystalBTrafo() const;
+	const t_mat33_real& GetCrystalUBTrafo() const;
 
 	const MagneticSite& GetMagneticSite(t_size idx) const;
 	MagneticSite& GetMagneticSite(t_size idx);
@@ -229,7 +245,7 @@ public:
 	std::vector<t_vec_real> GetMagneticSitePositions(bool homogeneous = false) const;
 
 	t_vec_real GetCrystalLattice() const;
-	const t_vec_real* GetScatteringPlane() const;
+	const t_vec3_real* GetScatteringPlane() const;
 
 	/**
 	 * get the needed supercell ranges from the exchange terms
@@ -271,7 +287,7 @@ public:
 	/**
 	 * set the rotation axis for the ordering wave vector
 	 */
-	void SetRotationAxis(const t_vec_real& axis);
+	void SetRotationAxis(const t_vec3_real& axis);
 
 	void SetCalcHamiltonian(bool H, bool Hp, bool Hm);
 	void SetCalcPolarisation(bool);
@@ -435,13 +451,13 @@ public:
 	 * calculate the real-space interaction matrix J of
 	 * equations (10) - (13) from (Toth 2015)
 	 */
-	t_mat CalcRealJ(const ExchangeTerm& term) const;
+	t_mat33 CalcRealJ(const ExchangeTerm& term) const;
 
 	/**
 	 * calculate the reciprocal interaction matrices J(Q) and J(-Q) of
 	 * equations (12) and (14) from (Toth 2015)
 	 */
-	std::tuple<t_Jmap, t_Jmap> CalcReciprocalJs(const t_vec_real& Qvec) const;
+	std::tuple<t_Jmap, t_Jmap> CalcReciprocalJs(const t_vec3_real& Qvec) const;
 
 	/**
 	 * sort eigenstates by their energies
@@ -458,14 +474,14 @@ public:
 	 * @note implements the formalism given by (Toth 2015)
 	 * @note a first version for a simplified ferromagnetic dispersion was based on (Heinsdorf 2021)
 	 */
-	t_mat CalcHamiltonian(const t_vec_real& Qvec) const;
+	t_mat CalcHamiltonian(const t_vec3_real& Qvec) const;
 
 	/**
 	 * get the energies from a hamiltonian
 	 * @note implements the formalism given by (Toth 2015)
 	 */
 	SofQE CalcEnergiesFromHamiltonian(
-		const t_mat& _H, const t_vec_real& Qvec,
+		const t_mat& _H, const t_vec3_real& Qvec,
 		bool only_energies = false) const;
 
 	/**
@@ -483,7 +499,7 @@ public:
 	/**
 	 * calculates the polarisation matrix
 	 */
-	bool CalcPolarisation(const t_vec_real& Q_rlu, EnergyAndWeight& E_and_S) const;
+	bool CalcPolarisation(const t_vec3_real& Q_rlu, EnergyAndWeight& E_and_S) const;
 
 	/**
 	 * unite degenerate energies and their corresponding eigenstates
@@ -495,7 +511,7 @@ public:
 	 * (also calculates incommensurate contributions and applies weight factors)
 	 * @note implements the formalism given by (Toth 2015)
 	 */
-	SofQE CalcEnergies(const t_vec_real& Q_rlu, bool only_energies = false) const;
+	SofQE CalcEnergies(const t_vec3_real& Q_rlu, bool only_energies = false) const;
 
 	EnergiesAndWeights CalcEnergies(t_real h, t_real k, t_real l,
 		bool only_energies = false) const;
@@ -513,7 +529,7 @@ public:
 	/**
 	 * generates the dispersion for the given Q points
 	 */
-	SofQEs CalcDispersion(const std::vector<t_vec_real>& Qs,
+	SofQEs CalcDispersion(const std::vector<t_vec3_real>& Qs,
 		t_size num_threads = 4, bool calc_weights = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		std::function<void(const SofQE*)> *result_fkt = nullptr) const;
@@ -679,13 +695,13 @@ protected:
 	 * [001] directions into the vectors comprised of the matrix columns
 	 * @see equation (9) and (51) from (Toth 2015)
 	 */
-	std::tuple<t_vec, t_vec> rot_to_trafo(const t_mat& R);
+	std::tuple<t_vec3, t_vec3> rot_to_trafo(const t_mat33& R);
 
 	/**
 	 * rotate local spin to ferromagnetic [001] direction
 	 * @see equations (7) and (9) from (Toth 2015)
 	 */
-	std::tuple<t_vec, t_vec> spin_to_trafo(const t_vec_real& spin_dir);
+	std::tuple<t_vec3, t_vec3> spin_to_trafo(const t_vec3_real& spin_dir);
 
 
 private:
@@ -701,15 +717,15 @@ private:
 	// external field
 	ExternalField m_field{};
 	// matrix to rotate field into the [001] direction
-	t_mat m_rot_field{ tl2::unit<t_mat>(3) };
+	t_mat33 m_rot_field{ tl2::unit<t_mat33>(3) };
 	// matrix to rotate inverted field into the [001] direction
-	t_mat m_rot_negfield{ tl2::unit<t_mat>(3) };
+	t_mat33 m_rot_negfield{ tl2::unit<t_mat33>(3) };
 
 	// ordering wave vector for incommensurate structures
 	t_vec_real m_ordering{ tl2::zero<t_vec_real>(3) };
 
 	// helix rotation axis for incommensurate structures
-	t_vec_real m_rotaxis{ tl2::create<t_vec_real>({ 1., 0., 0. }) };
+	t_vec3_real m_rotaxis{ tl2::create<t_vec3_real>({ 1., 0., 0. }) };
 
 	// calculate the hamiltonian for Q, Q+ordering, and Q-ordering
 	bool m_calc_H{ true };
@@ -720,7 +736,7 @@ private:
 	bool m_calc_pol{ false };
 
 	// direction to rotation spins into, usually [001]
-	t_vec_real m_zdir{ tl2::create<t_vec_real>({ 0., 0., 1. }) };
+	t_vec3_real m_zdir{ tl2::create<t_vec3_real>({ 0., 0., 1. }) };
 
 	// temperature (-1: disable bose factor)
 	t_real m_temperature{ -1. };
@@ -739,17 +755,17 @@ private:
 		t_real(0.5) * tl2::pi<t_real>,
 		t_real(0.5) * tl2::pi<t_real>
 	};
-	t_mat_real m_xtalA{ tl2::unit<t_mat_real>(3) };
-	t_mat_real m_xtalB{ tl2::unit<t_mat_real>(3) };
-	t_mat_real m_xtalUB{ tl2::unit<t_mat_real>(3) };
-	//t_mat_real m_xtalUBinv{ tl2::unit<t_mat_real>(3) };
+	t_mat33_real m_xtalA{ tl2::unit<t_mat33_real>(3) };
+	t_mat33_real m_xtalB{ tl2::unit<t_mat33_real>(3) };
+	t_mat33_real m_xtalUB{ tl2::unit<t_mat33_real>(3) };
+	//t_mat33_real m_xtalUBinv{ tl2::unit<t_mat33_real>(3) };
 
 	//scattering plane
-	t_vec_real m_scatteringplane[3]
+	t_vec3_real m_scatteringplane[3]
 	{
-		tl2::create<t_vec_real>({ 1., 0., 0. }),  // in-plane, x
-		tl2::create<t_vec_real>({ 0., 1., 0. }),  // in-plane, y
-		tl2::create<t_vec_real>({ 0., 0., 1. }),  // out-of-plane, z
+		tl2::create<t_vec3_real>({ 1., 0., 0. }),  // in-plane, x
+		tl2::create<t_vec3_real>({ 0., 1., 0. }),  // in-plane, y
+		tl2::create<t_vec3_real>({ 0., 0., 1. }),  // out-of-plane, z
 	};
 
 	t_real m_uc_min{ -0.5 };                    //

@@ -51,18 +51,18 @@ MAGDYN_TEMPL void MAGDYN_INST::Clear()
 	m_is_incommensurate = false;
 
 	// reset rotation axis
-	m_rotaxis = tl2::create<t_vec_real>({ 1., 0., 0. });
+	m_rotaxis = tl2::create<t_vec3_real>({ 1., 0., 0. });
 
 	// clear crystal
 	m_xtallattice[0] = m_xtallattice[1] = m_xtallattice[2] = 0.;
 	m_xtalangles[0] = m_xtalangles[1] = m_xtalangles[2] = t_real(0.5) * tl2::pi<t_real>;
-	m_xtalA = m_xtalB = tl2::unit<t_mat_real>(3);
-	m_xtalUB = /*m_xtalUBinv =*/ tl2::unit<t_mat_real>(3);
+	m_xtalA = m_xtalB = tl2::unit<t_mat33_real>(3);
+	m_xtalUB = /*m_xtalUBinv =*/ tl2::unit<t_mat33_real>(3);
 
 	// clear scattering plane
-	m_scatteringplane[0] = tl2::create<t_vec_real>({ 1., 0., 0. });
-	m_scatteringplane[1] = tl2::create<t_vec_real>({ 0., 1., 0. });
-	m_scatteringplane[2] = tl2::create<t_vec_real>({ 0., 0., 1. });
+	m_scatteringplane[0] = tl2::create<t_vec3_real>({ 1., 0., 0. });
+	m_scatteringplane[1] = tl2::create<t_vec3_real>({ 0., 1., 0. });
+	m_scatteringplane[2] = tl2::create<t_vec3_real>({ 0., 0., 1. });
 }
 
 
@@ -183,7 +183,7 @@ MAGDYN_TEMPL const MAGDYN_TYPE::ExternalField& MAGDYN_INST::GetExternalField() c
 }
 
 
-MAGDYN_TEMPL const t_vec_real& MAGDYN_INST::GetRotationAxis() const
+MAGDYN_TEMPL const MAGDYN_INST::t_vec3_real& MAGDYN_INST::GetRotationAxis() const
 {
 	return m_rotaxis;
 }
@@ -223,19 +223,19 @@ MAGDYN_TEMPL t_size MAGDYN_INST::GetMagneticFormFactorCount() const
 }
 
 
-MAGDYN_TEMPL const t_mat_real& MAGDYN_INST::GetCrystalATrafo() const
+MAGDYN_TEMPL const typename MAGDYN_INST::t_mat33_real& MAGDYN_INST::GetCrystalATrafo() const
 {
 	return m_xtalA;
 }
 
 
-MAGDYN_TEMPL const t_mat_real& MAGDYN_INST::GetCrystalBTrafo() const
+MAGDYN_TEMPL const typename MAGDYN_INST::t_mat33_real& MAGDYN_INST::GetCrystalBTrafo() const
 {
 	return m_xtalB;
 }
 
 
-MAGDYN_TEMPL const t_mat_real& MAGDYN_INST::GetCrystalUBTrafo() const
+MAGDYN_TEMPL const typename MAGDYN_INST::t_mat33_real& MAGDYN_INST::GetCrystalUBTrafo() const
 {
 	return m_xtalUB;
 }
@@ -448,7 +448,7 @@ MAGDYN_TEMPL t_vec_real MAGDYN_INST::GetCrystalLattice() const
 
 
 
-MAGDYN_TEMPL const t_vec_real* MAGDYN_INST::GetScatteringPlane() const
+MAGDYN_TEMPL const typename MAGDYN_INST::t_vec3_real* MAGDYN_INST::GetScatteringPlane() const
 {
 	return m_scatteringplane;
 }
@@ -631,12 +631,12 @@ MAGDYN_TEMPL void MAGDYN_INST::SetOrderingWavevector(const t_vec_real& ordering)
 /**
  * set the rotation axis for the ordering wave vector
  */
-MAGDYN_TEMPL void MAGDYN_INST::SetRotationAxis(const t_vec_real& axis)
+MAGDYN_TEMPL void MAGDYN_INST::SetRotationAxis(const t_vec3_real& axis)
 {
 	m_rotaxis = axis;
 
 	// normalise
-	const t_real len = tl2::norm<t_vec_real>(m_rotaxis);
+	const t_real len = tl2::norm<t_vec3_real>(m_rotaxis);
 	if(!tl2::equals_0<t_real>(len, m_eps))
 		m_rotaxis /= len;
 }
