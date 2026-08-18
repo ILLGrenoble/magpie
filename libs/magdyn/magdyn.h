@@ -63,6 +63,7 @@
 
 
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
+
 #define MAGDYN_TEMPL                                        \
 	template<                                               \
 		class t_mat, class t_vec,                           \
@@ -72,19 +73,23 @@
 		template<class, std::size_t> class t_vec_static>    \
 	requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> &&    \
 		tl2::is_mat<t_mat_real> && tl2::is_vec<t_vec_real>
+
+#define MAGDYN_INST                                       \
+	magdyn::MagDyn<t_mat, t_vec, t_mat_real, t_vec_real,  \
+		t_cplx, t_real, t_size, t_mat_static, t_vec_static>
+
 #else  // SWIG
 #define MAGDYN_TEMPL                                      \
 	template<                                             \
 		class t_mat, class t_vec,                         \
 		class t_mat_real, class t_vec_real,               \
-		class t_cplx, class t_real, class t_size,         \
-		template<class, std::size_t, std::size_t class t_mat_static,  \
-		template<class, std::size_t> class t_vec_static>
-#endif  // SWIG
+		class t_cplx, class t_real, class t_size>
 
 #define MAGDYN_INST                                       \
 	magdyn::MagDyn<t_mat, t_vec, t_mat_real, t_vec_real,  \
-		t_cplx, t_real, t_size, t_mat_static, t_vec_static>
+		t_cplx, t_real, t_size>
+
+#endif  // SWIG
 
 #define MAGDYN_TYPE typename MAGDYN_INST
 
@@ -107,9 +112,13 @@ template<
 	class t_mat_real, class t_vec_real,
 	class t_cplx = typename t_mat::value_type,
 	class t_real = typename t_mat_real::value_type,
-	class t_size = std::size_t,
+	class t_size = std::size_t
+#ifndef SWIG  // TODO: remove this as soon as swig understands template templates
+	,
 	template<class, std::size_t, std::size_t> class t_mat_static = tl2::mat_static,
-	template<class, std::size_t> class t_vec_static = tl2::vec_static>
+	template<class, std::size_t> class t_vec_static = tl2::vec_static
+#endif
+>
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> &&
 	tl2::is_mat<t_mat_real> && tl2::is_vec<t_vec_real>
@@ -120,6 +129,7 @@ public:
 	// --------------------------------------------------------------------
 	// structs and types
 	// --------------------------------------------------------------------
+#ifndef SWIG  // TODO: remove this as soon as swig understands template templates
 	using t_vec4 = t_vec_static<t_cplx, 4>;
 	using t_mat44 = t_mat_static<t_cplx, 4, 4>;
 	using t_vec4_real = t_vec_static<t_real, 4>;
@@ -129,6 +139,17 @@ public:
 	using t_mat33 = t_mat_static<t_cplx, 3, 3>;
 	using t_vec3_real = t_vec_static<t_real, 3>;
 	using t_mat33_real = t_mat_static<t_real, 3, 3>;
+#else  // SWIG
+	using t_vec4 = tl2::vec_static<t_cplx, 4>;
+	using t_mat44 = tl2::mat_static<t_cplx, 4, 4>;
+	using t_vec4_real = tl2::vec_static<t_real, 4>;
+	using t_mat44_real = tl2::mat_static<t_real, 4, 4>;
+
+	using t_vec3 = tl2::vec_static<t_cplx, 3>;
+	using t_mat33 = tl2::mat_static<t_cplx, 3, 3>;
+	using t_vec3_real = tl2::vec_static<t_real, 3>;
+	using t_mat33_real = tl2::mat_static<t_real, 3, 3>;
+#endif
 
 	using MagneticSite = t_MagneticSite<t_mat33, t_vec3, t_vec3_real, t_size, t_real>;
 	using MagneticSites = std::vector<MagneticSite>;
@@ -250,7 +271,7 @@ public:
 	/**
 	 * get the needed supercell ranges from the exchange terms
 	 */
-	std::tuple<t_vec_real, t_vec_real> GetSupercellMinMax() const;
+	std::tuple<t_vec3_real, t_vec3_real> GetSupercellMinMax() const;
 	// --------------------------------------------------------------------
 
 

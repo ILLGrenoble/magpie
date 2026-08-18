@@ -462,7 +462,7 @@ MAGDYN_TEMPL const typename MAGDYN_INST::t_vec3_real* MAGDYN_INST::GetScattering
 /**
  * get the needed supercell ranges from the exchange terms
  */
-MAGDYN_TEMPL std::tuple<t_vec_real, t_vec_real>
+MAGDYN_TEMPL std::tuple<typename MAGDYN_INST::t_vec3_real, typename MAGDYN_INST::t_vec3_real>
 MAGDYN_INST::GetSupercellMinMax() const
 {
 	t_vec3_real min = tl2::zero<t_vec3_real>(3);
