@@ -198,8 +198,8 @@ struct t_EnergyAndWeight
 /**
  * energies and correlations
  */
-template<class t_mat, class t_vec, class t_vec_real,
-	class t_real = typename t_vec_real::value_type,
+template<class t_mat, class t_vec,
+	class t_real = double,
 	class t_size = std::size_t,
 	class t_cplx = typename t_mat::value_type,
 	class t_vec3_real = tl2::vec_static<t_real, 3>,

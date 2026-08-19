@@ -730,7 +730,7 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 		m_needsBZCalc = true;
 
 		auto [errstr, atoms, generatedatoms, atomnames, lattice, symops] =
-			sym::load_cif<t_vec_real, t_mat_real>(filename.toStdString(), g_eps);
+			sym::load_cif<t_vec4_real, t_mat44_real>(filename.toStdString(), g_eps);
 		if(errstr != "")
 		{
 			ShowError(QString("Cannot load CIF \"%1\": %2").arg(filename).arg(errstr.c_str()));
@@ -755,7 +755,7 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 				std::cout << std::get<1>(matching_sgs[0]) << std::endl;
 			}
 		}*/
-		if(t_size sgidx = sym::match_symops<t_mat_real, t_real, t_size>(
+		if(t_size sgidx = sym::match_symops<t_mat44_real, t_real, t_size>(
 			symops, m_SGops, g_eps); sgidx < m_SGops.size())
 		{
 			m_comboSG->setCurrentIndex(sgidx);
@@ -772,8 +772,8 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 			for(std::size_t symnum = 0; symnum < generatedatoms[atomnum].size(); ++symnum)
 			{
 				// adapt atom positions to defined unit cell
-				t_vec_real& pos = generatedatoms[atomnum][symnum];
-				pos = tl2::keep_atom_in_uc<t_vec_real>(pos, 3, uc_min, uc_max);
+				t_vec4_real& pos = generatedatoms[atomnum][symnum];
+				pos = tl2::keep_atom_in_uc<t_vec4_real>(pos, 3, uc_min, uc_max);
 
 				AddSiteTabItem(-1, name, 0, 0,
 					tl2::var_to_str(pos[0], g_prec),  // pos.x

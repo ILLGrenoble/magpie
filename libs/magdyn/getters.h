@@ -431,10 +431,38 @@ MAGDYN_INST::GetMagneticSitePositions(bool homogeneous) const
 	for(const MagneticSite& site : GetMagneticSites())
 	{
 		if(homogeneous)
-			sites.push_back(to_4vec<t_vec_real>(site.pos_calc, 1.));
+			sites.emplace_back(to_4vec<t_vec_real>(site.pos_calc, 1.));
 		else
-			sites.push_back(to_3vec<t_vec_real>(site.pos_calc));
+			sites.emplace_back(to_3vec<t_vec_real>(site.pos_calc));
 	}
+
+	return sites;
+}
+
+
+
+MAGDYN_TEMPL std::vector<typename MAGDYN_INST::t_vec4_real>
+MAGDYN_INST::GetMagneticSitePositionsHom() const
+{
+	std::vector<t_vec4_real> sites;
+	sites.reserve(GetMagneticSitesCount());
+
+	for(const MagneticSite& site : GetMagneticSites())
+		sites.emplace_back(to_4vec<t_vec4_real>(site.pos_calc, 1.));
+
+	return sites;
+}
+
+
+
+MAGDYN_TEMPL std::vector<typename MAGDYN_INST::t_vec3_real>
+MAGDYN_INST::GetMagneticSitePositionsNonHom() const
+{
+	std::vector<t_vec3_real> sites;
+	sites.reserve(GetMagneticSitesCount());
+
+	for(const MagneticSite& site : GetMagneticSites())
+		sites.push_back(site.pos_calc);
 
 	return sites;
 }

@@ -86,6 +86,13 @@ concept is_dyn_vec = requires(const T& a)
 };
 
 
+template<class t_vec>
+concept has_push_back = requires(const t_vec& v)
+{
+	v.push_back(typename t_vec::value_type{});
+};
+
+
 /**
  * requirements for a vector container
  */

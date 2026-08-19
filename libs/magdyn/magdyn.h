@@ -165,7 +165,7 @@ public:
 	using EnergyAndWeight = t_EnergyAndWeight<t_mat33, t_vec, t_real, t_size, t_cplx>;
 	using EnergiesAndWeights = std::vector<EnergyAndWeight>;
 
-	using SofQE = t_SofQE<t_mat, t_vec, t_vec_real, t_real, t_size, t_cplx, t_vec3_real, t_mat33>;
+	using SofQE = t_SofQE<t_mat, t_vec, t_real, t_size, t_cplx, t_vec3_real, t_mat33>;
 	using SofQEs = std::vector<SofQE>;
 
 	using t_indices = std::pair<t_size, t_size>;
@@ -264,6 +264,8 @@ public:
 	t_size GetExchangeTermIndex(const std::string& name) const;
 
 	std::vector<t_vec_real> GetMagneticSitePositions(bool homogeneous = false) const;
+	std::vector<t_vec3_real> GetMagneticSitePositionsNonHom() const;
+	std::vector<t_vec4_real> GetMagneticSitePositionsHom() const;
 
 	t_vec_real GetCrystalLattice() const;
 	const t_vec3_real* GetScatteringPlane() const;
@@ -368,12 +370,12 @@ public:
 	/**
 	 * generate symmetric positions based on the given symops
 	 */
-	void SymmetriseMagneticSites(const std::vector<t_mat_real>& symops);
+	void SymmetriseMagneticSites(const std::vector<t_mat44_real>& symops);
 
 	/**
 	 * generate symmetric exchange terms based on the given symops
 	 */
-	void SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops);
+	void SymmetriseExchangeTerms(const std::vector<t_mat44_real>& symops);
 
 	/**
 	 * generate possible couplings up to a certain distance
@@ -407,18 +409,18 @@ public:
 	 * are two sites equivalent with respect to the given symmetry operators?
 	 */
 	bool IsSymmetryEquivalent(const MagneticSite& site1, const MagneticSite& site2,
-		const std::vector<t_mat_real>& symops) const;
+		const std::vector<t_mat44_real>& symops) const;
 
 	/**
 	 * are two couplings equivalent with respect to the given symmetry operators?
 	 */
 	bool IsSymmetryEquivalent(const ExchangeTerm& term1, const ExchangeTerm& term2,
-		const std::vector<t_mat_real>& symops) const;
+		const std::vector<t_mat44_real>& symops) const;
 
 	/**
 	 * assign symmetry group indices to sites and couplings
 	 */
-	void CalcSymmetryIndices(const std::vector<t_mat_real>& symops);
+	void CalcSymmetryIndices(const std::vector<t_mat44_real>& symops);
 
 	/**
 	 * assign exchange constants to all couplings with the same symmetry index

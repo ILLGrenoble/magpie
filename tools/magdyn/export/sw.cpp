@@ -149,7 +149,7 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 	for(t_size opidx = 0; opidx < symops.size(); ++opidx)
 	{
 		std::string symops_xyz =
-			sym::symop_to_xyz<t_mat_real, t_real>(symops[opidx], g_prec, g_eps);
+			sym::symop_to_xyz<t_mat44_real, t_real>(symops[opidx], g_prec, g_eps);
 
 		ofstr << symops_xyz;
 

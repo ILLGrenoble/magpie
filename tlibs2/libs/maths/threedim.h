@@ -1146,7 +1146,13 @@ requires is_vec<t_vec> && is_mat<t_mat>
 		if(is_pseudovector)
 		{
 			t_real oldw = newvec[3];
-			newvec *= det<t_mat>(submat<t_mat>(op, 3, 3));
+			t_mat submat33 = submat<t_mat>(op, 3, 3);
+
+			// fill up the matrix for statically sized containers
+			for(std::size_t idx = 3; idx < submat33.size1(); ++idx)
+				submat33(idx, idx) = t_real(1);
+
+			newvec *= det<t_mat>(submat33);
 			newvec[3] = oldw;
 		}
 

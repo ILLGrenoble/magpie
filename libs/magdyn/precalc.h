@@ -263,8 +263,8 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 
 		// defaults
 		term.dist_calc = tl2::zero<t_vec3_real>(3);  // distance
-		term.dmi_calc = tl2::zero<t_vec3>(3);       // dmi interaction
-		term.Jgen_calc = tl2::zero<t_mat33>(3, 3);  // general exchange interaction
+		term.dmi_calc = tl2::zero<t_vec3>(3);        // dmi interaction
+		term.Jgen_calc = tl2::zero<t_mat33>(3, 3);   // general exchange interaction
 
 		// get site indices
 		term.site1_calc = GetMagneticSiteIndex(term.site1);

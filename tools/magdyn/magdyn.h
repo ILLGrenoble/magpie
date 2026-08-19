@@ -188,7 +188,7 @@ protected:
 	QDoubleSpinBox *m_xtallattice[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_xtalangles[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_scatteringplane[2*3]{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-	std::vector<std::vector<t_mat_real>> m_SGops{};
+	std::vector<std::vector<t_mat44_real>> m_SGops{};
 	QComboBox *m_comboSG{};
 	QCheckBox *m_checkFilterSG{};
 	QLineEdit *m_editFilterSG{};
@@ -355,7 +355,7 @@ protected:
 	void GenerateCouplingsFromSG();
 	void GeneratePossibleCouplings();
 	void ExtendStructure();
-	const std::vector<t_mat_real>& GetSymOpsForCurrentSG(bool show_err = true) const;
+	const std::vector<t_mat44_real>& GetSymOpsForCurrentSG(bool show_err = true) const;
 
 	// transfer sites and terms from the kernel
 	void SyncSitesFromKernel(boost::optional<const boost::property_tree::ptree&> extra_infos = boost::none);
@@ -372,10 +372,8 @@ protected:
 	// general table operations
 	void MoveTabItemUp(QTableWidget *pTab);
 	void MoveTabItemDown(QTableWidget *pTab);
-	void ShowTableContextMenu(QTableWidget *pTab,
-		QMenu *pMenu, QMenu *pMenuNoItem, const QPoint& pt);
-	std::vector<int> GetSelectedRows(QTableWidget *pTab,
-		bool sort_reversed = false) const;
+	void ShowTableContextMenu(QTableWidget *pTab, QMenu *pMenu, QMenu *pMenuNoItem, const QPoint& pt);
+	std::vector<int> GetSelectedRows(QTableWidget *pTab, bool sort_reversed = false) const;
 
 	// add a site to the table
 	void AddSiteTabItem(int row = -1,

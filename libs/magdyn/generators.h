@@ -36,7 +36,7 @@
  * generate symmetric positions based on the given symops
  */
 MAGDYN_TEMPL
-void MAGDYN_INST::SymmetriseMagneticSites(const std::vector<t_mat_real>& symops)
+void MAGDYN_INST::SymmetriseMagneticSites(const std::vector<t_mat44_real>& symops)
 {
 	CalcExternalField();
 	CalcMagneticSites();
@@ -47,8 +47,8 @@ void MAGDYN_INST::SymmetriseMagneticSites(const std::vector<t_mat_real>& symops)
 	for(const MagneticSite& site : GetMagneticSites())
 	{
 		// get symmetry-equivalent positions
-		const auto positions = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(
-			to_3vec<t_vec_real>(site.pos_calc), symops, m_eps,
+		const auto positions = tl2::apply_ops_hom<t_vec4_real, t_mat44_real, t_real>(
+			to_4vec<t_vec4_real>(site.pos_calc, 1.), symops, m_eps,
 			true /*keep in uc*/, false /*ignore occupied*/,
 			false /*return homogeneous*/, false /*pseudovector*/,
 			m_uc_min, m_uc_max);
@@ -56,7 +56,7 @@ void MAGDYN_INST::SymmetriseMagneticSites(const std::vector<t_mat_real>& symops)
 		for(t_size idx = 0; idx < positions.size(); ++idx)
 		{
 			MagneticSite newsite = site;
-			newsite.pos_calc = positions[idx];
+			newsite.pos_calc = to_3vec<t_vec3_real>(positions[idx]);
 			newsite.pos[0] = tl2::var_to_str(newsite.pos_calc[0], m_prec);
 			newsite.pos[1] = tl2::var_to_str(newsite.pos_calc[1], m_prec);
 			newsite.pos[2] = tl2::var_to_str(newsite.pos_calc[2], m_prec);
@@ -78,7 +78,7 @@ void MAGDYN_INST::SymmetriseMagneticSites(const std::vector<t_mat_real>& symops)
  * generate symmetric exchange terms based on the given symops
  */
 MAGDYN_TEMPL
-void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
+void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat44_real>& symops)
 {
 	CalcExternalField();
 	CalcMagneticSites();
@@ -90,7 +90,7 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 	tl2::ExprParser<t_cplx> parser = GetExprParser();
 
 	// create unit cell site vectors
-	std::vector<t_vec_real> sites_uc = GetMagneticSitePositions(true);
+	std::vector<t_vec4_real> sites_uc = GetMagneticSitePositionsHom();
 
 	for(const ExchangeTerm& term : GetExchangeTerms())
 	{
@@ -102,19 +102,19 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 		t_vec_real dist_sc = to_4vec<t_vec_real>(term.dist_calc, 0.);
 
 		// generate new (possibly supercell) sites with symop
-		auto sites1_sc = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(
-			sites_uc[term.site1_calc], symops, m_eps,
+		auto sites1_sc = tl2::apply_ops_hom<t_vec4_real, t_mat44_real, t_real>(
+			to_4vec<t_vec4_real>(sites_uc[term.site1_calc], 1.), symops, m_eps,
 			false /*keep in uc*/, true /*ignore occupied*/,
 			true /*return homogeneous*/, false /*pseudovector*/,
 			m_uc_min, m_uc_max);
-		auto sites2_sc = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(
-			sites_uc[term.site2_calc] + dist_sc, symops, m_eps,
+		auto sites2_sc = tl2::apply_ops_hom<t_vec4_real, t_mat44_real, t_real>(
+			to_4vec<t_vec4_real>(sites_uc[term.site2_calc] + dist_sc, 1.), symops, m_eps,
 			false /*keep in uc*/, true /*ignore occupied*/,
 			true /*return homogeneous*/, false /*pseudovector*/,
 			m_uc_min, m_uc_max);
 
 		// generate new dmi vectors
-		t_vec_real dmi = tl2::zero<t_vec_real>(4);
+		t_vec4_real dmi = tl2::zero<t_vec4_real>(4);
 
 		for(std::uint8_t dmi_idx = 0; dmi_idx < 3; ++dmi_idx)
 		{
@@ -133,14 +133,14 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 			}
 		}
 
-		const auto newdmis = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(
+		const auto newdmis = tl2::apply_ops_hom<t_vec4_real, t_mat44_real, t_real>(
 			dmi, symops, m_eps,
 			false /*keep in uc*/, true /*ignore occupied*/,
 			false /*return homogeneous*/, true /*pseudovector*/,
 			m_uc_min, m_uc_max);
 
 		// generate new general J matrices
-		t_real Jgen_arr[3][3]{};
+		t_mat44_real Jgen = tl2::zero<t_mat44_real>(4, 4);
 
 		for(std::uint8_t J_idx1 = 0; J_idx1 < 3; ++J_idx1)
 		{
@@ -151,7 +151,7 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 
 				if(parser.parse_noexcept(term.Jgen[J_idx1][J_idx2]))
 				{
-					Jgen_arr[J_idx1][J_idx2] = parser.eval_noexcept().real();
+					Jgen(J_idx1, J_idx2) = parser.eval_noexcept().real();
 				}
 				else
 				{
@@ -163,13 +163,7 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 			}
 		}
 
-		t_mat_real Jgen = tl2::create<t_mat_real>({
-			Jgen_arr[0][0], Jgen_arr[0][1], Jgen_arr[0][2], 0,
-			Jgen_arr[1][0], Jgen_arr[1][1], Jgen_arr[1][2], 0,
-			Jgen_arr[2][0], Jgen_arr[2][1], Jgen_arr[2][2], 0,
-			0,              0,              0,              0 });
-
-		const auto newJgens = tl2::apply_ops_hom<t_mat_real, t_real>(Jgen, symops);
+		const auto newJgens = tl2::apply_ops_hom<t_mat44_real, t_real>(Jgen, symops);
 
 		// iterate and insert generated couplings
 		for(t_size op_idx = 0; op_idx < std::min(sites1_sc.size(), sites2_sc.size()); ++op_idx)
@@ -199,10 +193,15 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat_real>& symops)
 
 			for(std::uint8_t idx1 = 0; idx1 < 3; ++idx1)
 			{
+				// dmi
 				newterm.dmi[idx1] = tl2::var_to_str(newdmis[op_idx][idx1], m_prec);
+
+				// general J
 				for(std::uint8_t idx2 = 0; idx2 < 3; ++idx2)
+				{
 					newterm.Jgen[idx1][idx2] = tl2::var_to_str(
 						newJgens[op_idx](idx1, idx2), m_prec);
+				}
 			}
 			newterm.name += "_op" + tl2::var_to_str(op_idx + 1, m_prec);
 
@@ -616,11 +615,11 @@ void MAGDYN_INST::RemoveDuplicateExchangeTerms()
 MAGDYN_TEMPL
 bool MAGDYN_INST::IsSymmetryEquivalent(
 	const MAGDYN_TYPE::MagneticSite& site1, const MAGDYN_TYPE::MagneticSite& site2,
-	const std::vector<t_mat_real>& symops) const
+	const std::vector<t_mat44_real>& symops) const
 {
 	// get symmetry-equivalent positions
-	const auto positions = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(
-		to_3vec<t_vec_real>(site1.pos_calc), symops, m_eps,
+	const auto positions = tl2::apply_ops_hom<t_vec4_real, t_mat44_real, t_real>(
+		to_4vec<t_vec_real>(site1.pos_calc, 1.), symops, m_eps,
 		true /*keep in uc*/, false /*ignore occupied*/,
 		false /*return homogeneous*/, false /*pseudovector*/,
 		m_uc_min, m_uc_max);
@@ -628,7 +627,7 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
 	for(const auto& pos : positions)
 	{
 		// symmetry-equivalent site found?
-		if(tl2::equals<t_vec3_real>(site2.pos_calc, pos, m_eps))
+		if(tl2::equals<t_vec3_real>(site2.pos_calc, to_3vec<t_vec3_real>(pos), m_eps))
 			return true;
 	}
 
@@ -643,7 +642,7 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
 MAGDYN_TEMPL
 bool MAGDYN_INST::IsSymmetryEquivalent(
 	const MAGDYN_TYPE::ExchangeTerm& term1, const MAGDYN_TYPE::ExchangeTerm& term2,
-	const std::vector<t_mat_real>& symops) const
+	const std::vector<t_mat44_real>& symops) const
 {
 	// check if the site indices are valid
 	if(!CheckMagneticSite(term1.site1_calc) || !CheckMagneticSite(term1.site2_calc))
@@ -653,18 +652,18 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
 		return false;
 
 	// create unit cell site vectors
-	std::vector<t_vec_real> sites_uc = GetMagneticSitePositions(true);
+	std::vector<t_vec4_real> sites_uc = GetMagneticSitePositionsHom();
 
 	// super cell distance vector
 	t_vec_real dist_sc = to_4vec<t_vec_real>(term1.dist_calc, 0.);
 
 	// generate new (possibly supercell) sites with symop
-	auto sites1_sc = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(
-		sites_uc[term1.site1_calc], symops, m_eps,
+	auto sites1_sc = tl2::apply_ops_hom<t_vec4_real, t_mat44_real, t_real>(
+		to_4vec<t_vec4_real>(sites_uc[term1.site1_calc], 1.), symops, m_eps,
 		false /*keep in uc*/, true /*ignore occupied*/,
 		true /*return homogeneous*/);
-	auto sites2_sc = tl2::apply_ops_hom<t_vec_real, t_mat_real, t_real>(
-		sites_uc[term1.site2_calc] + dist_sc, symops, m_eps,
+	auto sites2_sc = tl2::apply_ops_hom<t_vec4_real, t_mat44_real, t_real>(
+		to_4vec<t_vec4_real>(sites_uc[term1.site2_calc] + dist_sc, 1.), symops, m_eps,
 		false /*keep in uc*/, true /*ignore occupied*/,
 		true /*return homogeneous*/);
 
@@ -710,7 +709,7 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
  * assign symmetry group indices to sites and couplings
  */
 MAGDYN_TEMPL
-void MAGDYN_INST::CalcSymmetryIndices(const std::vector<t_mat_real>& symops)
+void MAGDYN_INST::CalcSymmetryIndices(const std::vector<t_mat44_real>& symops)
 {
 	// iterate sites
 	t_size site_sym_idx_ctr = 0;
