@@ -56,11 +56,11 @@ using t_strarr33 = std::array<std::array<std::string, 3>, 3>;
 /**
  * magnetic sites
  */
-template<class t_mat, class t_vec, class t_vec_real,
+template<class t_mat33, class t_vec3, class t_vec3_real,
 	class t_size = std::size_t,
-	class t_real = typename t_vec_real::value_type>
+	class t_real = typename t_vec3_real::value_type>
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
-requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
+requires tl2::is_mat<t_mat33> && tl2::is_vec<t_vec3_real> && tl2::is_vec<t_vec3>
 #endif
 struct t_MagneticSite
 {
@@ -76,21 +76,21 @@ struct t_MagneticSite
 	t_strarr3 spin_ortho{};      // spin orthogonal vector
 
 	std::string spin_mag{};      // spin magnitude
-	t_mat g_e{};                 // electron g factor
+	std::optional<t_mat33> g_e{};  // electron g factor
 	// ------------------------------------------------------------------------
 
 	// ------------------------------------------------------------------------
 	// calculated properties
-	t_vec_real pos_calc{};       // magnetic site position
+	t_vec3_real pos_calc{};      // magnetic site position
 
-	t_vec_real spin_dir_calc{};  // spin vector
-	t_vec trafo_z_calc{};        // trafo z vector (3rd column in trafo matrix)
-	t_vec trafo_plane_calc{};    // trafo orthogonal plane (1st and 2nd columns)
-	t_vec trafo_plane_conj_calc{};
+	t_vec3_real spin_dir_calc{}; // spin vector
+	t_vec3 trafo_z_calc{};       // trafo z vector (3rd column in trafo matrix)
+	t_vec3 trafo_plane_calc{};   // trafo orthogonal plane (1st and 2nd columns)
+	t_vec3 trafo_plane_conj_calc{};
 
-	t_vec ge_trafo_z_calc{};     // g_e * trafo z vector
-	t_vec ge_trafo_plane_calc{}; // g_e * trafo orthogonal plane
-	t_vec ge_trafo_plane_conj_calc{};
+	t_vec3 ge_trafo_z_calc{};    // g_e * trafo z vector
+	t_vec3 ge_trafo_plane_calc{};// g_e * trafo orthogonal plane
+	t_vec3 ge_trafo_plane_conj_calc{};
 
 	t_real spin_mag_calc{};      // spin magnitude
 	// ------------------------------------------------------------------------
@@ -101,12 +101,12 @@ struct t_MagneticSite
 /**
  * couplings between magnetic sites
  */
-template<class t_mat, class t_vec, class t_vec_real,
+template<class t_mat33, class t_vec3, class t_vec3_real,
 	class t_size = std::size_t,
-	class t_cplx = typename t_mat::value_type,
-	class t_real = typename t_vec_real::value_type>
+	class t_cplx = typename t_mat33::value_type,
+	class t_real = typename t_vec3_real::value_type>
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
-requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
+requires tl2::is_mat<t_mat33> && tl2::is_vec<t_vec3>
 #endif
 struct t_ExchangeTerm
 {
@@ -128,12 +128,12 @@ struct t_ExchangeTerm
 	// calculated properties
 	t_size site1_calc{};         // index of first magnetic site
 	t_size site2_calc{};         // index of second magnetic site
-	t_vec_real dist_calc{};      // distance between unit cells
+	t_vec3_real dist_calc{};     // distance between unit cells
 	t_real length_calc{};        // length of the coupling (in lab units)
 
 	t_cplx J_calc{};             // Heisenberg interaction
-	t_vec dmi_calc{};            // Dzyaloshinskij-Moriya interaction
-	t_mat Jgen_calc{};           // general exchange interaction
+	std::optional<t_vec3> dmi_calc{};    // Dzyaloshinskij-Moriya interaction
+	std::optional<t_mat33> Jgen_calc{};  // general exchange interaction
 	// ------------------------------------------------------------------------
 };
 
@@ -142,16 +142,16 @@ struct t_ExchangeTerm
 /**
  * terms related to an external magnetic field
  */
-template<class t_vec_real, class t_real>
+template<class t_vec3_real, class t_real>
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
-requires tl2::is_vec<t_vec_real>
+requires tl2::is_vec<t_vec3_real>
 #endif
 struct t_ExternalField
 {
 	bool align_spins{};          // align spins along external field
 	bool keep_signs{};           // keep the senses of the spins
 
-	t_vec_real dir{};            // field direction
+	std::optional<t_vec3_real> dir{};  // field direction
 	t_real mag{};                // field magnitude
 };
 
@@ -160,33 +160,33 @@ struct t_ExternalField
 /**
  * eigenenergies and spin-spin correlation matrix
  */
-template<class t_mat, class t_vec, class t_real,
+template<class t_mat33, class t_vec, class t_real,
 	class t_size = std::size_t,
-	class t_cplx = typename t_mat::value_type>
+	class t_cplx = typename t_mat33::value_type>
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
-requires tl2::is_mat<t_mat>
+requires tl2::is_mat<t_mat33>
 #endif
 struct t_EnergyAndWeight
 {
 	t_real E{};                  // eigenenergy of hamiltonian
 	t_vec state{};               // eigenstate of hamiltonian
 
-	t_mat S{};                   // full dynamical structure factor
+	t_mat33 S{};                 // full dynamical structure factor
 	t_cplx S_sum{};
 	t_real weight_full{};
 
-	t_mat S_perp{};              // projected dynamical structure factor for neutron scattering
+	t_mat33 S_perp{};            // projected dynamical structure factor for neutron scattering
 	t_cplx S_perp_sum{};
 	t_real weight_perp{};
 #ifdef MAGDYN_COMPAT
 	t_real weight{};             // synonym for weight_perp
 #endif
 
-	t_mat S_pol{};               // full dynamical structure factor
+	t_mat33 S_pol{};             // full dynamical structure factor
 	t_cplx S_pol_sum{};
 	t_real weight_pol_full{};
 
-	t_mat S_pol_perp{};          // projected dynamical structure factor for neutron scattering
+	t_mat33 S_pol_perp{};        // projected dynamical structure factor for neutron scattering
 	t_cplx S_pol_perp_sum{};
 	t_real weight_pol_perp{};
 
@@ -198,17 +198,19 @@ struct t_EnergyAndWeight
 /**
  * energies and correlations
  */
-template<class t_mat, class t_vec, class t_vec_real,
-	class t_real = typename t_vec_real::value_type,
+template<class t_mat, class t_vec,
+	class t_real = double,
 	class t_size = std::size_t,
-	class t_cplx = typename t_mat::value_type>
+	class t_cplx = typename t_mat::value_type,
+	class t_vec3_real = tl2::vec_static<t_real, 3>,
+	class t_mat33 = tl2::mat_static<t_cplx, 3, 3>>
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
-requires tl2::is_mat<t_mat>
+requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec3_real> && tl2::is_mat<t_mat33>
 #endif
 struct t_SofQE
 {
-	t_vec_real Q_rlu{};          // momentum transfer in rlu
-	t_vec_real Q_invA{};         // momentum transfer in A^(-1)
+	t_vec3_real Q_rlu{};         // momentum transfer in rlu
+	t_vec3_real Q_invA{};        // momentum transfer in A^(-1)
 	t_mat comm{};                // commutators
 
 	t_mat H{};                   // hamiltonian
@@ -230,7 +232,7 @@ struct t_SofQE
 	// ------------------------------------------------------------------------
 
 	// energies and correlations
-	std::vector<t_EnergyAndWeight<t_mat, t_vec, t_real, t_size, t_cplx>> E_and_S{};
+	std::vector<t_EnergyAndWeight<t_mat33, t_vec, t_real, t_size, t_cplx>> E_and_S{};
 };
 
 

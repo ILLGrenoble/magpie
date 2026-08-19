@@ -117,7 +117,7 @@ void DiffDlg::SetKernel(const t_magdyn* dyn)
 /**
  * set the Q start and end points from the main window's dispersion
  */
-void DiffDlg::SetDispersionQ(const t_vec_real& Qstart, const t_vec_real& Qend)
+void DiffDlg::SetDispersionQ(const t_vec3_real& Qstart, const t_vec3_real& Qend)
 {
 	m_Qstart = Qstart;
 	m_Qend = Qend;
@@ -509,7 +509,7 @@ void DiffDlg::PlotGroupVelocity(bool clear_settings)
 
 	for(t_size Q_idx = 0; Q_idx < num_Q; ++Q_idx)
 	{
-		const t_vec_real& Q = m_data_gv[Q_idx].momentum;
+		const t_vec3_real& Q = m_data_gv[Q_idx].momentum;
 
 		for(t_size band = 0; band < num_bands; ++band)
 		{
@@ -658,14 +658,14 @@ void DiffDlg::CalculateGroupVelocity()
 	ClearGroupVelocityPlot(false);
 
 	// get coordinates
-	t_vec_real Q_start = tl2::create<t_vec_real>(
+	t_vec3_real Q_start = tl2::create<t_vec3_real>(
 	{
 		(t_real)m_Q_start_gv[0]->value(),
 		(t_real)m_Q_start_gv[1]->value(),
 		(t_real)m_Q_start_gv[2]->value(),
 	});
 
-	t_vec_real Q_end = tl2::create<t_vec_real>(
+	t_vec3_real Q_end = tl2::create<t_vec3_real>(
 	{
 		(t_real)m_Q_end_gv[0]->value(),
 		(t_real)m_Q_end_gv[1]->value(),
@@ -673,7 +673,7 @@ void DiffDlg::CalculateGroupVelocity()
 	});
 
 	// get Q component with maximum range
-	t_vec_real Q_range = Q_end - Q_start;
+	t_vec3_real Q_range = Q_end - Q_start;
 	m_Q_idx_gv = 0;
 	if(std::abs(Q_range[1]) > std::abs(Q_range[m_Q_idx_gv]))
 		m_Q_idx_gv = 1;
@@ -722,10 +722,10 @@ void DiffDlg::CalculateGroupVelocity()
 	{
 		auto task = [this, &mtx, &dyn, &Q_start, &Q_end, Q_idx, Q_count, perm]()
 		{
-			const t_vec_real Q1 = Q_count > 1
+			const t_vec3_real Q1 = Q_count > 1
 				? tl2::lerp(Q_start, Q_end, t_real(Q_idx) / t_real(Q_count - 1))
 				: Q_start;
-			const t_vec_real Q2 = Q_count > 1
+			const t_vec3_real Q2 = Q_count > 1
 				? tl2::lerp(Q_start, Q_end, t_real(Q_idx + 1) / t_real(Q_count - 1))
 				: Q_end;
 

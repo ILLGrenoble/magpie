@@ -149,14 +149,12 @@
 %template(SofQE) magdyn::t_SofQE<
 	tl2::mat<std::complex<double>>,
 	tl2::vec<std::complex<double>>,
-	tl2::vec<double>,
 	double, std::size_t,
 	std::complex<double>>;
 %template(VecSofQE) std::vector<
 	magdyn::t_SofQE<
 		tl2::mat<std::complex<double>>,
 		tl2::vec<std::complex<double>>,
-		tl2::vec<double>,
 		double, std::size_t,
 		std::complex<double>>
 	>;
@@ -177,8 +175,6 @@
 %template(MagDyn) magdyn::MagDyn<
 	tl2::mat<std::complex<double>>,
 	tl2::vec<std::complex<double>>,
-	tl2::mat<double>,
-	tl2::vec<double>,
 	std::complex<double>,
 	double,
 	std::size_t>;
@@ -199,16 +195,16 @@
 	 */
 	using t_str = std::string;
 	using t_real = double;
+	using t_cplx = std::complex<double>;
 	using t_mat = tl2::mat<std::complex<double>>;
 	using t_vec = tl2::vec<std::complex<double>>;
-	using t_mat_real = tl2::mat<double>;
-	using t_vec_real = tl2::vec<double>;
-	using t_cplx = std::complex<double>;
+	//using t_mat_real = tl2::mat<double>;
+	//using t_vec_real = tl2::vec<double>;
 
-	using t_MagDyn = magdyn::MagDyn<
-		t_mat, t_vec, t_mat_real, t_vec_real,
-		t_cplx, t_real, std::size_t>;
+	using t_MagDyn = magdyn::MagDyn<t_mat, t_vec, t_cplx, t_real, std::size_t>;
 
+	using t_vec3_real = typename t_MagDyn::t_vec3_real;
+	using t_mat44_real = typename t_MagDyn::t_mat44_real;
 	using t_SofQE = typename t_MagDyn::SofQE;
 
 
@@ -247,7 +243,7 @@
 	{
 		typename t_MagDyn::ExternalField field{};
 
-		field.dir = tl2::create<t_vec_real>({ Bx, By, Bz });
+		field.dir = tl2::create<t_vec3_real>({ Bx, By, Bz });
 		field.mag = Bmag;
 		field.align_spins = align_spins;
 
@@ -270,7 +266,7 @@
 	 */
 	void set_ordering(t_MagDyn& magdyn, t_real x, t_real y, t_real z)
 	{
-		t_vec_real vec = tl2::create<t_vec_real>({ x, y, z });
+		t_vec3_real vec = tl2::create<t_vec3_real>({ x, y, z });
 		magdyn.SetOrderingWavevector(vec);
 	}
 
@@ -280,7 +276,7 @@
 	 */
 	void set_rotation(t_MagDyn& magdyn, t_real x, t_real y, t_real z)
 	{
-		t_vec_real vec = tl2::create<t_vec_real>({ x, y, z });
+		t_vec3_real vec = tl2::create<t_vec3_real>({ x, y, z });
 		magdyn.SetRotationAxis(vec);
 	}
 
@@ -474,7 +470,7 @@
 	{
 		std::list<std::string> sg_names;
 
-		for(const auto& sg : sym::get_sgs<t_mat_real>(true, false))
+		for(const auto& sg : sym::get_sgs<t_mat44_real>(true, false))
 			sg_names.push_back(std::get<1>(sg));
 
 		return sg_names;
@@ -486,7 +482,7 @@
 	 */
 	 void symmetrise_sites(t_MagDyn& magdyn, const std::string& spacegroup)
 	 {
-		std::vector<t_mat_real> ops = sym::get_sg_ops<t_mat_real>(spacegroup);
+		std::vector<t_mat44_real> ops = sym::get_sg_ops<t_mat44_real>(spacegroup);
 		if(ops.size() == 0)
 		{
 			std::cerr << "Error: Space group \"" << spacegroup << "\" was not found. "
@@ -539,7 +535,7 @@
 	 */
 	 void symmetrise_couplings(t_MagDyn& magdyn, const std::string& spacegroup)
 	 {
-		std::vector<t_mat_real> ops = sym::get_sg_ops<t_mat_real>(spacegroup);
+		std::vector<t_mat44_real> ops = sym::get_sg_ops<t_mat44_real>(spacegroup);
 		if(ops.size() == 0)
 		{
 			std::cerr << "Error: Space group \"" << spacegroup << "\" was not found. "
@@ -559,7 +555,7 @@
 		t_real dist_max, std::size_t sc_max, std::size_t couplings_max,
 		const std::string& spacegroup)
 	 {
-		std::vector<t_mat_real> ops = sym::get_sg_ops<t_mat_real>(spacegroup);
+		std::vector<t_mat44_real> ops = sym::get_sg_ops<t_mat44_real>(spacegroup);
 		if(ops.size() == 0)
 		{
 			std::cerr << "Error: Space group \"" << spacegroup << "\" was not found. "

@@ -135,8 +135,8 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		}
 
 		S.E_and_S[i].E = energy_mat(i, i).real();
-		S.E_and_S[i].S = tl2::zero<t_mat>(3, 3);
-		S.E_and_S[i].S_perp = tl2::zero<t_mat>(3, 3);
+		S.E_and_S[i].S = tl2::zero<t_mat33>(3, 3);
+		S.E_and_S[i].S_perp = tl2::zero<t_mat33>(3, 3);
 	}
 
 	const auto [H_triag_inv, inv_ok] = tl2::inv(S.H_triag);
@@ -186,7 +186,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		}
 
 		// get |Q| in units of A^(-1)
-		t_real Q_abs = tl2::norm<t_vec_real>(S.Q_invA);
+		t_real Q_abs = tl2::norm<t_vec3_real>(S.Q_invA);
 
 		// evaluate form factor expression
 		magffacts[ffact_idx].register_var("Q", Q_abs);
@@ -211,8 +211,8 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 			const MagneticSite& s_i = GetMagneticSite(i);
 
 			// get the pre-calculated u vectors
-			const t_vec& u_i = s_i.ge_trafo_plane_calc;
-			const t_vec& uc_i = s_i.ge_trafo_plane_conj_calc;
+			const t_vec3& u_i = s_i.ge_trafo_plane_calc;
+			const t_vec3& uc_i = s_i.ge_trafo_plane_conj_calc;
 
 			// magnetic form factor for site i
 			t_cplx ffact_i = 1., ffactc_i = 1.;
@@ -228,8 +228,8 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 				const MagneticSite& s_j = GetMagneticSite(j);
 
 				// get the pre-calculated u vectors
-				const t_vec& u_j = s_j.ge_trafo_plane_calc;
-				const t_vec& uc_j = s_j.ge_trafo_plane_conj_calc;
+				const t_vec3& u_j = s_j.ge_trafo_plane_calc;
+				const t_vec3& uc_j = s_j.ge_trafo_plane_conj_calc;
 
 				// magnetic form factor for site j
 				t_cplx ffact_j = 1., ffactc_j = 1.;
@@ -242,12 +242,12 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 				// pre-factors of equation (44) from (Toth 2015)
 				const t_real S_mag = std::sqrt(s_i.spin_mag_calc * s_j.spin_mag_calc);
 				const t_cplx phase = std::exp(-m_phase_sign * s_imag * s_twopi *
-					tl2::inner<t_vec_real>(s_j.pos_calc - s_i.pos_calc, S.Q_rlu));
+					tl2::inner<t_vec3_real>(s_j.pos_calc - s_i.pos_calc, S.Q_rlu));
 				if(m_perform_checks)
 				{
 					// because A*B^T = diag(2pi), the phase is the same as:
 					const t_cplx phase_chk = std::exp(-m_phase_sign * s_imag *
-						tl2::inner<t_vec_real>(m_xtalA*s_j.pos_calc - m_xtalA*s_i.pos_calc, S.Q_invA));
+						tl2::inner<t_vec3_real>(m_xtalA*s_j.pos_calc - m_xtalA*s_i.pos_calc, S.Q_invA));
 
 					if(!tl2::equals<t_cplx>(phase, phase_chk, m_eps))
 					{
@@ -299,16 +299,16 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 
 		// calculate orthogonal projector for magnetic neutron scattering,
 		// see (Shirane 2002), p. 37, equation (2.64)
-		t_mat proj_neutron;
+		t_mat33 proj_neutron;
 		if(!tl2::equals_0(S.Q_invA, m_eps))
 		{
-			proj_neutron = tl2::convert<t_mat>(
-				tl2::ortho_projector<t_mat_real, t_vec_real>(S.Q_invA, false));
+			proj_neutron = tl2::convert<t_mat33>(
+				tl2::ortho_projector<t_mat33_real, t_vec3_real>(S.Q_invA, false));
 		}
 		else
 		{
 			// invalid projector at Q = 0
-			proj_neutron = tl2::zero<t_mat>(3, 3);
+			proj_neutron = tl2::zero<t_mat33>(3, 3);
 			MAGDYN_CERR_OPT << "Magdyn error: Cannot calculate orthogonal projector for Q = 0." << std::endl;
 		}
 
@@ -328,8 +328,8 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
-		t_mat proj_neutron2 = tl2::convert<t_mat>(
-			tl2::ortho_projector<t_mat_real, t_vec_real>(m_xtalB, S.Q_rlu, false, false));
+		t_mat33 proj_neutron2 = tl2::convert<t_mat33>(
+			tl2::ortho_projector<t_mat33_real, t_vec3_real>(m_xtalB, S.Q_rlu, false, false));
 
 		std::cout << "Q_proj for Q = " << S.Q_rlu << ":\n";
 		tl2::niceprint(std::cout, proj_neutron, 1e-4, 4);
@@ -339,8 +339,8 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 #endif
 
 		// weights
-		E_and_S.S_sum       = tl2::trace<t_mat>(E_and_S.S);
-		E_and_S.S_perp_sum  = tl2::trace<t_mat>(E_and_S.S_perp);
+		E_and_S.S_sum       = tl2::trace<t_mat33>(E_and_S.S);
+		E_and_S.S_perp_sum  = tl2::trace<t_mat33>(E_and_S.S_perp);
 		E_and_S.weight_full = std::abs(E_and_S.S_sum.real());
 		E_and_S.weight_perp = std::abs(E_and_S.S_perp_sum.real());
 #ifdef MAGDYN_COMPAT
@@ -349,8 +349,8 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 
 		if(m_calc_pol && CalcPolarisation(S.Q_rlu, E_and_S))
 		{
-			E_and_S.S_pol_sum       = tl2::trace<t_mat>(E_and_S.S_pol);
-			E_and_S.S_pol_perp_sum  = tl2::trace<t_mat>(E_and_S.S_pol_perp);
+			E_and_S.S_pol_sum       = tl2::trace<t_mat33>(E_and_S.S_pol);
+			E_and_S.S_pol_perp_sum  = tl2::trace<t_mat33>(E_and_S.S_pol_perp);
 			E_and_S.weight_pol_full = std::abs(E_and_S.S_pol_sum.real());
 			E_and_S.weight_pol_perp = std::abs(E_and_S.S_pol_perp_sum.real());
 		}

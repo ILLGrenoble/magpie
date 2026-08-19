@@ -290,7 +290,7 @@ void StructPlotDlg::PickerIntersection(
 		ostr.precision(g_prec_gui);
 		ostr << "Site: " << *m_cur_site
 			<< " (position: " << iter_sites->second.sc_pos;
-		if(!tl2::equals<t_vec_real>(iter_sites->second.uc_pos,
+		if(!tl2::equals<t_vec3_real>(iter_sites->second.uc_pos,
 			iter_sites->second.sc_pos, g_eps))
 			ostr << ", unit cell: " << iter_sites->second.uc_pos;
 		ostr << ")";
@@ -720,7 +720,7 @@ void StructPlotDlg::Sync()
 
 	// calculate the hash of a magnetic site
 	auto get_site_hash = [](const t_magdyn::MagneticSite& site,
-		const t_vec_real* sc_dist = nullptr) -> t_size
+		const t_vec3_real* sc_dist = nullptr) -> t_size
 	{
 		// super cell index
 		int _sc_x = 0, _sc_y = 0, _sc_z = 0;
@@ -743,7 +743,7 @@ void StructPlotDlg::Sync()
 	// check if the magnetic site has already been seen
 	auto site_not_yet_seen = [&site_hashes, &get_site_hash](
 		const t_magdyn::MagneticSite& site,
-		const t_vec_real& sc_dist)
+		const t_vec3_real& sc_dist)
 	{
 		t_size hash = get_site_hash(site, &sc_dist);
 		return site_hashes.find(hash) == site_hashes.end();
@@ -756,7 +756,7 @@ void StructPlotDlg::Sync()
 			t_size site_idx,
 			const t_magdyn::MagneticSite& site,
 			const t_magdyn::ExternalField& field,
-			const t_vec_real* sc_dist = nullptr)
+			const t_vec3_real* sc_dist = nullptr)
 	{
 		// super cell index
 		int _sc_x = 0, _sc_y = 0, _sc_z = 0;
@@ -798,7 +798,7 @@ void StructPlotDlg::Sync()
 		std::size_t arrow = m_structplot->GetRenderer()->AddLinkedObject(
 			m_arrow, 0,0,0, rgb[0], rgb[1], rgb[2], 1);
 
-		t_vec_real _pos_vec = site.pos_calc;
+		t_vec3_real _pos_vec = site.pos_calc;
 		if(sc_dist)
 			_pos_vec += *sc_dist;
 		t_vec_gl pos_vec = tl2::convert<t_vec_gl>(_pos_vec);
@@ -815,22 +815,22 @@ void StructPlotDlg::Sync()
 		}
 
 		// align spin to external field?
-		if(field.align_spins)
+		if(field.align_spins && field.dir)
 		{
-			if(field.keep_signs && tl2::inner(field.dir, site.spin_dir_calc) > 0.)
+			if(field.keep_signs && tl2::inner(*field.dir, site.spin_dir_calc) > 0.)
 			{
 				spin_vec = tl2::create<t_vec_gl>({
-					t_real_gl(field.dir[0] * site.spin_mag_calc),
-					t_real_gl(field.dir[1] * site.spin_mag_calc),
-					t_real_gl(field.dir[2] * site.spin_mag_calc),
+					t_real_gl((*field.dir)[0] * site.spin_mag_calc),
+					t_real_gl((*field.dir)[1] * site.spin_mag_calc),
+					t_real_gl((*field.dir)[2] * site.spin_mag_calc),
 				});
 			}
 			else
 			{
 				spin_vec = tl2::create<t_vec_gl>({
-					t_real_gl(-field.dir[0] * site.spin_mag_calc),
-					t_real_gl(-field.dir[1] * site.spin_mag_calc),
-					t_real_gl(-field.dir[2] * site.spin_mag_calc),
+					t_real_gl(-(*field.dir)[0] * site.spin_mag_calc),
+					t_real_gl(-(*field.dir)[1] * site.spin_mag_calc),
+					t_real_gl(-(*field.dir)[2] * site.spin_mag_calc),
 				});
 			}
 		}
@@ -899,13 +899,13 @@ void StructPlotDlg::Sync()
 
 		// TODO: handle self-couplings (e.g. single-ion anisotropy)
 		if(term.site1_calc == term.site2_calc &&
-			tl2::equals_0<t_vec_real>(term.dist_calc, g_eps))
+			tl2::equals_0<t_vec3_real>(term.dist_calc, g_eps))
 			continue;
 
 		const t_site& site1 = sites[term.site1_calc];
 		const t_site& site2 = sites[term.site2_calc];
 
-		const t_vec_real& sc_dist = term.dist_calc;
+		const t_vec3_real& sc_dist = term.dist_calc;
 
 		// get colour
 		t_real_gl rgb[3] {0., 0.75, 0.};
@@ -958,11 +958,11 @@ void StructPlotDlg::Sync()
 
 		// dmi vector
 		t_vec_gl dmi_vec = tl2::zero<t_vec_gl>(3);
-		if(term.dmi_calc.size() >= 3)
+		if(term.dmi_calc)
 		{
-			dmi_vec[0] = t_real_gl(term.dmi_calc[0].real());
-			dmi_vec[1] = t_real_gl(term.dmi_calc[1].real());
-			dmi_vec[2] = t_real_gl(term.dmi_calc[2].real());
+			dmi_vec[0] = t_real_gl((*term.dmi_calc)[0].real());
+			dmi_vec[1] = t_real_gl((*term.dmi_calc)[1].real());
+			dmi_vec[2] = t_real_gl((*term.dmi_calc)[2].real());
 		}
 
 		if(tl2::norm<t_vec_gl>(dmi_vec) > g_eps)
@@ -1018,12 +1018,12 @@ void StructPlotDlg::Sync()
 void StructPlotDlg::AddFieldVector()
 {
 	const auto& field = m_dyn->GetExternalField();
-	if(field.dir.size() < 3 || tl2::equals_0<t_real>(field.mag, g_eps) ||
-		tl2::equals_0(field.dir, g_eps))
+	if(!field.dir || tl2::equals_0<t_real>(field.mag, g_eps) ||
+		tl2::equals_0(*field.dir, g_eps))
 		return;
 
 	t_vec3_gl dir = tl2::create<t_vec3_gl>({
-		t_real_gl(field.dir[0]), t_real_gl(field.dir[1]), t_real_gl(field.dir[2]) });
+		t_real_gl((*field.dir)[0]), t_real_gl((*field.dir)[1]), t_real_gl((*field.dir)[2]) });
 
 	t_vec3_gl mid = tl2::create<t_vec3_gl>({ 0., 0., 0. });
 	t_real_gl len = tl2::norm(dir) * 0.5;

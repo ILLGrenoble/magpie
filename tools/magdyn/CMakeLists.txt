@@ -31,7 +31,6 @@ enable_language(CXX)
 set(CMAKE_CXX_STANDARD 20)
 add_compile_options(-std=c++20)
 add_compile_options(-Wall -Wextra -Weffc++)
-#add_compile_options(-march=native)
 
 
 # -----------------------------------------------------------------------------
@@ -41,11 +40,17 @@ option(USE_QT      "use Qt"            TRUE)
 option(USE_QT6     "use Qt version 6"  TRUE)
 option(USE_HDF     "use HDF"           TRUE)
 option(USE_MINUIT  "use Minuit"        TRUE)
+option(USE_NATIVE  "use native code"   FALSE)
 
 if(USE_QT6)
 	set(QT_VER 6)
 else()
 	set(QT_VER 5)
+endif()
+
+if(USE_NATIVE)
+	message("Using native optimisations.")
+	add_compile_options(-march=native)
 endif()
 
 #add_compile_options(-D__MAGDYN_DEBUG_OUTPUT__)

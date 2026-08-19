@@ -129,14 +129,14 @@ void MagDynDlg::CreateHamiltonPanel()
 		int num_pts = m_num_points->value();
 
 		// interpolate Q
-		const t_vec_real Q = num_pts > 1
-			? tl2::create<t_vec_real>(
+		const t_vec3_real Q = num_pts > 1
+			? tl2::create<t_vec3_real>(
 			{
 				std::lerp(Q_start[0], Q_end[0], t_real(idx) / t_real(num_pts - 1)),
 				std::lerp(Q_start[1], Q_end[1], t_real(idx) / t_real(num_pts - 1)),
 				std::lerp(Q_start[2], Q_end[2], t_real(idx) / t_real(num_pts - 1)),
 			})
-			: tl2::create<t_vec_real>({ Q_start[0], Q_start[1], Q_start[2] });
+			: tl2::create<t_vec3_real>({ Q_start[0], Q_start[1], Q_start[2] });
 
 		// set Q
 		for(int i = 0; i < 3; ++i)
@@ -170,7 +170,7 @@ void MagDynDlg::CalcHamiltonian()
 
 	m_hamiltonian->clear();
 
-	const t_vec_real Q = tl2::create<t_vec_real>(
+	const t_vec3_real Q = tl2::create<t_vec3_real>(
 	{
 		(t_real)m_Q[0]->value(),
 		(t_real)m_Q[1]->value(),
@@ -182,7 +182,7 @@ void MagDynDlg::CalcHamiltonian()
 
 
 	// print hamiltonian
-	auto print_H = [&ostr](const t_mat& H, const t_vec_real& Qvec,
+	auto print_H = [&ostr](const t_mat& H, const t_vec3_real& Qvec,
 		const std::string& Qstr = "Q", const std::string& mQstr = "-Q",
 		const std::string& title = "")
 	{
@@ -246,19 +246,19 @@ void MagDynDlg::CalcHamiltonian()
 	// print shifted hamiltonians for incommensurate case
 	bool print_incomm_p = false;
 	bool print_incomm_m = false;
-	t_vec_real O;
+	t_vec3_real O = tl2::zero<t_vec3_real>(3);
 
 	if(!is_comm)
 	{
 		// ordering wave vector
-		O = tl2::create<t_vec_real>(
+		O = tl2::create<t_vec3_real>(
 		{
 			(t_real)m_ordering[0]->value(),
 			(t_real)m_ordering[1]->value(),
 			(t_real)m_ordering[2]->value(),
 		});
 
-		if(!tl2::equals_0<t_vec_real>(O, g_eps))
+		if(!tl2::equals_0<t_vec3_real>(O, g_eps))
 		{
 			if(m_hamiltonian_comp[1]->isChecked())
 			{
@@ -396,12 +396,12 @@ void MagDynDlg::CalcHamiltonian()
 			if(ignore_annihilation && E < t_real(0))
 				continue;
 
-			const t_mat& S = use_polcoords ? E_and_S.S_pol : E_and_S.S;
-			const t_mat& S_perp = use_polcoords ? E_and_S.S_pol_perp : E_and_S.S_perp;
+			const t_mat33& S = use_polcoords ? E_and_S.S_pol : E_and_S.S;
+			const t_mat33& S_perp = use_polcoords ? E_and_S.S_pol_perp : E_and_S.S_perp;
 			t_real weight = use_polcoords ? E_and_S.weight_pol_perp : E_and_S.weight_perp;
 
 			if(!use_projector)
-				weight = tl2::trace<t_mat>(S).real();
+				weight = tl2::trace<t_mat33>(S).real();
 
 			tl2::set_eps_0(E);
 			tl2::set_eps_0(weight);

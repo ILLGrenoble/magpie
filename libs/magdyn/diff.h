@@ -42,7 +42,7 @@ namespace magdyn {
  */
 MAGDYN_TEMPL
 std::tuple<std::vector<t_real>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcGroupVelocities(
-	const t_vec_real& Q, const t_vec_real& deltaQ, const std::vector<t_size> *perm) const
+	const t_vec3_real& Q, const t_vec3_real& deltaQ, const std::vector<t_size> *perm) const
 {
 	//SetUniteDegenerateEnergies(false);
 
@@ -57,7 +57,7 @@ std::tuple<std::vector<t_real>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcGroupVeloci
 	}
 
 	const t_size num_bands = std::min(S1.E_and_S.size(), S2.E_and_S.size());
-	const t_real dQ = tl2::norm<t_vec_real>(deltaQ);
+	const t_real dQ = tl2::norm<t_vec3_real>(deltaQ);
 
 	std::vector<t_real> diffs;
 	diffs.reserve(num_bands);

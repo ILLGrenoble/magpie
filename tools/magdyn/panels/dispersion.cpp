@@ -379,13 +379,13 @@ void MagDynDlg::PlotMouseMove(QMouseEvent* evt)
 	if(Q_idx > 2)
 		Q_idx = 2;
 	const t_real t = (Q - Q1[Q_idx]) / (Q2[Q_idx] - Q1[Q_idx]);
-	const t_vec_real Qvec = tl2::create<t_vec_real>({
+	const t_vec3_real Qvec = tl2::create<t_vec3_real>({
 		std::lerp(Q1[0], Q2[0], t),
 		std::lerp(Q1[1], Q2[1], t),
 		std::lerp(Q1[2], Q2[2], t) });
 
-	const t_mat_real& B = m_dyn.GetCrystalBTrafo();
-	const t_vec_real Qvec_invA = B * Qvec;
+	const t_mat33_real& B = m_dyn.GetCrystalBTrafo();
+	const t_vec3_real Qvec_invA = B * Qvec;
 	const t_real Q_invA = tl2::norm(Qvec_invA);
 
 	// write status

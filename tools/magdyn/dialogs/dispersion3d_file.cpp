@@ -122,7 +122,7 @@ void Dispersion3DDlg::SaveData()
 	{
 		for(t_data_Q& data : m_data[band_idx])
 		{
-			const t_vec_real& Q = std::get<0>(data);
+			const t_vec3_real& Q = std::get<0>(data);
 			t_real E = std::get<1>(data);
 			t_real S = std::get<2>(data);
 			t_size Qidx1 = std::get<3>(data);
@@ -457,7 +457,7 @@ if __name__ == "__main__":
 		// band data
 		for(t_data_Q& data : m_data[band_idx])
 		{
-			const t_vec_real& Q = std::get<0>(data);
+			const t_vec3_real& Q = std::get<0>(data);
 			t_real E = std::get<1>(data);
 			t_real S = std::get<2>(data);
 			//t_size Qidx1 = std::get<3>(data);

@@ -49,7 +49,9 @@ namespace sym {
  * brillouin zone calculation
  */
 template<class t_mat, class t_vec, class t_real = typename t_vec::value_type>
-//requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
+#ifndef SWIG  // TODO: remove this as soon as swig understands concepts
+	requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
+#endif
 class BZCalc
 {
 protected:
@@ -317,8 +319,35 @@ public:
 	const std::vector<std::tuple<t_vec, t_vec, std::array<t_real, 3>>>&
 	GetCutLines(bool b000 = false) const
 	{
-	        // [x, y, Q]
+		// [x, y, Q]
 		return b000 ? m_cut_lines000 : m_cut_lines;
+	}
+
+
+	/**
+	 * convenience function to convert vectors to another type
+	 */
+	template<class t_vec_other>
+#ifndef SWIG  // TODO: remove this as soon as swig understands concepts
+	requires tl2::is_vec<t_vec_other>
+#endif
+	const std::vector<std::tuple<t_vec_other, t_vec_other, std::array<t_real, 3>>>
+	GetConvertedCutLines(bool b000 = false) const
+	{
+		auto cut_lines = GetCutLines(b000);
+
+		std::vector<std::tuple<t_vec_other, t_vec_other, std::array<t_real, 3>>> vec;
+		vec.reserve(cut_lines.size());
+
+		for(const auto& cut_line : cut_lines)
+		{
+			vec.emplace_back(std::make_tuple(
+				tl2::convert<t_vec_other>(std::get<0>(cut_line)),
+				tl2::convert<t_vec_other>(std::get<1>(cut_line)),
+				std::get<2>(cut_line)));
+		}
+
+		return vec;
 	}
 
 

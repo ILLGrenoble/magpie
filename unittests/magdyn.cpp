@@ -51,12 +51,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn, t_real, t_types_real)
 	using t_cplx = std::complex<t_real>;
 	using t_mat = tl2::mat<t_cplx>;
 	using t_vec = tl2::vec<t_cplx>;
-	using t_mat_real = tl2::mat<t_real>;
 	using t_vec_real = tl2::vec<t_real>;
+	//using t_mat_real = tl2::mat<t_real>;
 
 	using t_magdyn = magdyn::MagDyn<
 		t_mat, t_vec,
-		t_mat_real, t_vec_real,
 		t_cplx, t_real,
 		std::size_t>;
 

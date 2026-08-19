@@ -42,8 +42,8 @@ void MagDynDlg::CreateReciprocalPanel()
 	m_reciprocalpanel = new QWidget(this);
 
 	// 2d brillouin zone cut
-	m_bzscene = new BZCutScene<t_vec_real, t_real>(m_reciprocalpanel);
-	m_bzview = new BZCutView<t_vec_real, t_real>(m_bzscene, m_sett);
+	m_bzscene = new BZCutScene<t_vec3_real, t_real>(m_reciprocalpanel);
+	m_bzview = new BZCutView<t_vec3_real, t_real>(m_bzscene, m_sett);
 
 	m_bzscene->setFont(this->font());
 	m_bzview->setFont(this->font());
@@ -194,27 +194,27 @@ void MagDynDlg::CreateReciprocalPanel()
 
 	connect(acSetQi, &QAction::triggered, [this]()
 	{
-		t_vec_real pos = m_bzview->GetClickedPosition(true);
+		t_vec3_real pos = m_bzview->GetClickedPosition(true);
 		auto [QinvA, Qrlu] = m_bz.GetBZCutQ(pos[0], pos[1]);
 		if(Qrlu.size() != 3)
 			return;
 
-		SetCoordinates(Qrlu, t_vec_real{}, true);
+		SetCoordinates(Qrlu, std::nullopt, true);
 	});
 
 	connect(acSetQf, &QAction::triggered, [this]()
 	{
-		t_vec_real pos = m_bzview->GetClickedPosition(true);
+		t_vec3_real pos = m_bzview->GetClickedPosition(true);
 		auto [QinvA, Qrlu] = m_bz.GetBZCutQ(pos[0], pos[1]);
 		if(Qrlu.size() != 3)
 			return;
 
-		SetCoordinates(t_vec_real{}, Qrlu, true);
+		SetCoordinates(std::nullopt, Qrlu, true);
 	});
 
 	connect(btn_rotate_ccw, &QAbstractButton::clicked, [this]()
 	{
-		t_vec_real axis = tl2::create<t_vec_real>(
+		t_vec3_real axis = tl2::create<t_vec3_real>(
 		{
 			(t_real)m_recip_trafo_axis[0]->value(),
 			(t_real)m_recip_trafo_axis[1]->value(),
@@ -243,7 +243,7 @@ void MagDynDlg::CreateReciprocalPanel()
 
 	connect(btn_rotate_cw, &QAbstractButton::clicked, [this]()
 	{
-		t_vec_real axis = tl2::create<t_vec_real>(
+		t_vec3_real axis = tl2::create<t_vec3_real>(
 		{
 			(t_real)m_recip_trafo_axis[0]->value(),
 			(t_real)m_recip_trafo_axis[1]->value(),
@@ -274,7 +274,7 @@ void MagDynDlg::CreateReciprocalPanel()
 	{
 		connect(acPlane[i], &QAction::triggered, [this, i]()
 		{
-			const t_vec_real& vec = m_dyn.GetScatteringPlane()[i];
+			const t_vec3_real& vec = m_dyn.GetScatteringPlane()[i];
 
 			m_recip_trafo_axis[0]->setValue(vec[0]);
 			m_recip_trafo_axis[1]->setValue(vec[1]);
@@ -347,12 +347,12 @@ void MagDynDlg::CreateReciprocalPanel()
 /**
  * rotate the Q start and end vectors
  */
-void MagDynDlg::RotateDispersionQs(const t_vec_real& axis_rlu, t_real angle)
+void MagDynDlg::RotateDispersionQs(const t_vec3_real& axis_rlu, t_real angle)
 {
-	t_vec_real axis = axis_rlu;
+	t_vec3_real axis = axis_rlu;
 	auto [Q_start, Q_end] = GetDispersionQ();
 
-	const t_mat_real& xtalB = m_dyn.GetCrystalBTrafo();
+	const t_mat33_real& xtalB = m_dyn.GetCrystalBTrafo();
 	auto [xtalB_inv, inv_ok] = tl2::inv(xtalB);
 	if(inv_ok)
 	{
@@ -361,7 +361,7 @@ void MagDynDlg::RotateDispersionQs(const t_vec_real& axis_rlu, t_real angle)
 		Q_end = xtalB * Q_end;
 	}
 
-	t_mat_real R = tl2::rotation<t_mat_real, t_vec_real>(axis, angle, false);
+	t_mat33_real R = tl2::rotation<t_mat33_real, t_vec3_real>(axis, angle, false);
 	Q_start = R*Q_start;
 	Q_end = R*Q_end;
 
@@ -393,9 +393,9 @@ void MagDynDlg::RotateDispersionQs(const t_vec_real& axis_rlu, t_real angle)
 /**
  * translate the Q start and end vectors
  */
-void MagDynDlg::TranslateDispersionQs(const t_vec_real& axis_rlu, t_real delta)
+void MagDynDlg::TranslateDispersionQs(const t_vec3_real& axis_rlu, t_real delta)
 {
-	t_vec_real axis = axis_rlu;
+	t_vec3_real axis = axis_rlu;
 	auto [Q_start, Q_end] = GetDispersionQ();
 
 	Q_start += axis_rlu*delta;

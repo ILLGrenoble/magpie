@@ -94,4 +94,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_rotation,
 	std::cout << std::endl;
 	BOOST_TEST((tl2::equals<t_vec>(vecTo4d, vec4d, eps)));
 	BOOST_TEST((tl2::equals<t_real>(tl2::det<t_mat>(mat4d), 1., eps)));
+
+	// test 4d case with static matrix
+	const t_vec4 vecFrom4ds = tl2::create<t_vec4>({1, 0, 1, 0});
+	const t_vec4 vecTo4ds = tl2::create<t_vec4>({1, -1, 0, 0});
+	t_mat44 mat4ds = tl2::rotation<t_mat44, t_vec4, t_real>(vecFrom4ds, vecTo4ds, nullptr, eps, false);
+	t_vec4 vec4ds = mat4ds * vecFrom4ds / tl2::norm<t_vec4>(vecFrom4ds) * tl2::norm<t_vec4>(vecTo4ds);
+	std::cout << "4d rotation (static matrix):\n";
+	tl2::niceprint(std::cout, mat4ds, 1e-4, 4);
+	std::cout << std::endl;
+	BOOST_TEST((tl2::equals<t_vec4>(vecTo4ds, vec4ds, eps)));
+	BOOST_TEST((tl2::equals<t_real>(tl2::det<t_mat44>(mat4ds), 1., eps)));
 }

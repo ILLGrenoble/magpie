@@ -235,7 +235,7 @@ bool MAGDYN_INST::SaveDispersion(const std::string& filename,
  */
 MAGDYN_TEMPL
 bool MAGDYN_INST::SaveMultiDispersion(const std::string& filename,
-	const std::vector<t_vec_real>& Qs,
+	const std::vector<t_vec3_real>& Qs,
 	t_size num_Qs, t_size num_threads, bool as_py, bool calc_weights,
 	std::function<bool(int, int)> *progress_fkt,
 	const std::vector<std::string> *Q_names) const
@@ -402,7 +402,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
  */
 MAGDYN_TEMPL
 bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
-	const std::vector<t_vec_real>& Qs, t_size num_threads,
+	const std::vector<t_vec3_real>& Qs, t_size num_threads,
 	bool as_py, bool as_binary, bool calc_weights,
 	std::function<bool(int, int)> *progress_fkt,
 	bool write_header) const
@@ -543,7 +543,7 @@ bool MAGDYN_INST::SaveDispersion(std::ostream& ostr,
  */
 MAGDYN_TEMPL
 bool MAGDYN_INST::SaveMultiDispersion(std::ostream& ostr,
-	const std::vector<t_vec_real>& Qs,
+	const std::vector<t_vec3_real>& Qs,
 	t_size num_Qs, t_size num_threads,
 	bool as_py, bool calc_weights,
 	std::function<bool(int, int)> *progress_fkt,
@@ -570,13 +570,13 @@ bool MAGDYN_INST::SaveMultiDispersion(std::ostream& ostr,
 	// iterate branches
 	for(t_size i = 0; i < N - 1; ++i)
 	{
-		const t_vec_real& Q1 = Qs[i];
-		const t_vec_real& Q2 = Qs[i + 1];
+		const t_vec3_real& Q1 = Qs[i];
+		const t_vec3_real& Q2 = Qs[i + 1];
 
 		// length from Q1 to Q2
-		t_vec_real Q1_lab = m_xtalUB * Q1;
-		t_vec_real Q2_lab = m_xtalUB * Q2;
-		Q_ratios << tl2::norm<t_vec_real>(Q2_lab - Q1_lab) << ", ";
+		t_vec3_real Q1_lab = m_xtalUB * Q1;
+		t_vec3_real Q2_lab = m_xtalUB * Q2;
+		Q_ratios << tl2::norm<t_vec3_real>(Q2_lab - Q1_lab) << ", ";
 
 		if(!as_py)  // save as text file
 		{

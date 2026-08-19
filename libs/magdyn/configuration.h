@@ -174,7 +174,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 				seen_names.insert(magnetic_site.name);
 			}
 
-			magnetic_site.pos_calc = tl2::create<t_vec_real>(
+			magnetic_site.pos_calc = tl2::create<t_vec3_real>(
 			{
 				site.second.get<t_real>("position_x", 0.),
 				site.second.get<t_real>("position_y", 0.),
@@ -201,8 +201,8 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 
 			magnetic_site.spin_mag = site.second.get<std::string>("spin_magnitude", "1");
 
-			if(magnetic_site.g_e.size1() == 0 || magnetic_site.g_e.size2() == 0)
-				magnetic_site.g_e = tl2::g_e<t_real> * tl2::unit<t_mat>(3);
+			if(!magnetic_site.g_e)
+				magnetic_site.g_e = tl2::g_e<t_real> * tl2::unit<t_mat33>(3);
 
 			for(std::uint8_t i = 0; i < 3; ++i)
 			for(std::uint8_t j = 0; j < 3; ++j)
@@ -212,7 +212,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 					std::string{g_comp_names[j]};
 
 				if(auto g_comp = site.second.get_optional<t_cplx>(g_name); g_comp)
-					magnetic_site.g_e(i, j) = *g_comp;
+					(*magnetic_site.g_e)(i, j) = *g_comp;
 			}
 
 			AddMagneticSite(std::move(magnetic_site));
@@ -287,7 +287,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 				exchange_term.site2 = GetMagneticSite(exchange_term.site2_calc).name;
 			}
 
-			exchange_term.dist_calc = tl2::create<t_vec_real>(
+			exchange_term.dist_calc = tl2::create<t_vec3_real>(
 			{
 				term.second.get<t_real>("distance_x", 0.),
 				term.second.get<t_real>("distance_y", 0.),
@@ -329,7 +329,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 		thefield.align_spins = false;
 		thefield.keep_signs = false;
 
-		thefield.dir = tl2::create<t_vec_real>(
+		thefield.dir = tl2::create<t_vec3_real>(
 		{
 			field->get<t_real>("direction_h", 0.),
 			field->get<t_real>("direction_k", 0.),
@@ -361,7 +361,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 	// ordering vector
 	if(auto ordering = node.get_child_optional("ordering"); ordering)
 	{
-		t_vec_real ordering_vec = tl2::create<t_vec_real>(
+		t_vec3_real ordering_vec = tl2::create<t_vec3_real>(
 		{
 			ordering->get<t_real>("h", 0.),
 			ordering->get<t_real>("k", 0.),
@@ -374,7 +374,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 	// rotation axis
 	if(auto axis = node.get_child_optional("rotation_axis"); axis)
 	{
-		t_vec_real rotaxis = tl2::create<t_vec_real>(
+		t_vec3_real rotaxis = tl2::create<t_vec3_real>(
 		{
 			axis->get<t_real>("h", 1.),
 			axis->get<t_real>("k", 0.),
@@ -426,22 +426,22 @@ bool MAGDYN_INST::Save(boost::property_tree::ptree& node) const
 #endif
 
 	// external field
-	if(m_field.dir.size() == 3)
+	if(m_field.dir)
 	{
-		node.put<t_real>("field.direction_h", m_field.dir[0]);
-		node.put<t_real>("field.direction_k", m_field.dir[1]);
-		node.put<t_real>("field.direction_l", m_field.dir[2]);
+		node.put<t_real>("field.direction_h", (*m_field.dir)[0]);
+		node.put<t_real>("field.direction_k", (*m_field.dir)[1]);
+		node.put<t_real>("field.direction_l", (*m_field.dir)[2]);
 	}
 	node.put<t_real>("field.magnitude", m_field.mag);
 	node.put<bool>("field.align_spins", m_field.align_spins);
 	node.put<bool>("field.keep_signs", m_field.keep_signs);
 
 	// ordering vector
-	if(m_ordering.size() == 3)
+	if(m_ordering)
 	{
-		node.put<t_real>("ordering.h", m_ordering[0]);
-		node.put<t_real>("ordering.k", m_ordering[1]);
-		node.put<t_real>("ordering.l", m_ordering[2]);
+		node.put<t_real>("ordering.h", (*m_ordering)[0]);
+		node.put<t_real>("ordering.k", (*m_ordering)[1]);
+		node.put<t_real>("ordering.l", (*m_ordering)[2]);
 	}
 
 	// rotation axis
@@ -501,12 +501,15 @@ bool MAGDYN_INST::Save(boost::property_tree::ptree& node) const
 
 		itemNode.put<std::string>("spin_magnitude", site.spin_mag);
 
-		for(std::uint8_t i = 0; i < site.g_e.size1(); ++i)
-		for(std::uint8_t j = 0; j < site.g_e.size2(); ++j)
+		if(site.g_e)
 		{
-			itemNode.put<t_cplx>(std::string{"gfactor_"} +
-				std::string{g_comp_names[i]} +
-				std::string{g_comp_names[j]}, site.g_e(i, j));
+			for(std::uint8_t i = 0; i < site.g_e->size1(); ++i)
+			for(std::uint8_t j = 0; j < site.g_e->size2(); ++j)
+			{
+				itemNode.put<t_cplx>(std::string{"gfactor_"} +
+					std::string{g_comp_names[i]} +
+					std::string{g_comp_names[j]}, (*site.g_e)(i, j));
+			}
 		}
 
 		node.add_child("atom_sites.site", itemNode);

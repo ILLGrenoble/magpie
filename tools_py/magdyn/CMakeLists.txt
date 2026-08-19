@@ -25,11 +25,13 @@
 
 cmake_minimum_required(VERSION 3.10)
 cmake_policy(SET CMP0167 NEW)
+cmake_policy(SET CMP0078 NEW)
+cmake_policy(SET CMP0086 NEW)
 
 project(magpy)
 
-cmake_policy(SET CMP0078 NEW)
-cmake_policy(SET CMP0086 NEW)
+option(USE_NATIVE  "use native code"   FALSE)
+
 
 list(APPEND CMAKE_MODULE_PATH
 	"${PROJECT_SOURCE_DIR}"
@@ -47,6 +49,10 @@ set(CMAKE_CXX_STANDARD 20)
 add_compile_options(-std=c++20)
 add_compile_options(-Wall -Wextra)
 
+if(USE_NATIVE)
+	message("Using native optimisations.")
+	add_compile_options(-march=native)
+endif()
 
 add_definitions(-DMAGDYN_COMPAT)
 

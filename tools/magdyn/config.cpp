@@ -398,9 +398,18 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 		}
 
 		// external field
-		m_field_dir[0]->setValue(m_dyn.GetExternalField().dir[0]);
-		m_field_dir[1]->setValue(m_dyn.GetExternalField().dir[1]);
-		m_field_dir[2]->setValue(m_dyn.GetExternalField().dir[2]);
+		if(m_dyn.GetExternalField().dir)
+		{
+			m_field_dir[0]->setValue((*m_dyn.GetExternalField().dir)[0]);
+			m_field_dir[1]->setValue((*m_dyn.GetExternalField().dir)[1]);
+			m_field_dir[2]->setValue((*m_dyn.GetExternalField().dir)[2]);
+		}
+		else
+		{
+			m_field_dir[0]->setValue(0.);
+			m_field_dir[1]->setValue(0.);
+			m_field_dir[2]->setValue(0.);
+		}
 		m_field_mag->setValue(m_dyn.GetExternalField().mag);
 		m_align_spins->setChecked(m_dyn.GetExternalField().align_spins);
 		m_keep_spin_signs->setChecked(m_dyn.GetExternalField().keep_signs);
@@ -408,7 +417,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 			m_dyn.ClearExternalField();
 
 		// ordering vector
-		const t_vec_real& ordering = m_dyn.GetOrderingWavevector();
+		const t_vec3_real& ordering = m_dyn.GetOrderingWavevector();
 		if(ordering.size() == 3)
 		{
 			m_ordering[0]->setValue(ordering[0]);
@@ -417,7 +426,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 		}
 
 		// normal axis
-		const t_vec_real& norm = m_dyn.GetRotationAxis();
+		const t_vec3_real& norm = m_dyn.GetRotationAxis();
 		if(norm.size() == 3)
 		{
 			m_normaxis[0]->setValue(norm[0]);
@@ -721,7 +730,7 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 		m_needsBZCalc = true;
 
 		auto [errstr, atoms, generatedatoms, atomnames, lattice, symops] =
-			sym::load_cif<t_vec_real, t_mat_real>(filename.toStdString(), g_eps);
+			sym::load_cif<t_vec4_real, t_mat44_real>(filename.toStdString(), g_eps);
 		if(errstr != "")
 		{
 			ShowError(QString("Cannot load CIF \"%1\": %2").arg(filename).arg(errstr.c_str()));
@@ -740,13 +749,13 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 		/*if(atoms.size() && generatedatoms.size())
 		{
 			if(auto matching_sgs =
-				find_matching_sgs<t_vec_real, t_mat_real>(
+				find_matching_sgs<t_vec4_real, t_mat44_real>(
 					{ atoms[0] }, generatedatoms[0], g_eps); matching_sgs.size())
 			{
 				std::cout << std::get<1>(matching_sgs[0]) << std::endl;
 			}
 		}*/
-		if(t_size sgidx = sym::match_symops<t_mat_real, t_real, t_size>(
+		if(t_size sgidx = sym::match_symops<t_mat44_real, t_real, t_size>(
 			symops, m_SGops, g_eps); sgidx < m_SGops.size())
 		{
 			m_comboSG->setCurrentIndex(sgidx);
@@ -763,8 +772,8 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 			for(std::size_t symnum = 0; symnum < generatedatoms[atomnum].size(); ++symnum)
 			{
 				// adapt atom positions to defined unit cell
-				t_vec_real& pos = generatedatoms[atomnum][symnum];
-				pos = tl2::keep_atom_in_uc<t_vec_real>(pos, 3, uc_min, uc_max);
+				t_vec4_real& pos = generatedatoms[atomnum][symnum];
+				pos = tl2::keep_atom_in_uc<t_vec4_real>(pos, 3, uc_min, uc_max);
 
 				AddSiteTabItem(-1, name, 0, 0,
 					tl2::var_to_str(pos[0], g_prec),  // pos.x

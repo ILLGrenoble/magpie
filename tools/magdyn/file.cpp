@@ -167,7 +167,7 @@ void MagDynDlg::SaveMultiDispersion(bool as_scr)
 	m_stopRequested = false;
 
 	// get all Qs from the coordinates table
-	std::vector<t_vec_real> Qs;
+	std::vector<t_vec3_real> Qs;
 	std::vector<std::string> Q_names;
 	Qs.reserve(m_coordinatestab->rowCount());
 	Q_names.reserve(m_coordinatestab->rowCount());
@@ -184,7 +184,7 @@ void MagDynDlg::SaveMultiDispersion(bool as_scr)
 			m_coordinatestab->item(coord_row, COL_COORD_L))->GetValue();
 
 		Q_names.emplace_back(std::move(name));
-		Qs.emplace_back(tl2::create<t_vec_real>({ h, k, l }));
+		Qs.emplace_back(tl2::create<t_vec3_real>({ h, k, l }));
 	}
 
 	if(Qs.size() <= 1)

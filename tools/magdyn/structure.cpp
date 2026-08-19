@@ -57,7 +57,7 @@ void MagDynDlg::PopulateSpaceGroups(bool init)
 		selected_index = m_comboSG->itemData(m_comboSG->currentIndex()).toInt();
 
 	// get space groups and symops
-	auto spacegroups = sym::get_sgs<t_mat_real>();
+	auto spacegroups = sym::get_sgs<t_mat44_real>();
 
 	if(init)
 	{
@@ -357,7 +357,7 @@ void MagDynDlg::GeneratePossibleCouplings()
 /**
  * get the symmetry operators for the currently selected space group
  */
-const std::vector<t_mat_real>& MagDynDlg::GetSymOpsForCurrentSG(bool show_err) const
+const std::vector<t_mat44_real>& MagDynDlg::GetSymOpsForCurrentSG(bool show_err) const
 {
 	// current space group index
 	int sgidx = m_comboSG->itemData(m_comboSG->currentIndex()).toInt();
@@ -372,7 +372,7 @@ const std::vector<t_mat_real>& MagDynDlg::GetSymOpsForCurrentSG(bool show_err) c
 		}
 
 		// return empty symop list
-		static const std::vector<t_mat_real> nullvec{};
+		static const std::vector<t_mat44_real> nullvec{};
 		return nullvec;
 	}
 
@@ -538,8 +538,8 @@ void MagDynDlg::CalcBZ()
 	if(m_ignoreCalc)
 		return;
 
-	const t_mat_real& xtalA = m_dyn.GetCrystalATrafo();
-	const t_mat_real& xtalB = m_dyn.GetCrystalBTrafo();
+	const t_mat33_real& xtalA = m_dyn.GetCrystalATrafo();
+	const t_mat33_real& xtalB = m_dyn.GetCrystalBTrafo();
 
 	m_bz.SetEps(g_eps);
 	m_bz.SetSymOps(GetSymOpsForCurrentSG(), false);
@@ -552,7 +552,7 @@ void MagDynDlg::CalcBZ()
 	m_bz.CalcPeaksRtree();
 
 	// get plane coordinate system
-	const t_vec_real* plane = m_dyn.GetScatteringPlane();
+	const t_vec3_real* plane = m_dyn.GetScatteringPlane();
 	t_real plane_d = 0.;
 
 	// calculate brillouin zone
@@ -572,7 +572,7 @@ void MagDynDlg::CalcBZ()
 	// draw brillouin zone
 	if(m_bz_dlg)
 	{
-		m_bz_dlg->SetABTrafo(xtalA, xtalB);
+		m_bz_dlg->SetABTrafo(tl2::convert<t_mat_bz>(xtalA), tl2::convert<t_mat_bz>(xtalB));
 		m_bz_dlg->SetEps(g_eps);
 		m_bz_dlg->SetPrecGui(g_prec_gui);
 
@@ -581,31 +581,36 @@ void MagDynDlg::CalcBZ()
 
 		// add gamma point
 		std::size_t idx000 = m_bz.Get000Peak();
-		const std::vector<t_vec_bz>& Qs_invA = m_bz.GetPeaks(true);
+		const std::vector<t_vec_real> Qs_invA = tl2::convert<t_vec_real>(m_bz.GetPeaks(true));
 		if(idx000 < Qs_invA.size())
 			m_bz_dlg->AddBraggPeak(Qs_invA[idx000]);
 
 		// add voronoi vertices forming the vertices of the BZ
-		for(const t_vec_bz& voro : m_bz.GetVertices())
-			m_bz_dlg->AddVoronoiVertex(voro);
+		for(const t_vec4_real& voro : m_bz.GetVertices())
+			m_bz_dlg->AddVoronoiVertex(tl2::convert<t_vec_bz>(voro));
 
 		// add voronoi bisectors
-		m_bz_dlg->AddTriangles(m_bz.GetAllTriangles(), &m_bz.GetAllTrianglesFaceIndices());
+		m_bz_dlg->AddTriangles(
+			tl2::convert<t_vec_bz>(m_bz.GetAllTriangles()),
+			&m_bz.GetAllTrianglesFaceIndices());
 
 		// scattering plane
 		m_bz_dlg->SetPlane(
-			tl2::col<t_mat_real, t_vec_real>(m_bz.GetCutPlane(), 2),  // normal
-			m_bz.GetCutPlaneD());                                     // distance, here: 0
+			tl2::col<t_mat_bz, t_vec_bz>(tl2::convert<t_mat_bz>(m_bz.GetCutPlane()), 2),  // normal
+			m_bz.GetCutPlaneD());  // distance, here: 0
 	}
 
 	// draw brillouin zone cut
 	if(m_bzscene)
 	{
+		auto peaks_on_plane_rlu = tl2::convert<t_vec3_real>(m_bz.GetPeaksOnPlane(false));
+
 		m_bzscene->SetEps(g_eps);
 		m_bzscene->SetPrecGui(g_prec_gui);
 		m_bzscene->ClearAll();
-		m_bzscene->AddCut(m_bz.GetCutLines(false));
-		m_bzscene->AddPeaks(m_bz.GetPeaksOnPlane(true), &m_bz.GetPeaksOnPlane(false));
+		m_bzscene->AddCut(m_bz.GetConvertedCutLines<t_vec3_real>(false));
+		m_bzscene->AddPeaks(tl2::convert<t_vec3_real>(m_bz.GetPeaksOnPlane(true)), &peaks_on_plane_rlu);
+
 		m_bzview->Centre();
 	}
 
@@ -622,7 +627,7 @@ void MagDynDlg::BZCutMouseMoved(t_real x, t_real y)
 	auto [QinvA, Qrlu] = m_bz.GetBZCutQ(x, y);
 	if(Qrlu.size() < 3 || QinvA.size() < 3)
 		return;
-	std::vector<t_vec_bz> closest = m_bz.GetClosestPeaks(Qrlu);
+	std::vector<t_vec4_real> closest = m_bz.GetClosestPeaks(Qrlu);
 
 	std::ostringstream ostr;
 	ostr.precision(g_prec_gui);
@@ -632,15 +637,15 @@ void MagDynDlg::BZCutMouseMoved(t_real x, t_real y)
 
 	if(closest.size() == 1)
 	{
-		t_vec_bz vec = closest[0];
+		t_vec4_real vec = closest[0];
 		tl2::set_eps_0(vec, g_eps);
 
 		ostr << " G = (" << vec[0] << ", " << vec[1] << ", " << vec[2] << ") rlu.";
 	}
 	else if(closest.size() == 2)
 	{
-		t_vec_bz vec0 = closest[0];
-		t_vec_bz vec1 = closest[1];
+		t_vec4_real vec0 = closest[0];
+		t_vec4_real vec1 = closest[1];
 		tl2::set_eps_0(vec0, g_eps);
 		tl2::set_eps_0(vec1, g_eps);
 
@@ -673,14 +678,14 @@ void MagDynDlg::BZCutMouseClicked(int /*buttons*/, t_real /*x*/, t_real /*y*/)
 void MagDynDlg::ReducePathBZ()
 {
 	auto [Q_start, Q_end] = GetDispersionQ();
-	t_vec_real Q_mid = Q_start + 0.5*(Q_end - Q_start);
+	t_vec3_real Q_mid = Q_start + 0.5*(Q_end - Q_start);
 
-	std::vector<t_vec_bz> closest = m_bz.GetClosestPeaks(Q_mid);
+	std::vector<t_vec4_real> closest = m_bz.GetClosestPeaks(Q_mid);
 	if(closest.size() == 0)
 		return;
 
-	Q_start -= closest[0];
-	Q_end -= closest[0];
+	Q_start -= tl2::convert<t_vec3_real>(closest[0]);
+	Q_end -= tl2::convert<t_vec3_real>(closest[0]);
 
 	SetCoordinates(Q_start, Q_end, true);
 }

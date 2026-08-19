@@ -113,9 +113,9 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::UniteEnergies(const MAGDYN_TYPE::SofQE& S) const
  */
 MAGDYN_TEMPL
 MAGDYN_TYPE::SofQE
-MAGDYN_INST::CalcEnergies(const t_vec_real& Q_rlu, bool only_energies) const
+MAGDYN_INST::CalcEnergies(const t_vec3_real& Q_rlu, bool only_energies) const
 {
-	auto calc_EandS = [only_energies, this](const t_vec_real& Q) -> SofQE
+	auto calc_EandS = [only_energies, this](const t_vec3_real& Q) -> SofQE
 	{
 		const t_mat H = CalcHamiltonian(Q);
 		return CalcEnergiesFromHamiltonian(H, Q, only_energies);
@@ -129,20 +129,20 @@ MAGDYN_INST::CalcEnergies(const t_vec_real& Q_rlu, bool only_energies) const
 	if(IsIncommensurate())
 	{
 		// equations (39) and (40) from (Toth 2015)
-		const t_mat proj_norm = tl2::convert<t_mat>(
-			tl2::projector<t_mat_real, t_vec_real>(m_rotaxis, true));
+		const t_mat33 proj_norm = tl2::convert<t_mat33>(
+			tl2::projector<t_mat33_real, t_vec3_real>(m_rotaxis, true));
 
-		t_mat rot_incomm = tl2::unit<t_mat>(3);
-		rot_incomm -= s_imag * m_phase_sign * tl2::skewsymmetric<t_mat, t_vec>(m_rotaxis);
+		t_mat33 rot_incomm = tl2::unit<t_mat33>(3);
+		rot_incomm -= s_imag * m_phase_sign * tl2::skewsymmetric<t_mat33, t_vec3>(m_rotaxis);
 		rot_incomm -= proj_norm;
 		rot_incomm *= 0.5;
 
 		// calculate additional hamiltonians for Q+-O
 		SofQE S_p{}, S_m{};
 		if(m_calc_Hp)
-			S_p = calc_EandS(Q_rlu + m_ordering);
+			S_p = calc_EandS(Q_rlu + (*m_ordering));
 		if(m_calc_Hm)
-			S_m = calc_EandS(Q_rlu - m_ordering);
+			S_m = calc_EandS(Q_rlu - (*m_ordering));
 
 		// move over additional hamiltonians for Q+-O
 		S.H_p = std::move(S_p.H);
@@ -156,7 +156,7 @@ MAGDYN_INST::CalcEnergies(const t_vec_real& Q_rlu, bool only_energies) const
 
 		if(!only_energies)
 		{
-			const t_mat rot_incomm_conj = tl2::conj(rot_incomm);
+			const t_mat33 rot_incomm_conj = tl2::conj(rot_incomm);
 
 			// formula 40 from (Toth 2015)
 			for(EnergyAndWeight& EandW : S.E_and_S)
@@ -196,7 +196,7 @@ MAGDYN_TYPE::EnergiesAndWeights
 MAGDYN_INST::CalcEnergies(t_real h, t_real k, t_real l, bool only_energies) const
 {
 	// momentum transfer
-	const t_vec_real Qvec = tl2::create<t_vec_real>({ h, k, l });
+	const t_vec3_real Qvec = tl2::create<t_vec3_real>({ h, k, l });
 	return CalcEnergies(Qvec, only_energies).E_and_S;
 }
 
@@ -243,7 +243,7 @@ MAGDYN_INST::CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 				std::lerp(k_start, k_end, t_real(i) / t_real(num_Qs - 1));
 			const t_real l = num_Qs == 1 ? l_start :
 				std::lerp(l_start, l_end, t_real(i) / t_real(num_Qs - 1));
-			const t_vec_real Q = tl2::create<t_vec_real>({ h, k, l });
+			const t_vec3_real Q = tl2::create<t_vec3_real>({ h, k, l });
 
 			// get E and S(Q, E) for this Q
 			return CalcEnergies(Q, !calc_weights);
@@ -287,7 +287,7 @@ MAGDYN_INST::CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
  */
 MAGDYN_TEMPL
 MAGDYN_TYPE::SofQEs
-MAGDYN_INST::CalcDispersion(const std::vector<t_vec_real>& Qs,
+MAGDYN_INST::CalcDispersion(const std::vector<t_vec3_real>& Qs,
 	t_size num_threads, bool calc_weights,
 	std::function<bool(int, int)> *progress_fkt,
 	std::function<void(const MAGDYN_TYPE::SofQE*)> *result_fkt) const
@@ -308,7 +308,7 @@ MAGDYN_INST::CalcDispersion(const std::vector<t_vec_real>& Qs,
 	tasks.reserve(num_Qs);
 
 	// calculate dispersion
-	for(const t_vec_real& Q : Qs)
+	for(const t_vec3_real& Q : Qs)
 	{
 		if(progress_fkt && !(*progress_fkt)(0, num_Qs))
 			break;
@@ -398,7 +398,7 @@ MAGDYN_INST::CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 			const t_real l = num_Qs_sqrt == 1 ? l_start :
 				std::lerp(l_start, l_end1, t_real(i) / t_real(num_Qs_sqrt - 1)) +
 				std::lerp(l_start, l_end2, t_real(j) / t_real(num_Qs_sqrt - 1)) - l_start;
-			const t_vec_real Q = tl2::create<t_vec_real>({ h, k, l });
+			const t_vec3_real Q = tl2::create<t_vec3_real>({ h, k, l });
 
 			// get E and S(Q, E) for this Q
 			return CalcEnergies(Q, !calc_weights);

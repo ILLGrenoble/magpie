@@ -49,7 +49,6 @@ using t_rtree = boost::geometry::index::rtree<t_rtree_leaf, boost::geometry::ind
 // magpie core
 using t_magdyn = magdyn::MagDyn<
 	t_mat, t_vec,
-	t_mat_real, t_vec_real,
 	t_cplx, t_real,
 	std::size_t>;
 
@@ -265,7 +264,7 @@ void magpie_get_lattice(t_magpie _mag,
 
 	MagpieData *dat = reinterpret_cast<MagpieData*>(_mag);
 
-	t_vec_real latt = dat->mag.GetCrystalLattice();
+	std::vector<t_real> latt = dat->mag.GetCrystalLattice();
 
 	if(a) *a = latt[0];
 	if(b) *b = latt[1];

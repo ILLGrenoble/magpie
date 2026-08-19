@@ -59,8 +59,8 @@
 #endif
 
 #ifndef __TLIBS2_DEFAULT_VEC__
-	// 0: std::vector, 1: tl2::vec_raw, 2: tl2::vec
-	#define __TLIBS2_DEFAULT_VEC__ 2
+	// 0: std::vector, 1: tl2::vec
+	#define __TLIBS2_DEFAULT_VEC__ 1
 #endif
 
 
@@ -402,7 +402,7 @@ struct gen_iterator
 
 
 // ----------------------------------------------------------------------------
-// vector and matrix containers
+// vector containers
 // ----------------------------------------------------------------------------
 
 /**
@@ -654,10 +654,10 @@ private:
 
 
 /**
- * generic vector container with static and dynamic components and low-level memory management
+ * statically sized vector
  */
-template<class T = double, std::size_t STATIC_SIZE = __TLIBS2_DEFAULT_STATIC_SIZE__>
-class vec_raw
+template<class T, std::size_t SIZE>
+class vec_static
 {
 public:
 	using value_type = T;
@@ -665,278 +665,156 @@ public:
 	using size_type = std::size_t;
 	using difference_type = std::ptrdiff_t;
 
-	using iterator = gen_iterator<vec_raw<T, STATIC_SIZE>, false>;
-	using const_iterator = gen_iterator<vec_raw<T, STATIC_SIZE>, true>;
+	using iterator = gen_iterator<vec_static<T, SIZE>, false>;
+	using const_iterator = gen_iterator<vec_static<T, SIZE>, true>;
 
 
 public:
-	vec_raw()
+	// constructors
+	constexpr vec_static() = default;
+	constexpr ~vec_static() = default;
+
+	constexpr vec_static(const vec_static<T, SIZE>& other)
 	{
+		for(size_type i = 0; i < SIZE; ++i)
+			(*this)[i] = other[i];
 	}
 
+	constexpr vec_static(vec_static<T, SIZE>&& other) noexcept
+		: m_data{ std::move(other.m_data) }
+	{ }
 
-	~vec_raw()
+	template<class t_vec_other> requires is_basic_vec<t_vec_other>
+	constexpr vec_static(const t_vec_other& other)
 	{
-		clear();
+		this->operator=<t_vec_other>(other);
 	}
 
-
-	vec_raw(vec_raw<T, STATIC_SIZE>&& other) noexcept
-		: m_data{ std::exchange(other.m_data, nullptr) },
-			m_size{ std::exchange(other.m_size, 0) },
-			m_reserve{ std::exchange(other.m_reserve, 0) }
+	constexpr vec_static(const std::initializer_list<T>& lst)
 	{
-		for(size_type idx = 0; idx < std::min(STATIC_SIZE, m_size); ++idx)
-			m_static_data[idx] = other.m_static_data[idx];
-	}
-
-
-	vec_raw(const vec_raw<T, STATIC_SIZE>& other)
-	{
-		const size_type other_size = other.size();
-		resize(other_size);
-		for(size_type idx = 0; idx < other_size; ++idx)
-			(*this)[idx] = other[idx];
-	}
-
-
-	template<class T_other, std::size_t STATIC_SIZE_OTHER>
-	vec_raw(const vec_raw<T_other, STATIC_SIZE_OTHER>& other)
-	{
-		operator=<T_other, STATIC_SIZE_OTHER>(other);
-	}
-
-
-	vec_raw(const std::initializer_list<T>& lst)
-	{
-		resize(lst.size());
-		size_type idx = 0;
+		size_type i = 0;
 		for(const T& elem : lst)
-			(*this)[idx++] = elem;
+		{
+			(*this)[i] = elem;
+			++i;
+
+			if(i >= SIZE)
+				break;
+		}
 	}
 
-
-	vec_raw(size_type SIZE, const T* arr = nullptr)
+	// _SIZE is a dummy size arguments as the vector is statically sized
+	constexpr vec_static([[__maybe_unused__]] size_type _SIZE, const T* arr = nullptr)
 	{
-		resize(SIZE);
+		assert(_SIZE == SIZE);
 		if(arr)
 			from_array(arr);
 	}
 
 
-	vec_raw<T, STATIC_SIZE>& operator=(vec_raw<T, STATIC_SIZE>&& other)
+	// assignment operators
+	constexpr vec_static<T, SIZE>& operator=(const vec_static<T, SIZE>& other)
 	{
-		m_data = std::exchange(other.m_data, nullptr);
-		m_size = std::exchange(other.m_size, 0);
-		m_reserve = std::exchange(other.m_reserve, 0);
-
-		for(size_type idx = 0; idx < std::min(STATIC_SIZE, m_size); ++idx)
-			m_static_data[idx] = other.m_static_data[idx];
+		for(size_type i = 0; i < SIZE; ++i)
+			(*this)[i] = other[i];
 
 		return *this;
 	}
 
-
-	vec_raw<T, STATIC_SIZE>& operator=(const vec_raw<T, STATIC_SIZE>& other)
+	template<class t_vec_other> requires is_basic_vec<t_vec_other>
+	constexpr vec_static<T, SIZE>& operator=(
+		const t_vec_other& other)
 	{
-		const size_type other_size = other.size();
-		resize(other_size);
-		for(size_type idx = 0; idx < other_size; ++idx)
-			(*this)[idx] = other[idx];
-
+		*this = convert<vec_static<T, SIZE>, t_vec_other>(other);
 		return *this;
 	}
 
 
-	template<class T_other, std::size_t STATIC_SIZE_OTHER>
-	vec_raw<T, STATIC_SIZE>& operator=(const vec_raw<T_other, STATIC_SIZE_OTHER>& other)
+	// move operator
+	constexpr vec_static<T, SIZE>& operator=(vec_static<T, SIZE>&& other)
 	{
-		const size_type other_size = other.size();
-		resize(other_size);
-		for(size_type idx = 0; idx < other_size; ++idx)
-			(*this)[idx] = other[idx];
-
+		m_data = std::move(other.m_data);
 		return *this;
-	}
-
-
-	void push_back(const T& t)
-	{
-		size_type num = size();
-		resize(num + 1);
-		(*this)[num] = t;
-	}
-
-
-	void emplace_back(T&& t)
-	{
-		size_type num = size();
-		resize(num + 1);
-		(*this)[num] = std::forward<T>(t);
-	}
-
-
-	void clear()
-	{
-		if(m_data)
-		{
-			std::free(reinterpret_cast<void*>(m_data));
-			m_data = nullptr;
-		}
-
-		m_size = m_reserve = 0;
-	}
-
-
-	void resize(size_type size)
-	{
-		if(size == m_size)
-			return;
-
-		if(size <= m_reserve)
-		{
-			m_size = size;
-			return;
-		}
-
-		if(size > STATIC_SIZE)
-		{
-			const size_type dyn_size = size - STATIC_SIZE;
-			alloc(dyn_size);
-		}
-
-		m_size = size;
-		if(m_size > m_reserve)
-			m_reserve = m_size;
-	}
-
-
-	void reserve(size_type size)
-	{
-		if(size <= m_size || size <= m_reserve)
-			return;
-
-		if(size > STATIC_SIZE)
-		{
-			const size_type dyn_size = size - STATIC_SIZE;
-			alloc(dyn_size);
-		}
-
-		m_reserve = size;
 	}
 
 
 	// conversion from / to array
-	void from_array(const T* arr)
+	constexpr void from_array(const T* arr)
 	{
 		// initialise from given array data
-		for(size_type i = 0; i < size(); ++i)
+		for(size_type i = 0; i < SIZE; ++i)
 			this->operator[](i) = arr[i];
 	}
 
-	void to_array(T* arr) const
+	constexpr void to_array(T* arr) const
 	{
 		// write elements to array
-		for(size_type i = 0; i < size(); ++i)
+		for(size_type i = 0; i < SIZE; ++i)
 			arr[i] = this->operator[](i);
 	}
 
 
-	template<class t_vec = std::vector<T>>
-	t_vec to_stdvec() const
-	{
-		t_vec vec;
-		vec.reserve(size());
-
-		for(size_type i = 0; i < size(); ++i)
-			vec.push_back(this->operator[](i));
-
-		return vec;
-	}
+	constexpr size_type size() const noexcept { return SIZE; }
 
 
-	// element access
-	size_type size() const { return m_size; }
-	iterator begin() { return iterator{this, 0}; }
-	iterator end() { return iterator(this, m_size); }
-	const_iterator begin() const { return const_iterator(this, 0); }
-	const_iterator end() const { return const_iterator(this, m_size); }
+	// iterators
+	constexpr iterator begin() { return iterator{this, 0}; }
+	constexpr iterator end() { return iterator(this, SIZE); }
+	constexpr const_iterator begin() const { return const_iterator(this, 0); }
+	constexpr const_iterator end() const { return const_iterator(this, SIZE); }
 
 
 	// calculation operators
-	friend vec_raw operator+(const vec_raw& vec1, const vec_raw& vec2) { return tl2_ops::operator+(vec1, vec2); }
-	friend vec_raw operator-(const vec_raw& vec1, const vec_raw& vec2) { return tl2_ops::operator-(vec1, vec2); }
-	friend const vec_raw& operator+(const vec_raw& vec1) { return tl2_ops::operator+(vec1); }
-	friend vec_raw operator-(const vec_raw& vec1) { return tl2_ops::operator-(vec1); }
+	friend constexpr vec_static operator+(const vec_static& vec1, const vec_static& vec2) { return tl2_ops::operator+(vec1, vec2); }
+	friend constexpr vec_static operator-(const vec_static& vec1, const vec_static& vec2) { return tl2_ops::operator-(vec1, vec2); }
+	friend const constexpr vec_static& operator+(const vec_static& vec1) { return tl2_ops::operator+(vec1); }
+	friend constexpr vec_static operator-(const vec_static& vec1) { return tl2_ops::operator-(vec1); }
 
-	friend vec_raw operator*(value_type d, const vec_raw& vec1) { return tl2_ops::operator*(d, vec1); }
-	friend vec_raw operator*(const vec_raw& vec1, value_type d) { return tl2_ops::operator*(vec1, d); }
-	friend vec_raw operator/(const vec_raw& vec1, value_type d) { return tl2_ops::operator/(vec1, d); }
+	friend constexpr vec_static operator*(value_type d, const vec_static& vec1) { return tl2_ops::operator*(d, vec1); }
+	friend constexpr vec_static operator*(const vec_static& vec1, value_type d) { return tl2_ops::operator*(vec1, d); }
+	friend constexpr vec_static operator/(const vec_static& vec1, value_type d) { return tl2_ops::operator/(vec1, d); }
 
-	vec_raw& operator*=(const vec_raw& vec2) { return tl2_ops::operator*=(*this, vec2); }
-	vec_raw& operator+=(const vec_raw& vec2) { return tl2_ops::operator+=(*this, vec2); }
-	vec_raw& operator-=(const vec_raw& vec2) { return tl2_ops::operator-=(*this, vec2); }
-	vec_raw& operator*=(value_type d) { return tl2_ops::operator*=(*this, d); }
-	vec_raw& operator/=(value_type d) { return tl2_ops::operator/=(*this, d); }
+	constexpr vec_static& operator*=(const vec_static& vec2) { return tl2_ops::operator*=(*this, vec2); }
+	constexpr vec_static& operator+=(const vec_static& vec2) { return tl2_ops::operator+=(*this, vec2); }
+	constexpr vec_static& operator-=(const vec_static& vec2) { return tl2_ops::operator-=(*this, vec2); }
+	constexpr vec_static& operator*=(value_type d) { return tl2_ops::operator*=(*this, d); }
+	constexpr vec_static& operator/=(value_type d) { return tl2_ops::operator/=(*this, d); }
 
 
-	value_type& operator[](size_type idx)
+	// element access
+	constexpr const value_type& operator()(size_type i) const { return operator[](i); }
+	constexpr value_type& operator()(size_type i) { return operator[](i); }
+
+	constexpr const value_type& operator[](size_type i) const
 	{
-		if(idx < STATIC_SIZE)
-			return m_static_data[idx];
-		else if(idx < m_size)
-			return m_data[idx - STATIC_SIZE];
-
-		static T dummy{};
-		return dummy;
+		return m_data[i];
 	}
 
-
-	const value_type& operator[](size_type idx) const
+	constexpr value_type& operator[](size_type i)
 	{
-		if(idx < STATIC_SIZE)
-			return m_static_data[idx];
-		else if(idx < m_size)
-			return m_data[idx - STATIC_SIZE];
-
-		static T dummy{};
-		return dummy;
-	}
-
-
-protected:
-	/**
-	 * allocate dynamic elements
-	 */
-	void alloc(size_type num)
-	{
-		if(!m_data)
-			m_data = reinterpret_cast<T*>(std::malloc(num*sizeof(T)));
-		else
-			m_data = reinterpret_cast<T*>(std::realloc(m_data, num*sizeof(T)));
+		return m_data[i];
 	}
 
 
 private:
-	T m_static_data[STATIC_SIZE]/*{}*/;  // static part of the data
-	T* m_data{};                         // dynamic part of the data
-
-	size_type m_size{};                  // number of total elements
-	size_type m_reserve{ STATIC_SIZE };  // number of reserved elements
+	std::array<T, SIZE> m_data{};
 };
 
 
+
+
+// ----------------------------------------------------------------------------
+// matrix containers
+// ----------------------------------------------------------------------------
 
 /**
  * generic dynamic matrix container
  */
 #if __TLIBS2_DEFAULT_VEC__ == 0
 template<class T, class t_cont = class std::vector<T/*, __TLIBS2_DEFAULT_ALLOC__<T>*/>>
-#elif __TLIBS2_DEFAULT_VEC__ == 1
-template<class T, class t_cont = class vec_raw<T, __TLIBS2_DEFAULT_STATIC_SIZE__*__TLIBS2_DEFAULT_STATIC_SIZE__>>
 #else
 template<class T, class t_cont = vec<T, std::vector, __TLIBS2_DEFAULT_ALLOC__,
-	__TLIBS2_DEFAULT_STATIC_SIZE__*__TLIBS2_DEFAULT_STATIC_SIZE__>>
+__TLIBS2_DEFAULT_STATIC_SIZE__*__TLIBS2_DEFAULT_STATIC_SIZE__>>
 #endif
 requires is_basic_vec<t_cont> && is_dyn_vec<t_cont>
 class mat
@@ -951,7 +829,7 @@ public:
 	~mat() = default;
 
 	mat(size_type ROWS, size_type COLS, const T* arr = nullptr)
-		: m_data(ROWS*COLS), m_rowsize{ROWS}, m_colsize{COLS}
+	: m_data(ROWS*COLS), m_rowsize{ROWS}, m_colsize{COLS}
 	{
 		if(arr)
 			from_array(arr);
@@ -969,9 +847,9 @@ public:
 	}
 
 	mat(mat<T, t_cont>&& other) noexcept
-		: m_data{ std::move(other.m_data) },
-		  m_rowsize{ std::exchange(other.m_rowsize, 0) },
-		  m_colsize{ std::exchange(other.m_colsize, 0) }
+	: m_data{ std::move(other.m_data) },
+	m_rowsize{ std::exchange(other.m_rowsize, 0) },
+	m_colsize{ std::exchange(other.m_colsize, 0) }
 	{ }
 
 
@@ -1079,6 +957,142 @@ private:
 	t_cont m_data{ };
 	size_type m_rowsize{ };
 	size_type m_colsize{ };
+};
+
+
+
+/**
+ * generic dynamic matrix container
+ */
+template<class T, std::size_t ROWS, std::size_t COLS>
+class mat_static
+{
+public:
+	using value_type = T;
+	using size_type = std::size_t;
+
+
+	// constructors
+	constexpr mat_static() = default;
+	constexpr ~mat_static() = default;
+
+	// _ROWS and _COLS are dummy size arguments as the matrix is statically sized
+	constexpr mat_static(
+		[[__maybe_unused__]] size_type _ROWS,
+		[[__maybe_unused__]] size_type _COLS,
+		const T* arr = nullptr)
+	{
+		assert((ROWS == _ROWS && COLS == _COLS));
+
+		if(arr)
+			from_array(arr);
+	}
+
+	constexpr mat_static(const T* arr)
+	{
+		if(arr)
+			from_array(arr);
+	}
+
+	constexpr mat_static(const mat_static<T, ROWS, COLS>& other)
+	{
+		this->operator=(other);
+	}
+
+	template<class t_mat_other>
+	requires is_basic_mat<t_mat_other>
+	constexpr mat_static(const t_mat_other& other)
+	{
+		this->operator=<t_mat_other>(other);
+	}
+
+	constexpr mat_static(mat_static<T, ROWS, COLS>&& other) noexcept
+		: m_data{ std::move(other.m_data) }
+	{ }
+
+
+	// assignment operators
+	template<class t_mat_other>
+	requires is_basic_mat<t_mat_other>
+	constexpr mat_static<T, ROWS, COLS>& operator=(const t_mat_other& other)
+	{
+		*this = convert<mat_static<T, ROWS, COLS>, t_mat_other>(other);
+		return *this;
+	}
+
+	constexpr mat_static<T, ROWS, COLS>& operator=(const mat_static<T, ROWS, COLS>& other)
+	{
+		return operator=<mat_static<T, ROWS, COLS>>(other);
+	}
+
+
+	// move operator
+	constexpr mat_static<T, ROWS, COLS>& operator=(mat_static<T, ROWS, COLS>&& other)
+	{
+		m_data = std::move(other.m_data);
+		return *this;
+	}
+
+
+	// sizes
+	constexpr size_type size() const noexcept { return ROWS*COLS; }
+	constexpr size_type size1() const noexcept { return ROWS; }
+	constexpr size_type size2() const noexcept { return COLS; }
+
+
+	// element access
+	constexpr const T& operator()(size_type row, size_type col) const
+	{
+		return m_data[row*COLS + col];
+	}
+
+	constexpr T& operator()(size_type row, size_type col)
+	{
+		return m_data[row*COLS + col];
+	}
+
+
+	constexpr void from_array(const T* arr)
+	{
+		// initialise from given array data
+		for(size_type i = 0; i < ROWS; ++i)
+			for(size_type j = 0; j < COLS; ++j)
+				this->operator()(i, j) = arr[i*COLS + j];
+	}
+
+	constexpr void to_array(T* arr) const
+	{
+		// write elements to array
+		for(size_type i = 0; i < ROWS; ++i)
+			for(size_type j = 0; j < COLS; ++j)
+				arr[i*COLS + j] = this->operator()(i, j);
+	}
+
+
+	friend constexpr mat_static operator+(const mat_static& mat1, const mat_static& mat2) { return tl2_ops::operator+(mat1, mat2); }
+	friend constexpr mat_static operator-(const mat_static& mat1, const mat_static& mat2) { return tl2_ops::operator-(mat1, mat2); }
+	friend const constexpr mat_static& operator+(const mat_static& mat1) { return tl2_ops::operator+(mat1); }
+	friend constexpr mat_static operator-(const mat_static& mat1) { return tl2_ops::operator-(mat1); }
+
+	friend constexpr mat_static operator*(const mat_static& mat1, const mat_static& mat2) { return tl2_ops::operator*(mat1, mat2); }
+	friend constexpr mat_static operator*(const mat_static& mat1, value_type d) { return tl2_ops::operator*(mat1, d); }
+	friend constexpr mat_static operator*(value_type d, const mat_static& mat1) { return tl2_ops::operator*(d, mat1); }
+	friend constexpr mat_static operator/(const mat_static& mat1, value_type d) { return tl2_ops::operator/(mat1, d); }
+
+	template<class t_vec> requires is_basic_vec<t_vec>
+	friend constexpr t_vec operator*(const mat_static& mat1, const t_vec& vec2) { return tl2_ops::operator*(mat1, vec2); }
+
+	constexpr mat_static& operator*=(const mat_static& mat2) { return tl2_ops::operator*=(*this, mat2); }
+	constexpr mat_static& operator+=(const mat_static& mat2) { return tl2_ops::operator+=(*this, mat2); }
+	constexpr mat_static& operator-=(const mat_static& mat2) { return tl2_ops::operator-=(*this, mat2); }
+	constexpr mat_static& operator*=(value_type d) { return tl2_ops::operator*=(*this, d); }
+	constexpr mat_static& operator/=(value_type d) { return tl2_ops::operator/=(*this, d); }
+
+	//constexpr const std::array<T, ROWS*COLS>& GetData() const { return m_data; }
+
+
+private:
+	std::array<T, ROWS*COLS> m_data{ };
 };
 
 // ----------------------------------------------------------------------------

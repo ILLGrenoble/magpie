@@ -69,7 +69,7 @@ public:
 
 	// set kernel and Q path from main window
 	void SetKernel(const t_magdyn* dyn);
-	void SetDispersionQE(const t_vec_real& Qstart, const t_vec_real& Qend, t_real Estart, t_real Eend);
+	void SetDispersionQE(const t_vec3_real& Qstart, const t_vec3_real& Qend, t_real Estart, t_real Eend);
 	void SetDispersionE(t_real Estart, t_real Eend);
 
 
@@ -104,7 +104,7 @@ private:
 	// ------------------------------------------------------------------------
 	// from main dialog
 	const t_magdyn *m_dyn{};            // main calculation kernel
-	t_vec_real m_Qstart{}, m_Qend{};    // Qs from main window
+	t_vec3_real m_Qstart{}, m_Qend{};   // Qs from main window
 	t_real m_Estart{0}, m_Eend{1};      // Es from main window
 
 	QSettings *m_sett{};                // program settings

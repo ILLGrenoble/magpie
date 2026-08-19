@@ -354,7 +354,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 
 	connect(btn_rotate_ccw, &QAbstractButton::clicked, [this]()
 	{
-		t_vec_real axis = tl2::create<t_vec_real>(
+		t_vec3_real axis = tl2::create<t_vec3_real>(
 		{
 			(t_real)m_rot_axis[0]->value(),
 			(t_real)m_rot_axis[1]->value(),
@@ -368,7 +368,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 
 	connect(btn_rotate_cw, &QAbstractButton::clicked, [this]()
 	{
-		t_vec_real axis = tl2::create<t_vec_real>(
+		t_vec3_real axis = tl2::create<t_vec3_real>(
 		{
 			(t_real)m_rot_axis[0]->value(),
 			(t_real)m_rot_axis[1]->value(),
@@ -408,7 +408,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 	{
 		connect(acDirPlane[i], &QAction::triggered, [this, i, calc_all]()
 		{
-			const t_vec_real& vec = m_dyn.GetScatteringPlane()[i];
+			const t_vec3_real& vec = m_dyn.GetScatteringPlane()[i];
 
 			for(int j = 0; j < 3; ++j)
 			{
@@ -422,7 +422,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 
 		connect(acPlane[i], &QAction::triggered, [this, i]()
 		{
-			const t_vec_real& vec = m_dyn.GetScatteringPlane()[i];
+			const t_vec3_real& vec = m_dyn.GetScatteringPlane()[i];
 
 			m_rot_axis[0]->setValue(vec[0]);
 			m_rot_axis[1]->setValue(vec[1]);
@@ -454,18 +454,18 @@ void MagDynDlg::FieldsSelectionChanged()
 /**
  * rotate the direction of the magnetic field
  */
-void MagDynDlg::RotateField(const t_vec_real& axis_rlu, t_real angle)
+void MagDynDlg::RotateField(const t_vec3_real& axis_rlu, t_real angle)
 {
-	t_vec_real axis = axis_rlu;
+	t_vec3_real axis = axis_rlu;
 
-	t_vec_real B = tl2::create<t_vec_real>(
+	t_vec3_real B = tl2::create<t_vec3_real>(
 	{
 		(t_real)m_field_dir[0]->value(),
 		(t_real)m_field_dir[1]->value(),
 		(t_real)m_field_dir[2]->value(),
 	});
 
-	const t_mat_real& xtalB = m_dyn.GetCrystalBTrafo();
+	const t_mat33_real& xtalB = m_dyn.GetCrystalBTrafo();
 	auto [xtalB_inv, inv_ok] = tl2::inv(xtalB);
 	if(inv_ok)
 	{
@@ -473,7 +473,7 @@ void MagDynDlg::RotateField(const t_vec_real& axis_rlu, t_real angle)
 		B = xtalB * B;
 	}
 
-	t_mat_real R = tl2::rotation<t_mat_real, t_vec_real>(axis, angle, false);
+	t_mat33_real R = tl2::rotation<t_mat33_real, t_vec3_real>(axis, angle, false);
 	B = R*B;
 
 	if(inv_ok)

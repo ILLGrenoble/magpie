@@ -188,7 +188,7 @@ protected:
 	QDoubleSpinBox *m_xtallattice[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_xtalangles[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_scatteringplane[2*3]{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-	std::vector<std::vector<t_mat_real>> m_SGops{};
+	std::vector<std::vector<t_mat44_real>> m_SGops{};
 	QComboBox *m_comboSG{};
 	QCheckBox *m_checkFilterSG{};
 	QLineEdit *m_editFilterSG{};
@@ -210,8 +210,8 @@ protected:
 	QDoubleSpinBox *m_temperature{};           // temperature
 
 	// scattering plane panel
-	BZCutScene<t_vec_real, t_real> *m_bzscene{};
-	BZCutView<t_vec_real, t_real> *m_bzview{};
+	BZCutScene<t_vec3_real, t_real> *m_bzscene{};
+	BZCutView<t_vec3_real, t_real> *m_bzview{};
 	QComboBox *m_recip_trafo_mode{};
 	QDoubleSpinBox *m_recip_trafo_axis[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_recip_trafo_delta{};
@@ -326,7 +326,7 @@ protected:
 	t_size ReplaceValueWithVariable(const std::string& var, const t_cplx& val);
 	t_size ReplaceValuesWithVariables();
 
-	std::pair<t_vec_real, t_vec_real> GetDispersionQ() const;
+	std::pair<t_vec3_real, t_vec3_real> GetDispersionQ() const;
 	std::pair<t_real, t_real> GetDispersionE() const;
 	void ClearDispersion(bool replot = false);
 	void Clear(bool recalc = true);
@@ -347,15 +347,15 @@ protected:
 	void SaveMultiDispersion(bool as_scr = false);
 
 	void MirrorAtoms();
-	void RotateField(const t_vec_real& axis, t_real angle);
-	void RotateDispersionQs(const t_vec_real& axis, t_real angle);
-	void TranslateDispersionQs(const t_vec_real& axis, t_real delta);
+	void RotateField(const t_vec3_real& axis, t_real angle);
+	void RotateDispersionQs(const t_vec3_real& axis, t_real angle);
+	void TranslateDispersionQs(const t_vec3_real& axis, t_real delta);
 	void ScaleDispersionQs(t_real factor);
 	void GenerateSitesFromSG();
 	void GenerateCouplingsFromSG();
 	void GeneratePossibleCouplings();
 	void ExtendStructure();
-	const std::vector<t_mat_real>& GetSymOpsForCurrentSG(bool show_err = true) const;
+	const std::vector<t_mat44_real>& GetSymOpsForCurrentSG(bool show_err = true) const;
 
 	// transfer sites and terms from the kernel
 	void SyncSitesFromKernel(boost::optional<const boost::property_tree::ptree&> extra_infos = boost::none);
@@ -372,10 +372,8 @@ protected:
 	// general table operations
 	void MoveTabItemUp(QTableWidget *pTab);
 	void MoveTabItemDown(QTableWidget *pTab);
-	void ShowTableContextMenu(QTableWidget *pTab,
-		QMenu *pMenu, QMenu *pMenuNoItem, const QPoint& pt);
-	std::vector<int> GetSelectedRows(QTableWidget *pTab,
-		bool sort_reversed = false) const;
+	void ShowTableContextMenu(QTableWidget *pTab, QMenu *pMenu, QMenu *pMenuNoItem, const QPoint& pt);
+	std::vector<int> GetSelectedRows(QTableWidget *pTab, bool sort_reversed = false) const;
 
 	// add a site to the table
 	void AddSiteTabItem(int row = -1,
@@ -475,7 +473,8 @@ public:
 	void SetCurrentFile(const QString& filename);
 
 	void SetNumQPoints(t_size num_Q_pts);
-	void SetCoordinates(const t_vec_real& Qi, const t_vec_real& Qf, bool calc_dynamics = true);
+	void SetCoordinates(const std::optional<t_vec3_real>& Qi,
+		const std::optional<t_vec3_real>& Qf, bool calc_dynamics = true);
 
 	void CalcDispersion();
 	void CalcHamiltonian();

@@ -141,11 +141,11 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 		return false;
 	}
 
-	const t_vec_real Qstart = tl2::create<t_vec_real>({
+	const t_vec3_real Qstart = tl2::create<t_vec3_real>({
 		(t_real)m_exportStartQ[0]->value(),
 		(t_real)m_exportStartQ[1]->value(),
 		(t_real)m_exportStartQ[2]->value() });
-	const t_vec_real Qend = tl2::create<t_vec_real>({
+	const t_vec3_real Qend = tl2::create<t_vec3_real>({
 		(t_real)m_exportEndQ[0]->value(),
 		(t_real)m_exportEndQ[1]->value(),
 		(t_real)m_exportEndQ[2]->value() });
@@ -159,11 +159,11 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 	bool use_weights = m_use_weights->isChecked();
 	bool use_projector = m_use_projector->isChecked();
 
-	const t_vec_real dir = Qend - Qstart;
+	const t_vec3_real dir = Qend - Qstart;
 	const t_real inc_h = dir[0] / t_real(num_pts_h);
 	const t_real inc_k = dir[1] / t_real(num_pts_k);
 	const t_real inc_l = dir[2] / t_real(num_pts_l);
-	const t_vec_real Qstep = tl2::create<t_vec_real>({inc_h, inc_k, inc_l});
+	const t_vec3_real Qstep = tl2::create<t_vec3_real>({inc_h, inc_k, inc_l});
 
 
 	using t_taskret = std::deque<
@@ -196,11 +196,11 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 				if(std::isnan(E) || std::isinf(E))
 					continue;
 
-				const t_mat& S = E_and_S.S;
+				const t_mat33& S = E_and_S.S;
 				t_real weight = E_and_S.weight_perp;
 
 				if(!use_projector)
-					weight = tl2::trace<t_mat>(S).real();
+					weight = tl2::trace<t_mat33>(S).real();
 
 				if(std::isnan(weight) || std::isinf(weight))
 					weight = 0.;
@@ -255,7 +255,7 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 			if(m_stopRequested)
 				break;
 
-			t_vec_real Q = Qstart;
+			t_vec3_real Q = Qstart;
 			Q[0] += inc_h*t_real(h_idx);
 			Q[1] += inc_k*t_real(k_idx);
 			//Q[2] += inc_l*t_real(l_idx);
@@ -432,13 +432,21 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 		tl2::set_h5_string<std::string>(*h5file, "meta_infos/doi_magpie", "https://doi.org/10.5281/zenodo.16180814");
 		tl2::set_h5_string<std::string>(*h5file, "meta_infos/doi_tlibs", "https://doi.org/10.5281/zenodo.5717779");
 
+		auto to_stdvec = [](const t_vec3_real& vec) -> std::vector<t_real>
+		{
+			std::vector<t_real> vecret;
+			vecret.reserve(vec.size());
+
+			for(t_real val : vec)
+				vecret.push_back(val);
+
+			return vecret;
+		};
+
 		tl2::set_h5_string<std::string>(*h5file, "infos/shape", "cuboid");
-		tl2::set_h5_vector<std::vector<t_real>>(*h5file, "infos/Q_start",
-			Qstart.to_stdvec<std::vector<t_real>>());
-		tl2::set_h5_vector<std::vector<t_real>>(*h5file, "infos/Q_end",
-			Qend.to_stdvec<std::vector<t_real>>());
-		tl2::set_h5_vector<std::vector<t_real>>(*h5file, "infos/Q_steps",
-			Qstep.to_stdvec<std::vector<t_real>>());
+		tl2::set_h5_vector<std::vector<t_real>>(*h5file, "infos/Q_start", to_stdvec(Qstart));
+		tl2::set_h5_vector<std::vector<t_real>>(*h5file, "infos/Q_end", to_stdvec(Qend));
+		tl2::set_h5_vector<std::vector<t_real>>(*h5file, "infos/Q_steps", to_stdvec(Qstep));
 		tl2::set_h5_vector(*h5file, "infos/Q_dimensions",
 			std::vector<std::size_t>{{ num_pts_h, num_pts_k, num_pts_l }});
 

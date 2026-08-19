@@ -341,13 +341,13 @@ logprint("Using Sunny version %s running on interpreter version %s.\n",
 
 
 	ofstr << "\n\n# spin directions\n";
-	if(field.align_spins)
+	if(field.align_spins && field.dir)
 	{
 		// set all spins to field direction
 		ofstr << "polarize_spins!(magsys, [ "
-			<< field.dir[0] << ", "
-			<< field.dir[1] << ", "
-			<< field.dir[2] << " ])\n";
+			<< (*field.dir)[0] << ", "
+			<< (*field.dir)[1] << ", "
+			<< (*field.dir)[2] << " ])\n";
 	}
 	else
 	{
@@ -418,7 +418,7 @@ logprint("Using Sunny version %s running on interpreter version %s.\n",
 				<< "   " << get_str_var(term.J, true)              // 2,2
 				<< "\n\t]";
 
-			if(!tl2::equals_0(term.Jgen_calc, g_eps))
+			if(term.Jgen_calc && !tl2::equals_0(*term.Jgen_calc, g_eps))
 			{
 				ofstr << " +\n\t[\n"
 					<< "\t\t" << get_str_var(term.Jgen[0][0], true)
@@ -452,13 +452,13 @@ if use_spacegroup
 end)BLOCK" << "\n";
 
 
-	if(use_field)
+	if(use_field && field.dir)
 	{
 		ofstr << "\n\n# external field\n";
 		ofstr << "set_field!(magsys, -[ "
-			<< field.dir[0] << ", "
-			<< field.dir[1] << ", "
-			<< field.dir[2] << " ] * magfield"
+			<< (*field.dir)[0] << ", "
+			<< (*field.dir)[1] << ", "
+			<< (*field.dir)[2] << " ] * magfield"
 			<< ")\n";
 	}
 	// --------------------------------------------------------------------
@@ -479,9 +479,9 @@ end)BLOCK" << "\n";
 	// --------------------------------------------------------------------
 	if(m_dyn.IsIncommensurate())
 	{
-		const t_vec_real& prop = m_dyn.GetOrderingWavevector();
-		const t_vec_real& axis = m_dyn.GetRotationAxis();
-		//t_vec_real s0 = tl2::cross(prop, axis);
+		const t_vec3_real& prop = m_dyn.GetOrderingWavevector();
+		const t_vec3_real& axis = m_dyn.GetRotationAxis();
+		//t_vec3_real s0 = tl2::cross(prop, axis);
 		//t_real s0_len = tl2::norm(s0);
 		//if(!tl2::equals_0<t_real>(s0_len, g_eps))
 		//	s0 /= s0_len;

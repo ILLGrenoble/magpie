@@ -47,22 +47,22 @@ MAGDYN_TEMPL void MAGDYN_INST::Clear()
 	m_temperature = -1.;
 
 	// clear ordering wave vector
-	m_ordering = tl2::zero<t_vec_real>(3);
+	m_ordering = std::nullopt;
 	m_is_incommensurate = false;
 
 	// reset rotation axis
-	m_rotaxis = tl2::create<t_vec_real>({ 1., 0., 0. });
+	m_rotaxis = tl2::create<t_vec3_real>({ 1., 0., 0. });
 
 	// clear crystal
 	m_xtallattice[0] = m_xtallattice[1] = m_xtallattice[2] = 0.;
 	m_xtalangles[0] = m_xtalangles[1] = m_xtalangles[2] = t_real(0.5) * tl2::pi<t_real>;
-	m_xtalA = m_xtalB = tl2::unit<t_mat_real>(3);
-	m_xtalUB = /*m_xtalUBinv =*/ tl2::unit<t_mat_real>(3);
+	m_xtalA = m_xtalB = tl2::unit<t_mat33_real>(3);
+	m_xtalUB = /*m_xtalUBinv =*/ tl2::unit<t_mat33_real>(3);
 
 	// clear scattering plane
-	m_scatteringplane[0] = tl2::create<t_vec_real>({ 1., 0., 0. });
-	m_scatteringplane[1] = tl2::create<t_vec_real>({ 0., 1., 0. });
-	m_scatteringplane[2] = tl2::create<t_vec_real>({ 0., 0., 1. });
+	m_scatteringplane[0] = tl2::create<t_vec3_real>({ 1., 0., 0. });
+	m_scatteringplane[1] = tl2::create<t_vec3_real>({ 0., 1., 0. });
+	m_scatteringplane[2] = tl2::create<t_vec3_real>({ 0., 0., 1. });
 }
 
 
@@ -102,7 +102,7 @@ MAGDYN_TEMPL void MAGDYN_INST::ClearExchangeTerms()
  */
 MAGDYN_TEMPL void MAGDYN_INST::ClearExternalField()
 {
-	m_field.dir.clear();
+	m_field.dir = std::nullopt;
 	m_field.mag = 0.;
 	m_field.align_spins = false;
 	m_field.keep_signs = false;
@@ -183,15 +183,19 @@ MAGDYN_TEMPL const MAGDYN_TYPE::ExternalField& MAGDYN_INST::GetExternalField() c
 }
 
 
-MAGDYN_TEMPL const t_vec_real& MAGDYN_INST::GetRotationAxis() const
+MAGDYN_TEMPL const MAGDYN_INST::t_vec3_real& MAGDYN_INST::GetRotationAxis() const
 {
 	return m_rotaxis;
 }
 
 
-MAGDYN_TEMPL const t_vec_real& MAGDYN_INST::GetOrderingWavevector() const
+MAGDYN_TEMPL const typename MAGDYN_INST::t_vec3_real& MAGDYN_INST::GetOrderingWavevector() const
 {
-	return m_ordering;
+	if(m_ordering)
+		return *m_ordering;
+
+	static t_vec3_real zero = tl2::zero<t_vec3_real>(3);
+	return zero;
 }
 
 
@@ -223,19 +227,19 @@ MAGDYN_TEMPL t_size MAGDYN_INST::GetMagneticFormFactorCount() const
 }
 
 
-MAGDYN_TEMPL const t_mat_real& MAGDYN_INST::GetCrystalATrafo() const
+MAGDYN_TEMPL const typename MAGDYN_INST::t_mat33_real& MAGDYN_INST::GetCrystalATrafo() const
 {
 	return m_xtalA;
 }
 
 
-MAGDYN_TEMPL const t_mat_real& MAGDYN_INST::GetCrystalBTrafo() const
+MAGDYN_TEMPL const typename MAGDYN_INST::t_mat33_real& MAGDYN_INST::GetCrystalBTrafo() const
 {
 	return m_xtalB;
 }
 
 
-MAGDYN_TEMPL const t_mat_real& MAGDYN_INST::GetCrystalUBTrafo() const
+MAGDYN_TEMPL const typename MAGDYN_INST::t_mat33_real& MAGDYN_INST::GetCrystalUBTrafo() const
 {
 	return m_xtalUB;
 }
@@ -296,7 +300,7 @@ MAGDYN_INST::GetExchangeTerm(t_size idx)
 
 MAGDYN_TEMPL bool MAGDYN_INST::IsIncommensurate() const
 {
-	return m_is_incommensurate || m_force_incommensurate;
+	return m_ordering && (m_is_incommensurate || m_force_incommensurate);
 }
 
 
@@ -418,37 +422,45 @@ MAGDYN_TEMPL t_size MAGDYN_INST::GetExchangeTermIndex(const std::string& name) c
 
 
 
-MAGDYN_TEMPL std::vector<t_vec_real>
-MAGDYN_INST::GetMagneticSitePositions(bool homogeneous) const
+MAGDYN_TEMPL std::vector<typename MAGDYN_INST::t_vec4_real>
+MAGDYN_INST::GetMagneticSitePositionsHom() const
 {
-	std::vector<t_vec_real> sites;
+	std::vector<t_vec4_real> sites;
 	sites.reserve(GetMagneticSitesCount());
 
 	for(const MagneticSite& site : GetMagneticSites())
-	{
-		if(homogeneous)
-			sites.push_back(to_4vec<t_vec_real>(site.pos_calc, 1.));
-		else
-			sites.push_back(to_3vec<t_vec_real>(site.pos_calc));
-	}
+		sites.emplace_back(to_4vec<t_vec4_real>(site.pos_calc, 1.));
 
 	return sites;
 }
 
 
 
-MAGDYN_TEMPL t_vec_real MAGDYN_INST::GetCrystalLattice() const
+MAGDYN_TEMPL std::vector<typename MAGDYN_INST::t_vec3_real>
+MAGDYN_INST::GetMagneticSitePositions() const
 {
-	return tl2::create<t_vec_real>(
-	{
-		m_xtallattice[0], m_xtallattice[1], m_xtallattice[2],
-		m_xtalangles[0], m_xtalangles[1], m_xtalangles[2],
-	});
+	std::vector<t_vec3_real> sites;
+	sites.reserve(GetMagneticSitesCount());
+
+	for(const MagneticSite& site : GetMagneticSites())
+		sites.push_back(site.pos_calc);
+
+	return sites;
 }
 
 
 
-MAGDYN_TEMPL const t_vec_real* MAGDYN_INST::GetScatteringPlane() const
+MAGDYN_TEMPL std::vector<t_real> MAGDYN_INST::GetCrystalLattice() const
+{
+	return std::vector<t_real>{{
+		m_xtallattice[0], m_xtallattice[1], m_xtallattice[2],
+		m_xtalangles[0], m_xtalangles[1], m_xtalangles[2]
+	}};
+}
+
+
+
+MAGDYN_TEMPL const typename MAGDYN_INST::t_vec3_real* MAGDYN_INST::GetScatteringPlane() const
 {
 	return m_scatteringplane;
 }
@@ -458,11 +470,11 @@ MAGDYN_TEMPL const t_vec_real* MAGDYN_INST::GetScatteringPlane() const
 /**
  * get the needed supercell ranges from the exchange terms
  */
-MAGDYN_TEMPL std::tuple<t_vec_real, t_vec_real>
+MAGDYN_TEMPL std::tuple<typename MAGDYN_INST::t_vec3_real, typename MAGDYN_INST::t_vec3_real>
 MAGDYN_INST::GetSupercellMinMax() const
 {
-	t_vec_real min = tl2::zero<t_vec_real>(3);
-	t_vec_real max = tl2::zero<t_vec_real>(3);
+	t_vec3_real min = tl2::zero<t_vec3_real>(3);
+	t_vec3_real max = tl2::zero<t_vec3_real>(3);
 
 	for(const ExchangeTerm& term : GetExchangeTerms())
 	{
@@ -521,6 +533,8 @@ MAGDYN_TEMPL void MAGDYN_INST::SetUniteDegenerateEnergies(bool b)
 
 MAGDYN_TEMPL void MAGDYN_INST::SetForceIncommensurate(bool b)
 {
+	if(!m_ordering)
+		m_ordering = tl2::zero<t_vec3_real>(3);
 	m_force_incommensurate = b;
 }
 
@@ -595,24 +609,27 @@ MAGDYN_TEMPL void MAGDYN_INST::SetExternalField(const MAGDYN_TYPE::ExternalField
 	m_field = field;
 
 	// normalise direction vector
-	const t_real len = tl2::norm<t_vec_real>(m_field.dir);
+	const t_real len = tl2::norm<t_vec3_real>(*m_field.dir);
 	if(!tl2::equals_0<t_real>(len, m_eps))
-		m_field.dir /= len;
+		(*m_field.dir) /= len;
 }
 
 
 
-MAGDYN_TEMPL void MAGDYN_INST::RotateExternalField(const t_vec_real& axis, t_real angle)
+MAGDYN_TEMPL void MAGDYN_INST::RotateExternalField(const t_vec3_real& axis, t_real angle)
 {
-	const t_mat_real rot = tl2::rotation<t_mat_real, t_vec_real>(axis, angle, false);
-	m_field.dir = rot * m_field.dir;
+	if(!m_field.dir)
+		return;
+
+	const t_mat33_real rot = tl2::rotation<t_mat33_real, t_vec3_real>(axis, angle, false);
+	m_field.dir = rot * (*m_field.dir);
 }
 
 
 
 MAGDYN_TEMPL void MAGDYN_INST::RotateExternalField(t_real x, t_real y, t_real z, t_real angle)
 {
-	RotateExternalField(tl2::create<t_vec_real>({ x, y, z }), angle);
+	RotateExternalField(tl2::create<t_vec3_real>({ x, y, z }), angle);
 }
 
 
@@ -620,10 +637,10 @@ MAGDYN_TEMPL void MAGDYN_INST::RotateExternalField(t_real x, t_real y, t_real z,
 /**
  * set the ordering wave vector (e.g., the helix pitch) for incommensurate structures
  */
-MAGDYN_TEMPL void MAGDYN_INST::SetOrderingWavevector(const t_vec_real& ordering)
+MAGDYN_TEMPL void MAGDYN_INST::SetOrderingWavevector(const t_vec3_real& ordering)
 {
 	m_ordering = ordering;
-	m_is_incommensurate = !tl2::equals_0<t_vec_real>(m_ordering, m_eps);
+	m_is_incommensurate = !tl2::equals_0<t_vec3_real>(*m_ordering, m_eps);
 }
 
 
@@ -631,12 +648,12 @@ MAGDYN_TEMPL void MAGDYN_INST::SetOrderingWavevector(const t_vec_real& ordering)
 /**
  * set the rotation axis for the ordering wave vector
  */
-MAGDYN_TEMPL void MAGDYN_INST::SetRotationAxis(const t_vec_real& axis)
+MAGDYN_TEMPL void MAGDYN_INST::SetRotationAxis(const t_vec3_real& axis)
 {
 	m_rotaxis = axis;
 
 	// normalise
-	const t_real len = tl2::norm<t_vec_real>(m_rotaxis);
+	const t_real len = tl2::norm<t_vec3_real>(m_rotaxis);
 	if(!tl2::equals_0<t_real>(len, m_eps))
 		m_rotaxis /= len;
 }
@@ -721,12 +738,12 @@ void MAGDYN_INST::SetCrystalLattice(t_real a, t_real b, t_real c,
 		m_xtalangles[2] = gamma;
 
 		// crystal fractional coordinate trafo matrices
-		m_xtalA = tl2::A_matrix<t_mat_real>(a, b, c, alpha, beta, gamma);
-		m_xtalB = tl2::B_matrix<t_mat_real>(a, b, c, alpha, beta, gamma);
+		m_xtalA = tl2::A_matrix<t_mat33_real>(a, b, c, alpha, beta, gamma);
+		m_xtalB = tl2::B_matrix<t_mat33_real>(a, b, c, alpha, beta, gamma);
 	}
 	catch(const std::exception& ex)
 	{
-		m_xtalA = m_xtalB = tl2::unit<t_mat_real>(3);
+		m_xtalA = m_xtalB = tl2::unit<t_mat33_real>(3);
 
 		MAGDYN_CERR_OPT << "Magdyn error: Could not calculate crystal matrices."
 			<< std::endl;
@@ -745,12 +762,12 @@ void MAGDYN_INST::SetScatteringPlane(t_real ah, t_real ak, t_real al,
 {
 	try
 	{
-		m_scatteringplane[0] = tl2::create<t_vec_real>({ ah, ak, al });
-		m_scatteringplane[1] = tl2::create<t_vec_real>({ bh, bk, bl });
+		m_scatteringplane[0] = tl2::create<t_vec3_real>({ ah, ak, al });
+		m_scatteringplane[1] = tl2::create<t_vec3_real>({ bh, bk, bl });
 		m_scatteringplane[2] = tl2::cross(m_xtalB, m_scatteringplane[0], m_scatteringplane[1]);
 
 		for(std::uint8_t i = 0; i < 3; ++i)
-			m_scatteringplane[i] /= tl2::norm<t_vec_real>(m_scatteringplane[i]);
+			m_scatteringplane[i] /= tl2::norm<t_vec3_real>(m_scatteringplane[i]);
 
 		m_xtalUB = tl2::UB_matrix(m_xtalB,
 			m_scatteringplane[0], m_scatteringplane[1], m_scatteringplane[2]);
@@ -766,7 +783,7 @@ void MAGDYN_INST::SetScatteringPlane(t_real ah, t_real ak, t_real al,
 	}
 	catch(const std::exception& ex)
 	{
-		m_xtalUB = /*m_xtalUBinv =*/ tl2::unit<t_mat_real>(3);
+		m_xtalUB = /*m_xtalUBinv =*/ tl2::unit<t_mat33_real>(3);
 
 		MAGDYN_CERR_OPT << "Magdyn error: Could not calculate scattering plane matrices."
 			<< std::endl;

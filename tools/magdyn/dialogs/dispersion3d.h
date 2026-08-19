@@ -63,7 +63,7 @@ private:
 
 
 protected:
-	using t_data_Q = std::tuple<t_vec_real /*0: Q*/, t_real /*1: E*/, t_real /*2: S*/,
+	using t_data_Q = std::tuple<t_vec3_real /*0: Q*/, t_real /*1: E*/, t_real /*2: S*/,
 		t_size /*3: Q_idx_1*/, t_size /*4: Q_idx_2*/,
 		t_size /*5: degeneracy*/, bool /*6: valid*/>;
 	using t_data_Qs = std::vector<t_data_Q>;
@@ -79,15 +79,15 @@ public:
 
 	// set kernel and Q path from the main window
 	void SetKernel(const t_magdyn* dyn);
-	void SetDispersionQ(const t_vec_real& Qstart, const t_vec_real& Qend);
+	void SetDispersionQ(const t_vec3_real& Qstart, const t_vec3_real& Qend);
 
 	void SetPlotFont(const QString& font);
 	bool IsPlotterValid() const;
 
 	// coordinate conversion
-	std::pair<t_vec_real, t_real> PlotXYZToQE(t_real x, t_real y, t_real z) const;
-	t_vec_real QEToPlotXYZ(const t_vec_real& Q, t_real E) const;
-	t_vec_real GetQFromIndices(std::size_t idx1, std::size_t idx2) const;
+	std::pair<t_vec3_real, t_real> PlotXYZToQE(t_real x, t_real y, t_real z) const;
+	t_vec3_real QEToPlotXYZ(const t_vec3_real& Q, t_real E) const;
+	t_vec3_real GetQFromIndices(std::size_t idx1, std::size_t idx2) const;
 
 
 protected:
@@ -100,7 +100,7 @@ protected:
 
 	void ClearData();
 	void SetMinMaxQ();
-	std::tuple<t_vec_real, t_vec_real, t_vec_real> GetQVectors() const;
+	std::tuple<t_vec3_real, t_vec3_real, t_vec3_real> GetQVectors() const;
 	std::tuple<t_size, t_size> GetQIndices() const;
 	void FromMainQ();
 
@@ -154,14 +154,14 @@ private:
 	t_size m_Q_count_1{}, m_Q_count_2{}; // number of Q points along the two directions
 	t_data_bands m_data{};               // data for all energy bands
 	std::array<t_real, 2> m_minmax_E{};  // minimum and maximum band energy
-	std::array<t_vec_real, 2> m_minmax_Q1{};  // minimum and maximum Q
-	std::array<t_vec_real, 2> m_minmax_Q2{};  // minimum and maximum Q
+	std::array<t_vec3_real, 2> m_minmax_Q1{};  // minimum and maximum Q
+	std::array<t_vec3_real, 2> m_minmax_Q2{};  // minimum and maximum Q
 	t_size m_first_band{};               // index of first visible band
 
 	// ------------------------------------------------------------------------
 	// from main dialog
 	const t_magdyn *m_dyn{};             // main calculation kernel
-	t_vec_real m_Qstart{}, m_Qend{};     // Qs from the main window
+	t_vec3_real m_Qstart{}, m_Qend{};    // Qs from the main window
 	QSettings *m_sett{};                 // program settings
 	// ------------------------------------------------------------------------
 

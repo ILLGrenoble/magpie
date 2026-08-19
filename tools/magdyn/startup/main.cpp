@@ -45,14 +45,15 @@ namespace pt = boost::property_tree;
 
 
 #ifdef DONT_USE_QT
-static int gui_main(int, char**, const std::string&, const t_vec_real&, const t_vec_real&, t_size)
+static int gui_main(int, char**, const std::string&,
+	const std::optional<t_vec3_real>&, const std::optional<t_vec3_real>&, t_size)
 {
 	std::cerr << "Error: The GUI is not available in this version." << std::endl;
 	return -1;
 }
 #else
 extern int gui_main(int argc, char** argv, const std::string& model_file,
-	const t_vec_real& Qi, const t_vec_real& Qf, t_size num_Q_pts);
+	const std::optional<t_vec3_real>& Qi, const std::optional<t_vec3_real>& Qf, t_size num_Q_pts);
 #endif
 
 
@@ -64,7 +65,8 @@ extern int gui_main(int argc, char** argv, const std::string& model_file,
  * starts the cli program
  */
 static int cli_main(const std::string& model_file, const std::string& results_file,
-	const t_vec_real& Qi, const t_vec_real& Qf, const t_vec_real& Qf2,
+	const std::optional<t_vec3_real>& Qi, const std::optional<t_vec3_real>& Qf,
+	const std::optional<t_vec3_real>& Qf2,
 	t_size num_Q_pts, t_size num_Q_pts2, const std::string& Qlist_file,
 	bool as_py = false, bool as_bin = false, bool calc_weights = true, bool silent = false/*,
 	t_real Emin = 1., t_real Emax = -1*/)
@@ -116,7 +118,8 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 
 		const auto& field = magdyn.GetExternalField();
 		std::cout << "\tMagnetic field magnitude: " << field.mag << "." << std::endl;
-		std::cout << "\tMagnetic field direction: " << field.dir << "." << std::endl;
+		if(field.dir)
+			std::cout << "\tMagnetic field direction: " << (*field.dir) << "." << std::endl;
 		if(field.align_spins)
 			std::cout << "\tAligning spins to field." << std::endl;
 		else
@@ -161,7 +164,7 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 		}
 
 		// calculate the dispersion for the given Q points
-		std::vector<t_vec_real> Qs;
+		std::vector<t_vec3_real> Qs;
 
 		// read one h k l triplet per line
 		std::string line;
@@ -175,9 +178,9 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 			if(line.size() > 0 && line[0] == '#')
 				continue;  // ignore comments
 
-			t_vec_real Q;
-			tl2::get_tokens<t_real, std::string, t_vec_real>(line, std::string(" \t;,"), Q);
-			if(Q.size() != 3)
+			t_vec_real _Q;
+			tl2::get_tokens<t_real, std::string, t_vec_real>(line, std::string(" \t;,"), _Q);
+			if(_Q.size() != 3)
 			{
 				CERR_OPT << "Error: Invalid Q vector length in line " << lineno
 					<< " of \"" << Qlist_file
@@ -185,7 +188,8 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 					<< std::endl;
 				continue;
 			}
-			Qs.emplace_back(std::move(Q));
+
+			Qs.emplace_back(tl2::create<t_vec3_real>({ _Q[0], _Q[1], _Q[2] }));
 		}
 
 		COUT_OPT << "\nCalculating dispersion for custom Q points in "
@@ -209,22 +213,22 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 			num_Q_pts = magdyn_node.get<t_size>("config.num_Q_points", 128);
 
 		// get the override options
-		if(Qi.size() == 3)
+		if(Qi)
 		{
-			h_start = Qi[0];
-			k_start = Qi[1];
-			l_start = Qi[2];
+			h_start = (*Qi)[0];
+			k_start = (*Qi)[1];
+			l_start = (*Qi)[2];
 		}
 		// get the override options
-		if(Qf.size() == 3)
+		if(Qf)
 		{
-			h_end = Qf[0];
-			k_end = Qf[1];
-			l_end = Qf[2];
+			h_end = (*Qf)[0];
+			k_end = (*Qf)[1];
+			l_end = (*Qf)[2];
 		}
 
 		bool use_2d_map = false;
-		if(Qf2.size() == 3 && num_Q_pts2 > 0)
+		if(Qf2 && num_Q_pts2 > 0)
 			use_2d_map = true;
 
 		if(!use_2d_map)
@@ -246,12 +250,12 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 		{
 			// 2d dispersion
 			// generate Q points
-			std::vector<t_vec_real> Qs;
+			std::vector<t_vec3_real> Qs;
 			Qs.reserve(num_Q_pts * num_Q_pts2);
 
-			t_vec_real Q0 = tl2::create<t_vec_real>({ h_start, k_start, l_start });
-			t_vec_real Qdir1 = tl2::create<t_vec_real>({ h_end, k_end, l_end }) - Q0;
-			t_vec_real Qdir2 = Qf2 - Q0;
+			t_vec3_real Q0 = tl2::create<t_vec3_real>({ h_start, k_start, l_start });
+			t_vec3_real Qdir1 = tl2::create<t_vec3_real>({ h_end, k_end, l_end }) - Q0;
+			t_vec3_real Qdir2 = (*Qf2) - Q0;
 			Qdir1 /= t_real(num_Q_pts);
 			Qdir2 /= t_real(num_Q_pts2);
 
@@ -260,7 +264,7 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 			for(t_size i = 0; i < num_Q_pts; ++i)
 			for(t_size j = 0; j < num_Q_pts2; ++j)
 			{
-				t_vec_real Q = Q0 + Qdir1 * t_real(i) + Qdir2 * t_real(j);
+				t_vec3_real Q = Q0 + Qdir1 * t_real(i) + Qdir2 * t_real(j);
 				Qs.emplace_back(std::move(Q));
 			}
 			//stopwatch.stop();
@@ -270,7 +274,7 @@ static int cli_main(const std::string& model_file, const std::string& results_fi
 			COUT_OPT << "\nCalculating 2d dispersion from"
 				<< " Q_i = (" << h_start << ", " << k_start << ", " << l_start << ") to"
 				<< " Q_f = (" << h_end << ", " << k_end << ", " << l_end << ") and"
-				<< " Q_f2 = (" << Qf2[0] << ", " << Qf2[1] << ", " << Qf2[2] << ")"
+				<< " Q_f2 = (" << (*Qf2)[0] << ", " << (*Qf2)[1] << ", " << (*Qf2)[2] << ")"
 				<< " in " << num_Q_pts << "*" << num_Q_pts2 << " steps and "
 				<< g_num_threads << " threads..."
 				<< std::endl;
@@ -463,10 +467,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 		auto iterKf2 = mapArgs.find("kf2");
 		auto iterLf2 = mapArgs.find("lf2");
 
-		t_vec_real Qi, Qf, Qf2;
+		std::optional<t_vec3_real> Qi, Qf, Qf2;
 		if(iterHi != mapArgs.end() &&iterKi != mapArgs.end() && iterLi != mapArgs.end())
 		{
-			Qi = tl2::create<t_vec_real>({
+			Qi = tl2::create<t_vec3_real>({
 				iterHi->second.as<t_real>(),
 				iterKi->second.as<t_real>(),
 				iterLi->second.as<t_real>()
@@ -474,7 +478,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 		}
 		if(iterHf != mapArgs.end() &&iterKf != mapArgs.end() && iterLf != mapArgs.end())
 		{
-			Qf = tl2::create<t_vec_real>({
+			Qf = tl2::create<t_vec3_real>({
 				iterHf->second.as<t_real>(),
 				iterKf->second.as<t_real>(),
 				iterLf->second.as<t_real>()
@@ -482,7 +486,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 		}
 		if(iterHf2 != mapArgs.end() &&iterKf2 != mapArgs.end() && iterLf2 != mapArgs.end())
 		{
-			Qf2 = tl2::create<t_vec_real>({
+			Qf2 = tl2::create<t_vec3_real>({
 				iterHf2->second.as<t_real>(),
 				iterKf2->second.as<t_real>(),
 				iterLf2->second.as<t_real>()

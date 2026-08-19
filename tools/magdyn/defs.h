@@ -62,12 +62,18 @@ using t_mat_gl = tl2::t_mat_gl;
 #endif
 
 // magnon calculation kernel
-using t_magdyn = magdyn::MagDyn<t_mat, t_vec, t_mat_real, t_vec_real, t_cplx, t_real, t_size>;
+using t_magdyn = magdyn::MagDyn<t_mat, t_vec, t_cplx, t_real, t_size>;
+using t_vec3 = typename t_magdyn::t_vec3;
+using t_mat33 = typename t_magdyn::t_mat33;
+using t_vec3_real = typename t_magdyn::t_vec3_real;
+using t_mat33_real = typename t_magdyn::t_mat33_real;
+using t_vec4_real = typename t_magdyn::t_vec4_real;
+using t_mat44_real = typename t_magdyn::t_mat44_real;
 using t_site = typename t_magdyn::MagneticSite;
-using t_term = typename t_magdyn::ExchangeTerm;;
+using t_term = typename t_magdyn::ExchangeTerm;
 
 // brillouin zone calculation kernel
-using t_bz = sym::BZCalc<t_mat_real, t_vec_real, t_real>;
+using t_bz = sym::BZCalc<t_mat44_real, t_vec4_real, t_real>;
 // ----------------------------------------------------------------------------
 
 

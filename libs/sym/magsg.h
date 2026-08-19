@@ -6,12 +6,9 @@
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
- * tlibs2
- * Copyright (C) 2017-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
+ * magpie
+ * Copyright (C) 2022-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
  *                          Grenoble, France).
- * tlibs1
- * Copyright (C) 2015-2017  Tobias WEBER (Technische Universitaet Muenchen
- *                          (TUM), Garching, Germany).
  * magtools
  * Copyright (C) 2017-2018  Tobias WEBER (privately developed).
  *
@@ -37,13 +34,15 @@
 #include <memory>
 #include <iostream>
 
-#include "maths.h"
-#include "str.h"
+#include "tlibs2/libs/maths.h"
+#include "tlibs2/libs/str.h"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/info_parser.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
+
+namespace sym {
 
 
 // ----------------------------------------------------------------------------
@@ -68,15 +67,17 @@ class Symmetry
 {
 	friend class Spacegroups<t_mat, t_vec>;
 
+
 private:
 	// rotations
-	std::vector<t_mat> m_rot;
+	std::vector<t_mat> m_rot{};
 
 	// translations
-	std::vector<t_vec> m_trans;
+	std::vector<t_vec> m_trans{};
 
 	// time inversions
-	std::vector<typename t_mat::value_type> m_inv;
+	std::vector<typename t_mat::value_type> m_inv{};
+
 
 public:
 	Symmetry() = default;
@@ -101,17 +102,19 @@ class WycPositions
 {
 	friend class Spacegroups<t_mat, t_vec>;
 
+
 private:
-	std::string m_letter;
+	std::string m_letter{};
 
 	// multiplicity
-	int m_mult = 0;
+	int m_mult{0};
 
 	// structural & magnetic rotations
-	std::vector<t_mat> m_rot, m_rotMag;
+	std::vector<t_mat> m_rot{}, m_rotMag{};
 
 	// translations
-	std::vector<t_vec> m_trans;
+	std::vector<t_vec> m_trans{};
+
 
 public:
 	WycPositions() = default;
@@ -140,26 +143,28 @@ class Spacegroup
 {
 	friend class Spacegroups<t_mat, t_vec>;
 
+
 private:
-	std::string m_nameBNS, m_nameOG;
-	std::string m_nrBNS, m_nrOG;
-	int m_sgnrStruct = -1, m_sgnrMag = -1;
+	std::string m_nameBNS{}, m_nameOG{};
+	std::string m_nrBNS{}, m_nrOG{};
+	int m_sgnrStruct{-1}, m_sgnrMag{-1};
 
 	// lattice definition
-	std::shared_ptr<std::vector<t_vec>> m_latticeBNS;
-	std::shared_ptr<std::vector<t_vec>> m_latticeOG;
+	std::shared_ptr<std::vector<t_vec>> m_latticeBNS{};
+	std::shared_ptr<std::vector<t_vec>> m_latticeOG{};
 
 	// symmetry operations
-	std::shared_ptr<Symmetry<t_mat, t_vec>> m_symBNS;
-	std::shared_ptr<Symmetry<t_mat, t_vec>> m_symOG;
+	std::shared_ptr<Symmetry<t_mat, t_vec>> m_symBNS{};
+	std::shared_ptr<Symmetry<t_mat, t_vec>> m_symOG{};
 
 	// Wyckoff positions
-	std::shared_ptr<std::vector<WycPositions<t_mat, t_vec>>> m_wycBNS;
-	std::shared_ptr<std::vector<WycPositions<t_mat, t_vec>>> m_wycOG;
+	std::shared_ptr<std::vector<WycPositions<t_mat, t_vec>>> m_wycBNS{};
+	std::shared_ptr<std::vector<WycPositions<t_mat, t_vec>>> m_wycOG{};
 
 	// BNS to OG trafo
-	t_mat m_rotBNS2OG;
-	t_vec m_transBNS2OG;
+	t_mat m_rotBNS2OG{};
+	t_vec m_transBNS2OG{};
+
 
 public:
 	Spacegroup() = default;
@@ -198,7 +203,8 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
 class Spacegroups
 {
 private:
-	std::vector<Spacegroup<t_mat, t_vec>> m_sgs;
+	std::vector<Spacegroup<t_mat, t_vec>> m_sgs{};
+
 
 public:
 	Spacegroups() = default;
@@ -318,17 +324,17 @@ bool Spacegroups<t_mat, t_vec>::Load(const std::string& strFile)
 			if(str == "0")
 				;
 			else if(str == "x")
-				vec = tl2::create<t_vec>({1,0,0});
+				vec = tl2::create<t_vec>({ 1, 0, 0 });
 			else if(str == "y")
-				vec = tl2::create<t_vec>({0,1,0});
+				vec = tl2::create<t_vec>({ 0, 1, 0 });
 			else if(str == "z")
-				vec = tl2::create<t_vec>({0,0,1});
+				vec = tl2::create<t_vec>({ 0, 0, 1 });
 			else if(str == "-x")
-				vec = tl2::create<t_vec>({-1,0,0});
+				vec = tl2::create<t_vec>({ -1, 0, 0 });
 			else if(str == "-y")
-				vec = tl2::create<t_vec>({0,-1,0});
+				vec = tl2::create<t_vec>({ 0, -1, 0 });
 			else if(str == "-z")
-				vec = tl2::create<t_vec>({0,0,-1});
+				vec = tl2::create<t_vec>({ 0, 0, -1 });
 			else
 			{
 				// read vector
@@ -343,7 +349,7 @@ bool Spacegroups<t_mat, t_vec>::Load(const std::string& strFile)
 		// reads in a matrix
 		auto get_mat = [](const std::string& str) -> t_mat
 		{
-			t_mat mat = tl2::zero<t_mat>(3,3);
+			t_mat mat = tl2::zero<t_mat>(3, 3);
 
 			// abbreviations
 			if(str == "0")
@@ -354,8 +360,8 @@ bool Spacegroups<t_mat, t_vec>::Load(const std::string& strFile)
 			{
 				// read matrix
 				std::istringstream istr(str);
-				for(std::size_t i=0; i<mat.size1(); ++i)
-					for(std::size_t j=0; j<mat.size2(); ++j)
+				for(std::size_t i = 0; i < mat.size1(); ++i)
+					for(std::size_t j = 0; j < mat.size2(); ++j)
 						istr >> mat(i,j);
 			}
 
@@ -607,5 +613,7 @@ bool Spacegroups<t_mat, t_vec>::Load(const std::string& strFile)
 }
 // ----------------------------------------------------------------------------
 
+
+}  // namespace sym
 
 #endif

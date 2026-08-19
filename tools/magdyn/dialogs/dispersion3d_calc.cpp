@@ -51,7 +51,7 @@ void Dispersion3DDlg::SetKernel(const t_magdyn* dyn)
 /**
  * save the Q start and end points from the main window's dispersion
  */
-void Dispersion3DDlg::SetDispersionQ(const t_vec_real& Qstart, const t_vec_real& Qend)
+void Dispersion3DDlg::SetDispersionQ(const t_vec3_real& Qstart, const t_vec3_real& Qend)
 {
 	m_Qstart = Qstart;
 	m_Qend = Qend;
@@ -67,15 +67,15 @@ void Dispersion3DDlg::FromMainQ()
 	if(m_Qstart.size() < 3 || m_Qend.size() < 3 || !m_dyn)
 		return;
 
-	const t_mat_real& xtalB = m_dyn->GetCrystalBTrafo();
-	const t_vec_real* plane = m_dyn->GetScatteringPlane();
+	const t_mat33_real& xtalB = m_dyn->GetCrystalBTrafo();
+	const t_vec3_real* plane = m_dyn->GetScatteringPlane();
 	if(!plane)
 		return;
 
 	// direction 1 is from the start to the end point
-	t_vec_real Qdir1 = m_Qend - m_Qstart;
+	t_vec3_real Qdir1 = m_Qend - m_Qstart;
 	// direction 2 is perpendicular to direction 1 inside the scattering plane
-	t_vec_real Qdir2 = tl2::cross(xtalB, plane[2], Qdir1);
+	t_vec3_real Qdir2 = tl2::cross(xtalB, plane[2], Qdir1);
 
 	for(int i = 0; i < 3; ++i)
 	{
@@ -90,23 +90,23 @@ void Dispersion3DDlg::FromMainQ()
 /**
  * get the Q origin and direction vectors
  */
-std::tuple<t_vec_real, t_vec_real, t_vec_real> Dispersion3DDlg::GetQVectors() const
+std::tuple<t_vec3_real, t_vec3_real, t_vec3_real> Dispersion3DDlg::GetQVectors() const
 {
-	t_vec_real Q_origin = tl2::create<t_vec_real>(
+	t_vec3_real Q_origin = tl2::create<t_vec3_real>(
 	{
 		(t_real)m_Q_origin[0]->value(),
 		(t_real)m_Q_origin[1]->value(),
 		(t_real)m_Q_origin[2]->value(),
 	});
 
-	t_vec_real Q_dir_1 = tl2::create<t_vec_real>(
+	t_vec3_real Q_dir_1 = tl2::create<t_vec3_real>(
 	{
 		(t_real)m_Q_dir1[0]->value(),
 		(t_real)m_Q_dir1[1]->value(),
 		(t_real)m_Q_dir1[2]->value(),
 	});
 
-	t_vec_real Q_dir_2 = tl2::create<t_vec_real>(
+	t_vec3_real Q_dir_2 = tl2::create<t_vec3_real>(
 	{
 		(t_real)m_Q_dir2[0]->value(),
 		(t_real)m_Q_dir2[1]->value(),
@@ -163,13 +163,13 @@ std::tuple<t_size, t_size> Dispersion3DDlg::GetQIndices() const
 /**
  * converts array indices to Q position
  */
-t_vec_real Dispersion3DDlg::GetQFromIndices(std::size_t idx1, std::size_t idx2) const
+t_vec3_real Dispersion3DDlg::GetQFromIndices(std::size_t idx1, std::size_t idx2) const
 {
 	// get coordinates
 	auto [Q_origin, Q_dir_1, Q_dir_2] = GetQVectors();
 
-	t_vec_real Q_step_1 = Q_dir_1 / t_real(m_Q_count_1 - 1);
-	t_vec_real Q_step_2 = Q_dir_2 / t_real(m_Q_count_2 - 1);
+	t_vec3_real Q_step_1 = Q_dir_1 / t_real(m_Q_count_1 - 1);
+	t_vec3_real Q_step_2 = Q_dir_2 / t_real(m_Q_count_2 - 1);
 
 	return Q_origin + Q_step_1*t_real(idx1) + Q_step_2*t_real(idx2);
 }
@@ -189,8 +189,8 @@ void Dispersion3DDlg::SetMinMaxQ()
 	if(m_Q_count_1 < 2 || m_Q_count_2 < 2)
 		return;
 
-	t_vec_real Q_step_1 = Q_dir_1 / t_real(m_Q_count_1 - 1);
-	t_vec_real Q_step_2 = Q_dir_2 / t_real(m_Q_count_2 - 1);
+	t_vec3_real Q_step_1 = Q_dir_1 / t_real(m_Q_count_1 - 1);
+	t_vec3_real Q_step_2 = Q_dir_2 / t_real(m_Q_count_2 - 1);
 
 	m_minmax_Q1[0] = Q_origin;
 	m_minmax_Q1[1] = Q_origin + Q_step_1*t_real(m_Q_count_1 - 1);
@@ -204,8 +204,8 @@ void Dispersion3DDlg::ClearData()
 {
 	m_minmax_E[0] = +std::numeric_limits<t_real>::max();
 	m_minmax_E[1] = -std::numeric_limits<t_real>::max();
-	m_minmax_Q1[0] = m_minmax_Q1[1] = tl2::zero<t_vec_real>(3);
-	m_minmax_Q2[0] = m_minmax_Q2[1] = tl2::zero<t_vec_real>(3);
+	m_minmax_Q1[0] = m_minmax_Q1[1] = tl2::zero<t_vec3_real>(3);
+	m_minmax_Q2[0] = m_minmax_Q2[1] = tl2::zero<t_vec3_real>(3);
 	m_data.clear();
 }
 
@@ -270,7 +270,7 @@ void Dispersion3DDlg::Calculate()
 			expected_bands, unite_degen, use_weights, use_projector, min_S]()
 		{
 			// calculate the dispersion at the given Q point
-			t_vec_real Q = GetQFromIndices(Q_idx_1, Q_idx_2);
+			t_vec3_real Q = GetQFromIndices(Q_idx_1, Q_idx_2);
 			auto Es_and_S = dyn.CalcEnergies(Q, !use_weights).E_and_S;
 
 			// iterate the energies for this Q point
@@ -303,8 +303,8 @@ void Dispersion3DDlg::Calculate()
 
 					if(!use_projector)
 					{
-						const t_mat& S = E_and_S.S;
-						weight = tl2::trace<t_mat>(S).real();
+						const t_mat33& S = E_and_S.S;
+						weight = tl2::trace<t_mat33>(S).real();
 					}
 
 					// filter invalid S(Q, E)

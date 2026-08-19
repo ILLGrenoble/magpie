@@ -1228,9 +1228,13 @@ requires is_vec<t_vec_dst> && is_vec<t_vec_src>
 	const t_idx vec_size = vec.size();
 
 	t_vec_dst vecdst = create<t_vec_dst>(vec_size);
+	const t_idx vecdst_size = (t_idx)vecdst.size();
+	const t_idx eff_size = std::min(vecdst_size, vec_size);
 
-	for(t_idx i = 0; i < vec_size; ++i)
+	for(t_idx i = 0; i < eff_size; ++i)
 		vecdst[i] = static_cast<typename t_vec_dst::value_type>(vec[i]);
+	for(t_idx i = eff_size; i < vecdst_size; ++i)
+		vecdst[i] = typename t_vec_dst::value_type{};
 
 	return vecdst;
 }
@@ -1347,7 +1351,7 @@ typename t_vec::value_type inner(const t_vec& vec1, const t_vec& vec2)
 requires is_basic_vec<t_vec>
 {
 	typename t_vec::value_type val{0};
-	auto size = vec1.size();
+	const auto size = vec1.size();
 	using local_size_t = std::decay_t<decltype(size)>;
 
 	for(local_size_t i = 0; i < size; ++i)

@@ -62,7 +62,7 @@ MAGDYN_INST::CalcPowder(t_real Q_invA,
 			<< std::endl;
 	}
 
-	std::vector<t_vec_real> Qvecs_rlu;
+	std::vector<t_vec3_real> Qvecs_rlu;
 	Qvecs_rlu.reserve(num_points);
 
 	// generate mc points
@@ -75,7 +75,7 @@ MAGDYN_INST::CalcPowder(t_real Q_invA,
 		const auto [ x, y, z ] = tl2::sph_to_cart<t_real>(Q_invA, phi, theta);
 
 		// generate Q vector
-		t_vec_real Qvec_invA = tl2::create<t_vec_real>({ x, y, z });
+		t_vec3_real Qvec_invA = tl2::create<t_vec3_real>({ x, y, z });
 		if(m_perform_checks)
 		{
 			if(!tl2::equals(tl2::norm(Qvec_invA), Q_invA, m_eps))
@@ -86,7 +86,7 @@ MAGDYN_INST::CalcPowder(t_real Q_invA,
 		}
 
 		// transform Q vector to rlu
-		t_vec_real Qvec_rlu = Binv * Qvec_invA;
+		t_vec3_real Qvec_rlu = Binv * Qvec_invA;
 		Qvecs_rlu.emplace_back(std::move(Qvec_rlu));
 	}
 

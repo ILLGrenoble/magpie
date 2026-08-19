@@ -25,11 +25,14 @@
 
 cmake_minimum_required(VERSION 3.10)
 cmake_policy(SET CMP0167 NEW)
+cmake_policy(SET CMP0078 NEW)
+cmake_policy(SET CMP0086 NEW)
+
 
 project(magpie_c)
 
-cmake_policy(SET CMP0078 NEW)
-cmake_policy(SET CMP0086 NEW)
+option(USE_NATIVE  "use native code"   FALSE)
+
 
 list(APPEND CMAKE_MODULE_PATH
 	"${PROJECT_SOURCE_DIR}"
@@ -91,6 +94,11 @@ add_library(magpie_c SHARED magpie_c.cpp magpie_c.h)
 set_target_properties(magpie_c PROPERTIES CMAKE_CXX_STANDARD 20)
 target_compile_options(magpie_c PRIVATE -std=c++20)
 target_compile_options(magpie_c PUBLIC -Wall -Wextra)
+
+if(USE_NATIVE)
+	message("Using native optimisations.")
+	target_compile_definitions(magpie_c PRIVATE -march=native)
+endif()
 
 target_compile_definitions(magpie_c PRIVATE -DUSE_LAPACK=1)
 target_compile_definitions(magpie_c PRIVATE ${Boost_CXX_FLAGS})
