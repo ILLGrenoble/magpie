@@ -603,13 +603,14 @@ void MagDynDlg::CalcBZ()
 	// draw brillouin zone cut
 	if(m_bzscene)
 	{
-		auto peaks_on_plane_rlu = tl2::convert<t_vec_bz>(m_bz.GetPeaksOnPlane(false));
+		auto peaks_on_plane_rlu = tl2::convert<t_vec3_real>(m_bz.GetPeaksOnPlane(false));
 
 		m_bzscene->SetEps(g_eps);
 		m_bzscene->SetPrecGui(g_prec_gui);
 		m_bzscene->ClearAll();
-		m_bzscene->AddCut(m_bz.GetConvertedCutLines<t_vec_bz>(false));
-		m_bzscene->AddPeaks(tl2::convert<t_vec_bz>(m_bz.GetPeaksOnPlane(true)), &peaks_on_plane_rlu);
+		m_bzscene->AddCut(m_bz.GetConvertedCutLines<t_vec3_real>(false));
+		m_bzscene->AddPeaks(tl2::convert<t_vec3_real>(m_bz.GetPeaksOnPlane(true)), &peaks_on_plane_rlu);
+
 		m_bzview->Centre();
 	}
 
@@ -677,14 +678,14 @@ void MagDynDlg::BZCutMouseClicked(int /*buttons*/, t_real /*x*/, t_real /*y*/)
 void MagDynDlg::ReducePathBZ()
 {
 	auto [Q_start, Q_end] = GetDispersionQ();
-	t_vec_real Q_mid = Q_start + 0.5*(Q_end - Q_start);
+	t_vec3_real Q_mid = Q_start + 0.5*(Q_end - Q_start);
 
 	std::vector<t_vec4_real> closest = m_bz.GetClosestPeaks(Q_mid);
 	if(closest.size() == 0)
 		return;
 
-	Q_start -= tl2::convert<t_vec_real>(closest[0]);
-	Q_end -= tl2::convert<t_vec_real>(closest[0]);
+	Q_start -= tl2::convert<t_vec3_real>(closest[0]);
+	Q_end -= tl2::convert<t_vec3_real>(closest[0]);
 
 	SetCoordinates(Q_start, Q_end, true);
 }

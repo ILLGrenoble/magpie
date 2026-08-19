@@ -120,7 +120,7 @@ void PowderDlg::SetKernel(const t_magdyn* dyn)
  * set the Q and E start and end points from the main window's dispersion
  */
 void PowderDlg::SetDispersionQE(
-	const t_vec_real& Qstart, const t_vec_real& Qend,
+	const t_vec3_real& Qstart, const t_vec3_real& Qend,
 	const t_real Estart, const t_real Eend)
 {
 	m_Qstart = Qstart;
@@ -782,11 +782,11 @@ void PowderDlg::SetPowderQE()
 
 	const t_mat33_real& B = m_dyn->GetCrystalBTrafo();
 
-	t_vec_real Qvec_start_invA = tl2::convert<t_mat_real>(B) * m_Qstart;
+	t_vec3_real Qvec_start_invA = B * m_Qstart;
 	t_real Q_start_invA = tl2::norm(Qvec_start_invA);
 	m_Q_start_powder->setValue(Q_start_invA);
 
-	t_vec_real Qvec_end_invA = tl2::convert<t_mat_real>(B) * m_Qend;
+	t_vec3_real Qvec_end_invA = B * m_Qend;
 	t_real Q_end_invA = tl2::norm(Qvec_end_invA);
 	m_Q_end_powder->setValue(Q_end_invA);
 }

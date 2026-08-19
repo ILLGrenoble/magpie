@@ -49,7 +49,9 @@ namespace sym {
  * brillouin zone calculation
  */
 template<class t_mat, class t_vec, class t_real = typename t_vec::value_type>
-requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
+#ifndef SWIG  // TODO: remove this as soon as swig understands concepts
+	requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
+#endif
 class BZCalc
 {
 protected:
@@ -326,7 +328,9 @@ public:
 	 * convenience function to convert vectors to another type
 	 */
 	template<class t_vec_other>
+#ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 	requires tl2::is_vec<t_vec_other>
+#endif
 	const std::vector<std::tuple<t_vec_other, t_vec_other, std::array<t_real, 3>>>
 	GetConvertedCutLines(bool b000 = false) const
 	{

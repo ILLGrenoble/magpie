@@ -210,8 +210,8 @@ protected:
 	QDoubleSpinBox *m_temperature{};           // temperature
 
 	// scattering plane panel
-	BZCutScene<t_vec_real, t_real> *m_bzscene{};
-	BZCutView<t_vec_real, t_real> *m_bzview{};
+	BZCutScene<t_vec3_real, t_real> *m_bzscene{};
+	BZCutView<t_vec3_real, t_real> *m_bzview{};
 	QComboBox *m_recip_trafo_mode{};
 	QDoubleSpinBox *m_recip_trafo_axis[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_recip_trafo_delta{};
@@ -326,7 +326,7 @@ protected:
 	t_size ReplaceValueWithVariable(const std::string& var, const t_cplx& val);
 	t_size ReplaceValuesWithVariables();
 
-	std::pair<t_vec_real, t_vec_real> GetDispersionQ() const;
+	std::pair<t_vec3_real, t_vec3_real> GetDispersionQ() const;
 	std::pair<t_real, t_real> GetDispersionE() const;
 	void ClearDispersion(bool replot = false);
 	void Clear(bool recalc = true);
@@ -348,8 +348,8 @@ protected:
 
 	void MirrorAtoms();
 	void RotateField(const t_vec_real& axis, t_real angle);
-	void RotateDispersionQs(const t_vec_real& axis, t_real angle);
-	void TranslateDispersionQs(const t_vec_real& axis, t_real delta);
+	void RotateDispersionQs(const t_vec3_real& axis, t_real angle);
+	void TranslateDispersionQs(const t_vec3_real& axis, t_real delta);
 	void ScaleDispersionQs(t_real factor);
 	void GenerateSitesFromSG();
 	void GenerateCouplingsFromSG();

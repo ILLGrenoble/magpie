@@ -247,10 +247,10 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 		t_real E_min = use_E_min ? E_min_sel : m_minmax_E[0];
 		t_real E_max = use_E_max ? E_max_sel : m_minmax_E[1];
 
-		t_vec_real Qmin_Emin = QEToPlotXYZ(m_Qstart, E_min);
-		t_vec_real Qmin_Emax = QEToPlotXYZ(m_Qstart, E_max);
-		t_vec_real Qmax_Emin = QEToPlotXYZ(m_Qend, E_min);
-		t_vec_real Qmax_Emax = QEToPlotXYZ(m_Qend, E_max);
+		t_vec3_real Qmin_Emin = QEToPlotXYZ(m_Qstart, E_min);
+		t_vec3_real Qmin_Emax = QEToPlotXYZ(m_Qstart, E_max);
+		t_vec3_real Qmax_Emin = QEToPlotXYZ(m_Qend, E_min);
+		t_vec3_real Qmax_Emax = QEToPlotXYZ(m_Qend, E_max);
 
 		if(Qmin_Emin.size() == 3 && Qmin_Emax.size() == 3 &&
 			Qmax_Emin.size() == 3 && Qmax_Emax.size() == 3)
@@ -280,7 +280,7 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 /**
  * conversion from (Q, E) to plot position
  */
-t_vec_real Dispersion3DDlg::QEToPlotXYZ(const t_vec_real& Q, t_real E) const
+t_vec3_real Dispersion3DDlg::QEToPlotXYZ(const t_vec3_real& Q, t_real E) const
 {
 	// coordinate scaling
 	t_real E_scale = m_E_scale->value();
@@ -298,14 +298,14 @@ t_vec_real Dispersion3DDlg::QEToPlotXYZ(const t_vec_real& Q, t_real E) const
 	// Q - Q_origin - Q_dir_1*0.5 - Q_dir_2*0.5 = (Q_dir1/Q_scale1, Q_dir2/Q_scale2) * (x y)^T
 	// (Q_dir1/Q_scale1, Q_dir2/Q_scale2)^(-1) (Q - Q_origin - Q_dir_1*0.5 - Q_dir_2*0.5) = (x y)^T
 
-	t_mat_real mat = tl2::create<t_mat_real, t_vec_real>({ Q_dir_1/Q_scale1, Q_dir_2/Q_scale2 });
-	t_vec_real vec = Q - Q_origin - Q_dir_1*0.5 - Q_dir_2*0.5;
+	t_mat33_real mat = tl2::create<t_mat33_real, t_vec3_real>({ Q_dir_1/Q_scale1, Q_dir_2/Q_scale2 });
+	t_vec3_real vec = Q - Q_origin - Q_dir_1*0.5 - Q_dir_2*0.5;
 
-	auto [xy, ok] = tl2::leastsq<t_vec_real, t_mat_real>(mat, vec);
+	auto [xy, ok] = tl2::leastsq<t_vec3_real, t_mat33_real>(mat, vec);
 	if(!ok)
-		return t_vec_real{};
+		return t_vec3_real{};
 
-	return tl2::create<t_vec_real>({ xy[0], xy[1], E * E_scale });
+	return tl2::create<t_vec3_real>({ xy[0], xy[1], E * E_scale });
 }
 
 
@@ -313,7 +313,7 @@ t_vec_real Dispersion3DDlg::QEToPlotXYZ(const t_vec_real& Q, t_real E) const
 /**
  * conversion from plot position to (Q, E)
  */
-std::pair<t_vec_real, t_real> Dispersion3DDlg::PlotXYZToQE(t_real x, t_real y, t_real z) const
+std::pair<t_vec3_real, t_real> Dispersion3DDlg::PlotXYZToQE(t_real x, t_real y, t_real z) const
 {
 	// coordinate scaling
 	t_real E_scale = m_E_scale->value();
@@ -327,7 +327,7 @@ std::pair<t_vec_real, t_real> Dispersion3DDlg::PlotXYZToQE(t_real x, t_real y, t
 	t_real Q1param = (0.5*Q_scale1 + x) / Q_scale1;
 	t_real Q2param = (0.5*Q_scale2 + y) / Q_scale2;
 
-	const t_vec_real Q = Q_origin + Q_dir_1*Q1param + Q_dir_2*Q2param;
+	const t_vec3_real Q = Q_origin + Q_dir_1*Q1param + Q_dir_2*Q2param;
 	const t_real E = z / E_scale;
 
 	return std::make_pair(Q, E);
@@ -358,11 +358,11 @@ void Dispersion3DDlg::PlotPickerIntersection(
 
 	// test
 	//using namespace tl2_ops;
-	//t_vec_real xyz = QEToPlotXYZ(Q, E);
+	//t_vec3_real xyz = QEToPlotXYZ(Q, E);
 	//std::cout << xyz << "; " << (*pos)[0] << " " << (*pos)[1] << " " << (*pos)[2] << std::endl;
 
 	const t_mat33_real& B = m_dyn->GetCrystalBTrafo();
-	const t_vec_real Qvec_invA = tl2::convert<t_mat_real>(B) * Q;
+	const t_vec3_real Qvec_invA = B * Q;
 	const t_real Q_invA = tl2::norm(Qvec_invA);
 
 	std::ostringstream ostr;

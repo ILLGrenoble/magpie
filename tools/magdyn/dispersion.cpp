@@ -78,16 +78,16 @@ void MagDynDlg::ClearDispersion(bool replot)
 /**
  * get the dispersion's start and end points in Q
  */
-std::pair<t_vec_real, t_vec_real> MagDynDlg::GetDispersionQ() const
+std::pair<t_vec3_real, t_vec3_real> MagDynDlg::GetDispersionQ() const
 {
-	t_vec_real Q_start = tl2::create<t_vec_real>(
+	t_vec3_real Q_start = tl2::create<t_vec3_real>(
 	{
 		(t_real)m_Q_start[0]->value(),
 		(t_real)m_Q_start[1]->value(),
 		(t_real)m_Q_start[2]->value(),
 	});
 
-	t_vec_real Q_end = tl2::create<t_vec_real>(
+	t_vec3_real Q_end = tl2::create<t_vec3_real>(
 	{
 		(t_real)m_Q_end[0]->value(),
 		(t_real)m_Q_end[1]->value(),
@@ -121,7 +121,7 @@ void MagDynDlg::DispersionQChanged(bool calc_dyn)
 	if(this->m_autocalc->isChecked() && calc_dyn)
 		this->CalcDispersion();
 
-	t_vec_real Q_start, Q_end;
+	t_vec3_real Q_start{}, Q_end{};
 	t_real E_start{0}, E_end{1};
 	if(m_topo_dlg || m_diff_dlg || m_powder_dlg || m_disp3d_dlg || m_bzscene || m_bz_dlg)
 	{
@@ -145,8 +145,8 @@ void MagDynDlg::DispersionQChanged(bool calc_dyn)
 		m_bzscene->ClearLines();
 
 		const t_mat33_real& UB = m_dyn.GetCrystalUBTrafo();
-		t_vec_real pt_start = UB*Q_start;
-		t_vec_real pt_end = UB*Q_end;
+		t_vec3_real pt_start = UB*Q_start;
+		t_vec3_real pt_end = UB*Q_end;
 
 		// add line if both points are in the scattering plane
 		if(tl2::equals_0<t_real>(pt_start[2], g_eps) &&
@@ -162,10 +162,12 @@ void MagDynDlg::DispersionQChanged(bool calc_dyn)
 		m_bz_dlg->ClearLines(false);
 
 		const t_mat33_real& B = m_dyn.GetCrystalBTrafo();
-		t_vec_real pt_start = B*Q_start;
-		t_vec_real pt_end = B*Q_end;
+		t_vec3_real pt_start = B*Q_start;
+		t_vec3_real pt_end = B*Q_end;
 
-		m_bz_dlg->AddLine(pt_start, pt_end, false);
+		m_bz_dlg->AddLine(
+			tl2::convert<t_vec_bz>(pt_start),
+			tl2::convert<t_vec_bz>(pt_end), false);
 	}
 }
 
@@ -199,7 +201,7 @@ void MagDynDlg::CalcDispersion()
 
 	// get Qs
 	auto [Q_start, Q_end] = GetDispersionQ();
-	t_vec_real Q_range = Q_end - Q_start;
+	t_vec3_real Q_range = Q_end - Q_start;
 	for(int i = 0; i < 3; ++i)
 		Q_range[i] =  std::abs(Q_range[i]);
 
@@ -275,14 +277,14 @@ void MagDynDlg::CalcDispersion()
 		auto task = [this, &mtx, i, num_pts, E0, &Q_start, &Q_end,
 			use_projector, use_weights, use_polcoords, ignore_annihilation]()
 		{
-			const t_vec_real Q = num_pts > 1
-				? tl2::create<t_vec_real>(
+			const t_vec3_real Q = num_pts > 1
+				? tl2::create<t_vec3_real>(
 				{
 					std::lerp(Q_start[0], Q_end[0], t_real(i) / t_real(num_pts - 1)),
 					std::lerp(Q_start[1], Q_end[1], t_real(i) / t_real(num_pts - 1)),
 					std::lerp(Q_start[2], Q_end[2], t_real(i) / t_real(num_pts - 1)),
 				})
-				: tl2::create<t_vec_real>({ Q_start[0], Q_start[1], Q_start[2] });
+				: tl2::create<t_vec3_real>({ Q_start[0], Q_start[1], Q_start[2] });
 
 			auto S = m_dyn.CalcEnergies(Q, !use_weights);
 

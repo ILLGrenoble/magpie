@@ -51,7 +51,7 @@
 
 struct GroupVelocityData
 {
-	t_vec_real momentum{};
+	t_vec3_real momentum{};
 
 	std::vector<t_real> energies{};   // E
 	std::vector<t_real> weights{};    // S_perp
@@ -74,7 +74,7 @@ public:
 
 	// set kernel and Q path from main window
 	void SetKernel(const t_magdyn* dyn);
-	void SetDispersionQ(const t_vec_real& Qstart, const t_vec_real& Qend);
+	void SetDispersionQ(const t_vec3_real& Qstart, const t_vec3_real& Qend);
 
 
 protected:
@@ -113,7 +113,7 @@ private:
 	// ------------------------------------------------------------------------
 	// from main dialog
 	const t_magdyn *m_dyn{};            // main calculation kernel
-	t_vec_real m_Qstart{}, m_Qend{};    // Qs from main window
+	t_vec3_real m_Qstart{}, m_Qend{};   // Qs from main window
 
 	QSettings *m_sett{};                // program settings
 	QLabel *m_status{};                 // status bar

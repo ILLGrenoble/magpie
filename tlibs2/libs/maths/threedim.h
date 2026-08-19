@@ -764,7 +764,7 @@ requires is_vec<t_vec> && is_mat<t_mat>
 {
 	t_mat mat = ortho_mirror_op<t_mat, t_vec>(axis, is_normalised);
 
-	t_mat mat_hom = unit<t_mat>(4,4);
+	t_mat mat_hom = unit<t_mat>(4, 4);
 	tl2::convert<t_mat, t_mat>(mat_hom, mat);
 
 	// in case the matrix is statically sized and was already larger than 4x4
@@ -1148,9 +1148,14 @@ requires is_vec<t_vec> && is_mat<t_mat>
 			t_real oldw = newvec[3];
 			t_mat submat33 = submat<t_mat>(op, 3, 3);
 
-			// fill up the matrix for statically sized containers
-			for(std::size_t idx = 3; idx < submat33.size1(); ++idx)
-				submat33(idx, idx) = t_real(1);
+			if(submat33.size1() > 3)
+			{
+				// fill up the matrix for statically sized containers
+				for(std::size_t idx = 3; idx < submat33.size1(); ++idx)
+					submat33(idx, idx) = t_real(1);
+				for(std::size_t idx = 0; idx < 3; ++idx)
+					submat33(3, idx) = submat33(idx, 3) = t_real(0);
+			}
 
 			newvec *= det<t_mat>(submat33);
 			newvec[3] = oldw;
