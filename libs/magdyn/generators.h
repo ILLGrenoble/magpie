@@ -99,7 +99,7 @@ void MAGDYN_INST::SymmetriseExchangeTerms(const std::vector<t_mat44_real>& symop
 			continue;
 
 		// super cell distance vector
-		t_vec_real dist_sc = to_4vec<t_vec_real>(term.dist_calc, 0.);
+		t_vec4_real dist_sc = to_4vec<t_vec4_real>(term.dist_calc, 0.);
 
 		// generate new (possibly supercell) sites with symop
 		auto sites1_sc = tl2::apply_ops_hom<t_vec4_real, t_mat44_real, t_real>(
@@ -264,13 +264,13 @@ void MAGDYN_INST::GeneratePossibleExchangeTerms(
 	for(t_real sc_l = -sc_max; sc_l <= sc_max; sc_l += 1.)
 	{
 		// super cell vector
-		const t_vec_real sc_vec = tl2::create<t_vec_real>({ sc_h, sc_k, sc_l });
+		const t_vec3_real sc_vec = tl2::create<t_vec3_real>({ sc_h, sc_k, sc_l });
 
 		for(t_size idx1 = 0; idx1 < num_sites; ++idx1)
 		for(t_size idx2 = 0 /*idx1*/; idx2 < num_sites; ++idx2)
 		{
 			// no self-coupling
-			if(idx1 == idx2 && tl2::equals_0<t_vec_real>(sc_vec, m_eps))
+			if(idx1 == idx2 && tl2::equals_0<t_vec3_real>(sc_vec, m_eps))
 				continue;
 
 			PossibleCoupling coupling;
@@ -513,7 +513,7 @@ void MAGDYN_INST::FixExchangeTerms(t_size x_size, t_size y_size, t_size z_size)
 				// found the identical site
 				term.site2 = site.name;
 				term.dist[0] = term.dist[1] = term.dist[2] = "0";
-				term.dist_calc = tl2::zero<t_vec_real>(3);
+				term.dist_calc = tl2::zero<t_vec3_real>(3);
 				fixed_coupling = true;
 				break;
 			}
@@ -619,7 +619,7 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
 {
 	// get symmetry-equivalent positions
 	const auto positions = tl2::apply_ops_hom<t_vec4_real, t_mat44_real, t_real>(
-		to_4vec<t_vec_real>(site1.pos_calc, 1.), symops, m_eps,
+		to_4vec<t_vec4_real>(site1.pos_calc, 1.), symops, m_eps,
 		true /*keep in uc*/, false /*ignore occupied*/,
 		false /*return homogeneous*/, false /*pseudovector*/,
 		m_uc_min, m_uc_max);
@@ -655,7 +655,7 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
 	std::vector<t_vec4_real> sites_uc = GetMagneticSitePositionsHom();
 
 	// super cell distance vector
-	t_vec_real dist_sc = to_4vec<t_vec_real>(term1.dist_calc, 0.);
+	t_vec4_real dist_sc = to_4vec<t_vec4_real>(term1.dist_calc, 0.);
 
 	// generate new (possibly supercell) sites with symop
 	auto sites1_sc = tl2::apply_ops_hom<t_vec4_real, t_mat44_real, t_real>(
@@ -688,7 +688,7 @@ bool MAGDYN_INST::IsSymmetryEquivalent(
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
 		std::cout << "term1_op" << op_idx << ": " << site1_sc_idx << ", " << site2_sc_idx
-			<< ", dist: " << to_3vec<t_vec_real>(sc2 - sc1) << std::endl;
+			<< ", dist: " << to_3vec<t_vec3_real>(sc2 - sc1) << std::endl;
 #endif
 
 		// symmetry-equivalent coupling found?

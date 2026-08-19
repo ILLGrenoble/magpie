@@ -1351,7 +1351,7 @@ typename t_vec::value_type inner(const t_vec& vec1, const t_vec& vec2)
 requires is_basic_vec<t_vec>
 {
 	typename t_vec::value_type val{0};
-	auto size = vec1.size();
+	const auto size = vec1.size();
 	using local_size_t = std::decay_t<decltype(size)>;
 
 	for(local_size_t i = 0; i < size; ++i)

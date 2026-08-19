@@ -347,7 +347,7 @@ protected:
 	void SaveMultiDispersion(bool as_scr = false);
 
 	void MirrorAtoms();
-	void RotateField(const t_vec_real& axis, t_real angle);
+	void RotateField(const t_vec3_real& axis, t_real angle);
 	void RotateDispersionQs(const t_vec3_real& axis, t_real angle);
 	void TranslateDispersionQs(const t_vec3_real& axis, t_real delta);
 	void ScaleDispersionQs(t_real factor);

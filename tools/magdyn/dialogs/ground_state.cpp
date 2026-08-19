@@ -315,7 +315,7 @@ void GroundStateDlg::UpdateSpinFromTable(int row)
 		site.spin_dir[0] = tl2::var_to_str(x, g_prec);
 		site.spin_dir[1] = tl2::var_to_str(y, g_prec);
 		site.spin_dir[2] = tl2::var_to_str(z, g_prec);
-		site.spin_dir_calc = tl2::create<t_vec_real>({ x, y, z });
+		site.spin_dir_calc = tl2::create<t_vec3_real>({ x, y, z });
 
 		m_dyn->CalcMagneticSite(site);
 	}

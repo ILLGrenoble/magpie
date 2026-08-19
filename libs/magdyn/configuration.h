@@ -287,7 +287,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 				exchange_term.site2 = GetMagneticSite(exchange_term.site2_calc).name;
 			}
 
-			exchange_term.dist_calc = tl2::create<t_vec_real>(
+			exchange_term.dist_calc = tl2::create<t_vec3_real>(
 			{
 				term.second.get<t_real>("distance_x", 0.),
 				term.second.get<t_real>("distance_y", 0.),
@@ -329,7 +329,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 		thefield.align_spins = false;
 		thefield.keep_signs = false;
 
-		thefield.dir = tl2::create<t_vec_real>(
+		thefield.dir = tl2::create<t_vec3_real>(
 		{
 			field->get<t_real>("direction_h", 0.),
 			field->get<t_real>("direction_k", 0.),
@@ -361,7 +361,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 	// ordering vector
 	if(auto ordering = node.get_child_optional("ordering"); ordering)
 	{
-		t_vec_real ordering_vec = tl2::create<t_vec_real>(
+		t_vec3_real ordering_vec = tl2::create<t_vec3_real>(
 		{
 			ordering->get<t_real>("h", 0.),
 			ordering->get<t_real>("k", 0.),
@@ -374,7 +374,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 	// rotation axis
 	if(auto axis = node.get_child_optional("rotation_axis"); axis)
 	{
-		t_vec_real rotaxis = tl2::create<t_vec_real>(
+		t_vec3_real rotaxis = tl2::create<t_vec3_real>(
 		{
 			axis->get<t_real>("h", 1.),
 			axis->get<t_real>("k", 0.),

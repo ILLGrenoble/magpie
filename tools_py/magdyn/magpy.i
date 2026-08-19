@@ -175,8 +175,6 @@
 %template(MagDyn) magdyn::MagDyn<
 	tl2::mat<std::complex<double>>,
 	tl2::vec<std::complex<double>>,
-	tl2::mat<double>,
-	tl2::vec<double>,
 	std::complex<double>,
 	double,
 	std::size_t>;
@@ -197,15 +195,13 @@
 	 */
 	using t_str = std::string;
 	using t_real = double;
+	using t_cplx = std::complex<double>;
 	using t_mat = tl2::mat<std::complex<double>>;
 	using t_vec = tl2::vec<std::complex<double>>;
-	using t_mat_real = tl2::mat<double>;
-	using t_vec_real = tl2::vec<double>;
-	using t_cplx = std::complex<double>;
+	//using t_mat_real = tl2::mat<double>;
+	//using t_vec_real = tl2::vec<double>;
 
-	using t_MagDyn = magdyn::MagDyn<
-		t_mat, t_vec, t_mat_real, t_vec_real,
-		t_cplx, t_real, std::size_t>;
+	using t_MagDyn = magdyn::MagDyn<t_mat, t_vec, t_cplx, t_real, std::size_t>;
 
 	using t_vec3_real = typename t_MagDyn::t_vec3_real;
 	using t_mat44_real = typename t_MagDyn::t_mat44_real;

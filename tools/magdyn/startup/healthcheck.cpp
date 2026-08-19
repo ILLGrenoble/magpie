@@ -80,10 +80,10 @@ bool healthcheck()
 
 
 	// set propagation vector
-	t_vec_real prop = tl2::create<t_vec_real>({ 0.5, 0., 0. });
+	t_vec3_real prop = tl2::create<t_vec3_real>({ 0.5, 0., 0. });
 	magdyn.SetOrderingWavevector(prop);
 
-	t_vec_real rotax = tl2::create<t_vec_real>({ 0., 1., 0. });
+	t_vec3_real rotax = tl2::create<t_vec3_real>({ 0., 1., 0. });
 	magdyn.SetRotationAxis(rotax);
 
 

@@ -67,27 +67,25 @@
 #define MAGDYN_TEMPL                                        \
 	template<                                               \
 		class t_mat, class t_vec,                           \
-		class t_mat_real, class t_vec_real,                 \
 		class t_cplx, class t_real, class t_size,           \
 		template<class, std::size_t, std::size_t> class t_mat_static,  \
 		template<class, std::size_t> class t_vec_static>    \
 	requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> &&    \
-		tl2::is_mat<t_mat_real> && tl2::is_vec<t_vec_real>
+		tl2::is_mat<t_mat_static<t_real, 3, 3>> &&          \
+		tl2::is_vec<t_vec_static<t_real, 3>>
 
 #define MAGDYN_INST                                       \
-	magdyn::MagDyn<t_mat, t_vec, t_mat_real, t_vec_real,  \
-		t_cplx, t_real, t_size, t_mat_static, t_vec_static>
+	magdyn::MagDyn<t_mat, t_vec, t_cplx, t_real,          \
+	t_size, t_mat_static, t_vec_static>
 
 #else  // SWIG
 #define MAGDYN_TEMPL                                      \
 	template<                                             \
 		class t_mat, class t_vec,                         \
-		class t_mat_real, class t_vec_real,               \
 		class t_cplx, class t_real, class t_size>
 
 #define MAGDYN_INST                                       \
-	magdyn::MagDyn<t_mat, t_vec, t_mat_real, t_vec_real,  \
-		t_cplx, t_real, t_size>
+	magdyn::MagDyn<t_mat, t_vec, t_cplx, t_real, t_size>
 
 #endif  // SWIG
 
@@ -109,9 +107,8 @@ namespace magdyn {
  */
 template<
 	class t_mat, class t_vec,
-	class t_mat_real, class t_vec_real,
 	class t_cplx = typename t_mat::value_type,
-	class t_real = typename t_mat_real::value_type,
+	class t_real = double,
 	class t_size = std::size_t
 #ifndef SWIG  // TODO: remove this as soon as swig understands template templates
 	,
@@ -120,8 +117,8 @@ template<
 #endif
 >
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
-requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> &&
-	tl2::is_mat<t_mat_real> && tl2::is_vec<t_vec_real>
+	requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> &&
+		tl2::is_mat<t_mat_static<t_real, 3, 3>> && tl2::is_vec<t_vec_static<t_real, 3>>
 #endif
 class MagDyn
 {
@@ -263,11 +260,10 @@ public:
 	 */
 	t_size GetExchangeTermIndex(const std::string& name) const;
 
-	std::vector<t_vec_real> GetMagneticSitePositions(bool homogeneous = false) const;
-	std::vector<t_vec3_real> GetMagneticSitePositionsNonHom() const;
+	std::vector<t_vec3_real> GetMagneticSitePositions() const;
 	std::vector<t_vec4_real> GetMagneticSitePositionsHom() const;
 
-	t_vec_real GetCrystalLattice() const;
+	std::vector<t_real> GetCrystalLattice() const;
 	const t_vec3_real* GetScatteringPlane() const;
 
 	/**

@@ -422,25 +422,6 @@ MAGDYN_TEMPL t_size MAGDYN_INST::GetExchangeTermIndex(const std::string& name) c
 
 
 
-MAGDYN_TEMPL std::vector<t_vec_real>
-MAGDYN_INST::GetMagneticSitePositions(bool homogeneous) const
-{
-	std::vector<t_vec_real> sites;
-	sites.reserve(GetMagneticSitesCount());
-
-	for(const MagneticSite& site : GetMagneticSites())
-	{
-		if(homogeneous)
-			sites.emplace_back(to_4vec<t_vec_real>(site.pos_calc, 1.));
-		else
-			sites.emplace_back(to_3vec<t_vec_real>(site.pos_calc));
-	}
-
-	return sites;
-}
-
-
-
 MAGDYN_TEMPL std::vector<typename MAGDYN_INST::t_vec4_real>
 MAGDYN_INST::GetMagneticSitePositionsHom() const
 {
@@ -456,7 +437,7 @@ MAGDYN_INST::GetMagneticSitePositionsHom() const
 
 
 MAGDYN_TEMPL std::vector<typename MAGDYN_INST::t_vec3_real>
-MAGDYN_INST::GetMagneticSitePositionsNonHom() const
+MAGDYN_INST::GetMagneticSitePositions() const
 {
 	std::vector<t_vec3_real> sites;
 	sites.reserve(GetMagneticSitesCount());
@@ -469,13 +450,12 @@ MAGDYN_INST::GetMagneticSitePositionsNonHom() const
 
 
 
-MAGDYN_TEMPL t_vec_real MAGDYN_INST::GetCrystalLattice() const
+MAGDYN_TEMPL std::vector<t_real> MAGDYN_INST::GetCrystalLattice() const
 {
-	return tl2::create<t_vec_real>(
-	{
+	return std::vector<t_real>{{
 		m_xtallattice[0], m_xtallattice[1], m_xtallattice[2],
-		m_xtalangles[0], m_xtalangles[1], m_xtalangles[2],
-	});
+		m_xtalangles[0], m_xtalangles[1], m_xtalangles[2]
+	}};
 }
 
 
@@ -631,7 +611,7 @@ MAGDYN_TEMPL void MAGDYN_INST::SetExternalField(const MAGDYN_TYPE::ExternalField
 	// normalise direction vector
 	const t_real len = tl2::norm<t_vec3_real>(*m_field.dir);
 	if(!tl2::equals_0<t_real>(len, m_eps))
-		*m_field.dir /= len;
+		(*m_field.dir) /= len;
 }
 
 
@@ -649,7 +629,7 @@ MAGDYN_TEMPL void MAGDYN_INST::RotateExternalField(const t_vec3_real& axis, t_re
 
 MAGDYN_TEMPL void MAGDYN_INST::RotateExternalField(t_real x, t_real y, t_real z, t_real angle)
 {
-	RotateExternalField(tl2::create<t_vec_real>({ x, y, z }), angle);
+	RotateExternalField(tl2::create<t_vec3_real>({ x, y, z }), angle);
 }
 
 
@@ -758,12 +738,12 @@ void MAGDYN_INST::SetCrystalLattice(t_real a, t_real b, t_real c,
 		m_xtalangles[2] = gamma;
 
 		// crystal fractional coordinate trafo matrices
-		m_xtalA = tl2::A_matrix<t_mat_real>(a, b, c, alpha, beta, gamma);
-		m_xtalB = tl2::B_matrix<t_mat_real>(a, b, c, alpha, beta, gamma);
+		m_xtalA = tl2::A_matrix<t_mat33_real>(a, b, c, alpha, beta, gamma);
+		m_xtalB = tl2::B_matrix<t_mat33_real>(a, b, c, alpha, beta, gamma);
 	}
 	catch(const std::exception& ex)
 	{
-		m_xtalA = m_xtalB = tl2::unit<t_mat_real>(3);
+		m_xtalA = m_xtalB = tl2::unit<t_mat33_real>(3);
 
 		MAGDYN_CERR_OPT << "Magdyn error: Could not calculate crystal matrices."
 			<< std::endl;
@@ -803,7 +783,7 @@ void MAGDYN_INST::SetScatteringPlane(t_real ah, t_real ak, t_real al,
 	}
 	catch(const std::exception& ex)
 	{
-		m_xtalUB = /*m_xtalUBinv =*/ tl2::unit<t_mat_real>(3);
+		m_xtalUB = /*m_xtalUBinv =*/ tl2::unit<t_mat33_real>(3);
 
 		MAGDYN_CERR_OPT << "Magdyn error: Could not calculate scattering plane matrices."
 			<< std::endl;

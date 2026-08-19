@@ -56,11 +56,11 @@ bool MAGDYN_INST::CalcPolarisation(const t_vec3_real& Q_rlu,
 	}
 
 
-	/*t_vec_real Q_lab = m_xtalUB * Q_rlu;
-	t_vec_real h_lab = m_xtalUB * tl2::create<t_vec_real>({ 1., 0., 0. });
-	t_vec_real l_lab = m_xtalUB * tl2::create<t_vec_real>({ 0., 0., 1. });
-	t_mat_real rotQ = tl2::rotation<t_mat_real>(h_lab, Q_lab, &l_lab, m_eps, true);
-	t_mat_real rotQ_hkl = m_xtalUBinv * rotQ * m_xtalUB;*/
+	/*t_vec3_real Q_lab = m_xtalUB * Q_rlu;
+	t_vec3_real h_lab = m_xtalUB * tl2::create<t_vec3_real>({ 1., 0., 0. });
+	t_vec3_real l_lab = m_xtalUB * tl2::create<t_vec3_real>({ 0., 0., 1. });
+	t_mat33_real rotQ = tl2::rotation<t_mat33_real>(h_lab, Q_lab, &l_lab, m_eps, true);
+	t_mat33_real rotQ_hkl = m_xtalUBinv * rotQ * m_xtalUB;*/
 
 
 	t_vec3_real Q_lab = m_xtalB * Q_rlu;
@@ -72,13 +72,13 @@ bool MAGDYN_INST::CalcPolarisation(const t_vec3_real& Q_rlu,
 	t_vec3_real Qperp_lab = tl2::cross(up_lab, Q_lab);
 	Qperp_lab /= norm(Qperp_lab);
 
-	t_mat33_real rotQ = tl2::create<t_mat_real>(3, 3);
+	t_mat33_real rotQ = tl2::create<t_mat33_real>(3, 3);
 	tl2::set_row<t_mat33_real, t_vec3_real>(rotQ, Q_lab, 0);
 	tl2::set_row<t_mat33_real, t_vec3_real>(rotQ, Qperp_lab, 1);
 	tl2::set_row<t_mat33_real, t_vec3_real>(rotQ, up_lab, 2);
 
 
-	//t_mat_real rotQ_inv = tl2::trans<t_mat_real>(rotQ);
+	//t_mat33_real rotQ_inv = tl2::trans<t_mat33_real>(rotQ);
 	const auto [rotQ_inv, rotQ_inv_ok] = tl2::inv(rotQ);
 	if(!rotQ_inv_ok)
 	{

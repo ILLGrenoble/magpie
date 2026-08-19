@@ -749,7 +749,7 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 		/*if(atoms.size() && generatedatoms.size())
 		{
 			if(auto matching_sgs =
-				find_matching_sgs<t_vec_real, t_mat_real>(
+				find_matching_sgs<t_vec4_real, t_mat44_real>(
 					{ atoms[0] }, generatedatoms[0], g_eps); matching_sgs.size())
 			{
 				std::cout << std::get<1>(matching_sgs[0]) << std::endl;
