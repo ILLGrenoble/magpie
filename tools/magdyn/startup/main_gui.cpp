@@ -38,12 +38,7 @@
 
 
 
-/**
- * starts the gui program
- */
-int gui_main(int argc, char** argv, const std::string& model_file,
-	const std::optional<t_vec3_real>& Qi, const std::optional<t_vec3_real>& Qf,
-	t_size num_Q_pts)
+static std::unique_ptr<QApplication> setup_app(int argc, char** argv)
 {
 	tl2::set_gl_format(true, _GL_MAJ_VER, _GL_MIN_VER);
 	//QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL);
@@ -58,6 +53,20 @@ int gui_main(int argc, char** argv, const std::string& model_file,
 
 	// re-set locales
 	tl2::set_locales();
+
+	return app;
+}
+
+
+
+/**
+ * starts the gui magpie program
+ */
+int gui_main(int argc, char** argv, const std::string& model_file,
+	const std::optional<t_vec3_real>& Qi, const std::optional<t_vec3_real>& Qf,
+	t_size num_Q_pts)
+{
+	auto app = setup_app(argc, argv);
 
 	// main window
 	auto magdyn = std::make_unique<MagDynDlg>(nullptr);
@@ -78,6 +87,26 @@ int gui_main(int argc, char** argv, const std::string& model_file,
 
 	magdyn->CalcDispersion();
 	magdyn->CalcHamiltonian();
+
+	return app->exec();
+}
+
+
+
+/**
+ * starts the bz gui program
+ */
+int gui_main_bz(int argc, char** argv, const std::string& cfg_file)
+{
+	auto app = setup_app(argc, argv);
+
+	// main window
+	auto dlg = std::make_unique<BZDlg>(nullptr);
+	dlg->show();
+
+	// if a configuration file is given, load it
+	if(cfg_file != "")
+		dlg->Load(cfg_file.c_str(), false);
 
 	return app->exec();
 }
