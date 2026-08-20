@@ -300,6 +300,7 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 		// calculate orthogonal projector for magnetic neutron scattering,
 		// see (Shirane 2002), p. 37, equation (2.64)
 		t_mat33 proj_neutron;
+		bool Q_is_zero = false;
 		if(!tl2::equals_0(S.Q_invA, m_eps))
 		{
 			proj_neutron = tl2::convert<t_mat33>(
@@ -307,14 +308,17 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 		}
 		else
 		{
-			// invalid projector at Q = 0
-			proj_neutron = tl2::zero<t_mat33>(3, 3);
-			MAGDYN_CERR_OPT << "Magdyn error: Cannot calculate orthogonal projector for Q = 0." << std::endl;
+			// replacement for the projector at Q = 0,
+			// see the discussion here: https://github.com/SunnySuite/Sunny.jl/pull/131#issuecomment-2254290782
+			proj_neutron = tl2::unit<t_mat33>(3, 3) * 2./3.;
+			Q_is_zero = true;
+			//MAGDYN_CERR_OPT << "Magdyn error: Cannot calculate orthogonal projector for Q = 0." << std::endl;
 		}
 
 		// apply orthogonal projector
 		E_and_S.S_perp = proj_neutron * E_and_S.S;
-		if(m_perform_checks && !tl2::equals(tl2::trace(E_and_S.S_perp), tl2::trace(E_and_S.S_perp * proj_neutron), m_eps))
+		if(m_perform_checks && !Q_is_zero &&
+		   !tl2::equals(tl2::trace(E_and_S.S_perp), tl2::trace(E_and_S.S_perp * proj_neutron), m_eps))
 		{
 			MAGDYN_CERR_OPT << "Magdyn error: Wrong S_perp at Q = " << S.Q_rlu << ":";
 			MAGDYN_CERR_OPT << "\nproj * S =\n";
@@ -328,14 +332,17 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
-		t_mat33 proj_neutron2 = tl2::convert<t_mat33>(
-			tl2::ortho_projector<t_mat33_real, t_vec3_real>(m_xtalB, S.Q_rlu, false, false));
+		if(!Q_is_zero)
+		{
+			t_mat33 proj_neutron2 = tl2::convert<t_mat33>(
+				tl2::ortho_projector<t_mat33_real, t_vec3_real>(m_xtalB, S.Q_rlu, false, false));
 
-		std::cout << "Q_proj for Q = " << S.Q_rlu << ":\n";
-		tl2::niceprint(std::cout, proj_neutron, 1e-4, 4);
-		std::cout << "Q_proj2 for Q = " << S.Q_rlu << ":\n";
-		tl2::niceprint(std::cout, proj_neutron2, 1e-4, 4);
-		std::cout << "\n";
+			std::cout << "Q_proj for Q = " << S.Q_rlu << ":\n";
+			tl2::niceprint(std::cout, proj_neutron, 1e-4, 4);
+			std::cout << "Q_proj2 for Q = " << S.Q_rlu << ":\n";
+			tl2::niceprint(std::cout, proj_neutron2, 1e-4, 4);
+			std::cout << "\n";
+		}
 #endif
 
 		// weights
