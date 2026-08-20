@@ -608,10 +608,13 @@ MAGDYN_TEMPL void MAGDYN_INST::SetExternalField(const MAGDYN_TYPE::ExternalField
 {
 	m_field = field;
 
-	// normalise direction vector
-	const t_real len = tl2::norm<t_vec3_real>(*m_field.dir);
-	if(!tl2::equals_0<t_real>(len, m_eps))
-		(*m_field.dir) /= len;
+	if(m_field.dir)
+	{
+		// normalise direction vector
+		const t_real len = tl2::norm<t_vec3_real>(*m_field.dir);
+		if(!tl2::equals_0<t_real>(len, m_eps))
+			(*m_field.dir) /= len;
+	}
 }
 
 

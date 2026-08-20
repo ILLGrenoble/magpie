@@ -52,6 +52,8 @@ using t_magdyn = magdyn::MagDyn<
 	t_cplx, t_real,
 	std::size_t>;
 
+using t_vec3_real = typename t_magdyn::t_vec3_real;
+
 
 
 /**
@@ -60,13 +62,13 @@ using t_magdyn = magdyn::MagDyn<
 struct MagpieData
 {
 	// calculation core
-	t_magdyn mag;
+	t_magdyn mag{ };
 
 	// cache S(Q, E) results
 	t_rtree rtree_S{ };
 	t_real rtree_rlu_eps{ 1e-4 };
 	bool use_rtree{ true };
-	std::mutex rtree_mutex;
+	std::mutex rtree_mutex{ };
 };
 
 
@@ -82,14 +84,14 @@ static t_E_and_S _calc_energies(t_magpie _mag,
 
 	MagpieData *dat = reinterpret_cast<MagpieData*>(_mag);
 
-	t_vec_real Q_rlu = tl2::create<t_vec_real>({ h, k, l });
+	t_vec3_real Q_rlu = tl2::create<t_vec3_real>({ h, k, l });
 
 
 	// look for cached S(Q, E) value
 	t_rtree_vertex rtree_vert;
 	if(dat->use_rtree)
 	{
-		tl2::to_geo_vertex<t_rtree_vertex, t_vec_real>(
+		tl2::to_geo_vertex<t_rtree_vertex, t_vec3_real>(
 			rtree_vert, Q_rlu, std::make_index_sequence<3>());
 
 		std::vector<t_rtree_leaf> rtree_nearest;
@@ -101,8 +103,8 @@ static t_E_and_S _calc_energies(t_magpie _mag,
 
 		if(rtree_nearest.size() > 0)
 		{
-			t_vec_real nearest_point =
-				tl2::from_geo_vertex<t_vec_real, t_rtree_vertex>(
+			t_vec3_real nearest_point =
+				tl2::from_geo_vertex<t_vec3_real, t_rtree_vertex>(
 					std::get<0>(rtree_nearest[0]), std::make_index_sequence<3>());
 
 			// use cached value if within epsilon distance
@@ -305,7 +307,7 @@ void magpie_set_field(t_magpie _mag, t_real B,
 
 	typename t_magdyn::ExternalField field{};
 	field.mag = B;
-	field.dir = tl2::create<t_vec_real>({ Bx, By, Bz });
+	field.dir = tl2::create<t_vec3_real>({ Bx, By, Bz });
 	field.align_spins = (align_spins != 0);
 	field.keep_signs = (keep_signs != 0);
 

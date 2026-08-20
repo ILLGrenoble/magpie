@@ -677,7 +677,7 @@ public:
 	constexpr vec_static(const vec_static<T, SIZE>& other)
 	{
 		for(size_type i = 0; i < SIZE; ++i)
-			(*this)[i] = other[i];
+			m_data[i] = other[i];
 	}
 
 	constexpr vec_static(vec_static<T, SIZE>&& other) noexcept
@@ -695,7 +695,7 @@ public:
 		size_type i = 0;
 		for(const T& elem : lst)
 		{
-			(*this)[i] = elem;
+			m_data[i] = elem;
 			++i;
 
 			if(i >= SIZE)
@@ -717,7 +717,7 @@ public:
 	constexpr vec_static<T, SIZE>& operator=(const vec_static<T, SIZE>& other)
 	{
 		for(size_type i = 0; i < SIZE; ++i)
-			(*this)[i] = other[i];
+			m_data[i] = other[i];
 
 		return *this;
 	}
@@ -744,18 +744,15 @@ public:
 	{
 		// initialise from given array data
 		for(size_type i = 0; i < SIZE; ++i)
-			this->operator[](i) = arr[i];
+			m_data[i] = arr[i];
 	}
 
 	constexpr void to_array(T* arr) const
 	{
 		// write elements to array
 		for(size_type i = 0; i < SIZE; ++i)
-			arr[i] = this->operator[](i);
+			arr[i] = m_data[i];
 	}
-
-
-	constexpr size_type size() const noexcept { return SIZE; }
 
 
 	// iterators
@@ -783,24 +780,18 @@ public:
 
 
 	// element access
-	constexpr const value_type& operator()(size_type i) const { return operator[](i); }
-	constexpr value_type& operator()(size_type i) { return operator[](i); }
+	constexpr const value_type& operator()(size_type i) const { return m_data[i]; }
+	constexpr value_type& operator()(size_type i) { return m_data[i]; }
 
-	constexpr const value_type& operator[](size_type i) const
-	{
-		return m_data[i];
-	}
+	constexpr const value_type& operator[](size_type i) const { return m_data[i]; }
+	constexpr value_type& operator[](size_type i) { return m_data[i]; }
 
-	constexpr value_type& operator[](size_type i)
-	{
-		return m_data[i];
-	}
+	constexpr size_type size() const noexcept { return SIZE; }
 
 
 private:
-	std::array<T, SIZE> m_data{};
+	std::array<T, SIZE> m_data{ };
 };
-
 
 
 
@@ -1088,8 +1079,6 @@ public:
 	constexpr mat_static& operator-=(const mat_static& mat2) { return tl2_ops::operator-=(*this, mat2); }
 	constexpr mat_static& operator*=(value_type d) { return tl2_ops::operator*=(*this, d); }
 	constexpr mat_static& operator/=(value_type d) { return tl2_ops::operator/=(*this, d); }
-
-	//constexpr const std::array<T, ROWS*COLS>& GetData() const { return m_data; }
 
 
 private:
