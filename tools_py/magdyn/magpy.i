@@ -66,6 +66,15 @@
 //%template(VectorCplx) tl2::vec<std::complex<double>>;
 //%template(MatrixD) tl2::mat<double>;
 //%template(MatrixCplx) tl2::mat<std::complex<double>>;
+
+//%template(Vector3D) tl2::vec_static<double, 3>;
+//%template(Vector3Cplx) tl2::vec_static<std::complex<double>, 3>;
+//%template(Matrix33D) tl2::mat_static<double, 3, 3>;
+//%template(Matrix33Cplx) tl2::mat_static<std::complex<double>, 3, 3>;
+//%template(Vector4D) tl2::vec_static<double, 4>;
+//%template(Vector4Cplx) tl2::vec_static<std::complex<double>, 4>;
+//%template(Matrix44D) tl2::mat_static<double, 4, 4>;
+//%template(Matrix44Cplx) tl2::mat_static<std::complex<double>, 4, 4>;
 // ----------------------------------------------------------------------------
 
 
@@ -73,6 +82,7 @@
 %include "../../libs/magdyn/magdyn.h"
 %include "../../libs/magdyn/structs.h"
 %include "../../libs/magdyn/helpers.h"
+%include "../../libs/magdyn/checks.h"
 %include "../../libs/magdyn/getters.h"
 %include "../../libs/magdyn/generators.h"
 %include "../../libs/magdyn/file.h"
@@ -83,80 +93,74 @@
 %include "../../libs/magdyn/correlation.h"
 %include "../../libs/magdyn/polarisation.h"
 %include "../../libs/magdyn/dispersion.h"
+%include "../../libs/magdyn/powder.h"
 %include "../../libs/magdyn/topology.h"
+%include "../../libs/magdyn/diff.h"
 
 
 // ----------------------------------------------------------------------------
 // input- and output structs (and vectors of them)
 // ----------------------------------------------------------------------------
 %template(MagneticSite) magdyn::t_MagneticSite<
-	tl2::mat<std::complex<double>>,
-	tl2::vec<std::complex<double>>,
-	tl2::vec<double>,
-	std::size_t,
-	double>;
+	tl2::mat_static<std::complex<double>, 3, 3>,
+	tl2::vec_static<std::complex<double>, 3>,
+	tl2::vec_static<double, 3>,
+	std::size_t, double>;
 %template(VecMagneticSite) std::vector<
 	magdyn::t_MagneticSite<
-		tl2::mat<std::complex<double>>,
-		tl2::vec<std::complex<double>>,
-		tl2::vec<double>,
-		std::size_t,
-		double>
+		tl2::mat_static<std::complex<double>, 3, 3>,
+		tl2::vec_static<std::complex<double>, 3>,
+		tl2::vec_static<double, 3>,
+		std::size_t, double>
 	>;
 %template(VecMagneticSitePtr) std::vector<
 	const magdyn::t_MagneticSite<
-		tl2::mat<std::complex<double>>,
-		tl2::vec<std::complex<double>>,
-		tl2::vec<double>,
-		std::size_t,
-		double>*
+		tl2::mat_static<std::complex<double>, 3, 3>,
+		tl2::vec_static<std::complex<double>, 3>,
+		tl2::vec_static<double, 3>,
+		std::size_t, double>*
 	>;
 
 %template(ExchangeTerm) magdyn::t_ExchangeTerm<
-	tl2::mat<std::complex<double>>,
-	tl2::vec<std::complex<double>>,
-	tl2::vec<double>,
-	std::size_t,
-	std::complex<double>,
-	double>;
+	tl2::mat_static<std::complex<double>, 3, 3>,
+	tl2::vec_static<std::complex<double>, 3>,
+	tl2::vec_static<double, 3>,
+	std::size_t, std::complex<double>, double>;
 %template(VecExchangeTerm) std::vector<
 	magdyn::t_ExchangeTerm<
-		tl2::mat<std::complex<double>>,
-		tl2::vec<std::complex<double>>,
-		tl2::vec<double>,
-		std::size_t,
-		std::complex<double>,
-		double>
+		tl2::mat_static<std::complex<double>, 3, 3>,
+		tl2::vec_static<std::complex<double>, 3>,
+		tl2::vec_static<double, 3>,
+		std::size_t, std::complex<double>, double>
 	>;
 
 %template(ExternalField) magdyn::t_ExternalField<
-	tl2::vec<double>,
-	double>;
+	tl2::vec_static<double, 3>, double>;
 
 %template(EnergyAndWeight) magdyn::t_EnergyAndWeight<
-	tl2::mat<std::complex<double>>,
+	tl2::mat_static<std::complex<double>, 3, 3>,
 	tl2::vec<std::complex<double>>,
-	double, std::size_t,
-	std::complex<double>>;
+	double, std::size_t, std::complex<double>>;
 %template(VecEnergyAndWeight) std::vector<
 	magdyn::t_EnergyAndWeight<
-		tl2::mat<std::complex<double>>,
+		tl2::mat_static<std::complex<double>, 3, 3>,
 		tl2::vec<std::complex<double>>,
-		double, std::size_t,
-		std::complex<double>>
+		double, std::size_t, std::complex<double>>
 	>;
 
 %template(SofQE) magdyn::t_SofQE<
 	tl2::mat<std::complex<double>>,
 	tl2::vec<std::complex<double>>,
-	double, std::size_t,
-	std::complex<double>>;
+	double, std::size_t, std::complex<double>,
+	tl2::vec_static<double, 3>,
+	tl2::mat_static<std::complex<double>, 3, 3>>;
 %template(VecSofQE) std::vector<
 	magdyn::t_SofQE<
 		tl2::mat<std::complex<double>>,
 		tl2::vec<std::complex<double>>,
-		double, std::size_t,
-		std::complex<double>>
+		double, std::size_t, std::complex<double>,
+		tl2::vec_static<double, 3>,
+		tl2::mat_static<std::complex<double>, 3, 3>>
 	>;
 
 %template(Variable) magdyn::t_Variable<
@@ -175,9 +179,7 @@
 %template(MagDyn) magdyn::MagDyn<
 	tl2::mat<std::complex<double>>,
 	tl2::vec<std::complex<double>>,
-	std::complex<double>,
-	double,
-	std::size_t>;
+	std::complex<double>, double, std::size_t>;
 // ----------------------------------------------------------------------------
 
 

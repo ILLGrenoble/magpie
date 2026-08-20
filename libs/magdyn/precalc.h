@@ -434,4 +434,61 @@ MAGDYN_INST::spin_to_trafo(const MAGDYN_INST::t_vec3_real& spin_dir)
 }
 // --------------------------------------------------------------------
 
+
+
+// --------------------------------------------------------------------
+// pre-calculation functions
+// --------------------------------------------------------------------
+/**
+ * rotate a Q vector given in rlu
+ */
+MAGDYN_TEMPL
+typename MAGDYN_INST::t_vec3_real
+MAGDYN_INST::RotateQ(const typename MAGDYN_INST::t_vec3_real& Q_rlu,
+	const typename MAGDYN_INST::t_vec3_real& axis_rlu, t_real angle) const
+{
+	t_vec3_real axis = axis_rlu;
+	t_vec3_real Q = Q_rlu;
+
+	const t_mat33_real& xtalB = GetCrystalBTrafo();
+	auto [xtalB_inv, inv_ok] = tl2::inv(xtalB);
+
+	// get Q and the axis in A^(-1)
+	if(inv_ok)
+	{
+		axis = xtalB * axis;
+		Q = xtalB * Q_rlu;
+	}
+
+	// rotate Q in the orthonormal A^(-1) system
+	t_mat33_real R = tl2::rotation<t_mat33_real, t_vec3_real>(axis, angle, false);
+	Q = R * Q;
+
+	// convert Q back to rlu
+	if(inv_ok)
+		Q = xtalB_inv * Q;
+
+	tl2::set_eps_0(Q, m_eps);
+	return Q;
+};
+
+
+
+/**
+ * rotate a Q vector given in rlu
+ */
+MAGDYN_TEMPL
+std::array<t_real, 3>
+MAGDYN_INST::RotateQ(t_real h, t_real k, t_real l,
+	t_real axis_h, t_real axis_k, t_real axis_l, t_real angle) const
+{
+	const t_vec3_real Q = tl2::create<t_vec3_real>({ h, k, l });
+	const t_vec3_real axis = tl2::create<t_vec3_real>({ axis_h, axis_k, axis_l });
+
+	const t_vec3_real Qrot = RotateQ(Q, axis, angle);
+
+	return std::array<t_real, 3>({ Qrot[0], Qrot[1], Qrot[2] });
+}
+// --------------------------------------------------------------------
+
 #endif

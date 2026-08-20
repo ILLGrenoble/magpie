@@ -333,6 +333,15 @@ public:
 
 
 	// --------------------------------------------------------------------
+	// helper functions
+	// --------------------------------------------------------------------
+	t_vec3_real RotateQ(const t_vec3_real& Q, const t_vec3_real& axis, t_real angle) const;
+	std::array<t_real, 3> RotateQ(t_real h, t_real k, t_real l,
+		t_real axis_h, t_real axis_k, t_real axis_l, t_real angle) const;
+	// --------------------------------------------------------------------
+
+
+	// --------------------------------------------------------------------
 	/**
 	 * get an expression parser object with registered variables
 	 */
