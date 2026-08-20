@@ -36,6 +36,7 @@ option(BUILD_MODULES       "build standalone tool programs" TRUE)
 option(BUILD_PY_MODULES    "build py scripting modules"     TRUE)
 option(ONLY_BUILD_FINISHED "only build finished tools"      TRUE)
 option(USE_QT6             "use Qt version 6"               TRUE)
+option(USE_NATIVE          "use native code"                FALSE)
 
 
 # mingw settings
@@ -66,17 +67,17 @@ endif()
 
 # additional modules (used by takin)
 if(BUILD_MODULES)
-	# Brillouin zone tool
-	#message("\n================================================================================")
-	#message("Configuring bz...")
-	#message("================================================================================")
-	#add_subdirectory(tools/bz)
-
 	# cif converter
 	message("\n================================================================================")
 	message("Configuring cif2xml...")
 	message("================================================================================")
 	add_subdirectory(tools/cif2xml)
+
+	# Brillouin zone tool
+	#message("\n================================================================================")
+	#message("Configuring bz...")
+	#message("================================================================================")
+	#add_subdirectory(tools/bz)
 
 	# nuclear and magnetic structure factor tools
 	#message("\n================================================================================")

@@ -97,7 +97,7 @@ target_compile_options(magpie_c PUBLIC -Wall -Wextra)
 
 if(USE_NATIVE)
 	message("Using native optimisations.")
-	target_compile_definitions(magpie_c PRIVATE -march=native)
+	target_compile_options(magpie_c PRIVATE -march=native)
 endif()
 
 target_compile_definitions(magpie_c PRIVATE -DUSE_LAPACK=1)

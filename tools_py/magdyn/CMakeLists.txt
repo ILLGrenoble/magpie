@@ -29,6 +29,7 @@ cmake_policy(SET CMP0078 NEW)
 cmake_policy(SET CMP0086 NEW)
 
 project(magpy)
+enable_language(CXX)
 
 option(USE_NATIVE  "use native code"   FALSE)
 

@@ -28,9 +28,16 @@ cmake_policy(SET CMP0167 NEW)
 project(bz_py)
 enable_language(CXX)
 
+option(USE_NATIVE  "use native code"   FALSE)
+
 set(CMAKE_CXX_STANDARD 20)
 add_compile_options(-std=c++20)
 add_compile_options(-Wall -Wextra)
+
+if(USE_NATIVE)
+	message("Using native optimisations.")
+	add_compile_options(-march=native)
+endif()
 
 list(APPEND CMAKE_MODULE_PATH
 	"${PROJECT_SOURCE_DIR}"
