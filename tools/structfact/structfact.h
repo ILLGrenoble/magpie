@@ -81,15 +81,18 @@ public:
 
 	struct NuclPos
 	{
-		std::string name;
-		t_cplx b;
-		t_real pos[3];
+		std::string name {};
+		t_cplx b {};
+		t_real pos[3] {};
 	};
 
 
 public:
 	StructFactDlg(QWidget* pParent = nullptr);
 	~StructFactDlg() = default;
+
+	StructFactDlg(const StructFactDlg&) = delete;
+	StructFactDlg& operator=(const StructFactDlg&) = delete;
 
 	bool Load(const QString& filename);
 
@@ -99,7 +102,7 @@ protected:
 	QMenuBar *m_menu = nullptr;
 
 	QDialog *m_dlgPlot = nullptr;
-	std::shared_ptr<tl2::GlPlot> m_plot;
+	std::shared_ptr<tl2::GlPlot> m_plot{};
 	std::size_t m_sphere = 0;
 	QLabel *m_labelGlInfos[4] = { nullptr, nullptr, nullptr, nullptr };
 	QLabel *m_status3D = nullptr;
@@ -118,7 +121,7 @@ protected:
 	QLineEdit *m_editGamma = nullptr;
 
 	QComboBox *m_comboSG = nullptr;
-	std::vector<std::vector<t_mat_real>> m_SGops, m_SGops_centr;
+	std::vector<std::vector<t_mat_real>> m_SGops{}, m_SGops_centr{};
 
 	QSpinBox *m_maxBZ = nullptr;
 	QCheckBox *m_RemoveZeroes = nullptr;

@@ -97,7 +97,7 @@ public:
 		t_real Q{};
 		t_real I{};
 		std::size_t num_peaks = 0;
-		std::string peaks;
+		std::string peaks{};
 	};
 
 
@@ -110,7 +110,7 @@ public:
 		t_real ImM[3];		// imag part of Fourier components
 
 		// cosmetic data
-		std::string name;
+		std::string name{};
 		std::string col{"#ff0000"};
 		t_real scale{1};	// scaling of Fourier components (only for drawing)
 	};
@@ -119,6 +119,9 @@ public:
 public:
 	MagStructFactDlg(QWidget* pParent = nullptr);
 	virtual ~MagStructFactDlg() = default;
+
+	MagStructFactDlg(const MagStructFactDlg&) = delete;
+	MagStructFactDlg& operator=(const MagStructFactDlg&) = delete;
 
 	bool Load(const QString& filename);
 
@@ -129,14 +132,14 @@ protected:
 
 	// unit cell view
 	QDialog *m_dlgPlot = nullptr;
-	std::shared_ptr<tl2::GlPlot> m_plot;
+	std::shared_ptr<tl2::GlPlot> m_plot{};
 	std::size_t m_sphere = 0;
 	std::size_t m_arrow = 0;
 	QLabel *m_status3D = nullptr;
 
 	// super cell view
 	QDialog *m_dlgPlotSC = nullptr;
-	std::shared_ptr<tl2::GlPlot> m_plotSC;
+	std::shared_ptr<tl2::GlPlot> m_plotSC{};
 	std::size_t m_sphereSC = 0;
 	std::size_t m_arrowSC = 0;
 	QLabel *m_status3DSC = nullptr;
@@ -159,7 +162,7 @@ protected:
 	QLineEdit *m_editGamma = nullptr;
 
 	QComboBox *m_comboSG = nullptr;
-	std::vector<std::vector<t_mat_real>> m_SGops;
+	std::vector<std::vector<t_mat_real>> m_SGops{};
 
 	QSpinBox *m_maxBZ = nullptr;
 	QCheckBox *m_RemoveZeroes = nullptr;
@@ -232,7 +235,7 @@ private:
 
 	long m_curPickedObj = -1;
 
-	std::vector<std::size_t> m_3dobjsSC;
+	std::vector<std::size_t> m_3dobjsSC{};
 };
 
 

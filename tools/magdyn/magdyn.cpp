@@ -133,10 +133,12 @@ MagDynDlg::~MagDynDlg()
 		(QDialog**)&m_powder_dlg, (QDialog**)&m_ffact_dlg,
 		(QDialog**)&m_disp3d_dlg, (QDialog**)&m_bz_dlg,
 		(QDialog**)&m_trafos, (QDialog**)&m_plot2d,
-		(QDialog**)&m_plot3d, (QDialog**)&m_bz_tool })
+		(QDialog**)&m_plot3d, (QDialog**)&m_bz_tool,
+		(QDialog**)&m_structfact_tool, (QDialog**)&m_magstructfact_tool })
 	{
 		if(!dlg || !*dlg)
 			continue;
+
 		delete reinterpret_cast<QDialog*>(*dlg);
 		*dlg = nullptr;
 	}
@@ -482,6 +484,8 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acPlot2d = new QAction("2D Plotter...", menuTools);
 	QAction *acPlot3d = new QAction("3D Plotter...", menuTools);
 	QAction *acBZTool = new QAction("Brillouin Zones...", menuTools);
+	QAction *acStructFactTool = new QAction("Nuclear Structure Factors...", menuTools);
+	QAction *acMagStructFactTool = new QAction("Magnetic Structure Factors...", menuTools);
 	QAction *acSGTool = new QAction("Space Groups...", menuTools);
 	QAction *acPolCalc = new QAction("Polarisation Vectors...", menuTools);
 	QAction *acPreferences = new QAction("Preferences...", menuTools);
@@ -595,6 +599,9 @@ void MagDynDlg::CreateMenuBar()
 	menuTools->addSeparator();
 	menuTools->addAction(acBZTool);
 	menuTools->addAction(acSGTool);
+	menuTools->addSeparator();
+	menuTools->addAction(acStructFactTool);
+	menuTools->addAction(acMagStructFactTool);
 	menuTools->addSeparator();
 	menuTools->addAction(acPolCalc);
 	menuTools->addSeparator();
@@ -787,6 +794,34 @@ void MagDynDlg::CreateMenuBar()
 		m_bz_tool->show();
 		m_bz_tool->raise();
 		m_bz_tool->activateWindow();
+	});
+
+	// show nuclear structure factor dialog
+	connect(acStructFactTool, &QAction::triggered, [this]()
+	{
+		if(!m_structfact_tool)
+		{
+			m_structfact_tool = new StructFactDlg(this/*, m_sett*/);
+			m_structfact_tool->setFont(this->font());
+		}
+
+		m_structfact_tool->show();
+		m_structfact_tool->raise();
+		m_structfact_tool->activateWindow();
+	});
+
+	// show magnetic structure factor dialog
+	connect(acMagStructFactTool, &QAction::triggered, [this]()
+	{
+		if(!m_magstructfact_tool)
+		{
+			m_magstructfact_tool = new MagStructFactDlg(this/*, m_sett*/);
+			m_magstructfact_tool->setFont(this->font());
+		}
+
+		m_magstructfact_tool->show();
+		m_magstructfact_tool->raise();
+		m_magstructfact_tool->activateWindow();
 	});
 
 	// show space group dialog

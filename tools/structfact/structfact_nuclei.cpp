@@ -432,7 +432,7 @@ struct PowderLine
         t_real Q{};
         t_real I{};
         std::size_t num_peaks = 0;
-        std::string peaks;
+        std::string peaks{};
 };
 
 

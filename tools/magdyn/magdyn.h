@@ -246,32 +246,36 @@ protected:
 	QComboBox *m_exportFormat{nullptr};
 
 	// calculation kernels
-	t_magdyn m_dyn{};                      // magnon dynamics calculation kernel
-	t_bz m_bz{};                           // brillouin zone calculation kernel
-	MagFormfactorTable<t_real> m_ff{};     // magnetic form factor table
+	t_magdyn m_dyn{};                         // magnon dynamics calculation kernel
+	t_bz m_bz{};                              // brillouin zone calculation kernel
+	MagFormfactorTable<t_real> m_ff{};        // magnetic form factor table
 
 	// dialogs
-	QDialog *m_settings_dlg{};             // settings dialog
-	TableImportDlg *m_table_import_dlg{};  // table import dialog
-	MatrixElemsDlg *m_matrixelems_dlg{};   // dialog to choose matrix elements
-	NotesDlg *m_notes_dlg{};               // notes dialog
-	PolDlg *m_pol{};                       // polarisation calculator
-	AssignDlg *m_assign_dlg{};             // coupling assignments
-	InfoDlg *m_info_dlg{};                 // info dialog
-	GlInfoDlg *m_glinfo_dlg{};             // gl renderer info dialog
-	StructPlotDlg *m_structplot_dlg{};     // magnetic structure plotter
-	GroundStateDlg *m_groundstate_dlg{};   // ground state minimiser
-	TopologyDlg *m_topo_dlg{};             // topological calculations
-	DiffDlg *m_diff_dlg{};                 // differentiation
-	PowderDlg *m_powder_dlg{};             // powder spectra
-	FormFactorDlg *m_ffact_dlg{};          // form factor plotting
-	Dispersion3DDlg *m_disp3d_dlg{};       // 3d dispersion calculations
-	BZPlotDlg *m_bz_dlg{};                 // 3d brillouin zone plotter
-	TrafoCalculator *m_trafos{};           // trafo calculator
-	Plot2DDlg *m_plot2d{};                 // general 2d function plotter
-	Plot3DDlg *m_plot3d{};                 // general 3d function plotter
-	BZDlg *m_bz_tool{};                    // 3d brillouin zone tool
-	SgBrowserDlg *m_sg_browser{};          // space group browser
+	QDialog *m_settings_dlg{};                // settings dialog
+	TableImportDlg *m_table_import_dlg{};     // table import dialog
+	MatrixElemsDlg *m_matrixelems_dlg{};      // dialog to choose matrix elements
+	NotesDlg *m_notes_dlg{};                  // notes dialog
+	PolDlg *m_pol{};                          // polarisation calculator
+	AssignDlg *m_assign_dlg{};                // coupling assignments
+	InfoDlg *m_info_dlg{};                    // info dialog
+	GlInfoDlg *m_glinfo_dlg{};                // gl renderer info dialog
+	StructPlotDlg *m_structplot_dlg{};        // magnetic structure plotter
+	GroundStateDlg *m_groundstate_dlg{};      // ground state minimiser
+	TopologyDlg *m_topo_dlg{};                // topological calculations
+	DiffDlg *m_diff_dlg{};                    // differentiation
+	PowderDlg *m_powder_dlg{};                // powder spectra
+	FormFactorDlg *m_ffact_dlg{};             // form factor plotting
+	Dispersion3DDlg *m_disp3d_dlg{};          // 3d dispersion calculations
+	BZPlotDlg *m_bz_dlg{};                    // 3d brillouin zone plotter
+
+	// tools
+	TrafoCalculator *m_trafos{};              // trafo calculator
+	Plot2DDlg *m_plot2d{};                    // general 2d function plotter
+	Plot3DDlg *m_plot3d{};                    // general 3d function plotter
+	BZDlg *m_bz_tool{};                       // 3d brillouin zone tool
+	StructFactDlg *m_structfact_tool{};       // nuclear structure factor tool
+	MagStructFactDlg *m_magstructfact_tool{}; // magnetic structure factor tool
+	SgBrowserDlg *m_sg_browser{};             // space group browser
 
 
 protected:

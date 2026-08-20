@@ -38,24 +38,15 @@
 
 
 
-static std::unique_ptr<QApplication> setup_app(int argc, char** argv)
-{
-	tl2::set_gl_format(true, _GL_MAJ_VER, _GL_MIN_VER);
-	//QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL);
-
-	// application
-	auto app = std::make_unique<QApplication>(argc, argv);
-	QApplication::setApplicationName("magpie");
-	QApplication::setApplicationVersion(MAGPIE_VER);
-	QApplication::addLibraryPath(QString(".") + QDir::separator() + "Qt_Plugins");
-	QApplication::addLibraryPath(QApplication::applicationDirPath() + QDir::separator() + ".." +
-		QDir::separator() + "Libraries" + QDir::separator() + "Qt_Plugins");
-
-	// re-set locales
+#define SETUP_MAGPIE_APP                                        \
+	tl2::set_gl_format(true, _GL_MAJ_VER, _GL_MIN_VER);         \
+	auto app = std::make_unique<QApplication>(argc, argv);      \
+	QApplication::setApplicationName("magpie");                 \
+	QApplication::setApplicationVersion(MAGPIE_VER);            \
+	QApplication::addLibraryPath(QString(".") + QDir::separator() + "Qt_Plugins");                \
+	QApplication::addLibraryPath(QApplication::applicationDirPath() + QDir::separator() + ".." +  \
+		QDir::separator() + "Libraries" + QDir::separator() + "Qt_Plugins");                      \
 	tl2::set_locales();
-
-	return app;
-}
 
 
 
@@ -66,7 +57,7 @@ int gui_main(int argc, char** argv, const std::string& model_file,
 	const std::optional<t_vec3_real>& Qi, const std::optional<t_vec3_real>& Qf,
 	t_size num_Q_pts)
 {
-	auto app = setup_app(argc, argv);
+	SETUP_MAGPIE_APP
 
 	// main window
 	auto magdyn = std::make_unique<MagDynDlg>(nullptr);
@@ -98,15 +89,15 @@ int gui_main(int argc, char** argv, const std::string& model_file,
  */
 int gui_main_bz(int argc, char** argv, const std::string& cfg_file)
 {
-	auto app = setup_app(argc, argv);
+	SETUP_MAGPIE_APP
 
 	// main window
-	auto dlg = std::make_unique<BZDlg>(nullptr);
-	dlg->show();
+	auto bz = std::make_unique<BZDlg>(nullptr);
+	bz->show();
 
 	// if a configuration file is given, load it
 	if(cfg_file != "")
-		dlg->Load(cfg_file.c_str(), false);
+		bz->Load(cfg_file.c_str(), false);
 
 	return app->exec();
 }
@@ -118,7 +109,7 @@ int gui_main_bz(int argc, char** argv, const std::string& cfg_file)
  */
 int gui_main_structfact(int argc, char** argv, const std::string& cfg_file)
 {
-	auto app = setup_app(argc, argv);
+	SETUP_MAGPIE_APP
 
 	// main window
 	auto dlg = std::make_unique<StructFactDlg>(nullptr);
@@ -138,7 +129,7 @@ int gui_main_structfact(int argc, char** argv, const std::string& cfg_file)
  */
 int gui_main_magstructfact(int argc, char** argv, const std::string& cfg_file)
 {
-	auto app = setup_app(argc, argv);
+	SETUP_MAGPIE_APP
 
 	// main window
 	auto dlg = std::make_unique<MagStructFactDlg>(nullptr);
