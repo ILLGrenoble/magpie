@@ -52,32 +52,6 @@
 #include "libs/defs.h"
 
 
-// columns of Fourier components table
-enum : int
-{
-	COL_NAME = 0,
-	COL_X, COL_Y, COL_Z,                // position
-	COL_M_MAG,                          // scale factor of FC
-	COL_ReM_X, COL_ReM_Y, COL_ReM_Z,    // fourier components
-	COL_ImM_X, COL_ImM_Y, COL_ImM_Z,
-	COL_RAD,                            // drawing radius
-	COL_COL,                            // colour
-
-	NUM_COLS
-};
-
-
-// columns of propagation vectors table
-enum : int
-{
-	PROP_COL_NAME = 0,
-	PROP_COL_X, PROP_COL_Y, PROP_COL_Z, // propagation direction
-	PROP_COL_CONJ,                      // conjugate fourier component for this propagation ve>
-
-	PROP_NUM_COLS
-};
-
-
 using t_real_gl = tl2::t_real_gl;
 using t_vec2_gl = tl2::t_vec2_gl;
 using t_vec3_gl = tl2::t_vec3_gl;
@@ -89,35 +63,64 @@ extern t_real g_eps;
 extern int g_prec;
 
 
-struct PowderLine
-{
-	t_real Q{};
-	t_real I{};
-	std::size_t num_peaks = 0;
-	std::string peaks;
-};
-
-
-struct NuclPos
-{
-	// physically meaningful data
-	t_real pos[3];		// position
-	t_cplx MAbs{1};		// magnitude of Fourier components
-	t_real ReM[3];		// real part of Fourier components
-	t_real ImM[3];		// imag part of Fourier components
-
-	// cosmetic data
-	std::string name;
-	std::string col{"#ff0000"};
-	t_real scale{1};	// scaling of Fourier components (only for drawing)
-};
-
-
 class MagStructFactDlg : public QDialog
 {
 public:
+	// columns of Fourier components table
+	enum : int
+	{
+		COL_NAME = 0,
+		COL_X, COL_Y, COL_Z,                // position
+		COL_M_MAG,                          // scale factor of FC
+		COL_ReM_X, COL_ReM_Y, COL_ReM_Z,    // fourier components
+		COL_ImM_X, COL_ImM_Y, COL_ImM_Z,
+		COL_RAD,                            // drawing radius
+		COL_COL,                            // colour
+
+		NUM_COLS
+	};
+
+
+	// columns of propagation vectors table
+	enum : int
+	{
+		PROP_COL_NAME = 0,
+		PROP_COL_X, PROP_COL_Y, PROP_COL_Z, // propagation direction
+		PROP_COL_CONJ,                      // conjugate fourier component for this propagation ve>
+
+		PROP_NUM_COLS
+	};
+
+
+	struct PowderLine
+	{
+		t_real Q{};
+		t_real I{};
+		std::size_t num_peaks = 0;
+		std::string peaks;
+	};
+
+
+	struct NuclPos
+	{
+		// physically meaningful data
+		t_real pos[3];		// position
+		t_cplx MAbs{1};		// magnitude of Fourier components
+		t_real ReM[3];		// real part of Fourier components
+		t_real ImM[3];		// imag part of Fourier components
+
+		// cosmetic data
+		std::string name;
+		std::string col{"#ff0000"};
+		t_real scale{1};	// scaling of Fourier components (only for drawing)
+	};
+
+
+public:
 	MagStructFactDlg(QWidget* pParent = nullptr);
 	virtual ~MagStructFactDlg() = default;
+
+	bool Load(const QString& filename);
 
 
 protected:
@@ -193,7 +196,6 @@ protected:
 	void Add3DItem(int row=-1);
 	void Sync3DItem(int row=-1);
 
-	bool Load(const QString& filename);
 	void Load();
 
 	bool Save(const QString& filename);

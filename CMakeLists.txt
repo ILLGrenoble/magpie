@@ -79,10 +79,10 @@ if(BUILD_MODULES)
 	add_subdirectory(tools/cif2xml)
 
 	# nuclear and magnetic structure factor tools
-	message("\n================================================================================")
-	message("Configuring structfact...")
-	message("================================================================================")
-	add_subdirectory(tools/structfact)
+	#message("\n================================================================================")
+	#message("Configuring structfact...")
+	#message("================================================================================")
+	#add_subdirectory(tools/structfact)
 
 
 	if(NOT ONLY_BUILD_FINISHED)

@@ -1241,6 +1241,27 @@ requires is_vec<t_vec_dst> && is_vec<t_vec_src>
 
 
 /**
+ * converts vector containers of different value types at a given size
+ */
+template<class t_vec_dst, class t_vec_src>
+t_vec_dst convert(const t_vec_src& vec, decltype(vec.size()) size)
+requires is_vec<t_vec_dst> && is_vec<t_vec_src>
+{
+	using t_idx = decltype(vec.size());
+	t_vec_dst vecdst = create<t_vec_dst>(size);
+	const t_idx vecdst_size = (t_idx)vecdst.size();
+	const t_idx eff_size = std::min(vecdst_size, size);
+
+	for(t_idx i = 0; i < eff_size; ++i)
+		vecdst[i] = static_cast<typename t_vec_dst::value_type>(vec[i]);
+	for(t_idx i = eff_size; i < vecdst_size; ++i)
+		vecdst[i] = typename t_vec_dst::value_type{};
+
+	return vecdst;
+}
+
+
+/**
  * converts a container of objects
  */
 template<class t_obj_dst, class t_obj_src, template<class...> class t_cont>
@@ -1252,6 +1273,23 @@ requires (is_vec<t_obj_dst> || is_mat<t_obj_dst>) && (is_vec<t_obj_src> || is_ma
 
 	for(const t_obj_src& src_obj : src_objs)
 		dst_objs.emplace_back(tl2::convert<t_obj_dst, t_obj_src>(src_obj));
+
+	return dst_objs;
+}
+
+
+/**
+ * converts a container of objects of a given size
+ */
+template<class t_obj_dst, class t_obj_src, template<class...> class t_cont>
+t_cont<t_obj_dst> convert(const t_cont<t_obj_src>& src_objs, std::size_t size)
+requires (is_vec<t_obj_dst> || is_mat<t_obj_dst>) && (is_vec<t_obj_src> || is_mat<t_obj_src>)
+{
+	t_cont<t_obj_dst> dst_objs;
+	dst_objs.reserve(src_objs.size());
+
+	for(const t_obj_src& src_obj : src_objs)
+		dst_objs.emplace_back(tl2::convert<t_obj_dst, t_obj_src>(src_obj, size));
 
 	return dst_objs;
 }

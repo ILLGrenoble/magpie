@@ -483,7 +483,7 @@ void MagStructFactDlg::GenerateFromSG()
 /**
  * reads nuclei positions from table
  */
-std::vector<NuclPos> MagStructFactDlg::GetNuclei() const
+std::vector<MagStructFactDlg::NuclPos> MagStructFactDlg::GetNuclei() const
 {
 	std::vector<NuclPos> vec;
 

@@ -603,13 +603,13 @@ void MagDynDlg::CalcBZ()
 	// draw brillouin zone cut
 	if(m_bzscene)
 	{
-		auto peaks_on_plane_rlu = tl2::convert<t_vec3_real>(m_bz.GetPeaksOnPlane(false));
+		auto peaks_on_plane_rlu = tl2::convert<t_vec3_real>(m_bz.GetPeaksOnPlane(false), 3);
 
 		m_bzscene->SetEps(g_eps);
 		m_bzscene->SetPrecGui(g_prec_gui);
 		m_bzscene->ClearAll();
 		m_bzscene->AddCut(m_bz.GetConvertedCutLines<t_vec3_real>(false));
-		m_bzscene->AddPeaks(tl2::convert<t_vec3_real>(m_bz.GetPeaksOnPlane(true)), &peaks_on_plane_rlu);
+		m_bzscene->AddPeaks(tl2::convert<t_vec3_real>(m_bz.GetPeaksOnPlane(true), 3), &peaks_on_plane_rlu);
 
 		m_bzview->Centre();
 	}
@@ -684,8 +684,8 @@ void MagDynDlg::ReducePathBZ()
 	if(closest.size() == 0)
 		return;
 
-	Q_start -= tl2::convert<t_vec3_real>(closest[0]);
-	Q_end -= tl2::convert<t_vec3_real>(closest[0]);
+	Q_start -= tl2::convert<t_vec3_real>(closest[0], 3);
+	Q_end -= tl2::convert<t_vec3_real>(closest[0], 3);
 
 	SetCoordinates(Q_start, Q_end, true);
 }

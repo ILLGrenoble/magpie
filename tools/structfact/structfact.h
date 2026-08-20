@@ -63,32 +63,35 @@ extern t_real g_eps;
 extern int g_prec;
 
 
-enum : int
-{
-	COL_NAME = 0,
-	COL_SCATLEN_RE,
-	COL_SCATLEN_IM,
-	COL_X, COL_Y, COL_Z,
-	COL_RAD,
-	COL_COL,
-
-	NUM_COLS
-};
-
-
-struct NuclPos
-{
-	std::string name;
-	t_cplx b;
-	t_real pos[3];
-};
-
-
 class StructFactDlg : public QDialog
 {
 public:
+	enum : int
+	{
+		COL_NAME = 0,
+		COL_SCATLEN_RE,
+		COL_SCATLEN_IM,
+		COL_X, COL_Y, COL_Z,
+		COL_RAD,
+		COL_COL,
+
+		NUM_COLS
+	};
+
+
+	struct NuclPos
+	{
+		std::string name;
+		t_cplx b;
+		t_real pos[3];
+	};
+
+
+public:
 	StructFactDlg(QWidget* pParent = nullptr);
 	~StructFactDlg() = default;
+
+	bool Load(const QString& filename);
 
 
 protected:
@@ -143,7 +146,6 @@ protected:
 	void TableItemChanged(QTableWidgetItem *item);
 	void ShowTableContextMenu(const QPoint& pt);
 
-	bool Load(const QString& filename);
 	void Load();
 
 	bool Save(const QString& filename);

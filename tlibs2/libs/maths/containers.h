@@ -706,7 +706,8 @@ public:
 	// _SIZE is a dummy size arguments as the vector is statically sized
 	constexpr vec_static([[__maybe_unused__]] size_type _SIZE, const T* arr = nullptr)
 	{
-		assert(_SIZE == SIZE);
+		assert(_SIZE <= SIZE);
+
 		if(arr)
 			from_array(arr);
 	}
@@ -982,7 +983,7 @@ public:
 		[[__maybe_unused__]] size_type _COLS,
 		const T* arr = nullptr)
 	{
-		assert((ROWS == _ROWS && COLS == _COLS));
+		assert((ROWS >= _ROWS && COLS >= _COLS));
 
 		if(arr)
 			from_array(arr);

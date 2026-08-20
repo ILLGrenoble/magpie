@@ -26,6 +26,7 @@
 #ifndef __MAG_DYN_GUI_H__
 #define __MAG_DYN_GUI_H__
 
+
 #include <QtCore/QSettings>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QSplitter>
@@ -70,7 +71,12 @@
 // tools
 #include "../bz/plot.h"
 #include "../bz/plot_cut.h"
+#include "../bz/bz.h"
 #include "../magsgbrowser/browser.h"
+#include "../structfact/structfact.h"
+#include "../structfact/magstructfact.h"
+#include "tlibs2/tools/plot2d/plot2d.h"
+#include "tlibs2/tools/plot3d/plot3d.h"
 
 #include "gui_defs.h"
 #include "widgets/graph.h"
@@ -92,9 +98,6 @@
 #include "dialogs/notes.h"
 #include "dialogs/infos.h"
 #include "dialogs/glinfos.h"
-#include "tlibs2/tools/plot2d/plot2d.h"
-#include "tlibs2/tools/plot3d/plot3d.h"
-#include "../bz/bz.h"
 
 
 

@@ -52,8 +52,10 @@ namespace algo = boost::algorithm;
 using namespace tl2_ops;
 
 
+#ifndef __MAGDYN_HAS_DEFS__
 t_real g_eps = 1e-6;
 int g_prec = 6;
+#endif
 
 
 // ----------------------------------------------------------------------------

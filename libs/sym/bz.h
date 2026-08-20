@@ -342,8 +342,8 @@ public:
 		for(const auto& cut_line : cut_lines)
 		{
 			vec.emplace_back(std::make_tuple(
-				tl2::convert<t_vec_other>(std::get<0>(cut_line)),
-				tl2::convert<t_vec_other>(std::get<1>(cut_line)),
+				tl2::convert<t_vec_other>(std::get<0>(cut_line), 3),
+				tl2::convert<t_vec_other>(std::get<1>(cut_line), 3),
 				std::get<2>(cut_line)));
 		}
 

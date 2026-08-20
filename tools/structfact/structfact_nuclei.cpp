@@ -390,7 +390,7 @@ void StructFactDlg::GenerateFromSG()
 /**
  * reads nuclei positions from table
  */
-std::vector<NuclPos> StructFactDlg::GetNuclei() const
+std::vector<StructFactDlg::NuclPos> StructFactDlg::GetNuclei() const
 {
 	std::vector<NuclPos> vec;
 

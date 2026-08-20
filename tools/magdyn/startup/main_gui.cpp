@@ -110,3 +110,43 @@ int gui_main_bz(int argc, char** argv, const std::string& cfg_file)
 
 	return app->exec();
 }
+
+
+
+/**
+ * starts the nuclear structure factor gui program
+ */
+int gui_main_structfact(int argc, char** argv, const std::string& cfg_file)
+{
+	auto app = setup_app(argc, argv);
+
+	// main window
+	auto dlg = std::make_unique<StructFactDlg>(nullptr);
+	dlg->show();
+
+	// if a configuration file is given, load it
+	if(cfg_file != "")
+		dlg->Load(cfg_file.c_str());
+
+	return app->exec();
+}
+
+
+
+/**
+ * starts the magnetic structure factor gui program
+ */
+int gui_main_magstructfact(int argc, char** argv, const std::string& cfg_file)
+{
+	auto app = setup_app(argc, argv);
+
+	// main window
+	auto dlg = std::make_unique<MagStructFactDlg>(nullptr);
+	dlg->show();
+
+	// if a configuration file is given, load it
+	if(cfg_file != "")
+		dlg->Load(cfg_file.c_str());
+
+	return app->exec();
+}

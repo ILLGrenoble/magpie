@@ -49,13 +49,25 @@ namespace pt = boost::property_tree;
 static int gui_main(int, char**, const std::string&,
 	const std::optional<t_vec3_real>&, const std::optional<t_vec3_real>&, t_size)
 {
-	std::cerr << "Error: The GUI is not available in this version." << std::endl;
+	std::cerr << "Error: The Magpie GUI is not available in this version." << std::endl;
 	return -1;
 }
 
 static int gui_main_bz(int, char**, const std::string&)
 {
-	std::cerr << "Error: The GUI is not available in this version." << std::endl;
+	std::cerr << "Error: The bz tool is not available in this version." << std::endl;
+	return -1;
+}
+
+static int gui_main_structfact(int, char**, const std::string&)
+{
+	std::cerr << "Error: The nuclear structure factor tool is not available in this version." << std::endl;
+	return -1;
+}
+
+static int gui_main_magstructfact(int, char**, const std::string&)
+{
+	std::cerr << "Error: The magnetic structure factor tool is not available in this version." << std::endl;
 	return -1;
 }
 
@@ -65,6 +77,8 @@ extern int gui_main(int argc, char** argv, const std::string& model_file,
 	const std::optional<t_vec3_real>& Qi, const std::optional<t_vec3_real>& Qf, t_size num_Q_pts);
 
 extern int gui_main_bz(int argc, char** argv, const std::string& cfg_file);
+extern int gui_main_structfact(int argc, char** argv, const std::string& cfg_file);
+extern int gui_main_magstructfact(int argc, char** argv, const std::string& cfg_file);
 
 #endif
 
@@ -354,6 +368,8 @@ int main(int argc, char** argv)
 		bool as_bin = false;
 		bool no_weights = false;
 		bool bz_tool = false;
+		bool structfact_tool = false;
+		bool magstructfact_tool = false;
 		//t_real Emin = 1., Emax = -1.;
 
 #ifdef DONT_USE_QT
@@ -372,6 +388,8 @@ int main(int argc, char** argv)
 #ifndef DONT_USE_QT
 			("cli,c", args::bool_switch(&use_cli), "use command-line interface")
 			("bz", args::bool_switch(&bz_tool), "start the Brillouin zone tool")
+			("structfact", args::bool_switch(&structfact_tool), "start the nuclear structure factor tool")
+			("magstructfact", args::bool_switch(&magstructfact_tool), "start the magnetic structure factor tool")
 #endif
 			("silent", args::bool_switch(&silent), "disable console output")
 			("input,i", args::value(&model_file), "input magnetic model file (.magpie)")
@@ -439,6 +457,22 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 				return 0;
 
 			return gui_main_bz(argc, argv, model_file);
+		}
+
+		if(structfact_tool)
+		{
+			if(healthcheck)  // TODO
+				return 0;
+
+			return gui_main_structfact(argc, argv, model_file);
+		}
+
+		if(magstructfact_tool)
+		{
+			if(healthcheck)  // TODO
+				return 0;
+
+			return gui_main_magstructfact(argc, argv, model_file);
 		}
 
 

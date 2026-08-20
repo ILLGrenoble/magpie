@@ -54,6 +54,7 @@ if(USE_NATIVE)
 endif()
 
 #add_compile_options(-D__MAGDYN_DEBUG_OUTPUT__)
+add_compile_options(-D__MAGDYN_HAS_DEFS__)
 # -----------------------------------------------------------------------------
 
 
@@ -254,6 +255,15 @@ if(USE_QT)
 		../bz/bz_conf.cpp ../bz/bz_conf.h
 		../bz/globals.cpp ../bz/globals.h
 		../bz/bz_formulas.cpp
+
+		# structure factor tools
+		../structfact/structfact.cpp ../structfact/structfact_file.cpp
+		../structfact/structfact_plot.cpp
+		../structfact/structfact_findsg.cpp ../structfact/structfact_nuclei.cpp
+		../structfact/structfact.h
+		../structfact/magstructfact.cpp ../structfact/magstructfact_file.cpp
+		../structfact/magstructfact_plot.cpp
+		../structfact/magstructfact_nuclei.cpp ../structfact/magstructfact.h
 
 		# sg tool
 		../magsgbrowser/browser.cpp ../magsgbrowser/browser.h
