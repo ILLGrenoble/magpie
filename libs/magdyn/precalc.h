@@ -263,8 +263,6 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 
 		// defaults
 		term.dist_calc = tl2::zero<t_vec3_real>(3);  // distance
-		term.dmi_calc = tl2::zero<t_vec3>(3);        // dmi interaction
-		term.Jgen_calc = tl2::zero<t_mat33>(3, 3);   // general exchange interaction
 
 		// get site indices
 		term.site1_calc = GetMagneticSiteIndex(term.site1);
@@ -313,6 +311,33 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 			MAGDYN_CERR_OPT << "Magdyn error: Parsing J term \""
 				<< term.J << "\"." << std::endl;
 		}
+
+		// check if dmi is enabled
+		auto has_dmi = [&term]() -> bool
+		{
+			for(std::uint8_t i = 0; i < 3; ++i)
+				if(term.dist[i] != "")
+					return true;
+			return false;
+		};
+
+		// check if the general J matrix is enabled
+		auto has_Jgen = [&term]() -> bool
+		{
+			for(std::uint8_t i = 0; i < 3; ++i)
+				for(std::uint8_t j = 0; j < 3; ++j)
+					if(term.Jgen[i][j] != "")
+						return true;
+			return false;
+		};
+
+		// enable dmi
+		if(has_dmi())
+			term.dmi_calc  = tl2::zero<t_vec3>(3);
+
+		// enable general J
+		if(has_Jgen())
+			term.Jgen_calc = tl2::zero<t_mat33>(3, 3);
 
 		for(std::uint8_t i = 0; i < 3; ++i)
 		{
