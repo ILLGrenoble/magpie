@@ -309,7 +309,8 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 		else
 		{
 			// replacement for the projector at Q = 0,
-			// see the discussion here: https://github.com/SunnySuite/Sunny.jl/pull/131#issuecomment-2254290782
+			//   - see the discussion here: https://github.com/SunnySuite/Sunny.jl/pull/131#issuecomment-2254290782
+			//   - see: ./tlibs2/tests/proj.cpp
 			proj_neutron = tl2::unit<t_mat33>(3, 3) * 2./3.;
 			Q_is_zero = true;
 			//MAGDYN_CERR_OPT << "Magdyn error: Cannot calculate orthogonal projector for Q = 0." << std::endl;
