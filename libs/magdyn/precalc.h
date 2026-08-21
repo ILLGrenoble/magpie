@@ -313,7 +313,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 		}
 
 		// check if dmi is enabled
-		auto has_dmi = [&term]() -> bool
+		auto _has_dmi = [&term]() -> bool
 		{
 			for(std::uint8_t i = 0; i < 3; ++i)
 				if(term.dist[i] != "")
@@ -322,7 +322,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 		};
 
 		// check if the general J matrix is enabled
-		auto has_Jgen = [&term]() -> bool
+		auto _has_Jgen = [&term]() -> bool
 		{
 			for(std::uint8_t i = 0; i < 3; ++i)
 				for(std::uint8_t j = 0; j < 3; ++j)
@@ -331,12 +331,14 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 			return false;
 		};
 
-		// enable dmi
-		if(has_dmi())
-			term.dmi_calc  = tl2::zero<t_vec3>(3);
+		const bool has_dmi = _has_dmi();
+		const bool has_Jgen = _has_Jgen();
 
+		// enable dmi
+		if(has_dmi)
+			term.dmi_calc  = tl2::zero<t_vec3>(3);
 		// enable general J
-		if(has_Jgen())
+		if(has_Jgen)
 			term.Jgen_calc = tl2::zero<t_mat33>(3, 3);
 
 		for(std::uint8_t i = 0; i < 3; ++i)
@@ -358,7 +360,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 			}
 
 			// dmi
-			if(term.dmi[i] != "")
+			if(has_dmi && term.dmi[i] != "")
 			{
 				if(parser.parse_noexcept(term.dmi[i]))
 				{
@@ -373,25 +375,28 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 				}
 			}
 
-			// general exchange interaction
-			for(std::uint8_t j = 0; j < 3; ++j)
+				// general exchange interaction
+			if(has_Jgen)
 			{
-				if(term.Jgen[i][j] == "")
-					continue;
+				for(std::uint8_t j = 0; j < 3; ++j)
+				{
+					if(term.Jgen[i][j] == "")
+						continue;
 
-				if(parser.parse_noexcept(term.Jgen[i][j]))
-				{
-					(*term.Jgen_calc)(i, j) = parser.eval_noexcept();
-				}
-				else
-				{
-					MAGDYN_CERR_OPT << "Magdyn error: Parsing general term \""
-						<< term.Jgen[i][j]
-						<< "\" (indices " << int(i) << ", "
-						<< int(j) << ")" << "." << std::endl;
-				}
-			}
-		}
+					if(parser.parse_noexcept(term.Jgen[i][j]))
+					{
+						(*term.Jgen_calc)(i, j) = parser.eval_noexcept();
+					}
+					else
+					{
+						MAGDYN_CERR_OPT << "Magdyn error: Parsing general term \""
+							<< term.Jgen[i][j]
+							<< "\" (indices " << int(i) << ", "
+							<< int(j) << ")" << "." << std::endl;
+					}
+				}  // j iteration
+			}  // has_Jgen
+		}  // i iteration
 
 		const t_vec3_real& pos1_uc = GetMagneticSite(term.site1_calc).pos_calc;
 		const t_vec3_real& pos2_uc = GetMagneticSite(term.site2_calc).pos_calc;
