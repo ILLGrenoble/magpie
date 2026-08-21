@@ -312,8 +312,8 @@ public:
 
 
 private:
-	std::stack<t_num> m_stack;
-	bool m_debug = false;
+	std::stack<t_num> m_stack{ };
+	bool m_debug{ false };
 };
 
 // ------------------------------------------------------------------------
@@ -327,12 +327,70 @@ template<typename t_num = double>
 class ExprAST
 {
 public:
+	using t_ast = std::shared_ptr<ExprAST<t_num>>;
+
 	virtual ~ExprAST() = default;
 
-	virtual t_num eval(const ExprParser<t_num>&) const = 0;
+	virtual t_num eval(const ExprParser<t_num>*) const = 0;
 	virtual void codegen(std::ostream& ostr) const = 0;
 
-	virtual void print(std::ostream& ostr=std::cout, std::size_t indent=0) const = 0;
+	virtual t_ast optimise(t_ast& pThis) = 0;
+	virtual bool IsConstVal() const = 0;
+
+	virtual void print(std::ostream& ostr = std::cout, std::size_t indent = 0) const = 0;
+};
+
+
+template<typename t_num = double>
+class ExprASTValue : public ExprAST<t_num>
+{
+public:
+	using typename ExprAST<t_num>::t_ast;
+
+	ExprASTValue(t_num val) : m_val{val}
+	{}
+
+	ExprASTValue(const ExprASTValue<t_num>&) = delete;
+	const ExprASTValue<t_num>& operator=(const ExprASTValue<t_num>&) = delete;
+
+	virtual ~ExprASTValue() = default;
+
+	virtual t_num eval(const ExprParser<t_num>*) const override
+	{
+		return m_val;
+	}
+
+	virtual void codegen(std::ostream& ostr) const override
+	{
+		auto op = ExprVM<t_num>::Op::PUSH_VAL;
+
+		ostr.write(reinterpret_cast<const char*>(&op), sizeof(op));
+		ostr.write(reinterpret_cast<const char*>(&m_val), sizeof(m_val));
+	}
+
+	virtual t_ast optimise(t_ast& pThis) override
+	{
+		return pThis;
+	}
+
+	virtual bool IsConstVal() const override
+	{
+		return true;
+	}
+
+	virtual void print(std::ostream& ostr = std::cout, std::size_t indent = 0) const override
+	{
+		for(std::size_t i = 0; i < indent; ++i) ostr << " | ";
+		ostr << "value " << m_val << "\n";
+	}
+
+	void SetValue(const t_num& num)
+	{
+		m_val = num;
+	}
+
+private:
+	t_num m_val{};
 };
 
 
@@ -340,7 +398,9 @@ template<typename t_num = double>
 class ExprASTBinOp : public ExprAST<t_num>
 {
 public:
-	ExprASTBinOp(char op, const std::shared_ptr<ExprAST<t_num>>& left, const std::shared_ptr<ExprAST<t_num>>& right)
+	using typename ExprAST<t_num>::t_ast;
+
+	ExprASTBinOp(char op, const t_ast& left, const t_ast& right)
 		: m_op{op}, m_left{left}, m_right{right}
 	{}
 
@@ -349,7 +409,7 @@ public:
 
 	virtual ~ExprASTBinOp() = default;
 
-	virtual t_num eval(const ExprParser<t_num>& context) const override
+	virtual t_num eval(const ExprParser<t_num>* context) const override
 	{
 #ifdef TL2_USE_THREADS
 		auto fut_left = std::async([this, &context]() { return m_left->eval(context); });
@@ -373,17 +433,42 @@ public:
 		ostr.write(&m_op, sizeof(m_op));
 	}
 
-	virtual void print(std::ostream& ostr=std::cout, std::size_t indent=0) const override
+	virtual t_ast optimise(t_ast& pThis) override
 	{
-		for(std::size_t i=0; i<indent; ++i) ostr << " | ";
+		m_left = m_left->optimise(m_left);
+		m_right = m_right->optimise(m_right);
+
+		if(m_left->IsConstVal() && m_right->IsConstVal())
+		{
+			t_num val_left = m_left->eval(nullptr);
+			t_num val_right = m_right->eval(nullptr);
+			t_num result = expr_binop<t_num>(m_op, val_left, val_right);
+
+			// re-use left node as new result node
+			std::static_pointer_cast<ExprASTValue<t_num>>(m_left)->SetValue(result);
+			m_right = nullptr;
+			return m_left;
+		}
+
+		return pThis;
+	}
+
+	virtual bool IsConstVal() const override
+	{
+		return false;
+	}
+
+	virtual void print(std::ostream& ostr = std::cout, std::size_t indent = 0) const override
+	{
+		for(std::size_t i = 0; i < indent; ++i) ostr << " | ";
 		ostr << "binary operator " << m_op << "\n";
-		m_left->print(ostr, indent+1);
-		m_right->print(ostr, indent+1);
+		m_left->print(ostr, indent + 1);
+		m_right->print(ostr, indent + 1);
 	}
 
 private:
 	char m_op{'+'};
-	std::shared_ptr<ExprAST<t_num>> m_left{}, m_right{};
+	t_ast m_left{}, m_right{};
 };
 
 
@@ -391,7 +476,9 @@ template<typename t_num = double>
 class ExprASTUnOp : public ExprAST<t_num>
 {
 public:
-	ExprASTUnOp(char op, const std::shared_ptr<ExprAST<t_num>>& child)
+	using typename ExprAST<t_num>::t_ast;
+
+	ExprASTUnOp(char op, const t_ast& child)
 		: m_op{op}, m_child{child}
 	{}
 
@@ -400,7 +487,7 @@ public:
 
 	virtual ~ExprASTUnOp() = default;
 
-	virtual t_num eval(const ExprParser<t_num>& context) const override
+	virtual t_num eval(const ExprParser<t_num>* context) const override
 	{
 		const t_num val = m_child->eval(context);
 		return expr_unop<t_num>(m_op, val);
@@ -415,16 +502,38 @@ public:
 		ostr.write(&m_op, sizeof(m_op));
 	}
 
-	virtual void print(std::ostream& ostr=std::cout, std::size_t indent=0) const override
+	virtual t_ast optimise(t_ast& pThis) override
 	{
-		for(std::size_t i=0; i<indent; ++i) ostr << " | ";
+		m_child = m_child->optimise(m_child);
+
+		if(m_child->IsConstVal())
+		{
+			t_num val = m_child->eval(nullptr);
+			t_num result = expr_unop<t_num>(m_op, val);
+
+			// re-use child node as new result node
+			std::static_pointer_cast<ExprASTValue<t_num>>(m_child)->SetValue(result);
+			return m_child;
+		}
+
+		return pThis;
+	}
+
+	virtual bool IsConstVal() const override
+	{
+		return false;
+	}
+
+	virtual void print(std::ostream& ostr = std::cout, std::size_t indent = 0) const override
+	{
+		for(std::size_t i = 0; i < indent; ++i) ostr << " | ";
 		ostr << "unary operator " << m_op << "\n";
-		m_child->print(ostr, indent+1);
+		m_child->print(ostr, indent + 1);
 	}
 
 private:
 	char m_op{'+'};
-	std::shared_ptr<ExprAST<t_num>> m_child{};
+	t_ast m_child{};
 };
 
 
@@ -432,6 +541,8 @@ template<typename t_num = double>
 class ExprASTVar : public ExprAST<t_num>
 {
 public:
+	using typename ExprAST<t_num>::t_ast;
+
 	ExprASTVar(const std::string& name) : m_name{name}
 	{}
 
@@ -440,9 +551,9 @@ public:
 
 	virtual ~ExprASTVar() = default;
 
-	virtual t_num eval(const ExprParser<t_num>& context) const override
+	virtual t_num eval(const ExprParser<t_num>* context) const override
 	{
-		return context.get_var_or_const(m_name);
+		return context->get_var_or_const(m_name);
 	}
 
 	virtual void codegen(std::ostream& ostr) const override
@@ -455,9 +566,19 @@ public:
 		ostr.write(m_name.c_str(), m_name.length());
 	}
 
-	virtual void print(std::ostream& ostr=std::cout, std::size_t indent=0) const override
+	virtual t_ast optimise(t_ast& pThis) override
 	{
-		for(std::size_t i=0; i<indent; ++i) ostr << " | ";
+		return pThis;
+	}
+
+	virtual bool IsConstVal() const override
+	{
+		return false;
+	}
+
+	virtual void print(std::ostream& ostr = std::cout, std::size_t indent = 0) const override
+	{
+		for(std::size_t i = 0; i < indent; ++i) ostr << " | ";
 		ostr << "variable \"" << m_name << "\"\n";
 	}
 
@@ -467,46 +588,12 @@ private:
 
 
 template<typename t_num = double>
-class ExprASTValue : public ExprAST<t_num>
-{
-public:
-	ExprASTValue(t_num val) : m_val{val}
-	{}
-
-	ExprASTValue(const ExprASTValue<t_num>&) = delete;
-	const ExprASTValue<t_num>& operator=(const ExprASTValue<t_num>&) = delete;
-
-	virtual ~ExprASTValue() = default;
-
-	virtual t_num eval(const ExprParser<t_num>&) const override
-	{
-		return m_val;
-	}
-
-	virtual void codegen(std::ostream& ostr) const override
-	{
-		auto op = ExprVM<t_num>::Op::PUSH_VAL;
-
-		ostr.write(reinterpret_cast<const char*>(&op), sizeof(op));
-		ostr.write(reinterpret_cast<const char*>(&m_val), sizeof(m_val));
-	}
-
-	virtual void print(std::ostream& ostr=std::cout, std::size_t indent=0) const override
-	{
-		for(std::size_t i=0; i<indent; ++i) ostr << " | ";
-		ostr << "value " << m_val << "\n";
-	}
-
-private:
-	t_num m_val{};
-};
-
-
-template<typename t_num = double>
 class ExprASTAssign : public ExprAST<t_num>
 {
 public:
-	ExprASTAssign(const std::string& ident, const std::shared_ptr<ExprAST<t_num>>& right)
+	using typename ExprAST<t_num>::t_ast;
+
+	ExprASTAssign(const std::string& ident, const t_ast& right)
 		: m_ident{ident}, m_right{right}
 	{}
 
@@ -515,10 +602,10 @@ public:
 
 	virtual ~ExprASTAssign() = default;
 
-	virtual t_num eval(const ExprParser<t_num>& context) const override
+	virtual t_num eval(const ExprParser<t_num>* context) const override
 	{
 		const t_num val_right = m_right->eval(context);
-		context.register_var(m_ident, val_right);
+		context->register_var(m_ident, val_right);
 		return val_right;
 	}
 
@@ -534,16 +621,26 @@ public:
 		ostr.write(m_ident.c_str(), len);
 	}
 
-	virtual void print(std::ostream& ostr=std::cout, std::size_t indent=0) const override
+	virtual t_ast optimise(t_ast& pThis) override
 	{
-		for(std::size_t i=0; i<indent; ++i) ostr << " | ";
+		return pThis;
+	}
+
+	virtual bool IsConstVal() const override
+	{
+		return false;
+	}
+
+	virtual void print(std::ostream& ostr = std::cout, std::size_t indent = 0) const override
+	{
+		for(std::size_t i = 0; i < indent; ++i) ostr << " | ";
 		ostr << "assignment \"" << m_ident << "\" = " << "\n";
-		m_right->print(ostr, indent+1);
+		m_right->print(ostr, indent + 1);
 	}
 
 private:
 	std::string m_ident{};
-	std::shared_ptr<ExprAST<t_num>> m_right{};
+	t_ast m_right{};
 };
 
 
@@ -551,18 +648,20 @@ template<typename t_num = double>
 class ExprASTCall : public ExprAST<t_num>
 {
 public:
+	using typename ExprAST<t_num>::t_ast;
+
 	ExprASTCall(const std::string& name)
 		: m_name{name}
 	{}
 
-	ExprASTCall(const std::string& name, const std::shared_ptr<ExprAST<t_num>>& arg1)
+	ExprASTCall(const std::string& name, const t_ast& arg1)
 		: m_name{name}
 	{
 		m_args.push_back(arg1);
 	}
 
 	ExprASTCall(const std::string& name,
-		const std::shared_ptr<ExprAST<t_num>>& arg1, const std::shared_ptr<ExprAST<t_num>>& arg2)
+		const t_ast& arg1, const t_ast& arg2)
 		: m_name{name}
 	{
 		m_args.push_back(arg1);
@@ -574,15 +673,15 @@ public:
 
 	virtual ~ExprASTCall() = default;
 
-	virtual t_num eval(const ExprParser<t_num>& context) const override
+	virtual t_num eval(const ExprParser<t_num>* context) const override
 	{
 		if(m_args.size() == 0)
 		{
-			return context.call_func0(m_name);
+			return context->call_func0(m_name);
 		}
 		else if(m_args.size() == 1)
 		{
-			return context.call_func1(m_name, m_args[0]->eval(context));
+			return context->call_func1(m_name, m_args[0]->eval(context));
 		}
 		else if(m_args.size() == 2)
 		{
@@ -598,7 +697,7 @@ public:
 			const t_num arg1 = m_args[1]->eval(context);
 #endif
 
-			return context.call_func2(m_name, arg0, arg1);
+			return context->call_func2(m_name, arg0, arg1);
 		}
 
 		throw std::runtime_error("Invalid function call.");
@@ -619,18 +718,28 @@ public:
 		ostr.write(m_name.c_str(), len);
 	}
 
-	virtual void print(std::ostream& ostr=std::cout, std::size_t indent=0) const override
+	virtual t_ast optimise(t_ast& pThis) override
 	{
-		for(std::size_t i=0; i<indent; ++i) ostr << " | ";
+		return pThis;
+	}
+
+	virtual bool IsConstVal() const override
+	{
+		return false;
+	}
+
+	virtual void print(std::ostream& ostr = std::cout, std::size_t indent = 0) const override
+	{
+		for(std::size_t i = 0; i < indent; ++i) ostr << " | ";
 		ostr << "function call \"" << m_name << "\"\n";
 
 		for(const auto& arg : m_args)
-			arg->print(ostr, indent+1);
+			arg->print(ostr, indent + 1);
 	}
 
 private:
 	std::string m_name{};
-	std::vector<std::shared_ptr<ExprAST<t_num>>> m_args{};
+	std::vector<t_ast> m_args{};
 };
 
 
@@ -647,6 +756,9 @@ class ExprParser
 
 
 public:
+	using t_ast = typename ExprAST<t_num>::t_ast;
+
+
 	ExprParser(bool debug = false)
 		: m_ok{false}, m_exprstr{}, m_debug{debug},
 		  m_asts{}, m_codes{}, m_vars{}, m_consts{},
@@ -671,7 +783,7 @@ public:
 	/**
 	 * parse a given string into an ast (and generate code)
 	 */
-	bool parse(const std::string& expr, bool codegen = true)
+	bool parse(const std::string& expr, bool codegen = true, bool optimise = true)
 	{
 		clear();
 
@@ -695,8 +807,8 @@ public:
 				return false;
 			}
 
+			// parse
 			t_ast ast = plus_term();
-			m_asts.push_back(ast);
 
 			// check if there would be are more tokens available?
 			next_lookahead();
@@ -708,6 +820,18 @@ public:
 			m_ok = !!ast;
 			if(m_ok)
 			{
+				if(optimise)
+				{
+					//std::cout << "before optimisation: " << std::endl;
+					//ast->print();
+
+					ast = ast->optimise(ast);
+
+					//std::cout << "\nafter optimisation: " << std::endl;
+					//ast->print();
+					//std::cout << std::endl;
+				}
+
 				if(m_debug)
 				{
 					ast->print(std::cout);
@@ -735,6 +859,8 @@ public:
 				if(m_invalid_0)
 					ast = std::make_shared<ExprASTValue<t_num>>(t_num{});
 			}
+
+			m_asts.push_back(ast);
 
 			if(m_unknown_vars.size())
 				m_ok = false;
@@ -830,7 +956,7 @@ public:
 						<< std::endl;
 				}
 
-				result = ast->eval(*this);
+				result = ast->eval(this);
 			}
 
 			++ast_idx;
@@ -1188,7 +1314,7 @@ protected:
 	 * +,- terms
 	 * (lowest precedence, 1)
 	 */
-	std::shared_ptr<ExprAST<t_num>> plus_term()
+	t_ast plus_term()
 	{
 		// plus_term -> mul_term plus_term_rest
 		if(m_lookahead == '(' || m_lookahead == (int)Token::TOK_NUM || m_lookahead == (int)Token::TOK_IDENT)
@@ -1224,7 +1350,7 @@ protected:
 	}
 
 
-	std::shared_ptr<ExprAST<t_num>> plus_term_rest(const std::shared_ptr<ExprAST<t_num>>& arg)
+	t_ast plus_term_rest(const t_ast& arg)
 	{
 		// plus_term_rest -> '+' mul_term plus_term_rest
 		if(m_lookahead == '+')
@@ -1261,7 +1387,7 @@ protected:
 	 * *,/,% terms
 	 * (precedence 2)
 	 */
-	std::shared_ptr<ExprAST<t_num>> mul_term()
+	t_ast mul_term()
 	{
 		// mul_term -> pow_term mul_term_rest
 		if(m_lookahead == '(' || m_lookahead == (int)Token::TOK_NUM || m_lookahead == (int)Token::TOK_IDENT)
@@ -1278,7 +1404,7 @@ protected:
 	}
 
 
-	std::shared_ptr<ExprAST<t_num>> mul_term_rest(const std::shared_ptr<ExprAST<t_num>>& arg)
+	t_ast mul_term_rest(const t_ast& arg)
 	{
 		// mul_term_rest -> '*' pow_term mul_term_rest
 		if(m_lookahead == '*')
@@ -1327,7 +1453,7 @@ protected:
 	 * ^ terms
 	 * (precedence 3)
 	 */
-	std::shared_ptr<ExprAST<t_num>> pow_term()
+	t_ast pow_term()
 	{
 		// pow_term -> factor pow_term_rest
 		if(m_lookahead == '(' || m_lookahead == (int)Token::TOK_NUM || m_lookahead == (int)Token::TOK_IDENT)
@@ -1344,7 +1470,7 @@ protected:
 	}
 
 
-	std::shared_ptr<ExprAST<t_num>> pow_term_rest(const std::shared_ptr<ExprAST<t_num>>& arg)
+	t_ast pow_term_rest(const t_ast& arg)
 	{
 		// pow_term_rest -> '^' factor pow_term_rest
 		if(m_lookahead == '^')
@@ -1374,7 +1500,7 @@ protected:
 	 * () terms, real factor or identifier
 	 * (highest precedence, 4)
 	 */
-	std::shared_ptr<ExprAST<t_num>> factor()
+	t_ast factor()
 	{
 		// factor -> '(' plus_term ')'
 		if(m_lookahead == '(')
@@ -1584,7 +1710,6 @@ private:
 	std::unordered_set<std::string> m_unknown_vars{};
 
 	// ast root
-	using t_ast = std::shared_ptr<ExprAST<t_num>>;
 	std::vector<t_ast> m_asts{};
 
 	// generated code
