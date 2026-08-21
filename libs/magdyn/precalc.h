@@ -49,37 +49,36 @@
  */
 MAGDYN_TEMPL void MAGDYN_INST::CalcExternalField()
 {
-	bool use_field_rot =
+	const bool use_field_rot =
 		(!tl2::equals_0<t_real>(m_field.mag, m_eps) || m_field.align_spins)
 		&& !!m_field.dir;
+	if(!use_field_rot)
+		return;
 
-	if(use_field_rot)
+	// rotate field to [001] direction
+	m_rot_field = tl2::convert<t_mat33>(
+		tl2::trans<t_mat33_real>(
+			tl2::rotation<t_mat33_real, t_vec3_real>(
+				-*m_field.dir, m_zdir, &m_rotaxis, m_eps)));
+
+	// rotate -field to [001] direction
+	if(m_field.keep_signs)
 	{
-		// rotate field to [001] direction
-		m_rot_field = tl2::convert<t_mat33>(
+		m_rot_negfield = tl2::convert<t_mat33>(
 			tl2::trans<t_mat33_real>(
 				tl2::rotation<t_mat33_real, t_vec3_real>(
-					-*m_field.dir, m_zdir, &m_rotaxis, m_eps)));
-
-		// rotate -field to [001] direction
-		if(m_field.keep_signs)
-		{
-			m_rot_negfield = tl2::convert<t_mat33>(
-				tl2::trans<t_mat33_real>(
-					tl2::rotation<t_mat33_real, t_vec3_real>(
-						*m_field.dir, m_zdir, &m_rotaxis, m_eps)));
-		}
+					*m_field.dir, m_zdir, &m_rotaxis, m_eps)));
+	}
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
-		std::cout << "Field rotation from:\n";
-		tl2::niceprint(std::cout, -(*m_field.dir), 1e-4, 4);
-		std::cout << "\nto:\n";
-		tl2::niceprint(std::cout, m_zdir, 1e-4, 4);
-		std::cout << "\nmatrix:\n";
-		tl2::niceprint(std::cout, m_rot_field, 1e-4, 4);
-		std::cout << std::endl;
+	std::cout << "Field rotation from:\n";
+	tl2::niceprint(std::cout, -(*m_field.dir), 1e-4, 4);
+	std::cout << "\nto:\n";
+	tl2::niceprint(std::cout, m_zdir, 1e-4, 4);
+	std::cout << "\nmatrix:\n";
+	tl2::niceprint(std::cout, m_rot_field, 1e-4, 4);
+	std::cout << std::endl;
 #endif
-	}
 }
 
 
@@ -263,6 +262,8 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 
 		// defaults
 		term.dist_calc = tl2::zero<t_vec3_real>(3);  // distance
+		term.dmi_calc  = std::nullopt;
+		term.Jgen_calc = std::nullopt;
 
 		// get site indices
 		term.site1_calc = GetMagneticSiteIndex(term.site1);
