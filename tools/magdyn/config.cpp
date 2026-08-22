@@ -35,7 +35,7 @@ namespace pt = boost::property_tree;
 #include <cstdlib>
 
 #include "tlibs2/libs/str.h"
-#include "libs/rnd.h"
+#include "libs/helpers.h"
 
 
 // precision
@@ -258,6 +258,10 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 			m_weight_min->setValue(*optVal);
 		if(auto optVal = magdyn.get_optional<t_real>("config.weight_max"))
 			m_weight_max->setValue(*optVal);
+		if(auto optVal = magdyn.get_optional<bool>("config.plot_total"))
+			m_plot_total->setChecked(*optVal);
+		if(auto optVal = magdyn.get_optional<bool>("config.plot_bands"))
+			m_plot_bands->setChecked(*optVal);
 		if(auto optVal = magdyn.get_optional<bool>("config.plot_channels"))
 			m_plot_channels->setChecked(*optVal);
 		if(auto optVal = magdyn.get_optional<bool>("config.plot_degeneracies"))
@@ -868,6 +872,8 @@ bool MagDynDlg::Save(const QString& filename)
 		magdyn.put<t_real>("config.weight_scale", m_weight_scale->value());
 		magdyn.put<t_real>("config.weight_min", m_weight_min->value());
 		magdyn.put<t_real>("config.weight_max", m_weight_max->value());
+		magdyn.put<bool>("config.plot_total", m_plot_total->isChecked());
+		magdyn.put<bool>("config.plot_bands", m_plot_bands->isChecked());
 		magdyn.put<bool>("config.plot_channels", m_plot_channels->isChecked());
 		magdyn.put<bool>("config.plot_degeneracies", m_plot_degeneracies->isChecked());
 		magdyn.put<bool>("config.plot_weight_as_pointsize", m_plot_weights_pointsize->isChecked());

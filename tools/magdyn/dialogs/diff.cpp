@@ -44,6 +44,7 @@ namespace asio = boost::asio;
 
 #include "tlibs2/libs/algos.h"
 #include "tlibs2/libs/str.h"
+#include "libs/helpers.h"
 
 
 
@@ -583,16 +584,8 @@ void DiffDlg::PlotGroupVelocity(bool clear_settings)
 
 		// colour for this magnon band
 		QPen pen = curve->pen();
-		int col[3] = {
-			num_effective_bands <= 1 ? 0xff
-				: int(std::lerp(1., 0., t_real(effective_band) / t_real(num_effective_bands - 1)) * 255.),
-			0x00,
-			num_effective_bands <= 1 ? 0x00
-				: int(std::lerp(0., 1., t_real(effective_band) / t_real(num_effective_bands - 1)) * 255.),
-		};
-
 		//tl2::get_colour<int>(g_colPlot, col);
-		const QColor colFull(col[0], col[1], col[2]);
+		const QColor colFull = get_linear_colour<QColor, t_real>(effective_band, num_effective_bands);
 		pen.setColor(colFull);
 		pen.setWidthF(2.);
 

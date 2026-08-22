@@ -1,5 +1,5 @@
 /**
- * random values
+ * helpers
  * @author Tobias Weber <tweber@ill.fr>
  * @date 14-mar-2026
  * @license GPLv3, see 'LICENSE' file
@@ -32,6 +32,7 @@
 #include <random>
 
 
+
 template<class t_str = std::string>
 t_str get_random_colour()
 {
@@ -45,6 +46,22 @@ t_str get_random_colour()
 		<< std::setw(2) << std::setfill('0') << dist(rndgen);
 
 	return ostrcol.str();
+}
+
+
+
+template<class t_colour, class t_real>
+t_colour get_linear_colour(std::size_t band_idx, std::size_t num_bands)
+{
+	int col[3] = {
+		num_bands <= 1 ? 0xff
+			: int(std::lerp(1., 0., t_real(band_idx) / t_real(num_bands - 1)) * 255.),
+		0x00,
+		num_bands <= 1 ? 0x00
+			: int(std::lerp(0., 1., t_real(band_idx) / t_real(num_bands - 1)) * 255.),
+	};
+
+	return t_colour{ col[0], col[1], col[2] };
 }
 
 

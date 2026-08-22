@@ -324,11 +324,24 @@ void MagDynDlg::CreateMenuBar()
 
 	// dispersion plot menu
 	m_menuDisp = new QMenu("Dispersion Plot", m_menu);
-	m_plot_channels = new QAction("Plot Channels", m_menuDisp);
+	QMenu *menuPlotMode = new QMenu("Plot Mode", m_menuDisp);
+	m_plot_total = new QAction("Plot All", menuPlotMode);
+	m_plot_total->setToolTip("Plot everything merged.");
+	m_plot_total->setCheckable(true);
+	m_plot_total->setChecked(true);
+	m_plot_bands = new QAction("Plot Bands", menuPlotMode);
+	m_plot_bands->setToolTip("Plot individual magnon bands.");
+	m_plot_bands->setCheckable(true);
+	m_plot_bands->setChecked(false);
+	m_plot_channels = new QAction("Plot Channels", menuPlotMode);
 	m_plot_channels->setToolTip("Plot individual polarisation channels.");
 	m_plot_channels->setCheckable(true);
 	m_plot_channels->setChecked(false);
-	QAction* acChannels = new QAction("Select Channels...", m_menuDisp);
+	QActionGroup* groupPlotMode = new QActionGroup(menuPlotMode);
+	groupPlotMode->addAction(m_plot_total);
+	groupPlotMode->addAction(m_plot_bands);
+	groupPlotMode->addAction(m_plot_channels);
+	QAction* acChannels = new QAction("Select Bands / Channels...", m_menuDisp);
 	m_plot_degeneracies = new QAction("Plot Degeneracies", m_menuDisp);
 	m_plot_degeneracies->setToolTip("Mark degenerate dispersion branches.");
 	m_plot_degeneracies->setCheckable(true);
@@ -432,7 +445,7 @@ void MagDynDlg::CreateMenuBar()
 	m_use_polcoords->setToolTip("Uses the Blume-Maleev coordinate basis for polarisation analysis.");
 	m_use_polcoords->setCheckable(true);
 	m_use_polcoords->setChecked(false);
-	m_use_weights = new QAction("Use Neutron Spectral Weights", menuCalcOpt);
+	m_use_weights = new QAction("Use Spin-Spin Correlation", menuCalcOpt);
 	m_use_weights->setToolTip("Enables calculation of the spin correlation function.");
 	m_use_weights->setCheckable(true);
 	m_use_weights->setChecked(true);
@@ -550,7 +563,11 @@ void MagDynDlg::CreateMenuBar()
 	menuExport->addAction(acStructExportSW);
 	menuExport->addAction(acStructExportScript);
 
-	m_menuDisp->addAction(m_plot_channels);
+	menuPlotMode->addAction(m_plot_total);
+	menuPlotMode->addAction(m_plot_bands);
+	menuPlotMode->addAction(m_plot_channels);
+
+	m_menuDisp->addMenu(menuPlotMode);
 	m_menuDisp->addAction(acChannels);
 	m_menuDisp->addAction(m_plot_degeneracies);
 	m_menuDisp->addSeparator();
@@ -707,11 +724,20 @@ void MagDynDlg::CreateMenuBar()
 		ShowMatrixElemsDlg(false);
 	});
 
-	connect(m_plot_channels, &QAction::toggled, [this, acChannels](bool checked)
+	connect(m_plot_total, &QAction::toggled, [this, acChannels](bool checked)
 	{
-		acChannels->setEnabled(checked);
+		acChannels->setEnabled(!checked);
 		this->PlotDispersion();
 	});
+
+	for(QAction *ac : { m_plot_bands, m_plot_channels })
+	{
+		connect(ac, &QAction::toggled, [this, acChannels](bool checked)
+		{
+			acChannels->setEnabled(checked);
+			this->PlotDispersion();
+		});
+	}
 
 	for(int i = 0; i < 3; ++i)
 		connect(m_hamiltonian_comp[i], &QAction::toggled, calc_all_dyn);

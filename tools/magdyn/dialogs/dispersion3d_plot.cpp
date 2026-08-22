@@ -30,6 +30,7 @@
 
 #include "tlibs2/libs/algos.h"
 #include "tlibs2/libs/str.h"
+#include "libs/helpers.h"
 
 
 
@@ -38,14 +39,7 @@
  */
 std::array<int, 3> Dispersion3DDlg::GetBranchColour(t_size branch_idx, t_size num_branches) const
 {
-	if(num_branches <= 1)
-		return std::array<int, 3>{{ 0xff, 0x00, 0x00 }};
-
-	return std::array<int, 3>{{
-		int(std::lerp(1., 0., t_real(branch_idx) / t_real(num_branches - 1)) * 255.),
-		0x00,
-		int(std::lerp(0., 1., t_real(branch_idx) / t_real(num_branches - 1)) * 255.),
-	}};
+	return get_linear_colour<std::array<int, 3>, t_real>(branch_idx, num_branches);
 }
 
 

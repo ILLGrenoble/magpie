@@ -101,6 +101,28 @@
 
 
 
+struct DispersionData
+{
+	// momentum transfers, energy transfers and weights
+	QVector<qreal> qs{}, Es{}, ws{};
+
+	void clear()
+	{
+		qs.clear();
+		Es.clear();
+		ws.clear();
+	}
+
+	void reserve(std::size_t num)
+	{
+		qs.reserve(num);
+		Es.reserve(num);
+		ws.reserve(num);
+	}
+};
+
+
+
 /**
  * magnon calculation dialog
  */
@@ -132,6 +154,8 @@ protected:
 	QAction *m_unite_degeneracies{};
 	QAction *m_ignore_annihilation{};
 	QAction *m_force_incommensurate{};
+	QAction *m_plot_total{};
+	QAction *m_plot_bands{};
 	QAction *m_plot_channels{};
 	QAction *m_plot_degeneracies{};
 	QAction *m_plot_weights_pointsize{};
@@ -505,7 +529,9 @@ private:
 	bool m_allow_general_J { false };
 
 	// data for dispersion plot
-	QVector<qreal> m_qs_data{}, m_Es_data{}, m_ws_data{};
+	DispersionData m_disp_data{};                // total dispersion
+	std::vector<DispersionData> m_bands_data{};  // individual bands
+	// polarisation channels
 	QVector<qreal> m_qs_data_channel[2*3*3]{}, m_Es_data_channel[2*3*3]{}, m_ws_data_channel[2*3*3]{};
 	t_real m_ws_total_channel[2*3*3]{};  // total weight in channel
 	QVector<int> m_degen_data{};

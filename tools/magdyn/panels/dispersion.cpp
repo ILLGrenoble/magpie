@@ -35,6 +35,7 @@
 #include "tlibs2/libs/phys.h"
 #include "tlibs2/libs/algos.h"
 #include "tlibs2/libs/str.h"
+#include "libs/helpers.h"
 
 
 
@@ -207,12 +208,84 @@ void MagDynDlg::PlotDispersion()
 	m_plot->clearPlottables();
 	m_graphs.clear();
 
+	const bool plot_total = m_plot_total->isChecked();
+	const bool plot_bands = m_plot_bands->isChecked();
 	const bool plot_channels = m_plot_channels->isChecked();
 	const bool plot_degeneracies = m_plot_degeneracies->isChecked();
 
-	// create plot curves for each matrix element
-	if(plot_channels)
+	if(plot_total)  // total dispersion
 	{
+		GraphWithWeights *graph = new GraphWithWeights(m_plot->xAxis, m_plot->yAxis);
+
+		// dispersion colour
+		int col_comp[3] = { 0, 0, 0xff };           // default colour
+		tl2::get_colour<int>(g_colPlot, col_comp);  // get actual colour
+		const QColor colFull(col_comp[0], col_comp[1], col_comp[2]);
+
+		QPen pen = graph->pen();
+		pen.setColor(colFull);
+
+		// colour degeneracies
+		if(plot_degeneracies)
+		{
+			// colour for degenerate dispersion points
+			int col_comp_degen[3] = { 0xff, 0, 0 };      // default colour
+			tl2::get_colour<int>(g_colPlotDegen, col_comp_degen);  // get actual colour
+			const QColor colDegen(col_comp_degen[0], col_comp_degen[1], col_comp_degen[2]);
+
+			graph->AddColour(colFull);
+			graph->AddColour(colDegen);
+
+			graph->SetColourIndices(m_degen_data);
+		}
+
+		pen.setWidthF(1.);
+		graph->setPen(pen);
+		graph->setBrush(QBrush(pen.color(), Qt::SolidPattern));
+		graph->setLineStyle(QCPGraph::lsNone);
+		graph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, m_weight_scale->value()));
+		graph->setAntialiased(true);
+		graph->setData(m_disp_data.qs, m_disp_data.Es, true /*already sorted*/);
+		graph->SetWeights(m_disp_data.ws);
+		graph->SetWeightScale(m_weight_scale->value(), m_weight_min->value(), m_weight_max->value());
+		graph->SetWeightAsPointSize(m_plot_weights_pointsize->isChecked());
+		graph->SetWeightAsAlpha(m_plot_weights_alpha->isChecked());
+		m_graphs.push_back(graph);
+	}
+	else if(plot_bands)  // individual bands
+	{
+		// iterate bands
+		const std::size_t num_bands = m_bands_data.size();
+		for(t_size band_idx = 0; band_idx < num_bands; ++band_idx)
+		{
+			//m_matrixelems_dlg->SetActive(i, j, imag_elem == 0,
+			//	!tl2::equals_0(m_ws_total_channel[idx], g_eps));
+
+			//if(!m_matrixelems_dlg->IsChecked(i, j, imag_elem == 0))
+			//	continue;
+
+			const QColor colBand = get_linear_colour<QColor, t_real>(band_idx, num_bands);
+
+			GraphWithWeights *graph = new GraphWithWeights(m_plot->xAxis, m_plot->yAxis);
+			QPen pen = graph->pen();
+			pen.setColor(colBand);
+			pen.setWidthF(1.);
+			graph->setPen(pen);
+			graph->setBrush(QBrush(pen.color(), Qt::SolidPattern));
+			graph->setLineStyle(QCPGraph::lsNone);
+			graph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, m_weight_scale->value()));
+			graph->setAntialiased(true);
+			graph->setData(m_bands_data[band_idx].qs, m_bands_data[band_idx].Es, true /*already sorted*/);
+			graph->SetWeights(m_bands_data[band_idx].ws);
+			graph->SetWeightScale(m_weight_scale->value(), m_weight_min->value(), m_weight_max->value());
+			graph->SetWeightAsPointSize(m_plot_weights_pointsize->isChecked());
+			graph->SetWeightAsAlpha(m_plot_weights_alpha->isChecked());
+			m_graphs.push_back(graph);
+		}
+	}
+	else if(plot_channels)  // polarisation channels
+	{
+		// create plot curves for each matrix element
 		// TODO: handle case if channels AND degeneracies are plotted
 
 		const QColor colChannel[2*3*3]
@@ -273,45 +346,6 @@ void MagDynDlg::PlotDispersion()
 			m_graphs.push_back(graph);
 		}
 	}
-	else
-	{
-		GraphWithWeights *graph = new GraphWithWeights(m_plot->xAxis, m_plot->yAxis);
-
-		// dispersion colour
-		int col_comp[3] = { 0, 0, 0xff };           // default colour
-		tl2::get_colour<int>(g_colPlot, col_comp);  // get actual colour
-		const QColor colFull(col_comp[0], col_comp[1], col_comp[2]);
-
-		QPen pen = graph->pen();
-		pen.setColor(colFull);
-
-		// colour degeneracies
-		if(plot_degeneracies)
-		{
-			// colour for degenerate dispersion points
-			int col_comp_degen[3] = { 0xff, 0, 0 };      // default colour
-			tl2::get_colour<int>(g_colPlotDegen, col_comp_degen);  // get actual colour
-			const QColor colDegen(col_comp_degen[0], col_comp_degen[1], col_comp_degen[2]);
-
-			graph->AddColour(colFull);
-			graph->AddColour(colDegen);
-
-			graph->SetColourIndices(m_degen_data);
-		}
-
-		pen.setWidthF(1.);
-		graph->setPen(pen);
-		graph->setBrush(QBrush(pen.color(), Qt::SolidPattern));
-		graph->setLineStyle(QCPGraph::lsNone);
-		graph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, m_weight_scale->value()));
-		graph->setAntialiased(true);
-		graph->setData(m_qs_data, m_Es_data, true /*already sorted*/);
-		graph->SetWeights(m_ws_data);
-		graph->SetWeightScale(m_weight_scale->value(), m_weight_min->value(), m_weight_max->value());
-		graph->SetWeightAsPointSize(m_plot_weights_pointsize->isChecked());
-		graph->SetWeightAsAlpha(m_plot_weights_alpha->isChecked());
-		m_graphs.push_back(graph);
-	}
 
 	// set labels
 	const char* Q_label[]{ "h (rlu)", "k (rlu)", "l (rlu)" };
@@ -321,8 +355,8 @@ void MagDynDlg::PlotDispersion()
 	m_plot->xAxis->setRange(m_Q_min, m_Q_max);
 
 	// set E plot range
-	auto [min_E_iter, max_E_iter] = std::minmax_element(m_Es_data.begin(), m_Es_data.end());
-	if(min_E_iter != m_Es_data.end() && max_E_iter != m_Es_data.end())
+	auto [min_E_iter, max_E_iter] = std::minmax_element(m_disp_data.Es.begin(), m_disp_data.Es.end());
+	if(min_E_iter != m_disp_data.Es.end() && max_E_iter != m_disp_data.Es.end())
 	{
 		t_real E_range = *max_E_iter - *min_E_iter;
 

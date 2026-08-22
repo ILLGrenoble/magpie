@@ -57,9 +57,8 @@ void MagDynDlg::ClearDispersion(bool replot)
 			m_plot->replot();
 	}
 
-	m_qs_data.clear();
-	m_Es_data.clear();
-	m_ws_data.clear();
+	m_disp_data.clear();
+	m_bands_data.clear();
 	m_degen_data.clear();
 
 	for(int i = 0; i < 2*3*3; ++i)
@@ -188,7 +187,8 @@ void MagDynDlg::CalcDispersion()
 	EnableInput(false);
 
 	// nothing to calculate?
-	if(m_dyn.GetMagneticSitesCount() == 0 || m_dyn.GetExchangeTermsCount() == 0)
+	const std::size_t num_sites = m_dyn.GetMagneticSitesCount();
+	if(num_sites == 0 || m_dyn.GetExchangeTermsCount() == 0)
 	{
 		ClearDispersion(true);
 		return;
@@ -221,12 +221,10 @@ void MagDynDlg::CalcDispersion()
 
 
 	// reserve vector memory
-	t_size num_pts = m_num_points->value();
-
-	m_qs_data.reserve(num_pts*10);
-	m_Es_data.reserve(num_pts*10);
-	m_ws_data.reserve(num_pts*10);
+	const t_size num_pts = m_num_points->value();
+	m_disp_data.reserve(num_pts*10);
 	m_degen_data.reserve(num_pts*10);
+	m_bands_data.reserve(num_sites*2*3);
 
 	for(t_size i = 0; i < 2*3*3; ++i)
 	{
@@ -272,22 +270,23 @@ void MagDynDlg::CalcDispersion()
 	std::vector<t_taskptr> tasks;
 	tasks.reserve(num_pts);
 
-	for(t_size i = 0; i < num_pts; ++i)
+	for(t_size Q_idx = 0; Q_idx < num_pts; ++Q_idx)
 	{
-		auto task = [this, &mtx, i, num_pts, E0, &Q_start, &Q_end,
+		auto task = [this, &mtx, Q_idx, num_pts, E0, &Q_start, &Q_end,
 			use_projector, use_weights, use_polcoords, ignore_annihilation]()
 		{
 			const t_vec3_real Q = num_pts > 1
 				? tl2::create<t_vec3_real>(
 				{
-					std::lerp(Q_start[0], Q_end[0], t_real(i) / t_real(num_pts - 1)),
-					std::lerp(Q_start[1], Q_end[1], t_real(i) / t_real(num_pts - 1)),
-					std::lerp(Q_start[2], Q_end[2], t_real(i) / t_real(num_pts - 1)),
+					std::lerp(Q_start[0], Q_end[0], t_real(Q_idx) / t_real(num_pts - 1)),
+					std::lerp(Q_start[1], Q_end[1], t_real(Q_idx) / t_real(num_pts - 1)),
+					std::lerp(Q_start[2], Q_end[2], t_real(Q_idx) / t_real(num_pts - 1)),
 				})
 				: tl2::create<t_vec3_real>({ Q_start[0], Q_start[1], Q_start[2] });
 
 			auto S = m_dyn.CalcEnergies(Q, !use_weights);
 
+			std::size_t band_idx = 0;
 			for(const auto& E_and_S : S.E_and_S)
 			{
 				if(m_stopRequested)
@@ -337,7 +336,13 @@ void MagDynDlg::CalcDispersion()
 					if(std::isnan(weight) || std::isinf(weight))
 						continue;
 
-					m_ws_data.push_back(weight);
+					// total dispersion weight
+					m_disp_data.ws.push_back(weight);
+
+					// individual band weight
+					if(band_idx >= m_bands_data.size())
+						m_bands_data.resize(band_idx + 1);
+					m_bands_data[band_idx].ws.push_back(weight);
 
 					for(t_size channel_i = 0; channel_i < 3; ++channel_i)
 					for(t_size channel_j = 0; channel_j < 3; ++channel_j)
@@ -364,9 +369,18 @@ void MagDynDlg::CalcDispersion()
 					}  // channel
 				}  // weights
 
-				m_qs_data.push_back(Q[m_Q_idx]);
-				m_Es_data.push_back(E);
+				// total dispersion
+				m_disp_data.qs.push_back(Q[m_Q_idx]);
+				m_disp_data.Es.push_back(E);
 				m_degen_data.push_back(static_cast<int>(E_and_S.degeneracy - 1));
+
+				// individual band
+				if(band_idx >= m_bands_data.size())
+					m_bands_data.resize(band_idx + 1);
+				m_bands_data[band_idx].qs.push_back(Q[m_Q_idx]);
+				m_bands_data[band_idx].Es.push_back(E);
+
+				++band_idx;
 			}  // E_and_S
 		};  // task
 
@@ -439,8 +453,15 @@ void MagDynDlg::CalcDispersion()
 		return perm;
 	};
 
+	// sort total dispersion data
 	//std::vector<std::size_t> perm =
-	sort_data(m_qs_data, m_Es_data, m_ws_data, &m_degen_data);
+	sort_data(m_disp_data.qs, m_disp_data.Es, m_disp_data.ws, &m_degen_data);
+
+	// sort bands data
+	for(std::size_t band_idx = 0; band_idx < m_bands_data.size(); ++band_idx)
+		sort_data(m_bands_data[band_idx].qs, m_bands_data[band_idx].Es, m_bands_data[band_idx].ws);
+
+	// sort polrisation channels data
 	for(t_size i = 0; i < 2*3*3; ++i)
 	{
 		//tl2::reorder(m_ws_data_channel[i], perm);
