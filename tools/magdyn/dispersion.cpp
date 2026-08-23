@@ -57,6 +57,9 @@ void MagDynDlg::ClearDispersion(bool replot)
 			m_plot->replot();
 	}
 
+	if(m_bands_dlg)
+		m_bands_dlg->Clear(true);
+
 	m_disp_data.clear();
 	m_bands_data.clear();
 	m_degen_data.clear();

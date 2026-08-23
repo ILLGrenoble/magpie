@@ -116,6 +116,7 @@ void MagDynDlg::Clear(bool recalc)
 		m_hamiltonian_comp[i]->setChecked(true);
 
 	m_matrixelems_dlg->Reset();
+	m_bands_dlg->Reset();
 
 	m_ffact->clear();
 	m_cur_ffact->setValue(0);

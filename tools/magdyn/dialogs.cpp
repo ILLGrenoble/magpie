@@ -144,7 +144,7 @@ void MagDynDlg::ShowAssignDlg(bool only_create)
 
 
 /**
- * notes dialog
+ * matrix elements dialog
  */
 void MagDynDlg::ShowMatrixElemsDlg(bool only_create)
 {
@@ -164,6 +164,32 @@ void MagDynDlg::ShowMatrixElemsDlg(bool only_create)
 		m_matrixelems_dlg->show();
 		m_matrixelems_dlg->raise();
 		m_matrixelems_dlg->activateWindow();
+	}
+}
+
+
+
+/**
+ * magnon bands dialog
+ */
+void MagDynDlg::ShowBandsDlg(bool only_create)
+{
+	if(!m_bands_dlg)
+	{
+		m_bands_dlg = new BandsDlg(this, m_sett);
+		m_bands_dlg->setFont(this->font());
+
+		connect(m_bands_dlg, &BandsDlg::StateChanged, [this]()
+		{
+			this->PlotDispersion();
+		});
+	}
+
+	if(!only_create)
+	{
+		m_bands_dlg->show();
+		m_bands_dlg->raise();
+		m_bands_dlg->activateWindow();
 	}
 }
 

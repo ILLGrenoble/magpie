@@ -230,6 +230,7 @@ if(USE_QT)
 		dialogs/pol.cpp dialogs/pol.h
 		dialogs/assign.cpp dialogs/assign.h
 		dialogs/matrixelems.cpp dialogs/matrixelems.h
+		dialogs/bands.cpp dialogs/bands.h
 		dialogs/notes.cpp dialogs/notes.h
 		dialogs/infos.cpp dialogs/infos.h
 		dialogs/glinfos.cpp dialogs/glinfos.h

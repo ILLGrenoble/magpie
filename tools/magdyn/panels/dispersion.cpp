@@ -207,6 +207,7 @@ void MagDynDlg::PlotDispersion()
 
 	m_plot->clearPlottables();
 	m_graphs.clear();
+	m_bands_dlg->Clear(false);
 
 	const bool plot_total = m_plot_total->isChecked();
 	const bool plot_bands = m_plot_bands->isChecked();
@@ -258,13 +259,12 @@ void MagDynDlg::PlotDispersion()
 		const std::size_t num_bands = m_bands_data.size();
 		for(t_size band_idx = 0; band_idx < num_bands; ++band_idx)
 		{
-			//m_matrixelems_dlg->SetActive(i, j, imag_elem == 0,
-			//	!tl2::equals_0(m_ws_total_channel[idx], g_eps));
-
-			//if(!m_matrixelems_dlg->IsChecked(i, j, imag_elem == 0))
-			//	continue;
-
 			const QColor colBand = get_linear_colour<QColor, t_real>(band_idx, num_bands);
+			m_bands_dlg->AddBand("#" + tl2::var_to_str(band_idx + 1), colBand,
+				m_bands_dlg->GetOldChecked(band_idx));
+
+			if(!m_bands_dlg->IsChecked(band_idx))
+				continue;
 
 			GraphWithWeights *graph = new GraphWithWeights(m_plot->xAxis, m_plot->yAxis);
 			QPen pen = graph->pen();

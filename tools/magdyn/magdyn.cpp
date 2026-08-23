@@ -72,6 +72,7 @@ MagDynDlg::MagDynDlg(QWidget* pParent) : QDialog{pParent},
 	// pre-create dialogs
 	ShowGlInfoDlg(true);
 	ShowMatrixElemsDlg(true);
+	ShowBandsDlg(true);
 	ShowNotesDlg(true);
 
 	// create input panels
@@ -134,7 +135,8 @@ MagDynDlg::~MagDynDlg()
 		(QDialog**)&m_disp3d_dlg, (QDialog**)&m_bz_dlg,
 		(QDialog**)&m_trafos, (QDialog**)&m_plot2d,
 		(QDialog**)&m_plot3d, (QDialog**)&m_bz_tool,
-		(QDialog**)&m_structfact_tool, (QDialog**)&m_magstructfact_tool })
+		(QDialog**)&m_structfact_tool, (QDialog**)&m_magstructfact_tool,
+		(QDialog**)&m_bands_dlg })
 	{
 		if(!dlg || !*dlg)
 			continue;
@@ -721,7 +723,10 @@ void MagDynDlg::CreateMenuBar()
 
 	connect(acChannels, &QAction::triggered, [this]()
 	{
-		ShowMatrixElemsDlg(false);
+		if(m_plot_channels->isChecked())
+			ShowMatrixElemsDlg(false);
+		else if(m_plot_bands->isChecked())
+			ShowBandsDlg(false);
 	});
 
 	connect(m_plot_total, &QAction::toggled, [this, acChannels](bool checked)
