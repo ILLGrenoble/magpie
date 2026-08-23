@@ -67,6 +67,10 @@ find_package(Threads REQUIRED)
 find_package(FLEX REQUIRED)
 find_package(BISON 3.0 REQUIRED)
 
+if(NOT FLEX_INCLUDE_DIRS)
+	set(FLEX_INCLUDE_DIRS "/opt/homebrew/Cellar/flex/2.6.4_2/include/")
+endif()
+
 # temp dir for parser
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/parser)
 
@@ -122,7 +126,7 @@ add_executable(takin_scanbrowser
 
 target_link_libraries(takin_scanbrowser
 	${Boost_LIBRARIES}
-	Qt6::Core Qt6::Gui Qt6::Widgets
+	Qt6::Core Qt6::Gui Qt6::Widgets Qt6::PrintSupport
 	${QCP_LIBRARIES}
 	${Minuit2_LIBRARIES} Threads::Threads #OpenMP::OpenMP_CXX
 	-ldl

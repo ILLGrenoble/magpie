@@ -37,7 +37,8 @@
 #include "tlibs2/libs/str.h"
 #include "tlibs2/libs/qt/helper.h"
 
-#include <iostream>
+#include <boost/algorithm/string.hpp>
+namespace algo = boost::algorithm;
 
 
 MainWnd::MainWnd(QSettings* pSettings)
