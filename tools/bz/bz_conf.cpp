@@ -99,12 +99,12 @@ BZConfig load_bz_config(const std::string& filename, bool use_stdin)
 		cfg.xtal_a && cfg.xtal_b && cfg.xtal_c &&
 		cfg.xtal_alpha && cfg.xtal_beta && cfg.xtal_gamma)
 	{
-		t_vec_bz vec1_rlu = tl2::create<t_vec_bz>({
+		t_vec3_real vec1_rlu = tl2::create<t_vec3_real>({
 			*cfg.cut_x, *cfg.cut_y, *cfg.cut_z });
-		t_vec_bz vec2_rlu = tl2::create<t_vec_bz>({
+		t_vec3_real vec2_rlu = tl2::create<t_vec3_real>({
 			*cut_x2, *cut_y2, *cut_z2 });
 
-		t_mat_bz crystB = tl2::B_matrix<t_mat_bz>(
+		t_mat33_real crystB = tl2::B_matrix<t_mat33_real>(
 			*cfg.xtal_a, *cfg.xtal_b, *cfg.xtal_c,
 			tl2::d2r<t_real>(*cfg.xtal_alpha),
 			tl2::d2r<t_real>(*cfg.xtal_beta),
@@ -113,13 +113,13 @@ BZConfig load_bz_config(const std::string& filename, bool use_stdin)
 		// get plane normal
 		if(auto [crystBinv, inv_ok] = tl2::inv(crystB); inv_ok)
 		{
-			t_vec_bz vec1_invA = crystB * vec1_rlu;
-			t_vec_bz vec2_invA = crystB * vec2_rlu;
+			t_vec3_real vec1_invA = crystB * vec1_rlu;
+			t_vec3_real vec2_invA = crystB * vec2_rlu;
 
-			t_vec_bz norm_invA = tl2::cross<t_vec_bz>(vec1_invA, vec2_invA);
+			t_vec3_real norm_invA = tl2::cross<t_vec3_real>(vec1_invA, vec2_invA);
 
-			t_vec_bz norm_rlu = crystBinv * norm_invA;
-			norm_rlu /= tl2::norm<t_vec_bz>(norm_rlu);
+			t_vec3_real norm_rlu = crystBinv * norm_invA;
+			norm_rlu /= tl2::norm<t_vec3_real>(norm_rlu);
 
 			cfg.cut_nx = norm_rlu[0];
 			cfg.cut_ny = norm_rlu[1];
@@ -136,7 +136,7 @@ BZConfig load_bz_config(const std::string& filename, bool use_stdin)
 			std::string op = symop.second.get<std::string>(
 				"", "1 0 0 0  0 1 0 0  0 0 1 0  0 0 0 1");
 
-			cfg.symops.emplace_back(sym::str_to_op<t_mat_bz>(op));
+			cfg.symops.emplace_back(sym::str_to_op<t_mat44_real>(op));
 		}
 	}
 

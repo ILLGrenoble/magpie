@@ -42,8 +42,8 @@ void MagDynDlg::CreateReciprocalPanel()
 	m_reciprocalpanel = new QWidget(this);
 
 	// 2d brillouin zone cut
-	m_bzscene = new BZCutScene<t_vec3_real, t_real>(m_reciprocalpanel);
-	m_bzview = new BZCutView<t_vec3_real, t_real>(m_bzscene, m_sett);
+	m_bzscene = new BZCutScene<t_vec3_real, t_vec2_real, t_real>(m_reciprocalpanel);
+	m_bzview = new BZCutView<t_vec3_real, t_vec2_real, t_real>(m_bzscene, m_sett);
 
 	m_bzscene->setFont(this->font());
 	m_bzview->setFont(this->font());
@@ -194,7 +194,7 @@ void MagDynDlg::CreateReciprocalPanel()
 
 	connect(acSetQi, &QAction::triggered, [this]()
 	{
-		t_vec3_real pos = m_bzview->GetClickedPosition(true);
+		const t_vec2_real& pos = m_bzview->GetClickedPosition(true);
 		auto [QinvA, Qrlu] = m_bz.GetBZCutQ(pos[0], pos[1]);
 		if(Qrlu.size() != 3)
 			return;
@@ -204,7 +204,7 @@ void MagDynDlg::CreateReciprocalPanel()
 
 	connect(acSetQf, &QAction::triggered, [this]()
 	{
-		t_vec3_real pos = m_bzview->GetClickedPosition(true);
+		const t_vec2_real& pos = m_bzview->GetClickedPosition(true);
 		auto [QinvA, Qrlu] = m_bz.GetBZCutQ(pos[0], pos[1]);
 		if(Qrlu.size() != 3)
 			return;

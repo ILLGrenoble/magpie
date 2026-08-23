@@ -572,7 +572,7 @@ void MagDynDlg::CalcBZ()
 	// draw brillouin zone
 	if(m_bz_dlg)
 	{
-		m_bz_dlg->SetABTrafo(tl2::convert<t_mat_bz>(xtalA), tl2::convert<t_mat_bz>(xtalB));
+		m_bz_dlg->SetABTrafo(xtalA, xtalB);
 		m_bz_dlg->SetEps(g_eps);
 		m_bz_dlg->SetPrecGui(g_prec_gui);
 
@@ -581,22 +581,22 @@ void MagDynDlg::CalcBZ()
 
 		// add gamma point
 		std::size_t idx000 = m_bz.Get000Peak();
-		const std::vector<t_vec_real> Qs_invA = tl2::convert<t_vec_real>(m_bz.GetPeaks(true));
+		const std::vector<t_vec4_real>& Qs_invA = m_bz.GetPeaks(true);
 		if(idx000 < Qs_invA.size())
-			m_bz_dlg->AddBraggPeak(Qs_invA[idx000]);
+			m_bz_dlg->AddBraggPeak(tl2::convert<t_vec3_real>(Qs_invA[idx000], 3));
 
 		// add voronoi vertices forming the vertices of the BZ
 		for(const t_vec4_real& voro : m_bz.GetVertices())
-			m_bz_dlg->AddVoronoiVertex(tl2::convert<t_vec_bz>(voro));
+			m_bz_dlg->AddVoronoiVertex(tl2::convert<t_vec3_real>(voro, 3));
 
 		// add voronoi bisectors
 		m_bz_dlg->AddTriangles(
-			tl2::convert<t_vec_bz>(m_bz.GetAllTriangles()),
+			tl2::convert<t_vec3_real>(m_bz.GetAllTriangles(), 3),
 			&m_bz.GetAllTrianglesFaceIndices());
 
 		// scattering plane
 		m_bz_dlg->SetPlane(
-			tl2::col<t_mat_bz, t_vec_bz>(tl2::convert<t_mat_bz>(m_bz.GetCutPlane()), 2),  // normal
+			tl2::convert<t_vec3_real>(tl2::col<t_mat44_real, t_vec4_real>(m_bz.GetCutPlane(), 2), 3),  // normal
 			m_bz.GetCutPlaneD());  // distance, here: 0
 	}
 

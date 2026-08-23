@@ -49,7 +49,7 @@ using t_cplx = std::complex<t_real>;
 
 
 // ----------------------------------------------------------------------------
-// vector and matrix type definitions
+// dynamic vector and matrix type definitions
 // ----------------------------------------------------------------------------
 using t_vec_real = tl2::vec<t_real, std::vector, __TLIBS2_DEFAULT_ALLOC__, 4>;
 
@@ -67,6 +67,25 @@ using t_vec = tl2::vec<t_cplx, std::vector, __TLIBS2_DEFAULT_ALLOC__, 4>;
 //using t_mat = tl2::mat<t_cplx, t_vec_for_mat>;
 using t_mat = tl2::mat<t_cplx, std::vector<t_cplx, __TLIBS2_DEFAULT_ALLOC__<t_cplx>>>;
 //using t_mat = tl2::mat<t_cplx, std::vector<t_cplx>>;
+// ----------------------------------------------------------------------------
+
+
+// ----------------------------------------------------------------------------
+// static vector and matrix type definitions
+// ----------------------------------------------------------------------------
+using t_vec2_real = tl2::vec_static<t_real, 2>;
+using t_vec3_real = tl2::vec_static<t_real, 3>;
+using t_vec4_real = tl2::vec_static<t_real, 4>;
+
+using t_vec3 = tl2::vec_static<t_cplx, 3>;
+using t_vec4 = tl2::vec_static<t_cplx, 4>;
+
+
+using t_mat33_real = tl2::mat_static<t_real, 3, 3>;
+using t_mat44_real = tl2::mat_static<t_real, 4, 4>;
+
+using t_mat33 = tl2::mat_static<t_cplx, 3, 3>;
+using t_mat44 = tl2::mat_static<t_cplx, 4, 4>;
 // ----------------------------------------------------------------------------
 
 

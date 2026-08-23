@@ -139,7 +139,7 @@ bool BZDlg::Load(const QString& filename, bool use_stdin)
 			m_comboSG->setCurrentIndex(*cfg.sg_idx);
 
 		// symops
-		for(const t_mat_bz& symop : cfg.symops)
+		for(const t_mat44_real& symop : cfg.symops)
 			AddSymOpTabItem(-1, symop);
 
 		// formulas
@@ -283,7 +283,7 @@ void BZDlg::ImportCIF()
 		m_sett->setValue("dir_cif", QFileInfo(filename).path());
 
 		auto [errstr, atoms, generatedatoms, atomnames, lattice, symops] =
-			sym::load_cif<t_vec_bz, t_mat_bz>(filename.toStdString(), g_eps_bz);
+			sym::load_cif<t_vec4_real, t_mat44_real>(filename.toStdString(), g_eps_bz);
 		if(errstr != "")
 		{
 			QMessageBox::critical(this, "CIF Importer", errstr.c_str());

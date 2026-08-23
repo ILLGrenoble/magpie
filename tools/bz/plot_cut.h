@@ -58,7 +58,7 @@
 
 
 // --------------------------------------------------------------------------------
-template<class t_vec, class t_real = typename t_vec::value_type>
+template<class t_vec3, class t_vec2, class t_real = typename t_vec3::value_type>
 class BZCutScene : public QGraphicsScene
 {
 public:
@@ -73,8 +73,8 @@ public:
 	}
 
 
-	BZCutScene(const BZCutScene<t_vec, t_real>&) = delete;
-	BZCutScene<t_vec, t_real>& operator=(const BZCutScene<t_vec, t_real>&) = delete;
+	BZCutScene(const BZCutScene<t_vec3, t_vec2, t_real>&) = delete;
+	BZCutScene<t_vec3, t_vec2, t_real>& operator=(const BZCutScene<t_vec3, t_vec2, t_real>&) = delete;
 
 
 	/**
@@ -83,10 +83,10 @@ public:
 	 */
 	void AddCut(const std::vector<
 		// [x, y, Q]
-		std::tuple<t_vec, t_vec, std::array<t_real, 3>>>& lines)
+		std::tuple<t_vec3, t_vec3, std::array<t_real, 3>>>& lines)
 	{
 		// (000) brillouin zone
-		std::vector<const std::tuple<t_vec, t_vec, std::array<t_real, 3>>*> lines000;
+		std::vector<const std::tuple<t_vec3, t_vec3, std::array<t_real, 3>>*> lines000;
 
 		QPen pen;
 		pen.setCosmetic(true);
@@ -137,7 +137,7 @@ public:
 	/**
 	 * adds bragg peaks
 	 */
-	void AddPeaks(const std::vector<t_vec>& peaks, const std::vector<t_vec>* peaks_rlu = nullptr)
+	void AddPeaks(const std::vector<t_vec3>& peaks, const std::vector<t_vec3>* peaks_rlu = nullptr)
 	{
 		QColor col(0x00, 0x99, 0x00);
 
@@ -155,7 +155,7 @@ public:
 
 		for(std::size_t Q_idx = 0; Q_idx < peaks.size(); ++Q_idx)
 		{
-			const t_vec& Q = peaks[Q_idx];
+			const t_vec3& Q = peaks[Q_idx];
 
 			QGraphicsEllipseItem *ell = addEllipse(
 				Q[0]*m_scale - w/2., Q[1]*m_scale - w/2., w, w,
@@ -163,7 +163,7 @@ public:
 
 			if(peaks_rlu)
 			{
-				const t_vec& Q_rlu = (*peaks_rlu)[Q_idx];
+				const t_vec3& Q_rlu = (*peaks_rlu)[Q_idx];
 
 				std::ostringstream ostr;
 				ostr.precision(m_prec_gui);
@@ -186,7 +186,7 @@ public:
 	/**
 	 * adds a plot curve from a set of points
 	 */
-	void AddCurve(const std::vector<t_vec>& points)
+	void AddCurve(const std::vector<t_vec2>& points)
 	{
 		if(points.size() < 2)
 			return;
@@ -215,7 +215,7 @@ public:
 	/**
 	 * adds a line from a start to an end point
 	 */
-	void AddLine(const t_vec& start, const t_vec& end,
+	void AddLine(const t_vec2& start, const t_vec2& end,
 		bool add_verts = false,
 		const std::string& line_tooltip = "",
 		const std::string& start_tooltip = "",
@@ -415,14 +415,14 @@ private:
 
 
 // --------------------------------------------------------------------------------
-template<class t_vec, class t_real = typename t_vec::value_type>
+template<class t_vec3, class t_vec2, class t_real = typename t_vec3::value_type>
 class BZCutView : public QGraphicsView
 {
 #ifdef BZ_USE_QT_SIGNALS
 	Q_OBJECT
 #endif
 public:
-	BZCutView(BZCutScene<t_vec, t_real>* scene, QSettings *sett = nullptr)
+	BZCutView(BZCutScene<t_vec3, t_vec2, t_real>* scene, QSettings *sett = nullptr)
 		: QGraphicsView(scene, static_cast<QWidget*>(scene->parent())),
 		  m_scene{scene}, m_sett{sett}
 	{
@@ -438,7 +438,7 @@ public:
 		m_context->addAction(acSaveImage);
 
 		// connections
-		connect(acShowLabels, &QAction::toggled, m_scene, &BZCutScene<t_vec, t_real>::SetShowLabels);
+		connect(acShowLabels, &QAction::toggled, m_scene, &BZCutScene<t_vec3, t_vec2, t_real>::SetShowLabels);
 		connect(acSaveImage, &QAction::triggered, this, &BZCutView::SaveImage);
 
 		setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
@@ -450,8 +450,8 @@ public:
 	}
 
 
-	BZCutView(const BZCutView<t_vec, t_real>&) = delete;
-	BZCutView<t_vec, t_real>& operator=(const BZCutView<t_vec, t_real>&) = delete;
+	BZCutView(const BZCutView<t_vec3, t_vec2, t_real>&) = delete;
+	BZCutView<t_vec3, t_vec2, t_real>& operator=(const BZCutView<t_vec3, t_vec2, t_real>&) = delete;
 
 
 	virtual ~BZCutView()
@@ -480,7 +480,7 @@ public:
 	}
 
 
-	const t_vec& GetClickedPosition(bool right_button = false) const
+	const t_vec2& GetClickedPosition(bool right_button = false) const
 	{
 		return right_button ? m_cur_pos[1] : m_cur_pos[0];
 	}
@@ -544,12 +544,12 @@ protected:
 		// show context menu
 		if(buttons & 1)  // left button
 		{
-			m_cur_pos[0] = tl2::create<t_vec>({ (t_real)pos.x() / scale, (t_real)pos.y() / scale });
+			m_cur_pos[0] = tl2::create<t_vec2>({ (t_real)pos.x() / scale, (t_real)pos.y() / scale });
 		}
 
 		if(buttons & 4)  // right button
 		{
-			m_cur_pos[1] = tl2::create<t_vec>({ (t_real)pos.x() / scale, (t_real)pos.y() / scale });
+			m_cur_pos[1] = tl2::create<t_vec2>({ (t_real)pos.x() / scale, (t_real)pos.y() / scale });
 
 			QPointF _pt{ pos.x(), pos.y() };
 			QPoint pt = mapToGlobal(mapFromScene(_pt));
@@ -621,11 +621,11 @@ signals:
 
 
 private:
-	BZCutScene<t_vec, t_real>* m_scene{};
+	BZCutScene<t_vec3, t_vec2, t_real>* m_scene{};
 	QSettings *m_sett{};
 
-	QMenu *m_context{};     // right-click context menu
-	t_vec m_cur_pos[2]{};   // current position when clicking on plot
+	QMenu *m_context{};      // right-click context menu
+	t_vec2 m_cur_pos[2]{};   // current position when clicking on plot
 };
 // --------------------------------------------------------------------------------
 

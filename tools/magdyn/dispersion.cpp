@@ -153,8 +153,12 @@ void MagDynDlg::DispersionQChanged(bool calc_dyn)
 		// add line if both points are in the scattering plane
 		if(tl2::equals_0<t_real>(pt_start[2], g_eps) &&
 			tl2::equals_0<t_real>(pt_end[2], g_eps))
-			m_bzscene->AddLine(pt_start, pt_end, true,
+		{
+			m_bzscene->AddLine(
+				tl2::convert<t_vec2_real>(pt_start, 2),
+				tl2::convert<t_vec2_real>(pt_end, 2), true,
 			"Scan Direction", "Start Q", "End Q");
+		}
 	}
 
 	// show current scan in bz plot
@@ -167,9 +171,7 @@ void MagDynDlg::DispersionQChanged(bool calc_dyn)
 		t_vec3_real pt_start = B*Q_start;
 		t_vec3_real pt_end = B*Q_end;
 
-		m_bz_dlg->AddLine(
-			tl2::convert<t_vec_bz>(pt_start),
-			tl2::convert<t_vec_bz>(pt_end), false);
+		m_bz_dlg->AddLine(pt_start, pt_end, false);
 	}
 }
 

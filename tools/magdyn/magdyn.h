@@ -238,8 +238,8 @@ protected:
 	QDoubleSpinBox *m_temperature{};           // temperature
 
 	// scattering plane panel
-	BZCutScene<t_vec3_real, t_real> *m_bzscene{};
-	BZCutView<t_vec3_real, t_real> *m_bzview{};
+	BZCutScene<t_vec3_real, t_vec2_real, t_real> *m_bzscene{};
+	BZCutView<t_vec3_real, t_vec2_real, t_real> *m_bzview{};
 	QComboBox *m_recip_trafo_mode{};
 	QDoubleSpinBox *m_recip_trafo_axis[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_recip_trafo_delta{};

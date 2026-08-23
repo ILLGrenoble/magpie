@@ -58,21 +58,21 @@ public:
 	void ClearLines(bool update = true);
 	void ClearBZ(bool update = true);
 
-	void SetABTrafo(const t_mat_bz& crystA, const t_mat_bz& crystB);
-	void SetPlane(const t_vec_bz& norm, t_real d);
+	void SetABTrafo(const t_mat33_real& crystA, const t_mat33_real& crystB);
+	void SetPlane(const t_vec3_real& norm, t_real d);
 	void SetEps(t_real eps);
 	void SetPrecGui(int prec);
 
-	void AddVoronoiVertex(const t_vec_bz& pos);
-	void AddBraggPeak(const t_vec_bz& pos);
-	void AddTriangles(const std::vector<t_vec_bz>& vecs,
+	void AddVoronoiVertex(const t_vec3_real& pos);
+	void AddBraggPeak(const t_vec3_real& pos);
+	void AddTriangles(const std::vector<t_vec3_real>& vecs,
 		const std::vector<std::size_t> *faceindices = nullptr);
-	void AddLine(const t_vec_bz& start, const t_vec_bz& end, bool add_vertices = true);
-	void AddVertex(const t_vec_bz& pos, std::vector<std::size_t>* cont = nullptr,
+	void AddLine(const t_vec3_real& start, const t_vec3_real& end, bool add_vertices = true);
+	void AddVertex(const t_vec3_real& pos, std::vector<std::size_t>* cont = nullptr,
 		t_real_gl scale = 1., t_real_gl r = 1., t_real_gl g = 0., t_real_gl b = 0.);
 
 	QMenu* GetContextMenu();
-	const t_vec_bz& GetClickedPosition(bool right_button = false) const;
+	const t_vec3_real& GetClickedPosition(bool right_button = false) const;
 
 	void SetPlotFont(const QString& font);
 
@@ -106,8 +106,8 @@ private:
 	t_real m_eps{ 1e-7 };
 	int m_prec_gui{ 4 };
 
-	t_mat_bz m_crystA{ tl2::unit<t_mat_bz>(3) };  // crystal A matrix
-	t_mat_bz m_crystB{ tl2::unit<t_mat_bz>(3) };  // crystal B matrix
+	t_mat33_real m_crystA{ tl2::unit<t_mat33_real>(3) };  // crystal A matrix
+	t_mat33_real m_crystB{ tl2::unit<t_mat33_real>(3) };  // crystal B matrix
 
 	QSettings *m_sett{};
 
@@ -128,8 +128,8 @@ private:
 	std::vector<std::size_t> m_objsBZ{};      // BZ triangle plot objects
 	std::vector<std::size_t> m_objsLines{};   // line plot objects
 
-	t_vec_bz m_cur_Qrlu{};                    // current cursor position
-	t_vec_bz m_clicked_Q_rlu[2]{};            // clicked position
+	t_vec3_real m_cur_Qrlu{};                 // current cursor position
+	t_vec3_real m_clicked_Q_rlu[2]{};         // clicked position
 
 	// maps an object to its triangles' BZ face indices
 	std::unordered_map<std::size_t, std::vector<std::size_t>> m_objFaceIndices{};

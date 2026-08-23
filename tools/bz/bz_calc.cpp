@@ -91,9 +91,9 @@ bool BZDlg::CalcB(bool full_recalc)
 		return false;
 	}
 
-	m_crystA = tl2::A_matrix<t_mat_bz>(a, b, c,
+	m_crystA = tl2::A_matrix<t_mat33_real>(a, b, c,
 		tl2::d2r<t_real>(alpha), tl2::d2r<t_real>(beta), tl2::d2r<t_real>(gamma));
-	m_crystB = tl2::B_matrix<t_mat_bz>(a, b, c,
+	m_crystB = tl2::B_matrix<t_mat33_real>(a, b, c,
 		tl2::d2r<t_real>(alpha), tl2::d2r<t_real>(beta), tl2::d2r<t_real>(gamma));
 
 	if(m_dlgPlot)
@@ -139,16 +139,16 @@ bool BZDlg::CalcBZ(bool full_recalc)
 
 		// add gamma point
 		std::size_t idx000 = m_bzcalc.Get000Peak();
-		const std::vector<t_vec_bz>& Qs_invA = m_bzcalc.GetPeaks(true);
+		const std::vector<t_vec4_real>& Qs_invA = m_bzcalc.GetPeaks(true);
 		if(idx000 < Qs_invA.size())
-			m_dlgPlot->AddBraggPeak(Qs_invA[idx000]);
+			m_dlgPlot->AddBraggPeak(tl2::convert<t_vec3_real>(Qs_invA[idx000], 3));
 
 		// add voronoi vertices forming the vertices of the BZ
-		for(const t_vec_bz& voro : m_bzcalc.GetVertices())
-			m_dlgPlot->AddVoronoiVertex(voro);
+		for(const t_vec4_real& voro : m_bzcalc.GetVertices())
+			m_dlgPlot->AddVoronoiVertex(tl2::convert<t_vec3_real>(voro, 3));
 
 		// add voronoi bisectors
-		m_dlgPlot->AddTriangles(m_bzcalc.GetAllTriangles(),
+		m_dlgPlot->AddTriangles(tl2::convert<t_vec3_real>(m_bzcalc.GetAllTriangles(), 3),
 			&m_bzcalc.GetAllTrianglesFaceIndices());
 	}
 
@@ -179,12 +179,12 @@ bool BZDlg::CalcBZCut()
 		return false;
 
 	// get plane coordinate system
-	t_vec_bz vec1_rlu = tl2::create<t_vec_bz>({
+	t_vec3_real vec1_rlu = tl2::create<t_vec3_real>({
 		(t_real)m_cutX->value(),
 		(t_real)m_cutY->value(),
 		(t_real)m_cutZ->value()
 	});
-	t_vec_bz norm_rlu = tl2::create<t_vec_bz>({
+	t_vec3_real norm_rlu = tl2::create<t_vec3_real>({
 		(t_real)m_cutNX->value(),
 		(t_real)m_cutNY->value(),
 		(t_real)m_cutNZ->value()
@@ -199,8 +199,10 @@ bool BZDlg::CalcBZCut()
 	m_bzscene->SetEps(g_eps_bz);
 	m_bzscene->SetPrecGui(g_prec_gui_bz);
 	m_bzscene->ClearAll();
-	m_bzscene->AddCut(m_bzcalc.GetCutLines(false));
-	m_bzscene->AddPeaks(m_bzcalc.GetPeaksOnPlane(true), &m_bzcalc.GetPeaksOnPlane(false));
+	m_bzscene->AddCut(m_bzcalc.GetConvertedCutLines<t_vec3_real>(false));
+	auto peaks_on_plane_rlu = tl2::convert<t_vec3_real>(m_bzcalc.GetPeaksOnPlane(false), 3);
+	m_bzscene->AddPeaks(
+		tl2::convert<t_vec3_real>(m_bzcalc.GetPeaksOnPlane(true), 3), &peaks_on_plane_rlu);
 	m_bzview->Centre();
 
 	// get description of the cutting plane
@@ -211,8 +213,8 @@ bool BZDlg::CalcBZCut()
 	if(m_dlgPlot)
 	{
 		m_dlgPlot->SetPlane(
-			tl2::col<t_mat_bz, t_vec_bz>(m_bzcalc.GetCutPlane(), 2),  // normal
-			m_bzcalc.GetCutPlaneD());                                 // distance
+			tl2::convert<t_vec3_real>(tl2::col<t_mat44_real, t_vec4_real>(m_bzcalc.GetCutPlane(), 2), 3),  // normal
+			m_bzcalc.GetCutPlaneD());  // distance
 	}
 
 	UpdateBZDescription();
@@ -261,13 +263,13 @@ bool BZDlg::CalcFormulas()
 			int num_pts = 512;
 			t_real x_delta = (max_x - min_x) / t_real(num_pts);
 
-			std::vector<t_vec_bz> curve;
+			std::vector<t_vec2_real> curve;
 			curve.reserve(num_pts);
 
 			for(t_real x = min_x; x <= max_x; x += x_delta)
 			{
-				t_vec_bz QinvA = m_bzcalc.GetCutPlane() *
-					tl2::create<t_vec_bz>({ x, 0., m_bzcalc.GetCutPlaneD() });
+				t_vec3_real QinvA = m_bzcalc.GetCutPlane() *
+					tl2::create<t_vec3_real>({ x, 0., m_bzcalc.GetCutPlaneD() });
 				//std::cout << x << ": " << QinvA << std::endl;
 
 				parser.register_var("x", x);
@@ -280,7 +282,7 @@ bool BZDlg::CalcFormulas()
 				if(y < min_y || y > max_y)
 					continue;
 
-				curve.emplace_back(tl2::create<t_vec_bz>({ x, y }));
+				curve.emplace_back(tl2::create<t_vec2_real>({ x, y }));
 			}
 
 			m_bzscene->AddCurve(curve);
@@ -313,7 +315,7 @@ void BZDlg::BZCutMouseMoved(t_real x, t_real y)
 	auto [QinvA, Qrlu] = m_bzcalc.GetBZCutQ(x, y);
 	if(Qrlu.size() < 3 || QinvA.size() < 3)
 		return;
-	std::vector<t_vec_bz> closest = m_bzcalc.GetClosestPeaks(Qrlu);
+	std::vector<t_vec4_real> closest = m_bzcalc.GetClosestPeaks(Qrlu);
 
 	std::ostringstream ostr;
 	ostr.precision(g_prec_gui_bz);
@@ -323,15 +325,15 @@ void BZDlg::BZCutMouseMoved(t_real x, t_real y)
 
 	if(closest.size() == 1)
 	{
-		t_vec_bz vec = closest[0];
+		t_vec4_real vec = closest[0];
 		tl2::set_eps_0(vec, g_eps_bz);
 
 		ostr << " G = (" << vec[0] << ", " << vec[1] << ", " << vec[2] << ") rlu.";
 	}
 	else if(closest.size() == 2)
 	{
-		t_vec_bz vec0 = closest[0];
-		t_vec_bz vec1 = closest[1];
+		t_vec4_real vec0 = closest[0];
+		t_vec4_real vec1 = closest[1];
 		tl2::set_eps_0(vec0, g_eps_bz);
 		tl2::set_eps_0(vec1, g_eps_bz);
 

@@ -500,8 +500,18 @@ requires is_mat<t_mat>
 	if(N != mat.size2())
 		return false;
 
+	t_mat submat33 = submat<t_mat>(mat, 0, 0, 3, 3);
+	if(submat33.size1() > 3)
+	{
+		// fill up the matrix for statically sized containers
+		for(std::size_t idx = 3; idx < submat33.size1(); ++idx)
+			submat33(idx, idx) = t_real(1);
+		for(std::size_t idx = 0; idx < 3; ++idx)
+			submat33(3, idx) = submat33(idx, 3) = t_real(0);
+	}
+
 	// is the left-upper 3x3 a rotation matrix (and no unit matrix)?
-	if(!is_unit(submat<t_mat>(mat, 0, 0, 3, 3), eps))
+	if(!is_unit(submat33, eps))
 		return false;
 
 	// translation?

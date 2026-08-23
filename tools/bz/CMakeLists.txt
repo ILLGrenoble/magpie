@@ -100,7 +100,7 @@ if(USE_QT)
 	set(CMAKE_AUTOMOC TRUE)
 
 
-	add_executable(takin_bz
+	add_executable(bz
 		bz.cpp bz_file.cpp bz_calc.cpp
 		bz_main.cpp
 		bz_ops.cpp bz.h
@@ -115,7 +115,7 @@ if(USE_QT)
 		../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h
 	)
 
-	target_link_libraries(takin_bz
+	target_link_libraries(bz
 		${Boost_LIBRARIES}
 		${Qhull_LIBRARIES}
 		${QtLibraries}
@@ -125,7 +125,7 @@ else()
 	message("Compiling without Qt.")
 	add_definitions(-DDONT_USE_QT)
 
-	add_executable(takin_bz
+	add_executable(bz
 		bz_main.cpp
 		bz_conf.cpp bz_conf.h
 		globals.cpp globals.h
@@ -133,7 +133,7 @@ else()
 		../../libs/sym/symops.h ../../libs/sym/bz.h
 	)
 
-	target_link_libraries(takin_bz
+	target_link_libraries(bz
 		${Boost_LIBRARIES}
 		${Qhull_LIBRARIES}
 		gemmi::gemmi_cpp
@@ -142,13 +142,13 @@ endif()
 
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	target_link_options(takin_bz
+	target_link_options(bz
 		# create an __info_plist section in the binary
 		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../setup/osx/InfoBZ.plist
 	)
 
-	add_custom_command(TARGET takin_bz POST_BUILD
-		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:takin_bz> || true
+	add_custom_command(TARGET bz POST_BUILD
+		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:bz> || true
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	)
 endif()
@@ -157,7 +157,7 @@ endif()
 if(MAKE_LIB)
 	message("Compiling as library.")
 
-	add_library(takinbz
+	add_library(magpiebz
 		bz_lib.cpp
 		bz_conf.cpp bz_conf.h
 		globals.cpp globals.h
@@ -165,9 +165,9 @@ if(MAKE_LIB)
 		../../libs/sym/symops.h ../../libs/sym/bz.h
 	)
 
-	target_compile_definitions(takinbz PUBLIC -DDONT_USE_QT)
+	target_compile_definitions(magpiebz PUBLIC -DDONT_USE_QT)
 
-	target_link_libraries(takinbz
+	target_link_libraries(magpiebz
 		${Boost_LIBRARIES}
 		${Qhull_LIBRARIES}
 		gemmi::gemmi_cpp
@@ -177,7 +177,7 @@ endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# pass linker --subsystem option
-	target_compile_options(takin_bz PUBLIC -Wl,--subsystem,windows)
+	target_compile_options(bz PUBLIC -Wl,--subsystem,windows)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	target_compile_options(takin_bz PUBLIC -mmacosx-version-min=11.0)
+	target_compile_options(bz PUBLIC -mmacosx-version-min=11.0)
 endif()

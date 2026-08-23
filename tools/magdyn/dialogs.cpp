@@ -502,7 +502,7 @@ void MagDynDlg::ShowBZ3DDlg(bool only_create)
 
 		connect(acSetQi, &QAction::triggered, [this]()
 		{
-			const t_vec_real& Qrlu = m_bz_dlg->GetClickedPosition(true);
+			const t_vec3_real& Qrlu = m_bz_dlg->GetClickedPosition(true);
 			if(Qrlu.size() != 3)
 				return;
 
@@ -511,7 +511,7 @@ void MagDynDlg::ShowBZ3DDlg(bool only_create)
 
 		connect(acSetQf, &QAction::triggered, [this]()
 		{
-			const t_vec_real& Qrlu = m_bz_dlg->GetClickedPosition(true);
+			const t_vec3_real& Qrlu = m_bz_dlg->GetClickedPosition(true);
 			if(Qrlu.size() != 3)
 				return;
 

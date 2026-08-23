@@ -70,7 +70,7 @@ static int cli_main(const std::string& cfg_file, const std::string& results_file
 	{
 		BZConfig cfg = load_bz_config(cfg_file, use_stdin);
 
-		sym::BZCalc<t_mat_bz, t_vec_bz, t_real> bzcalc;
+		sym::BZCalc<t_mat44_real, t_vec4_real, t_real> bzcalc;
 		bzcalc.SetEps(g_eps_bz);
 		bzcalc.SetSymOps(cfg.symops, false);
 		if(cfg.xtal_a && cfg.xtal_b && cfg.xtal_c &&
@@ -95,12 +95,12 @@ static int cli_main(const std::string& cfg_file, const std::string& results_file
 			t_real cut_d = cfg.cut_d ? *cfg.cut_d : 0.;
 
 			// get plane coordinate system
-			t_vec_bz vec1_rlu = tl2::create<t_vec_bz>({
+			t_vec3_real vec1_rlu = tl2::create<t_vec3_real>({
 				*cfg.cut_x,
 				*cfg.cut_y,
 				*cfg.cut_z
 			});
-			t_vec_bz norm_rlu = tl2::create<t_vec_bz>({
+			t_vec3_real norm_rlu = tl2::create<t_vec3_real>({
 				*cfg.cut_nx,
 				*cfg.cut_ny,
 				*cfg.cut_nz

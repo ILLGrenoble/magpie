@@ -326,7 +326,7 @@ void BZPlotDlg::ShowQVertices(bool show)
 /**
  * set the crystal matrices
  */
-void BZPlotDlg::SetABTrafo(const t_mat_bz& crystA, const t_mat_bz& crystB)
+void BZPlotDlg::SetABTrafo(const t_mat33_real& crystA, const t_mat33_real& crystB)
 {
 	m_crystA = crystA;
 	m_crystB = crystB;
@@ -342,7 +342,7 @@ void BZPlotDlg::SetABTrafo(const t_mat_bz& crystA, const t_mat_bz& crystB)
 /**
  * add a vertex to the plot
  */
-void BZPlotDlg::AddVertex(const t_vec_bz& pos,
+void BZPlotDlg::AddVertex(const t_vec3_real& pos,
 	std::vector<std::size_t>* cont, t_real_gl scale,
 	t_real_gl r, t_real_gl g, t_real_gl b)
 {
@@ -369,7 +369,7 @@ void BZPlotDlg::AddVertex(const t_vec_bz& pos,
 /**
  * add a voronoi vertex to the plot
  */
-void BZPlotDlg::AddVoronoiVertex(const t_vec_bz& pos)
+void BZPlotDlg::AddVoronoiVertex(const t_vec3_real& pos)
 {
 	AddVertex(pos, &m_objsVoronoi, 1., 0., 0., 1.);
 }
@@ -378,7 +378,7 @@ void BZPlotDlg::AddVoronoiVertex(const t_vec_bz& pos)
 /**
  * add a bragg peak to the plot
  */
-void BZPlotDlg::AddBraggPeak(const t_vec_bz& pos)
+void BZPlotDlg::AddBraggPeak(const t_vec3_real& pos)
 {
 	AddVertex(pos, &m_objsBragg, 1., 1., 0., 0.);
 }
@@ -387,7 +387,7 @@ void BZPlotDlg::AddBraggPeak(const t_vec_bz& pos)
 /**
  * add a line from a start to an end point
  */
-void BZPlotDlg::AddLine(const t_vec_bz& start, const t_vec_bz& end, bool add_vertices)
+void BZPlotDlg::AddLine(const t_vec3_real& start, const t_vec3_real& end, bool add_vertices)
 {
 	if(add_vertices)
 	{
@@ -419,7 +419,7 @@ void BZPlotDlg::AddLine(const t_vec_bz& start, const t_vec_bz& end, bool add_ver
 /**
  * add polygons to the plot
  */
-void BZPlotDlg::AddTriangles(const std::vector<t_vec_bz>& _vecs,
+void BZPlotDlg::AddTriangles(const std::vector<t_vec3_real>& _vecs,
 	const std::vector<std::size_t> *faceindices)
 {
 	if(!m_plot || _vecs.size() < 3)
@@ -441,7 +441,7 @@ void BZPlotDlg::AddTriangles(const std::vector<t_vec_bz>& _vecs,
 		t_vec3_gl norm = tl2::cross<t_vec3_gl>(vec2 - vec1, vec3 - vec1);
 		norm /= tl2::norm(norm);
 
-		t_vec3_gl mid = (vec1+vec2+vec3)/3.;
+		t_vec3_gl mid = (vec1 + vec2 + vec3)/3.;
 		mid /= tl2::norm<t_vec3_gl>(mid);
 
 		// change sign of norm / sense of veritices?
@@ -482,7 +482,7 @@ void BZPlotDlg::AddTriangles(const std::vector<t_vec_bz>& _vecs,
 /**
  * set the brillouin zone cut plane
  */
-void BZPlotDlg::SetPlane(const t_vec_bz& _norm, t_real d)
+void BZPlotDlg::SetPlane(const t_vec3_real& _norm, t_real d)
 {
 	if(!m_plot)
 		return;
@@ -569,12 +569,12 @@ void BZPlotDlg::PickerIntersection(
 		return;
 	}
 
-	t_vec_bz QinvA = tl2::convert<t_vec_bz>(*pos);
-	t_mat_bz Binv =  tl2::trans(m_crystA) / (t_real(2)*tl2::pi<t_real>);
+	t_vec3_real QinvA = tl2::convert<t_vec3_real>(*pos);
+	t_mat33_real Binv =  tl2::trans(m_crystA) / (t_real(2)*tl2::pi<t_real>);
 	m_cur_Qrlu = Binv * QinvA;
 
-	tl2::set_eps_0<t_vec_bz>(QinvA, m_eps);
-	tl2::set_eps_0<t_vec_bz>(m_cur_Qrlu, m_eps);
+	tl2::set_eps_0<t_vec3_real>(QinvA, m_eps);
+	tl2::set_eps_0<t_vec3_real>(m_cur_Qrlu, m_eps);
 
 	std::ostringstream ostr;
 	ostr.precision(m_prec_gui);
@@ -771,7 +771,7 @@ QMenu* BZPlotDlg::GetContextMenu()
 }
 
 
-const t_vec_bz& BZPlotDlg::GetClickedPosition(bool right_button) const
+const t_vec3_real& BZPlotDlg::GetClickedPosition(bool right_button) const
 {
 	return right_button ? m_clicked_Q_rlu[1] : m_clicked_Q_rlu[0];
 }

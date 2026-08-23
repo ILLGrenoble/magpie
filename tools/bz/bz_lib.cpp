@@ -29,4 +29,4 @@
 #include "globals.h"
 
 
-template class sym::BZCalc<t_mat_bz, t_vec_bz, t_real>;
+template class sym::BZCalc<t_mat44_real, t_vec4_real, t_real>;

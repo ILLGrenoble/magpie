@@ -223,7 +223,7 @@ void BZDlg::CreateSymopsPanel()
 
 
 	// get space groups and symops
-	auto spacegroups = sym::get_sgs<t_mat_bz>();
+	auto spacegroups = sym::get_sgs<t_mat44_real>();
 	m_sg_ops.reserve(spacegroups.size());
 	for(auto [sgnum, descr, ops] : spacegroups)
 	{
@@ -325,10 +325,10 @@ void BZDlg::CreateBZPanel()
 	auto bzpanel = new QWidget(this);
 	auto grid = new QGridLayout(bzpanel);
 	grid->setSpacing(4);
-	grid->setContentsMargins(4,4,4,4);
+	grid->setContentsMargins(4, 4, 4, 4);
 
-	m_bzscene = new BZCutScene<t_vec_bz, t_real>(bzpanel);
-	m_bzview = new BZCutView<t_vec_bz, t_real>(m_bzscene, m_sett);
+	m_bzscene = new BZCutScene<t_vec3_real, t_vec2_real, t_real>(bzpanel);
+	m_bzview = new BZCutView<t_vec3_real, t_vec2_real, t_real>(m_bzscene, m_sett);
 
 	for(QDoubleSpinBox** const cut : {
 		&m_cutNX, &m_cutNY, &m_cutNZ,
@@ -403,7 +403,7 @@ void BZDlg::CreateBZPanel()
 		[this](int order) { this->SetDrawOrder(order); });
 
 #ifdef BZ_USE_QT_SIGNALS
-	connect(m_bzview, &BZCutView<t_vec_bz, t_real>::SignalMouseCoordinates,
+	connect(m_bzview, &BZCutView<t_vec3_real, t_real>::SignalMouseCoordinates,
 		this, &BZDlg::BZCutMouseMoved);
 #else
 	m_bzview->AddMouseCoordinatesSlot([this](t_real x, t_real y)
