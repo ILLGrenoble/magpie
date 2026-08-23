@@ -4,8 +4,8 @@
 # @license GPLv3, see 'LICENSE' file
 #
 # ----------------------------------------------------------------------------
-# mag-core (part of the Takin software suite)
-# Copyright (C) 2018-2021  Tobias WEBER (Institut Laue-Langevin (ILL),
+# mag-core / magpie
+# Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
 #                          Grenoble, France).
 #
 # This program is free software: you can redistribute it and/or modify
@@ -86,7 +86,7 @@ include_directories(
 )
 
 
-add_executable(takin_structfact
+add_executable(structfact
 	structfact.cpp structfact_file.cpp
 	structfact_plot.cpp structfact_main.cpp
 	structfact_findsg.cpp structfact_nuclei.cpp
@@ -95,25 +95,25 @@ add_executable(takin_structfact
 	../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	target_link_options(takin_structfact
+	target_link_options(structfact
 		# create an __info_plist section in the binary
 		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../setup/osx/InfoStructFact.plist
 	)
 
-	add_custom_command(TARGET takin_structfact POST_BUILD
-		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:takin_structfact> || true
+	add_custom_command(TARGET structfact POST_BUILD
+		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:structfact> || true
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	)
 endif()
 
-target_link_libraries(takin_structfact
+target_link_libraries(structfact
 	${Boost_LIBRARIES}
 	${QtLibraries}
 	gemmi::gemmi_cpp
 )
 
 
-add_executable(takin_magstructfact
+add_executable(magstructfact
 	magstructfact.cpp magstructfact_file.cpp
 	magstructfact_plot.cpp magstructfact_main.cpp
 	magstructfact_nuclei.cpp magstructfact.h
@@ -121,18 +121,18 @@ add_executable(takin_magstructfact
 	../../tlibs2/libs/qt/glplot.cpp ../../tlibs2/libs/qt/glplot.h)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	target_link_options(takin_magstructfact
+	target_link_options(magstructfact
 		# create an __info_plist section in the binary
 		PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${PROJECT_SOURCE_DIR}/../../setup/osx/InfoMagStructFact.plist
 	)
 
-	add_custom_command(TARGET takin_magstructfact POST_BUILD
-		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:takin_magstructfact> || true
+	add_custom_command(TARGET magstructfact POST_BUILD
+		COMMAND install_name_tool -add_rpath /usr/local/lib $<TARGET_FILE:magstructfact> || true
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	)
 endif()
 
-target_link_libraries(takin_magstructfact
+target_link_libraries(magstructfact
 	${Boost_LIBRARIES}
 	${QtLibraries}
 	gemmi::gemmi_cpp
