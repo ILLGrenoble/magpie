@@ -57,6 +57,8 @@ endif()
 
 add_definitions(-DMAGDYN_COMPAT)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
+
 
 
 # -----------------------------------------------------------------------------
@@ -80,6 +82,16 @@ add_definitions(-DUSE_LAPACK=1)
 # -----------------------------------------------------------------------------
 # Gemmi
 find_package(Gemmi REQUIRED)
+# -----------------------------------------------------------------------------
+
+
+# -----------------------------------------------------------------------------
+# Qhull
+find_package(Qhull REQUIRED)
+if(Qhull_FOUND)
+	add_definitions(-DUSE_QHULL)
+	include_directories("${Qhull_INCLUDE_DIRS}")
+endif()
 # -----------------------------------------------------------------------------
 
 
@@ -125,7 +137,9 @@ set_source_files_properties(magpy.i PROPERTIES SWIG_FLAGS "-I ${PROJECT_SOURCE_D
 swig_add_library(magpy LANGUAGE python SOURCES magpy.i)
 target_link_libraries(magpy
 	Python3::Python
+	${Boost_LIBRARIES}
 	${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES} ${GFortran_LIBRARIES}
+	${Qhull_LIBRARIES}
 	#/usr/local/lib/libgemmi_cpp.a
 	gemmi::gemmi_cpp
 )
@@ -160,7 +174,7 @@ install(TARGETS magpy LIBRARY DESTINATION "${Python3_SITEARCH}")
 # packaging
 # -----------------------------------------------------------------------------
 set(CPACK_PACKAGE_NAME "Magpie")
-set(CPACK_PACKAGE_VERSION "0.9.5")
+set(CPACK_PACKAGE_VERSION "1.0")
 set(CPACK_PACKAGE_VENDOR "T. Weber, ILL, Grenoble")
 set(CPACK_PACKAGE_DESCRIPTION "Magpie Py Library (Magpy)")
 set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/../../res/magpie.svg")

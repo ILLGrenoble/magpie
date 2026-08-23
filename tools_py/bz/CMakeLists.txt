@@ -50,7 +50,7 @@ set(CMAKE_VERBOSE_MAKEFILE TRUE)
 message("Building for ${CMAKE_SYSTEM_NAME} systems.")
 
 find_package(Boost)
-add_definitions(-DDONT_USE_BOOTS_PROGOPTS)
+add_definitions(-DDONT_USE_BOOST_PROGOPTS)
 add_compile_options(${Boost_CXX_FLAGS})
 
 find_package(Gemmi REQUIRED)
@@ -112,7 +112,7 @@ endif()
 # packaging
 # -----------------------------------------------------------------------------
 #set(CPACK_PACKAGE_NAME "Magpie")
-set(CPACK_PACKAGE_VERSION "0.9.5")
+set(CPACK_PACKAGE_VERSION "1.0")
 set(CPACK_PACKAGE_VENDOR "T. Weber, ILL, Grenoble")
 set(CPACK_PACKAGE_DESCRIPTION "Brillouin Zone Calculator")
 #set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/../../res/magpie.svg")

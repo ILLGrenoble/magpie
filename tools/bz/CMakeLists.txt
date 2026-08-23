@@ -63,7 +63,7 @@ else()
 	find_package(Boost)
 
 	message("Compiling without Boost.program_options.")
-	add_definitions(-DDONT_USE_BOOTS_PROGOPTS)
+	add_definitions(-DDONT_USE_BOOST_PROGOPTS)
 endif()
 add_compile_options(${Boost_CXX_FLAGS})
 

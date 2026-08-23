@@ -41,7 +41,7 @@
 #include <fstream>
 
 
-#ifndef DONT_USE_BOOTS_PROGOPTS
+#ifndef DONT_USE_BOOST_PROGOPTS
 	#include <boost/program_options.hpp>
 	namespace args = boost::program_options;
 #endif
@@ -176,7 +176,7 @@ static int gui_main(int argc, char** argv, const std::string& cfg_file, bool use
 
 
 
-#ifndef DONT_USE_BOOTS_PROGOPTS
+#ifndef DONT_USE_BOOST_PROGOPTS
 /**
  * starts the cli or the gui program
  */
@@ -252,7 +252,7 @@ int main(int argc, char** argv)
 
 
 
-#else   // DONT_USE_BOOTS_PROGOPTS
+#else   // DONT_USE_BOOST_PROGOPTS
 
 /**
  * starts the cli program using a minimal interface
@@ -291,4 +291,4 @@ int main(int argc, char** argv)
 	return cli_main(cfg_file, results_file, false);
 }
 
-#endif  // DONT_USE_BOOTS_PROGOPTS
+#endif  // DONT_USE_BOOST_PROGOPTS

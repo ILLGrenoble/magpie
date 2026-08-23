@@ -116,15 +116,15 @@ if(BUILD_PY_MODULES)
 	message("================================================================================")
 	add_subdirectory(tools_py/magdyn)
 
-	# brillouin zones
-	message("\n================================================================================")
-	message("Configuring py-bz...")
-	message("================================================================================")
-	add_subdirectory(tools_py/bz)
-
 	# instrument data file loader
 	message("\n================================================================================")
 	message("Configuring py-instr...")
 	message("================================================================================")
 	add_subdirectory(tools_py/instr)
+
+	# brillouin zones
+	#message("\n================================================================================")
+	#message("Configuring py-bz...")
+	#message("================================================================================")
+	#add_subdirectory(tools_py/bz)
 endif()

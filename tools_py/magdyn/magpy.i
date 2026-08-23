@@ -28,7 +28,9 @@
 	#ifndef MAGDYN_COMPAT
 		#define MAGDYN_COMPAT
 	#endif
+
 	#include "../../libs/magdyn.h"
+	#include "../../libs/sym/bz.h"
 %}
 
 #define MAGDYN_COMPAT
@@ -44,6 +46,7 @@
 //%template(CplxD) std::complex<double>;
 %template(VecD) std::vector<double>;
 %template(VecCplxD) std::vector<std::complex<double>>;
+%template(VecUI) std::vector<unsigned int>;
 
 %template(LstStr) std::list<std::string>;
 
@@ -96,6 +99,7 @@
 %include "../../libs/magdyn/powder.h"
 %include "../../libs/magdyn/topology.h"
 %include "../../libs/magdyn/diff.h"
+%include "../../libs/sym/bz.h"
 
 
 // ----------------------------------------------------------------------------
@@ -180,6 +184,11 @@
 	tl2::mat<std::complex<double>>,
 	tl2::vec<std::complex<double>>,
 	std::complex<double>, double, std::size_t>;
+
+/**
+ * main BZ class
+ */
+%template(BZCalc) sym::BZCalc<tl2::mat<double>, tl2::vec<double>, double>;
 // ----------------------------------------------------------------------------
 
 
