@@ -5,8 +5,8 @@
 # @desc The present version was forked on 8-Nov-2018 from my privately developed "magtools" project (https://github.com/t-weber/magtools).
 #
 # ----------------------------------------------------------------------------
-# mag-core (part of the Takin software suite)
-# Copyright (C) 2018-2021  Tobias WEBER (Institut Laue-Langevin (ILL),
+# mag-core / magpie
+# Copyright (C) 2018-2026  Tobias WEBER (Institut Laue-Langevin (ILL),
 #                          Grenoble, France).
 # "magtools" project
 # Copyright (C) 2017-2018  Tobias WEBER (privately developed).
@@ -53,12 +53,12 @@ include_directories("${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/../.."
 
 # -----------------------------------------------------------------------------
 # main program
-add_executable(takin_magsgbrowser
+add_executable(magsgbrowser
 	main.cpp
 	browser.cpp browser.h
 )
 
-target_link_libraries(takin_magsgbrowser
+target_link_libraries(magsgbrowser
 	${Boost_LIBRARIES}
 	gemmi::gemmi_cpp
 	Qt6::Core Qt6::Gui Qt6::Widgets
