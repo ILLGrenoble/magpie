@@ -55,12 +55,12 @@ def get_E(ki, kf):
 #
 def load_data(datfile, mergefiles = [], intensity_scale = 1.):
 	print("Loading \"%s\"." % (datfile))
-	instrdat = instr.FileInstrBaseD.LoadInstr(datfile)
+	instrdat = instr.FileInstrBase.LoadInstr(datfile)
 	if instrdat == None:
 		return
 
 	for mergefile in mergefiles:
-		tomerge = instr.FileInstrBaseD.LoadInstr(mergefile)
+		tomerge = instr.FileInstrBase.LoadInstr(mergefile)
 		if tomerge != None:
 			print("Merging with \"%s\"." % (mergefile))
 			instrdat.MergeWith(tomerge)

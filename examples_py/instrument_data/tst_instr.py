@@ -35,7 +35,7 @@ import instrhelper
 #
 def load_data(datfile):
 	#print("Loading \"%s\"." % (datfile))
-	dat = instr.FileInstrBaseD.LoadInstr(datfile)
+	dat = instr.FileInstrBase.LoadInstr(datfile)
 	if dat == None:
 		return
 
