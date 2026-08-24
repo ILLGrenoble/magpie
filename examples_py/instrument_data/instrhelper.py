@@ -23,7 +23,9 @@
 # ----------------------------------------------------------------------------
 #
 
-import instr
+#import instr
+import magpy as instr
+
 import numpy
 import scipy.constants as co
 

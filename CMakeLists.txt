@@ -117,10 +117,10 @@ if(BUILD_PY_MODULES)
 	add_subdirectory(tools_py/magdyn)
 
 	# instrument data file loader
-	message("\n================================================================================")
-	message("Configuring py-instr...")
-	message("================================================================================")
-	add_subdirectory(tools_py/instr)
+	#message("\n================================================================================")
+	#message("Configuring py-instr...")
+	#message("================================================================================")
+	#add_subdirectory(tools_py/instr)
 
 	# brillouin zones
 	#message("\n================================================================================")

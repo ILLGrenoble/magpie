@@ -31,6 +31,8 @@
 
 	#include "../../libs/magdyn.h"
 	#include "../../libs/sym/bz.h"
+
+	#include "../../tlibs2/libs/instr.h"
 %}
 
 #define MAGDYN_COMPAT
@@ -39,6 +41,9 @@
 %include "std_list.i"
 %include "std_array.i"
 %include "std_string.i"
+%include "std_map.i"
+%include "std_unordered_map.i"
+%include "std_pair.i"
 %include "std_complex.i"
 %include "std_shared_ptr.i"
 
@@ -47,15 +52,22 @@
 %template(VecD) std::vector<double>;
 %template(VecCplxD) std::vector<std::complex<double>>;
 %template(VecUI) std::vector<unsigned int>;
+%template(ArrB3) std::array<bool, 3>;
 
 %template(LstStr) std::list<std::string>;
-
-%template(ArrD3) std::array<double, 3>;
-%template(ArrD4) std::array<double, 4>;
-%template(ArrCplx3) std::array<std::complex<double>, 3>;
-%template(ArrCplx4) std::array<std::complex<double>, 4>;
+%template(VecStr) std::vector<std::string>;
+%template(MapStrStr) std::unordered_map<std::string, std::string>;
 %template(ArrStr3) std::array<std::string, 3>;
 %template(ArrStr33) std::array<std::array<std::string, 3>, 3>;
+
+%template(ArrD2) std::array<double, 2>;
+%template(ArrD3) std::array<double, 3>;
+%template(ArrD4) std::array<double, 4>;
+%template(ArrD5) std::array<double, 5>;
+%template(ArrCplx3) std::array<std::complex<double>, 3>;
+%template(ArrCplx4) std::array<std::complex<double>, 4>;
+
+%shared_ptr(tl2::FileInstrBase<double>);
 
 
 // ----------------------------------------------------------------------------
@@ -100,6 +112,16 @@
 %include "../../libs/magdyn/topology.h"
 %include "../../libs/magdyn/diff.h"
 %include "../../libs/sym/bz.h"
+
+%include "../../tlibs2/libs/instr.h"
+%include "../../tlibs2/libs/instr/base.h"
+%include "../../tlibs2/libs/instr/base_loader.h"
+%include "../../tlibs2/libs/instr/frm.h"
+%include "../../tlibs2/libs/instr/psi.h"
+%include "../../tlibs2/libs/instr/macs.h"
+%include "../../tlibs2/libs/instr/tax.h"
+%include "../../tlibs2/libs/instr/trisp.h"
+%include "../../tlibs2/libs/instr/raw.h"
 
 
 // ----------------------------------------------------------------------------
@@ -189,6 +211,11 @@
  * main BZ class
  */
 %template(BZCalc) sym::BZCalc<tl2::mat<double>, tl2::vec<double>, double>;
+
+/**
+ * instrument data loaders
+ */
+%template(FileInstrBase) tl2::FileInstrBase<double>;
 // ----------------------------------------------------------------------------
 
 

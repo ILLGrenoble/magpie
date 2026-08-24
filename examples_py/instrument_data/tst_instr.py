@@ -24,8 +24,9 @@
 #
 
 import math
-import instr
 
+#import instr
+import magpy as instr
 import instrhelper
 
 

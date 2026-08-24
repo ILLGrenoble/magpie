@@ -1,1 +1,1 @@
-../../../examples_py/plot_dyn.py
+../../../examples_py/plotters/plot_dyn.py
