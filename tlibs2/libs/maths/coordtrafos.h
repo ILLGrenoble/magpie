@@ -59,6 +59,7 @@ namespace tl2 {
  */
 template<class T = double>
 std::tuple<T, T, T> cart_to_sph(T x, T y, T z)
+requires is_scalar<T>
 {
 	T rho = std::sqrt(x*x + y*y + z*z);
 	T phi = std::atan2(y, x);      // range: [-pi, pi]
@@ -74,6 +75,7 @@ std::tuple<T, T, T> cart_to_sph(T x, T y, T z)
  */
 template<class T = double>
 std::tuple<T, T, T> sph_to_cart(T rho, T phi, T theta)
+requires is_scalar<T>
 {
 	T x = rho * std::cos(phi)*std::sin(theta);
 	T y = rho * std::sin(phi)*std::sin(theta);
@@ -88,16 +90,12 @@ std::tuple<T, T, T> sph_to_cart(T rho, T phi, T theta)
  */
 template<class T = double>
 std::tuple<T, T> uv_mod(T u, T v)
+requires is_scalar<T>
 {
 	// wrap around u parameter
 	u = tl2::mod_pos<T>(u, 1.);
-
-	// "reflect back" out-of-range v parameter
-	if(v < 0.)
-		v = -v;
-	else if(v > 1.)
-		v = 1. - v;
-	//v = tl2::mod_pos<T>(v + 1., 2.) - 1.;
+	// see: https://en.wikipedia.org/wiki/Triangle_wave
+	v = std::acos(std::cos(tl2::pi<T> * v)) / tl2::pi<T>;
 
 	return std::make_tuple(u, v);
 }
@@ -110,6 +108,7 @@ std::tuple<T, T> uv_mod(T u, T v)
  */
 template<class T = double>
 std::tuple<T, T> uv_to_sph(T u, T v)
+requires is_scalar<T>
 {
 	std::tie(u, v) = uv_mod(u, v);
 	T phi = T(2)*pi<T>*u - pi<T>;
@@ -129,6 +128,7 @@ std::tuple<T, T> uv_to_sph(T u, T v)
  */
 template<class T = double>
 std::tuple<T, T> sph_to_uv(T phi, T theta)
+requires is_scalar<T>
 {
 	T u = (phi + pi<T>) / (T(2) * pi<T>);
 	T v = (std::cos(theta) + T(1)) / T(2);
@@ -143,6 +143,7 @@ std::tuple<T, T> sph_to_uv(T phi, T theta)
  */
 template<class T = double>
 std::tuple<T, T, T> cyl_to_sph(T rho_cyl, T phi_cyl, T z_cyl)
+requires is_scalar<T>
 {
 	T rho = std::sqrt(rho_cyl*rho_cyl + z_cyl*z_cyl);
 	T theta = std::acos(z_cyl / rho);
@@ -157,6 +158,7 @@ std::tuple<T, T, T> cyl_to_sph(T rho_cyl, T phi_cyl, T z_cyl)
  */
 template<class T = double>
 std::tuple<T, T, T> sph_to_cyl(T rho_sph, T phi_sph, T theta_sph)
+requires is_scalar<T>
 {
 	T rho = rho_sph * std::sin(theta_sph);
 	T z = rho_sph * std::cos(theta_sph);
@@ -171,6 +173,7 @@ std::tuple<T, T, T> sph_to_cyl(T rho_sph, T phi_sph, T theta_sph)
  */
 template<class T = double>
 std::tuple<T, T, T> cyl_to_cart(T rho, T phi, T z)
+requires is_scalar<T>
 {
 	T x = rho * std::cos(phi);
 	T y = rho * std::sin(phi);
@@ -185,6 +188,7 @@ std::tuple<T, T, T> cyl_to_cart(T rho, T phi, T z)
  */
 template<class T = double>
 std::tuple<T, T, T> cart_to_cyl(T x, T y, T z)
+requires is_scalar<T>
 {
 	T rho = std::sqrt(x*x + y*y);
 	T phi = std::atan2(y, x);
@@ -200,6 +204,7 @@ std::tuple<T, T, T> cart_to_cyl(T x, T y, T z)
  */
 template<class T = double>
 std::tuple<T, T> gnomonic_proj(T twophi_crys, T twotheta_crys)
+requires is_scalar<T>
 {
 	T x = -std::tan(twophi_crys);
 	T y = std::tan(twotheta_crys) / std::cos(twophi_crys);
@@ -215,6 +220,7 @@ std::tuple<T, T> gnomonic_proj(T twophi_crys, T twotheta_crys)
  */
 template<class T = double>
 std::tuple<T, T> stereographic_proj(T twophi_crys, T twotheta_crys, T rad)
+requires is_scalar<T>
 {
 	const T sth = std::sin(twotheta_crys);
 	const T cth = std::cos(twotheta_crys);
