@@ -279,7 +279,6 @@ void MagDynDlg::AssignCouplingsBySymmetryIndex(t_size symmidx,
 	const std::string* J, const std::string* DMI, const std::string* Js)
 {
 	//m_dyn.CalcSymmetryIndices(GetSymOpsForCurrentSG());
-
 	m_dyn.AssignCouplingsBySymmetryIndex(symmidx, J, DMI, Js);
 
 	//SyncSymmetryIndicesFromKernel();

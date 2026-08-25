@@ -528,6 +528,30 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 			}
 		}
 
+		// symmetry indices
+		bool needs_sym_recalc = false;
+		for(const t_site& site : m_dyn.GetMagneticSites())
+		{
+			if(site.sym_idx == 0)
+			{
+				needs_sym_recalc = true;
+				break;
+			}
+		}
+		if(!needs_sym_recalc)
+		{
+			for(const t_term& term : m_dyn.GetExchangeTerms())
+			{
+				if(term.sym_idx == 0)
+				{
+					needs_sym_recalc = true;
+					break;
+				}
+			}
+		}
+		if(needs_sym_recalc)
+			CalcSymmetryIndices();
+
 		if(m_groundstate_dlg)
 			m_groundstate_dlg->SyncFromKernel();
 	}

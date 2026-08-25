@@ -326,7 +326,7 @@ void GroundStateDlg::UpdateSpinFromTable(int row)
 		if(use_sym)
 		{
 			// set the spins of all sites with the same symmetry index
-			for(auto& othersite : m_dyn->GetMagneticSites())
+			for(t_site& othersite : m_dyn->GetMagneticSites())
 			{
 				if(othersite.sym_idx != site.sym_idx)
 					continue;
