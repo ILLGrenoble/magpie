@@ -154,12 +154,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 
 	std::cout << "Calculating ground state..." << std::endl;
 	std::unordered_set<std::string> fixed_params
-	{{
+	{
 		"site1_phi", "site1_theta",
 		"site2_phi",
-	}};
+	};
 
-	if(magdyn.CalcGroundState(&fixed_params, true))
+	bool ok = false;
+	const std::size_t minimiser_max_tries = 5;
+	std::size_t minimiser_try = 0;
+	while(/*!ok*/ true)
+	{
+		ok = magdyn.CalcGroundState(&fixed_params, true);
+		if(++minimiser_try >= minimiser_max_tries)
+			break;
+	}
+	if(ok)
 	{
 		std::cout << "Found ground state spins:" << std::endl;
 
@@ -179,7 +188,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 	// calculate a point on the dispersion
 	auto Es_and_S = magdyn.CalcEnergies(0.2, 0., 0., false);
 	BOOST_TEST(Es_and_S.size() == 2);  // + and - energy branch
-	if(Es_and_S.size() != 2)
+	if(Es_and_S.size() < 2)
 		return;
 
 	BOOST_TEST(tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps));

@@ -84,6 +84,26 @@ std::tuple<T, T, T> sph_to_cart(T rho, T phi, T theta)
 
 
 /**
+ * keep u, v parameters in [0, 1] range
+ */
+template<class T = double>
+std::tuple<T, T> uv_mod(T u, T v)
+{
+	// wrap around u parameter
+	u = tl2::mod_pos<T>(u, 1.);
+
+	// "reflect back" out-of-range v parameter
+	if(v < 0.)
+		v = -v;
+	else if(v > 1.)
+		v = 1. - v;
+	//v = tl2::mod_pos<T>(v + 1., 2.) - 1.;
+
+	return std::make_tuple(u, v);
+}
+
+
+/**
  * uv parameter -> spherical (for uniform point distribution on sphere)
  * u in [0, 1], v in [0, 1]
  * @see https://mathworld.wolfram.com/SpherePointPicking.html
@@ -91,13 +111,8 @@ std::tuple<T, T, T> sph_to_cart(T rho, T phi, T theta)
 template<class T = double>
 std::tuple<T, T> uv_to_sph(T u, T v)
 {
+	std::tie(u, v) = uv_mod(u, v);
 	T phi = T(2)*pi<T>*u - pi<T>;
-
-	// "reflect back" out-of-range parameter
-	if(v < 0.)
-		v = -v;
-	else if(v > 1.)
-		v -= v - 1.;
 
 	T c = T(2)*v - T(1);
 	c = std::clamp<T>(c, -1., 1.);

@@ -170,13 +170,10 @@ bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_p
 	t_size num_args = GetMagneticSitesCount() * 2;
 	std::vector<std::string> params;
 	std::vector<t_real> vals, errs;
-	std::vector<t_real> lower_lims, upper_lims;
 	std::vector<bool> fixed;
 	params.reserve(num_args);
 	vals.reserve(num_args);
 	errs.reserve(num_args);
-	lower_lims.reserve(num_args);
-	upper_lims.reserve(num_args);
 	fixed.reserve(num_args);
 
 	for(const MagneticSite& site : GetMagneticSites())
@@ -204,19 +201,12 @@ bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_p
 		vals.push_back(u);
 		vals.push_back(v);
 
-		lower_lims.push_back(0. -m_eps);
-		lower_lims.push_back(0. -m_eps);
-
-		upper_lims.push_back(1. + m_eps);
-		upper_lims.push_back(1. + m_eps);
-
 		errs.push_back(0.25);
 		errs.push_back(0.25);
 	}
 
-	if(tl2::minimise_dynargs<t_real>(num_args, func,
-		params, vals, errs, &fixed, &lower_lims, &upper_lims,
-		verbose && !m_silent, stop_request))
+	if(tl2::minimise_dynargs<t_real>(num_args, func, params, vals, errs,
+		&fixed, nullptr, nullptr, verbose && !m_silent, stop_request))
 	{
 		// set the spins to the newly-found ground state
 		for(t_size site_idx = 0; site_idx < GetMagneticSitesCount(); ++site_idx)
@@ -224,6 +214,7 @@ bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_p
 			// convert (u, v) to cartesian spin directions
 			t_real u = vals[site_idx * 2 + 0];
 			t_real v = vals[site_idx * 2 + 1];
+			std::tie(u, v) = tl2::uv_mod(u, v);
 			tl2::set_eps_round<t_real>(u, m_eps);
 			tl2::set_eps_round<t_real>(v, m_eps);
 
@@ -324,13 +315,10 @@ bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::st
 	t_size num_args = GetMagneticSitesCount(true) * 2;
 	std::vector<std::string> params;
 	std::vector<t_real> vals, errs;
-	std::vector<t_real> lower_lims, upper_lims;
 	std::vector<bool> fixed;
 	params.reserve(num_args);
 	vals.reserve(num_args);
 	errs.reserve(num_args);
-	lower_lims.reserve(num_args);
-	upper_lims.reserve(num_args);
 	fixed.reserve(num_args);
 
 	std::unordered_set<t_size> seen_sym_indices;
@@ -363,19 +351,12 @@ bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::st
 		vals.push_back(u);
 		vals.push_back(v);
 
-		lower_lims.push_back(0. -m_eps);
-		lower_lims.push_back(0. -m_eps);
-
-		upper_lims.push_back(1. + m_eps);
-		upper_lims.push_back(1. + m_eps);
-
 		errs.push_back(0.25);
 		errs.push_back(0.25);
 	}
 
-	if(tl2::minimise_dynargs<t_real>(num_args, func,
-		params, vals, errs, &fixed, &lower_lims, &upper_lims,
-		verbose && !m_silent, stop_request))
+	if(tl2::minimise_dynargs<t_real>(num_args, func, params, vals, errs,
+		&fixed, nullptr, nullptr, verbose && !m_silent, stop_request))
 	{
 		// set the spins to the newly-found ground state
 		// caution: symmetry indices are 1-based!
@@ -384,6 +365,7 @@ bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::st
 			// convert (u, v) to cartesian spin directions
 			t_real u = vals[(sym_idx - 1) * 2 + 0];
 			t_real v = vals[(sym_idx - 1) * 2 + 1];
+			std::tie(u, v) = tl2::uv_mod(u, v);
 			tl2::set_eps_round<t_real>(u, m_eps);
 			tl2::set_eps_round<t_real>(v, m_eps);
 
