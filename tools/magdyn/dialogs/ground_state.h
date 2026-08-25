@@ -29,6 +29,7 @@
 #include <QtCore/QSettings>
 #include <QtWidgets/QTableWidget>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QCheckBox>
 #include <QtWidgets/QLabel>
 
 #include <thread>
@@ -78,7 +79,9 @@ private:
 	std::optional<t_magdyn> m_dyn{};  // local copy to work on
 
 	QSettings *m_sett{};
+
 	QTableWidget *m_spinstab{};
+	QCheckBox *m_checkSym{};
 	QPushButton *m_btnFromKernel{}, *m_btnToKernel{};
 	QPushButton *m_btnMinimise{};
 	QLabel *m_status{};

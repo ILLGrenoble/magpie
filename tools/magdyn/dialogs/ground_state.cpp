@@ -97,6 +97,9 @@ GroundStateDlg::GroundStateDlg(QWidget *parent, QSettings *sett)
 	m_spinstab->setColumnWidth(COL_SPIN_U_FIXED, 50);
 	m_spinstab->setColumnWidth(COL_SPIN_V_FIXED, 50);
 
+	m_checkSym = new QCheckBox("Unique Sites", this);
+	m_checkSym->setToolTip("Keep the same spin for symmetry-equivalent sites.");
+
 	m_btnFromKernel = new QPushButton("Get Config.", this);
 	m_btnToKernel = new QPushButton("Set Spins", this);
 	m_btnMinimise = new QPushButton("Minimise", this);
@@ -126,6 +129,7 @@ GroundStateDlg::GroundStateDlg(QWidget *parent, QSettings *sett)
 	grid->setSpacing(4);
 	grid->setContentsMargins(8, 8, 8, 8);
 	grid->addWidget(m_spinstab, y++, 0, 1, 4);
+	grid->addWidget(m_checkSym, y++, 0, 1, 1);
 	grid->addWidget(m_btnFromKernel, y, 0, 1, 1);
 	grid->addWidget(m_btnToKernel, y, 1, 1, 1);
 	grid->addWidget(m_btnMinimise, y, 2, 1, 1);
@@ -306,18 +310,45 @@ void GroundStateDlg::UpdateSpinFromTable(int row)
 	const auto [ x, y, z ] = tl2::sph_to_cart<t_real>(
 		1., tl2::d2r(item_phi->GetValue()), tl2::d2r(item_theta->GetValue()));
 
+	const bool use_sym = m_checkSym->isChecked();
+
 	// set new spin (x, y, z)
 	if(t_size idx = m_dyn->GetMagneticSiteIndex(site_name);
 		idx < m_dyn->GetMagneticSitesCount())
 	{
 		t_site& site = m_dyn->GetMagneticSites()[idx];
 
-		site.spin_dir[0] = tl2::var_to_str(x, g_prec);
-		site.spin_dir[1] = tl2::var_to_str(y, g_prec);
-		site.spin_dir[2] = tl2::var_to_str(z, g_prec);
-		site.spin_dir_calc = tl2::create<t_vec3_real>({ x, y, z });
+		std::string sx = tl2::var_to_str(x, g_prec);
+		std::string sy = tl2::var_to_str(y, g_prec);
+		std::string sz = tl2::var_to_str(z, g_prec);
+		t_vec3_real Svec = tl2::create<t_vec3_real>({ x, y, z });
 
-		m_dyn->CalcMagneticSite(site);
+		if(use_sym)
+		{
+			// set the spins of all sites with the same symmetry index
+			for(auto& othersite : m_dyn->GetMagneticSites())
+			{
+				if(othersite.sym_idx != site.sym_idx)
+					continue;
+
+				othersite.spin_dir[0] = sx;
+				othersite.spin_dir[1] = sy;
+				othersite.spin_dir[2] = sz;
+				othersite.spin_dir_calc = Svec;
+
+				m_dyn->CalcMagneticSite(othersite);
+			}
+		}
+		else
+		{
+			// set the spin of the given site
+			site.spin_dir[0] = sx;
+			site.spin_dir[1] = sy;
+			site.spin_dir[2] = sz;
+			site.spin_dir_calc = Svec;
+
+			m_dyn->CalcMagneticSite(site);
+		}
 	}
 }
 
@@ -361,8 +392,19 @@ void GroundStateDlg::SyncFromKernel(const t_magdyn *dyn,
 	m_spinstab->clearContents();
 	m_spinstab->setRowCount(0);
 
+	const bool use_sym = m_checkSym->isChecked();
+	std::unordered_set<t_size> seen_sym_indices;
+
 	for(const t_site& site : m_dyn->GetMagneticSites())
 	{
+		if(use_sym)
+		{
+			// ignore symmetry-equivalent sites
+			if(seen_sym_indices.find(site.sym_idx) != seen_sym_indices.end())
+				continue;
+			seen_sym_indices.insert(site.sym_idx);
+		}
+
 		const t_vec3_real& S = site.spin_dir_calc;
 		const auto [ rho, phi, theta ] = tl2::cart_to_sph<t_real>(S[0], S[1], S[2]);
 		const auto [ u, v ] = tl2::sph_to_uv<t_real>(phi, theta);
@@ -473,7 +515,9 @@ void GroundStateDlg::Minimise()
 	m_running = true;
 	EnableMinimisation(false);
 
-	m_thread = std::make_unique<std::thread>([this]()
+	const bool use_sym = m_checkSym->isChecked();
+
+	m_thread = std::make_unique<std::thread>([this, use_sym]()
 	{
 		BOOST_SCOPE_EXIT(this_)
 		{
@@ -514,8 +558,12 @@ void GroundStateDlg::Minimise()
 
 		try
 		{
+			auto calc_func = &t_magdyn::CalcGroundState;
+			if(use_sym)
+				calc_func = &t_magdyn::CalcGroundStateUniqueSymmetry;
+
 			// minimise
-			if(!m_dyn->CalcGroundState(&fixed_spins, true, &m_stop_request))
+			if(!((*m_dyn).*calc_func)(&fixed_spins, true, &m_stop_request))
 			{
 				QMetaObject::invokeMethod(this, [this]()
 				{

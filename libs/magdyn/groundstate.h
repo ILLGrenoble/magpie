@@ -279,25 +279,30 @@ bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::st
 		if(args.size() < N*2)
 			return std::numeric_limits<t_real>::max();
 
-		for(t_size sym_idx = 1; sym_idx < N; ++sym_idx)
+		// caution: symmetry indices are 1-based!
+		for(t_size sym_idx = 1; sym_idx <= N; ++sym_idx)
 		{
 			// convert (u, v) to cartesian spin directions
-			t_real u = args[sym_idx * 2 + 0];
-			t_real v = args[sym_idx * 2 + 1];
+			t_real u = args[(sym_idx - 1) * 2 + 0];
+			t_real v = args[(sym_idx - 1) * 2 + 1];
 			if(std::isnan(u) || std::isnan(v) || std::isinf(u) || std::isinf(v))
 				return std::numeric_limits<t_real>::max();
 
 			const auto [ phi, theta ] = tl2::uv_to_sph<t_real>(u, v);
 			const auto [ x, y, z ] = tl2::sph_to_cart<t_real>(1., phi, theta);
 
+			std::string sx = tl2::var_to_str(x, m_prec);
+			std::string sy = tl2::var_to_str(y, m_prec);
+			std::string sz = tl2::var_to_str(z, m_prec);
+
 			for(MagneticSite& site : dyn.GetMagneticSites())
 			{
 				if(site.sym_idx != sym_idx)
 					continue;
 
-				site.spin_dir[0] = tl2::var_to_str(x, m_prec);
-				site.spin_dir[1] = tl2::var_to_str(y, m_prec);
-				site.spin_dir[2] = tl2::var_to_str(z, m_prec);
+				site.spin_dir[0] = sx;
+				site.spin_dir[1] = sy;
+				site.spin_dir[2] = sz;
 
 				dyn.CalcMagneticSite(site);
 			}
@@ -373,11 +378,12 @@ bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::st
 		verbose && !m_silent, stop_request))
 	{
 		// set the spins to the newly-found ground state
-		for(t_size sym_idx = 0; sym_idx < GetMagneticSitesCount(true); ++sym_idx)
+		// caution: symmetry indices are 1-based!
+		for(t_size sym_idx = 1; sym_idx <= GetMagneticSitesCount(true); ++sym_idx)
 		{
 			// convert (u, v) to cartesian spin directions
-			t_real u = vals[sym_idx * 2 + 0];
-			t_real v = vals[sym_idx * 2 + 1];
+			t_real u = vals[(sym_idx - 1) * 2 + 0];
+			t_real v = vals[(sym_idx - 1) * 2 + 1];
 			tl2::set_eps_round<t_real>(u, m_eps);
 			tl2::set_eps_round<t_real>(v, m_eps);
 
@@ -387,14 +393,18 @@ bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::st
 			tl2::set_eps_round<t_real>(y, m_eps);
 			tl2::set_eps_round<t_real>(z, m_eps);
 
+			std::string sx = tl2::var_to_str(x, m_prec);
+			std::string sy = tl2::var_to_str(y, m_prec);
+			std::string sz = tl2::var_to_str(z, m_prec);
+
 			for(MagneticSite& site : GetMagneticSites())
 			{
 				if(site.sym_idx != sym_idx)
 					continue;
 
-				site.spin_dir[0] = tl2::var_to_str(x, m_prec);
-				site.spin_dir[1] = tl2::var_to_str(y, m_prec);
-				site.spin_dir[2] = tl2::var_to_str(z, m_prec);
+				site.spin_dir[0] = sx;
+				site.spin_dir[1] = sy;
+				site.spin_dir[2] = sz;
 
 				CalcMagneticSite(site);
 			}
