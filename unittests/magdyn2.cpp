@@ -47,13 +47,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 
 
 	static constexpr t_real eps = 1e-4;
+	const t_real pi = tl2::pi<t_real>;
 
 	// types
 	using t_cplx = std::complex<t_real>;
 	using t_mat = tl2::mat<t_cplx>;
 	using t_vec = tl2::vec<t_cplx>;
-	//using t_mat_real = tl2::mat<t_real>;
-	//using t_vec_real = tl2::vec<t_real>;
 
 	using t_magdyn = magdyn::MagDyn<
 		t_mat, t_vec,
@@ -62,6 +61,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 
 	// magnon calculator
 	t_magdyn magdyn{};
+
+
+	// crystal lattice
+	magdyn.SetCrystalLattice(5., 5., 5., pi/2., pi/2., pi/2.);
 
 
 	// add a variable
@@ -156,7 +159,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 		"site2_phi",
 	}};
 
-	if(magdyn.CalcGroundState(&fixed_params), true)
+	if(magdyn.CalcGroundState(&fixed_params, true))
 	{
 		std::cout << "Found ground state spins:" << std::endl;
 
@@ -176,6 +179,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 	// calculate a point on the dispersion
 	auto Es_and_S = magdyn.CalcEnergies(0.2, 0., 0., false);
 	BOOST_TEST(Es_and_S.size() == 2);  // + and - energy branch
+	if(Es_and_S.size() != 2)
+		return;
+
 	BOOST_TEST(tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps));
 	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), 0.5878, eps));
 	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), 0.6513, eps));

@@ -212,10 +212,10 @@ public:
 	const Variables& GetVariables() const;
 	const MagneticSites& GetMagneticSites() const;
 	MagneticSites& GetMagneticSites();
-	t_size GetMagneticSitesCount() const;
+	t_size GetMagneticSitesCount(bool dont_count_equivalent = false) const;
 	const ExchangeTerms& GetExchangeTerms() const;
 	ExchangeTerms& GetExchangeTerms();
-	t_size GetExchangeTermsCount() const;
+	t_size GetExchangeTermsCount(bool dont_count_equivalent = false) const;
 
 	const ExternalField& GetExternalField() const;
 	const t_vec3_real& GetRotationAxis() const;
@@ -589,6 +589,9 @@ public:
 	 * minimise energy to found ground state
 	 */
 	bool CalcGroundState(const std::unordered_set<std::string>* fixed_params = nullptr,
+		bool verbose = false, const bool *stop_request = nullptr);
+
+	bool CalcGroundStateUniqueSymmetry(const std::unordered_set<std::string>* fixed_params = nullptr,
 		bool verbose = false, const bool *stop_request = nullptr);
 	// --------------------------------------------------------------------
 

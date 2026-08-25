@@ -153,9 +153,30 @@ MAGDYN_TEMPL MAGDYN_TYPE::MagneticSites& MAGDYN_INST::GetMagneticSites()
 }
 
 
-MAGDYN_TEMPL t_size MAGDYN_INST::GetMagneticSitesCount() const
+MAGDYN_TEMPL t_size MAGDYN_INST::GetMagneticSitesCount(bool dont_count_equivalent) const
 {
-	return m_sites.size();
+	if(!dont_count_equivalent)
+	{
+		// count all sites
+		return m_sites.size();
+	}
+	else
+	{
+		// only count unique sites
+		t_size count = 0;
+		std::unordered_set<t_size> seen_sym_indices;
+
+		for(const MagneticSite& site : GetMagneticSites())
+		{
+			if(seen_sym_indices.find(site.sym_idx) != seen_sym_indices.end())
+				continue;
+
+			++count;
+			seen_sym_indices.insert(site.sym_idx);
+		}
+
+		return count;
+	}
 }
 
 
@@ -171,9 +192,30 @@ MAGDYN_TEMPL MAGDYN_TYPE::ExchangeTerms& MAGDYN_INST::GetExchangeTerms()
 }
 
 
-MAGDYN_TEMPL t_size MAGDYN_INST::GetExchangeTermsCount() const
+MAGDYN_TEMPL t_size MAGDYN_INST::GetExchangeTermsCount(bool dont_count_equivalent) const
 {
-	return m_exchange_terms.size();
+	if(!dont_count_equivalent)
+	{
+		// count all terms
+		return m_exchange_terms.size();
+	}
+	else
+	{
+		// only count unique terms
+		t_size count = 0;
+		std::unordered_set<t_size> seen_sym_indices;
+
+		for(const ExchangeTerm& term : GetExchangeTerms())
+		{
+			if(seen_sym_indices.find(term.sym_idx) != seen_sym_indices.end())
+				continue;
+
+			++count;
+			seen_sym_indices.insert(term.sym_idx);
+		}
+
+		return count;
+	}
 }
 
 
