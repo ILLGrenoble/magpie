@@ -219,7 +219,10 @@ void MagDynDlg::CreateSitesPanel()
 		QIcon::fromTheme("list-remove"),
 		"Delete Symmetry-Equivalent Sites", this,
 		[this]() { this->DelIdentTabItems(m_sitestab, COL_SITE_SYM_IDX); });
-
+	menuTableContext->addAction(
+		QIcon::fromTheme("list-remove"),
+		"Delete Unused Sites", this,
+		[this]() { this->RemoveUnusedSites(); });
 
 
 	// table context menu in case nothing is selected
@@ -232,6 +235,10 @@ void MagDynDlg::CreateSitesPanel()
 		QIcon::fromTheme("list-remove"),
 		"Delete Site(s)", this,
 		[this]() { this->DelTabItem(m_sitestab); });
+	menuTableContextNoItem->addAction(
+		QIcon::fromTheme("list-remove"),
+		"Delete Unused Sites", this,
+		[this]() { this->RemoveUnusedSites(); });
 
 
 	// signals

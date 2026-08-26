@@ -394,11 +394,12 @@ protected:
 	// transfer sites and terms from the kernel
 	void SyncSitesFromKernel(boost::optional<const boost::property_tree::ptree&> extra_infos = boost::none);
 	void SyncTermsFromKernel(boost::optional<const boost::property_tree::ptree&> extra_infos = boost::none);
+	void RemoveUnusedSites(bool sync = true);  // remove sites without any coupling
+	void RemoveUnusedTerms(bool sync = true);  // remove terms without coupling constants
 	void SyncSymmetryIndicesFromKernel();
 	void SyncToKernel();         // transfer all data to the kernel
 	void CalcSymmetryIndices();  // assign symmetry groups to sites and couplings
 	void SortTerms();            // sort couplings by their lengths
-	void RemoveUnusedTerms();    // remove terms without coupling constants
 	void CalcAll();              // syncs sites and terms and calculates all dynamics
 	void CalcBZ();               // calculate brillouin zone and cut
 	void SetKernel(const t_magdyn* dyn, bool sync_sites = true, bool sync_terms = true, bool sync_idx = true);

@@ -364,6 +364,44 @@ void MAGDYN_INST::SortExchangeTerms()
 
 
 /**
+ * remove sites that don't have any coupling
+ */
+MAGDYN_TEMPL
+void MAGDYN_INST::RemoveUnusedMagneticSites()
+{
+	// get all used sites
+	std::unordered_set<std::string> used_sites;
+
+	for(const ExchangeTerm& term : GetExchangeTerms())
+	{
+		used_sites.insert(term.site1);
+		used_sites.insert(term.site2);
+	}
+
+	// remove unused sites
+	MagneticSites& sites = GetMagneticSites();
+
+	for(auto iter = sites.begin(); iter != sites.end(); )
+	{
+		MagneticSite& site = *iter;
+		if(used_sites.find(site.name) != used_sites.end())
+		{
+			// site in use
+			++iter;
+			continue;
+		}
+
+		// site not in use
+		iter = sites.erase(iter);
+	}
+
+	// recalculate changed site indices
+	CalcExchangeTerms();
+}
+
+
+
+/**
  * remove terms that don't have a coupling constant
  */
 MAGDYN_TEMPL

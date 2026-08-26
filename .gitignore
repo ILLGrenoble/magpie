@@ -42,6 +42,7 @@ build/**
 # temporary files
 tmp/**
 __pycache__/**
+.cache/**
 *.pyc
 *.csv
 *.swp

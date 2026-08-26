@@ -311,7 +311,7 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acStructSymIdx = new QAction("Assign Symmetry Indices", menuStruct);
 	QAction *acStructSortCouplings = new QAction("Sort Couplings by Length", menuStruct);
 	QAction *acStructAssignCouplings = new QAction("Assign Multiple Couplings...", menuStruct);
-	QAction *acStructRemoveUnusedCouplings = new QAction("Remove Unused Couplings", menuStruct);
+	QAction *acStructRemoveUnused = new QAction("Remove Unused Couplings and Sites", menuStruct);
 	QAction *acStructNotes = new QAction("Notes...", menuStruct);
 	QAction *acStructView = new QAction("View 3D Structure...", menuStruct);
 	QAction *acBZView = new QAction("View 3D Brillouin Zone...", menuStruct);
@@ -548,7 +548,7 @@ void MagDynDlg::CreateMenuBar()
 	menuStruct->addAction(acStructSymIdx);
 	menuStruct->addAction(acStructSortCouplings);
 	menuStruct->addAction(acStructAssignCouplings);
-	menuStruct->addAction(acStructRemoveUnusedCouplings);
+	menuStruct->addAction(acStructRemoveUnused);
 	menuStruct->addSeparator();
 	menuStruct->addAction(acStructNotes);
 	menuStruct->addSeparator();
@@ -684,7 +684,6 @@ void MagDynDlg::CreateMenuBar()
 	connect(acStructNotes, &QAction::triggered, this, &MagDynDlg::ShowNotesDlg);
 	connect(acStructSymIdx, &QAction::triggered, this, &MagDynDlg::CalcSymmetryIndices);
 	connect(acStructSortCouplings, &QAction::triggered, this, &MagDynDlg::SortTerms);
-	connect(acStructRemoveUnusedCouplings, &QAction::triggered, this, &MagDynDlg::RemoveUnusedTerms);
 	connect(acStructAssignCouplings, &QAction::triggered, this, &MagDynDlg::ShowAssignDlg);
 	connect(acStructView, &QAction::triggered, this, &MagDynDlg::ShowStructPlotDlg);
 	connect(acBZView, &QAction::triggered, this, &MagDynDlg::ShowBZ3DDlg);
@@ -714,6 +713,12 @@ void MagDynDlg::CreateMenuBar()
 	{
 		connect(action, &QAction::toggled, calc_all_dyn);
 	}
+
+	connect(acStructRemoveUnused, &QAction::triggered, [this]
+	{
+		RemoveUnusedTerms(false);
+		RemoveUnusedSites(true);
+	});
 
 	connect(m_autocalc, &QAction::toggled, [this](bool checked)
 	{

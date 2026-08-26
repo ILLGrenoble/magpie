@@ -439,6 +439,11 @@ public:
 	void SortExchangeTerms();
 
 	/**
+	 * remove sites that don't have any coupling
+	 */
+	void RemoveUnusedMagneticSites();
+
+	/**
 	 * remove terms that don't have a coupling constant
 	 */
 	void RemoveUnusedExchangeTerms();

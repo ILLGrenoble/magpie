@@ -521,10 +521,28 @@ void MagDynDlg::SortTerms()
 /**
  * remove terms without coupling constants
  */
-void MagDynDlg::RemoveUnusedTerms()
+void MagDynDlg::RemoveUnusedTerms(bool sync)
 {
 	m_dyn.RemoveUnusedExchangeTerms();
-	SyncTermsFromKernel();
+
+	if(sync)
+		SyncTermsFromKernel();
+}
+
+
+
+/**
+ * remove terms without coupling constants
+ */
+void MagDynDlg::RemoveUnusedSites(bool sync)
+{
+	m_dyn.RemoveUnusedMagneticSites();
+
+	if(sync)
+	{
+		SyncSitesFromKernel();
+		SyncTermsFromKernel();
+	}
 }
 
 
