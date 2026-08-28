@@ -204,6 +204,9 @@ void MagDynDlg::SyncSiteComboBox(SitesComboBox* combo, const std::string& select
 	} BOOST_SCOPE_EXIT_END
 	combo->blockSignals(true);
 
+	// manually remove items, clear doesn't seem to work...
+	while(combo->count())
+		combo->removeItem(0);
 	combo->clear();
 
 	int selected_idx = -1;
