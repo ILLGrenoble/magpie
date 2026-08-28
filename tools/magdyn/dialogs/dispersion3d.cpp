@@ -255,10 +255,15 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	m_S_filter->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_S_filter->setToolTip("Minimum S(Q, E) to keep.");
 
+	// remove bands with S = 0
+	m_S_pointwise = new QCheckBox("Pointwise");
+	m_S_pointwise->setChecked(false);
+	m_S_pointwise->setToolTip("Remove individual Q points having S < S_min, or otherwise entire magnon bands.");
+
 	// unite degenerate energies
-	m_unite_degeneracies = new QCheckBox("Unite degenerate Es.", groupQ);
+	m_unite_degeneracies = new QCheckBox("Unite Degenerate Es", groupQ);
 	m_unite_degeneracies->setChecked(false);
-	m_unite_degeneracies->setToolTip("Unite degenerate energies.");
+	m_unite_degeneracies->setToolTip("Unite degenerate magnon energies.");
 
 	// Q and E scale for plot
 	QGroupBox *groupPlotOptions = new QGroupBox("Plot Options", this);
@@ -363,7 +368,8 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	Qgrid->addWidget(btnMainQ, y++, 3, 1, 1);
 	Qgrid->addWidget(m_S_filter_enable, y, 0, 1, 1);
 	Qgrid->addWidget(m_S_filter, y, 1, 1, 1);
-	Qgrid->addWidget(m_unite_degeneracies, y++, 2, 1, 1);
+	Qgrid->addWidget(m_S_pointwise, y, 2, 1, 1);
+	Qgrid->addWidget(m_unite_degeneracies, y++, 3, 1, 1);
 
 	// plot options grid
 	y = 0;
@@ -447,6 +453,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	connect(m_enable_E_range[1], &QCheckBox::toggled, [this](bool enabled) { m_E_range[1]->setEnabled(enabled); Plot(true); });
 	connect(btnMainQ, &QAbstractButton::clicked, this, &Dispersion3DDlg::FromMainQ);
 	connect(m_S_filter_enable, &QCheckBox::toggled, m_S_filter, &QDoubleSpinBox::setEnabled);
+	connect(m_S_filter_enable, &QCheckBox::toggled, m_S_pointwise, &QDoubleSpinBox::setEnabled);
 	connect(m_E_range[0], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 		[this]() { Plot(true); });
 	connect(m_E_range[1], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
@@ -483,6 +490,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	});
 
 	m_S_filter->setEnabled(m_S_filter_enable->isChecked());
+	m_S_pointwise->setEnabled(m_S_filter_enable->isChecked());
 	EnableCalculation(true);
 }
 

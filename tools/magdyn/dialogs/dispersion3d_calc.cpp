@@ -212,7 +212,7 @@ void Dispersion3DDlg::ClearData()
 
 
 /**
- * calculate the dispersion
+ * calculate the dispersion bands
  */
 void Dispersion3DDlg::Calculate()
 {
@@ -227,6 +227,8 @@ void Dispersion3DDlg::Calculate()
 	} BOOST_SCOPE_EXIT_END
 	EnableCalculation(false);
 
+
+	// get options
 	SetMinMaxQ();
 	bool E_minmax_valid = false;
 
@@ -234,6 +236,8 @@ void Dispersion3DDlg::Calculate()
 	bool use_weights = m_S_filter_enable->isChecked();
 	bool use_projector = true;
 	bool unite_degen = m_unite_degeneracies->isChecked();
+	bool pointwise = m_S_pointwise->isChecked();
+
 
 	// calculate the dispersion
 	t_magdyn dyn = *m_dyn;
@@ -252,6 +256,7 @@ void Dispersion3DDlg::Calculate()
 	tl2::Stopwatch<t_real> stopwatch;
 	stopwatch.start();
 
+
 	// create calculation tasks
 	using t_task = std::packaged_task<void()>;
 	using t_taskptr = std::shared_ptr<t_task>;
@@ -266,8 +271,8 @@ void Dispersion3DDlg::Calculate()
 	for(t_size Q_idx_1 = 0; Q_idx_1 < m_Q_count_1; ++Q_idx_1)
 	for(t_size Q_idx_2 = 0; Q_idx_2 < m_Q_count_2; ++Q_idx_2)
 	{
-		auto task = [this, &mtx, &dyn, Q_idx_1, Q_idx_2, &E_minmax_valid,
-			expected_bands, unite_degen, use_weights, use_projector, min_S]()
+		auto task = [this, &mtx, &dyn, Q_idx_1, Q_idx_2, &E_minmax_valid, expected_bands,
+			unite_degen, use_weights, use_projector, min_S, pointwise]()
 		{
 			// calculate the dispersion at the given Q point
 			t_vec3_real Q = GetQFromIndices(Q_idx_1, Q_idx_2);
@@ -275,7 +280,9 @@ void Dispersion3DDlg::Calculate()
 
 			// iterate the energies for this Q point
 			t_size data_band_idx = 0;
-			for(t_size band_idx = 0; band_idx < Es_and_S.size() && data_band_idx < expected_bands; ++band_idx, ++data_band_idx)
+			for(t_size band_idx = 0;
+				band_idx < Es_and_S.size() && data_band_idx < expected_bands;
+				++band_idx, ++data_band_idx)
 			{
 				const auto& E_and_S = Es_and_S[band_idx];
 
@@ -312,7 +319,7 @@ void Dispersion3DDlg::Calculate()
 						weight = 0.;
 
 					// filter minimum S(Q, E)
-					if(min_S >= 0. && std::abs(weight) <= min_S)
+					if(pointwise && min_S > 0. && std::abs(weight) < min_S)
 						valid = false;
 				}  // weights
 
@@ -368,6 +375,7 @@ void Dispersion3DDlg::Calculate()
 		asio::post(pool, [taskptr]() { (*taskptr)(); });
 	}  // Q iteration
 
+
 	if(!E_minmax_valid)
 		m_minmax_E[0] = m_minmax_E[1] = 0.;
 
@@ -398,6 +406,7 @@ void Dispersion3DDlg::Calculate()
 
 	// finish parallel calculations
 	pool.join();
+
 
 	// get sorting of data by Q
 	for(t_size band_idx = 0; band_idx < m_data.size(); ++band_idx)
@@ -436,6 +445,7 @@ void Dispersion3DDlg::Calculate()
 		m_data[band_idx] = tl2::reorder(m_data[band_idx], perm);
 	}
 
+
 	// move degenerate points to the bands where most of the other points are
 	if(unite_degen && m_data.size())
 	{
@@ -461,20 +471,31 @@ void Dispersion3DDlg::Calculate()
 		}
 	}
 
-	// remove fully invalid bands
+	// remove fully invalid or empty bands
 	for(auto iter = m_data.begin(); iter != m_data.end();)
 	{
 		if(!IsValid(*iter))
+		{
 			iter = m_data.erase(iter);
-		else
-			++iter;
+			continue;
+		}
+
+		if(use_weights && !pointwise && IsEmpty(*iter, min_S))
+		{
+			iter = m_data.erase(iter);
+			continue;
+		}
+
+		++iter;
 	}
+
 
 	// sort band energies in descending order
 	std::stable_sort(m_data.begin(), m_data.end(), [this](const t_data_Qs& dat1, const t_data_Qs& dat2)
 	{
 		return GetMeanEnergy(dat1) >= GetMeanEnergy(dat2);
 	});
+
 
 	// show elapsed time
 	stopwatch.stop();
@@ -556,6 +577,24 @@ bool Dispersion3DDlg::IsValid(const t_data_Qs& data) const
 
 	// all points invalid
 	return false;
+}
+
+
+
+/**
+ * determine if a band has S = 0 everywhere
+ */
+bool Dispersion3DDlg::IsEmpty(const t_data_Qs& data, t_real min_S) const
+{
+	for(const t_data_Q& data : data)
+	{
+		// does at least one data point have finite S?
+		if(std::abs(std::get<2>(data)) >= min_S)
+			return false;
+	}
+
+	// all points have S = 0
+	return true;
 }
 
 

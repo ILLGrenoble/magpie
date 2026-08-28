@@ -108,6 +108,7 @@ protected:
 	std::pair<t_size, t_size> BandIndicesInRange() const;
 	std::pair<t_size, t_size> NumValid(const t_data_Qs& data) const;
 	bool IsValid(const t_data_Qs& data) const;
+	bool IsEmpty(const t_data_Qs& data, t_real minS = 0.) const;
 	t_real GetMeanEnergy(const t_data_Qs& data) const;
 	t_real GetMeanEnergy(t_size band_idx) const;
 	std::array<int, 3> GetBranchColour(t_size branch_idx, t_size num_branches) const;
@@ -185,6 +186,7 @@ private:
 	// correlation options
 	QCheckBox *m_S_filter_enable{};      // switch to enable minimum S(Q,E) value
 	QDoubleSpinBox *m_S_filter{};        // minimum S(Q,E) value
+	QCheckBox *m_S_pointwise{};          // remove points or otherwise entire bands with S = 0
 	QCheckBox *m_unite_degeneracies{};   // unite degenerate energies
 
 	// context menus
