@@ -89,25 +89,6 @@ requires is_quat<t_quat>
 
 
 /**
- * slerp
- * @see K. Shoemake, "Animating rotation with quaternion curves", http://dx.doi.org/10.1145/325334.325242
- * @see (Desktop Bronstein 2008), formula 4.207
- * @see (Bronstein 2008), p. 306, formula 4.155
- */
-template<class T>
-T slerp(const T& q1, const T& q2, typename T::value_type t)
-{
-	using t_real = typename T::value_type;
-	t_real angle = angle_unsigned<T>(q1, q2);
-
-	T q = std::sin((t_real(1)-t)*angle)/std::sin(angle) * q1 +
-	std::sin(t*angle)/std::sin(angle) * q2;
-
-	return q;
-}
-
-
-/**
  * set values close to an integer value to that integer
  * quaternion version
  */

@@ -68,9 +68,32 @@ T lerp(const T& a, const T& b, t_real pos)
 
 
 /**
+ * spherical linear interpolation for vectors and quaternions
+ * @see https://en.wikipedia.org/wiki/Spherical_linear_interpolation
+ * @see K. Shoemake, "Animating rotation with quaternion curves", http://dx.doi.org/10.1145/325334.325242
+ * @see (Desktop Bronstein 2008), formula 4.207
+ * @see (Bronstein 2008), p. 306, formula 4.155
+ */
+template<class T>
+T slerp(const T& q1, const T& q2, typename T::value_type t)
+{
+	using t_real = typename T::value_type;
+	t_real angle = angle_unsigned<T>(q1, q2);
+	t_real sin_angle = std::sin(angle);
+
+	T q = std::sin(angle*(t_real(1) - t))/sin_angle * q1 +
+		  std::sin(angle*t)/sin_angle * q2;
+
+	return q;
+}
+
+
+
+/**
  * @see http://mathworld.wolfram.com/BernsteinPolynomial.html
  */
-template<typename T> T bernstein(int i, int n, T t)
+template<typename T>
+T bernstein(int i, int n, T t)
 {
 	T bino = boost::math::binomial_coefficient<T>(n, i);
 	return bino * pow(t, i) * pow(1-t, n-i);

@@ -55,6 +55,7 @@ public:
 protected:
 	QWidget* CreateRotationPanel();
 	QWidget* CreateProjectionPanel();
+	QWidget* CreateCrossProductPanel();
 
 
 private:
@@ -66,12 +67,17 @@ private:
 	QDoubleSpinBox *m_spinAxis[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_spinAngle{};
 	QDoubleSpinBox *m_spinVecToRotate[3]{nullptr, nullptr, nullptr};
-	QCheckBox *m_checkRot{};
+	QCheckBox *m_checkXtalRot{};
 
 	QTextEdit *m_textProjection{};
 	QDoubleSpinBox *m_spinProjAxis[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_spinVecToProj[3]{nullptr, nullptr, nullptr};
-	QCheckBox *m_checkProj{};
+	QCheckBox *m_checkXtalProj{};
+
+	QTextEdit *m_textCrossProd{};
+	QDoubleSpinBox *m_spinVec1[3]{nullptr, nullptr, nullptr};
+	QDoubleSpinBox *m_spinVec2[3]{nullptr, nullptr, nullptr};
+	QCheckBox *m_checkXtalCrossProd{};
 
 
 protected slots:
@@ -79,6 +85,7 @@ protected slots:
 
 	void CalculateRotation();
 	void CalculateProjection();
+	void CalculateCrossProduct();
 };
 
 

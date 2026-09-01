@@ -60,8 +60,10 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 	QTabWidget *tabs = new QTabWidget(this);
 	QWidget *rotationPanel = CreateRotationPanel();
 	QWidget *projectionPanel = CreateProjectionPanel();
+	QWidget *crossProdPanel = CreateCrossProductPanel();
 	rotationPanel->setParent(tabs);
 	projectionPanel->setParent(tabs);
+	crossProdPanel->setParent(tabs);
 
 	// buttons
 	QDialogButtonBox *buttons = new QDialogButtonBox(this);
@@ -70,6 +72,7 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 	// tab panels
 	tabs->addTab(rotationPanel, "Axis Rotation");
 	tabs->addTab(projectionPanel, "Projection");
+	tabs->addTab(crossProdPanel, "Normal");
 
 	// main grid
 	auto grid_dlg = new QGridLayout(this);
@@ -94,6 +97,7 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 
 	CalculateRotation();
 	CalculateProjection();
+	CalculateCrossProduct();
 }
 
 
@@ -121,9 +125,9 @@ QWidget* TrafoCalculator::CreateRotationPanel()
 	m_spinAngle->setSingleStep(0.1);
 	//m_spinAngle->setSuffix("\xc2\xb0");
 
-	m_checkRot = new QCheckBox(rotationPanel);
-	m_checkRot->setText("Use Crystal System");
-	m_checkRot->setChecked(true);
+	m_checkXtalRot = new QCheckBox(rotationPanel);
+	m_checkXtalRot->setText("Use Crystal System");
+	m_checkXtalRot->setChecked(true);
 
 	QPushButton *btnRecalc = new QPushButton(rotationPanel);
 	btnRecalc->setText("Get Crystal");
@@ -165,7 +169,7 @@ QWidget* TrafoCalculator::CreateRotationPanel()
 	grid_rotation->addWidget(m_spinAxis[2], 0, 3, 1, 1);
 	grid_rotation->addWidget(labelAngle, 1, 0, 1, 1);
 	grid_rotation->addWidget(m_spinAngle, 1, 1, 1, 1);
-	grid_rotation->addWidget(m_checkRot, 1, 2, 1, 1);
+	grid_rotation->addWidget(m_checkXtalRot, 1, 2, 1, 1);
 	grid_rotation->addWidget(btnRecalc, 1, 3, 1, 1);
 	grid_rotation->addWidget(labelVecToRotate, 2, 0, 1, 1);
 	grid_rotation->addWidget(m_spinVecToRotate[0], 2, 1, 1, 1);
@@ -182,7 +186,7 @@ QWidget* TrafoCalculator::CreateRotationPanel()
 			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 			this, &TrafoCalculator::CalculateRotation);
 	}
-	connect(m_checkRot, &QCheckBox::toggled, [this, btnRecalc](bool checked)
+	connect(m_checkXtalRot, &QCheckBox::toggled, [this, btnRecalc](bool checked)
 	{
 		btnRecalc->setEnabled(checked);
 		CalculateRotation();
@@ -200,9 +204,6 @@ QWidget* TrafoCalculator::CreateProjectionPanel()
 	// projection tab (crystal)
 	QWidget *projectionPanel = new QWidget(this);
 
-	QLabel *labelAxis = new QLabel("Axis (rlu): ");
-	QLabel *labelVecToProj = new QLabel("Vector (rlu): ");
-
 	m_spinProjAxis[0] = new QDoubleSpinBox(projectionPanel);
 	m_spinProjAxis[1] = new QDoubleSpinBox(projectionPanel);
 	m_spinProjAxis[2] = new QDoubleSpinBox(projectionPanel);
@@ -210,9 +211,9 @@ QWidget* TrafoCalculator::CreateProjectionPanel()
 	m_spinProjAxis[1]->setValue(0);
 	m_spinProjAxis[2]->setValue(1);
 
-	m_checkProj = new QCheckBox(projectionPanel);
-	m_checkProj->setText("Use Crystal System");
-	m_checkProj->setChecked(true);
+	m_checkXtalProj = new QCheckBox(projectionPanel);
+	m_checkXtalProj->setText("Use Crystal System");
+	m_checkXtalProj->setChecked(true);
 
 	QPushButton *btnRecalc = new QPushButton(projectionPanel);
 	btnRecalc->setText("Get Crystal");
@@ -237,6 +238,8 @@ QWidget* TrafoCalculator::CreateProjectionPanel()
 		m_spinVecToProj[i]->setSingleStep(0.1);
 	}
 
+	QLabel *labelAxis = new QLabel("Axis (rlu): ");
+	QLabel *labelVecToProj = new QLabel("Vector (rlu): ");
 	labelAxis->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
 	labelVecToProj->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
 
@@ -251,7 +254,7 @@ QWidget* TrafoCalculator::CreateProjectionPanel()
 	grid_projection->addWidget(m_spinProjAxis[0], 0, 1, 1, 1);
 	grid_projection->addWidget(m_spinProjAxis[1], 0, 2, 1, 1);
 	grid_projection->addWidget(m_spinProjAxis[2], 0, 3, 1, 1);
-	grid_projection->addWidget(m_checkProj, 1, 2, 1, 1);
+	grid_projection->addWidget(m_checkXtalProj, 1, 2, 1, 1);
 	grid_projection->addWidget(btnRecalc, 1, 3, 1, 1);
 	grid_projection->addWidget(labelVecToProj, 2, 0, 1, 1);
 	grid_projection->addWidget(m_spinVecToProj[0], 2, 1, 1, 1);
@@ -268,7 +271,7 @@ QWidget* TrafoCalculator::CreateProjectionPanel()
 			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 			this, &TrafoCalculator::CalculateProjection);
 	}
-	connect(m_checkProj, &QCheckBox::toggled, [this, btnRecalc](bool checked)
+	connect(m_checkXtalProj, &QCheckBox::toggled, [this, btnRecalc](bool checked)
 	{
 		btnRecalc->setEnabled(checked);
 		CalculateProjection();
@@ -277,6 +280,90 @@ QWidget* TrafoCalculator::CreateProjectionPanel()
 		this, &TrafoCalculator::CalculateProjection);
 
 	return projectionPanel;
+}
+
+
+
+QWidget* TrafoCalculator::CreateCrossProductPanel()
+{
+	// projection tab (crystal)
+	QWidget *crossProdPanel = new QWidget(this);
+
+	m_spinVec1[0] = new QDoubleSpinBox(crossProdPanel);
+	m_spinVec1[1] = new QDoubleSpinBox(crossProdPanel);
+	m_spinVec1[2] = new QDoubleSpinBox(crossProdPanel);
+	m_spinVec1[0]->setValue(1);
+	m_spinVec1[1]->setValue(0);
+	m_spinVec1[2]->setValue(0);
+
+	m_spinVec2[0] = new QDoubleSpinBox(crossProdPanel);
+	m_spinVec2[1] = new QDoubleSpinBox(crossProdPanel);
+	m_spinVec2[2] = new QDoubleSpinBox(crossProdPanel);
+	m_spinVec2[0]->setValue(0);
+	m_spinVec2[1]->setValue(1);
+	m_spinVec2[2]->setValue(0);
+
+	for(int i = 0; i < 3; ++i)
+	{
+		m_spinVec1[i]->setMinimum(-999.);
+		m_spinVec1[i]->setMaximum(999.);
+		m_spinVec1[i]->setDecimals(4);
+		m_spinVec1[i]->setSingleStep(0.1);
+
+		m_spinVec2[i]->setMinimum(-999.);
+		m_spinVec2[i]->setMaximum(999.);
+		m_spinVec2[i]->setDecimals(4);
+		m_spinVec2[i]->setSingleStep(0.1);
+	}
+
+	m_checkXtalCrossProd = new QCheckBox(crossProdPanel);
+	m_checkXtalCrossProd->setText("Use Crystal System");
+	m_checkXtalCrossProd->setChecked(true);
+
+	QPushButton *btnRecalc = new QPushButton(crossProdPanel);
+	btnRecalc->setText("Get Crystal");
+
+	QLabel *labelVec1 = new QLabel("Vector 1 (rlu): ");
+	QLabel *labelVec2 = new QLabel("Vector 2 (rlu): ");
+	labelVec1->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
+	labelVec2->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
+
+	m_textCrossProd = new QTextEdit(crossProdPanel);
+	m_textCrossProd->setReadOnly(true);
+
+	// rotation grid
+	auto grid_projection = new QGridLayout(crossProdPanel);
+	grid_projection->setSpacing(4);
+	grid_projection->setContentsMargins(6, 6, 6, 6);
+	grid_projection->addWidget(labelVec1, 0, 0, 1, 1);
+	grid_projection->addWidget(m_spinVec1[0], 0, 1, 1, 1);
+	grid_projection->addWidget(m_spinVec1[1], 0, 2, 1, 1);
+	grid_projection->addWidget(m_spinVec1[2], 0, 3, 1, 1);
+	grid_projection->addWidget(labelVec2, 1, 0, 1, 1);
+	grid_projection->addWidget(m_spinVec2[0], 1, 1, 1, 1);
+	grid_projection->addWidget(m_spinVec2[1], 1, 2, 1, 1);
+	grid_projection->addWidget(m_spinVec2[2], 1, 3, 1, 1);
+	grid_projection->addWidget(m_checkXtalCrossProd, 2, 2, 1, 1);
+	grid_projection->addWidget(btnRecalc, 2, 3, 1, 1);
+	grid_projection->addWidget(m_textCrossProd, 3, 0, 1, 4);
+
+	// connections
+	for(QDoubleSpinBox* spin : {
+		m_spinVec1[0], m_spinVec1[1], m_spinVec1[2],
+		m_spinVec2[0], m_spinVec2[1], m_spinVec2[2] })
+	{
+		connect(spin,
+			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+			this, &TrafoCalculator::CalculateCrossProduct);
+	}
+	connect(m_checkXtalCrossProd, &QCheckBox::toggled, [this, btnRecalc](bool checked)
+	{
+		btnRecalc->setEnabled(checked);
+		CalculateCrossProduct();
+	});
+	connect(btnRecalc, &QAbstractButton::clicked, this, &TrafoCalculator::CalculateCrossProduct);
+
+	return crossProdPanel;
 }
 
 
@@ -302,7 +389,7 @@ void TrafoCalculator::CalculateRotation()
 
 
 	// apply crystal B matrix
-	bool use_B = m_checkRot->isChecked() && m_dyn;
+	bool use_B = m_checkXtalRot->isChecked() && m_dyn;
 	t_mat33_real xtalB_inv;
 	bool inv_ok = false;
 
@@ -434,7 +521,7 @@ void TrafoCalculator::CalculateProjection()
 
 
 	// apply crystal B matrix
-	bool use_B = m_checkProj->isChecked() && m_dyn;
+	bool use_B = m_checkXtalProj->isChecked() && m_dyn;
 	t_mat33_real xtalB_inv;
 	bool inv_ok = false;
 
@@ -575,6 +662,118 @@ void TrafoCalculator::CalculateProjection()
 
 
 	m_textProjection->setHtml(ostrResult.str().c_str());
+}
+
+
+
+void TrafoCalculator::CalculateCrossProduct()
+{
+	using namespace tl2_ops;
+
+	if(!m_textCrossProd)
+		return;
+
+	t_vec3_real vec1 = tl2::create<t_vec3_real>({
+		(t_real)m_spinVec1[0]->value(),
+		(t_real)m_spinVec1[1]->value(),
+		(t_real)m_spinVec1[2]->value() });
+	t_vec3_real vec2 = tl2::create<t_vec3_real>({
+		(t_real)m_spinVec2[0]->value(),
+		(t_real)m_spinVec2[1]->value(),
+		(t_real)m_spinVec2[2]->value() });
+
+	m_textCrossProd->clear();
+
+
+	// apply crystal B matrix
+	bool use_B = m_checkXtalProj->isChecked() && m_dyn;
+	t_mat33_real xtalB_inv;
+	bool inv_ok = false;
+
+	if(use_B)
+	{
+		const t_mat33_real& xtalB = m_dyn->GetCrystalBTrafo();
+		std::tie(xtalB_inv, inv_ok) = tl2::inv(xtalB);
+
+		vec1 = xtalB * vec1;
+		vec2 = xtalB * vec2;
+	}
+
+
+	// print the B and the rotation matrices
+	std::ostringstream ostrResult;
+	ostrResult.precision(g_prec);
+
+	if(use_B)
+	{
+		t_mat33_real xtalB = m_dyn->GetCrystalBTrafo();
+		tl2::set_eps_0(xtalB, g_eps);
+
+
+		ostrResult << "<p>Crystal B Matrix:\n";
+		ostrResult << "<table style=\"border:0px\">\n";
+		for(std::size_t i = 0; i < xtalB.size1(); ++i)
+		{
+			ostrResult << "\t<tr>\n";
+			for(std::size_t j = 0; j < xtalB.size2(); ++j)
+			{
+				ostrResult << "\t\t<td style=\"padding-right:8px\">";
+				ostrResult << xtalB(i, j);
+				ostrResult << "</td>\n";
+			}
+			ostrResult << "\t</tr>\n";
+		}
+		ostrResult << "</table>";
+		ostrResult << "</p>\n";
+
+		ostrResult << "<p>B Matrix As Single-Line String:<br>";
+		ostrResult << xtalB;
+		ostrResult << "</p>\n";
+	}
+
+
+	tl2::set_eps_0(vec1, g_eps);
+	ostrResult << "<p>Vector 1 (lab): ";
+	ostrResult << vec1;
+	ostrResult << "</p>\n";
+
+	tl2::set_eps_0(vec2, g_eps);
+	ostrResult << "<p>Vector 2 (lab): ";
+	ostrResult << vec2;
+	ostrResult << "</p>\n";
+
+	// print the cross product vector
+	t_vec3_real vec_cross = tl2::cross<t_vec3_real>(vec1, vec2);
+	t_vec3_real vec_cross_norm = vec_cross / tl2::norm<t_vec3_real>(vec_cross);
+
+	tl2::set_eps_0(vec_cross, g_eps);
+	ostrResult << "<p>Normal Vector (lab): ";
+	ostrResult << vec_cross;
+	ostrResult << "</p>\n";
+
+	tl2::set_eps_0(vec_cross, g_eps);
+	ostrResult << "<p>Normalised Normal Vector (lab): ";
+	ostrResult << vec_cross_norm;
+	ostrResult << "</p>\n";
+
+	if(use_B && inv_ok)
+	{
+		vec_cross = xtalB_inv * vec_cross;
+		vec_cross_norm = xtalB_inv * vec_cross_norm;
+		tl2::set_eps_0(vec_cross, g_eps);
+		tl2::set_eps_0(vec_cross_norm, g_eps);
+
+		ostrResult << "<p>Normal Vector (rlu): ";
+		ostrResult << vec_cross;
+		ostrResult << "</p>\n";
+
+		ostrResult << "<p>Normalised Normal Vector (rlu): ";
+		ostrResult << vec_cross_norm;
+		ostrResult << "</p>\n";
+	}
+
+
+	m_textCrossProd->setHtml(ostrResult.str().c_str());
 }
 
 
