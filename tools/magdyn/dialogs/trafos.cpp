@@ -46,6 +46,7 @@ void TrafoCalculator::SetKernel(const t_magdyn* dyn)
 
 	CalculateRotation();
 	CalculateProjection();
+	CalculateCrossProduct();
 }
 
 
@@ -94,10 +95,6 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 	// connections
 	connect(buttons, &QDialogButtonBox::accepted, this, &TrafoCalculator::accept);
 	connect(buttons, &QDialogButtonBox::rejected, this, &TrafoCalculator::reject);
-
-	CalculateRotation();
-	CalculateProjection();
-	CalculateCrossProduct();
 }
 
 
@@ -127,10 +124,12 @@ QWidget* TrafoCalculator::CreateRotationPanel()
 
 	m_checkXtalRot = new QCheckBox(rotationPanel);
 	m_checkXtalRot->setText("Use Crystal System");
+	m_checkXtalRot->setToolTip("Use the crystallographic B matrix.");
 	m_checkXtalRot->setChecked(true);
 
 	QPushButton *btnRecalc = new QPushButton(rotationPanel);
 	btnRecalc->setText("Get Crystal");
+	btnRecalc->setToolTip("Get the crystallographic B matrix and recalculate.");
 
 	m_spinVecToRotate[0] = new QDoubleSpinBox(rotationPanel);
 	m_spinVecToRotate[1] = new QDoubleSpinBox(rotationPanel);
@@ -211,13 +210,6 @@ QWidget* TrafoCalculator::CreateProjectionPanel()
 	m_spinProjAxis[1]->setValue(0);
 	m_spinProjAxis[2]->setValue(1);
 
-	m_checkXtalProj = new QCheckBox(projectionPanel);
-	m_checkXtalProj->setText("Use Crystal System");
-	m_checkXtalProj->setChecked(true);
-
-	QPushButton *btnRecalc = new QPushButton(projectionPanel);
-	btnRecalc->setText("Get Crystal");
-
 	m_spinVecToProj[0] = new QDoubleSpinBox(projectionPanel);
 	m_spinVecToProj[1] = new QDoubleSpinBox(projectionPanel);
 	m_spinVecToProj[2] = new QDoubleSpinBox(projectionPanel);
@@ -238,6 +230,15 @@ QWidget* TrafoCalculator::CreateProjectionPanel()
 		m_spinVecToProj[i]->setSingleStep(0.1);
 	}
 
+	m_checkXtalProj = new QCheckBox(projectionPanel);
+	m_checkXtalProj->setText("Use Crystal System");
+	m_checkXtalProj->setToolTip("Use the crystallographic B matrix.");
+	m_checkXtalProj->setChecked(true);
+
+	QPushButton *btnRecalc = new QPushButton(projectionPanel);
+	btnRecalc->setText("Get Crystal");
+	btnRecalc->setToolTip("Get the crystallographic B matrix and recalculate.");
+
 	QLabel *labelAxis = new QLabel("Axis (rlu): ");
 	QLabel *labelVecToProj = new QLabel("Vector (rlu): ");
 	labelAxis->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
@@ -254,12 +255,12 @@ QWidget* TrafoCalculator::CreateProjectionPanel()
 	grid_projection->addWidget(m_spinProjAxis[0], 0, 1, 1, 1);
 	grid_projection->addWidget(m_spinProjAxis[1], 0, 2, 1, 1);
 	grid_projection->addWidget(m_spinProjAxis[2], 0, 3, 1, 1);
-	grid_projection->addWidget(m_checkXtalProj, 1, 2, 1, 1);
-	grid_projection->addWidget(btnRecalc, 1, 3, 1, 1);
-	grid_projection->addWidget(labelVecToProj, 2, 0, 1, 1);
-	grid_projection->addWidget(m_spinVecToProj[0], 2, 1, 1, 1);
-	grid_projection->addWidget(m_spinVecToProj[1], 2, 2, 1, 1);
-	grid_projection->addWidget(m_spinVecToProj[2], 2, 3, 1, 1);
+	grid_projection->addWidget(labelVecToProj, 1, 0, 1, 1);
+	grid_projection->addWidget(m_spinVecToProj[0], 1, 1, 1, 1);
+	grid_projection->addWidget(m_spinVecToProj[1], 1, 2, 1, 1);
+	grid_projection->addWidget(m_spinVecToProj[2], 1, 3, 1, 1);
+	grid_projection->addWidget(m_checkXtalProj, 2, 2, 1, 1);
+	grid_projection->addWidget(btnRecalc, 2, 3, 1, 1);
 	grid_projection->addWidget(m_textProjection, 3, 0, 1, 4);
 
 	// connections
@@ -318,10 +319,12 @@ QWidget* TrafoCalculator::CreateCrossProductPanel()
 
 	m_checkXtalCrossProd = new QCheckBox(crossProdPanel);
 	m_checkXtalCrossProd->setText("Use Crystal System");
+	m_checkXtalCrossProd->setToolTip("Use the crystallographic B matrix.");
 	m_checkXtalCrossProd->setChecked(true);
 
 	QPushButton *btnRecalc = new QPushButton(crossProdPanel);
 	btnRecalc->setText("Get Crystal");
+	btnRecalc->setToolTip("Get the crystallographic B matrix and recalculate.");
 
 	QLabel *labelVec1 = new QLabel("Vector 1 (rlu): ");
 	QLabel *labelVec2 = new QLabel("Vector 2 (rlu): ");
@@ -364,6 +367,42 @@ QWidget* TrafoCalculator::CreateCrossProductPanel()
 	connect(btnRecalc, &QAbstractButton::clicked, this, &TrafoCalculator::CalculateCrossProduct);
 
 	return crossProdPanel;
+}
+
+
+
+/**
+ * prints a matrix as html table
+ */
+static void print_matrix(const t_mat33_real& _mat, const std::string& name,
+	std::ostream& ostr = std::cout)
+{
+	using namespace tl2_ops;
+
+	t_mat33_real mat = _mat;
+	tl2::set_eps_0(mat, g_eps);
+
+	ostr << "<p>" << name << ":\n";
+	ostr << "<table style=\"border:0px\">\n";
+	for(std::size_t i = 0; i < mat.size1(); ++i)
+	{
+		ostr << "\t<tr>\n";
+		for(std::size_t j = 0; j < mat.size2(); ++j)
+		{
+			ostr << "\t\t<td style=\"padding-right:8px\">";
+			ostr << mat(i, j);
+			ostr << "</td>\n";
+		}
+		ostr << "\t</tr>\n";
+	}
+	ostr << "</table>";
+	ostr << "</p>\n";
+
+	ostr << "<p>" << name << " Trace: ";
+	ostr << tl2::trace(mat);
+	ostr << "<br>" << name << " As Single-Line String:<br>";
+	ostr << mat;
+	ostr << "</p>\n";
 }
 
 
@@ -411,54 +450,11 @@ void TrafoCalculator::CalculateRotation()
 	ostrResult.precision(g_prec);
 
 	if(use_B)
-	{
-		t_mat33_real xtalB = m_dyn->GetCrystalBTrafo();
-		tl2::set_eps_0(xtalB, g_eps);
+		print_matrix(m_dyn->GetCrystalBTrafo(), "Crystal B Matrix", ostrResult);
 
-		ostrResult << "<p>Crystal B Matrix:\n";
-		ostrResult << "<table style=\"border:0px\">\n";
-		for(std::size_t i = 0; i < xtalB.size1(); ++i)
-		{
-			ostrResult << "\t<tr>\n";
-			for(std::size_t j = 0; j < xtalB.size2(); ++j)
-			{
-				ostrResult << "\t\t<td style=\"padding-right:8px\">";
-				ostrResult << xtalB(i, j);
-				ostrResult << "</td>\n";
-			}
-			ostrResult << "\t</tr>\n";
-		}
-		ostrResult << "</table>";
-		ostrResult << "</p>\n";
-
-		ostrResult << "<p>B Matrix As Single-Line String:<br>";
-		ostrResult << xtalB;
-		ostrResult << "</p>\n";
-	}
-
-	ostrResult << "<p>Transformation Matrix:\n";
-	ostrResult << "<table style=\"border:0px\">\n";
-	for(std::size_t i = 0; i < mat.size1(); ++i)
-	{
-		ostrResult << "\t<tr>\n";
-		for(std::size_t j = 0; j < mat.size2(); ++j)
-		{
-			ostrResult << "\t\t<td style=\"padding-right:8px\">";
-			ostrResult << mat(i, j);
-			ostrResult << "</td>\n";
-		}
-		ostrResult << "\t</tr>\n";
-	}
-	ostrResult << "</table>";
-	ostrResult << "</p>\n";
-
-	ostrResult << "<p>Trafo As Single-Line String:<br>";
-	ostrResult << mat;
-	ostrResult << "</p>\n";
-
+	print_matrix(mat, "Transformation Matrix", ostrResult);
 
 	using t_quat = boost::math::quaternion<t_real>;
-
 	t_quat quat = tl2::rot3_to_quat<t_mat33_real, t_quat>(mat);
 	tl2::set_eps_0(quat, g_eps);
 	ostrResult << "<p>Trafo As Quaternion:<br>";
@@ -470,10 +466,9 @@ void TrafoCalculator::CalculateRotation()
 		tl2::set_eps_0(axis, g_eps);
 		ostrResult << "<p>Original Axis (lab): ";
 		ostrResult << axis;
-		ostrResult << "</p>\n";
-
+		ostrResult << "<br>\n";
 		tl2::set_eps_0(vec, g_eps);
-		ostrResult << "<p>Original Vector (lab): ";
+		ostrResult << "Original Vector (lab): ";
 		ostrResult << vec;
 		ostrResult << "</p>\n";
 	}
@@ -484,16 +479,15 @@ void TrafoCalculator::CalculateRotation()
 	tl2::set_eps_0(vec_rot, g_eps);
 	ostrResult << "<p>Rotated Vector (lab): ";
 	ostrResult << vec_rot;
-	ostrResult << "</p>\n";
 
 	if(use_B && inv_ok)
 	{
 		vec_rot = xtalB_inv * vec_rot;
 		tl2::set_eps_0(vec_rot, g_eps);
-		ostrResult << "<p>Rotated Vector (rlu): ";
+		ostrResult << "<br>Rotated Vector (rlu): ";
 		ostrResult << vec_rot;
-		ostrResult << "</p>\n";
 	}
+	ostrResult << "</p>\n";
 
 
 	m_textRotation->setHtml(ostrResult.str().c_str());
@@ -545,90 +539,18 @@ void TrafoCalculator::CalculateProjection()
 	ostrResult.precision(g_prec);
 
 	if(use_B)
-	{
-		t_mat33_real xtalB = m_dyn->GetCrystalBTrafo();
-		tl2::set_eps_0(xtalB, g_eps);
+		print_matrix(m_dyn->GetCrystalBTrafo(), "Crystal B Matrix", ostrResult);
+	
+	print_matrix(matProj, "Projection Matrix", ostrResult);
+	print_matrix(matOrthoProj, "Orthogonal Projection Matrix", ostrResult);
 
-
-		ostrResult << "<p>Crystal B Matrix:\n";
-		ostrResult << "<table style=\"border:0px\">\n";
-		for(std::size_t i = 0; i < xtalB.size1(); ++i)
-		{
-			ostrResult << "\t<tr>\n";
-			for(std::size_t j = 0; j < xtalB.size2(); ++j)
-			{
-				ostrResult << "\t\t<td style=\"padding-right:8px\">";
-				ostrResult << xtalB(i, j);
-				ostrResult << "</td>\n";
-			}
-			ostrResult << "\t</tr>\n";
-		}
-		ostrResult << "</table>";
-		ostrResult << "</p>\n";
-
-		ostrResult << "<p>B Matrix As Single-Line String:<br>";
-		ostrResult << xtalB;
-		ostrResult << "</p>\n";
-	}
-
-
-	ostrResult << "<p>Projection Matrix:\n";
-	ostrResult << "<table style=\"border:0px\">\n";
-	for(std::size_t i = 0; i < matProj.size1(); ++i)
-	{
-		ostrResult << "\t<tr>\n";
-		for(std::size_t j = 0; j < matProj.size2(); ++j)
-		{
-			ostrResult << "\t\t<td style=\"padding-right:8px\">";
-			ostrResult << matProj(i, j);
-			ostrResult << "</td>\n";
-		}
-		ostrResult << "\t</tr>\n";
-	}
-	ostrResult << "</table>";
-	ostrResult << "</p>\n";
-
-	ostrResult << "<p>Projection Matrix Trace: ";
-	ostrResult << tl2::trace(matProj);
-	ostrResult << "</p>\n";
-
-	ostrResult << "<p>Projection Matrix As Single-Line String:<br>";
-	ostrResult << matProj;
-	ostrResult << "</p>\n";
-
-
-	ostrResult << "<p>Orthogonal Projection Matrix:\n";
-	ostrResult << "<table style=\"border:0px\">\n";
-	for(std::size_t i = 0; i < matOrthoProj.size1(); ++i)
-	{
-		ostrResult << "\t<tr>\n";
-		for(std::size_t j = 0; j < matOrthoProj.size2(); ++j)
-		{
-			ostrResult << "\t\t<td style=\"padding-right:8px\">";
-			ostrResult << matOrthoProj(i, j);
-			ostrResult << "</td>\n";
-		}
-		ostrResult << "\t</tr>\n";
-	}
-	ostrResult << "</table>";
-	ostrResult << "</p>\n";
-
-	ostrResult << "<p>Orthogonal Projection Matrix Trace: ";
-	ostrResult << tl2::trace(matOrthoProj);
-	ostrResult << "</p>\n";
-
-	ostrResult << "<p>Orthogonal Projection Matrix As Single-Line String:<br>";
-	ostrResult << matOrthoProj;
-	ostrResult << "</p>\n";
-
-
+	// print the original vectors
 	tl2::set_eps_0(axis, g_eps);
 	ostrResult << "<p>Original Axis (lab): ";
 	ostrResult << axis;
-	ostrResult << "</p>\n";
-
+	ostrResult << "<br>\n";
 	tl2::set_eps_0(vec, g_eps);
-	ostrResult << "<p>Original Vector (lab): ";
+	ostrResult << "Original Vector (lab): ";
 	ostrResult << vec;
 	ostrResult << "</p>\n";
 
@@ -639,10 +561,9 @@ void TrafoCalculator::CalculateProjection()
 	tl2::set_eps_0(vec_proj, g_eps);
 	ostrResult << "<p>Projected Vector (lab): ";
 	ostrResult << vec_proj;
-	ostrResult << "</p>\n";
-
+	ostrResult << "<br>\n";
 	tl2::set_eps_0(vec_proj, g_eps);
-	ostrResult << "<p>Orthogonally Projected Vector (lab): ";
+	ostrResult << "Orthogonally Projected Vector (lab): ";
 	ostrResult << vec_ortho_proj;
 	ostrResult << "</p>\n";
 
@@ -654,8 +575,8 @@ void TrafoCalculator::CalculateProjection()
 		tl2::set_eps_0(vec_ortho_proj, g_eps);
 		ostrResult << "<p>Projected Vector (rlu): ";
 		ostrResult << vec_proj;
-		ostrResult << "</p>\n";
-		ostrResult << "<p>Orthogonally Projected Vector (rlu): ";
+		ostrResult << "<br>\n";
+		ostrResult << "Orthogonally Projected Vector (rlu): ";
 		ostrResult << vec_ortho_proj;
 		ostrResult << "</p>\n";
 	}
@@ -686,7 +607,7 @@ void TrafoCalculator::CalculateCrossProduct()
 
 
 	// apply crystal B matrix
-	bool use_B = m_checkXtalProj->isChecked() && m_dyn;
+	bool use_B = m_checkXtalCrossProd->isChecked() && m_dyn;
 	t_mat33_real xtalB_inv;
 	bool inv_ok = false;
 
@@ -705,40 +626,16 @@ void TrafoCalculator::CalculateCrossProduct()
 	ostrResult.precision(g_prec);
 
 	if(use_B)
-	{
-		t_mat33_real xtalB = m_dyn->GetCrystalBTrafo();
-		tl2::set_eps_0(xtalB, g_eps);
-
-
-		ostrResult << "<p>Crystal B Matrix:\n";
-		ostrResult << "<table style=\"border:0px\">\n";
-		for(std::size_t i = 0; i < xtalB.size1(); ++i)
-		{
-			ostrResult << "\t<tr>\n";
-			for(std::size_t j = 0; j < xtalB.size2(); ++j)
-			{
-				ostrResult << "\t\t<td style=\"padding-right:8px\">";
-				ostrResult << xtalB(i, j);
-				ostrResult << "</td>\n";
-			}
-			ostrResult << "\t</tr>\n";
-		}
-		ostrResult << "</table>";
-		ostrResult << "</p>\n";
-
-		ostrResult << "<p>B Matrix As Single-Line String:<br>";
-		ostrResult << xtalB;
-		ostrResult << "</p>\n";
-	}
-
+		print_matrix(m_dyn->GetCrystalBTrafo(), "Crystal B Matrix", ostrResult);
+	if(use_B && inv_ok)
+		print_matrix(xtalB_inv, "Inverse B Matrix", ostrResult);
 
 	tl2::set_eps_0(vec1, g_eps);
 	ostrResult << "<p>Vector 1 (lab): ";
 	ostrResult << vec1;
-	ostrResult << "</p>\n";
-
+	ostrResult << "<br>\n";
 	tl2::set_eps_0(vec2, g_eps);
-	ostrResult << "<p>Vector 2 (lab): ";
+	ostrResult << "Vector 2 (lab): ";
 	ostrResult << vec2;
 	ostrResult << "</p>\n";
 
@@ -749,10 +646,9 @@ void TrafoCalculator::CalculateCrossProduct()
 	tl2::set_eps_0(vec_cross, g_eps);
 	ostrResult << "<p>Normal Vector (lab): ";
 	ostrResult << vec_cross;
-	ostrResult << "</p>\n";
-
+	ostrResult << "<br>\n";
 	tl2::set_eps_0(vec_cross, g_eps);
-	ostrResult << "<p>Normalised Normal Vector (lab): ";
+	ostrResult << "Normalised Normal Vector (lab): ";
 	ostrResult << vec_cross_norm;
 	ostrResult << "</p>\n";
 
@@ -765,9 +661,8 @@ void TrafoCalculator::CalculateCrossProduct()
 
 		ostrResult << "<p>Normal Vector (rlu): ";
 		ostrResult << vec_cross;
-		ostrResult << "</p>\n";
-
-		ostrResult << "<p>Normalised Normal Vector (rlu): ";
+		ostrResult << "<br>\n";
+		ostrResult << "Normalised Normal Vector (rlu): ";
 		ostrResult << vec_cross_norm;
 		ostrResult << "</p>\n";
 	}
