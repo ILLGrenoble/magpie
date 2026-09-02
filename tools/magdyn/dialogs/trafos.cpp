@@ -34,13 +34,17 @@
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QMessageBox>
 
 #include <boost/math/quaternion.hpp>
 
 
 
-// set kernel from the main window
-void TrafoCalculator::SetKernel(const t_magdyn* dyn)
+/**
+ * set kernel from the main window
+ */
+void TrafoCalculator::SetKernel(t_magdyn* dyn)
 {
 	m_dyn = dyn;
 
@@ -104,10 +108,6 @@ QWidget* TrafoCalculator::CreateRotationPanel()
 	// rotation tab (crystal)
 	QWidget *rotationPanel = new QWidget(this);
 
-	QLabel *labelAxis = new QLabel("Axis (rlu): ");
-	QLabel *labelAngle = new QLabel("Angle (\xc2\xb0): ");
-	QLabel *labelVecToRotate = new QLabel("Vector (rlu): ");
-
 	m_spinAxis[0] = new QDoubleSpinBox(rotationPanel);
 	m_spinAxis[1] = new QDoubleSpinBox(rotationPanel);
 	m_spinAxis[2] = new QDoubleSpinBox(rotationPanel);
@@ -123,7 +123,7 @@ QWidget* TrafoCalculator::CreateRotationPanel()
 	//m_spinAngle->setSuffix("\xc2\xb0");
 
 	m_checkXtalRot = new QCheckBox(rotationPanel);
-	m_checkXtalRot->setText("Use Crystal System");
+	m_checkXtalRot->setText("Use Crystal");
 	m_checkXtalRot->setToolTip("Use the crystallographic B matrix.");
 	m_checkXtalRot->setChecked(true);
 
@@ -151,9 +151,26 @@ QWidget* TrafoCalculator::CreateRotationPanel()
 		m_spinVecToRotate[i]->setSingleStep(0.1);
 	}
 
+	QSpinBox *spinSite = new QSpinBox(rotationPanel);
+	spinSite->setMinimum(1);
+	spinSite->setMaximum(999);
+	spinSite->setValue(1);
+
+	QPushButton *btnGetSpin = new QPushButton(rotationPanel);
+	QPushButton *btnSetSpin = new QPushButton(rotationPanel);
+	btnGetSpin->setText("Get Spin");
+	btnSetSpin->setText("Set Spin");
+	btnGetSpin->setToolTip("Get the spin of the site with the given index as the input vector.");
+	btnSetSpin->setToolTip("Set the spin of the site with the given index to the calculated vector.");
+
+	QLabel *labelAxis = new QLabel("Axis (rlu): ");
+	QLabel *labelAngle = new QLabel("Angle (\xc2\xb0): ");
+	QLabel *labelVecToRotate = new QLabel("Vector (rlu): ");
+	QLabel *labelSpin = new QLabel("Site Index: ");
 	labelAxis->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
 	labelAngle->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
 	labelVecToRotate->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
+	labelSpin->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
 
 	m_textRotation = new QTextEdit(rotationPanel);
 	m_textRotation->setReadOnly(true);
@@ -174,9 +191,52 @@ QWidget* TrafoCalculator::CreateRotationPanel()
 	grid_rotation->addWidget(m_spinVecToRotate[0], 2, 1, 1, 1);
 	grid_rotation->addWidget(m_spinVecToRotate[1], 2, 2, 1, 1);
 	grid_rotation->addWidget(m_spinVecToRotate[2], 2, 3, 1, 1);
-	grid_rotation->addWidget(m_textRotation, 3, 0, 1, 4);
+	grid_rotation->addWidget(labelSpin, 3, 0, 1, 1);
+	grid_rotation->addWidget(spinSite, 3, 1, 1, 1);
+	grid_rotation->addWidget(btnGetSpin, 3, 2, 1, 1);
+	grid_rotation->addWidget(btnSetSpin, 3, 3, 1, 1);
+	grid_rotation->addWidget(m_textRotation, 4, 0, 1, 4);
 
 	// connections
+	// get site spin
+	connect(btnGetSpin, &QAbstractButton::clicked, [this, spinSite]()
+	{
+		if(!m_dyn)
+			return;
+
+		const int idx = spinSite->value();
+		if(idx <= 0 || idx > (int)m_dyn->GetMagneticSitesCount())
+		{
+			QMessageBox::critical(this, windowTitle() + " -- Error", "Invalid site index.");
+			return;
+		}
+
+		const auto& site = m_dyn->GetMagneticSite(idx - 1);
+		for(int comp = 0; comp < 3; ++comp)
+			m_spinVecToRotate[comp]->setValue(site.spin_dir_calc[comp]);
+	});
+
+	// set site spin
+	connect(btnSetSpin, &QAbstractButton::clicked, [this, spinSite]()
+	{
+		if(!m_dyn)
+			return;
+
+		const int idx = spinSite->value();
+		if(idx <= 0 || idx > (int)m_dyn->GetMagneticSitesCount())
+		{
+			QMessageBox::critical(this, windowTitle() + " -- Error", "Invalid site index.");
+			return;
+		}
+
+		auto& site = m_dyn->GetMagneticSite(idx - 1);
+		for(int comp = 0; comp < 3; ++comp)
+			site.spin_dir[comp] = tl2::var_to_str(m_vec_rot[comp], g_prec);
+
+		m_dyn->CalcMagneticSite(idx - 1);
+		emit SpinsUpdated();
+	});
+
 	for(QDoubleSpinBox* spin : {
 		m_spinAxis[0], m_spinAxis[1], m_spinAxis[2], m_spinAngle,
 		m_spinVecToRotate[0], m_spinVecToRotate[1], m_spinVecToRotate[2] })
@@ -185,13 +245,14 @@ QWidget* TrafoCalculator::CreateRotationPanel()
 			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 			this, &TrafoCalculator::CalculateRotation);
 	}
+
 	connect(m_checkXtalRot, &QCheckBox::toggled, [this, btnRecalc](bool checked)
 	{
 		btnRecalc->setEnabled(checked);
 		CalculateRotation();
 	});
-	connect(btnRecalc, &QAbstractButton::clicked,
-		this, &TrafoCalculator::CalculateRotation);
+
+	connect(btnRecalc, &QAbstractButton::clicked, this, &TrafoCalculator::CalculateRotation);
 
 	return rotationPanel;
 }
@@ -231,7 +292,7 @@ QWidget* TrafoCalculator::CreateProjectionPanel()
 	}
 
 	m_checkXtalProj = new QCheckBox(projectionPanel);
-	m_checkXtalProj->setText("Use Crystal System");
+	m_checkXtalProj->setText("Use Crystal");
 	m_checkXtalProj->setToolTip("Use the crystallographic B matrix.");
 	m_checkXtalProj->setChecked(true);
 
@@ -318,7 +379,7 @@ QWidget* TrafoCalculator::CreateCrossProductPanel()
 	}
 
 	m_checkXtalCrossProd = new QCheckBox(crossProdPanel);
-	m_checkXtalCrossProd->setText("Use Crystal System");
+	m_checkXtalCrossProd->setText("Use Crystal");
 	m_checkXtalCrossProd->setToolTip("Use the crystallographic B matrix.");
 	m_checkXtalCrossProd->setChecked(true);
 
@@ -474,18 +535,18 @@ void TrafoCalculator::CalculateRotation()
 	}
 
 	// print the rotated test vector
-	t_vec3_real vec_rot = mat * vec;
+	m_vec_rot = mat * vec;
 
-	tl2::set_eps_0(vec_rot, g_eps);
+	tl2::set_eps_0(m_vec_rot, g_eps);
 	ostrResult << "<p>Rotated Vector (lab): ";
-	ostrResult << vec_rot;
+	ostrResult << m_vec_rot;
 
 	if(use_B && inv_ok)
 	{
-		vec_rot = xtalB_inv * vec_rot;
-		tl2::set_eps_0(vec_rot, g_eps);
+		m_vec_rot = xtalB_inv * m_vec_rot;
+		tl2::set_eps_0(m_vec_rot, g_eps);
 		ostrResult << "<br>Rotated Vector (rlu): ";
-		ostrResult << vec_rot;
+		ostrResult << m_vec_rot;
 	}
 	ostrResult << "</p>\n";
 
@@ -540,7 +601,7 @@ void TrafoCalculator::CalculateProjection()
 
 	if(use_B)
 		print_matrix(m_dyn->GetCrystalBTrafo(), "Crystal B Matrix", ostrResult);
-	
+
 	print_matrix(matProj, "Projection Matrix", ostrResult);
 	print_matrix(matOrthoProj, "Orthogonal Projection Matrix", ostrResult);
 
@@ -669,6 +730,19 @@ void TrafoCalculator::CalculateCrossProduct()
 
 
 	m_textCrossProd->setHtml(ostrResult.str().c_str());
+}
+
+
+
+/**
+ * send spin configuration to kernel
+ */
+void TrafoCalculator::SyncToKernel()
+{
+	if(!m_dyn)
+		return;
+
+	emit SpinsUpdated();
 }
 
 

@@ -49,7 +49,7 @@ public:
 	const TrafoCalculator& operator=(const TrafoCalculator&) = delete;
 
 	// set kernel from the main window
-	void SetKernel(const t_magdyn* dyn);
+	void SetKernel(t_magdyn* dyn);
 
 
 protected:
@@ -59,7 +59,7 @@ protected:
 
 
 private:
-	const t_magdyn *m_dyn{};  // main calculation kernel
+	t_magdyn *m_dyn{};  // main calculation kernel
 
 	QSettings *m_sett{};
 
@@ -68,6 +68,7 @@ private:
 	QDoubleSpinBox *m_spinAngle{};
 	QDoubleSpinBox *m_spinVecToRotate[3]{nullptr, nullptr, nullptr};
 	QCheckBox *m_checkXtalRot{};
+	t_vec3_real m_vec_rot{ tl2::zero<t_vec3_real>(3) };
 
 	QTextEdit *m_textProjection{};
 	QDoubleSpinBox *m_spinProjAxis[3]{nullptr, nullptr, nullptr};
@@ -80,12 +81,20 @@ private:
 	QCheckBox *m_checkXtalCrossProd{};
 
 
+protected:
+	void SyncToKernel();
+
+
 protected slots:
 	virtual void accept() override;
 
 	void CalculateRotation();
 	void CalculateProjection();
 	void CalculateCrossProduct();
+
+
+signals:
+	void SpinsUpdated();
 };
 
 

@@ -243,6 +243,21 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
  * calculate the spin rotation trafo for the magnetic sites
  * and parse any given expressions
  */
+MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(t_size idx)
+{
+	if(idx >= GetMagneticSitesCount())
+		return;
+
+	MagneticSite& site = GetMagneticSites()[idx];
+	CalcMagneticSite(site);
+}
+
+
+
+/**
+ * calculate the spin rotation trafo for the magnetic sites
+ * and parse any given expressions
+ */
 MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSites()
 {
 	for(MagneticSite& site : GetMagneticSites())

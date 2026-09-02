@@ -41,7 +41,8 @@ void MagDynDlg::SetKernel(const t_magdyn* dyn, bool sync_sites, bool sync_terms,
 	if(!dyn)
 		return;
 
-	m_dyn = *dyn;
+	if(&m_dyn != dyn)
+		m_dyn = *dyn;
 
 	if(sync_sites)
 		SyncSitesFromKernel();

@@ -780,6 +780,11 @@ void MagDynDlg::CreateMenuBar()
 			m_trafos->setFont(this->font());
 
 			m_trafos->SetKernel(&m_dyn);
+
+			connect(m_trafos, &TrafoCalculator::SpinsUpdated, [this]()
+			{
+				this->SetKernel(&m_dyn, true, false, false);
+			});
 		}
 
 		m_trafos->show();

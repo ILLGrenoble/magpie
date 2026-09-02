@@ -463,6 +463,7 @@ public:
 	 * and parse any given expressions
 	 */
 	void CalcMagneticSite(MagneticSite& site);
+	void CalcMagneticSite(t_size idx);
 
 	/**
 	 * calculate the spin rotation trafo for the magnetic sites
