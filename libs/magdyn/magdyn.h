@@ -315,7 +315,10 @@ public:
 	void SetVariable(Variable&& var);
 
 	void AddMagneticSite(MagneticSite&& site);
+	void SetMagneticSite(MagneticSite&& site);
+
 	void AddExchangeTerm(ExchangeTerm&& term);
+	void SetExchangeTerm(ExchangeTerm&& term);
 
 	/**
 	 * calculate the B matrix from the crystal lattice

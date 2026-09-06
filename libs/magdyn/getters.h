@@ -758,9 +758,55 @@ MAGDYN_TEMPL void MAGDYN_INST::AddMagneticSite(MAGDYN_TYPE::MagneticSite&& site)
 
 
 
+MAGDYN_TEMPL void MAGDYN_INST::SetMagneticSite(MAGDYN_TYPE::MagneticSite&& site)
+{
+	// is a site with the same name already registered?
+	auto iter = std::find_if(m_sites.begin(), m_sites.end(),
+		[&site](const MagneticSite& thesite)
+	{
+		return thesite.name == site.name;
+	});
+
+	if(iter == m_sites.end())
+	{
+		// add a new site
+		AddMagneticSite(std::forward<MagneticSite&&>(site));
+	}
+	else
+	{
+		// replace the contents of an existing site
+		*iter = site;
+	}
+}
+
+
+
 MAGDYN_TEMPL void MAGDYN_INST::AddExchangeTerm(MAGDYN_TYPE::ExchangeTerm&& term)
 {
 	m_exchange_terms.emplace_back(std::forward<ExchangeTerm&&>(term));
+}
+
+
+
+MAGDYN_TEMPL void MAGDYN_INST::SetExchangeTerm(MAGDYN_TYPE::ExchangeTerm&& term)
+{
+	// is a term with the same name already registered?
+	auto iter = std::find_if(m_exchange_terms.begin(), m_exchange_terms.end(),
+		[&term](const ExchangeTerm& theterm)
+	{
+		return theterm.name == term.name;
+	});
+
+	if(iter == m_exchange_terms.end())
+	{
+		// add a new term
+		AddExchangeTerm(std::forward<ExchangeTerm&&>(term));
+	}
+	else
+	{
+		// replace the contents of an existing term
+		*iter = term;
+	}
 }
 
 

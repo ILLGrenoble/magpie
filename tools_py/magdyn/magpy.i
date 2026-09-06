@@ -342,8 +342,9 @@
 		site.spin_dir[2] = sz;
 		site.spin_mag = S;
 
+		// set existing or add new site
 		magdyn.CalcMagneticSite(site);
-		magdyn.AddMagneticSite(std::move(site));
+		magdyn.SetMagneticSite(std::move(site));
 	}
 
 
@@ -371,8 +372,9 @@
 		site.spin_dir[2] = tl2::var_to_str(sz);
 		site.spin_mag = tl2::var_to_str(S);
 
+		// set existing or add new site
 		magdyn.CalcMagneticSite(site);
-		magdyn.AddMagneticSite(std::move(site));
+		magdyn.SetMagneticSite(std::move(site));
 	}
 
 
@@ -438,8 +440,9 @@
 		coupling.Jgen[2][1] = Jzy;
 		coupling.Jgen[2][2] = Jzz;
 
+		// set existing or add new term
 		magdyn.CalcExchangeTerm(coupling);
-		magdyn.AddExchangeTerm(std::move(coupling));
+		magdyn.SetExchangeTerm(std::move(coupling));
 	}
 
 
@@ -485,8 +488,9 @@
 		coupling.Jgen[2][1] = tl2::var_to_str(Jzy);
 		coupling.Jgen[2][2] = tl2::var_to_str(Jzz);
 
+		// set existing or add new term
 		magdyn.CalcExchangeTerm(coupling);
-		magdyn.AddExchangeTerm(std::move(coupling));
+		magdyn.SetExchangeTerm(std::move(coupling));
 	}
 
 
