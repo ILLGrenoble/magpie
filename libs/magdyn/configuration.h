@@ -42,6 +42,8 @@
 #include "magdyn.h"
 
 
+#define __B64_IDENT__ "__base64__"
+
 
 // --------------------------------------------------------------------
 // loading and saving of the configuration
@@ -354,8 +356,11 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 	t_size num_ffacts = node.get<t_size>("magnetic_form_factors.count", 0);
 	for(t_size i = 0; i < num_ffacts; ++i)
 	{
-		SetMagneticFormFactor(node.get<std::string>(
-			"magnetic_form_factors.index_" + tl2::var_to_str(i), ""));
+		std::string ffact = node.get<std::string>("magnetic_form_factors.index_" + tl2::var_to_str(i), "");
+		if(tl2::begins_with<std::string>(ffact, __B64_IDENT__))
+			ffact = tl2::b64str(ffact.substr(std::strlen(__B64_IDENT__)), false);
+
+		SetMagneticFormFactor(ffact);
 	}
 
 	// ordering vector
@@ -461,8 +466,10 @@ bool MAGDYN_INST::Save(boost::property_tree::ptree& node) const
 		tl2::var_to_str(GetMagneticFormFactorCount()));
 	for(t_size i = 0; i < GetMagneticFormFactorCount(); ++i)
 	{
-		node.put<std::string>("magnetic_form_factors.index_" + tl2::var_to_str(i),
-			GetMagneticFormFactor(i));
+		const std::string& ffact = GetMagneticFormFactor(i);
+		std::string ffact_b64 = __B64_IDENT__ + tl2::b64str(ffact, true);
+
+		node.put<std::string>("magnetic_form_factors.index_" + tl2::var_to_str(i), ffact_b64);
 	}
 
 	// variables

@@ -49,6 +49,9 @@
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/archive/iterators/base64_from_binary.hpp>
+#include <boost/archive/iterators/binary_from_base64.hpp>
+#include <boost/archive/iterators/transform_width.hpp>
 
 #include "expr.h"
 
@@ -234,7 +237,7 @@ std::size_t string_rm(t_str& str, const t_str& strStart, const t_str& strEnd)
 		if(iStart >= iEnd)
 			break;
 
-		str.erase(iStart, iEnd-iStart+strEnd.length());
+		str.erase(iStart, iEnd - iStart + strEnd.length());
 		++iNumFound;
 	}
 
@@ -249,7 +252,7 @@ template<class t_str = std::string>
 t_str insert_before(const t_str& str, const t_str& strChar, const t_str& strInsert)
 {
 	std::size_t pos = str.find(strChar);
-	if(pos==t_str::npos)
+	if(pos == t_str::npos)
 		return str;
 
 	t_str strRet = str;
@@ -288,12 +291,12 @@ bool ends_with(const t_str& str, const t_str& strEnd, bool use_case = true)
 
 template<class t_str = std::string>
 std::pair<t_str, t_str>
-split_first(const t_str& str, const t_str& strSep, bool bTrim = false, bool bSeq = false)
+split_first(const t_str& str, const t_str& strSep, bool trim = false, bool seq = false)
 {
 	t_str str1, str2;
 
-	std::size_t iLenTok = bSeq ? strSep.length() : 1;
-	std::size_t ipos = bSeq ? str.find(strSep) : str.find_first_of(strSep);
+	std::size_t iLenTok = seq ? strSep.length() : 1;
+	std::size_t ipos = seq ? str.find(strSep) : str.find_first_of(strSep);
 
 	if(ipos != t_str::npos)
 	{
@@ -302,10 +305,10 @@ split_first(const t_str& str, const t_str& strSep, bool bTrim = false, bool bSeq
 			str2 = str.substr(ipos+iLenTok, t_str::npos);
 	}
 
-	if(bTrim)
+	if(trim)
 	{
-		trim(str1);
-		trim(str2);
+		tl2::trim(str1);
+		tl2::trim(str2);
 	}
 
 	return std::make_pair(str1, str2);
@@ -317,18 +320,20 @@ split_first(const t_str& str, const t_str& strSep, bool bTrim = false, bool bSeq
  */
 template<class t_str = std::string>
 t_str str_between(const t_str& str, const t_str& strSep1, const t_str& strSep2,
-	bool bTrim = false, bool bSeq = false)
+	bool trim = false, bool seq = false)
 {
 	t_str str1, str2;
-	std::tie(str1, str2) = split_first<t_str>(str, strSep1, bTrim, bSeq);
-	if(str2 == "") return t_str("");
+	std::tie(str1, str2) = split_first<t_str>(str, strSep1, trim, seq);
+	if(str2 == "")
+		return t_str("");
 
-	std::tie(str1, str2) = split_first<t_str>(str2, strSep2, bTrim, bSeq);
+	std::tie(str1, str2) = split_first<t_str>(str2, strSep2, trim, seq);
 	return str1;
 }
 
 
 // ----------------------------------------------------------------------------
+
 
 template<typename T, class t_str = std::string, bool bTIsStr = false>
 struct _str_to_var_impl;
@@ -561,6 +566,33 @@ t_cont unite_incomplete_tokens(const t_cont& toks, const t_str& opening = "([{",
 	return newtoks;
 }
 
+
+/**
+ * base64 encoding and decoding
+ */
+template<class t_str = std::string, typename t_ch = typename t_str::value_type>
+t_str b64str(const t_str& str, bool encode = true)
+{
+	namespace iters = boost::archive::iterators;
+	using t_b64_enc_iter = iters::base64_from_binary<iters::transform_width<t_ch*, 6, 8*sizeof(t_ch)>>;
+	using t_b64_dec_iter = iters::transform_width<iters::binary_from_base64<t_ch*>, 8*sizeof(t_ch), 6>;
+
+	t_str strRet;
+	if(encode)
+	{
+		t_b64_enc_iter end(str.data() + str.size());
+		for(t_b64_enc_iter iter(str.data()); iter != end; ++iter)
+			strRet += *iter;
+	}
+	else
+	{
+		t_b64_dec_iter end(str.data() + str.size());
+		for(t_b64_dec_iter iter(str.data()); iter != end; ++iter)
+			strRet += *iter;
+	}
+
+	return strRet;
+}
 // ----------------------------------------------------------------------------
 
 
@@ -690,14 +722,14 @@ t_str cont_to_str(const t_cont& cont, const char* pcDelim=",",
 template<typename t_char=char>
 bool skip_after_line(std::basic_istream<t_char>& istr,
 	const std::basic_string<t_char>& strLineBegin,
-	bool bTrim = true, bool use_case = false)
+	bool trim = true, bool use_case = false)
 {
 	while(!istr.eof())
 	{
 		std::basic_string<t_char> strLine;
 		std::getline(istr, strLine);
-		if(bTrim)
-			trim(strLine);
+		if(trim)
+			tl2::trim(strLine);
 
 		if(strLine.size() < strLineBegin.size())
 			continue;
@@ -784,9 +816,7 @@ bool str_is_digits(const t_str& str)
 }
 
 
-
 // ----------------------------------------------------------------------------
-
 
 
 template<class t_real = double>
@@ -837,9 +867,7 @@ std::string get_duration_str(const std::chrono::duration<t_real>& dur)
 }
 
 
-
 // ----------------------------------------------------------------------------
-
 
 
 template<class t_str = std::string, class t_cont = std::vector<double>>
@@ -883,9 +911,7 @@ t_str get_py_string(const t_str& str)
 }
 
 
-
 // ----------------------------------------------------------------------------
-
 
 
 template<class t_str /*=std::string*/, class t_val /*=double*/>
@@ -914,9 +940,7 @@ std::pair<bool, t_val> eval_expr(const t_str& str) noexcept
 }
 
 
-
 // ----------------------------------------------------------------------------
-
 
 
 /**
