@@ -28,6 +28,8 @@
 
 #include "magdyn.h"
 
+#include <boost/scope_exit.hpp>
+
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QLabel>
@@ -98,51 +100,60 @@ void MagDynDlg::CreateSamplePanel()
 	m_scatteringplane[0]->setValue(1);
 	m_scatteringplane[4]->setValue(1);
 
-	// magnetic form factor
-	m_ffact = new QPlainTextEdit(m_samplepanel);
-	m_ffact->setPlaceholderText("Enter magnetic form factor formula."
-		" The free variable is 'Q' or 's'.");
-	m_ffact->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
+	// ------------------------------------------------------------------------
+	// magnetic form factors
+	m_panelFFacts = new QGroupBox("Magnetic Form Factors", m_samplepanel);
+	m_panelFFacts->setCheckable(true);
+	m_panelFFacts->setChecked(false);
+	QGridLayout *gridFF = new QGridLayout(m_panelFFacts);
+	gridFF->setSpacing(4);
+	gridFF->setContentsMargins(0, 0, 0, 0);
 
+	int yFF = 0;
 	// maximum number of form factors
-	m_num_ffacts = new QSpinBox(m_samplepanel);
+	m_num_ffacts = new QSpinBox(m_panelFFacts);
 	m_num_ffacts->setMinimum(1);
 	m_num_ffacts->setMaximum(10000);
 	m_num_ffacts->setValue(1);
-	m_num_ffacts->setPrefix("num = ");
+	//m_num_ffacts->setPrefix("num = ");
 	m_num_ffacts->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_num_ffacts->setToolTip("Maximum number of magnetic form factors.");
 
 	// index of currently shown form factor
-	m_cur_ffact = new QSpinBox(m_samplepanel);
+	m_cur_ffact = new QSpinBox(m_panelFFacts);
 	m_cur_ffact->setMinimum(0);
 	m_cur_ffact->setMaximum(0);
 	m_cur_ffact->setValue(0);
-	m_cur_ffact->setPrefix("cur = ");
+	//m_cur_ffact->setPrefix("cur = ");
 	m_cur_ffact->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_cur_ffact->setToolTip("Index of currently shown magnetic form factor.");
+
+	m_ffact = new QPlainTextEdit(m_panelFFacts);
+	m_ffact->setPlaceholderText("Enter magnetic form factor formula."
+		" The free variable is 'Q' or 's'.");
+	m_ffact->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
 	// form factor table
 	QPushButton *btn_set_ffact = nullptr;
 	if(m_ff.GetFormfactorCount())
 	{
-		m_combo_ffacts = new QComboBox(m_samplepanel);
+		m_combo_ffacts = new QComboBox(m_panelFFacts);
 		m_combo_ffacts->setFocusPolicy(Qt::StrongFocus);
 		m_combo_ffacts->setToolTip("List of magnetic form factors.");
 
-		m_editFilterFFacts = new QLineEdit(m_samplepanel);
+		m_editFilterFFacts = new QLineEdit(m_panelFFacts);
 		m_editFilterFFacts->setPlaceholderText("Form factor filter.");
 
 		PopulateFormFactors();
 
-		btn_set_ffact = new QPushButton("Set", m_samplepanel);
+		btn_set_ffact = new QPushButton("Set", m_panelFFacts);
 		btn_set_ffact->setToolTip("Set the form factor term from the currently selected magnetic ion.");
 	}
 
-	QPushButton *btn_ffact_j0 = new QPushButton("<j0> Templ.", m_samplepanel);
-	QPushButton *btn_ffact_j2 = new QPushButton("<j0-2> Templ.", m_samplepanel);
-	QPushButton *btn_ffact_j4 = new QPushButton("<j0-4> Templ.", m_samplepanel);
-	QPushButton *btn_ffact_plot = new QPushButton("Plot...", m_samplepanel);
+	QPushButton *btn_ffact_j0 = new QPushButton("<j0> Templ.", m_panelFFacts);
+	QPushButton *btn_ffact_j2 = new QPushButton("<j0-2> Templ.", m_panelFFacts);
+	QPushButton *btn_ffact_j4 = new QPushButton("<j0-4> Templ.", m_panelFFacts);
+	QPushButton *btn_ffact_plot = new QPushButton("Plot...", m_panelFFacts);
 	btn_ffact_j0->setToolTip("Add a template <j0> term.");
 	btn_ffact_j2->setToolTip("Add template <j0> and <j2> terms.");
 	btn_ffact_j4->setToolTip("Add template <j0>, <j2>, and <j4> terms.");
@@ -156,13 +167,34 @@ void MagDynDlg::CreateSamplePanel()
 		btn->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
+	gridFF->addWidget(new QLabel("Number of Formulas:", m_panelFFacts), yFF, 0, 1, 1);
+	gridFF->addWidget(m_num_ffacts, yFF, 1, 1, 1);
+	gridFF->addWidget(new QLabel("Current Formula:", m_panelFFacts), yFF, 2, 1, 1);
+	gridFF->addWidget(m_cur_ffact, yFF++, 3, 1, 1);
+	gridFF->addWidget(new QLabel("Formula, F_M(Q or s) =", m_panelFFacts), yFF++, 0, 1, 4);
+	gridFF->addWidget(m_ffact, yFF++, 0, 1, 4);
+	if(m_combo_ffacts && btn_set_ffact)
+	{
+		gridFF->addWidget(new QLabel("Select Ion:", m_panelFFacts), yFF, 0, 1, 1);
+		gridFF->addWidget(m_combo_ffacts, yFF, 1, 1, 1);
+		gridFF->addWidget(m_editFilterFFacts, yFF, 2, 1, 1);
+		gridFF->addWidget(btn_set_ffact, yFF++, 3, 1, 1);
+	}
+	gridFF->addWidget(btn_ffact_j0, yFF, 0, 1, 1);
+	gridFF->addWidget(btn_ffact_j2, yFF, 1, 1, 1);
+	gridFF->addWidget(btn_ffact_j4, yFF, 2, 1, 1);
+	gridFF->addWidget(btn_ffact_plot, yFF++, 3, 1, 1);
+	//gridFF->addItem(new QSpacerItem(8, 8,
+	//	QSizePolicy::Minimum, QSizePolicy::Expanding),
+	//	yFF++, 0, 1, 1);
+	// ------------------------------------------------------------------------
+
 	QGridLayout *grid = new QGridLayout(m_samplepanel);
 	grid->setSpacing(4);
 	grid->setContentsMargins(6, 6, 6, 6);
 
-	int y = 0;
-
 	// crystal
+	int y = 0;
 	grid->addWidget(new QLabel("Crystal Definition", m_samplepanel), y++, 0, 1, 4);
 	grid->addWidget(new QLabel("Lattice (\xe2\x84\xab):", m_samplepanel), y, 0, 1, 1);
 	grid->addWidget(m_xtallattice[0], y, 1, 1, 1);
@@ -212,27 +244,12 @@ void MagDynDlg::CreateSamplePanel()
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
 		y++, 0, 1, 1);
 
-	// magnetic form factor formula
-	grid->addWidget(new QLabel("Magnetic Form Factors", m_samplepanel), y, 0, 1, 1);
-	grid->addWidget(m_num_ffacts, y, 2, 1, 1);
-	grid->addWidget(m_cur_ffact, y++, 3, 1, 1);
-	grid->addWidget(new QLabel("Formula, F_M(Q or s) = ", m_samplepanel), y++, 0, 1, 4);
-	grid->addWidget(m_ffact, y++, 0, 1, 4);
-	if(m_combo_ffacts && btn_set_ffact)
-	{
-		grid->addWidget(new QLabel("Select Ion:", m_samplepanel), y, 0, 1, 1);
-		grid->addWidget(m_combo_ffacts, y, 1, 1, 1);
-		grid->addWidget(m_editFilterFFacts, y, 2, 1, 1);
-		grid->addWidget(btn_set_ffact, y++, 3, 1, 1);
-	}
-	grid->addWidget(btn_ffact_j0, y, 0, 1, 1);
-	grid->addWidget(btn_ffact_j2, y, 1, 1, 1);
-	grid->addWidget(btn_ffact_j4, y, 2, 1, 1);
-	grid->addWidget(btn_ffact_plot, y++, 3, 1, 1);
-	//grid->addItem(new QSpacerItem(8, 8,
-	//	QSizePolicy::Minimum, QSizePolicy::Expanding),
-	//	y++, 0, 1, 1);
+	grid->addWidget(m_panelFFacts, y++, 0, 1, 4);
 
+	EnableFormFactors(false);
+
+	// ------------------------------------------------------------------------
+	// connections
 	auto calc_all = [this]()
 	{
 		m_needsBZCalc = true;
@@ -384,6 +401,34 @@ void MagDynDlg::CreateSamplePanel()
 		});
 	}
 
+	connect(m_panelFFacts, &QGroupBox::toggled, this, &MagDynDlg::EnableFormFactors);
+	// ------------------------------------------------------------------------
+
 	m_tabs_setup->addTab(m_samplepanel, "Crystal");
 }
 
+
+
+void MagDynDlg::EnableFormFactors(bool enable)
+{
+	// prevent recursively calling this function
+	if(m_use_formfact)
+		m_use_formfact->blockSignals(true);
+	if(m_panelFFacts)
+		m_panelFFacts->blockSignals(true);
+	BOOST_SCOPE_EXIT(this_)
+	{
+		if(this_->m_use_formfact)
+			this_->m_use_formfact->blockSignals(false);
+		if(this_->m_panelFFacts)
+			this_->m_panelFFacts->blockSignals(false);
+	} BOOST_SCOPE_EXIT_END
+
+	if(m_use_formfact)
+		m_use_formfact->setChecked(enable);
+	if(m_panelFFacts)
+		m_panelFFacts->setChecked(enable);
+
+	if(m_autocalc && m_autocalc->isChecked())
+		this->CalcAll();
+}

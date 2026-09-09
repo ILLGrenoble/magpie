@@ -28,10 +28,11 @@
 
 #include "magdyn.h"
 
+#include <boost/scope_exit.hpp>
+
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QLabel>
-
 
 
 /**
@@ -224,6 +225,9 @@ void MagDynDlg::CreateSampleEnvPanel()
 
 
 	// temperature
+	QCheckBox *m_checkTemperature = new QCheckBox("Temperature:", m_sampleenviropanel);
+	m_checkTemperature->setChecked(false);
+
 	m_temperature = new QDoubleSpinBox(m_sampleenviropanel);
 	m_temperature->setDecimals(2);
 	m_temperature->setMinimum(0);
@@ -256,64 +260,78 @@ void MagDynDlg::CreateSampleEnvPanel()
 	m_field_dir[2]->setPrefix("Bl = ");
 
 
+	// ------------------------------------------------------------------------
+	// magnetic field
+	m_panelField = new QGroupBox("External Magnetic Field", m_sampleenviropanel);
+	m_panelField->setCheckable(true);
+	m_panelField->setChecked(true);
+	QGridLayout *gridField = new QGridLayout(m_panelField);
+	gridField->setSpacing(4);
+	gridField->setContentsMargins(0, 0, 0, 0);
+
+	int yField = 0;
+	//gridField->addWidget(new QLabel("Magnetic Field", m_panelField), yField++, 0, 1, 2);
+	gridField->addWidget(new QLabel("Magnitude:", m_panelField), yField, 0, 1, 1);
+	gridField->addWidget(m_field_mag, yField, 1, 1, 1);
+	gridField->addWidget(btnDirs, yField++, 3, 1, 1);
+	gridField->addWidget(new QLabel("Direction (rlu):", m_panelField), yField, 0, 1, 1);
+	gridField->addWidget(m_field_dir[0], yField, 1, 1, 1);
+	gridField->addWidget(m_field_dir[1], yField, 2, 1, 1);
+	gridField->addWidget(m_field_dir[2], yField++, 3, 1, 1);
+	gridField->addWidget(m_align_spins, yField, 0, 1, 2);
+	gridField->addWidget(m_keep_spin_signs, yField++, 2, 1, 2);
+
+	QFrame *sep1 = new QFrame(m_panelField);
+	sep1->setFrameStyle(QFrame::HLine);
+	QFrame *sep2 = new QFrame(m_panelField);
+	sep2->setFrameStyle(QFrame::HLine);
+
+	gridField->addItem(new QSpacerItem(8, 8,
+		QSizePolicy::Minimum, QSizePolicy::Fixed),
+		yField++, 0, 1, 1);
+	gridField->addWidget(sep1, yField++, 0, 1, 4);
+	gridField->addItem(new QSpacerItem(8, 8,
+		QSizePolicy::Minimum, QSizePolicy::Fixed),
+		yField++, 0, 1, 1);
+
+	gridField->addWidget(new QLabel("Rotate Magnetic Field", m_panelField), yField, 0, 1, 2);
+	gridField->addWidget(btnAxes, yField++, 3, 1, 1);
+	gridField->addWidget(new QLabel("Axis (rlu):", m_panelField), yField, 0, 1, 1);
+	gridField->addWidget(m_rot_axis[0], yField, 1, 1, 1);
+	gridField->addWidget(m_rot_axis[1], yField, 2, 1, 1);
+	gridField->addWidget(m_rot_axis[2], yField++, 3, 1, 1);
+	gridField->addWidget(new QLabel("Angle (\xc2\xb0):", m_panelField), yField, 0, 1, 1);
+	gridField->addWidget(m_rot_angle, yField, 1, 1, 1);
+	gridField->addWidget(btn_rotate_ccw, yField, 2, 1, 1);
+	gridField->addWidget(btn_rotate_cw, yField++, 3, 1, 1);
+
+	gridField->addItem(new QSpacerItem(8, 8,
+		QSizePolicy::Minimum, QSizePolicy::Fixed),
+		yField++, 0, 1, 1);
+	gridField->addWidget(sep2, yField++, 0, 1, 4);
+	gridField->addItem(new QSpacerItem(8, 8,
+		QSizePolicy::Minimum, QSizePolicy::Fixed),
+		yField++, 0, 1, 1);
+
+	gridField->addWidget(new QLabel("Saved Fields:", m_panelField), yField++, 0, 1, 4);
+	gridField->addWidget(m_fieldstab, yField, 0, 1, 4);
+	gridField->addWidget(btnAddField, ++yField, 0, 1, 1);
+	gridField->addWidget(btnDelField, yField, 1, 1, 1);
+	gridField->addWidget(btnFieldUp, yField, 2, 1, 1);
+	gridField->addWidget(btnFieldDown, yField++, 3, 1, 1);
+	gridField->addWidget(btnSetField, yField++, 3, 1, 1);
+	// ------------------------------------------------------------------------
+
 	// grid
 	QGridLayout *grid = new QGridLayout(m_sampleenviropanel);
 	grid->setSpacing(4);
 	grid->setContentsMargins(6, 6, 6, 6);
-
 	int y = 0;
-	grid->addWidget(new QLabel("Magnetic Field:", m_sampleenviropanel), y++, 0, 1, 2);
-	grid->addWidget(new QLabel("Magnitude:", m_sampleenviropanel), y, 0, 1, 1);
-	grid->addWidget(m_field_mag, y, 1, 1, 1);
-	grid->addWidget(btnDirs, y++, 3, 1, 1);
-	grid->addWidget(new QLabel("Direction (rlu):", m_sampleenviropanel), y, 0, 1, 1);
-	grid->addWidget(m_field_dir[0], y, 1, 1, 1);
-	grid->addWidget(m_field_dir[1], y, 2, 1, 1);
-	grid->addWidget(m_field_dir[2], y++, 3, 1, 1);
-	grid->addWidget(m_align_spins, y, 0, 1, 2);
-	grid->addWidget(m_keep_spin_signs, y++, 2, 1, 2);
 
-	QFrame *sep1 = new QFrame(m_sampleenviropanel);
-	sep1->setFrameStyle(QFrame::HLine);
-	QFrame *sep2 = new QFrame(m_sampleenviropanel);
-	sep2->setFrameStyle(QFrame::HLine);
+	grid->addWidget(m_panelField, y++, 0, 1, 4);
+
 	QFrame *sep3 = new QFrame(m_sampleenviropanel);
 	sep3->setFrameStyle(QFrame::HLine);
-
-	grid->addItem(new QSpacerItem(8, 8,
-		QSizePolicy::Minimum, QSizePolicy::Fixed),
-		y++, 0, 1, 1);
-	grid->addWidget(sep1, y++, 0, 1, 4);
-	grid->addItem(new QSpacerItem(8, 8,
-		QSizePolicy::Minimum, QSizePolicy::Fixed),
-		y++, 0, 1, 1);
-
-	grid->addWidget(new QLabel("Rotate Magnetic Field:", m_sampleenviropanel), y, 0, 1, 2);
-	grid->addWidget(btnAxes, y++, 3, 1, 1);
-	grid->addWidget(new QLabel("Axis (rlu):", m_sampleenviropanel), y, 0, 1, 1);
-	grid->addWidget(m_rot_axis[0], y, 1, 1, 1);
-	grid->addWidget(m_rot_axis[1], y, 2, 1, 1);
-	grid->addWidget(m_rot_axis[2], y++, 3, 1, 1);
-	grid->addWidget(new QLabel("Angle (\xc2\xb0):", m_sampleenviropanel), y, 0, 1, 1);
-	grid->addWidget(m_rot_angle, y, 1, 1, 1);
-	grid->addWidget(btn_rotate_ccw, y, 2, 1, 1);
-	grid->addWidget(btn_rotate_cw, y++, 3, 1, 1);
-
-	grid->addItem(new QSpacerItem(8, 8,
-		QSizePolicy::Minimum, QSizePolicy::Fixed),
-		y++, 0, 1, 1);
-	grid->addWidget(sep2, y++, 0, 1, 4);
-	grid->addItem(new QSpacerItem(8, 8,
-		QSizePolicy::Minimum, QSizePolicy::Fixed),
-		y++, 0, 1, 1);
-
-	grid->addWidget(new QLabel("Saved Fields:", m_sampleenviropanel), y++, 0, 1, 4);
-	grid->addWidget(m_fieldstab, y, 0, 1, 4);
-	grid->addWidget(btnAddField, ++y, 0, 1, 1);
-	grid->addWidget(btnDelField, y, 1, 1, 1);
-	grid->addWidget(btnFieldUp, y, 2, 1, 1);
-	grid->addWidget(btnFieldDown, y++, 3, 1, 1);
-	grid->addWidget(btnSetField, y++, 3, 1, 1);
 
 	grid->addItem(new QSpacerItem(8, 8,
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
@@ -323,8 +341,8 @@ void MagDynDlg::CreateSampleEnvPanel()
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
 		y++, 0, 1, 1);
 
-	grid->addWidget(new QLabel("Temperature:", m_sampleenviropanel), y, 0, 1, 1);
-	grid->addWidget(m_temperature, y++, 1, 1, 1);
+	grid->addWidget(m_checkTemperature, y, 0, 1, 1);
+	grid->addWidget(m_temperature, y++, 2, 1, 2);
 
 	auto calc_all = [this]()
 	{
@@ -332,7 +350,10 @@ void MagDynDlg::CreateSampleEnvPanel()
 			this->CalcAll();
 	};
 
+	EnableTemperature(false);
+	EnableField(false);
 
+	// ------------------------------------------------------------------------
 	// signals
 	connect(m_field_mag,
 		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
@@ -403,7 +424,6 @@ void MagDynDlg::CreateSampleEnvPanel()
 		this->ShowTableContextMenu(m_fieldstab, menuTableContext, menuTableContextNoItem, pt);
 	});
 
-
 	for(int i = 0; i < 3; ++i)
 	{
 		connect(acDirPlane[i], &QAction::triggered, [this, i, calc_all]()
@@ -430,6 +450,9 @@ void MagDynDlg::CreateSampleEnvPanel()
 		});
 	}
 
+	connect(m_checkTemperature, &QCheckBox::toggled, this, &MagDynDlg::EnableTemperature);
+	connect(m_panelField, &QGroupBox::toggled, this, &MagDynDlg::EnableField);
+	// ------------------------------------------------------------------------
 
 	m_tabs_in->insertTab(1, m_sampleenviropanel, "Environment");
 }
@@ -488,6 +511,60 @@ void MagDynDlg::RotateField(const t_vec3_real& axis_rlu, t_real angle)
 		m_field_dir[i]->blockSignals(false);
 	}
 
-	if(m_autocalc->isChecked())
+	if(m_autocalc && m_autocalc->isChecked())
 		CalcAll();
 };
+
+
+
+void MagDynDlg::EnableTemperature(bool enable)
+{
+	// prevent recursively calling this function
+	if(m_use_temperature)
+		m_use_temperature->blockSignals(true);
+	if(m_checkTemperature)
+		m_checkTemperature->blockSignals(true);
+	BOOST_SCOPE_EXIT(this_)
+	{
+		if(this_->m_use_temperature)
+			this_->m_use_temperature->blockSignals(false);
+		if(this_->m_checkTemperature)
+			this_->m_checkTemperature->blockSignals(false);
+	} BOOST_SCOPE_EXIT_END
+
+	if(m_use_temperature)
+		m_use_temperature->setChecked(enable);
+	if(m_checkTemperature)
+		m_checkTemperature->setChecked(enable);
+	if(m_temperature)
+		m_temperature->setEnabled(enable);
+
+	if(m_autocalc && m_autocalc->isChecked())
+		this->CalcAll();
+}
+
+
+
+void MagDynDlg::EnableField(bool enable)
+{
+	// prevent recursively calling this function
+	if(m_use_field)
+		m_use_field->blockSignals(true);
+	if(m_panelField)
+		m_panelField->blockSignals(true);
+	BOOST_SCOPE_EXIT(this_)
+	{
+		if(this_->m_use_field)
+			this_->m_use_field->blockSignals(false);
+		if(this_->m_panelField)
+			this_->m_panelField->blockSignals(false);
+	} BOOST_SCOPE_EXIT_END
+
+	if(m_use_field)
+		m_use_field->setChecked(enable);
+	if(m_panelField)
+		m_panelField->setChecked(enable);
+
+	if(m_autocalc && m_autocalc->isChecked())
+		this->CalcAll();
+}

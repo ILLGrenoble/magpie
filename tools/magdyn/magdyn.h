@@ -44,6 +44,7 @@
 #include <QtWidgets/QTextEdit>
 #include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QLineEdit>
+#include <QtWidgets/QGroupBox>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMenu>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -220,21 +221,26 @@ protected:
 	QComboBox *m_comboSG{};
 	QCheckBox *m_checkFilterSG{};
 	QLineEdit *m_editFilterSG{};
+	std::string m_magsgfile{};                 // file with magnetic space groups
+
+	// magnetic form factors
+	QGroupBox *m_panelFFacts{};
 	QPlainTextEdit *m_ffact{};                 // magnetic form factor formula
 	QSpinBox *m_cur_ffact{}, *m_num_ffacts{};  // form factor index and number
 	QComboBox *m_combo_ffacts{};               // ions from form factor table
 	QLineEdit *m_editFilterFFacts{};
 	std::vector<std::string> m_ffacts{};       // buffers for form factors
-	std::string m_magsgfile{};                 // file with magnetic space groups
 
 	// sample environment panel
 	// external magnetic field
+	QGroupBox *m_panelField{};
 	QDoubleSpinBox *m_field_dir[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_field_mag{};
 	QCheckBox *m_align_spins{}, *m_keep_spin_signs{};
 	QDoubleSpinBox *m_rot_axis[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_rot_angle{};
 	QTableWidget *m_fieldstab{};
+	QCheckBox *m_checkTemperature{};
 	QDoubleSpinBox *m_temperature{};           // temperature
 
 	// scattering plane panel
@@ -348,6 +354,7 @@ protected:
 	void PopulateSpaceGroups(bool init = false);
 	void PopulateFormFactors();
 	void PlotFormFactors();
+	void EnableFormFactors(bool enable);
 
 	void SyncSiteComboBoxes();
 	void SyncSiteComboBox(SitesComboBox* combo, const std::string& selected_site);
@@ -355,6 +362,9 @@ protected:
 
 	void SetCurrentField();
 	void SetCurrentCoordinate(int which = 0);
+	void EnableField(bool enable);
+
+	void EnableTemperature(bool enable);
 
 	std::vector<t_magdyn::Variable> GetVariables() const;
 	t_size ReplaceValueWithVariable(const std::string& var, const t_cplx& val);

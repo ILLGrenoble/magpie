@@ -434,7 +434,7 @@ void MagDynDlg::CreateMenuBar()
 	m_use_field = new QAction("Use External Field", menuCalcOpt);
 	m_use_field->setToolTip("Enables an external field.");
 	m_use_field->setCheckable(true);
-	m_use_field->setChecked(true);
+	m_use_field->setChecked(false);
 	m_use_temperature = new QAction("Use Bose Factor", menuCalcOpt);
 	m_use_temperature->setToolTip("Enables the Bose factor.");
 	m_use_temperature->setCheckable(true);
@@ -699,11 +699,15 @@ void MagDynDlg::CreateMenuBar()
 		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::ExportToSpinW));
 	connect(acStructExportScript, &QAction::triggered,
 		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::ExportToScript));
+	connect(m_use_formfact, &QAction::toggled, this, &MagDynDlg::EnableFormFactors);
+	connect(m_use_temperature, &QAction::toggled, this, &MagDynDlg::EnableTemperature);
+	connect(m_use_field, &QAction::toggled, this, &MagDynDlg::EnableField);
+
 	if(m_allow_general_J)
 		connect(m_use_genJ, &QAction::toggled, calc_all);
 
-	for(QAction* action : { m_use_dmi, m_use_field, m_use_temperature,
-		m_use_formfact, m_use_polcoords })
+	for(QAction* action : { m_use_dmi, /*m_use_field, m_use_temperature,
+		m_use_formfact,*/ m_use_polcoords })
 	{
 		connect(action, &QAction::toggled, calc_all);
 	}
