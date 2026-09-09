@@ -361,8 +361,20 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 	for(t_size i = 0; i < num_ffacts; ++i)
 	{
 		std::string ffact = node.get<std::string>("magnetic_form_factors.index_" + tl2::var_to_str(i), "");
+
 		if(tl2::begins_with<std::string>(ffact, __MAGDYN_B64_IDENT__))
-			ffact = tl2::b64str(ffact.substr(std::strlen(__MAGDYN_B64_IDENT__)), false);
+		{
+			try
+			{
+				ffact = tl2::b64str(ffact.substr(std::strlen(__MAGDYN_B64_IDENT__)), false);
+			}
+			catch(const std::exception& ex)
+			{
+				MAGDYN_CERR_OPT << "Magdyn error: Could not decode form factor #" << i
+					<< "." << std::endl;
+				continue;
+			}
+		}
 
 		SetMagneticFormFactor(ffact);
 	}
@@ -471,7 +483,17 @@ bool MAGDYN_INST::Save(boost::property_tree::ptree& node) const
 	for(t_size i = 0; i < GetMagneticFormFactorCount(); ++i)
 	{
 		const std::string& ffact = GetMagneticFormFactor(i);
-		std::string ffact_b64 = __MAGDYN_B64_IDENT__ + tl2::b64str(ffact, true);
+		std::string ffact_b64;
+		try
+		{
+			// b64-encode the form factor
+			ffact_b64 = __MAGDYN_B64_IDENT__ + tl2::b64str(ffact, true);
+		}
+		catch(const std::exception& ex)
+		{
+			// use the unencoded form factor instead
+			ffact_b64 = ffact;
+		}
 
 		node.put<std::string>("magnetic_form_factors.index_" + tl2::var_to_str(i), ffact_b64);
 	}
