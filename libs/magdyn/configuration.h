@@ -42,7 +42,11 @@
 #include "magdyn.h"
 
 
-#define __B64_IDENT__ "__base64__"
+#ifndef __MAGDYN_B64_IDENT__
+	// prefix to base64-encoded strings
+	#define __MAGDYN_B64_IDENT__ "__base64__"
+#endif
+
 
 
 // --------------------------------------------------------------------
@@ -357,8 +361,8 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 	for(t_size i = 0; i < num_ffacts; ++i)
 	{
 		std::string ffact = node.get<std::string>("magnetic_form_factors.index_" + tl2::var_to_str(i), "");
-		if(tl2::begins_with<std::string>(ffact, __B64_IDENT__))
-			ffact = tl2::b64str(ffact.substr(std::strlen(__B64_IDENT__)), false);
+		if(tl2::begins_with<std::string>(ffact, __MAGDYN_B64_IDENT__))
+			ffact = tl2::b64str(ffact.substr(std::strlen(__MAGDYN_B64_IDENT__)), false);
 
 		SetMagneticFormFactor(ffact);
 	}
@@ -467,7 +471,7 @@ bool MAGDYN_INST::Save(boost::property_tree::ptree& node) const
 	for(t_size i = 0; i < GetMagneticFormFactorCount(); ++i)
 	{
 		const std::string& ffact = GetMagneticFormFactor(i);
-		std::string ffact_b64 = __B64_IDENT__ + tl2::b64str(ffact, true);
+		std::string ffact_b64 = __MAGDYN_B64_IDENT__ + tl2::b64str(ffact, true);
 
 		node.put<std::string>("magnetic_form_factors.index_" + tl2::var_to_str(i), ffact_b64);
 	}

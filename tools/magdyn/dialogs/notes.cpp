@@ -32,7 +32,7 @@
 
 
 // prefix to base64-encoded strings
-static const std::string g_b64_prefix = "__base64__";
+static const std::string g_b64_prefix = "__base64__" /* __MAGDYN_B64_IDENT__ */;
 
 
 
