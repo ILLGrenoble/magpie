@@ -23,12 +23,12 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <boost/scope_exit.hpp>
+
 #include "magdyn.h"
 
 #include <QtCore/QString>
 #include <QtWidgets/QApplication>
-
-#include <boost/scope_exit.hpp>
 
 #include <vector>
 

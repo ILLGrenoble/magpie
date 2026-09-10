@@ -62,12 +62,19 @@ void MagDynDlg::CreateHamiltonPanel()
 	m_hamiltonian->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
 	// Q coordinates
+	QToolButton *swap_Q[3];
 	m_Q[0] = new QDoubleSpinBox(m_hamiltonianpanel);
+	swap_Q[0] = new QToolButton(m_hamiltonianpanel);
 	m_Q[1] = new QDoubleSpinBox(m_hamiltonianpanel);
+	swap_Q[1] = new QToolButton(m_hamiltonianpanel);
 	m_Q[2] = new QDoubleSpinBox(m_hamiltonianpanel);
+	swap_Q[2] = new QToolButton(m_hamiltonianpanel);
 	m_Q[0]->setToolTip("Momentum transfer component h (rlu).");
 	m_Q[1]->setToolTip("Momentum transfer component k (rlu).");
 	m_Q[2]->setToolTip("Momentum transfer component l (rlu).");
+	swap_Q[0]->setToolTip("Swap the h and k components.");
+	swap_Q[1]->setToolTip("Swap the k and l components.");
+	swap_Q[2]->setToolTip("Swap the h and l components.");
 
 	for(int i = 0; i < 3; ++i)
 	{
@@ -79,6 +86,10 @@ void MagDynDlg::CreateHamiltonPanel()
 		//m_Q[i]->setSuffix(" rlu");
 		m_Q[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 		m_Q[i]->setPrefix(hklPrefix[i]);
+
+		swap_Q[i]->setText("↔");
+		swap_Q[i]->setFocusPolicy(Qt::StrongFocus);
+		swap_Q[i]->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Preferred});
 	}
 
 	// main Q index
@@ -100,13 +111,16 @@ void MagDynDlg::CreateHamiltonPanel()
 	grid->setContentsMargins(6, 6, 6, 6);
 
 	int y = 0;
-	grid->addWidget(m_hamiltonian, y++, 0, 1, 4);
+	grid->addWidget(m_hamiltonian, y++, 0, 1, 7);
 	grid->addWidget(new QLabel("Q (rlu):", m_hamiltonianpanel), y, 0, 1, 1);
 	grid->addWidget(m_Q[0], y, 1, 1, 1);
-	grid->addWidget(m_Q[1], y, 2, 1, 1);
-	grid->addWidget(m_Q[2], y++, 3, 1, 1);
-	grid->addWidget(m_Qidx, y, 2, 1, 1);
-	grid->addWidget(btnFromDispersion, y++, 3, 1, 1);
+	grid->addWidget(swap_Q[0], y, 2, 1, 1);
+	grid->addWidget(m_Q[1], y, 3, 1, 1);
+	grid->addWidget(swap_Q[1], y, 4, 1, 1);
+	grid->addWidget(m_Q[2], y, 5, 1, 1);
+	grid->addWidget(swap_Q[2], y++, 6, 1, 1);
+	grid->addWidget(m_Qidx, y, 3, 1, 1);
+	grid->addWidget(btnFromDispersion, y++, 5, 1, 1);
 
 	// signals
 	for(int i = 0; i < 3; ++i)
@@ -115,6 +129,28 @@ void MagDynDlg::CreateHamiltonPanel()
 			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 			[this]()
 		{
+			if(this->m_autocalc->isChecked())
+				this->CalcHamiltonian();
+		});
+
+		const int j = (i + 1) % 3;
+
+		connect(swap_Q[i], &QAbstractButton::clicked, [this, i, j]()
+		{
+			BOOST_SCOPE_EXIT(this_, i, j)
+			{
+				this_->m_Q[i]->blockSignals(false);
+				this_->m_Q[j]->blockSignals(false);
+			} BOOST_SCOPE_EXIT_END
+			m_Q[i]->blockSignals(true);
+			m_Q[j]->blockSignals(true);
+
+			t_real h = m_Q[i]->value();
+			t_real k = m_Q[j]->value();
+
+			m_Q[i]->setValue(k);
+			m_Q[j]->setValue(h);
+
 			if(this->m_autocalc->isChecked())
 				this->CalcHamiltonian();
 		});

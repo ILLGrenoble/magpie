@@ -294,7 +294,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
 		yField++, 0, 1, 1);
 
-	gridField->addWidget(new QLabel("Rotate Magnetic Field", m_panelField), yField, 0, 1, 2);
+	gridField->addWidget(new QLabel("Rotate Magnetic Field", m_panelField), yField, 0, 1, 3);
 	gridField->addWidget(btnAxes, yField++, 3, 1, 1);
 	gridField->addWidget(new QLabel("Axis (rlu):", m_panelField), yField, 0, 1, 1);
 	gridField->addWidget(m_rot_axis[0], yField, 1, 1, 1);
@@ -313,7 +313,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
 		yField++, 0, 1, 1);
 
-	gridField->addWidget(new QLabel("Saved Fields:", m_panelField), yField++, 0, 1, 4);
+	gridField->addWidget(new QLabel("Saved Fields", m_panelField), yField++, 0, 1, 4);
 	gridField->addWidget(m_fieldstab, yField, 0, 1, 4);
 	gridField->addWidget(btnAddField, ++yField, 0, 1, 1);
 	gridField->addWidget(btnDelField, yField, 1, 1, 1);

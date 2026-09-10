@@ -26,11 +26,12 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <boost/scope_exit.hpp>
+
 #include "magdyn.h"
 
 #include <iostream>
 #include <unordered_set>
-#include <boost/scope_exit.hpp>
 
 
 // types

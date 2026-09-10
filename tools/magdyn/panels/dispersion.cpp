@@ -26,6 +26,8 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <boost/scope_exit.hpp>
+
 #include "magdyn.h"
 
 #include <QtWidgets/QGridLayout>
@@ -57,12 +59,19 @@ void MagDynDlg::CreateDispersionPanel()
 	m_plot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
 	// start and stop coordinates
+	QToolButton *swap_Q_start[3], *swap_Q_end[3];
 	m_Q_start[0] = new QDoubleSpinBox(m_disppanel);
+	swap_Q_start[0] = new QToolButton(m_disppanel);
 	m_Q_start[1] = new QDoubleSpinBox(m_disppanel);
+	swap_Q_start[1] = new QToolButton(m_disppanel);
 	m_Q_start[2] = new QDoubleSpinBox(m_disppanel);
+	swap_Q_start[2] = new QToolButton(m_disppanel);
 	m_Q_end[0] = new QDoubleSpinBox(m_disppanel);
+	swap_Q_end[0] = new QToolButton(m_disppanel);
 	m_Q_end[1] = new QDoubleSpinBox(m_disppanel);
+	swap_Q_end[1] = new QToolButton(m_disppanel);
 	m_Q_end[2] = new QDoubleSpinBox(m_disppanel);
+	swap_Q_end[2] = new QToolButton(m_disppanel);
 
 	m_Q_start[0]->setToolTip("Dispersion initial momentum transfer, h_i (rlu).");
 	m_Q_start[1]->setToolTip("Dispersion initial momentum transfer, k_i (rlu).");
@@ -70,6 +79,12 @@ void MagDynDlg::CreateDispersionPanel()
 	m_Q_end[0]->setToolTip("Dispersion final momentum transfer, h_f (rlu).");
 	m_Q_end[1]->setToolTip("Dispersion final momentum transfer, k_f (rlu).");
 	m_Q_end[2]->setToolTip("Dispersion final momentum transfer, l_f (rlu).");
+	swap_Q_start[0]->setToolTip("Swap the h_i and k_i components.");
+	swap_Q_start[1]->setToolTip("Swap the k_i and l_i components.");
+	swap_Q_start[2]->setToolTip("Swap the h_i and l_i components.");
+	swap_Q_end[0]->setToolTip("Swap the h_f and k_f components.");
+	swap_Q_end[1]->setToolTip("Swap the k_f and l_f components.");
+	swap_Q_end[2]->setToolTip("Swap the h_f and l_f components.");
 
 	// number of Q points in the plot
 	m_num_points = new QSpinBox(m_disppanel);
@@ -119,6 +134,13 @@ void MagDynDlg::CreateDispersionPanel()
 		//m_Q_end[i]->setSuffix(" rlu");
 		m_Q_end[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 		m_Q_end[i]->setPrefix(hklPrefix[i]);
+
+		swap_Q_start[i]->setText("↔");
+		swap_Q_start[i]->setFocusPolicy(Qt::StrongFocus);
+		swap_Q_start[i]->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Preferred});
+		swap_Q_end[i]->setText("↔");
+		swap_Q_end[i]->setFocusPolicy(Qt::StrongFocus);
+		swap_Q_end[i]->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Preferred});
 	}
 
 	QGridLayout *grid = new QGridLayout(m_disppanel);
@@ -127,23 +149,29 @@ void MagDynDlg::CreateDispersionPanel()
 
 	int y = 0;
 	if(m_plot)
-		grid->addWidget(m_plot, y++,0,1,4);
-	grid->addWidget(new QLabel("Start Q (rlu):", m_disppanel), y,0,1,1);
-	grid->addWidget(m_Q_start[0], y,1,1,1);
-	grid->addWidget(m_Q_start[1], y,2,1,1);
-	grid->addWidget(m_Q_start[2], y++,3,1,1);
-	grid->addWidget(new QLabel("End Q (rlu):", m_disppanel), y,0,1,1);
-	grid->addWidget(m_Q_end[0], y,1,1,1);
-	grid->addWidget(m_Q_end[1], y,2,1,1);
-	grid->addWidget(m_Q_end[2], y++,3,1,1);
-	grid->addWidget(new QLabel("Q Count:", m_disppanel), y,0,1,1);
-	grid->addWidget(m_num_points, y,1,1,1);
-	grid->addWidget(new QLabel("Weight Scale:", m_disppanel), y,2,1,1);
-	grid->addWidget(m_weight_scale, y++,3,1,1);
-	grid->addWidget(new QLabel("Min. Weight:", m_disppanel), y,0,1,1);
-	grid->addWidget(m_weight_min, y,1,1,1);
-	grid->addWidget(new QLabel("Max. Weight:", m_disppanel), y,2,1,1);
-	grid->addWidget(m_weight_max, y++,3,1,1);
+		grid->addWidget(m_plot, y++, 0, 1, 7);
+	grid->addWidget(new QLabel("Start Q (rlu):", m_disppanel), y, 0, 1, 1);
+	grid->addWidget(m_Q_start[0], y, 1, 1, 1);
+	grid->addWidget(swap_Q_start[0], y, 2, 1, 1);
+	grid->addWidget(m_Q_start[1], y, 3, 1, 1);
+	grid->addWidget(swap_Q_start[1], y, 4, 1, 1);
+	grid->addWidget(m_Q_start[2], y, 5, 1, 1);
+	grid->addWidget(swap_Q_start[2], y++, 6, 1, 1);
+	grid->addWidget(new QLabel("End Q (rlu):", m_disppanel), y, 0, 1, 1);
+	grid->addWidget(m_Q_end[0], y, 1, 1, 1);
+	grid->addWidget(swap_Q_end[0], y, 2, 1, 1);
+	grid->addWidget(m_Q_end[1], y, 3, 1, 1);
+	grid->addWidget(swap_Q_end[1], y, 4, 1, 1);
+	grid->addWidget(m_Q_end[2], y, 5, 1, 1);
+	grid->addWidget(swap_Q_end[2], y++, 6, 1, 1);
+	grid->addWidget(new QLabel("Q Count:", m_disppanel), y, 0, 1, 1);
+	grid->addWidget(m_num_points, y, 1, 1, 1);
+	grid->addWidget(new QLabel("Weight Scale:", m_disppanel), y, 3, 1, 1);
+	grid->addWidget(m_weight_scale, y++, 5, 1, 1);
+	grid->addWidget(new QLabel("Min. Weight:", m_disppanel), y, 0, 1, 1);
+	grid->addWidget(m_weight_min, y, 1, 1, 1);
+	grid->addWidget(new QLabel("Max. Weight:", m_disppanel), y, 3, 1, 1);
+	grid->addWidget(m_weight_max, y++, 5, 1, 1);
 
 	// signals
 	for(int i = 0; i < 3; ++i)
@@ -161,6 +189,46 @@ void MagDynDlg::CreateDispersionPanel()
 			{
 				DispersionQChanged(true);
 			});
+
+		const int j = (i + 1) % 3;
+
+		connect(swap_Q_start[i], &QAbstractButton::clicked, [this, i, j]()
+		{
+			BOOST_SCOPE_EXIT(this_, i, j)
+			{
+				this_->m_Q_start[i]->blockSignals(false);
+				this_->m_Q_start[j]->blockSignals(false);
+			} BOOST_SCOPE_EXIT_END
+			m_Q_start[i]->blockSignals(true);
+			m_Q_start[j]->blockSignals(true);
+
+			t_real h = m_Q_start[i]->value();
+			t_real k = m_Q_start[j]->value();
+
+			m_Q_start[i]->setValue(k);
+			m_Q_start[j]->setValue(h);
+
+			DispersionQChanged(true);
+		});
+
+		connect(swap_Q_end[i], &QAbstractButton::clicked, [this, i, j]()
+		{
+			BOOST_SCOPE_EXIT(this_, i, j)
+			{
+				this_->m_Q_end[i]->blockSignals(false);
+				this_->m_Q_end[j]->blockSignals(false);
+			} BOOST_SCOPE_EXIT_END
+			m_Q_end[i]->blockSignals(true);
+			m_Q_end[j]->blockSignals(true);
+
+			t_real h = m_Q_end[i]->value();
+			t_real k = m_Q_end[j]->value();
+
+			m_Q_end[i]->setValue(k);
+			m_Q_end[j]->setValue(h);
+
+			DispersionQChanged(true);
+		});
 	}
 
 	connect(m_num_points,

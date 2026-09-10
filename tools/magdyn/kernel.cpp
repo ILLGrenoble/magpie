@@ -23,11 +23,12 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <boost/scope_exit.hpp>
+
 #include "magdyn.h"
 #include "tlibs2/libs/units.h"
 
 #include <iostream>
-#include <boost/scope_exit.hpp>
 
 namespace pt = boost::property_tree;
 

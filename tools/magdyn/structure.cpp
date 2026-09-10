@@ -23,12 +23,12 @@
  * ----------------------------------------------------------------------------
  */
 
-#include "magdyn.h"
+#include <boost/scope_exit.hpp>
 
+#include "magdyn.h"
 #include "tlibs2/libs/str.h"
 
 #include <iostream>
-#include <boost/scope_exit.hpp>
 
 using t_numitem = tl2::NumericTableWidgetItem<t_real>;
 
