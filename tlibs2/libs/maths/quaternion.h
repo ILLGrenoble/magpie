@@ -134,7 +134,27 @@ requires is_quat<t_quat>
 
 template<class t_quat> t_quat unit_quat() requires is_quat<t_quat>
 {
-	return t_quat(1, 0,0,0);
+	return t_quat(1, 0, 0, 0);
+}
+
+
+/**
+ * are two quaternion equal?
+ */
+template<class t_quat, typename t_real = typename t_quat::value_type>
+bool equals(const t_quat& q1, const t_quat& q2, t_real eps)
+requires is_quat<t_quat>
+{
+	if(!tl2::equals<t_real>(q1.R_component_1(), q2.R_component_1(), eps))
+		return false;
+	if(!tl2::equals<t_real>(q1.R_component_2(), q2.R_component_2(), eps))
+		return false;
+	if(!tl2::equals<t_real>(q1.R_component_3(), q2.R_component_3(), eps))
+		return false;
+	if(!tl2::equals<t_real>(q1.R_component_4(), q2.R_component_4(), eps))
+		return false;
+
+	return true;
 }
 
 
@@ -190,17 +210,17 @@ requires is_quat<t_quat> && is_mat<t_mat>
 	if(tr > T(0))	// scalar component is largest
 	{
 		w = T(0.5) * std::sqrt(tr+T(1));
-		v[0] = (rot(2,1) - rot(1,2)) / (T(4)*w);
-		v[1] = (rot(0,2) - rot(2,0)) / (T(4)*w);
-		v[2] = (rot(1,0) - rot(0,1)) / (T(4)*w);
+		v[0] = (rot(2, 1) - rot(1, 2)) / (T(4)*w);
+		v[1] = (rot(0, 2) - rot(2, 0)) / (T(4)*w);
+		v[2] = (rot(1, 0) - rot(0, 1)) / (T(4)*w);
 	}
 	else
 	{
 		for(std::size_t iComp = 0; iComp < 3; ++iComp)	// find largest vector component
 		{
-			const std::size_t iM = iComp;		// major comp.
-			const std::size_t im1 = (iComp+1)%3;	// minor comp. 1
-			const std::size_t im2 = (iComp+2)%3;	// minor comp. 2
+			const std::size_t iM = iComp;           // major comp.
+			const std::size_t im1 = (iComp + 1)%3;  // minor comp. 1
+			const std::size_t im2 = (iComp + 2)%3;  // minor comp. 2
 
 			if(rot(iM,iM) >= rot(im1,im1) && rot(iM,iM) >= rot(im2,im2))
 			{
@@ -360,7 +380,7 @@ requires is_quat<t_quat> && is_vec<t_vec>
 	const T z = s * vec[2] / n;
 	const T r = c;
 
-	return t_quat{r, x,y,z};
+	return t_quat{r, x, y, z};
 }
 
 
@@ -496,7 +516,7 @@ t_quat stereo_proj(const t_quat& quat)
 requires is_quat<t_quat>
 {
 	using T = typename t_quat::value_type;
-	return (T{1}+quat) / (T{1}-quat);
+	return (T{1} + quat) / (T{1} - quat);
 }
 
 
@@ -509,7 +529,7 @@ t_quat stereo_proj_inv(const t_quat& quat)
 requires is_quat<t_quat>
 {
 	using T = typename t_quat::value_type;
-	return (T{1}-quat) / (T{1}+quat);
+	return (T{1} - quat) / (T{1} + quat);
 }
 
 // ----------------------------------------------------------------------------

@@ -43,6 +43,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_equals, t_real, t_types)
 {
 	#include "defs.h"
 	using t_quat = boost::math::quaternion<t_real>;
+	static constexpr t_real eps = std::is_same_v<t_real, float> ? 1e-5 : 1e-8;
 
 	t_real angle = tl2::pi<t_real>/t_real{4};
 	auto vec = tl2::create<t_vec>({1, 2, 3});
@@ -58,6 +59,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_equals, t_real, t_types)
 	std::cout << "axis2 = " << vec2 << ", angle2 = " << angle2 << std::endl;
 
 
-	BOOST_TEST(tl2::equals(vec, vec2, 1e-5));
-	BOOST_TEST(tl2::equals<t_real>(angle, angle2, 1e-5));
+	BOOST_TEST(tl2::equals(vec, vec2, eps));
+	BOOST_TEST(tl2::equals<t_real>(angle, angle2, eps));
 }
