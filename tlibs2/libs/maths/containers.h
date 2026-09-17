@@ -816,6 +816,7 @@ public:
 	using size_type = decltype(t_cont{}.size());
 
 
+public:
 	// constructors
 	mat() = default;
 	~mat() = default;
@@ -964,6 +965,7 @@ public:
 	using size_type = std::size_t;
 
 
+public:
 	// constructors
 	constexpr mat_static() = default;
 	constexpr ~mat_static() = default;

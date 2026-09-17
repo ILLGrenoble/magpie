@@ -25,7 +25,7 @@
  * ----------------------------------------------------------------------------
  */
 
-// g++ -std=c++20 -I.. -I /opt/homebrew/Cellar/boost/1.90.0_1/include -L/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/16 -o magdyn_powder magdyn_powder.cpp -lgfortran -llapacke -llapack -lblas
+// g++ -std=c++20 -I../.. -I /opt/homebrew/Cellar/boost/*/include -L/opt/homebrew/Cellar/gcc/16.2.0/lib/gcc/current -o powder powder.cpp -lgfortran -llapacke -llapack -lblas
 
 #include "libs/magdyn.h"
 
@@ -37,14 +37,9 @@ using t_size = std::size_t;
 
 using t_mat = tl2::mat<t_cplx>;
 using t_vec = tl2::vec<t_cplx>;
-using t_mat_real = tl2::mat<t_real>;
-using t_vec_real = tl2::vec<t_real>;
 
-using t_magdyn = tl2_mag::MagDyn<
-	t_mat, t_vec,
-	t_mat_real, t_vec_real,
-	t_cplx, t_real,
-	std::size_t>;
+using t_magdyn = magdyn::MagDyn<t_mat, t_vec, t_cplx, t_real, std::size_t>;
+using t_vec3_real = typename t_magdyn::t_vec3_real;
 
 
 bool progress(int cur, int total)
@@ -109,10 +104,10 @@ int main()
 
 
 	// set propagation vector
-	t_vec_real prop = tl2::create<t_vec_real>({ 0.5, 0., 0. });
+	t_vec3_real prop = tl2::create<t_vec3_real>({ 0.5, 0., 0. });
 	magdyn.SetOrderingWavevector(prop);
 
-	t_vec_real rotax = tl2::create<t_vec_real>({ 0., 1., 0. });
+	t_vec3_real rotax = tl2::create<t_vec3_real>({ 0., 1., 0. });
 	magdyn.SetRotationAxis(rotax);
 
 

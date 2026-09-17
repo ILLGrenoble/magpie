@@ -25,7 +25,7 @@
  * ----------------------------------------------------------------------------
  */
 
-// g++ -std=c++20 -march=native -O2 -Wall -Wextra -Weffc++ -I .. -o berry berry.cpp -llapacke -llapack -lblas -lgfortran
+// g++ -std=c++20 -march=native -O2 -Wall -Wextra -Weffc++ -I ../.. -I /opt/homebrew/Cellar/boost/*/include -o berry berry.cpp -llapacke -llapack -lblas -lgfortran
 
 
 #include "libs/magdyn.h"
@@ -40,12 +40,11 @@ using t_real = double;
 using t_cplx = std::complex<t_real>;
 using t_mat = tl2::mat<t_cplx>;
 using t_vec = tl2::vec<t_cplx>;
-using t_mat_real = tl2::mat<t_real>;
-using t_vec_real = tl2::vec<t_real>;
 using t_size = std::size_t;
-using t_magdyn = tl2_mag::MagDyn<
-	t_mat, t_vec, t_mat_real, t_vec_real,
-	t_cplx, t_real, t_size>;
+
+using t_magdyn = magdyn::MagDyn<t_mat, t_vec, t_cplx, t_real, std::size_t>;
+using t_vec3_real = typename t_magdyn::t_vec3_real;
+
 using t_SofQE = typename t_magdyn::SofQE;
 using t_field = typename t_magdyn::ExternalField;
 
@@ -73,7 +72,7 @@ int main(int argc, char** argv)
 {
 	t_real delta = eps;       // for differentiation
 	t_real delta_int = 1e-3;  // for integration
-	t_vec_real Q0 = tl2::create<t_vec_real>({ 0., 0., 0. });
+	t_vec3_real Q0 = tl2::create<t_vec3_real>({ 0., 0., 0. });
 	t_real max_curv = 100.;
 
 	unsigned int print_width = print_prec * 3;
@@ -88,7 +87,7 @@ int main(int argc, char** argv)
 	/*t_field field001
 	{
 		.align_spins = true,
-		.dir = tl2::create<t_vec_real>({ 0., 0., 1. }),
+		.dir = tl2::create<t_vec3_real>({ 0., 0., 1. }),
 		.mag = 1.,
 	};*/
 
@@ -122,7 +121,7 @@ int main(int argc, char** argv)
 	std::cout << std::left << std::setw(print_width) << "...";
 	std::cout << std::endl;
 
-	t_vec_real Q = Q0;
+	t_vec3_real Q = Q0;
 	for(t_real q = 0.; q < 1.; q += 0.001)
 	{
 		Q[0] = Q0[0] + q;
