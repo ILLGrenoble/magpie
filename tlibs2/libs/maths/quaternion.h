@@ -139,7 +139,7 @@ template<class t_quat> t_quat unit_quat() requires is_quat<t_quat>
 
 
 /**
- * are two quaternion equal?
+ * are two quaternions equal?
  */
 template<class t_quat, typename t_real = typename t_quat::value_type>
 bool equals(const t_quat& q1, const t_quat& q2, t_real eps)
