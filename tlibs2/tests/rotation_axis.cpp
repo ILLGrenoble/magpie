@@ -57,7 +57,7 @@ int main(int argc, char** argv)
 		for(int j = 0; j < 3; ++j)
 			mat(i, j) = tl2::str_to_var_parse<t_real>(std::string(argv[1 + i*3 + j]));
 
-	// get rotateion axis and angle
+	// get rotation axis and angle
 	t_quat quat = tl2::rot3_to_quat<t_mat, t_quat>(mat);
 	auto [axis, angle] = tl2::rotation_axis<t_quat, t_vec>(quat);
 
