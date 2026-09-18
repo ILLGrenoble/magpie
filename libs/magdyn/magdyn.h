@@ -187,14 +187,10 @@ public:
 	// --------------------------------------------------------------------
 	// cleanup functions
 	// --------------------------------------------------------------------
-	/**
-	 * clear all
-	 */
+	// clear all
 	void Clear();
 
-	/**
-	 * clear all parser variables
-	 */
+	// clear all parser variables
 	void ClearVariables();
 	void ClearMagneticSites();
 	void ClearExchangeTerms();
@@ -240,24 +236,16 @@ public:
 	bool GetPerformChecks() const;
 	bool GetSilent() const;
 
-	/**
-	 * get number of magnetic sites with the given name (to check if the name is unique)
-	 */
+	// get number of magnetic sites with the given name (to check if the name is unique)
 	std::vector<const MagneticSite*> FindMagneticSites(const std::string& name) const;
 
-	/**
-	 * get magnetic site with the given name
-	 */
+	// get magnetic site with the given name
 	const MagneticSite* FindMagneticSite(const std::string& name) const;
 
-	/**
-	 * get the index of a magnetic site from its name
-	 */
+	// get the index of a magnetic site from its name
 	t_size GetMagneticSiteIndex(const std::string& name) const;
 
-	/**
-	 * get the index of an exchange term from its name
-	 */
+	// get the index of an exchange term from its name
 	t_size GetExchangeTermIndex(const std::string& name) const;
 
 	std::vector<t_vec3_real> GetMagneticSitePositions() const;
@@ -266,9 +254,7 @@ public:
 	std::vector<t_real> GetCrystalLattice() const;
 	const t_vec3_real* GetScatteringPlane() const;
 
-	/**
-	 * get the needed supercell ranges from the exchange terms
-	 */
+	// get the needed supercell ranges from the exchange terms
 	std::tuple<t_vec3_real, t_vec3_real> GetSupercellMinMax() const;
 	// --------------------------------------------------------------------
 
@@ -298,14 +284,10 @@ public:
 	void RotateExternalField(const t_vec3_real& axis, t_real angle);
 	void RotateExternalField(t_real x, t_real y, t_real z, t_real angle);
 
-	/**
-	 * set the ordering wave vector (e.g., the helix pitch) for incommensurate structures
-	 */
+	// set the ordering wave vector (e.g., the helix pitch) for incommensurate structures
 	void SetOrderingWavevector(const t_vec3_real& ordering);
 
-	/**
-	 * set the rotation axis for the ordering wave vector
-	 */
+	// set the rotation axis for the ordering wave vector
 	void SetRotationAxis(const t_vec3_real& axis);
 
 	void SetCalcHamiltonian(bool H, bool Hp, bool Hm);
@@ -320,16 +302,12 @@ public:
 	void AddExchangeTerm(ExchangeTerm&& term);
 	void SetExchangeTerm(ExchangeTerm&& term);
 
-	/**
-	 * calculate the B matrix from the crystal lattice
-	 */
+	// calculate the B matrix from the crystal lattice
 	void SetCrystalLattice(t_real a, t_real b, t_real c,
 		t_real alpha, t_real beta, t_real gamma);
 
-	/**
-	 * calculate the UB matrix from the scattering plane and the crystal lattice
-	 * note: SetCrystalLattice() has to be called before this function
-	 */
+	// calculate the UB matrix from the scattering plane and the crystal lattice
+	// note: SetCrystalLattice() has to be called before this function
 	void SetScatteringPlane(t_real ah, t_real ak, t_real al,
 		t_real bh, t_real bk, t_real bl);
 	// --------------------------------------------------------------------
@@ -345,9 +323,7 @@ public:
 
 
 	// --------------------------------------------------------------------
-	/**
-	 * get an expression parser object with registered variables
-	 */
+	// get an expression parser object with registered variables
 	tl2::ExprParser<t_cplx> GetExprParser() const;
 	// --------------------------------------------------------------------
 
@@ -355,19 +331,13 @@ public:
 	// --------------------------------------------------------------------
 	// sanity checks
 	// --------------------------------------------------------------------
-	/**
-	 * check if the site index is valid
-	 */
+	// check if the site index is valid
 	bool CheckMagneticSite(t_size idx, bool print_error = true) const;
 
-	/**
-	 * check if the term index is valid
-	 */
+	// check if the term index is valid
 	bool CheckExchangeTerm(t_size idx, bool print_error = true) const;
 
-	/**
-	 * check if imaginary weights remain
-	 */
+	// check if imaginary weights remain
 	bool CheckImagWeights(const SofQE& S) const;
 	// --------------------------------------------------------------------
 
@@ -375,80 +345,52 @@ public:
 	// --------------------------------------------------------------------
 	// symmetrisation and generation functions
 	// --------------------------------------------------------------------
-	/**
-	 * generate symmetric positions based on the given symops
-	 */
+	// generate symmetric positions based on the given symops
 	void SymmetriseMagneticSites(const std::vector<t_mat44_real>& symops);
 
-	/**
-	 * generate symmetric exchange terms based on the given symops
-	 */
+	// generate symmetric exchange terms based on the given symops
 	void SymmetriseExchangeTerms(const std::vector<t_mat44_real>& symops);
 
-	/**
-	 * generate possible couplings up to a certain distance
-	 */
+	// generate possible couplings up to a certain distance
 	void GeneratePossibleExchangeTerms(
 		t_real dist_max, t_size _sc_max,
 		std::optional<t_size> couplings_max);
 
-	/**
-	 * extend the magnetic structure
-	 */
+	// extend the magnetic structure
 	void ExtendStructure(t_size x_size, t_size y_size, t_size z_size,
 		bool remove_duplicates = true, bool flip_spin = true);
 
-	/**
-	 * modify exchange term whose sites point to sc positions that are also available in the uc
-	 */
+	// modify exchange term whose sites point to sc positions that are also available in the uc
 	void FixExchangeTerms(t_size x_size = 1, t_size y_size = 1, t_size z_size = 1);
 
-	/**
-	 * remove literal duplicate sites (not symmetry-equivalent ones)
-	 */
+	// remove literal duplicate sites (not symmetry-equivalent ones)
 	void RemoveDuplicateMagneticSites();
 
-	/**
-	 * remove literal duplicate couplings (not symmetry-equivalent ones)
-	 */
+	// remove literal duplicate couplings (not symmetry-equivalent ones)
 	void RemoveDuplicateExchangeTerms();
 
-	/**
-	 * are two sites equivalent with respect to the given symmetry operators?
-	 */
+	// are two sites equivalent with respect to the given symmetry operators?
 	bool IsSymmetryEquivalent(const MagneticSite& site1, const MagneticSite& site2,
 		const std::vector<t_mat44_real>& symops) const;
 
-	/**
-	 * are two couplings equivalent with respect to the given symmetry operators?
-	 */
+	// are two couplings equivalent with respect to the given symmetry operators?
 	bool IsSymmetryEquivalent(const ExchangeTerm& term1, const ExchangeTerm& term2,
 		const std::vector<t_mat44_real>& symops) const;
 
-	/**
-	 * assign symmetry group indices to sites and couplings
-	 */
+	// assign symmetry group indices to sites and couplings
 	void CalcSymmetryIndices(const std::vector<t_mat44_real>& symops);
 
-	/**
-	 * assign exchange constants to all couplings with the same symmetry index
-	 */
+	// assign exchange constants to all couplings with the same symmetry index
 	void AssignCouplingsBySymmetryIndex(t_size symmidx,
 		const std::string* J, const std::string* DMI = nullptr, const std::string* Js = nullptr);
 
-	/**
-	 * sort couplings by their lengths
-	 */
+	// sort couplings by their lengths
 	void SortExchangeTerms();
 
-	/**
-	 * remove sites that don't have any coupling
-	 */
+	// remove sites that don't have any coupling
 	void RemoveUnusedMagneticSites();
 
-	/**
-	 * remove terms that don't have a coupling constant
-	 */
+	// remove terms that don't have a coupling constant
 	void RemoveUnusedExchangeTerms();
 	// --------------------------------------------------------------------
 
@@ -456,106 +398,72 @@ public:
 	// --------------------------------------------------------------------
 	// calculation functions
 	// --------------------------------------------------------------------
-	/**
-	 * calculate the rotation matrix for the external field
-	 */
+	// calculate the rotation matrix for the external field
 	void CalcExternalField();
 
-	/**
-	 * calculate the spin rotation trafo for the magnetic sites
-	 * and parse any given expressions
-	 */
+	// calculate the spin rotation trafo for the magnetic sites
+	// and parse any given expressions
 	void CalcMagneticSite(MagneticSite& site);
 	void CalcMagneticSite(t_size idx);
 
-	/**
-	 * calculate the spin rotation trafo for the magnetic sites
-	 * and parse any given expressions
-	 */
+	// calculate the spin rotation trafo for the magnetic sites
+	// and parse any given expressions
 	void CalcMagneticSites();
 
-	/**
-	 * parse the exchange term expressions and calculate all properties
-	 */
+	// parse the exchange term expressions and calculate all properties
 	void CalcExchangeTerm(ExchangeTerm& term);
 
-	/**
-	 * parse all exchange term expressions and calculate all properties
-	 */
+	// parse all exchange term expressions and calculate all properties
 	void CalcExchangeTerms();
 
-	/**
-	 * calculate the real-space interaction matrix J of
-	 * equations (10) - (13) from (Toth 2015)
-	 */
+	// calculate the real-space interaction matrix J of
+	// equations (10) - (13) from (Toth 2015)
 	t_mat33 CalcRealJ(const ExchangeTerm& term) const;
 
-	/**
-	 * calculate the reciprocal interaction matrices J(Q) and J(-Q) of
-	 * equations (12) and (14) from (Toth 2015)
-	 */
+	// calculate the reciprocal interaction matrices J(Q) and J(-Q) of
+	// equations (12) and (14) from (Toth 2015)
 	std::tuple<t_Jmap, t_Jmap> CalcReciprocalJs(const t_vec3_real& Qvec) const;
 
-	/**
-	 * sort eigenstates by their energies
-	 */
+	// sort eigenstates by their energies
 	void SortByEnergies(SofQE& S) const;
 
-	/**
-	 * get energy term for external field
-	 */
+	// get energy term for external field
 	t_cplx CalcFieldEnergy(t_size site_idx) const;
 
-	/**
-	 * get the hamiltonian at the given momentum
-	 * @note implements the formalism given by (Toth 2015)
-	 * @note a first version for a simplified ferromagnetic dispersion was based on (Heinsdorf 2021)
-	 */
+	// get the hamiltonian at the given momentum
+	// @note implements the formalism given by (Toth 2015)
+	// @note a first version for a simplified ferromagnetic dispersion was based on (Heinsdorf 2021)
 	t_mat CalcHamiltonian(const t_vec3_real& Qvec) const;
 
-	/**
-	 * get the energies from a hamiltonian
-	 * @note implements the formalism given by (Toth 2015)
-	 */
+	// get the energies from a hamiltonian
+	// @note implements the formalism given by (Toth 2015)
 	SofQE CalcEnergiesFromHamiltonian(
 		const t_mat& _H, const t_vec3_real& Qvec,
 		bool only_energies = false) const;
 
-	/**
-	 * get the dynamical structure factor from a hamiltonian
-	 * @note implements the formalism given by (Toth 2015)
-	 */
+	// get the dynamical structure factor from a hamiltonian
+	// @note implements the formalism given by (Toth 2015)
 	bool CalcCorrelationsFromHamiltonian(SofQE& S) const;
 
-	/**
-	 * applies projectors, form and weight factors to get neutron intensities
-	 * @note implements the formalism given by (Toth 2015)
-	 */
+	// applies projectors, form and weight factors to get neutron intensities
+	// @note implements the formalism given by (Toth 2015)
 	void CalcIntensities(SofQE& S) const;
 
-	/**
-	 * calculates the polarisation matrix
-	 */
+	// calculates the polarisation matrix
 	bool CalcPolarisation(const t_vec3_real& Q_rlu, EnergyAndWeight& E_and_S) const;
 
-	/**
-	 * unite degenerate energies and their corresponding eigenstates
-	 */
+	// unite degenerate energies and their corresponding eigenstates
 	SofQE UniteEnergies(const SofQE& S) const;
 
-	/**
-	 * get the energies and the spin-correlation at the given momentum
-	 * (also calculates incommensurate contributions and applies weight factors)
-	 * @note implements the formalism given by (Toth 2015)
-	 */
+	// get the energies and the spin-correlation at the given momentum
+	// (also calculates incommensurate contributions and applies weight factors)
+	// @note implements the formalism given by (Toth 2015)
 	SofQE CalcEnergies(const t_vec3_real& Q_rlu, bool only_energies = false) const;
 
 	EnergiesAndWeights CalcEnergies(t_real h, t_real k, t_real l,
 		bool only_energies = false) const;
 
-	/**
-	 * generates the dispersion along the given Q path
-	 */
+	// generates the dispersion along the given Q path
 	SofQEs CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 		t_real h_end, t_real k_end, t_real l_end,
 		t_size num_Qs = 128, t_size num_threads = 4,
@@ -563,17 +471,13 @@ public:
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		std::function<void(const SofQE*)> *result_fkt = nullptr) const;
 
-	/**
-	 * generates the dispersion for the given Q points
-	 */
+	// generates the dispersion for the given Q points
 	SofQEs CalcDispersion(const std::vector<t_vec3_real>& Qs,
 		t_size num_threads = 4, bool calc_weights = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		std::function<void(const SofQE*)> *result_fkt = nullptr) const;
 
-	/**
-	 * generates the dispersion along the given 2d Q surface
-	 */
+	// generates the dispersion along the given 2d Q surface
 	SofQEs CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 		t_real h_end1, t_real k_end1, t_real l_end1,
 		t_real h_end2, t_real k_end2, t_real l_end2,
@@ -582,21 +486,15 @@ public:
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		std::function<void(const SofQE*)> *result_fkt = nullptr) const;
 
-	/**
-	 * get the energy minimum
-	 * @note a first version for a simplified ferromagnetic dispersion was based on (Heinsdorf 2021)
-	 */
+	// get the energy minimum
+	// @note a first version for a simplified ferromagnetic dispersion was based on (Heinsdorf 2021)
 	t_real CalcMinimumEnergy() const;
 
-	/**
-	 * get the ground-state energy
-	 * @note zero-operator term in expansion of equation (20) in (Toth 2015)
-	 */
+	// get the ground-state energy
+	// @note zero-operator term in expansion of equation (20) in (Toth 2015)
 	t_real CalcGroundStateEnergy() const;
 
-	/**
-	 * minimise energy to found ground state
-	 */
+	// minimise energy to found ground state
 	bool CalcGroundState(const std::unordered_set<std::string>* fixed_params = nullptr,
 		bool verbose = false, const bool *stop_request = nullptr);
 
@@ -633,17 +531,13 @@ public:
 	// --------------------------------------------------------------------
 	// powder calculation
 	// --------------------------------------------------------------------
-	/**
-	 * generates the powder energies for the given Q point
-	 */
+	// generates the powder energies for the given Q point
 	SofQEs CalcPowder(t_real Q_invA,
 		t_size num_points = 4096, t_size num_threads = 4, bool calc_weights = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		std::function<void(const SofQE*)> *result_fkt = nullptr) const;
 
-	/**
-	 * generates the powder energies for the given Q point, binning the energies
-	 */
+	// generates the powder energies for the given Q point, binning the energies
 	t_histo CalcPowderBin(t_real Q_invA,
 		t_real E_start = 0., t_real E_end = 5., t_size E_num = 128,
 		t_size num_points = 4096, t_size num_threads = 4,
@@ -656,9 +550,7 @@ public:
 	// --------------------------------------------------------------------
 	// loading and saving
 	// --------------------------------------------------------------------
-	/**
-	 * generates the dispersion plot along the given Q path
-	 */
+	// generates the dispersion plot along the given Q path
 	bool SaveDispersion(const std::string& filename,
 		t_real h_start, t_real k_start, t_real l_start,
 		t_real h_end, t_real k_end, t_real l_end,
@@ -666,9 +558,7 @@ public:
 		bool as_py = false, bool as_binary = false, bool calc_weights = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr) const;
 
-	/**
-	 * generates the dispersion plot along the given Q path
-	 */
+	// generates the dispersion plot along the given Q path
 	bool SaveDispersion(std::ostream& ostr,
 		t_real h_start, t_real k_start, t_real l_start,
 		t_real h_end, t_real k_end, t_real l_end,
@@ -677,9 +567,7 @@ public:
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		bool write_header = true) const;
 
-	/**
-	 * generates the dispersion plot for the given Q values
-	 */
+	// generates the dispersion plot for the given Q values
 	bool SaveDispersion(std::ostream& ostr,
 		const std::vector<t_vec3_real>& Qs,
 		t_size num_threads = 4,
@@ -687,9 +575,7 @@ public:
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		bool write_header = true) const;
 
-	/**
-	 * generates the dispersion plot along multiple Q paths
-	 */
+	// generates the dispersion plot along multiple Q paths
 	bool SaveMultiDispersion(const std::string& filename,
 		const std::vector<t_vec3_real>& Qs,
 		t_size num_Qs = 128, t_size num_threads = 4,
@@ -697,9 +583,7 @@ public:
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		const std::vector<std::string>* Q_names = nullptr) const;
 
-	/**
-	 * generates the dispersion plot along multiple Q paths
-	 */
+	// generates the dispersion plot along multiple Q paths
 	bool SaveMultiDispersion(std::ostream& ostr,
 		const std::vector<t_vec3_real>& Qs,
 		t_size num_Qs = 128, t_size num_threads = 4,
@@ -707,40 +591,28 @@ public:
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		const std::vector<std::string>* Q_names = nullptr) const;
 
-	/**
-	 * load a configuration from a file
-	 */
+	// load a configuration from a file
 	bool Load(const std::string& filename);
 
-	/**
-	 * save the configuration to a file
-	 */
+	// save the configuration to a file
 	bool Save(const std::string& filename) const;
 
-	/**
-	 * load a configuration from a property tree
-	 */
+	// load a configuration from a property tree
 	bool Load(const boost::property_tree::ptree& node);
 
-	/**
-	 * save the configuration to a property tree
-	 */
+	// save the configuration to a property tree
 	bool Save(boost::property_tree::ptree& node) const;
 	// --------------------------------------------------------------------
 
 
 protected:
-	/**
-	 * converts the rotation matrix rotating the local spins to ferromagnetic
-	 * [001] directions into the vectors comprised of the matrix columns
-	 * @see equation (9) and (51) from (Toth 2015)
-	 */
+	// converts the rotation matrix rotating the local spins to ferromagnetic
+	// [001] directions into the vectors comprised of the matrix columns
+	// @see equation (9) and (51) from (Toth 2015)
 	std::tuple<t_vec3, t_vec3> rot_to_trafo(const t_mat33& R);
 
-	/**
-	 * rotate local spin to ferromagnetic [001] direction
-	 * @see equations (7) and (9) from (Toth 2015)
-	 */
+	// rotate local spin to ferromagnetic [001] direction
+	// @see equations (7) and (9) from (Toth 2015)
 	std::tuple<t_vec3, t_vec3> spin_to_trafo(const t_vec3_real& spin_dir);
 
 
@@ -761,7 +633,7 @@ private:
 	// matrix to rotate inverted field into the [001] direction
 	t_mat33 m_rot_negfield{ tl2::unit<t_mat33>(3) };
 
-	// ordering wave vector for incommensurate structures
+	// ordering wave vector for incommensurate helical structures
 	std::optional<t_vec3_real> m_ordering{ std::nullopt };
 
 	// helix rotation axis for incommensurate structures

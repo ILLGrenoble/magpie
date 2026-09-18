@@ -261,6 +261,7 @@ void MagDynDlg::CreateExchangeTermsPanel()
 		QSizePolicy::Minimum, QSizePolicy::Fixed),
 		y++,0, 1,1);
 
+	grid->addWidget(new QLabel("Incommensurate Helical Order", m_termspanel), y++,0,1,4);
 	grid->addWidget(new QLabel("Ordering Vector:", m_termspanel), y,0,1,1);
 	grid->addWidget(m_ordering[0], y,1,1,1);
 	grid->addWidget(m_ordering[1], y,2,1,1);

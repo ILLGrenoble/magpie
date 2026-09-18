@@ -300,7 +300,7 @@ void magpie_set_temperature(t_magpie _mag, t_real T)
 extern "C"
 void magpie_set_field(t_magpie _mag, t_real B,
 	t_real Bx, t_real By, t_real Bz,
-	int align_spins, int keep_signs)
+	int align_spins, int keep_spin_signs)
 {
 	if(!_mag)
 		return;
@@ -309,7 +309,7 @@ void magpie_set_field(t_magpie _mag, t_real B,
 	field.mag = B;
 	field.dir = tl2::create<t_vec3_real>({ Bx, By, Bz });
 	field.align_spins = (align_spins != 0);
-	field.keep_signs = (keep_signs != 0);
+	field.keep_spin_signs = (keep_spin_signs != 0);
 
 	MagpieData *dat = reinterpret_cast<MagpieData*>(_mag);
 	dat->mag.SetExternalField(field);

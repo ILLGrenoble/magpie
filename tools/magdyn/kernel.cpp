@@ -301,7 +301,8 @@ void MagDynDlg::SyncToKernel()
 
 		field.mag = m_field_mag->value();
 		field.align_spins = m_align_spins->isChecked();
-		field.keep_signs = m_keep_spin_signs->isChecked();
+		field.align_ordering = m_align_ordering->isChecked();
+		field.keep_spin_signs = m_keep_spin_signs->isChecked();
 
 		m_dyn.SetExternalField(field);
 	}

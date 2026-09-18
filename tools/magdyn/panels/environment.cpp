@@ -74,16 +74,19 @@ void MagDynDlg::CreateSampleEnvPanel()
 	m_field_dir[2] = new QDoubleSpinBox(m_sampleenviropanel);
 
 	// align spins along field (field-polarised state)
-	m_align_spins = new QCheckBox(
-		"Align Spins Along Field", m_sampleenviropanel);
+	m_align_spins = new QCheckBox("Align Spins Along Field", m_sampleenviropanel);
 	m_align_spins->setChecked(false);
 	m_align_spins->setFocusPolicy(Qt::StrongFocus);
 
 	// align spins along field (field-polarised state)
-	m_keep_spin_signs = new QCheckBox(
-		"Keep the Spin Senses", m_sampleenviropanel);
+	m_keep_spin_signs = new QCheckBox("Keep the Spin Senses", m_sampleenviropanel);
 	m_keep_spin_signs->setChecked(false);
 	m_keep_spin_signs->setFocusPolicy(Qt::StrongFocus);
+
+	// align ordering vector along field
+	m_align_ordering = new QCheckBox("Align Ordering Vector Along Field", m_sampleenviropanel);
+	m_align_ordering->setChecked(false);
+	m_align_ordering->setFocusPolicy(Qt::StrongFocus);
 
 	// predefined rotation axes
 	QPushButton *btnAxes = new QPushButton(m_reciprocalpanel);
@@ -280,6 +283,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 	gridField->addWidget(m_field_dir[2], yField++, 3, 1, 1);
 	gridField->addWidget(m_align_spins, yField, 0, 1, 2);
 	gridField->addWidget(m_keep_spin_signs, yField++, 2, 1, 2);
+	gridField->addWidget(m_align_ordering, yField++, 0, 1, 2);
 
 	QFrame *sep1 = new QFrame(m_panelField);
 	sep1->setFrameStyle(QFrame::HLine);
@@ -371,6 +375,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 		calc_all);
 
 	connect(m_align_spins, &QCheckBox::toggled, calc_all);
+	connect(m_align_ordering, &QCheckBox::toggled, calc_all);
 	connect(m_keep_spin_signs, &QCheckBox::toggled, calc_all);
 
 	connect(btn_rotate_ccw, &QAbstractButton::clicked, [this]()

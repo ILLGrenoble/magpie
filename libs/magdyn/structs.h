@@ -148,11 +148,13 @@ requires tl2::is_vec<t_vec3_real>
 #endif
 struct t_ExternalField
 {
-	bool align_spins{};          // align spins along external field
-	bool keep_signs{};           // keep the senses of the spins
-
 	std::optional<t_vec3_real> dir{};  // field direction
 	t_real mag{};                // field magnitude
+
+	bool align_spins{};          // align spins along external field
+	bool keep_spin_signs{};      // keep the senses of the spins
+
+	bool align_ordering{};       // align ordering vector along external field
 };
 
 
