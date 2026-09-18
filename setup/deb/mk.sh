@@ -58,7 +58,7 @@ if [ $create_appdir -ne 0 ]; then
 	mkdir -pv ${APPDIRNAME}/DEBIAN
 
 	# package control file
-	echo -e "Package: ${APPNAME}\nVersion: 0.9.6" >         ${APPDIRNAME}/DEBIAN/control
+	echo -e "Package: ${APPNAME}\nVersion: 1.1.0" >         ${APPDIRNAME}/DEBIAN/control
 	echo -e "Architecture: $(dpkg --print-architecture)" >> ${APPDIRNAME}/DEBIAN/control
 	echo -e "Section: base\nPriority: optional" >>          ${APPDIRNAME}/DEBIAN/control
 	echo -e "Description: A Graphical Magnon Software" >>   ${APPDIRNAME}/DEBIAN/control
