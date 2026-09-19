@@ -7,7 +7,7 @@
 #
 # -----------------------------------------------------------------------------
 # Magpie
-# Copyright (C) 2025  Tobias WEBER (Institut Laue-Langevin (ILL),
+# Copyright (C) 2026  Tobias WEBER (Institut Laue-Langevin (ILL),
 #                     Grenoble, France).
 # TAS-Paths
 # Copyright (C) 2021  Tobias WEBER (Institut Laue-Langevin (ILL),
@@ -51,11 +51,11 @@ EXT_LIBS=( \
 	libgemmi_cpp.dll \
 	liblapack.dll liblapacke.dll libblas.dll libgfortran-5.dll libquadmath-0.dll \
 	libstdc++-6.dll libwinpthread-1.dll libglib-2.0-0.dll libgcc_s_seh-1.dll \
-	libbz2-1.dll zlib1.dll libpng16-16.dll \
+	libbz2-1.dll zlib1.dll libpng16-*.dll \
 	libfreetype-6.dll libfontconfig-1.dll \
-	libpcre2-16-0.dll libpcre2-8-0.dll libexpat-1.dll \
+	libpcre2-16-*.dll libpcre2-*.dll libexpat-1.dll \
 	libharfbuzz-0.dll iconv.dll libintl-8.dll \
-	icui18n77.dll icuuc77.dll icudata77.dll \
+	icui18n*.dll icuuc*.dll icudata*.dll \
 )
 
 
@@ -132,3 +132,7 @@ echo -e "[Paths]\n\tPlugins = qt_plugins\n" > "${APPDIRNAME}/qt.conf"
 
 # strip binaries
 find ${APPDIRNAME} -type f \( -name "*.exe" -o -name "*.dll" \) -exec strip -v {} \;
+
+
+# create archive
+zip -r -9 ${APPDIRNAME}.zip ${APPDIRNAME}
