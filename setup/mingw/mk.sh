@@ -53,7 +53,7 @@ EXT_LIBS=( \
 	libstdc++-6.dll libwinpthread-1.dll libglib-2.0-0.dll libgcc_s_seh-1.dll \
 	libbz2-1.dll zlib1.dll libpng16-*.dll \
 	libfreetype-6.dll libfontconfig-1.dll \
-	libpcre2-16-*.dll libpcre2-*.dll libexpat-1.dll \
+	libpcre2-16-*.dll libpcre2-8-*.dll libexpat-1.dll \
 	libharfbuzz-0.dll iconv.dll libintl-8.dll \
 	icui18n*.dll icuuc*.dll icudata*.dll \
 )
