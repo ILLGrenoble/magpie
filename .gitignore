@@ -38,6 +38,8 @@ tools_py/instr/build/**
 tools_c/build/**
 unittests/build/**
 build/**
+magpie_mingw/**
+magpie_mingw.zip
 
 # temporary files
 tmp/**
