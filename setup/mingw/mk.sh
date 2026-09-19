@@ -55,7 +55,7 @@ EXT_LIBS=( \
 	libfreetype-6.dll libfontconfig-1.dll \
 	libpcre2-16-0.dll libpcre2-8-0.dll libexpat-1.dll \
 	libharfbuzz-0.dll iconv.dll libintl-8.dll \
-	icui18n76.dll icuuc76.dll icudata76.dll \
+	icui18n77.dll icuuc77.dll icudata77.dll \
 )
 
 
