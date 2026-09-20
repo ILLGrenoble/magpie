@@ -23,6 +23,12 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <boost/version.hpp>
+#include <boost/config.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/replace.hpp>
+namespace algo = boost::algorithm;
+
 #include "infos.h"
 #include "defs.h"
 
@@ -30,12 +36,7 @@
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QLabel>
 
-#include <boost/version.hpp>
-#include <boost/config.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/replace.hpp>
-namespace algo = boost::algorithm;
-
+#include <qcustomplot.h>
 
 
 /**
@@ -177,18 +178,40 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 
 	grid->addWidget(sep2, y++, 0, 1, w);
 
-	grid->addWidget(new QLabel(
+	// ---------------------------------------------------------------------------
+	// external libraries
+	QWidget *panelLibs = new QWidget(infopanel);
+	QGridLayout *gridLibs = new QGridLayout(panelLibs);
+	gridLibs->setSpacing(4);
+	gridLibs->setContentsMargins(0, 0, 0, 0);
+
+	gridLibs->addWidget(new QLabel(
 		QString("Qt Version: ") +
 		QString(QT_VERSION_STR) + ".",
-		infopanel), y++, 0, 1, w);
-	grid->addWidget(new QLabel(
+		infopanel), 0, 0, 1, 1);
+	gridLibs->addWidget(new QLabel(
+		QString("QCustomPlot Version: ") +
+		QString(QCUSTOMPLOT_VERSION_STR) + ".",
+		infopanel), 0, 1, 1, 1);
+	gridLibs->addWidget(new QLabel(
 		QString("Boost Version: ") +
 		strBoost.c_str() + ".",
-		infopanel), y++, 0, 1, w);
-	grid->addWidget(new QLabel(
+		infopanel), 1, 0, 1, 1);
+	gridLibs->addWidget(new QLabel(
 		QString("Lapack(e) Version: ") +
 		ostrLapack.str().c_str() + ".",
-		infopanel), y++, 0, 1, w);
+		infopanel), 1, 1, 1, 1);
+	gridLibs->addWidget(new QLabel(
+		QString("Gemmi Version: ") +
+		(sym::get_gemmi_version() + ".").c_str(),
+		infopanel), 2, 0, 1, 1);
+	gridLibs->addWidget(new QLabel(
+		QString("Qhull Version: ") +
+		QString(qh_version) + ".",
+		infopanel), 2, 1, 1, 1);
+
+	grid->addWidget(panelLibs, y++, 0, 1, w);
+	// ---------------------------------------------------------------------------
 
 	grid->addWidget(sep3, y++, 0, 1, w);
 	grid->addWidget(labelPaper, y++, 0, 1, w);
