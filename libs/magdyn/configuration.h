@@ -130,6 +130,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 	if(auto optInfo = node.get_optional<std::string>("meta.info");
 		!optInfo || !(*optInfo == std::string{"magdyn_tool"}))
 	{
+		MAGDYN_CERR_OPT << "Magdyn error: Unrecognised file format." << std::endl;
 		return false;
 	}
 

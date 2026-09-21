@@ -144,9 +144,9 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	m_maxdist->setMinimum(0.001);
 	m_maxdist->setMaximum(99.999);
 	m_maxdist->setSingleStep(0.1);
-	m_maxdist->setValue(5);
+	m_maxdist->setValue(10.);
 	m_maxdist->setPrefix("d = ");
-	m_maxdist->setToolTip("Maximum distance between sites.");
+	m_maxdist->setToolTip("Maximum coupling distance between sites.");
 	m_maxdist->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 	m_maxSC = new QSpinBox(m_termspanel);
@@ -168,7 +168,7 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	QPushButton *btnGenByDist = new QPushButton(
 		QIcon::fromTheme("insert-object"),
 		"Generate", m_termspanel);
-	btnGenByDist->setToolTip("Create possible couplings by distances between sites.");
+	btnGenByDist->setToolTip("Create all possible couplings between the sites up to the given maximum distance and order.");
 	btnGenByDist->setFocusPolicy(Qt::StrongFocus);
 	btnGenByDist->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
@@ -177,8 +177,7 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	QPushButton *btnGenBySG = new QPushButton(
 		QIcon::fromTheme("insert-object"),
 		"Generate", m_termspanel);
-	btnGenBySG->setToolTip("Create couplings from space group"
-		" symmetry operators and existing couplings.");
+	btnGenBySG->setToolTip("Create couplings from space group symmetry operators and existing couplings.");
 	btnGenBySG->setFocusPolicy(Qt::StrongFocus);
 	btnGenBySG->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
@@ -192,6 +191,8 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	m_normaxis[1] = new QDoubleSpinBox(m_termspanel);
 	m_normaxis[2] = new QDoubleSpinBox(m_termspanel);
 
+	const char *comps[] = { "h", "k", "l" };
+
 	for(int i = 0; i < 3; ++i)
 	{
 		m_ordering[i]->setDecimals(4);
@@ -200,6 +201,9 @@ void MagDynDlg::CreateExchangeTermsPanel()
 		m_ordering[i]->setSingleStep(0.01);
 		m_ordering[i]->setValue(0.);
 		m_ordering[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+		m_ordering[i]->setPrefix(QString("O%1 = ").arg(comps[i]));
+		m_ordering[i]->setToolTip(QString(
+			"%1 component of the helical propagation vector.").arg(comps[i]));
 
 		m_normaxis[i]->setDecimals(4);
 		m_normaxis[i]->setMinimum(-9.9999);
@@ -207,15 +211,10 @@ void MagDynDlg::CreateExchangeTermsPanel()
 		m_normaxis[i]->setSingleStep(0.01);
 		m_normaxis[i]->setValue(i==0 ? 1. : 0.);
 		m_normaxis[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+		m_normaxis[i]->setPrefix(QString("N%1 = ").arg(comps[i]));
+		m_normaxis[i]->setToolTip(QString(
+			"%1 component of the helical normal vector used for spin rotation.").arg(comps[i]));
 	}
-
-	m_ordering[0]->setPrefix("Oh = ");
-	m_ordering[1]->setPrefix("Ok = ");
-	m_ordering[2]->setPrefix("Ol = ");
-
-	m_normaxis[0]->setPrefix("Nh = ");
-	m_normaxis[1]->setPrefix("Nk = ");
-	m_normaxis[2]->setPrefix("Nl = ");
 
 
 	// grid

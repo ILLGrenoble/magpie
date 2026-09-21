@@ -377,12 +377,23 @@ requires is_vec<t_vec> && is_mat<t_mat>
 		// antiparallel vectors?
 		if(equals<t_real>(std::abs(angle), pi<t_real>, eps))
 		{
+			t_real axis_len{};
+			bool axis_is_zero = true;
+
+			// use orthogonal vector if given and remove any non-orthogonal components
 			if(ortho_vec)
 			{
-				axis = *ortho_vec;
-				axis /= tl2::norm<t_vec>(axis);
+				axis = *ortho_vec - tl2::project<t_vec>(*ortho_vec, vec1, false);
+				axis_len = tl2::norm<t_vec>(axis);
+				if(!tl2::equals_0(axis_len, eps))
+				{
+					axis /= axis_len;
+					axis_is_zero = false;
+				}
 			}
-			else
+
+			// check if the orthogonal vector is really orthogonal
+			if(axis_is_zero || !tl2::equals_0(tl2::inner(axis, vec1), eps))
 			{
 				axis = tl2::perp<t_vec>(vec1, eps);
 			}
