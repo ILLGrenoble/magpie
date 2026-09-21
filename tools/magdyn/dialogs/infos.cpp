@@ -35,6 +35,7 @@ namespace algo = boost::algorithm;
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QLabel>
+#include <QtGui/QDesktopServices>
 
 #include <qcustomplot.h>
 
@@ -105,9 +106,9 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 	labelDoi->setOpenExternalLinks(true);
 
 	auto labelLicense = new QLabel(
-		"<p>This program is free software: you can redistribute it and/or modify "
-		"it under the terms of the <u>GNU General Public License</u> as published by "
-		"the Free Software Foundation, <u>version 3</u> of the License.</p>"
+		"<p>This program is free software: you can redistribute it and/or modify it under the terms of the "
+		"<a href=\"https://github.com/ILLGrenoble/magpie/blob/main/LICENSE\">GNU General Public License</a> "
+		"as published by the Free Software Foundation, <u>version 3</u> of the License.</p>"
 
 		"<p>This program is distributed in the hope that it will be useful, "
 		"but WITHOUT ANY WARRANTY; without even the implied warranty of "
@@ -224,9 +225,13 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 		y++,0, 1,w);
 
 	QDialogButtonBox *btnbox = new QDialogButtonBox(this);
-	btnbox->addButton(QDialogButtonBox::Ok);
 	btnbox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-	connect(btnbox, &QDialogButtonBox::accepted, this, &InfoDlg::accept);
+
+	btnbox->addButton(QDialogButtonBox::Ok);
+	QPushButton* btnLicense = btnbox->addButton("License...", QDialogButtonBox::HelpRole);
+	QPushButton* btnExtLicenses = btnbox->addButton("External Licenses...", QDialogButtonBox::HelpRole);
+	btnLicense->setToolTip("Show the Magpie license text.");
+	btnExtLicenses->setToolTip("Show the license texts for the 3rd-party libraries used in Magpie.");
 
 	auto dlgGrid = new QGridLayout(this);
 	dlgGrid->setSpacing(4);
@@ -243,6 +248,24 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 		else
 			resize(700, 700);
 	}
+
+	// ---------------------------------------------------------------------------
+	// connections
+	connect(btnbox, &QDialogButtonBox::accepted, this, &InfoDlg::accept);
+
+	connect(btnLicense, &QAbstractButton::clicked, [this]()
+	{
+		QUrl url("https://github.com/ILLGrenoble/magpie/blob/main/LICENSE");
+		if(!QDesktopServices::openUrl(url))
+				QMessageBox::critical(this, windowTitle() + " -- Error", "Could not open the license text.");
+	});
+	connect(btnExtLicenses, &QAbstractButton::clicked, [this]()
+	{
+		QUrl url("https://github.com/ILLGrenoble/magpie/blob/main/LICENSES");
+		if(!QDesktopServices::openUrl(url))
+				QMessageBox::critical(this, windowTitle() + " -- Error", "Could not open the license text.");
+	});
+	// ---------------------------------------------------------------------------
 }
 
 

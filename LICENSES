@@ -224,6 +224,17 @@ SOFTWARE.
 
 
 --------------------------------------------------------------------------------
+Magnetic form factor table
+URL: https://github.com/SunnySuite/Sunny.jl/blob/main/src/FormFactor.jl
+
+Copyright (c) 2021-2026 by the Sunny contributors.
+
+License URL: https://github.com/SunnySuite/Sunny.jl/blob/main/LICENSE.md
+--------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------
 Text of the GNU LGPL version 2.1 from https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
 (only pertaining to above-mentioned third-party software products which use this license):
 --------------------------------------------------------------------------------

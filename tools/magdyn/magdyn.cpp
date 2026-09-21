@@ -251,7 +251,7 @@ void MagDynDlg::CreateMainWindow()
 	// show 3d dispersion
 	QPushButton *btnShowDisp3d = new QPushButton("3D Dispersion...", this);
 	btnShowDisp3d->setIcon(QIcon::fromTheme("applications-graphics"));
-	btnShowDisp3d->setToolTip("Calculate 3D dispersion.");
+	btnShowDisp3d->setToolTip("Calculate three-dimensional dispersion relations.");
 	btnShowDisp3d->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
 	// splitter for input and output tabs
