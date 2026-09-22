@@ -48,7 +48,8 @@
 class BZPlotDlg : public QDialog
 { Q_OBJECT
 public:
-	BZPlotDlg(QWidget* pParent = nullptr, QSettings *sett = nullptr);
+	BZPlotDlg(QWidget* pParent = nullptr, QSettings *sett = nullptr,
+		bool fail_on_gl_error = false);
 	~BZPlotDlg() = default;
 
 	BZPlotDlg(const BZPlotDlg&) = delete;

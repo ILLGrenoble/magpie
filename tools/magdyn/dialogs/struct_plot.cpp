@@ -56,6 +56,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 
 	// create gl plotter
 	m_structplot = new tl2::GlPlot(this);
+	m_structplot->SetFailOnGlError(g_fail_on_gl_error != 0);
 	m_structplot->SetCameraSpeed(g_cam_speed);
 	m_structplot->SetCameraZoomScale(g_cam_zoom);
 	m_structplot->GetRenderer()->SetRestrictCamTheta(false);

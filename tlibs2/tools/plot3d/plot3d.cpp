@@ -46,7 +46,7 @@
 /**
  * sets up the topology dialog
  */
-Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
+Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett, bool fail_on_gl_error)
 	: QDialog{parent}, m_sett{sett}
 {
 	setWindowTitle("3D Plotter");
@@ -54,6 +54,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett)
 
 	// create gl plotter
 	m_dispplot = new tl2::GlPlot(this);
+	m_dispplot->SetFailOnGlError(fail_on_gl_error);
 	m_dispplot->GetRenderer()->SetAxisLabels("x", "y", "z");
 	m_dispplot->GetRenderer()->SetRestrictCamTheta(false);
 	m_dispplot->GetRenderer()->SetLight(0, tl2::create<t_vec3_gl>({ 50, 50, 50 }));

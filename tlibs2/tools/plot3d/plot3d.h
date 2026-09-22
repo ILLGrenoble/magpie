@@ -73,7 +73,7 @@ protected:
 
 
 public:
-	Plot3DDlg(QWidget *parent, QSettings* sett);
+	Plot3DDlg(QWidget *parent, QSettings *sett = nullptr, bool fail_on_gl_error = false);
 	virtual ~Plot3DDlg();
 
 	Plot3DDlg(const Plot3DDlg&) = delete;

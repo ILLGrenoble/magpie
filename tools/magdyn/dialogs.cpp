@@ -477,7 +477,8 @@ void MagDynDlg::ShowBZ3DDlg(bool only_create)
 {
 	if(!m_bz_dlg)
 	{
-		m_bz_dlg = new BZPlotDlg(this, m_sett);
+		m_bz_dlg = new BZPlotDlg(this, m_sett, g_fail_on_gl_error != 0);
+
 		m_bz_dlg->setFont(this->font());
 		m_bz_dlg->SetPlotFont(g_font3d);
 

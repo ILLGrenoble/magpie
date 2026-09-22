@@ -42,7 +42,7 @@
 using namespace tl2_ops;
 
 
-BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett)
+BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett, bool fail_on_gl_error)
 	: QDialog{parent}, m_sett{sett}
 {
 	setWindowTitle("Brillouin Zone");
@@ -50,6 +50,7 @@ BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett)
 	setSizeGripEnabled(true);
 
 	m_plot = std::make_shared<tl2::GlPlot>(this);
+	m_plot->SetFailOnGlError(fail_on_gl_error);
 	m_plot->GetRenderer()->SetRestrictCamTheta(false);
 	m_plot->GetRenderer()->SetCull(false);
 	m_plot->GetRenderer()->SetBlend(true);

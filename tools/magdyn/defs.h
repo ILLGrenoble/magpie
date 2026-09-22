@@ -138,6 +138,8 @@ extern t_real g_cam_zoom;
 // fraction of points to check if the stop button was pressed
 extern unsigned int g_stop_check_fraction;
 
+extern int g_fail_on_gl_error;
+
 
 #ifndef DONT_USE_QT
 	// gui theme and font
@@ -157,7 +159,7 @@ extern unsigned int g_stop_check_fraction;
 // ----------------------------------------------------------------------------
 #include "dialogs/settings.h"
 
-constexpr std::array<SettingsVariable, 28> g_settingsvariables
+constexpr std::array<SettingsVariable, 29> g_settingsvariables
 {{
 	// threads
 	{
@@ -286,6 +288,12 @@ constexpr std::array<SettingsVariable, 28> g_settingsvariables
 		.key = "cam_zoom",
 		.value = &g_cam_zoom,
 	},
+	{
+		.description = "Fail on GL error.",
+		.key = "fail_on_gl_error",
+		.value = &g_fail_on_gl_error,
+		.editor = SettingsVariableEditor::YESNO,
+	},
 
 	// optional features
 	{
@@ -327,7 +335,7 @@ constexpr std::array<SettingsVariable, 28> g_settingsvariables
 	},
 }};
 // ----------------------------------------------------------------------------
-#endif
+#endif  // DONT_USE_QT
 
 
 #endif

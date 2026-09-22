@@ -113,6 +113,8 @@ t_real g_cam_zoom = 1.;
 
 // fraction of points to check if the stop button was pressed
 unsigned int g_stop_check_fraction = 20;
+
+int g_fail_on_gl_error = 0;
 // ----------------------------------------------------------------------------
 
 

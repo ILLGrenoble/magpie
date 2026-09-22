@@ -815,7 +815,7 @@ void MagDynDlg::CreateMenuBar()
 	{
 		if(!m_plot3d)
 		{
-			m_plot3d = new Plot3DDlg(this, m_sett);
+			m_plot3d = new Plot3DDlg(this, m_sett, g_fail_on_gl_error != 0);
 			m_plot3d->setFont(this->font());
 
 			connect(m_plot3d, &Plot3DDlg::GlDeviceInfos,
