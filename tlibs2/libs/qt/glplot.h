@@ -117,6 +117,7 @@ protected:
 	t_real_gl m_CoordMax = 2.5;       // extent of coordinate axes
 
 	std::atomic<bool> m_initialised = false;
+	std::atomic<bool> m_fail_on_gl_error = false;
 	std::atomic<bool> m_viewport_needs_update = false;
 	std::atomic<bool> m_picker_enabled = true;
 	std::atomic<bool> m_picker_needs_update = false;
@@ -339,6 +340,11 @@ public:
 		return m_initialised;
 	}
 
+	void SetFailOnGlError(bool b)
+	{
+		m_fail_on_gl_error = b;
+	}
+
 	const QPointF& GetMousePosition() const
 	{
 		return m_posMouse;
@@ -448,6 +454,14 @@ public:
 	void SetCameraSpeed(t_real_gl speed) { m_cam_speed = speed; }
 	void SetCameraZoomScale(t_real_gl scale) { m_cam_zoomscale = scale; }
 
+	void SetFailOnGlError(bool b)
+	{
+		m_fail_on_gl_error = b;
+
+		if(m_renderer)
+			m_renderer->SetFailOnGlError(b);
+	}
+
 
 protected:
 	virtual void paintEvent(QPaintEvent*) override;
@@ -478,6 +492,8 @@ private:
 
 	t_real_gl m_cam_speed { 0.1 };
 	t_real_gl m_cam_zoomscale { 1. };
+
+	bool m_fail_on_gl_error { false };
 
 
 protected slots:

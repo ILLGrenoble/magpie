@@ -1193,14 +1193,14 @@ void main()
 	auto *pGl = GetGlFunctions();
 	if(!pGl)
 		return;
-	if(!LOGGLERR(pGl))
+	if(!LOGGLERR(pGl) && m_fail_on_gl_error)
 		return;
 
 	m_strGlVer = (char*)pGl->glGetString(GL_VERSION);
 	m_strGlShaderVer = (char*)pGl->glGetString(GL_SHADING_LANGUAGE_VERSION);
 	m_strGlVendor = (char*)pGl->glGetString(GL_VENDOR);
 	m_strGlRenderer = (char*)pGl->glGetString(GL_RENDERER);
-	if(!LOGGLERR(pGl))
+	if(!LOGGLERR(pGl) && m_fail_on_gl_error)
 		return;
 
 
@@ -1265,7 +1265,7 @@ void main()
 		m_attrVertexCol = m_pShaders->attributeLocation("vertex_col");
 		m_attrTexCoords = m_pShaders->attributeLocation("texture_coords");
 	}
-	if(!LOGGLERR(pGl))
+	if(!LOGGLERR(pGl) && m_fail_on_gl_error)
 		return;
 
 
@@ -1353,7 +1353,7 @@ void GlPlotRenderer::UpdateViewport()
 		return;
 	}
 	BOOST_SCOPE_EXIT(m_pShaders) { m_pShaders->release(); } BOOST_SCOPE_EXIT_END
-	if(!LOGGLERR(pGl))
+	if(!LOGGLERR(pGl) && m_fail_on_gl_error)
 	{
 		m_initialised = false;
 		return;
@@ -1363,7 +1363,7 @@ void GlPlotRenderer::UpdateViewport()
 	m_pShaders->setUniformValue(m_uniMatrixCam, m_cam.GetTransformation());
 	m_pShaders->setUniformValue(m_uniMatrixCamInv, m_cam.GetInverseTransformation());
 	m_pShaders->setUniformValue(m_uniMatrixProj, m_cam.GetPerspective());
-	if(!LOGGLERR(pGl))
+	if(!LOGGLERR(pGl) && m_fail_on_gl_error)
 	{
 		m_initialised = false;
 		return;
@@ -1779,7 +1779,7 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 	pGl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	pGl->glEnable(GL_DEPTH_TEST);
 	pGl->glDepthMask(GL_TRUE);
-	if(!LOGGLERR(pGl))
+	if(!LOGGLERR(pGl) && m_fail_on_gl_error)
 	{
 		m_initialised = false;
 		return;
@@ -1796,7 +1796,7 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 		return;
 	}
 	BOOST_SCOPE_EXIT(m_pShaders) { m_pShaders->release(); } BOOST_SCOPE_EXIT_END
-	if(!LOGGLERR(pGl))
+	if(!LOGGLERR(pGl) && m_fail_on_gl_error)
 	{
 		m_initialised = false;
 		return;
@@ -1877,7 +1877,7 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 
 			pGl->glActiveTexture(GL_TEXTURE0);
 			obj.m_texture->bind();
-			if(!LOGGLERR(pGl))
+			if(!LOGGLERR(pGl) && m_fail_on_gl_error)
 				continue;
 
 			// see: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexParameter.xhtml
@@ -1946,7 +1946,7 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 			pGl->glDisableVertexAttribArray(m_attrTexCoords);
 		}
 		BOOST_SCOPE_EXIT_END
-		if(!LOGGLERR(pGl))
+		if(!LOGGLERR(pGl) && m_fail_on_gl_error)
 			continue;
 
 
