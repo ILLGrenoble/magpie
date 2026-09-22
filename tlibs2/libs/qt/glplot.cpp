@@ -105,7 +105,7 @@ GlPlotRenderer::~GlPlotRenderer()
 		delete_render_object(obj);
 
 	m_objs.clear();
-	LOGGLERR(pGl)
+	LOGGLERR(pGl);
 }
 
 
@@ -1193,13 +1193,15 @@ void main()
 	auto *pGl = GetGlFunctions();
 	if(!pGl)
 		return;
-	LOGGLERR(pGl);
+	if(!LOGGLERR(pGl))
+		return;
 
 	m_strGlVer = (char*)pGl->glGetString(GL_VERSION);
 	m_strGlShaderVer = (char*)pGl->glGetString(GL_SHADING_LANGUAGE_VERSION);
 	m_strGlVendor = (char*)pGl->glGetString(GL_VENDOR);
 	m_strGlRenderer = (char*)pGl->glGetString(GL_RENDERER);
-	LOGGLERR(pGl);
+	if(!LOGGLERR(pGl))
+		return;
 
 
 	// shaders
@@ -1263,7 +1265,8 @@ void main()
 		m_attrVertexCol = m_pShaders->attributeLocation("vertex_col");
 		m_attrTexCoords = m_pShaders->attributeLocation("texture_coords");
 	}
-	LOGGLERR(pGl);
+	if(!LOGGLERR(pGl))
+		return;
 
 
 	// 3d coordinate system objects
@@ -1321,10 +1324,16 @@ void GlPlotRenderer::UpdateViewport()
 
 	if(auto *pContext = ((QOpenGLWidget*)m_pPlot)->context();
 		!pContext || !pContext->isValid())
+	{
+		m_initialised = false;
 		return;
+	}
 	auto *pGl = GetGlFunctions();
 	if(!pGl)
+	{
+		m_initialised = false;
 		return;
+	}
 
 	m_cam.UpdateViewport();
 	m_cam.UpdatePerspective();
@@ -1335,15 +1344,30 @@ void GlPlotRenderer::UpdateViewport()
 	pGl->glDepthFunc(GL_LEQUAL);
 
 	// bind shaders
-	m_pShaders->bind();
+	if(!m_pShaders->bind())
+	{
+		std::cerr << "GL error: Cannot bind shaders.\n"
+			<< "Log: " << m_pShaders->log().toStdString()
+			<< std::endl;
+		m_initialised = false;
+		return;
+	}
 	BOOST_SCOPE_EXIT(m_pShaders) { m_pShaders->release(); } BOOST_SCOPE_EXIT_END
-	LOGGLERR(pGl);
+	if(!LOGGLERR(pGl))
+	{
+		m_initialised = false;
+		return;
+	}
 
 	// set matrices
 	m_pShaders->setUniformValue(m_uniMatrixCam, m_cam.GetTransformation());
 	m_pShaders->setUniformValue(m_uniMatrixCamInv, m_cam.GetInverseTransformation());
 	m_pShaders->setUniformValue(m_uniMatrixProj, m_cam.GetPerspective());
-	LOGGLERR(pGl);
+	if(!LOGGLERR(pGl))
+	{
+		m_initialised = false;
+		return;
+	}
 
 	m_viewport_needs_update = false;
 }
@@ -1706,6 +1730,9 @@ void GlPlotRenderer::tick()
 
 void GlPlotRenderer::tick([[maybe_unused]] const std::chrono::milliseconds& ms)
 {
+	if(!IsInitialised())
+		return;
+
 	// TODO
 	UpdateCam();
 }
@@ -1752,13 +1779,28 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 	pGl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	pGl->glEnable(GL_DEPTH_TEST);
 	pGl->glDepthMask(GL_TRUE);
-	LOGGLERR(pGl);
+	if(!LOGGLERR(pGl))
+	{
+		m_initialised = false;
+		return;
+	}
 
 
 	// bind shaders
-	m_pShaders->bind();
+	if(!m_pShaders->bind())
+	{
+		std::cerr << "GL error: Cannot bind shaders.\n"
+			<< "Log: " << m_pShaders->log().toStdString()
+			<< std::endl;
+		m_initialised = false;
+		return;
+	}
 	BOOST_SCOPE_EXIT(m_pShaders) { m_pShaders->release(); } BOOST_SCOPE_EXIT_END
-	LOGGLERR(pGl);
+	if(!LOGGLERR(pGl))
+	{
+		m_initialised = false;
+		return;
+	}
 
 	if(m_lights_need_update)
 		UpdateLights();
@@ -1835,7 +1877,8 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 
 			pGl->glActiveTexture(GL_TEXTURE0);
 			obj.m_texture->bind();
-			LOGGLERR(pGl);
+			if(!LOGGLERR(pGl))
+				continue;
 
 			// see: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexParameter.xhtml
 			pGl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -1903,7 +1946,8 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 			pGl->glDisableVertexAttribArray(m_attrTexCoords);
 		}
 		BOOST_SCOPE_EXIT_END
-		LOGGLERR(pGl);
+		if(!LOGGLERR(pGl))
+			continue;
 
 
 		// draw object

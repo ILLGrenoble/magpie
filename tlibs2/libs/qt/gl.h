@@ -90,21 +90,21 @@
 	#define _GL_MIN_VER 3
 #endif
 
-#if _GL_MAJ_VER<=3 && _GL_MIN_VER<2
+#if _GL_MAJ_VER <= 3 && _GL_MIN_VER < 2
 	#if !defined(_GL_SUFFIX)
 		#define _GL_SUFFIX
 	#endif
 
-	#if _GL_MAJ_VER==3 && _GL_MIN_VER==1
+	#if _GL_MAJ_VER == 3 && _GL_MIN_VER == 1
 		#define _GLSL_MAJ_VER 1
 		#define _GLSL_MIN_VER 4
-	#elif _GL_MAJ_VER==3 && _GL_MIN_VER==0
+	#elif _GL_MAJ_VER == 3 && _GL_MIN_VER == 0
 		#define _GLSL_MAJ_VER 1
 		#define _GLSL_MIN_VER 3
-	#elif _GL_MAJ_VER==2 && _GL_MIN_VER==1
+	#elif _GL_MAJ_VER == 2 && _GL_MIN_VER == 1
 		#define _GLSL_MAJ_VER 1
 		#define _GLSL_MIN_VER 2
-	#elif _GL_MAJ_VER==2 && _GL_MIN_VER==0
+	#elif _GL_MAJ_VER == 2 && _GL_MIN_VER == 0
 		#define _GLSL_MAJ_VER 1
 		#define _GLSL_MIN_VER 1
 	#endif
@@ -113,7 +113,7 @@
 		#define _GL_SUFFIX _Core
 	#endif
 
-	#if _GL_MAJ_VER==3 && _GL_MIN_VER==2
+	#if _GL_MAJ_VER == 3 && _GL_MIN_VER == 2
 		#define _GLSL_MAJ_VER 1
 		#define _GLSL_MIN_VER 5
 	#else
@@ -139,15 +139,17 @@ using qgl_funcs = _GL_FUNC(_GL_MAJ_VER, _GL_MIN_VER, _GL_SUFFIX);
 
 
 // GL error codes: https://www.khronos.org/opengl/wiki/OpenGL_Error
-#define LOGGLERR(pGl) { while(pGl) {	\
+#define LOGGLERR(pGl) ({ bool ok = true; \
+		while(pGl) {	\
 		auto err = pGl->glGetError();	\
 		if(err == GL_NO_ERROR) break;	\
+		ok = false; \
 		std::cerr << "GL error in " << __func__ \
 			<< ", file: " << __FILE__ \
 			<< ", line " << std::dec <<  __LINE__  \
 			<< ": " << std::hex << "0x" << err \
 			<< "." << std::endl; \
-	}}
+	} ok; })
 // ----------------------------------------------------------------------------
 
 

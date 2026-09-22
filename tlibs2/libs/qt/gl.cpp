@@ -290,7 +290,8 @@ bool create_triangle_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 	obj.m_vertices = std::move(verts);
 	obj.m_triangles = std::move(triagverts);
 	obj.m_uvs = std::move(uvs);
-	LOGGLERR(pGl)
+	if(!LOGGLERR(pGl))
+		return false;
 
 	return true;
 }
@@ -386,7 +387,8 @@ bool create_line_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 	}
 
 	obj.m_vertices = std::move(verts);
-	LOGGLERR(pGl)
+	if(!LOGGLERR(pGl))
+		return false;
 
 	return true;
 }
