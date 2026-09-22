@@ -149,6 +149,7 @@ using qgl_funcs = _GL_FUNC(_GL_MAJ_VER, _GL_MIN_VER, _GL_SUFFIX);
 			<< ", line " << std::dec <<  __LINE__  \
 			<< ": " << std::hex << "0x" << err \
 			<< "." << std::endl; \
+		break; \
 	} ok; })
 // ----------------------------------------------------------------------------
 
