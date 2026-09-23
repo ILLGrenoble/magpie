@@ -36,7 +36,7 @@ clean_frameworks=1
 
 
 # tools
-STRIP=/opt/homebrew/Cellar/llvm/22.1.0/bin/llvm-strip
+STRIP=/opt/homebrew/Cellar/llvm/23.1.1_1/bin/llvm-strip
 if [ ! -e $STRIP ]; then
 	STRIP=llvm-strip
 fi
@@ -57,7 +57,7 @@ if [ ! -e $LOCAL_DIR ]; then
 	LOCAL_DIR=/usr/local
 fi
 QT_PLUGIN_DIR=${LOCAL_DIR}/share/qt/plugins
-GCC_LIB_DIR=${LOCAL_DIR}/Cellar/gcc/15.2.0_1/lib/gcc/current/
+GCC_LIB_DIR=${LOCAL_DIR}/Cellar/gcc/16.2.0/lib/gcc/current/
 LOCAL_FRAMEWORKS_DIR=${LOCAL_DIR}/Frameworks
 ICU_LIB_DIR=${LOCAL_DIR}/Cellar/icu4c@78/78.3/lib
 
@@ -255,6 +255,7 @@ if [ $create_appdir -ne 0 ]; then
 	mkdir -pv "${APPDIRNAME}/Contents/Libraries"
 	mkdir -pv "${APPDIRNAME}/Contents/Libraries/Qt_Plugins"
 	mkdir -pv "${APPDIRNAME}/Contents/Frameworks"
+	mkdir -pv "${APPDIRNAME}/Contents/py"
 
 	ln -sf "Libraries/Qt_Plugins" "${APPDIRNAME}/Contents/PlugIns"
 	echo -e "--------------------------------------------------------------------------------"
@@ -269,11 +270,17 @@ if [ $create_appdir -ne 0 ]; then
 	# resources
 	cp -v "${APPICON_ICNS}"     "${APPDIRNAME}/Contents/Resources/"
 	cp -v "${APPICON}"          "${APPDIRNAME}/Contents/Resources/"
+	cp -v res/*.xml             "${APPDIRNAME}/Contents/Resources/"
 	cp -v AUTHORS               "${APPDIRNAME}/Contents/Resources/AUTHORS.txt"
 	cp -v LICENSE               "${APPDIRNAME}/Contents/Resources/LICENSE.txt"
 	cp -v LICENSES              "${APPDIRNAME}/Contents/Resources/LICENSES.txt"
 	cp -v LITERATURE            "${APPDIRNAME}/Contents/Resources/LITERATURE.txt"
 	cp -rv examples             "${APPDIRNAME}/Contents/Resources/"
+
+	# scripting interface
+	cp -v build/tools_py/magdyn/*.py     "${APPDIRNAME}/Contents/py"
+	cp -v build/tools_py/magdyn/*.so     "${APPDIRNAME}/Contents/py"
+	cp -v build/tools_py/magdyn/*.dylin  "${APPDIRNAME}/Contents/py"
 
 	# local libraries
 	for (( libidx=0; libidx<${#LOCAL_LIBS[@]}; ++libidx )); do
@@ -341,7 +348,8 @@ if [ $create_appdir -ne 0 ]; then
 
 	# libraries and frameworks
 	for library in $(find "${APPDIRNAME}/Contents/Libraries/" -type f && \
-		find "${APPDIRNAME}/Contents/Frameworks/" -type f)
+		find "${APPDIRNAME}/Contents/Frameworks/" -type f && \
+		find "${APPDIRNAME}/Contents/py/" -type f)
 	do
 		is_binary ${library}
 		if [[ $? == 0 ]]; then

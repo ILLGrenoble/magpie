@@ -151,6 +151,7 @@ MagDynDlg::~MagDynDlg()
 void MagDynDlg::InitResources()
 {
 	QString appPath = QApplication::applicationDirPath();
+	//QMessageBox::information(this, windowTitle() + " -- Info", appPath);
 
 	// find resource directories
 	std::vector<QString> resdirs;
@@ -171,6 +172,8 @@ void MagDynDlg::InitResources()
 	add_path(appPath + "/../res/");
 	add_path(appPath + "/resources/");
 	add_path(appPath + "/../resources/");
+	add_path(appPath + "/Resources/");
+	add_path(appPath + "/../Resources/");
 	add_path("res/");
 	add_path("../res/");
 	add_path(QDir::homePath() + "/.magpie");
