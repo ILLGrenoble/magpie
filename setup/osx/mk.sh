@@ -342,6 +342,10 @@ if [ $create_appdir -ne 0 ]; then
 			-add_rpath @executable_path/../Libraries \
 			-add_rpath @executable_path/../Frameworks \
 			"${APPDIRNAME}/Contents/MacOS/${binary}"
+		install_name_tool \
+			-delete_rpath /usr/local/lib \
+			-delete_rpath /opt/homebrew/lib \
+			"${APPDIRNAME}/Contents/MacOS/${binary}"
 
 		change_to_rpath      "${APPDIRNAME}/Contents/MacOS/${binary}"
 		check_local_bindings "${APPDIRNAME}/Contents/MacOS/${binary}"
