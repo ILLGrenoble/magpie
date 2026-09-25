@@ -276,6 +276,7 @@ if [ $create_appdir -ne 0 ]; then
 	cp -v LICENSES              "${APPDIRNAME}/Contents/Resources/LICENSES.txt"
 	cp -v LITERATURE            "${APPDIRNAME}/Contents/Resources/LITERATURE.txt"
 	cp -rv examples             "${APPDIRNAME}/Contents/Resources/"
+	cp -rv examples_py          "${APPDIRNAME}/Contents/Resources/"
 
 	# scripting interface
 	cp -v build/tools_py/magdyn/*.py     "${APPDIRNAME}/Contents/py"
@@ -301,12 +302,17 @@ if [ $create_appdir -ne 0 ]; then
 		QT_LIB=${QT_LIBS[$libidx]}
 
 		cp -rv ${LOCAL_FRAMEWORKS_DIR}/${QT_LIB}.framework "${APPDIRNAME}/Contents/Frameworks/"
+		rm -fv "${APPDIRNAME}/Contents/Frameworks/${QT_LIB}.framework/${QT_LIB}"
+		rm -rf "${APPDIRNAME}/Contents/Frameworks/${QT_LIB}.framework/Versions/Current"
+		ln -sf "./A" "${APPDIRNAME}/Contents/Frameworks/${QT_LIB}.framework/Versions/Current"
+		ln -sf "./Versions/Current/${QT_LIB}" "${APPDIRNAME}/Contents/Frameworks/${QT_LIB}.framework/${QT_LIB}"
 	done
 
 	# remove unnecessary files from frameworks
 	if [ $clean_frameworks -ne 0 ]; then
 		echo -e "\nCleaning frameworks..."
 		find ${APPDIRNAME}/Contents/Frameworks/ -type d -name "Headers" -exec rm -rfv {} \;
+		#find ${APPDIRNAME}/Contents/Frameworks/ -type d -name "A" -exec rm -rfv {} \;
 		find ${APPDIRNAME}/Contents/Frameworks/ -type l -name "Headers" -exec rm -rv {} \;
 		find ${APPDIRNAME} -type d -name "_CodeSignature" -exec rm -rfv {} \;
 		echo -e "--------------------------------------------------------------------------------"
