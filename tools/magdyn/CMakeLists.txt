@@ -269,6 +269,7 @@ if(USE_QT)
 		# sg tool
 		../magsgbrowser/browser.cpp ../magsgbrowser/browser.h
 
+#		../../setup/mingw/magpie.rc
 #		../../ext/qcp/qcustomplot.cpp
 	)
 

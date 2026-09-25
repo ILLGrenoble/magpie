@@ -33,6 +33,7 @@ APPDIRNAME="magpie_mingw"
 # icon
 APPICON="res/magpie.svg"
 APPICON_ICO="${APPICON%\.svg}.ico"
+APPICON_RES="${APPICON%\.svg}.res"
 
 
 # mingw directories
@@ -99,6 +100,10 @@ APPICON_PNG="${svg_to_png_result}"
 
 echo -e "${APPICON_PNG} -> ${APPICON_ICO}..."
 magick "${APPICON_PNG}" "${APPICON_ICO}"
+
+#echo -e "${APPICON_ICO} -> ${APPICON_RES}..."
+#echo -e "id ICON \"${APPICON_ICO}\"" > magpie.rc
+#$(${MINGW_ROOT}/../../bin/windres magpie.rc -o ${APPICON_RES})
 
 
 # copy program files
