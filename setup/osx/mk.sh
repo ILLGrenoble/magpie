@@ -277,6 +277,7 @@ if [ $create_appdir -ne 0 ]; then
 	cp -v LITERATURE            "${APPDIRNAME}/Contents/Resources/LITERATURE.txt"
 	cp -rv examples             "${APPDIRNAME}/Contents/Resources/"
 	cp -rv examples_py          "${APPDIRNAME}/Contents/Resources/"
+	cp -rv tools/magdyn/scripts "${APPDIRNAME}/Contents/Resources/"
 
 	# scripting interface
 	cp -v build/tools_py/magdyn/*.py     "${APPDIRNAME}/Contents/py"
