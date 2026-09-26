@@ -53,6 +53,8 @@ if [ $create_appdir -ne 0 ]; then
 	mkdir -pv ${APPDIRNAME}${BINDIR}
 	mkdir -pv ${APPDIRNAME}${SHAREDIR}/${APPNAME}/res
 	mkdir -pv ${APPDIRNAME}${SHAREDIR}/${APPNAME}/examples
+	mkdir -pv ${APPDIRNAME}${SHAREDIR}/${APPNAME}/examples_py
+	mkdir -pv ${APPDIRNAME}${SHAREDIR}/${APPNAME}/scripts
 	mkdir -pv ${APPDIRNAME}${PY_DISTDIR}
 	mkdir -pv ${APPDIRNAME}/usr/share/applications
 	mkdir -pv ${APPDIRNAME}/DEBIAN
@@ -129,6 +131,8 @@ if [ $create_appdir -ne 0 ]; then
 	cp -v  LICENSES                     ${APPDIRNAME}${SHAREDIR}/${APPNAME}/
 	cp -rv res/*                        ${APPDIRNAME}${SHAREDIR}/${APPNAME}/res/
 	cp -rv examples/*                   ${APPDIRNAME}${SHAREDIR}/${APPNAME}/examples/
+	cp -rv examples_py/*                ${APPDIRNAME}${SHAREDIR}/${APPNAME}/examples_py/
+	cp -rv tools/magdyn/scripts/*       ${APPDIRNAME}${SHAREDIR}/${APPNAME}/scripts/
 	cp -v  setup/deb/themagpie.desktop  ${APPDIRNAME}/usr/share/applications
 	#cp -v  setup/deb/magpie.desktop     ${APPDIRNAME}/usr/share/applications
 
