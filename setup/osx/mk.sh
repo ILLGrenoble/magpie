@@ -304,9 +304,11 @@ if [ $create_appdir -ne 0 ]; then
 
 		cp -rv ${LOCAL_FRAMEWORKS_DIR}/${QT_LIB}.framework "${APPDIRNAME}/Contents/Frameworks/"
 		rm -fv "${APPDIRNAME}/Contents/Frameworks/${QT_LIB}.framework/${QT_LIB}"
+		rm -rf "${APPDIRNAME}/Contents/Frameworks/${QT_LIB}.framework/Resources"
 		rm -rf "${APPDIRNAME}/Contents/Frameworks/${QT_LIB}.framework/Versions/Current"
 		ln -sf "./A" "${APPDIRNAME}/Contents/Frameworks/${QT_LIB}.framework/Versions/Current"
 		ln -sf "./Versions/Current/${QT_LIB}" "${APPDIRNAME}/Contents/Frameworks/${QT_LIB}.framework/${QT_LIB}"
+		ln -sf "./Versions/Current/Resources" "${APPDIRNAME}/Contents/Frameworks/${QT_LIB}.framework/Resources"
 	done
 
 	# remove unnecessary files from frameworks
