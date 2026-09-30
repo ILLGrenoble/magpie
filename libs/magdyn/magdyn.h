@@ -381,7 +381,7 @@ public:
 	void CalcSymmetryIndices(const std::vector<t_mat44_real>& symops);
 
 	// assign exchange constants to all couplings with the same symmetry index
-	void AssignCouplingsBySymmetryIndex(t_size symmidx,
+	t_size AssignCouplingsBySymmetryIndex(t_size symmidx,
 		const std::string* J, const std::string* DMI = nullptr, const std::string* Js = nullptr);
 
 	// sort couplings by their lengths

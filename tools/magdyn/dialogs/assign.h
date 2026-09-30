@@ -32,6 +32,7 @@
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QSpinBox>
+#include <QtWidgets/QLabel>
 
 #include "defs.h"
 
@@ -56,6 +57,8 @@ private:
 
 	QSpinBox *m_symmidx{};
 
+	QLabel *m_status{};
+
 
 protected:
 	void AssignByIndex();
@@ -63,6 +66,10 @@ protected:
 
 protected slots:
 	virtual void accept() override;
+
+
+public slots:
+	void SetStatusMessage(const QString& msg);
 
 
 signals:

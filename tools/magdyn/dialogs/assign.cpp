@@ -117,17 +117,25 @@ AssignDlg::AssignDlg(QWidget* parent, QSettings *sett)
 	QDialogButtonBox *btnbox = new QDialogButtonBox(this);
 	btnbox->addButton(QDialogButtonBox::Ok);
 	btnbox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-	connect(btnbox, &QDialogButtonBox::accepted, this, &AssignDlg::accept);
+
+	// status bar
+	m_status = new QLabel(this);
+	m_status->setFrameShape(QFrame::Panel);
+	m_status->setFrameShadow(QFrame::Sunken);
+	m_status->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+	m_status->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
 	auto dlgGrid = new QGridLayout(this);
 	dlgGrid->setSpacing(4);
 	dlgGrid->setContentsMargins(8, 8, 8, 8);
 	dlgGrid->addWidget(panel, 0, 0, 1, 4);
 	dlgGrid->addWidget(btnbox, 1, 3, 1, 1);
+	dlgGrid->addWidget(m_status, 2, 0, 1, 4);
 
 
 	// connections
 	connect(btnAssignByIdx, &QAbstractButton::clicked, this, &AssignDlg::AssignByIndex);
+	connect(btnbox, &QDialogButtonBox::accepted, this, &AssignDlg::accept);
 
 
 	// restore settings
@@ -161,6 +169,16 @@ void AssignDlg::AssignByIndex()
 	}
 
 	emit AssignCouplingsBySymmetryIndex(symmidx, &J, DMI, Js);
+}
+
+
+
+void AssignDlg::SetStatusMessage(const QString& msg)
+{
+	if(!m_status)
+		return;
+
+	m_status->setText(msg);
 }
 
 

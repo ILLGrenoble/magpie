@@ -278,8 +278,22 @@ void MagDynDlg::GenerateCouplingsFromSG()
 void MagDynDlg::AssignCouplingsBySymmetryIndex(t_size symmidx,
 	const std::string* J, const std::string* DMI, const std::string* Js)
 {
+
 	//m_dyn.CalcSymmetryIndices(GetSymOpsForCurrentSG());
-	m_dyn.AssignCouplingsBySymmetryIndex(symmidx, J, DMI, Js);
+	t_size num_assigned = m_dyn.AssignCouplingsBySymmetryIndex(symmidx, J, DMI, Js);
+
+	// status message
+	QString assigned_msg = num_assigned > 0
+		? QString("Assigned %1 couplings.").arg(num_assigned)
+		: "No couplings assigned.";
+	if(m_assign_dlg)  // TODO: emit a signal instead
+		m_assign_dlg->SetStatusMessage(assigned_msg);
+
+	if(!num_assigned)
+	{
+		m_status->setText(assigned_msg);
+		return;
+	}
 
 	//SyncSymmetryIndicesFromKernel();
 	SyncTermsFromKernel();
@@ -289,6 +303,8 @@ void MagDynDlg::AssignCouplingsBySymmetryIndex(t_size symmidx,
 		CalcDispersion();
 		CalcHamiltonian();
 	}
+
+	m_status->setText(assigned_msg);
 }
 
 

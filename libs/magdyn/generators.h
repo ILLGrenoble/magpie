@@ -817,21 +817,28 @@ void MAGDYN_INST::CalcSymmetryIndices(const std::vector<t_mat44_real>& symops)
  * assign exchange constants to all couplings with the same symmetry index
  */
 MAGDYN_TEMPL
-void MAGDYN_INST::AssignCouplingsBySymmetryIndex(t_size symmidx,
+t_size MAGDYN_INST::AssignCouplingsBySymmetryIndex(t_size symmidx,
 	const std::string* J, const std::string* DMI, const std::string* Js)
 {
+	t_size num_assigned = 0;
+
 	for(ExchangeTerm& term : GetExchangeTerms())
 	{
 		if(term.sym_idx != symmidx)
 			continue;
+		bool assigned = false;
 
 		if(J)
+		{
 			term.J = *J;
+			assigned = true;
+		}
 
 		if(DMI)
 		{
 			for(std::uint8_t dmi_idx = 0; dmi_idx < 3; ++dmi_idx)
 				term.dmi[dmi_idx] = DMI[dmi_idx];
+			assigned = true;
 		}
 
 		if(Js)
@@ -839,10 +846,15 @@ void MAGDYN_INST::AssignCouplingsBySymmetryIndex(t_size symmidx,
 			for(std::uint8_t J_idx1 = 0; J_idx1 < 3; ++J_idx1)
 				for(std::uint8_t J_idx2 = 0; J_idx2 < 3; ++J_idx2)
 					term.Jgen[J_idx1][J_idx2] = Js[J_idx1*3 + J_idx2];
+			assigned = true;
 		}
+
+		if(assigned)
+			++num_assigned;
 	}
 
 	CalcExchangeTerms();
+	return num_assigned;
 }
 // --------------------------------------------------------------------
 
