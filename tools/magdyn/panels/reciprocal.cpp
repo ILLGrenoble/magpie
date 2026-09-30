@@ -196,7 +196,7 @@ void MagDynDlg::CreateReciprocalPanel()
 	{
 		const t_vec2_real& pos = m_bzview->GetClickedPosition(true);
 		auto [QinvA, Qrlu] = m_bz.GetBZCutQ(pos[0], pos[1]);
-		if(Qrlu.size() != 3)
+		if(Qrlu.size() < 3)
 			return;
 
 		SetCoordinates(Qrlu, std::nullopt, true);
@@ -206,7 +206,7 @@ void MagDynDlg::CreateReciprocalPanel()
 	{
 		const t_vec2_real& pos = m_bzview->GetClickedPosition(true);
 		auto [QinvA, Qrlu] = m_bz.GetBZCutQ(pos[0], pos[1]);
-		if(Qrlu.size() != 3)
+		if(Qrlu.size() < 3)
 			return;
 
 		SetCoordinates(std::nullopt, Qrlu, true);
