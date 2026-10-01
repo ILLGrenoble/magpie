@@ -193,6 +193,13 @@ void MagDynDlg::InitResources()
 				m_ff.Clear();
 		}
 
+		// print icon search paths
+		/*std::cout << QIcon::themeName().toStdString() << std::endl;
+		for(const QString& str : QIcon::fallbackSearchPaths())
+			std::cout << "fallback: " << str.toStdString() << std::endl;
+		for(const QString& str : QIcon::themeSearchPaths())
+			std::cout << "theme: " << str.toStdString() << std::endl;*/
+
 		// main icon
 		if(g_icon.isNull() && QFileInfo{resdir + "magpie.svg"}.exists())
 			g_icon = QIcon{resdir + "magpie.svg"};
@@ -385,33 +392,6 @@ void MagDynDlg::CreateMenuBar()
 	m_recent_struct.SetMaxRecentFiles(g_maxnum_recents);
 	m_recent_struct.SetOpenFunc(&m_import_struct_func);
 
-	// shortcuts
-	acNew->setShortcut(QKeySequence::New);
-	acLoad->setShortcut(QKeySequence::Open);
-	acSave->setShortcut(QKeySequence::Save);
-	acSaveAs->setShortcut(QKeySequence::SaveAs);
-	acExit->setShortcut(QKeySequence::Quit);
-	acExit->setMenuRole(QAction::QuitRole);
-
-	// icons
-	acNew->setIcon(QIcon::fromTheme("document-new"));
-	acLoad->setIcon(QIcon::fromTheme("document-open"));
-	acSave->setIcon(QIcon::fromTheme("document-save"));
-	acSaveAs->setIcon(QIcon::fromTheme("document-save-as"));
-	acExit->setIcon(QIcon::fromTheme("application-exit"));
-	m_menuOpenRecent->setIcon(QIcon::fromTheme("document-open-recent"));
-	acSaveFigure->setIcon(QIcon::fromTheme("image-x-generic"));
-	acSaveDisp->setIcon(QIcon::fromTheme("text-x-generic"));
-	acSaveMultiDisp->setIcon(QIcon::fromTheme("text-x-generic"));
-	acSaveDispScr->setIcon(QIcon::fromTheme("text-x-script"));
-	acSaveMultiDispScr->setIcon(QIcon::fromTheme("text-x-script"));
-	acStructExportSun->setIcon(QIcon::fromTheme("weather-clear"));
-	acStructExportSW->setIcon(QIcon::fromTheme("text-x-script"));
-	acStructExportScript->setIcon(QIcon::fromTheme("text-x-script"));
-	acStructNotes->setIcon(QIcon::fromTheme("accessories-text-editor"));
-	acStructView->setIcon(QIcon::fromTheme("applications-graphics"));
-	acBZView->setIcon(QIcon::fromTheme("applications-graphics"));
-
 	// calculation options menu
 	QMenu *menuCalcOpt = new QMenu("Calculation Options", m_menu);
 	m_autocalc = new QAction("Automatically Calculate", menuCalcOpt);
@@ -532,6 +512,47 @@ void MagDynDlg::CreateMenuBar()
 
 	acAboutQt->setMenuRole(QAction::AboutQtRole);
 	acAbout->setMenuRole(QAction::AboutRole);
+
+	// shortcuts
+	acNew->setShortcut(QKeySequence::New);
+	acLoad->setShortcut(QKeySequence::Open);
+	acSave->setShortcut(QKeySequence::Save);
+	acSaveAs->setShortcut(QKeySequence::SaveAs);
+	acExit->setShortcut(QKeySequence::Quit);
+	acExit->setMenuRole(QAction::QuitRole);
+
+	// shortcuts
+	acStructSymIdx->setShortcut(int(Qt::CTRL) | int(Qt::Key_I));
+	acStructSortCouplings->setShortcut(int(Qt::CTRL) | int(Qt::Key_L));
+	acStructRemoveUnused->setShortcut(int(Qt::CTRL) | int(Qt::Key_R));
+	acStructAssignCouplings->setShortcut(int(Qt::CTRL) | int(Qt::Key_A));
+	acGroundState->setShortcut(int(Qt::CTRL) | int(Qt::Key_G));
+	acStructView->setShortcut(int(Qt::CTRL) | int(Qt::Key_M));
+	acBZView->setShortcut(int(Qt::CTRL) | int(Qt::Key_B));
+	acDisp3D->setShortcut(int(Qt::CTRL) | int(Qt::Key_3));
+	acTopo->setShortcut(int(Qt::CTRL) | int(Qt::Key_T));
+	acDiff->setShortcut(int(Qt::CTRL) | int(Qt::Key_D));
+	acPowder->setShortcut(int(Qt::CTRL) | int(Qt::Key_P));
+	acCalc->setShortcut(int(Qt::ALT) | int(Qt::Key_C));
+
+	// icons
+	acNew->setIcon(QIcon::fromTheme("document-new"));
+	acLoad->setIcon(QIcon::fromTheme("document-open"));
+	acSave->setIcon(QIcon::fromTheme("document-save"));
+	acSaveAs->setIcon(QIcon::fromTheme("document-save-as"));
+	acExit->setIcon(QIcon::fromTheme("application-exit"));
+	m_menuOpenRecent->setIcon(QIcon::fromTheme("document-open-recent"));
+	acSaveFigure->setIcon(QIcon::fromTheme("image-x-generic"));
+	acSaveDisp->setIcon(QIcon::fromTheme("text-x-generic"));
+	acSaveMultiDisp->setIcon(QIcon::fromTheme("text-x-generic"));
+	acSaveDispScr->setIcon(QIcon::fromTheme("text-x-script"));
+	acSaveMultiDispScr->setIcon(QIcon::fromTheme("text-x-script"));
+	acStructExportSun->setIcon(QIcon::fromTheme("weather-clear"));
+	acStructExportSW->setIcon(QIcon::fromTheme("weather-clear-night"));
+	acStructExportScript->setIcon(QIcon::fromTheme("text-x-script"));
+	acStructNotes->setIcon(QIcon::fromTheme("accessories-text-editor"));
+	acStructView->setIcon(QIcon::fromTheme("applications-graphics"));
+	acBZView->setIcon(QIcon::fromTheme("applications-graphics"));
 
 	// actions
 	menuFile->addAction(acNew);
