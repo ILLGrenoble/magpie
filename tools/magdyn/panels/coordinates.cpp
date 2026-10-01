@@ -67,33 +67,31 @@ void MagDynDlg::CreateCoordinatesPanel()
 	m_coordinatestab->setColumnWidth(COL_COORD_L, 90);
 	m_coordinatestab->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
-	QPushButton *btnAddCoord = new QPushButton(
-		QIcon::fromTheme("list-add"),
-		"Add", m_coordinatespanel);
-	QPushButton *btnDelCoord = new QPushButton(
-		QIcon::fromTheme("list-remove"),
-		"Delete", m_coordinatespanel);
-	QPushButton *btnCoordUp = new QPushButton(
-		QIcon::fromTheme("go-up"),
-		"Up", m_coordinatespanel);
-	QPushButton *btnCoordDown = new QPushButton(
-		QIcon::fromTheme("go-down"),
-		"Down", m_coordinatespanel);
-
+	QPushButton *btnAddCoord = new QPushButton("Add", m_coordinatespanel);
+	QPushButton *btnDelCoord = new QPushButton("Delete", m_coordinatespanel);
+	QPushButton *btnCoordUp = new QPushButton("Up", m_coordinatespanel);
+	QPushButton *btnCoordDown = new QPushButton("Down", m_coordinatespanel);
 	btnAddCoord->setToolTip("Add a Q coordinate.");
 	btnDelCoord->setToolTip("Delete selected Q coordinate.");
 	btnCoordUp->setToolTip("Move selected coordinate(s) up.");
 	btnCoordDown->setToolTip("Move selected coordinate(s) down.");
+	if(g_use_icons)
+	{
+		btnAddCoord->setIcon(QIcon::fromTheme("list-add"));
+		btnDelCoord->setIcon(QIcon::fromTheme("list-remove"));
+		btnCoordUp->setIcon(QIcon::fromTheme("go-up"));
+		btnCoordDown->setIcon(QIcon::fromTheme("go-down"));
+	}
 
-	QPushButton *btnSaveMultiDisp = new QPushButton(
-		QIcon::fromTheme("text-x-generic"),
-		"Save Data...", m_coordinatespanel);
-	QPushButton *btnSaveMultiDispScr = new QPushButton(
-		QIcon::fromTheme("text-x-script"),
-		"Save Script...", m_coordinatespanel);
+	QPushButton *btnSaveMultiDisp = new QPushButton("Save Data...", m_coordinatespanel);
+	QPushButton *btnSaveMultiDispScr = new QPushButton("Save Script...", m_coordinatespanel);
 	btnSaveMultiDisp->setToolTip("Calculate the dispersion paths and save them to a data file.");
 	btnSaveMultiDispScr->setToolTip("Calculate the dispersion paths and save them to a script file.");
-
+	if(g_use_icons)
+	{
+		btnSaveMultiDisp->setIcon(QIcon::fromTheme("text-x-generic"));
+		btnSaveMultiDispScr->setIcon(QIcon::fromTheme("text-x-script"));
+	}
 
 	QPushButton *btnSetDispersion = new QPushButton("To Dispersion", m_coordinatespanel);
 	QPushButton *btnSetHamilton = new QPushButton("To Hamiltonian", m_coordinatespanel);
@@ -111,7 +109,7 @@ void MagDynDlg::CreateCoordinatesPanel()
 	// table context menu
 	QMenu *menuTableContext = new QMenu(m_coordinatestab);
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add Coordinate Before Current", this,
 		[this]()
 	{
@@ -119,7 +117,7 @@ void MagDynDlg::CreateCoordinatesPanel()
 			m_Q_start[0]->value(), m_Q_start[1]->value(), m_Q_start[2]->value());
 	});
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add Coordinate After Current", this,
 		[this]()
 	{
@@ -127,20 +125,20 @@ void MagDynDlg::CreateCoordinatesPanel()
 			m_Q_start[0]->value(), m_Q_start[1]->value(), m_Q_start[2]->value());
 	});
 	menuTableContext->addAction(
-		QIcon::fromTheme("edit-copy"),
+		g_use_icons ? QIcon::fromTheme("edit-copy") : QIcon{},
 		"Clone Coordinate", this,
 		[this]() { this->AddCoordinateTabItem(-4); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Coordinate(s)", this,
 		[this]() { this->DelTabItem(m_coordinatestab); });
 	menuTableContext->addSeparator();
 	menuTableContext->addAction(
-		QIcon::fromTheme("go-home"),
+		g_use_icons ? QIcon::fromTheme("go-home") : QIcon{},
 		"Calculate Dispersion From This To Next Q", this,
 		[this]() { this->SetCurrentCoordinate(0); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("go-home"),
+		g_use_icons ? QIcon::fromTheme("go-home") : QIcon{},
 		"Calculate Hamiltonian For This Q", this,
 		[this]() { this->SetCurrentCoordinate(1); });
 
@@ -148,7 +146,7 @@ void MagDynDlg::CreateCoordinatesPanel()
 	// table context menu in case nothing is selected
 	QMenu *menuTableContextNoItem = new QMenu(m_coordinatestab);
 	menuTableContextNoItem->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add Start Q Coordinate", this,
 		[this]()
 	{
@@ -156,7 +154,7 @@ void MagDynDlg::CreateCoordinatesPanel()
 			m_Q_start[0]->value(), m_Q_start[1]->value(), m_Q_start[2]->value());
 	});
 	menuTableContextNoItem->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add End Q Coordinate", this,
 		[this]()
 	{
@@ -165,7 +163,7 @@ void MagDynDlg::CreateCoordinatesPanel()
 	});
 	menuTableContextNoItem->addSeparator();
 	menuTableContextNoItem->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Coordinate(s)", this,
 		[this]() { this->DelTabItem(m_coordinatestab); });
 

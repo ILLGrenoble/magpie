@@ -221,8 +221,11 @@ QWidget* DiffDlg::CreateGroupVelocityPanel()
 	QAction *acSaveFigure = new QAction("Save Figure...", m_menuPlot_gv);
 	QAction *acSaveData = new QAction("Save Data...", m_menuPlot_gv);
 
-	acSaveFigure->setIcon(QIcon::fromTheme("image-x-generic"));
-	acSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
+	if(g_use_icons)
+	{
+		acSaveFigure->setIcon(QIcon::fromTheme("image-x-generic"));
+		acSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
+	}
 
 	m_menuPlot_gv->addAction(acRescalePlot);
 	m_menuPlot_gv->addSeparator();
@@ -996,13 +999,15 @@ void DiffDlg::EnableGroupVelocityCalculation(bool enable)
 	{
 		m_btnStartStop_gv->setText("Calculate");
 		m_btnStartStop_gv->setToolTip("Start calculation.");
-		m_btnStartStop_gv->setIcon(QIcon::fromTheme("media-playback-start"));
+		if(g_use_icons)
+			m_btnStartStop_gv->setIcon(QIcon::fromTheme("media-playback-start"));
 	}
 	else
 	{
 		m_btnStartStop_gv->setText("Stop");
 		m_btnStartStop_gv->setToolTip("Stop running calculation.");
-		m_btnStartStop_gv->setIcon(QIcon::fromTheme("media-playback-stop"));
+		if(g_use_icons)
+			m_btnStartStop_gv->setIcon(QIcon::fromTheme("media-playback-stop"));
 	}
 }
 

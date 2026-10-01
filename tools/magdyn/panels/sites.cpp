@@ -99,18 +99,10 @@ void MagDynDlg::CreateSitesPanel()
 
 	m_sitestab->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
-	QPushButton *btnAdd = new QPushButton(
-		QIcon::fromTheme("list-add"),
-		"Add", m_sitespanel);
-	QPushButton *btnDel = new QPushButton(
-		QIcon::fromTheme("list-remove"),
-		"Delete", m_sitespanel);
-	QPushButton *btnUp = new QPushButton(
-		QIcon::fromTheme("go-up"),
-		"Up", m_sitespanel);
-	QPushButton *btnDown = new QPushButton(
-		QIcon::fromTheme("go-down"),
-		"Down", m_sitespanel);
+	QPushButton *btnAdd = new QPushButton("Add", m_sitespanel);
+	QPushButton *btnDel = new QPushButton("Delete", m_sitespanel);
+	QPushButton *btnUp = new QPushButton("Up", m_sitespanel);
+	QPushButton *btnDown = new QPushButton("Down", m_sitespanel);
 
 	btnAdd->setToolTip("Add a site.");
 	btnDel->setToolTip("Delete selected site(s).");
@@ -118,9 +110,7 @@ void MagDynDlg::CreateSitesPanel()
 	btnDown->setToolTip("Move selected site(s) down.");
 
 	QPushButton *btnMirrorAtoms = new QPushButton("Mirror", m_sitespanel);
-	QPushButton *btnShowNotes = new QPushButton(
-		QIcon::fromTheme("accessories-text-editor"),
-		"Notes...", m_sitespanel);
+	QPushButton *btnShowNotes = new QPushButton("Notes...", m_sitespanel);
 	QPushButton *btnGroundState = new QPushButton("Ground State...", m_sitespanel);
 	btnMirrorAtoms->setToolTip("Flip the coordinates of the sites.");
 	btnShowNotes->setToolTip("Add notes or comments describing the magnetic structure.");
@@ -128,6 +118,16 @@ void MagDynDlg::CreateSitesPanel()
 #ifndef __MAGDYN_USE_MINUIT__
 	btnGroundState->setEnabled(false);
 #endif
+
+	if(g_use_icons)
+	{
+		btnAdd->setIcon(QIcon::fromTheme("list-add"));
+		btnDel->setIcon(QIcon::fromTheme("list-remove"));
+		btnUp->setIcon(QIcon::fromTheme("go-up"));
+		btnDown->setIcon(QIcon::fromTheme("go-down"));
+		btnShowNotes->setIcon(QIcon::fromTheme("accessories-text-editor"));
+	}
+
 
 	// extend cell
 	const char* idx_names[] = {"x = ", "y = ", "z = "};
@@ -142,16 +142,18 @@ void MagDynDlg::CreateSitesPanel()
 		m_extCell[cell_idx]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
-	QPushButton *btnExtCell = new QPushButton(
-		QIcon::fromTheme("insert-object"),
-		"Generate", m_sitespanel);
+	QPushButton *btnExtCell = new QPushButton("Generate", m_sitespanel);
 	btnExtCell->setToolTip("Extend the unit cell.");
 
-	QPushButton *btnGenBySG = new QPushButton(
-		QIcon::fromTheme("insert-object"),
-		"Generate", m_sitespanel);
+	QPushButton *btnGenBySG = new QPushButton("Generate", m_sitespanel);
 	btnGenBySG->setToolTip("Create site positions from space group"
 		" symmetry operators and existing positions.");
+
+	if(g_use_icons)
+	{
+		btnExtCell->setIcon(QIcon::fromTheme("insert-object"));
+		btnGenBySG->setIcon(QIcon::fromTheme("insert-object"));
+	}
 
 	for(QPushButton *btn : { btnAdd, btnDel, btnUp, btnDown, btnGenBySG, btnExtCell,
 		btnGroundState, btnMirrorAtoms, btnShowNotes })
@@ -200,27 +202,27 @@ void MagDynDlg::CreateSitesPanel()
 	// table context menu
 	QMenu *menuTableContext = new QMenu(m_sitestab);
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add Site Before Current", this,
 		[this]() { this->AddSiteTabItem(-2); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add Site After Current", this,
 		[this]() { this->AddSiteTabItem(-3); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("edit-copy"),
+		g_use_icons ? QIcon::fromTheme("edit-copy") : QIcon{},
 		"Clone Site", this,
 		[this]() { this->AddSiteTabItem(-4); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Site(s)",this,
 		[this]() { this->DelTabItem(m_sitestab); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Symmetry-Equivalent Sites", this,
 		[this]() { this->DelIdentTabItems(m_sitestab, COL_SITE_SYM_IDX); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Unused Sites", this,
 		[this]() { this->RemoveUnusedSites(); });
 
@@ -228,15 +230,15 @@ void MagDynDlg::CreateSitesPanel()
 	// table context menu in case nothing is selected
 	QMenu *menuTableContextNoItem = new QMenu(m_sitestab);
 	menuTableContextNoItem->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add Site", this,
 		[this]() { this->AddSiteTabItem(); });
 	menuTableContextNoItem->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Site(s)", this,
 		[this]() { this->DelTabItem(m_sitestab); });
 	menuTableContextNoItem->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Unused Sites", this,
 		[this]() { this->RemoveUnusedSites(); });
 

@@ -73,8 +73,9 @@ PowderDlg::PowderDlg(QWidget *parent, QSettings *sett)
 
 	// save data button
 	QPushButton *btnSaveData = btnbox->addButton("Save Data...", QDialogButtonBox::ActionRole);
-	btnSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
 	btnSaveData->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+	if(g_use_icons)
+		btnSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
 
 	// main grid
 	QGridLayout *maingrid = new QGridLayout(this);
@@ -207,8 +208,11 @@ QWidget* PowderDlg::CreatePowderPanel()
 	QAction *acSaveFigure = new QAction("Save Figure...", m_menuPlot_powder);
 	QAction *acSaveData = new QAction("Save Data...", m_menuPlot_powder);
 
-	acSaveFigure->setIcon(QIcon::fromTheme("image-x-generic"));
-	acSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
+	if(g_use_icons)
+	{
+		acSaveFigure->setIcon(QIcon::fromTheme("image-x-generic"));
+		acSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
+	}
 
 	m_menuPlot_powder->addAction(acRescalePlot);
 	m_menuPlot_powder->addSeparator();
@@ -755,13 +759,15 @@ void PowderDlg::EnablePowderCalculation(bool enable)
 	{
 		m_btnStartStop_powder->setText("Calculate");
 		m_btnStartStop_powder->setToolTip("Start calculation.");
-		m_btnStartStop_powder->setIcon(QIcon::fromTheme("media-playback-start"));
+		if(g_use_icons)
+			m_btnStartStop_powder->setIcon(QIcon::fromTheme("media-playback-start"));
 	}
 	else
 	{
 		m_btnStartStop_powder->setText("Stop");
 		m_btnStartStop_powder->setToolTip("Stop running calculation.");
-		m_btnStartStop_powder->setIcon(QIcon::fromTheme("media-playback-stop"));
+		if(g_use_icons)
+			m_btnStartStop_powder->setIcon(QIcon::fromTheme("media-playback-stop"));
 	}
 }
 

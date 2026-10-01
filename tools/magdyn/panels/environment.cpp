@@ -118,18 +118,21 @@ void MagDynDlg::CreateSampleEnvPanel()
 	//m_rot_angle->setSuffix("\xc2\xb0");
 	m_rot_angle->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
-	QPushButton *btn_rotate_ccw = new QPushButton(
-		QIcon::fromTheme("object-rotate-left"),
-		"Rotate CCW", m_sampleenviropanel);
-	QPushButton *btn_rotate_cw = new QPushButton(
-		QIcon::fromTheme("object-rotate-right"),
-		"Rotate CW", m_sampleenviropanel);
+	QPushButton *btn_rotate_ccw = new QPushButton("Rotate CCW", m_sampleenviropanel);
+	QPushButton *btn_rotate_cw = new QPushButton("Rotate CW", m_sampleenviropanel);
+
 	btn_rotate_ccw->setToolTip("Rotate the magnetic field in the counter-clockwise direction.");
 	btn_rotate_cw->setToolTip("Rotate the magnetic field in the clockwise direction.");
 	btn_rotate_ccw->setFocusPolicy(Qt::StrongFocus);
 	btn_rotate_cw->setFocusPolicy(Qt::StrongFocus);
 	btn_rotate_ccw->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	btn_rotate_cw->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+
+	if(g_use_icons)
+	{
+		btn_rotate_ccw->setIcon(QIcon::fromTheme("object-rotate-left"));
+		btn_rotate_cw->setIcon(QIcon::fromTheme("object-rotate-right"));
+	}
 
 
 	// table with saved fields
@@ -158,23 +161,23 @@ void MagDynDlg::CreateSampleEnvPanel()
 	m_fieldstab->setColumnWidth(COL_FIELD_MAG, 150);
 	m_fieldstab->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
-	QPushButton *btnAddField = new QPushButton(
-		QIcon::fromTheme("list-add"),
-		"Add", m_sampleenviropanel);
-	QPushButton *btnDelField = new QPushButton(
-		QIcon::fromTheme("list-remove"),
-		"Delete", m_sampleenviropanel);
-	QPushButton *btnFieldUp = new QPushButton(
-		QIcon::fromTheme("go-up"),
-		"Up", m_sampleenviropanel);
-	QPushButton *btnFieldDown = new QPushButton(
-		QIcon::fromTheme("go-down"),
-		"Down", m_sampleenviropanel);
+	QPushButton *btnAddField = new QPushButton("Add", m_sampleenviropanel);
+	QPushButton *btnDelField = new QPushButton("Delete", m_sampleenviropanel);
+	QPushButton *btnFieldUp = new QPushButton("Up", m_sampleenviropanel);
+	QPushButton *btnFieldDown = new QPushButton("Down", m_sampleenviropanel);
 
 	btnAddField->setToolTip("Add a magnetic field.");
 	btnDelField->setToolTip("Delete selected magnetic field(s).");
 	btnFieldUp->setToolTip("Move selected magnetic field(s) up.");
 	btnFieldDown->setToolTip("Move selected magnetic field(s) down.");
+
+	if(g_use_icons)
+	{
+		btnAddField->setIcon(QIcon::fromTheme("list-add"));
+		btnDelField->setIcon(QIcon::fromTheme("list-remove"));
+		btnFieldUp->setIcon(QIcon::fromTheme("go-up"));
+		btnFieldDown->setIcon(QIcon::fromTheme("go-down"));
+	}
 
 	QPushButton *btnSetField = new QPushButton("Set Field", m_sampleenviropanel);
 	btnSetField->setToolTip("Set the selected field as the currently active one.");
@@ -189,24 +192,24 @@ void MagDynDlg::CreateSampleEnvPanel()
 	// table context menu
 	QMenu *menuTableContext = new QMenu(m_fieldstab);
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add Field Before Current", this,
 		[this]() { this->AddFieldTabItem(-2); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add Field After Current", this,
 		[this]() { this->AddFieldTabItem(-3); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("edit-copy"),
+		g_use_icons ? QIcon::fromTheme("edit-copy") : QIcon{},
 		"Clone Field", this,
 		[this]() { this->AddFieldTabItem(-4); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Field(s)", this,
 		[this]() { this->DelTabItem(m_fieldstab); });
 	menuTableContext->addSeparator();
 	menuTableContext->addAction(
-		QIcon::fromTheme("go-home"),
+		g_use_icons ? QIcon::fromTheme("go-home") : QIcon{},
 		"Set As Current Field", this,
 		[this]() { this->SetCurrentField(); });
 
@@ -214,7 +217,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 	// table context menu in case nothing is selected
 	QMenu *menuTableContextNoItem = new QMenu(m_fieldstab);
 	menuTableContextNoItem->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add Field", this,
 		[this]() { this->AddFieldTabItem(-1,
 			m_field_dir[0]->value(),
@@ -222,7 +225,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 			m_field_dir[2]->value(),
 			m_field_mag->value()); });
 	menuTableContextNoItem->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Field(s)", this,
 		[this]() { this->DelTabItem(m_fieldstab); });
 

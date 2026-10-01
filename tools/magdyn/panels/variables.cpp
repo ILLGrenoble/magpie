@@ -67,27 +67,26 @@ void MagDynDlg::CreateVariablesPanel()
 	m_varstab->setColumnWidth(COL_VARS_VALUE_IMAG, 150);
 	m_varstab->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
-	QPushButton *btnAdd = new QPushButton(
-		QIcon::fromTheme("list-add"),
-		"Add", m_varspanel);
-	QPushButton *btnDel = new QPushButton(
-		QIcon::fromTheme("list-remove"),
-		"Delete", m_varspanel);
-	QPushButton *btnUp = new QPushButton(
-		QIcon::fromTheme("go-up"),
-		"Up", m_varspanel);
-	QPushButton *btnDown = new QPushButton(
-		QIcon::fromTheme("go-down"),
-		"Down", m_varspanel);
-	QPushButton *btnReplace = new QPushButton(
-		QIcon::fromTheme("edit-find-replace"),
-		"Replace Values", m_varspanel);
+	QPushButton *btnAdd = new QPushButton("Add", m_varspanel);
+	QPushButton *btnDel = new QPushButton("Delete", m_varspanel);
+	QPushButton *btnUp = new QPushButton("Up", m_varspanel);
+	QPushButton *btnDown = new QPushButton("Down", m_varspanel);
+	QPushButton *btnReplace = new QPushButton("Replace Values", m_varspanel);
 
 	btnAdd->setToolTip("Add a variable.");
 	btnDel->setToolTip("Delete selected variables(s).");
 	btnUp->setToolTip("Move selected variable(s) up.");
 	btnDown->setToolTip("Move selected variable(s) down.");
 	btnReplace->setToolTip("Replace numeric values with variable names.");
+
+	if(g_use_icons)
+	{
+		btnAdd->setIcon(QIcon::fromTheme("list-add"));
+		btnDel->setIcon(QIcon::fromTheme("list-remove"));
+		btnUp->setIcon(QIcon::fromTheme("go-up"));
+		btnDown->setIcon(QIcon::fromTheme("go-down"));
+		btnReplace->setIcon(QIcon::fromTheme("edit-find-replace"));
+	}
 
 	for(QPushButton *btn : { btnAdd, btnDel, btnUp, btnDown, btnReplace })
 	{
@@ -113,19 +112,19 @@ void MagDynDlg::CreateVariablesPanel()
 	// table context menu
 	QMenu *menuTableContext = new QMenu(m_varstab);
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add Variable Before Current", this,
 		[this]() { this->AddVariableTabItem(-2); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add Variable After Current", this,
 		[this]() { this->AddVariableTabItem(-3); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("edit-copy"),
+		g_use_icons ? QIcon::fromTheme("edit-copy") : QIcon{},
 		"Clone Variable", this,
 		[this]() { this->AddVariableTabItem(-4); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Variable(s)", this,
 		[this]() { this->DelTabItem(m_varstab); });
 
@@ -133,11 +132,11 @@ void MagDynDlg::CreateVariablesPanel()
 	// table context menu in case nothing is selected
 	QMenu *menuTableContextNoItem = new QMenu(m_varstab);
 	menuTableContextNoItem->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add Variable", this,
 		[this]() { this->AddVariableTabItem(); });
 	menuTableContextNoItem->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Variable(s)", this,
 		[this]() { this->DelTabItem(m_varstab); });
 

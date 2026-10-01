@@ -113,23 +113,23 @@ void MagDynDlg::CreateExchangeTermsPanel()
 
 	m_termstab->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
-	QPushButton *btnAdd = new QPushButton(
-		QIcon::fromTheme("list-add"),
-		"Add", m_termspanel);
-	QPushButton *btnDel = new QPushButton(
-		QIcon::fromTheme("list-remove"),
-		"Delete", m_termspanel);
-	QPushButton *btnUp = new QPushButton(
-		QIcon::fromTheme("go-up"),
-		"Up", m_termspanel);
-	QPushButton *btnDown = new QPushButton(
-		QIcon::fromTheme("go-down"),
-		"Down", m_termspanel);
+	QPushButton *btnAdd = new QPushButton("Add", m_termspanel);
+	QPushButton *btnDel = new QPushButton("Delete", m_termspanel);
+	QPushButton *btnUp = new QPushButton("Up", m_termspanel);
+	QPushButton *btnDown = new QPushButton("Down", m_termspanel);
 
 	btnAdd->setToolTip("Add a coupling between two sites.");
 	btnDel->setToolTip("Delete selected coupling(s).");
 	btnUp->setToolTip("Move selected coupling(s) up.");
 	btnDown->setToolTip("Move selected coupling(s) down.");
+
+	if(g_use_icons)
+	{
+		btnAdd->setIcon(QIcon::fromTheme("list-add"));
+		btnDel->setIcon(QIcon::fromTheme("list-remove"));
+		btnUp->setIcon(QIcon::fromTheme("go-up"));
+		btnDown->setIcon(QIcon::fromTheme("go-down"));
+	}
 
 	for(QPushButton *btn : { btnAdd, btnDel, btnUp, btnDown })
 	{
@@ -165,21 +165,24 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	m_maxcouplings->setToolTip("Maximum number of couplings to generate (-1: no limit).");
 	m_maxcouplings->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
-	QPushButton *btnGenByDist = new QPushButton(
-		QIcon::fromTheme("insert-object"),
-		"Generate", m_termspanel);
+	QPushButton *btnGenByDist = new QPushButton("Generate", m_termspanel);
 	btnGenByDist->setToolTip("Create all possible couplings between the sites up to the given maximum distance and order.");
 	btnGenByDist->setFocusPolicy(Qt::StrongFocus);
 	btnGenByDist->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 
 
 	// couplings from space group
-	QPushButton *btnGenBySG = new QPushButton(
-		QIcon::fromTheme("insert-object"),
-		"Generate", m_termspanel);
+	QPushButton *btnGenBySG = new QPushButton("Generate", m_termspanel);
 	btnGenBySG->setToolTip("Create couplings from space group symmetry operators and existing couplings.");
 	btnGenBySG->setFocusPolicy(Qt::StrongFocus);
 	btnGenBySG->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+
+	if(g_use_icons)
+	{
+		btnGenByDist->setIcon(QIcon::fromTheme("insert-object"));
+		btnGenBySG->setIcon(QIcon::fromTheme("insert-object"));
+	}
+
 
 	// ordering vector
 	m_ordering[0] = new QDoubleSpinBox(m_termspanel);
@@ -273,27 +276,27 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	// table context menu
 	QMenu *menuTableContext = new QMenu(m_termstab);
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add Coupling Before Current", this,
 		[this]() { this->AddTermTabItem(-2); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add Coupling After Current", this,
 		[this]() { this->AddTermTabItem(-3); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("edit-copy"),
+		g_use_icons ? QIcon::fromTheme("edit-copy") : QIcon{},
 		"Clone Coupling", this,
 		[this]() { this->AddTermTabItem(-4); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Coupling(s)", this,
 		[this]() { this->DelTabItem(m_termstab); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Symmetry-Equivalent Couplings", this,
 		[this]() { this->DelIdentTabItems(m_termstab, COL_XCH_SYM_IDX); });
 	menuTableContext->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Unused Couplings", this,
 		[this]() { this->RemoveUnusedTerms(); });
 
@@ -301,15 +304,15 @@ void MagDynDlg::CreateExchangeTermsPanel()
 	// table context menu in case nothing is selected
 	QMenu *menuTableContextNoItem = new QMenu(m_termstab);
 	menuTableContextNoItem->addAction(
-		QIcon::fromTheme("list-add"),
+		g_use_icons ? QIcon::fromTheme("list-add") : QIcon{},
 		"Add Coupling", this,
 		[this]() { this->AddTermTabItem(); });
 	menuTableContextNoItem->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Coupling(s)", this,
 		[this]() { this->DelTabItem(m_termstab); });
 	menuTableContextNoItem->addAction(
-		QIcon::fromTheme("list-remove"),
+		g_use_icons ? QIcon::fromTheme("list-remove") : QIcon{},
 		"Delete Unused Couplings", this,
 		[this]() { this->RemoveUnusedTerms(); });
 

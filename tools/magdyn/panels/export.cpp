@@ -69,9 +69,10 @@ void MagDynDlg::CreateExportPanel()
 	m_exportFormat->addItem("Text Data File", EXPORT_TEXT);
 
 	QPushButton *btn_export = new QPushButton(
-		QIcon::fromTheme("document-save-as"),
 		"Export...", m_exportpanel);
 	btn_export->setFocusPolicy(Qt::StrongFocus);
+	if(g_use_icons)
+		btn_export->setIcon(QIcon::fromTheme("document-save-as"));
 
 	for(int i = 0; i < 3; ++i)
 	{

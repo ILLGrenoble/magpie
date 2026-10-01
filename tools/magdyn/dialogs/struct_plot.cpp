@@ -121,14 +121,16 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	m_status->setFrameShadow(QFrame::Sunken);
 
 	QPushButton *btnOk = new QPushButton("OK", this);
-	btnOk->setIcon(style()->standardIcon(QStyle::SP_DialogOkButton));
+	if(g_use_icons)
+		btnOk->setIcon(style()->standardIcon(QStyle::SP_DialogOkButton));
 
 	// general context menu
 	m_context = new QMenu(this);
 	QAction *acCentre = new QAction("Centre Camera on Midpoint", m_context);
 	QAction *acCentreUC = new QAction("Centre Camera on Unit Cell", m_context);
 	QAction *acSaveImage = new QAction("Save Image...", m_context);
-	acSaveImage->setIcon(QIcon::fromTheme("image-x-generic"));
+	if(g_use_icons)
+		acSaveImage->setIcon(QIcon::fromTheme("image-x-generic"));
 	m_context->addAction(acCentre);
 	m_context->addAction(acCentreUC);
 	m_context->addSeparator();

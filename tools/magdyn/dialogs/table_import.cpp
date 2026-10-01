@@ -63,7 +63,6 @@ TableImportDlg::TableImportDlg(QWidget* parent, QSettings* sett)
 	btnSiteIndices->setMenu(menuSiteIndices);
 
 	QAction *acSunSites = new QAction("Set Site Indices For Sunny", menuSiteIndices);
-	acSunSites->setIcon(QIcon::fromTheme("weather-clear"));
 	menuSiteIndices->addAction(acSunSites);
 	menuSiteIndices->addSeparator();
 
@@ -76,6 +75,14 @@ TableImportDlg::TableImportDlg(QWidget* parent, QSettings* sett)
 	menuSiteIndices->addAction(acSWAtomSites);
 	menuSiteIndices->addAction(acSWMagSites);
 	menuSiteIndices->addAction(acSWMagSitesImag);
+
+	if(g_use_icons)
+	{
+		acSunSites->setIcon(QIcon::fromTheme("weather-clear"));
+		acSWAtomSites->setIcon(QIcon::fromTheme("weather-clear-night"));
+		acSWMagSites->setIcon(QIcon::fromTheme("weather-clear-night"));
+		acSWMagSitesImag->setIcon(QIcon::fromTheme("weather-clear-night"));
+	}
 
 	m_spinAtomName = new QSpinBox(this);
 	m_spinAtomX = new QSpinBox(this);
@@ -135,7 +142,6 @@ TableImportDlg::TableImportDlg(QWidget* parent, QSettings* sett)
 	btnCouplingIndices->setMenu(menuCouplingIndices);
 
 	QAction *acSunCouplings = new QAction("Set Coupling Indices For Sunny", menuCouplingIndices);
-	acSunCouplings->setIcon(QIcon::fromTheme("weather-clear"));
 	menuCouplingIndices->addAction(acSunCouplings);
 	menuCouplingIndices->addSeparator();
 
@@ -145,6 +151,13 @@ TableImportDlg::TableImportDlg(QWidget* parent, QSettings* sett)
 		menuCouplingIndices);
 	menuCouplingIndices->addAction(acSWCouplings);
 	menuCouplingIndices->addAction(acSWSIA);
+
+	if(g_use_icons)
+	{
+		acSunCouplings->setIcon(QIcon::fromTheme("weather-clear"));
+		acSWCouplings->setIcon(QIcon::fromTheme("weather-clear-night"));
+		acSWSIA->setIcon(QIcon::fromTheme("weather-clear-night"));
+	}
 
 	m_spinCouplingName = new QSpinBox(this);
 	m_spinCouplingAtom1 = new QSpinBox(this);
@@ -245,8 +258,11 @@ TableImportDlg::TableImportDlg(QWidget* parent, QSettings* sett)
 	QPushButton *btnHelp = new QPushButton("Help", this);
 	QPushButton *btnOK = new QPushButton("OK", this);
 
-	btnHelp->setIcon(style()->standardIcon(QStyle::SP_DialogHelpButton));
-	btnOK->setIcon(style()->standardIcon(QStyle::SP_DialogOkButton));
+	if(g_use_icons)
+	{
+		btnHelp->setIcon(style()->standardIcon(QStyle::SP_DialogHelpButton));
+		btnOK->setIcon(style()->standardIcon(QStyle::SP_DialogOkButton));
+	}
 
 	for(QPushButton *btn : { btnImportAtoms, btnImportCouplings, btnHelp, btnOK })
 		btn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);

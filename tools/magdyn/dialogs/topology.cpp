@@ -227,8 +227,11 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	QAction *acSaveFigure = new QAction("Save Figure...", m_menuPlot_bc);
 	QAction *acSaveData = new QAction("Save Data...", m_menuPlot_bc);
 
-	acSaveFigure->setIcon(QIcon::fromTheme("image-x-generic"));
-	acSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
+	if(g_use_icons)
+	{
+		acSaveFigure->setIcon(QIcon::fromTheme("image-x-generic"));
+		acSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
+	}
 
 	m_imag_bc = new QAction("Show Imaginary B Component", m_menuPlot_bc);
 	m_imag_bc->setCheckable(true);
@@ -1007,13 +1010,15 @@ void TopologyDlg::EnableBerryCurvatureCalculation(bool enable)
 	{
 		m_btnStartStop_bc->setText("Calculate");
 		m_btnStartStop_bc->setToolTip("Start calculation.");
-		m_btnStartStop_bc->setIcon(QIcon::fromTheme("media-playback-start"));
+		if(g_use_icons)
+			m_btnStartStop_bc->setIcon(QIcon::fromTheme("media-playback-start"));
 	}
 	else
 	{
 		m_btnStartStop_bc->setText("Stop");
 		m_btnStartStop_bc->setToolTip("Stop running calculation.");
-		m_btnStartStop_bc->setIcon(QIcon::fromTheme("media-playback-stop"));
+		if(g_use_icons)
+			m_btnStartStop_bc->setIcon(QIcon::fromTheme("media-playback-stop"));
 	}
 }
 

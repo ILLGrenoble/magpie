@@ -96,12 +96,8 @@ void MagDynDlg::CreateReciprocalPanel()
 		m_recip_trafo_axis[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
-	QPushButton *btn_rotate_ccw = new QPushButton(
-		QIcon::fromTheme("object-rotate-left"),
-		"Rotate CCW", m_reciprocalpanel);
-	QPushButton *btn_rotate_cw = new QPushButton(
-		QIcon::fromTheme("object-rotate-right"),
-		"Rotate CW", m_reciprocalpanel);
+	QPushButton *btn_rotate_ccw = new QPushButton("Rotate CCW", m_reciprocalpanel);
+	QPushButton *btn_rotate_cw = new QPushButton("Rotate CW", m_reciprocalpanel);
 	btn_rotate_ccw->setFocusPolicy(Qt::StrongFocus);
 	btn_rotate_cw->setFocusPolicy(Qt::StrongFocus);
 	btn_rotate_ccw->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
@@ -115,9 +111,16 @@ void MagDynDlg::CreateReciprocalPanel()
 
 	// show 3d brillouin zone
 	QPushButton *btnShowBZ = new QPushButton("3D Brillouin Zone...", this);
-	btnShowBZ->setIcon(QIcon::fromTheme("applications-graphics"));
 	btnShowBZ->setToolTip("Show a 3D view of the first nuclear Brillouin zone.");
 	btnShowBZ->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+
+
+	if(g_use_icons)
+	{
+		btn_rotate_ccw->setIcon(QIcon::fromTheme("object-rotate-left"));
+		btn_rotate_cw->setIcon(QIcon::fromTheme("object-rotate-right"));
+		btnShowBZ->setIcon(QIcon::fromTheme("applications-graphics"));
+	}
 
 
 	QFrame *sep1 = new QFrame(m_reciprocalpanel);

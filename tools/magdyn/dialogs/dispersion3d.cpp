@@ -149,9 +149,12 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	acShowCoords->setChecked(SHOW_COORD_CUBE);
 	acShowMainQ->setCheckable(true);
 	acShowMainQ->setChecked(m_show_main_Q);
-	acSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
-	acSaveScript->setIcon(QIcon::fromTheme("text-x-script"));
-	acSaveImage->setIcon(QIcon::fromTheme("image-x-generic"));
+	if(g_use_icons)
+	{
+		acSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
+		acSaveScript->setIcon(QIcon::fromTheme("text-x-script"));
+		acSaveImage->setIcon(QIcon::fromTheme("image-x-generic"));
+	}
 	m_context->addAction(acCentre);
 	m_context->addSeparator();
 	m_context->addAction(acShowCoords);
@@ -328,11 +331,14 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	btnbox->addButton(QDialogButtonBox::Ok);
 	QPushButton *btnSaveData = btnbox->addButton("Save Data...", QDialogButtonBox::ActionRole);
 	QPushButton *btnSaveScript = btnbox->addButton("Save Script...", QDialogButtonBox::ActionRole);
-	btnSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
-	btnSaveScript->setIcon(QIcon::fromTheme("text-x-script"));
 	btnSaveData->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 	btnSaveScript->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 	btnbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+	if(g_use_icons)
+	{
+		btnSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
+		btnSaveScript->setIcon(QIcon::fromTheme("text-x-script"));
+	}
 
 	// bands panel grid
 	int y = 0;
@@ -541,13 +547,15 @@ void Dispersion3DDlg::EnableCalculation(bool enable)
 	{
 		m_btn_start_stop->setText("Calculate");
 		m_btn_start_stop->setToolTip("Start dispersion calculation.");
-		m_btn_start_stop->setIcon(QIcon::fromTheme("media-playback-start"));
+		if(g_use_icons)
+			m_btn_start_stop->setIcon(QIcon::fromTheme("media-playback-start"));
 	}
 	else
 	{
 		m_btn_start_stop->setText("Stop");
 		m_btn_start_stop->setToolTip("Stop running dispersion calculation.");
-		m_btn_start_stop->setIcon(QIcon::fromTheme("media-playback-stop"));
+		if(g_use_icons)
+			m_btn_start_stop->setIcon(QIcon::fromTheme("media-playback-stop"));
 	}
 }
 

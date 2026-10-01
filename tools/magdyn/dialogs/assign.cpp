@@ -118,8 +118,9 @@ AssignDlg::AssignDlg(QWidget* parent, QSettings *sett)
 	//btnbox->addButton(QDialogButtonBox::Ok);
 	//btnbox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	QPushButton *btnOk = new QPushButton("OK", this);
-	btnOk->setIcon(style()->standardIcon(QStyle::SP_DialogOkButton));
 	btnOk->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	if(g_use_icons)
+		btnOk->setIcon(style()->standardIcon(QStyle::SP_DialogOkButton));
 
 	// status bar
 	m_status = new QLabel(this);
