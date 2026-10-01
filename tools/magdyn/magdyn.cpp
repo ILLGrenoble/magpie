@@ -248,21 +248,24 @@ void MagDynDlg::CreateMainWindow()
 
 	// start/stop button
 	m_btnStartStop = new QPushButton("Calculate", this);
-	m_btnStartStop->setIcon(QIcon::fromTheme("media-playback-start"));
 	m_btnStartStop->setToolTip("Start calculation.");
 	m_btnStartStop->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+	if(g_use_icons)
+		m_btnStartStop->setIcon(QIcon::fromTheme("media-playback-start"));
 
 	// show 3d structure
 	QPushButton *btnShowStruct = new QPushButton("3D Structure...", this);
-	btnShowStruct->setIcon(QIcon::fromTheme("applications-graphics"));
 	btnShowStruct->setToolTip("Show a 3D view of the magnetic sites and couplings.");
 	btnShowStruct->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+	if(g_use_icons)
+		btnShowStruct->setIcon(QIcon::fromTheme("applications-graphics"));
 
 	// show 3d dispersion
 	QPushButton *btnShowDisp3d = new QPushButton("3D Dispersion...", this);
-	btnShowDisp3d->setIcon(QIcon::fromTheme("applications-graphics"));
 	btnShowDisp3d->setToolTip("Calculate three-dimensional dispersion relations.");
 	btnShowDisp3d->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+	if(g_use_icons)
+		btnShowDisp3d->setIcon(QIcon::fromTheme("applications-graphics"));
 
 	// splitter for input and output tabs
 	m_split_inout = new QSplitter(this);
@@ -399,8 +402,9 @@ void MagDynDlg::CreateMenuBar()
 	m_autocalc->setCheckable(true);
 	m_autocalc->setChecked(false);
 	QAction *acCalc = new QAction("Start Calculation", menuCalcOpt);
-	acCalc->setIcon(QIcon::fromTheme("media-playback-start"));
 	acCalc->setToolTip("Calculate all results.");
+	if(g_use_icons)
+		acCalc->setIcon(QIcon::fromTheme("media-playback-start"));
 	m_use_dmi = new QAction("Use DMI", menuCalcOpt);
 	m_use_dmi->setToolTip("Enables the Dzyaloshinskij-Moriya interaction.");
 	m_use_dmi->setCheckable(true);
@@ -471,10 +475,13 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acTopo = new QAction("Topology...", menuCalc);
 	QAction *acDiff = new QAction("Differentiation...", menuCalc);
 	QAction *acPowder = new QAction("Powder Spectrum...", menuCalc);
-	acDisp3D->setIcon(QIcon::fromTheme("applications-graphics"));
-	//acTopo->setIcon(QIcon::fromTheme("TODO"));
-	//acDiff->setIcon(QIcon::fromTheme("TODO"));
-	acPowder->setIcon(QIcon::fromTheme("weather-snow"));
+	if(g_use_icons)
+	{
+		acDisp3D->setIcon(QIcon::fromTheme("applications-graphics"));
+		//acTopo->setIcon(QIcon::fromTheme("TODO"));
+		//acDiff->setIcon(QIcon::fromTheme("TODO"));
+		acPowder->setIcon(QIcon::fromTheme("weather-snow"));
+	}
 
 	// tools menu
 	QMenu *menuTools = new QMenu("Tools", m_menu);
@@ -488,27 +495,29 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acPolCalc = new QAction("Polarisation Vectors...", menuTools);
 	QAction *acPreferences = new QAction("Preferences...", menuTools);
 
-	acTrafoCalc->setIcon(QIcon::fromTheme("accessories-calculator"));
-	acPlot2d->setIcon(QIcon::fromTheme("x-office-spreadsheet"));
-	acPlot3d->setIcon(QIcon::fromTheme("x-office-spreadsheet"));
-	acPreferences->setIcon(QIcon::fromTheme("preferences-system"));
+	if(g_use_icons)
+	{
+		acTrafoCalc->setIcon(QIcon::fromTheme("accessories-calculator"));
+		acPlot2d->setIcon(QIcon::fromTheme("x-office-spreadsheet"));
+		acPlot3d->setIcon(QIcon::fromTheme("x-office-spreadsheet"));
+		acPreferences->setIcon(QIcon::fromTheme("preferences-system"));
+	}
 	acPreferences->setShortcut(QKeySequence::Preferences);
 	acPreferences->setMenuRole(QAction::PreferencesRole);
 
 	// help menu
 	QMenu *menuHelp = new QMenu("Help", m_menu);
-	QAction *acHelp = new QAction(
-		QIcon::fromTheme("help-contents"),
-		"Show Help...", menuHelp);
-	QAction *acAboutQt = new QAction(
-		QIcon::fromTheme("help-about"),
-		"About Qt...", menuHelp);
-	QAction *acAboutGl = new QAction(
-		QIcon::fromTheme("help-about"),
-		"About Renderer...", menuHelp);
-	QAction *acAbout = new QAction(
-		QIcon::fromTheme("help-about"),
-		"About...", menuHelp);
+	QAction *acHelp = new QAction("Show Help...", menuHelp);
+	QAction *acAboutQt = new QAction("About Qt...", menuHelp);
+	QAction *acAboutGl = new QAction("About Renderer...", menuHelp);
+	QAction *acAbout = new QAction("About...", menuHelp);
+	if(g_use_icons)
+	{
+		acHelp->setIcon(QIcon::fromTheme("help-contents"));
+		acAboutQt->setIcon(QIcon::fromTheme("help-about"));
+		acAboutGl->setIcon(QIcon::fromTheme("help-about"));
+		acAbout->setIcon(QIcon::fromTheme("help-about"));
+	}
 
 	acAboutQt->setMenuRole(QAction::AboutQtRole);
 	acAbout->setMenuRole(QAction::AboutRole);
@@ -536,23 +545,26 @@ void MagDynDlg::CreateMenuBar()
 	acCalc->setShortcut(int(Qt::ALT) | int(Qt::Key_C));
 
 	// icons
-	acNew->setIcon(QIcon::fromTheme("document-new"));
-	acLoad->setIcon(QIcon::fromTheme("document-open"));
-	acSave->setIcon(QIcon::fromTheme("document-save"));
-	acSaveAs->setIcon(QIcon::fromTheme("document-save-as"));
-	acExit->setIcon(QIcon::fromTheme("application-exit"));
-	m_menuOpenRecent->setIcon(QIcon::fromTheme("document-open-recent"));
-	acSaveFigure->setIcon(QIcon::fromTheme("image-x-generic"));
-	acSaveDisp->setIcon(QIcon::fromTheme("text-x-generic"));
-	acSaveMultiDisp->setIcon(QIcon::fromTheme("text-x-generic"));
-	acSaveDispScr->setIcon(QIcon::fromTheme("text-x-script"));
-	acSaveMultiDispScr->setIcon(QIcon::fromTheme("text-x-script"));
-	acStructExportSun->setIcon(QIcon::fromTheme("weather-clear"));
-	acStructExportSW->setIcon(QIcon::fromTheme("weather-clear-night"));
-	acStructExportScript->setIcon(QIcon::fromTheme("text-x-script"));
-	acStructNotes->setIcon(QIcon::fromTheme("accessories-text-editor"));
-	acStructView->setIcon(QIcon::fromTheme("applications-graphics"));
-	acBZView->setIcon(QIcon::fromTheme("applications-graphics"));
+	if(g_use_icons)
+	{
+		acNew->setIcon(QIcon::fromTheme("document-new"));
+		acLoad->setIcon(QIcon::fromTheme("document-open"));
+		acSave->setIcon(QIcon::fromTheme("document-save"));
+		acSaveAs->setIcon(QIcon::fromTheme("document-save-as"));
+		acExit->setIcon(QIcon::fromTheme("application-exit"));
+		m_menuOpenRecent->setIcon(QIcon::fromTheme("document-open-recent"));
+		acSaveFigure->setIcon(QIcon::fromTheme("image-x-generic"));
+		acSaveDisp->setIcon(QIcon::fromTheme("text-x-generic"));
+		acSaveMultiDisp->setIcon(QIcon::fromTheme("text-x-generic"));
+		acSaveDispScr->setIcon(QIcon::fromTheme("text-x-script"));
+		acSaveMultiDispScr->setIcon(QIcon::fromTheme("text-x-script"));
+		acStructExportSun->setIcon(QIcon::fromTheme("weather-clear"));
+		acStructExportSW->setIcon(QIcon::fromTheme("weather-clear-night"));
+		acStructExportScript->setIcon(QIcon::fromTheme("text-x-script"));
+		acStructNotes->setIcon(QIcon::fromTheme("accessories-text-editor"));
+		acStructView->setIcon(QIcon::fromTheme("applications-graphics"));
+		acBZView->setIcon(QIcon::fromTheme("applications-graphics"));
+	}
 
 	// actions
 	menuFile->addAction(acNew);
@@ -1055,7 +1067,8 @@ void MagDynDlg::EnableInput(bool enable)
 
 		m_btnStartStop->setText("Calculate");
 		m_btnStartStop->setToolTip("Start calculation.");
-		m_btnStartStop->setIcon(QIcon::fromTheme("media-playback-start"));
+		if(g_use_icons)
+			m_btnStartStop->setIcon(QIcon::fromTheme("media-playback-start"));
 	}
 	else
 	{
@@ -1065,7 +1078,8 @@ void MagDynDlg::EnableInput(bool enable)
 
 		m_btnStartStop->setText("Stop");
 		m_btnStartStop->setToolTip("Stop calculation.");
-		m_btnStartStop->setIcon(QIcon::fromTheme("media-playback-stop"));
+		if(g_use_icons)
+			m_btnStartStop->setIcon(QIcon::fromTheme("media-playback-stop"));
 	}
 }
 

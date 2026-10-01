@@ -336,6 +336,16 @@ public:
 			gridGui->addWidget(m_checkDialogs, yGui++,0,1,3);
 		}
 
+		// show icons
+		if(s_use_icons)
+		{
+			m_checkIcons = new QCheckBox("Show icons.", panelGui);
+			get_setting<int>(m_sett, "show_icons", s_use_icons);
+			m_checkIcons->setChecked(*s_use_icons != 0);
+
+			gridGui->addWidget(m_checkIcons, yGui++,0,1,3);
+		}
+
 		QSpacerItem *spacer_end = new QSpacerItem(1, 1,
 			QSizePolicy::Minimum, QSizePolicy::Expanding);
 		gridGui->addItem(spacer_end, yGui++,0,1,3);
@@ -438,6 +448,7 @@ public:
 		get_setting<QString>(sett, "font3d", s_font3d);
 		get_setting<int>(sett, "native_menubar", s_use_native_menubar);
 		get_setting<int>(sett, "native_dialogs", s_use_native_dialogs);
+		get_setting<int>(sett, "show_icons", s_use_icons);
 
 		ApplyGuiSettings();
 	}
@@ -450,6 +461,11 @@ public:
 	static void SetGuiFont3d(QString* str) { s_font3d = str; }
 	static void SetGuiUseNativeMenubar(int *i) { s_use_native_menubar = i; }
 	static void SetGuiUseNativeDialogs(int *i) { s_use_native_dialogs = i; }
+	static void SetGuiUseIcons(int *i) { s_use_icons = i; }
+
+	static const int* GetGuiUseNativeMenubar() { return s_use_native_menubar; }
+	static const int* GetGuiUseNativeDialogs() { return s_use_native_dialogs; }
+	static const int* GetGuiUseIcons() { return s_use_icons; }
 
 
 
@@ -473,6 +489,8 @@ public:
 			s_defaults.insert_or_assign("<native_menubar>", *s_use_native_menubar);
 		if(s_use_native_dialogs)
 			s_defaults.insert_or_assign("<native_dialogs>", *s_use_native_dialogs);
+		if(s_use_icons)
+			s_defaults.insert_or_assign("<show_icons>", *s_use_icons);
 	}
 
 
@@ -595,18 +613,21 @@ protected:
 		{
 			s_use_native_menubar,
 			s_use_native_dialogs,
+			s_use_icons,
 		};
 
 		std::string idents[] =
 		{
 			"<native_menubar>",
 			"<native_dialogs>",
+			"<show_icons>",
 		};
 
 		QCheckBox* checks[] =
 		{
 			m_checkMenubar,
 			m_checkDialogs,
+			m_checkIcons,
 		};
 
 		for(std::size_t idx=0; idx<sizeof(vars)/sizeof(*vars); ++idx)
@@ -646,6 +667,8 @@ protected:
 			*s_use_native_menubar = m_checkMenubar->isChecked();
 		if(s_use_native_dialogs)
 			*s_use_native_dialogs = m_checkDialogs->isChecked();
+		if(s_use_icons)
+			*s_use_icons = m_checkIcons->isChecked();
 
 		// write out the settings
 		if(m_sett)
@@ -657,11 +680,11 @@ protected:
 			if(s_font3d)
 				m_sett->setValue("font3d", *s_font3d);
 			if(s_use_native_menubar)
-				m_sett->setValue("native_menubar",
-					*s_use_native_menubar);
+				m_sett->setValue("native_menubar", *s_use_native_menubar);
 			if(s_use_native_dialogs)
-				m_sett->setValue("native_dialogs",
-					*s_use_native_dialogs);
+				m_sett->setValue("native_dialogs", *s_use_native_dialogs);
+			if(s_use_icons)
+				m_sett->setValue("show_icons", *s_use_icons);
 		}
 
 		ApplyGuiSettings();
@@ -996,6 +1019,7 @@ private:
 	QLineEdit *m_editFont3d{nullptr};
 	QCheckBox *m_checkMenubar{nullptr};
 	QCheckBox *m_checkDialogs{nullptr};
+	QCheckBox *m_checkIcons{nullptr};
 
 	// common gui settings
 	static QString *s_theme;           // gui theme
@@ -1003,6 +1027,7 @@ private:
 	static QString *s_font3d;          // 3d font
 	static int *s_use_native_menubar;  // use native menubar?
 	static int *s_use_native_dialogs;  // use native dialogs?
+	static int *s_use_icons;           // use icons in menus and buttons
 
 	// default setting values
 	static std::unordered_map<std::string, SettingsVariable::t_variant> s_defaults;
@@ -1062,6 +1087,11 @@ template<
 	std::size_t num_settingsvariables,
 	const std::array<SettingsVariable, num_settingsvariables> *settingsvariables>
 int *SettingsDlg<num_settingsvariables, settingsvariables>::s_use_native_dialogs{nullptr};
+
+template<
+	std::size_t num_settingsvariables,
+	const std::array<SettingsVariable, num_settingsvariables> *settingsvariables>
+int *SettingsDlg<num_settingsvariables, settingsvariables>::s_use_icons{nullptr};
 
 // ----------------------------------------------------------------------------
 

@@ -46,6 +46,7 @@ void MagDynDlg::InitSettingsDlg()
 	t_SettingsDlg::SetGuiFont3d(&g_font3d);
 	t_SettingsDlg::SetGuiUseNativeMenubar(&g_use_native_menubar);
 	t_SettingsDlg::SetGuiUseNativeDialogs(&g_use_native_dialogs);
+	t_SettingsDlg::SetGuiUseIcons(&g_use_icons);
 
 	// restore settings
 	t_SettingsDlg::ReadSettings(m_sett);
@@ -104,12 +105,28 @@ void MagDynDlg::ShowSettingsDlg()
 {
 	if(!m_settings_dlg)
 	{
-		m_settings_dlg = new t_SettingsDlg(this, m_sett);
+		t_SettingsDlg *sett = new t_SettingsDlg(this, m_sett);
+		m_settings_dlg = sett;
 
-		dynamic_cast<t_SettingsDlg*>(m_settings_dlg)->AddChangedSettingsSlot([this]()
+		auto change_fkt = [this]()
 		{
+			t_SettingsDlg* sett = dynamic_cast<t_SettingsDlg*>(m_settings_dlg);
+
+			if(const int* use_native_menubar = sett->GetGuiUseNativeMenubar(); use_native_menubar)
+				g_use_native_menubar = *use_native_menubar;
+			if(const int* use_native_dialogs = sett->GetGuiUseNativeDialogs(); use_native_dialogs)
+				g_use_native_dialogs = *use_native_dialogs;
+			if(const int* use_icons = sett->GetGuiUseIcons(); use_icons)
+				g_use_icons = *use_icons;
+
 			MagDynDlg::InitSettings();
-		});
+		};
+
+#ifdef MAGDYN_SETTINGS_USE_QT_SIGNALS
+		connect(m_settings_dlg, &t_SettingsDlg::SettingsHaveChanged, change_fkt);
+#else
+		sett->AddChangedSettingsSlot(change_fkt);
+#endif
 	}
 
 	m_settings_dlg->show();

@@ -96,6 +96,9 @@ int g_use_native_menubar = 0;
 // use native dialogs?
 int g_use_native_dialogs = 0;
 
+// show icons?
+int g_use_icons = 1;
+
 // plot colour
 std::string g_colPlot = "#0000ff";
 std::string g_colPlotDegen = "#ff0000";

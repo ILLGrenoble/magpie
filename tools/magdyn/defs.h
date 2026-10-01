@@ -118,8 +118,8 @@ extern int g_evecs_ortho;
 // console messages
 extern int g_silent, g_checks;
 
-// use native menubar and dialogs?
-extern int g_use_native_menubar, g_use_native_dialogs;
+// use native menubar and dialogs, show icons?
+extern int g_use_native_menubar, g_use_native_dialogs, g_use_icons;
 
 // plot colour
 extern std::string g_colPlot, g_colPlotDegen;

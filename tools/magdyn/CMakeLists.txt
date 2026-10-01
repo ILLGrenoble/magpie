@@ -55,6 +55,7 @@ endif()
 
 #add_compile_options(-D__MAGDYN_DEBUG_OUTPUT__)
 add_compile_options(-D__MAGDYN_HAS_DEFS__)
+#add_compile_options(-DMAGDYN_SETTINGS_USE_QT_SIGNALS)
 # -----------------------------------------------------------------------------
 
 
