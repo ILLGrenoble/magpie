@@ -39,6 +39,12 @@ option(USE_QT6             "use Qt version 6"               TRUE)
 option(USE_NATIVE          "use native code"                FALSE)
 
 
+# default to release builds
+if(CMAKE_BUILD_TYPE STREQUAL "")
+	set(CMAKE_BUILD_TYPE Release)
+endif()
+
+
 # mingw settings
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	set(Boost_USE_STATIC_LIBS FALSE)

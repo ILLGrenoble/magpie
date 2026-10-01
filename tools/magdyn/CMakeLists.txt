@@ -32,6 +32,11 @@ set(CMAKE_CXX_STANDARD 20)
 add_compile_options(-std=c++20)
 add_compile_options(-Wall -Wextra -Weffc++)
 
+# default to release builds
+if(CMAKE_BUILD_TYPE STREQUAL "")
+	set(CMAKE_BUILD_TYPE Release)
+endif()
+
 
 # -----------------------------------------------------------------------------
 #options

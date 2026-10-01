@@ -39,6 +39,11 @@ list(APPEND CMAKE_MODULE_PATH
 	"${PROJECT_SOURCE_DIR}/../setup/cmake")
 
 
+# default to release builds
+if(CMAKE_BUILD_TYPE STREQUAL "")
+	set(CMAKE_BUILD_TYPE Release)
+endif()
+
 message("Project: ${PROJECT_NAME}, build type: ${CMAKE_BUILD_TYPE}.")
 
 if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Release")

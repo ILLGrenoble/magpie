@@ -31,6 +31,11 @@ cmake_policy(SET CMP0086 NEW)
 project(magpy)
 enable_language(CXX)
 
+set(CMAKE_CXX_STANDARD 20)
+add_compile_options(-std=c++20)
+add_compile_options(-Wall -Wextra)
+
+
 option(USE_NATIVE  "use native code"   FALSE)
 
 
@@ -39,16 +44,17 @@ list(APPEND CMAKE_MODULE_PATH
 	"${PROJECT_SOURCE_DIR}/../../setup/cmake")
 
 
+# default to release builds
+if(CMAKE_BUILD_TYPE STREQUAL "")
+	set(CMAKE_BUILD_TYPE Release)
+endif()
+
 message("Project: ${PROJECT_NAME}, build type: ${CMAKE_BUILD_TYPE}.")
 
 if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 	set(CMAKE_VERBOSE_MAKEFILE TRUE)
 endif()
 
-
-set(CMAKE_CXX_STANDARD 20)
-add_compile_options(-std=c++20)
-add_compile_options(-Wall -Wextra)
 
 if(USE_NATIVE)
 	message("Using native optimisations.")
