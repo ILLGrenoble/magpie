@@ -360,7 +360,7 @@ install(FILES ${PROJECT_SOURCE_DIR}/../../setup/deb/magpie.desktop DESTINATION $
 
 set(CPACK_PACKAGE_NAME "Magpie")
 set(CPACK_PACKAGE_VENDOR "T. Weber, ILL, Grenoble")
-set(CPACK_PACKAGE_VERSION "0.9.5")
+set(CPACK_PACKAGE_VERSION "1.1.0")
 set(CPACK_PACKAGE_DESCRIPTION "A Graphical Magnon Software")
 set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/../../res/magpie.svg")
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/../../LICENSE")
