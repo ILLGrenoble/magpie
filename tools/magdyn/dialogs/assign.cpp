@@ -108,15 +108,18 @@ AssignDlg::AssignDlg(QWidget* parent, QSettings *sett)
 
 	grid->addWidget(new QLabel("Symmetry Index:", panel), y, 0, 1, 1);
 	grid->addWidget(m_symmidx, y, 1, 1, 1);
-	grid->addWidget(btnAssignByIdx, y++, 3, 1, 1);
+	grid->addWidget(btnAssignByIdx, y++, 2, 1, 2);
 
 	grid->addItem(new QSpacerItem(16, 16,
 		QSizePolicy::Minimum, QSizePolicy::Expanding),
 		y++, 0, 1, 4);
 
-	QDialogButtonBox *btnbox = new QDialogButtonBox(this);
-	btnbox->addButton(QDialogButtonBox::Ok);
-	btnbox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	//QDialogButtonBox *btnbox = new QDialogButtonBox(this);
+	//btnbox->addButton(QDialogButtonBox::Ok);
+	//btnbox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	QPushButton *btnOk = new QPushButton("OK", this);
+	btnOk->setIcon(style()->standardIcon(QStyle::SP_DialogOkButton));
+	btnOk->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 	// status bar
 	m_status = new QLabel(this);
@@ -129,13 +132,14 @@ AssignDlg::AssignDlg(QWidget* parent, QSettings *sett)
 	dlgGrid->setSpacing(4);
 	dlgGrid->setContentsMargins(8, 8, 8, 8);
 	dlgGrid->addWidget(panel, 0, 0, 1, 4);
-	dlgGrid->addWidget(btnbox, 1, 3, 1, 1);
-	dlgGrid->addWidget(m_status, 2, 0, 1, 4);
+	dlgGrid->addWidget(m_status, 1, 0, 1, 3);
+	dlgGrid->addWidget(/*btnbox*/ btnOk, 1, 3, 1, 1);
 
 
 	// connections
 	connect(btnAssignByIdx, &QAbstractButton::clicked, this, &AssignDlg::AssignByIndex);
-	connect(btnbox, &QDialogButtonBox::accepted, this, &AssignDlg::accept);
+	connect(btnOk, &QAbstractButton::clicked, this, &AssignDlg::accept);
+	//connect(btnbox, &QDialogButtonBox::accepted, this, &AssignDlg::accept);
 
 
 	// restore settings
