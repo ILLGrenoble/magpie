@@ -345,8 +345,8 @@ void MagDynDlg::AddTermTabItem(
 	{
 		for(int thecol = 0; thecol < m_termstab->columnCount(); ++thecol)
 		{
-			m_termstab->setItem(row, thecol,
-				m_termstab->item(m_terms_cursor_row, thecol)->clone());
+			if(QTableWidgetItem* item = m_termstab->item(m_terms_cursor_row, thecol); item)
+				m_termstab->setItem(row, thecol, item->clone());
 
 			// also clone site selection combo boxes
 			if(thecol == COL_XCH_ATOM1_IDX || thecol == COL_XCH_ATOM2_IDX)
