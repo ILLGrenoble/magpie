@@ -80,24 +80,6 @@ requires is_basic_vec<t_vec>
 
 
 /**
- * 2-dim cross product
- * @see https://en.wikipedia.org/wiki/Cross_product
- */
-template<class t_vec, typename t_scalar = typename t_vec::value_type>
-t_scalar cross_2d(const t_vec& vec1, const t_vec& vec2)
-requires is_basic_vec<t_vec>
-{
-	t_scalar prod = t_scalar(0);
-
-	// only valid for 2-vectors -> use first two components
-	if(vec1.size() < 2 || vec2.size() < 2)
-		return prod;
-
-	return vec1[0]*vec2[1] - vec1[1]*vec2[0];
-}
-
-
-/**
  * cross product matrix (3x3)
  * @see https://en.wikipedia.org/wiki/Skew-symmetric_matrix
  */
@@ -127,7 +109,7 @@ requires is_basic_vec<t_vec> && is_mat<t_mat>
  * givens rotation matrix
  * @see https://en.wikipedia.org/wiki/Givens_rotation
  */
-template<class t_mat, class t_real = typename t_mat::value_type>
+template<class t_mat, class t_real /*= typename t_mat::value_type*/>
 t_mat givens(std::size_t N, std::size_t i, std::size_t j, t_real angle)
 requires is_mat<t_mat>
 {
@@ -159,18 +141,6 @@ requires is_mat<t_mat>
 	mat(i, i) = mat(j, j) = c;
 
 	return mat;
-}
-
-
-/**
- * SO(2) rotation matrix
- * @see https://en.wikipedia.org/wiki/Rotation_matrix
- */
-template<class t_mat>
-t_mat rotation_2d(const typename t_mat::value_type angle)
-requires tl2::is_mat<t_mat>
-{
-	return givens<t_mat>(2, 0, 1, angle);
 }
 
 

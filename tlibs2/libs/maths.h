@@ -52,6 +52,7 @@
 #include "maths/funcs.h"
 #include "maths/scalar.h"
 #include "maths/ndim.h"
+#include "maths/twodim.h"
 #include "maths/threedim.h"
 #include "maths/projectors.h"
 #include "maths/tensor.h"

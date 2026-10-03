@@ -208,6 +208,10 @@ template<class t_mat>
 typename t_mat::value_type det(const t_mat& mat)
 requires is_mat<t_mat>;
 
+template<class t_mat, class t_real = typename t_mat::value_type>
+t_mat givens(std::size_t N, std::size_t i, std::size_t j, t_real angle)
+requires is_mat<t_mat>;
+
 template<class t_elem, template<class...> class t_cont = std::vector>
 t_elem mean(const t_cont<t_elem>& vec)
 requires is_basic_vec<t_cont<t_elem>>;

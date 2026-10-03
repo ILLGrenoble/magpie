@@ -83,19 +83,36 @@ requires is_vec<t_vec> && is_mat<t_mat>
  *
  * @see (Arens 2015), p. 814 for the projection tensor
  */
-template<class t_vec>
-t_vec project(const t_vec& vec, const t_vec& vecProj, bool is_normalised = true)
+template<class t_vec, class t_real = typename t_vec::value_type>
+t_real project_param(const t_vec& vec, const t_vec& vecProj, bool is_normalised = true)
 requires is_vec<t_vec>
 {
 	if(is_normalised)
 	{
-		return tl2::inner<t_vec>(vecProj, vec) * vecProj;
+		return tl2::inner<t_vec>(vecProj, vec);
 	}
 	else
 	{
-		const auto len = tl2::norm<t_vec>(vecProj, false);
-		return tl2::inner<t_vec>(vecProj, vec) * vecProj / len;
+		const auto len2 = tl2::norm<t_vec>(vecProj, false);
+		return tl2::inner<t_vec>(vecProj, vec) / len2;
 	}
+}
+
+
+/**
+ * project vec1 onto vec2
+ *
+ * proj_op = |vec2><vec2¦/ len(vec2)^2,  len(vec2) = sqrt(<vec2|vec2>)
+ * proj = proj_op * vec1 = |vec2> * <vec2|vec1> / <vec2|vec2>
+ *
+ * @see (Arens 2015), p. 814 for the projection tensor
+ */
+template<class t_vec>
+t_vec project(const t_vec& vec, const t_vec& vecProj, bool is_normalised = true)
+requires is_vec<t_vec>
+{
+	using t_real = typename t_vec::value_type;
+	return project_param<t_vec, t_real>(vec, vecProj, is_normalised) * vecProj;
 }
 
 
