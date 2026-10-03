@@ -129,6 +129,17 @@ requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
 
 
 /**
+ * inner product
+ */
+template<class t_vec>
+constexpr typename t_vec::value_type operator*(const t_vec& vec1, const t_vec& vec2)
+requires tl2::is_basic_vec<t_vec> && tl2::is_dyn_vec<t_vec>
+{
+	return inner<t_vec>(vec1, vec2);
+}
+
+
+/**
  * vector * scalar
  */
 template<class t_vec>
@@ -393,6 +404,7 @@ requires tl2::is_basic_mat<t_mat> && tl2::is_dyn_mat<t_mat>
 
 	return mat;
 }
+
 
 /**
  * scalar * matrix

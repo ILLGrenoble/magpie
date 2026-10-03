@@ -617,6 +617,8 @@ public:
 	vec& operator*=(value_type d) { return tl2_ops::operator*=(*this, d); }
 	vec& operator/=(value_type d) { return tl2_ops::operator/=(*this, d); }
 
+	auto operator<=>(const vec& vec2) const = default;
+
 
 	// element access
 	const value_type& operator()(size_type i) const { return operator[](i); }
@@ -777,6 +779,8 @@ public:
 	constexpr vec_static& operator-=(const vec_static& vec2) { return tl2_ops::operator-=(*this, vec2); }
 	constexpr vec_static& operator*=(value_type d) { return tl2_ops::operator*=(*this, d); }
 	constexpr vec_static& operator/=(value_type d) { return tl2_ops::operator/=(*this, d); }
+
+	auto operator<=>(const vec_static& vec2) const = default;
 
 
 	// element access

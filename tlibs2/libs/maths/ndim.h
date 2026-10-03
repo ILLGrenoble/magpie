@@ -1385,7 +1385,7 @@ requires is_mat<t_mat> && is_basic_vec<t_vec>
  * inner product <vec1|vec2>
  */
 template<class t_vec>
-typename t_vec::value_type inner(const t_vec& vec1, const t_vec& vec2)
+constexpr typename t_vec::value_type inner(const t_vec& vec1, const t_vec& vec2)
 requires is_basic_vec<t_vec>
 {
 	const auto size = vec1.size();
