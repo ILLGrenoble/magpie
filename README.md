@@ -9,7 +9,7 @@
   - A Python scripting interface (*Magpy*).
   - Several extension modules for [Takin](https://github.com/ILLGrenoble/takin).
 
-(No AI is used in this application or its development.)
+This application is entirely hand-crafted, **no AI** has been used in its development.
 
 
 ## Documentation
