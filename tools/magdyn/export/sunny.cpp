@@ -602,7 +602,12 @@ end)BLOCK" << "\n";
 
 	//ofstr << "momenta = collect(range(Qstart, Qend, Qpts))\n";
 	ofstr << "momenta = q_space_path(magsys.crystal, [ Qstart, Qend ], Qpts)\n";
-	ofstr << "bands = intensities_bands(calc, momenta; kT = temperature, with_negative = !only_pos_E)\n";
+	ofstr << "global bands = nothing\n";
+	ofstr << "try\n";
+	ofstr << "\tglobal bands = intensities_bands(calc, momenta; kT = temperature, with_negative = !only_pos_E)\n";
+	ofstr << "catch err\n";
+	ofstr << "\tglobal bands = intensities_bands(calc, momenta; kT = temperature)\n";
+	ofstr << "end\n";
 
 	ofstr << "\ntime_calc_end = time_ns()\n";
 	ofstr << "time_calc = (time_calc_end - time_calc_begin) / 1e6\n";
