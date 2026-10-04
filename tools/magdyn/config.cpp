@@ -70,6 +70,7 @@ void MagDynDlg::Clear(bool recalc)
 	DelTabItem(m_coordinatestab, -1);
 
 	ClearDispersion(true);
+	m_Qvec_cursor = tl2::zero<t_vec3_real>(3);
 	m_hamiltonian->clear();
 	m_dyn.Clear();
 

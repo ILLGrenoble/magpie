@@ -322,7 +322,7 @@ void MagDynDlg::CreateMenuBar()
 	// structure menu
 	QMenu *menuStruct = new QMenu("Structure", m_menu);
 	QAction *acStructSymIdx = new QAction("Assign Symmetry Indices", menuStruct);
-	QAction *acStructSortCouplings = new QAction("Sort Couplings by Length", menuStruct);
+	QAction *acStructSortCouplings = new QAction("Sort Couplings By Length", menuStruct);
 	QAction *acStructAssignCouplings = new QAction("Assign Multiple Couplings...", menuStruct);
 	QAction *acStructRemoveUnused = new QAction("Remove Unused Couplings and Sites", menuStruct);
 	QAction *acStructNotes = new QAction("Notes...", menuStruct);
@@ -367,6 +367,7 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acSaveMultiDisp = new QAction("Save Data For All Qs...", m_menuDisp);
 	QAction *acSaveDispScr = new QAction("Save Data As Script...", m_menuDisp);
 	QAction *acSaveMultiDispScr = new QAction("Save Data As Script For All Qs...", m_menuDisp);
+	QAction *acCalcHAtCursor = new QAction("Set Hamiltonian To Cursor Q");
 
 	acChannels->setEnabled(m_plot_channels->isChecked());
 
@@ -612,6 +613,8 @@ void MagDynDlg::CreateMenuBar()
 	m_menuDisp->addAction(acRescalePlot);
 	m_menuDisp->addMenu(menuWeights);
 	m_menuDisp->addSeparator();
+	m_menuDisp->addAction(acCalcHAtCursor);
+	m_menuDisp->addSeparator();
 	m_menuDisp->addAction(acSaveFigure);
 	m_menuDisp->addSeparator();
 	m_menuDisp->addAction(acSaveDisp);
@@ -692,6 +695,25 @@ void MagDynDlg::CreateMenuBar()
 		[this](){ this->SaveDispersion(true); });
 	connect(acSaveMultiDispScr, &QAction::triggered,
 		[this](){ this->SaveMultiDispersion(true); });
+
+	connect(acCalcHAtCursor, &QAction::triggered, [this]()
+	{
+		BOOST_SCOPE_EXIT(this_)
+		{
+			this_->m_Q[0]->blockSignals(false);
+			this_->m_Q[1]->blockSignals(false);
+			this_->m_Q[2]->blockSignals(false);
+		} BOOST_SCOPE_EXIT_END
+		m_Q[0]->blockSignals(true);
+		m_Q[1]->blockSignals(true);
+		m_Q[2]->blockSignals(true);
+
+		for(int i = 0; i < 3; ++i)
+			m_Q[i]->setValue(m_Qvec_cursor[i]);
+
+		if(this->m_autocalc->isChecked())
+			this->CalcHamiltonian();
+	});
 
 	connect(acRescalePlot, &QAction::triggered, [this]()
 	{
@@ -801,6 +823,7 @@ void MagDynDlg::CreateMenuBar()
 	{
 		this->PlotDispersion();
 	});
+
 	connect(m_plot_weights_alpha, &QAction::toggled, [this](bool)
 	{
 		this->PlotDispersion();

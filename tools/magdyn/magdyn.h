@@ -546,6 +546,7 @@ private:
 	// data for dispersion plot
 	DispersionData m_disp_data{};                // total dispersion
 	std::vector<DispersionData> m_bands_data{};  // individual bands
+	t_vec3_real m_Qvec_cursor { tl2::zero<t_vec3_real>(3) };
 	// polarisation channels
 	QVector<qreal> m_qs_data_channel[2*3*3]{}, m_Es_data_channel[2*3*3]{}, m_ws_data_channel[2*3*3]{};
 	t_real m_ws_total_channel[2*3*3]{};  // total weight in channel

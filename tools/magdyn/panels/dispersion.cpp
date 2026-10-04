@@ -481,21 +481,21 @@ void MagDynDlg::PlotMouseMove(QMouseEvent* evt)
 	if(Q_idx > 2)
 		Q_idx = 2;
 	const t_real t = (Q - Q1[Q_idx]) / (Q2[Q_idx] - Q1[Q_idx]);
-	const t_vec3_real Qvec = tl2::create<t_vec3_real>({
+	m_Qvec_cursor = tl2::create<t_vec3_real>({
 		std::lerp(Q1[0], Q2[0], t),
 		std::lerp(Q1[1], Q2[1], t),
 		std::lerp(Q1[2], Q2[2], t) });
 
 	const t_mat33_real& B = m_dyn.GetCrystalBTrafo();
-	const t_vec3_real Qvec_invA = B * Qvec;
+	const t_vec3_real Qvec_invA = B * m_Qvec_cursor;
 	const t_real Q_invA = tl2::norm(Qvec_invA);
 
 	// write status
 	QString status("Q = (%1, %2, %3) rlu, |Q| = %4 Å⁻¹, E = %5 meV.");
 	status = status
-		.arg(Qvec[0], 0, 'g', g_prec_gui)
-		.arg(Qvec[1], 0, 'g', g_prec_gui)
-		.arg(Qvec[2], 0, 'g', g_prec_gui)
+		.arg(m_Qvec_cursor[0], 0, 'g', g_prec_gui)
+		.arg(m_Qvec_cursor[1], 0, 'g', g_prec_gui)
+		.arg(m_Qvec_cursor[2], 0, 'g', g_prec_gui)
 		.arg(Q_invA, 0, 'g', g_prec_gui)
 		.arg(E, 0, 'g', g_prec_gui);
 	m_status->setText(status);

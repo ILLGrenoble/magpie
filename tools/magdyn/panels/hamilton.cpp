@@ -158,6 +158,16 @@ void MagDynDlg::CreateHamiltonPanel()
 
 	connect(btnFromDispersion, &QAbstractButton::clicked, [this]()
 	{
+		BOOST_SCOPE_EXIT(this_)
+		{
+			this_->m_Q[0]->blockSignals(false);
+			this_->m_Q[1]->blockSignals(false);
+			this_->m_Q[2]->blockSignals(false);
+		} BOOST_SCOPE_EXIT_END
+		m_Q[0]->blockSignals(true);
+		m_Q[1]->blockSignals(true);
+		m_Q[2]->blockSignals(true);
+
 		// Q range from main dispersion
 		auto [Q_start, Q_end] = GetDispersionQ();
 
@@ -177,6 +187,9 @@ void MagDynDlg::CreateHamiltonPanel()
 		// set Q
 		for(int i = 0; i < 3; ++i)
 			m_Q[i]->setValue(Q[i]);
+
+		if(this->m_autocalc->isChecked())
+			this->CalcHamiltonian();
 	});
 
 

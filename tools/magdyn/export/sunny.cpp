@@ -205,8 +205,9 @@ end
 # output the list of magnetic sites
 function print_sites(magsys, title)
 	site_idx = 1
-	logprint("%s:\n%6s %10s %10s %10s %10s %10s %10s %10s\n",
-		title, "index", "x", "y", "z", "Sx", "Sy", "Sz", "|S|")
+	logprint("%s:\n", title)
+	logprint("%6s %10s %10s %10s %10s %10s %10s %10s\n",
+		"index", "x", "y", "z", "Sx", "Sy", "Sz", "|S|")
 	for (r, s) in zip(magsys.crystal.positions, magsys.dipoles)
 		logprint("%6d %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g\n",
 			site_idx,
@@ -538,21 +539,39 @@ end)BLOCK" << "\n";
 	ofstr << "time_calc_begin = time_ns()\n\n";
 
 	// form factors
-	ofstr << "ffacts = nothing\n";
-	ofstr << "try\n";
-	ofstr << "\tglobal ffacts = [\n";
-	t_size site_idx = 1;
-	for(const t_site& site : m_dyn.GetMagneticSites())
+	auto gen_formfacts = [this, &ofstr](bool skip_seen)
 	{
-		if(site_idx == 1)
-			ofstr << "\t\t# TODO: use ion names as they are defined in sunny's database\n";
-		ofstr << "\t\t" << site_idx << " => FormFactor(\"" << site.name << "\"),\n";
-		++site_idx;
-	}
-	ofstr << "\t]\n";
-	ofstr << "catch err\n";
-	ofstr << "\t#logprint(\"Error: Invalid form factors.\\n\")\n";
-	ofstr << "end\n\n";
+		ofstr << "\tffacts = nothing\n";
+		ofstr << "\ttry\n";
+		ofstr << "\t\tglobal ffacts = [\n";
+		t_size site_idx = 1;
+		std::unordered_set<t_size> seen_site_sym_indices;
+		for(const t_site& site : m_dyn.GetMagneticSites())
+		{
+			if(site_idx == 1)
+				ofstr << "\t\t\t# TODO: use ion names as they are defined in sunny's database\n";
+
+			bool seen = (seen_site_sym_indices.find(site.sym_idx) != seen_site_sym_indices.end());
+			if(!seen)
+				seen_site_sym_indices.insert(site.sym_idx);
+			if(seen && skip_seen)
+				continue;
+
+			ofstr << "\t\t\t" << site_idx << " => FormFactor(\"" << site.name << "\"),\n";
+			++site_idx;
+		}
+		ofstr << "\t\t]\n";
+		ofstr << "\tcatch err\n";
+		ofstr << "\t\t#logprint(\"Error: Invalid form factors.\\n\")\n";
+		ofstr << "\tend\n";
+	};
+
+	ofstr << "if !use_spacegroup\n";
+	gen_formfacts(false);
+	ofstr << "else\n";   // use_spacegroup
+	gen_formfacts(true);
+	ofstr << "end\n\n";  // use_spacegroup
+
 
 	// magnon energies and spin-spin correlations
 	ofstr << "cholesky_eps = 1e-8\n";
