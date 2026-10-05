@@ -141,3 +141,19 @@ int gui_main_magstructfact(int argc, char** argv, const std::string& cfg_file)
 
 	return app->exec();
 }
+
+
+
+/**
+ * starts the trafo calculator gui program
+ */
+int gui_main_calc(int argc, char** argv)
+{
+	SETUP_MAGPIE_APP
+
+	// main window
+	auto dlg = std::make_unique<TrafoCalculator>(nullptr);
+	dlg->show();
+
+	return app->exec();
+}

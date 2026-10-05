@@ -71,6 +71,13 @@ static int gui_main_magstructfact(int, char**, const std::string&)
 	return -1;
 }
 
+static int gui_main_calc(int argc, char** argv)
+{
+	std::cerr << "Error: The transformation calculator is not available in this version." << std::endl;
+	return -1;
+}
+
+
 #else
 
 extern int gui_main(int argc, char** argv, const std::string& model_file,
@@ -79,6 +86,7 @@ extern int gui_main(int argc, char** argv, const std::string& model_file,
 extern int gui_main_bz(int argc, char** argv, const std::string& cfg_file);
 extern int gui_main_structfact(int argc, char** argv, const std::string& cfg_file);
 extern int gui_main_magstructfact(int argc, char** argv, const std::string& cfg_file);
+extern int gui_main_calc(int argc, char** argv);
 
 #endif
 
@@ -368,6 +376,7 @@ int main(int argc, char** argv)
 		bool as_bin = false;
 		bool no_weights = false;
 		bool bz_tool = false;
+		bool calc_tool = false;
 		bool structfact_tool = false;
 		bool magstructfact_tool = false;
 		//t_real Emin = 1., Emax = -1.;
@@ -390,6 +399,7 @@ int main(int argc, char** argv)
 			("bz", args::bool_switch(&bz_tool), "start the Brillouin zone tool")
 			("structfact", args::bool_switch(&structfact_tool), "start the nuclear structure factor tool")
 			("magstructfact", args::bool_switch(&magstructfact_tool), "start the magnetic structure factor tool")
+			("calc", args::bool_switch(&calc_tool), "start the trafo calculator tool")
 #endif
 			("silent", args::bool_switch(&silent), "disable console output")
 			("input,i", args::value(&model_file), "input magnetic model file (.magpie)")
@@ -473,6 +483,14 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 				return 0;
 
 			return gui_main_magstructfact(argc, argv, model_file);
+		}
+
+		if(calc_tool)
+		{
+			if(healthcheck)  // TODO
+				return 0;
+
+			return gui_main_calc(argc, argv);
 		}
 
 
