@@ -486,7 +486,7 @@ void MagDynDlg::CreateMenuBar()
 
 	// tools menu
 	QMenu *menuTools = new QMenu("Tools", m_menu);
-	QAction *acTrafoCalc = new QAction("Transformations...", menuTools);
+	QAction *acTrafoCalc = new QAction("Transformation Calculator...", menuTools);
 	QAction *acPlot2d = new QAction("2D Plotter...", menuTools);
 	QAction *acPlot3d = new QAction("3D Plotter...", menuTools);
 	QAction *acBZTool = new QAction("Brillouin Zones...", menuTools);
@@ -544,6 +544,7 @@ void MagDynDlg::CreateMenuBar()
 	acDiff->setShortcut(int(Qt::CTRL) | int(Qt::Key_D));
 	acPowder->setShortcut(int(Qt::CTRL) | int(Qt::Key_P));
 	acCalc->setShortcut(int(Qt::ALT) | int(Qt::Key_C));
+	acTrafoCalc->setShortcut(int(Qt::CTRL) | int(Qt::Key_C));
 
 	// icons
 	if(g_use_icons)

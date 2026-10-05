@@ -105,6 +105,20 @@ void MagDynDlg::Clear(bool recalc)
 	m_weight_min->setValue(0.);
 	m_weight_max->setValue(99.);
 
+	m_use_field->setChecked(false);
+	m_use_temperature->setChecked(true);
+	m_use_formfact->setChecked(false);
+	m_use_polcoords->setChecked(false);
+	m_use_weights->setChecked(true);
+	m_use_projector->setChecked(true);
+	m_unite_degeneracies->setChecked(true);
+	m_ignore_annihilation->setChecked(false);
+	m_force_incommensurate->setChecked(false);
+	m_field_xtal_sys->setChecked(false);
+	m_align_ordering->setChecked(false);
+	m_keep_spin_signs->setChecked(false);
+	m_align_spins->setChecked(false);
+
 	if(m_groundstate_dlg)
 		m_groundstate_dlg->SyncFromKernel();
 	if(m_notes_dlg)

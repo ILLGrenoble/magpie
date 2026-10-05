@@ -166,8 +166,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 				if(parser.parse_noexcept(site.spin_ortho[idx]))
 				{
 					site.trafo_plane_calc[idx] = parser.eval_noexcept();
-					site.trafo_plane_conj_calc[idx] =
-						std::conj(site.trafo_plane_calc[idx]);
+					site.trafo_plane_conj_calc[idx] = std::conj(site.trafo_plane_calc[idx]);
 				}
 				else
 				{
