@@ -45,14 +45,6 @@ MAGDYN_INST::CalcPowder(t_real Q_invA,
 	std::function<bool(int, int)> *progress_fkt,
 	std::function<void(const MAGDYN_TYPE::SofQE*)> *result_fkt) const
 {
-	auto [ Binv, inv_ok ] = tl2::inv(m_xtalB);
-
-	if(!inv_ok)
-	{
-		MAGDYN_CERR_OPT << "Magdyn error: B matrix is not invertible."
-			<< std::endl;
-	}
-
 	std::vector<t_vec3_real> Qvecs_rlu;
 	Qvecs_rlu.reserve(num_points);
 
@@ -77,7 +69,7 @@ MAGDYN_INST::CalcPowder(t_real Q_invA,
 		}
 
 		// transform Q vector to rlu
-		t_vec3_real Qvec_rlu = Binv * Qvec_invA;
+		t_vec3_real Qvec_rlu = m_xtalBinv * Qvec_invA;
 		Qvecs_rlu.emplace_back(std::move(Qvec_rlu));
 	}
 

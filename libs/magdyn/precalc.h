@@ -501,11 +501,12 @@ MAGDYN_INST::RotateQ(const typename MAGDYN_INST::t_vec3_real& Q_rlu,
 	t_vec3_real axis = axis_rlu;
 	t_vec3_real Q = Q_rlu;
 
+	bool use_B = true;
 	const t_mat33_real& xtalB = GetCrystalBTrafo();
-	auto [xtalB_inv, inv_ok] = tl2::inv(xtalB);
+	const t_mat33_real& xtalB_inv = GetCrystalBTrafo(true);
 
 	// get Q and the axis in A^(-1)
-	if(inv_ok)
+	if(use_B)
 	{
 		axis = xtalB * axis;
 		Q = xtalB * Q_rlu;
@@ -516,7 +517,7 @@ MAGDYN_INST::RotateQ(const typename MAGDYN_INST::t_vec3_real& Q_rlu,
 	Q = R * Q;
 
 	// convert Q back to rlu
-	if(inv_ok)
+	if(use_B)
 		Q = xtalB_inv * Q;
 
 	tl2::set_eps_0(Q, m_eps);
