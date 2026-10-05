@@ -164,7 +164,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 
 		for(const auto &site : *sites)
 		{
-			MagneticSite magnetic_site;
+			MagneticSite magnetic_site{};
 
 			magnetic_site.name = site.second.get<std::string>("name", "");
 			if(magnetic_site.name == "")
@@ -207,6 +207,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 			magnetic_site.spin_ortho[2] = site.second.get<std::string>("spin_ortho_z", "");
 
 			magnetic_site.spin_mag = site.second.get<std::string>("spin_magnitude", "1");
+			magnetic_site.xtal_sys = site.second.get<bool>("xtal_sys", false);
 
 			if(!magnetic_site.g_e)
 				magnetic_site.g_e = tl2::g_e<t_real> * tl2::unit<t_mat33>(3);
@@ -235,7 +236,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 
 		for(const auto &term : *terms)
 		{
-			ExchangeTerm exchange_term;
+			ExchangeTerm exchange_term{};
 
 			exchange_term.name = term.second.get<std::string>("name", "");
 			if(exchange_term.name == "")
@@ -536,6 +537,7 @@ bool MAGDYN_INST::Save(boost::property_tree::ptree& node) const
 		itemNode.put<std::string>("spin_ortho_z", site.spin_ortho[2]);
 
 		itemNode.put<std::string>("spin_magnitude", site.spin_mag);
+		itemNode.put<bool>("xtal_sys", site.xtal_sys);
 
 		if(site.g_e)
 		{

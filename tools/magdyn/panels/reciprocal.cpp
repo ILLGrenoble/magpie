@@ -356,23 +356,18 @@ void MagDynDlg::RotateDispersionQs(const t_vec3_real& axis_rlu, t_real angle)
 	auto [Q_start, Q_end] = GetDispersionQ();
 
 	const t_mat33_real& xtalB = m_dyn.GetCrystalBTrafo();
-	auto [xtalB_inv, inv_ok] = tl2::inv(xtalB);
-	if(inv_ok)
-	{
-		axis = xtalB * axis;
-		Q_start = xtalB * Q_start;
-		Q_end = xtalB * Q_end;
-	}
+	const t_mat33_real& xtalB_inv = m_dyn.GetCrystalBTrafo(true);
+
+	axis = xtalB * axis;
+	Q_start = xtalB * Q_start;
+	Q_end = xtalB * Q_end;
 
 	t_mat33_real R = tl2::rotation<t_mat33_real, t_vec3_real>(axis, angle, false);
 	Q_start = R*Q_start;
 	Q_end = R*Q_end;
 
-	if(inv_ok)
-	{
-		Q_start = xtalB_inv * Q_start;
-		Q_end = xtalB_inv * Q_end;
-	}
+	Q_start = xtalB_inv * Q_start;
+	Q_end = xtalB_inv * Q_end;
 
 	tl2::set_eps_0(Q_start, g_eps);
 	tl2::set_eps_0(Q_end, g_eps);

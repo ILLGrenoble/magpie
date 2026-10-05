@@ -56,6 +56,7 @@ protected:
 	QWidget* CreateRotationPanel();
 	QWidget* CreateProjectionPanel();
 	QWidget* CreateCrossProductPanel();
+	QWidget* CreateCrystalPanel();
 
 
 private:
@@ -80,6 +81,14 @@ private:
 	QDoubleSpinBox *m_spinVec2[3]{nullptr, nullptr, nullptr};
 	QCheckBox *m_checkXtalCrossProd{};
 
+	t_mat33_real m_xtalA { tl2::unit<t_mat33_real>(3, 3) };
+	t_mat33_real m_xtalA_inv { tl2::unit<t_mat33_real>(3, 3) };
+	t_mat33_real m_xtalB { tl2::unit<t_mat33_real>(3, 3) };
+	t_mat33_real m_xtalB_inv { tl2::unit<t_mat33_real>(3, 3) };
+	QTextEdit *m_textXtal{};
+	QDoubleSpinBox *m_spinVecLab[3]{nullptr, nullptr, nullptr};
+	QDoubleSpinBox *m_spinVecReal[3]{nullptr, nullptr, nullptr};
+	QDoubleSpinBox *m_spinVecRecip[3]{nullptr, nullptr, nullptr};
 
 protected:
 	void SyncToKernel();

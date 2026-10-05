@@ -57,7 +57,7 @@ MAGDYN_TEMPL void MAGDYN_INST::Clear()
 	m_xtallattice[0] = m_xtallattice[1] = m_xtallattice[2] = 0.;
 	m_xtalangles[0] = m_xtalangles[1] = m_xtalangles[2] = t_real(0.5) * tl2::pi<t_real>;
 	m_xtalA = m_xtalAinv = tl2::unit<t_mat33_real>(3);
-	m_xtalB = tl2::unit<t_mat33_real>(3);
+	m_xtalB = m_xtalBinv = tl2::unit<t_mat33_real>(3);
 	m_xtalUB = /*m_xtalUBinv =*/ tl2::unit<t_mat33_real>(3);
 
 	// clear scattering plane
@@ -278,9 +278,9 @@ MAGDYN_TEMPL const typename MAGDYN_INST::t_mat33_real& MAGDYN_INST::GetCrystalAT
 }
 
 
-MAGDYN_TEMPL const typename MAGDYN_INST::t_mat33_real& MAGDYN_INST::GetCrystalBTrafo() const
+MAGDYN_TEMPL const typename MAGDYN_INST::t_mat33_real& MAGDYN_INST::GetCrystalBTrafo(bool inv) const
 {
-	return m_xtalB;
+	return inv ? m_xtalBinv : m_xtalB;
 }
 
 
@@ -860,19 +860,21 @@ void MAGDYN_INST::SetCrystalLattice(t_real a, t_real b, t_real c,
 		m_xtalA = tl2::A_matrix<t_mat33_real>(a, b, c, alpha, beta, gamma);
 		m_xtalB = tl2::B_matrix<t_mat33_real>(a, b, c, alpha, beta, gamma);
 
-		bool inv_ok = false;
-		std::tie(m_xtalAinv, inv_ok) = tl2::inv(m_xtalA);
+		bool invA_ok = false;
+		bool invB_ok = false;
+		std::tie(m_xtalAinv, invA_ok) = tl2::inv(m_xtalA);
+		std::tie(m_xtalBinv, invB_ok) = tl2::inv(m_xtalB);
 
-		if(!inv_ok)
+		if(!invA_ok || !invB_ok)
 		{
-			MAGDYN_CERR_OPT << "Magdyn error: A matrix is not invertible."
+			MAGDYN_CERR_OPT << "Magdyn error: Crystal matrices are not invertible."
 				<< std::endl;
 		}
 	}
 	catch(const std::exception& ex)
 	{
 		m_xtalA = m_xtalAinv = tl2::unit<t_mat33_real>(3);
-		m_xtalB = tl2::unit<t_mat33_real>(3);
+		m_xtalB = m_xtalBinv = tl2::unit<t_mat33_real>(3);
 
 		MAGDYN_CERR_OPT << "Magdyn error: Could not calculate crystal matrices."
 			<< std::endl;

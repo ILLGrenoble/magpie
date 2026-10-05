@@ -91,6 +91,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 	m_field_xtal_sys = new QCheckBox("Use Crystal Coordinates", m_sampleenviropanel);
 	m_field_xtal_sys->setChecked(false);
 	m_field_xtal_sys->setFocusPolicy(Qt::StrongFocus);
+	m_field_xtal_sys->setToolTip("The field vector and the rotation axis are given in the crystal basis.");
 
 	// predefined rotation axes
 	QPushButton *btnAxes = new QPushButton(m_reciprocalpanel);

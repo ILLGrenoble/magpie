@@ -26,6 +26,8 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <boost/scope_exit.hpp>
+
 #include "trafos.h"
 #include "defs.h"
 
@@ -38,6 +40,42 @@
 #include <QtWidgets/QMessageBox>
 
 #include <boost/math/quaternion.hpp>
+
+
+
+/**
+ * prints a matrix as html table
+ */
+static void print_matrix(const t_mat33_real& _mat, const std::string& name,
+	std::ostream& ostr = std::cout)
+{
+	using namespace tl2_ops;
+
+	t_mat33_real mat = _mat;
+	tl2::set_eps_0(mat, g_eps);
+
+	ostr << "<p>" << name << ":\n";
+	ostr << "<table style=\"border:0px\">\n";
+	for(std::size_t i = 0; i < mat.size1(); ++i)
+	{
+		ostr << "\t<tr>\n";
+		for(std::size_t j = 0; j < mat.size2(); ++j)
+		{
+			ostr << "\t\t<td style=\"padding-right:8px\">";
+			ostr << mat(i, j);
+			ostr << "</td>\n";
+		}
+		ostr << "\t</tr>\n";
+	}
+	ostr << "</table>";
+	ostr << "</p>\n";
+
+	ostr << "<p>" << name << " Trace: ";
+	ostr << tl2::trace(mat);
+	ostr << "<br>" << name << " As Single-Line String:<br>";
+	ostr << mat;
+	ostr << "</p>\n";
+}
 
 
 
@@ -66,9 +104,11 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 	QWidget *rotationPanel = CreateRotationPanel();
 	QWidget *projectionPanel = CreateProjectionPanel();
 	QWidget *crossProdPanel = CreateCrossProductPanel();
+	QWidget *xtalPanel = CreateCrystalPanel();
 	rotationPanel->setParent(tabs);
 	projectionPanel->setParent(tabs);
 	crossProdPanel->setParent(tabs);
+	xtalPanel->setParent(tabs);
 
 	// buttons
 	QDialogButtonBox *buttons = new QDialogButtonBox(this);
@@ -78,6 +118,7 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 	tabs->addTab(rotationPanel, "Axis Rotation");
 	tabs->addTab(projectionPanel, "Projection");
 	tabs->addTab(crossProdPanel, "Normal");
+	tabs->addTab(xtalPanel, "Crystal System");
 
 	// main grid
 	auto grid_dlg = new QGridLayout(this);
@@ -308,7 +349,7 @@ QWidget* TrafoCalculator::CreateProjectionPanel()
 	m_textProjection = new QTextEdit(projectionPanel);
 	m_textProjection->setReadOnly(true);
 
-	// rotation grid
+	// grid
 	auto grid_projection = new QGridLayout(projectionPanel);
 	grid_projection->setSpacing(4);
 	grid_projection->setContentsMargins(6, 6, 6, 6);
@@ -395,7 +436,7 @@ QWidget* TrafoCalculator::CreateCrossProductPanel()
 	m_textCrossProd = new QTextEdit(crossProdPanel);
 	m_textCrossProd->setReadOnly(true);
 
-	// rotation grid
+	// grid
 	auto grid_projection = new QGridLayout(crossProdPanel);
 	grid_projection->setSpacing(4);
 	grid_projection->setContentsMargins(6, 6, 6, 6);
@@ -432,38 +473,234 @@ QWidget* TrafoCalculator::CreateCrossProductPanel()
 
 
 
-/**
- * prints a matrix as html table
- */
-static void print_matrix(const t_mat33_real& _mat, const std::string& name,
-	std::ostream& ostr = std::cout)
+QWidget* TrafoCalculator::CreateCrystalPanel()
 {
-	using namespace tl2_ops;
+	// projection tab (crystal)
+	QWidget *xtalPanel = new QWidget(this);
 
-	t_mat33_real mat = _mat;
-	tl2::set_eps_0(mat, g_eps);
+	m_spinVecLab[0] = new QDoubleSpinBox(xtalPanel);
+	m_spinVecLab[1] = new QDoubleSpinBox(xtalPanel);
+	m_spinVecLab[2] = new QDoubleSpinBox(xtalPanel);
+	m_spinVecLab[0]->setValue(1);
+	m_spinVecLab[1]->setValue(0);
+	m_spinVecLab[2]->setValue(0);
 
-	ostr << "<p>" << name << ":\n";
-	ostr << "<table style=\"border:0px\">\n";
-	for(std::size_t i = 0; i < mat.size1(); ++i)
+	m_spinVecReal[0] = new QDoubleSpinBox(xtalPanel);
+	m_spinVecReal[1] = new QDoubleSpinBox(xtalPanel);
+	m_spinVecReal[2] = new QDoubleSpinBox(xtalPanel);
+	m_spinVecReal[0]->setValue(0);
+	m_spinVecReal[1]->setValue(1);
+	m_spinVecReal[2]->setValue(0);
+
+	m_spinVecRecip[0] = new QDoubleSpinBox(xtalPanel);
+	m_spinVecRecip[1] = new QDoubleSpinBox(xtalPanel);
+	m_spinVecRecip[2] = new QDoubleSpinBox(xtalPanel);
+	m_spinVecRecip[0]->setValue(0);
+	m_spinVecRecip[1]->setValue(1);
+	m_spinVecRecip[2]->setValue(0);
+
+	for(int i = 0; i < 3; ++i)
 	{
-		ostr << "\t<tr>\n";
-		for(std::size_t j = 0; j < mat.size2(); ++j)
-		{
-			ostr << "\t\t<td style=\"padding-right:8px\">";
-			ostr << mat(i, j);
-			ostr << "</td>\n";
-		}
-		ostr << "\t</tr>\n";
-	}
-	ostr << "</table>";
-	ostr << "</p>\n";
+		m_spinVecLab[i]->setMinimum(-999.);
+		m_spinVecLab[i]->setMaximum(999.);
+		m_spinVecLab[i]->setDecimals(4);
+		m_spinVecLab[i]->setSingleStep(0.1);
 
-	ostr << "<p>" << name << " Trace: ";
-	ostr << tl2::trace(mat);
-	ostr << "<br>" << name << " As Single-Line String:<br>";
-	ostr << mat;
-	ostr << "</p>\n";
+		m_spinVecReal[i]->setMinimum(-999.);
+		m_spinVecReal[i]->setMaximum(999.);
+		m_spinVecReal[i]->setDecimals(4);
+		m_spinVecReal[i]->setSingleStep(0.1);
+
+		m_spinVecRecip[i]->setMinimum(-999.);
+		m_spinVecRecip[i]->setMaximum(999.);
+		m_spinVecRecip[i]->setDecimals(4);
+		m_spinVecRecip[i]->setSingleStep(0.1);
+	}
+
+	QPushButton *btnRecalc = new QPushButton(xtalPanel);
+	btnRecalc->setText("Get Crystal");
+	btnRecalc->setToolTip("Get the crystallographic A and B matrices and recalculate.");
+
+	QLabel *labelVecLab = new QLabel("Lab. Vector: ");
+	QLabel *labelVecReal = new QLabel("Real Vector (frac): ");
+	QLabel *labelVecRecip = new QLabel("Recip. Vector (rlu): ");
+	labelVecLab->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
+	labelVecReal->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
+	labelVecRecip->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
+
+	m_textXtal = new QTextEdit(xtalPanel);
+	m_textXtal->setReadOnly(true);
+
+	// grid
+	auto grid = new QGridLayout(xtalPanel);
+	grid->setSpacing(4);
+	grid->setContentsMargins(6, 6, 6, 6);
+	grid->addWidget(labelVecLab, 0, 0, 1, 1);
+	grid->addWidget(m_spinVecLab[0], 0, 1, 1, 1);
+	grid->addWidget(m_spinVecLab[1], 0, 2, 1, 1);
+	grid->addWidget(m_spinVecLab[2], 0, 3, 1, 1);
+	grid->addWidget(labelVecReal, 1, 0, 1, 1);
+	grid->addWidget(m_spinVecReal[0], 1, 1, 1, 1);
+	grid->addWidget(m_spinVecReal[1], 1, 2, 1, 1);
+	grid->addWidget(m_spinVecReal[2], 1, 3, 1, 1);
+	grid->addWidget(labelVecRecip, 2, 0, 1, 1);
+	grid->addWidget(m_spinVecRecip[0], 2, 1, 1, 1);
+	grid->addWidget(m_spinVecRecip[1], 2, 2, 1, 1);
+	grid->addWidget(m_spinVecRecip[2], 2, 3, 1, 1);
+	grid->addWidget(btnRecalc, 3, 3, 1, 1);
+	grid->addWidget(m_textXtal, 4, 0, 1, 4);
+
+	auto calc_AB = [this]()
+	{
+		t_vec3_real vecLab = tl2::create<t_vec3_real>({
+			(t_real)m_spinVecLab[0]->value(),
+			(t_real)m_spinVecLab[1]->value(),
+			(t_real)m_spinVecLab[2]->value() });
+
+		t_vec3_real vecA = m_xtalA_inv * vecLab;
+		t_vec3_real vecB = m_xtalB_inv * vecLab;
+
+		BOOST_SCOPE_EXIT(this_)
+		{
+			for(int i = 0; i < 3; ++i)
+			{
+				this_->m_spinVecReal[i]->blockSignals(false);
+				this_->m_spinVecRecip[i]->blockSignals(false);
+			}
+		} BOOST_SCOPE_EXIT_END
+		for(int i = 0; i < 3; ++i)
+		{
+			m_spinVecReal[i]->blockSignals(true);
+			m_spinVecRecip[i]->blockSignals(true);
+		}
+
+		for(int i = 0; i < 3; ++i)
+		{
+			m_spinVecReal[i]->setValue(vecA[i]);
+			m_spinVecRecip[i]->setValue(vecB[i]);
+		}
+	};
+
+	auto calc_LabB = [this]()
+	{
+		t_vec3_real vecA = tl2::create<t_vec3_real>({
+			(t_real)m_spinVecReal[0]->value(),
+			(t_real)m_spinVecReal[1]->value(),
+			(t_real)m_spinVecReal[2]->value() });
+
+		t_vec3_real vecLab = m_xtalA * vecA;
+		t_vec3_real vecB = m_xtalB_inv * vecLab;
+
+		BOOST_SCOPE_EXIT(this_)
+		{
+			for(int i = 0; i < 3; ++i)
+			{
+				this_->m_spinVecLab[i]->blockSignals(false);
+				this_->m_spinVecRecip[i]->blockSignals(false);
+			}
+		} BOOST_SCOPE_EXIT_END
+		for(int i = 0; i < 3; ++i)
+		{
+			m_spinVecLab[i]->blockSignals(true);
+			m_spinVecRecip[i]->blockSignals(true);
+		}
+
+		for(int i = 0; i < 3; ++i)
+		{
+			m_spinVecLab[i]->setValue(vecLab[i]);
+			m_spinVecRecip[i]->setValue(vecB[i]);
+		}
+	};
+
+	auto calc_LabA = [this]()
+	{
+		t_vec3_real vecB = tl2::create<t_vec3_real>({
+			(t_real)m_spinVecRecip[0]->value(),
+			(t_real)m_spinVecRecip[1]->value(),
+			(t_real)m_spinVecRecip[2]->value() });
+
+		t_vec3_real vecLab = m_xtalB * vecB;
+		t_vec3_real vecA = m_xtalA_inv * vecLab;
+
+		BOOST_SCOPE_EXIT(this_)
+		{
+			for(int i = 0; i < 3; ++i)
+			{
+				this_->m_spinVecReal[i]->blockSignals(false);
+				this_->m_spinVecLab[i]->blockSignals(false);
+			}
+		} BOOST_SCOPE_EXIT_END
+		for(int i = 0; i < 3; ++i)
+		{
+			m_spinVecReal[i]->blockSignals(true);
+			m_spinVecLab[i]->blockSignals(true);
+		}
+
+		for(int i = 0; i < 3; ++i)
+		{
+			m_spinVecReal[i]->setValue(vecA[i]);
+			m_spinVecLab[i]->setValue(vecLab[i]);
+		}
+	};
+
+	auto print_results = [this, calc_AB]()
+	{
+		m_textCrossProd->clear();
+
+		t_mat33_real xtalA = tl2::unit<t_mat33_real>(3);
+		t_mat33_real xtalA_inv = tl2::unit<t_mat33_real>(3);
+		t_mat33_real xtalB = tl2::unit<t_mat33_real>(3);
+		t_mat33_real xtalB_inv = tl2::unit<t_mat33_real>(3);
+		if(m_dyn)
+		{
+			xtalA = m_xtalA = m_dyn->GetCrystalATrafo();
+			xtalA_inv = m_xtalA_inv = m_dyn->GetCrystalATrafo(true);
+			xtalB = m_xtalB = m_dyn->GetCrystalBTrafo();
+			xtalB_inv = m_xtalB_inv = m_dyn->GetCrystalBTrafo(true);
+		}
+
+		calc_AB();
+	
+		tl2::set_eps_0(xtalA, g_eps);
+		tl2::set_eps_0(xtalA_inv, g_eps);
+		tl2::set_eps_0(xtalB, g_eps);
+		tl2::set_eps_0(xtalB_inv, g_eps);
+
+		std::ostringstream ostrResult;
+		ostrResult.precision(g_prec);
+
+		print_matrix(xtalA, "Crystal A Matrix", ostrResult);
+		print_matrix(xtalA_inv, "Inverse Crystal A Matrix", ostrResult);
+		print_matrix(xtalB, "Crystal B Matrix", ostrResult);
+		print_matrix(xtalB_inv, "Inverse Crystal B Matrix", ostrResult);
+
+		m_textXtal->setHtml(ostrResult.str().c_str());
+	};
+
+
+	// connections
+	for(QDoubleSpinBox* spin : { m_spinVecLab[0], m_spinVecLab[1], m_spinVecLab[2] })
+	{
+		connect(spin,
+			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), calc_AB);
+	}
+
+	for(QDoubleSpinBox* spin : { m_spinVecReal[0], m_spinVecReal[1], m_spinVecReal[2] })
+	{
+		connect(spin,
+			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), calc_LabB);
+	}
+
+	for(QDoubleSpinBox* spin : { m_spinVecRecip[0], m_spinVecRecip[1], m_spinVecRecip[2] })
+	{
+		connect(spin,
+			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), calc_LabA);
+	}
+
+	connect(btnRecalc, &QAbstractButton::clicked, print_results);
+	print_results();
+
+	return xtalPanel;
 }
 
 
@@ -490,13 +727,10 @@ void TrafoCalculator::CalculateRotation()
 
 	// apply crystal B matrix
 	bool use_B = m_checkXtalRot->isChecked() && m_dyn;
-	t_mat33_real xtalB_inv;
-	bool inv_ok = false;
 
 	if(use_B)
 	{
 		const t_mat33_real& xtalB = m_dyn->GetCrystalBTrafo();
-		std::tie(xtalB_inv, inv_ok) = tl2::inv(xtalB);
 
 		axis = xtalB * axis;
 		vec = xtalB * vec;
@@ -541,8 +775,10 @@ void TrafoCalculator::CalculateRotation()
 	ostrResult << "<p>Rotated Vector (lab): ";
 	ostrResult << m_vec_rot;
 
-	if(use_B && inv_ok)
+	if(use_B)
 	{
+		const t_mat33_real& xtalB_inv = m_dyn->GetCrystalBTrafo(true);
+
 		m_vec_rot = xtalB_inv * m_vec_rot;
 		tl2::set_eps_0(m_vec_rot, g_eps);
 		ostrResult << "<br>Rotated Vector (rlu): ";
@@ -577,13 +813,10 @@ void TrafoCalculator::CalculateProjection()
 
 	// apply crystal B matrix
 	bool use_B = m_checkXtalProj->isChecked() && m_dyn;
-	t_mat33_real xtalB_inv;
-	bool inv_ok = false;
 
 	if(use_B)
 	{
 		const t_mat33_real& xtalB = m_dyn->GetCrystalBTrafo();
-		std::tie(xtalB_inv, inv_ok) = tl2::inv(xtalB);
 
 		axis = xtalB * axis;
 		vec = xtalB * vec;
@@ -628,8 +861,10 @@ void TrafoCalculator::CalculateProjection()
 	ostrResult << vec_ortho_proj;
 	ostrResult << "</p>\n";
 
-	if(use_B && inv_ok)
+	if(use_B)
 	{
+		const t_mat33_real& xtalB_inv = m_dyn->GetCrystalBTrafo(true);
+
 		vec_proj = xtalB_inv * vec_proj;
 		vec_ortho_proj = xtalB_inv * vec_ortho_proj;
 		tl2::set_eps_0(vec_proj, g_eps);
@@ -669,13 +904,10 @@ void TrafoCalculator::CalculateCrossProduct()
 
 	// apply crystal B matrix
 	bool use_B = m_checkXtalCrossProd->isChecked() && m_dyn;
-	t_mat33_real xtalB_inv;
-	bool inv_ok = false;
 
 	if(use_B)
 	{
 		const t_mat33_real& xtalB = m_dyn->GetCrystalBTrafo();
-		std::tie(xtalB_inv, inv_ok) = tl2::inv(xtalB);
 
 		vec1 = xtalB * vec1;
 		vec2 = xtalB * vec2;
@@ -688,8 +920,8 @@ void TrafoCalculator::CalculateCrossProduct()
 
 	if(use_B)
 		print_matrix(m_dyn->GetCrystalBTrafo(), "Crystal B Matrix", ostrResult);
-	if(use_B && inv_ok)
-		print_matrix(xtalB_inv, "Inverse B Matrix", ostrResult);
+	if(use_B)
+		print_matrix(m_dyn->GetCrystalBTrafo(true), "Inverse B Matrix", ostrResult);
 
 	tl2::set_eps_0(vec1, g_eps);
 	ostrResult << "<p>Vector 1 (lab): ";
@@ -713,8 +945,10 @@ void TrafoCalculator::CalculateCrossProduct()
 	ostrResult << vec_cross_norm;
 	ostrResult << "</p>\n";
 
-	if(use_B && inv_ok)
+	if(use_B)
 	{
+		const t_mat33_real& xtalB_inv = m_dyn->GetCrystalBTrafo(true);
+
 		vec_cross = xtalB_inv * vec_cross;
 		vec_cross_norm = xtalB_inv * vec_cross_norm;
 		tl2::set_eps_0(vec_cross, g_eps);

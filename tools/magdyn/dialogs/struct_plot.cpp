@@ -851,8 +851,12 @@ void StructPlotDlg::Sync()
 				pos_vec[0], pos_vec[1], pos_vec[2]) *
 			tl2::hom_scaling<t_mat_gl>(scale, scale, scale));
 
-		const t_mat33_real& Ainv = m_dyn->GetCrystalATrafo(true);
-		spin_vec = tl2::convert<t_mat_gl>(Ainv) * spin_vec;
+		if(!site.xtal_sys)
+		{
+			const t_mat33_real& Ainv = m_dyn->GetCrystalATrafo(true);
+			spin_vec = tl2::convert<t_mat_gl>(Ainv) * spin_vec;
+		}
+
 		spin_vec /= tl2::norm(spin_vec);
 
 		m_structplot->GetRenderer()->SetObjectMatrix(arrow,

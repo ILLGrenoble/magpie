@@ -224,7 +224,7 @@ public:
 	t_size GetMagneticFormFactorCount() const;
 
 	const t_mat33_real& GetCrystalATrafo(bool inv = false) const;
-	const t_mat33_real& GetCrystalBTrafo() const;
+	const t_mat33_real& GetCrystalBTrafo(bool inv = false) const;
 	const t_mat33_real& GetCrystalUBTrafo() const;
 
 	const MagneticSite& GetMagneticSite(t_size idx) const;
@@ -672,6 +672,7 @@ private:
 	t_mat33_real m_xtalB{ tl2::unit<t_mat33_real>(3) };
 	t_mat33_real m_xtalUB{ tl2::unit<t_mat33_real>(3) };
 	t_mat33_real m_xtalAinv{ tl2::unit<t_mat33_real>(3) };
+	t_mat33_real m_xtalBinv{ tl2::unit<t_mat33_real>(3) };
 	//t_mat33_real m_xtalUBinv{ tl2::unit<t_mat33_real>(3) };
 
 	//scattering plane

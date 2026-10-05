@@ -186,19 +186,19 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 			}
 		}  // idx
 
+		if(site.xtal_sys)
+		{
+			site.spin_dir_calc = m_xtalA * site.spin_dir_calc;
+			site.spin_dir_calc /= tl2::norm<t_vec3_real>(site.spin_dir_calc);
+		}	
+
 		// spin rotation of equation (9) from (Toth 2015)
 		if(m_field.align_spins && m_field.dir)
 		{
 			if(m_field.keep_spin_signs && tl2::inner(site.spin_dir_calc, GetExternalFieldLab()) > 0.)
-			{
-				std::tie(site.trafo_plane_calc, site.trafo_z_calc) =
-					rot_to_trafo(m_rot_negfield);
-			}
+				std::tie(site.trafo_plane_calc, site.trafo_z_calc) = rot_to_trafo(m_rot_negfield);
 			else
-			{
-				std::tie(site.trafo_plane_calc, site.trafo_z_calc) =
-					rot_to_trafo(m_rot_field);
-			}
+				std::tie(site.trafo_plane_calc, site.trafo_z_calc) = rot_to_trafo(m_rot_field);
 		}
 		else
 		{
