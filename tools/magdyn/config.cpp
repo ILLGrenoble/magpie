@@ -420,6 +420,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 		m_align_spins->setChecked(m_dyn.GetExternalField().align_spins);
 		m_align_ordering->setChecked(m_dyn.GetExternalField().align_ordering);
 		m_keep_spin_signs->setChecked(m_dyn.GetExternalField().keep_spin_signs);
+		m_field_xtal_sys->setChecked(m_dyn.GetExternalField().xtal_sys);
 		if(!m_use_field->isChecked())
 			m_dyn.ClearExternalField();
 

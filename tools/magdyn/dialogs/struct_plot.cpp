@@ -821,29 +821,13 @@ void StructPlotDlg::Sync()
 		if(field.align_spins && field.dir)
 		{
 			if(field.keep_spin_signs && tl2::inner(*field.dir, site.spin_dir_calc) > 0.)
-			{
-				spin_vec = tl2::create<t_vec_gl>({
-					t_real_gl((*field.dir)[0] * site.spin_mag_calc),
-					t_real_gl((*field.dir)[1] * site.spin_mag_calc),
-					t_real_gl((*field.dir)[2] * site.spin_mag_calc),
-				});
-			}
+				spin_vec = tl2::convert<t_vec_gl>((*field.dir) * site.spin_mag_calc);
 			else
-			{
-				spin_vec = tl2::create<t_vec_gl>({
-					t_real_gl(-(*field.dir)[0] * site.spin_mag_calc),
-					t_real_gl(-(*field.dir)[1] * site.spin_mag_calc),
-					t_real_gl(-(*field.dir)[2] * site.spin_mag_calc),
-				});
-			}
+				spin_vec = tl2::convert<t_vec_gl>(-(*field.dir) * site.spin_mag_calc);
 		}
 		else
 		{
-			spin_vec = tl2::create<t_vec_gl>({
-				t_real_gl(site.spin_dir_calc[0] * site.spin_mag_calc),
-				t_real_gl(site.spin_dir_calc[1] * site.spin_mag_calc),
-				t_real_gl(site.spin_dir_calc[2] * site.spin_mag_calc),
-			});
+			spin_vec = tl2::convert<t_vec_gl>(site.spin_dir_calc * site.spin_mag_calc);
 
 			if(is_incommensurate)
 			{
@@ -866,6 +850,10 @@ void StructPlotDlg::Sync()
 			tl2::hom_translation<t_mat_gl>(
 				pos_vec[0], pos_vec[1], pos_vec[2]) *
 			tl2::hom_scaling<t_mat_gl>(scale, scale, scale));
+
+		const t_mat33_real& Ainv = m_dyn->GetCrystalATrafo(true);
+		spin_vec = tl2::convert<t_mat_gl>(Ainv) * spin_vec;
+		spin_vec /= tl2::norm(spin_vec);
 
 		m_structplot->GetRenderer()->SetObjectMatrix(arrow,
 			tl2::get_arrow_matrix<t_vec_gl, t_mat_gl, t_real_gl>(
@@ -1025,9 +1013,18 @@ void StructPlotDlg::AddFieldVector()
 		tl2::equals_0(*field.dir, g_eps))
 		return;
 
-	t_vec3_gl dir = tl2::create<t_vec3_gl>({
-		t_real_gl((*field.dir)[0]), t_real_gl((*field.dir)[1]), t_real_gl((*field.dir)[2]) });
+	t_vec3_gl dir;
+	if(!field.xtal_sys)
+	{
+		const t_mat33_real& Ainv = m_dyn->GetCrystalATrafo(true);
+		dir = tl2::convert<t_vec3_gl>(Ainv * (*field.dir));
+	}
+	else
+	{
+		dir = tl2::convert<t_vec3_gl>(*field.dir);
+	}
 
+	dir /= tl2::norm(dir);
 	t_vec3_gl mid = tl2::create<t_vec3_gl>({ 0., 0., 0. });
 	t_real_gl len = tl2::norm(dir) * 0.5;
 

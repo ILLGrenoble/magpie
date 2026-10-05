@@ -51,7 +51,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExternalField()
 	if(m_ordering && m_field.align_ordering && !!m_field.dir)
 	{
 		t_real len_ordering = tl2::norm(*m_ordering);
-		m_ordering = *m_field.dir * len_ordering;
+		m_ordering = GetExternalFieldLab(false) * len_ordering;
 	}
 
 	// rotate spins
@@ -65,7 +65,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExternalField()
 	m_rot_field = tl2::convert<t_mat33>(
 		tl2::trans<t_mat33_real>(
 			tl2::rotation<t_mat33_real, t_vec3_real>(
-				-*m_field.dir, m_zdir, &m_rotaxis, m_eps)));
+				-GetExternalFieldLab(), m_zdir, &m_rotaxis, m_eps)));
 
 	// rotate -field to [001] direction
 	if(m_field.keep_spin_signs)
@@ -73,7 +73,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExternalField()
 		m_rot_negfield = tl2::convert<t_mat33>(
 			tl2::trans<t_mat33_real>(
 				tl2::rotation<t_mat33_real, t_vec3_real>(
-					*m_field.dir, m_zdir, &m_rotaxis, m_eps)));
+					GetExternalFieldLab(), m_zdir, &m_rotaxis, m_eps)));
 	}
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
@@ -189,7 +189,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 		// spin rotation of equation (9) from (Toth 2015)
 		if(m_field.align_spins && m_field.dir)
 		{
-			if(m_field.keep_spin_signs && tl2::inner(site.spin_dir_calc, *m_field.dir) > 0.)
+			if(m_field.keep_spin_signs && tl2::inner(site.spin_dir_calc, GetExternalFieldLab()) > 0.)
 			{
 				std::tie(site.trafo_plane_calc, site.trafo_z_calc) =
 					rot_to_trafo(m_rot_negfield);

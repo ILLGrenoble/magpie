@@ -169,11 +169,19 @@ t_cplx MAGDYN_INST::CalcFieldEnergy(t_size site_idx) const
 		return 0.;
 
 	const MagneticSite& s_i = GetMagneticSite(site_idx);
+	const t_vec3& gv = s_i.ge_trafo_z_calc;;
 
-	const t_vec3& v_i  = s_i.trafo_z_calc;
-	const t_vec3 field = tl2::convert<t_vec3>(-(*m_field.dir)) * m_field.mag;
-	const t_vec3 gv    = (*s_i.g_e) * v_i;
-	const t_cplx Bgv   = tl2::inner_noconj<t_vec3>(field, gv);
+	t_vec3_real field = -GetExternalFieldLab();
+	const t_cplx Bgv = tl2::inner_noconj<t_vec3>(tl2::convert<t_vec3>(field), gv);
+
+/*
+	t_vec3_real v_i_invA = m_xtalA * std::get<0>(
+		tl2::split_cplx<t_vec3, t_vec3_real>(s_i.trafo_z_calc));
+	v_i_invA /= tl2::norm(v_i_invA);
+	const t_vec3 gv = (*s_i.g_e) * tl2::convert<t_vec3>(v_i_invA);
+
+	const t_cplx Bgv = tl2::inner_noconj<t_vec3>(field_invA, gv);
+*/
 
 	// bohr magneton in [meV/T]
 	constexpr const t_real muB = tl2::mu_B<t_real>

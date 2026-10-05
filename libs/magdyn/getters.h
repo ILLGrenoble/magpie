@@ -56,7 +56,8 @@ MAGDYN_TEMPL void MAGDYN_INST::Clear()
 	// clear crystal
 	m_xtallattice[0] = m_xtallattice[1] = m_xtallattice[2] = 0.;
 	m_xtalangles[0] = m_xtalangles[1] = m_xtalangles[2] = t_real(0.5) * tl2::pi<t_real>;
-	m_xtalA = m_xtalB = tl2::unit<t_mat33_real>(3);
+	m_xtalA = m_xtalAinv = tl2::unit<t_mat33_real>(3);
+	m_xtalB = tl2::unit<t_mat33_real>(3);
 	m_xtalUB = /*m_xtalUBinv =*/ tl2::unit<t_mat33_real>(3);
 
 	// clear scattering plane
@@ -107,6 +108,7 @@ MAGDYN_TEMPL void MAGDYN_INST::ClearExternalField()
 	m_field.align_spins = false;
 	m_field.keep_spin_signs = false;
 	m_field.align_ordering = false;
+	m_field.xtal_sys = false;
 }
 
 
@@ -270,9 +272,9 @@ MAGDYN_TEMPL t_size MAGDYN_INST::GetMagneticFormFactorCount() const
 }
 
 
-MAGDYN_TEMPL const typename MAGDYN_INST::t_mat33_real& MAGDYN_INST::GetCrystalATrafo() const
+MAGDYN_TEMPL const typename MAGDYN_INST::t_mat33_real& MAGDYN_INST::GetCrystalATrafo(bool inv) const
 {
-	return m_xtalA;
+	return inv ? m_xtalAinv : m_xtalA;
 }
 
 
@@ -662,11 +664,36 @@ MAGDYN_TEMPL void MAGDYN_INST::SetExternalField(const MAGDYN_TYPE::ExternalField
 
 
 
+/**
+ * get the field in the lab coordinate system
+ */
+MAGDYN_TEMPL MAGDYN_INST::t_vec3_real MAGDYN_INST::GetExternalFieldLab(bool include_magnitude) const
+{
+	t_vec3_real field = tl2::zero<t_vec3_real>(3);
+
+	bool use_field = !tl2::equals_0<t_real>(m_field.mag, m_eps) && m_field.dir;
+	if(!use_field)
+		return field;
+
+	field = *m_field.dir;
+	if(m_field.xtal_sys)
+		field = m_xtalA * field;
+	field /= tl2::norm<t_vec3_real>(field);
+
+	if(include_magnitude)
+		field *= m_field.mag;
+
+	return field;
+}
+
+
+
 MAGDYN_TEMPL void MAGDYN_INST::RotateExternalField(const t_vec3_real& axis, t_real angle)
 {
 	if(!m_field.dir)
 		return;
 
+	// TODO: case for fractional coordinates
 	const t_mat33_real rot = tl2::rotation<t_mat33_real, t_vec3_real>(axis, angle, false);
 	m_field.dir = rot * (*m_field.dir);
 }
@@ -832,10 +859,20 @@ void MAGDYN_INST::SetCrystalLattice(t_real a, t_real b, t_real c,
 		// crystal fractional coordinate trafo matrices
 		m_xtalA = tl2::A_matrix<t_mat33_real>(a, b, c, alpha, beta, gamma);
 		m_xtalB = tl2::B_matrix<t_mat33_real>(a, b, c, alpha, beta, gamma);
+
+		bool inv_ok = false;
+		std::tie(m_xtalAinv, inv_ok) = tl2::inv(m_xtalA);
+
+		if(!inv_ok)
+		{
+			MAGDYN_CERR_OPT << "Magdyn error: A matrix is not invertible."
+				<< std::endl;
+		}
 	}
 	catch(const std::exception& ex)
 	{
-		m_xtalA = m_xtalB = tl2::unit<t_mat33_real>(3);
+		m_xtalA = m_xtalAinv = tl2::unit<t_mat33_real>(3);
+		m_xtalB = tl2::unit<t_mat33_real>(3);
 
 		MAGDYN_CERR_OPT << "Magdyn error: Could not calculate crystal matrices."
 			<< std::endl;

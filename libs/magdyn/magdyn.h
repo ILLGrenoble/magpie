@@ -223,7 +223,7 @@ public:
 	const std::string& GetMagneticFormFactor(t_size idx = 0) const;
 	t_size GetMagneticFormFactorCount() const;
 
-	const t_mat33_real& GetCrystalATrafo() const;
+	const t_mat33_real& GetCrystalATrafo(bool inv = false) const;
 	const t_mat33_real& GetCrystalBTrafo() const;
 	const t_mat33_real& GetCrystalUBTrafo() const;
 
@@ -400,6 +400,7 @@ public:
 	// --------------------------------------------------------------------
 	// calculate the rotation matrix for the external field
 	void CalcExternalField();
+	t_vec3_real GetExternalFieldLab(bool include_magnitude = true) const;
 
 	// calculate the spin rotation trafo for the magnetic sites
 	// and parse any given expressions
@@ -670,6 +671,7 @@ private:
 	t_mat33_real m_xtalA{ tl2::unit<t_mat33_real>(3) };
 	t_mat33_real m_xtalB{ tl2::unit<t_mat33_real>(3) };
 	t_mat33_real m_xtalUB{ tl2::unit<t_mat33_real>(3) };
+	t_mat33_real m_xtalAinv{ tl2::unit<t_mat33_real>(3) };
 	//t_mat33_real m_xtalUBinv{ tl2::unit<t_mat33_real>(3) };
 
 	//scattering plane

@@ -88,6 +88,10 @@ void MagDynDlg::CreateSampleEnvPanel()
 	m_align_ordering->setChecked(false);
 	m_align_ordering->setFocusPolicy(Qt::StrongFocus);
 
+	m_field_xtal_sys = new QCheckBox("Use Crystal Coordinates", m_sampleenviropanel);
+	m_field_xtal_sys->setChecked(false);
+	m_field_xtal_sys->setFocusPolicy(Qt::StrongFocus);
+
 	// predefined rotation axes
 	QPushButton *btnAxes = new QPushButton(m_reciprocalpanel);
 	btnAxes->setText("Set Axis");
@@ -150,9 +154,9 @@ void MagDynDlg::CreateSampleEnvPanel()
 	m_fieldstab->verticalHeader()->setVisible(true);
 
 	m_fieldstab->setColumnCount(NUM_FIELD_COLS);
-	m_fieldstab->setHorizontalHeaderItem(COL_FIELD_H, new QTableWidgetItem{"Bh"});
-	m_fieldstab->setHorizontalHeaderItem(COL_FIELD_K, new QTableWidgetItem{"Bk"});
-	m_fieldstab->setHorizontalHeaderItem(COL_FIELD_L, new QTableWidgetItem{"Bl"});
+	m_fieldstab->setHorizontalHeaderItem(COL_FIELD_H, new QTableWidgetItem{"Bx"});
+	m_fieldstab->setHorizontalHeaderItem(COL_FIELD_K, new QTableWidgetItem{"By"});
+	m_fieldstab->setHorizontalHeaderItem(COL_FIELD_L, new QTableWidgetItem{"Bz"});
 	m_fieldstab->setHorizontalHeaderItem(COL_FIELD_MAG, new QTableWidgetItem{"|B|"});
 
 	m_fieldstab->setColumnWidth(COL_FIELD_H, 150);
@@ -261,9 +265,9 @@ void MagDynDlg::CreateSampleEnvPanel()
 		m_rot_axis[i]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	}
 
-	m_field_dir[0]->setPrefix("Bh = ");
-	m_field_dir[1]->setPrefix("Bk = ");
-	m_field_dir[2]->setPrefix("Bl = ");
+	m_field_dir[0]->setPrefix("Bx = ");
+	m_field_dir[1]->setPrefix("By = ");
+	m_field_dir[2]->setPrefix("Bz = ");
 
 
 	// ------------------------------------------------------------------------
@@ -280,13 +284,14 @@ void MagDynDlg::CreateSampleEnvPanel()
 	gridField->addWidget(new QLabel("Magnitude:", m_panelField), yField, 0, 1, 1);
 	gridField->addWidget(m_field_mag, yField, 1, 1, 1);
 	gridField->addWidget(btnDirs, yField++, 3, 1, 1);
-	gridField->addWidget(new QLabel("Direction (rlu):", m_panelField), yField, 0, 1, 1);
+	gridField->addWidget(new QLabel("Direction:", m_panelField), yField, 0, 1, 1);
 	gridField->addWidget(m_field_dir[0], yField, 1, 1, 1);
 	gridField->addWidget(m_field_dir[1], yField, 2, 1, 1);
 	gridField->addWidget(m_field_dir[2], yField++, 3, 1, 1);
 	gridField->addWidget(m_align_spins, yField, 0, 1, 2);
 	gridField->addWidget(m_keep_spin_signs, yField++, 2, 1, 2);
-	gridField->addWidget(m_align_ordering, yField++, 0, 1, 2);
+	gridField->addWidget(m_align_ordering, yField, 0, 1, 2);
+	gridField->addWidget(m_field_xtal_sys, yField++, 2, 1, 2);
 
 	QFrame *sep1 = new QFrame(m_panelField);
 	sep1->setFrameStyle(QFrame::HLine);
@@ -303,7 +308,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 
 	gridField->addWidget(new QLabel("Rotate Magnetic Field", m_panelField), yField, 0, 1, 3);
 	gridField->addWidget(btnAxes, yField++, 3, 1, 1);
-	gridField->addWidget(new QLabel("Axis (rlu):", m_panelField), yField, 0, 1, 1);
+	gridField->addWidget(new QLabel("Axis:", m_panelField), yField, 0, 1, 1);
 	gridField->addWidget(m_rot_axis[0], yField, 1, 1, 1);
 	gridField->addWidget(m_rot_axis[1], yField, 2, 1, 1);
 	gridField->addWidget(m_rot_axis[2], yField++, 3, 1, 1);
@@ -380,6 +385,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 	connect(m_align_spins, &QCheckBox::toggled, calc_all);
 	connect(m_align_ordering, &QCheckBox::toggled, calc_all);
 	connect(m_keep_spin_signs, &QCheckBox::toggled, calc_all);
+	connect(m_field_xtal_sys, &QCheckBox::toggled, calc_all);
 
 	connect(btn_rotate_ccw, &QAbstractButton::clicked, [this]()
 	{
@@ -487,6 +493,7 @@ void MagDynDlg::FieldsSelectionChanged()
  */
 void MagDynDlg::RotateField(const t_vec3_real& axis_rlu, t_real angle)
 {
+	const bool in_xtal_sys = m_field_xtal_sys->isChecked();
 	t_vec3_real axis = axis_rlu;
 
 	t_vec3_real B = tl2::create<t_vec3_real>(
@@ -496,19 +503,21 @@ void MagDynDlg::RotateField(const t_vec3_real& axis_rlu, t_real angle)
 		(t_real)m_field_dir[2]->value(),
 	});
 
-	const t_mat33_real& xtalB = m_dyn.GetCrystalBTrafo();
-	auto [xtalB_inv, inv_ok] = tl2::inv(xtalB);
-	if(inv_ok)
+	//const t_mat33_real& xtal = m_dyn.GetCrystalBTrafo();
+	//auto [xtal_inv, inv_ok] = tl2::inv(xtal);
+	const t_mat33_real& xtal = m_dyn.GetCrystalATrafo();
+	const t_mat33_real& xtal_inv = m_dyn.GetCrystalATrafo(true);
+	if(in_xtal_sys)
 	{
-		axis = xtalB * axis;
-		B = xtalB * B;
+		axis = xtal * axis;
+		B = xtal * B;
 	}
 
 	t_mat33_real R = tl2::rotation<t_mat33_real, t_vec3_real>(axis, angle, false);
-	B = R*B;
+	B = R * B;
 
-	if(inv_ok)
-		B = xtalB_inv * B;
+	if(in_xtal_sys)
+		B = xtal_inv * B;
 
 	tl2::set_eps_0(B, g_eps);
 

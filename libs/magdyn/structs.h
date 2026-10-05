@@ -147,6 +147,7 @@ requires tl2::is_vec<t_vec3_real>
 struct t_ExternalField
 {
 	std::optional<t_vec3_real> dir{};  // field direction
+	bool xtal_sys{};             // field direction in fractional units?
 	t_real mag{};                // field magnitude
 
 	bool align_spins{};          // align spins along external field
