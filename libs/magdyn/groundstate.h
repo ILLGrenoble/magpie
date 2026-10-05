@@ -119,7 +119,7 @@ t_real MAGDYN_INST::CalcGroundStateEnergy() const
 #if defined(__TLIBS2_USE_MINUIT__) && defined(__MAGDYN_USE_MINUIT__)
 
 /**
- * minimise energy to find ground state
+ * minimise energy to find ground state spin configuration
  */
 MAGDYN_TEMPL
 bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_params,
@@ -150,6 +150,7 @@ bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_p
 			site.spin_dir[0] = tl2::var_to_str(x, m_prec);
 			site.spin_dir[1] = tl2::var_to_str(y, m_prec);
 			site.spin_dir[2] = tl2::var_to_str(z, m_prec);
+			site.xtal_sys = false;
 
 			dyn.CalcMagneticSite(site);
 
@@ -228,6 +229,7 @@ bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_p
 			site.spin_dir[0] = tl2::var_to_str(x, m_prec);
 			site.spin_dir[1] = tl2::var_to_str(y, m_prec);
 			site.spin_dir[2] = tl2::var_to_str(z, m_prec);
+			site.xtal_sys = false;
 
 			CalcMagneticSite(site);
 
@@ -294,6 +296,7 @@ bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::st
 				site.spin_dir[0] = sx;
 				site.spin_dir[1] = sy;
 				site.spin_dir[2] = sz;
+				site.xtal_sys = false;
 
 				dyn.CalcMagneticSite(site);
 			}
@@ -387,6 +390,7 @@ bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::st
 				site.spin_dir[0] = sx;
 				site.spin_dir[1] = sy;
 				site.spin_dir[2] = sz;
+				site.xtal_sys = false;
 
 				CalcMagneticSite(site);
 			}
