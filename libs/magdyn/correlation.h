@@ -178,7 +178,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 			if(magffacts[ffact_idx].GetExprString() != "")
 			{
 				MAGDYN_CERR_OPT << "Magdyn error: Invalid form factor #"
-					<< ffact_idx << " at Q = " << S.Q_rlu << ", "
+					<< ffact_idx << " at Q = " << S.Q_central_rlu << ", "
 					<< "formula: \"" << magffacts[ffact_idx].GetExprString() << "\"."
 					<< std::endl;
 			}
@@ -186,7 +186,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		}
 
 		// get |Q| in units of A^(-1)
-		t_real Q_abs = tl2::norm<t_vec3_real>(S.Q_invA);
+		t_real Q_abs = tl2::norm<t_vec3_real>(S.Q_central_invA);
 
 		// evaluate form factor expression
 		magffacts[ffact_idx].register_var("Q", Q_abs);
@@ -195,7 +195,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		magffacts[ffact_idx].register_var("s2", std::pow(Q_abs / (2.*s_twopi), 2.));
 		ffacts.push_back(magffacts[ffact_idx].eval_noexcept());
 
-		//std::cout << "ffact(Q = |" << S.Q_rlu << "| rlu = " << Q_abs << " / A) = " << ffacts[ffact_idx] << std::endl;
+		//std::cout << "ffact(Q = |" << S.Q_central_rlu << "| rlu = " << Q_abs << " / A) = " << ffacts[ffact_idx] << std::endl;
 	}
 
 	// building the spin correlation functions of equation (47) from (Toth 2015)

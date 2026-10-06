@@ -123,7 +123,7 @@ t_real MAGDYN_INST::CalcGroundStateEnergy() const
  */
 MAGDYN_TEMPL
 bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_params,
-	bool verbose, const bool *stop_request)
+	bool verbose, const std::atomic<bool> *stop_request)
 {
 	// function to minimise the state's energy
 	auto func = [this](const std::vector<tl2::t_real_min>& args) -> t_real
@@ -260,13 +260,13 @@ bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_p
  */
 MAGDYN_TEMPL
 bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::string>* fixed_params,
-	bool verbose, const bool *stop_request)
+	bool verbose, const std::atomic<bool> *stop_request)
 {
 	// function to minimise the state's energy
 	auto func = [this](const std::vector<tl2::t_real_min>& args) -> t_real
 	{
 		auto dyn = *this;  // work on copy of spin configuration to avoid race conditions
-		const t_size N = dyn.GetMagneticSitesCount(true);
+		const t_size N = dyn.GetMagneticSitesCount(true, true);
 
 		// invalid arguments vector?
 		if(args.size() < N*2)
@@ -315,7 +315,7 @@ bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::st
 	};
 
 	// add minimisation parameters and initial values
-	t_size num_args = GetMagneticSitesCount(true) * 2;
+	t_size num_args = GetMagneticSitesCount(true, true) * 2;
 	std::vector<std::string> params;
 	std::vector<t_real> vals, errs;
 	std::vector<bool> fixed;
@@ -363,7 +363,7 @@ bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::st
 	{
 		// set the spins to the newly-found ground state
 		// caution: symmetry indices are 1-based!
-		for(t_size sym_idx = 1; sym_idx <= GetMagneticSitesCount(true); ++sym_idx)
+		for(t_size sym_idx = 1; sym_idx <= GetMagneticSitesCount(true, true); ++sym_idx)
 		{
 			// convert (u, v) to cartesian spin directions
 			t_real u = vals[(sym_idx - 1) * 2 + 0];
@@ -418,7 +418,8 @@ bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::st
 #else  // __MAGDYN_USE_MINUIT__
 
 MAGDYN_TEMPL
-bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>*, bool, const bool*)
+bool MAGDYN_INST::CalcGroundState(
+	const std::unordered_set<std::string>*, bool, const std::atomic<bool>*)
 {
 	std::cerr << "Magdyn error: Ground state minimisation support disabled." << std::endl;
 	return false;
@@ -427,7 +428,8 @@ bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>*, bool, 
 
 
 MAGDYN_TEMPL
-bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::string>*, bool, const bool*)
+bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(
+	const std::unordered_set<std::string>*, bool, const std::atomic<bool>*)
 {
 	std::cerr << "Magdyn error: Ground state minimisation support disabled." << std::endl;
 	return false;

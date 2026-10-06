@@ -87,7 +87,7 @@ public:
 	}
 
 
-	void SetStopRequest(const bool *b)
+	void SetStopRequest(const std::atomic<bool> *b)
 	{
 		m_stop_requested = b;
 	}
@@ -104,7 +104,7 @@ public:
 
 
 private:
-	const bool *m_stop_requested{};
+	const std::atomic<bool> *m_stop_requested{};
 };
 // ----------------------------------------------------------------------------
 
@@ -503,7 +503,7 @@ bool fit(t_func&& func,
 	std::vector<t_real>& errs,
 	const std::vector<bool>* fixed = nullptr,
 
-	bool debug = true, const bool *stop_request = nullptr)
+	bool debug = true, const std::atomic<bool> *stop_request = nullptr)
 {
 	try
 	{
@@ -610,7 +610,7 @@ bool fit_expr(const std::string& func,
 	std::vector<t_real>& errs,
 	const std::vector<bool>* fixed = nullptr,
 
-	bool debug = true, const bool *stop_request = nullptr)
+	bool debug = true, const std::atomic<bool> *stop_request = nullptr)
 {
 	try
 	{
@@ -708,7 +708,7 @@ bool minimise(t_func&& func, const std::vector<std::string>& param_names,
 	const std::vector<bool>* fixed = nullptr,
 	const std::vector<t_real>* lower_limits = nullptr,
 	const std::vector<t_real>* upper_limits = nullptr,
-	bool debug = true, const bool *stop_request = nullptr)
+	bool debug = true, const std::atomic<bool> *stop_request = nullptr)
 {
 	try
 	{
@@ -781,7 +781,7 @@ bool minimise_dynargs(std::size_t num_args, t_func&& func,
 	const std::vector<bool>* fixed = nullptr,
 	const std::vector<t_real>* lower_limits = nullptr,
 	const std::vector<t_real>* upper_limits = nullptr,
-	bool debug = true, const bool *stop_request = nullptr)
+	bool debug = true, const std::atomic<bool> *stop_request = nullptr)
 {
 	try
 	{
@@ -880,7 +880,7 @@ template<class t_real = t_real_min>
 bool minimise_expr(const std::string& func, const std::vector<std::string>& param_names,
 	std::vector<t_real>& vals, std::vector<t_real>& errs,
 	const std::vector<bool>* fixed = nullptr,
-	bool debug = true, const bool *stop_request = nullptr)
+	bool debug = true, const std::atomic<bool> *stop_request = nullptr)
 {
 	try
 	{

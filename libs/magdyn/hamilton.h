@@ -106,6 +106,12 @@ MAGDYN_INST::CalcReciprocalJs(const t_vec3_real& Qvec) const
 {
 	t_Jmap J_Q{}, J_Q0{};
 
+	t_size num_sites = GetMagneticSitesCount();
+	std::vector<bool> sites_ok;
+	sites_ok.reserve(num_sites);
+	for(t_size site_idx = 0; site_idx < num_sites; ++site_idx)
+		sites_ok.push_back(CheckMagneticSite(site_idx));
+
 	// iterate couplings to pre-calculate corresponding J matrices
 	for(const ExchangeTerm& term : GetExchangeTerms())
 	{
@@ -118,25 +124,35 @@ MAGDYN_INST::CalcReciprocalJs(const t_vec3_real& Qvec) const
 				J.emplace(std::move(std::make_pair(indices, J33)));
 		};
 
-		if(!CheckMagneticSite(term.site1_calc) || !CheckMagneticSite(term.site2_calc))
+		if(term.site1_calc >= num_sites || !sites_ok[term.site1_calc])
+		{
+			using namespace tl2_ops;
+			MAGDYN_CERR_OPT << "Magdyn error: Invalid site " << term.site1_calc
+				<< " at Q = " << Qvec << "." << std::endl;
 			continue;
+		}
+		if(term.site2_calc >= num_sites || !sites_ok[term.site2_calc])
+		{
+			using namespace tl2_ops;
+			MAGDYN_CERR_OPT << "Magdyn error: Invalid site " << term.site2_calc
+				<< " at Q = " << Qvec << "." << std::endl;
+			continue;
+		}
 
 		const t_indices indices = std::make_pair(term.site1_calc, term.site2_calc);
 		const t_indices indices_t = std::make_pair(term.site2_calc, term.site1_calc);
 
-		const t_mat33 J = CalcRealJ(term);
-
 		// get J in reciprocal space by fourier trafo
 		// equations (14), (12), (11), and (52) from (Toth 2015)
-		const t_mat33 J_fourier = J * std::exp(m_phase_sign * s_imag * s_twopi *
+		const t_mat33 J_fourier = term.J_real * std::exp(m_phase_sign * s_imag * s_twopi *
 			tl2::inner<t_vec3_real>(term.dist_calc, Qvec));
 
 		// symmetry: equation (15) from (Toth 2015)
 		insert_or_add(J_Q, indices, J_fourier);
 		insert_or_add(J_Q, indices_t, tl2::herm(J_fourier));
 
-		insert_or_add(J_Q0, indices, J);
-		insert_or_add(J_Q0, indices_t, tl2::herm(J));
+		insert_or_add(J_Q0, indices, term.J_real);
+		insert_or_add(J_Q0, indices_t, tl2::herm(term.J_real));
 	}  // end of iteration over couplings
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
@@ -285,12 +301,26 @@ t_mat MAGDYN_INST::CalcHamiltonian(const t_vec3_real& Qvec) const
  */
 MAGDYN_TEMPL
 MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
-	const t_mat& _H, const t_vec3_real& Qvec, bool only_energies) const
+	const t_mat& _H, const t_vec3_real& Qvec, bool only_energies,
+	const t_vec3_real* Qvec_central) const
 {
 	SofQE S;
 	S.Q_rlu = Qvec;
 	S.Q_invA = m_xtalB * Qvec;
 	S.H = _H;
+
+	if(Qvec_central)
+	{
+		// differs for the incommensurate case
+		S.Q_central_rlu = *Qvec_central;
+		S.Q_central_invA = m_xtalB * (*Qvec_central);
+	}
+	else
+	{
+		// identical for the commensurate case
+		S.Q_central_rlu = S.Q_rlu;
+		S.Q_central_invA = S.Q_invA;
+	}
 
 	using namespace tl2_ops;
 	const t_size N = GetMagneticSitesCount();

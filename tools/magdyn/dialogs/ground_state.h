@@ -87,7 +87,7 @@ private:
 	QLabel *m_status{};
 
 	std::unique_ptr<std::thread> m_thread{};  // minimiser thread
-	bool m_stop_request{false};               // stop minimisation
+	std::atomic<bool> m_stop_request{false};  // stop minimisation
 	std::atomic<bool> m_running{false};       // is minimisation running?
 
 

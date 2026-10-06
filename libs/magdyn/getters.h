@@ -156,12 +156,27 @@ MAGDYN_TEMPL MAGDYN_TYPE::MagneticSites& MAGDYN_INST::GetMagneticSites()
 }
 
 
-MAGDYN_TEMPL t_size MAGDYN_INST::GetMagneticSitesCount(bool dont_count_equivalent) const
+MAGDYN_TEMPL t_size MAGDYN_INST::GetMagneticSitesCount(
+	bool dont_count_equivalent, bool ignore_symidx0) const
 {
 	if(!dont_count_equivalent)
 	{
-		// count all sites
-		return m_sites.size();
+		if(ignore_symidx0)
+		{
+			t_size num = 0;
+			for(const MagneticSite& site : GetMagneticSites())
+			{
+				if(site.sym_idx == 0)
+					continue;
+				++num;
+			}
+			return num;
+		}
+		else
+		{
+			// count all sites
+			return m_sites.size();
+		}
 	}
 	else
 	{
@@ -171,6 +186,8 @@ MAGDYN_TEMPL t_size MAGDYN_INST::GetMagneticSitesCount(bool dont_count_equivalen
 
 		for(const MagneticSite& site : GetMagneticSites())
 		{
+			if(site.sym_idx == 0)
+				continue;
 			if(seen_sym_indices.find(site.sym_idx) != seen_sym_indices.end())
 				continue;
 

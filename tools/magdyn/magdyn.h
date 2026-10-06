@@ -536,7 +536,7 @@ private:
 
 	bool m_ignoreCalc { true };
 	bool m_ignoreSitesCalc { false };
-	bool m_stopRequested { false };
+	std::atomic<bool> m_stopRequested { false };
 	bool m_inputEnabled { true };     // "calc" behaves as start or stop button?
 	bool m_needsBZCalc { true };      // brillouin zone needs to be recalculated
 

@@ -337,7 +337,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 		auto _has_dmi = [&term]() -> bool
 		{
 			for(std::uint8_t i = 0; i < 3; ++i)
-				if(term.dist[i] != "")
+				if(term.dmi[i] != "")
 					return true;
 			return false;
 		};
@@ -428,6 +428,9 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 		t_vec3_real pos2_sc_lab = m_xtalA * pos2_sc;
 
 		term.length_calc = tl2::norm<t_vec3_real>(pos2_sc_lab - pos1_uc_lab);
+
+		// pre-calculate J factors
+		term.J_real = CalcRealJ(term);
 	}
 	catch(const std::exception& ex)
 	{

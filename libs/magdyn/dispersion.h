@@ -115,14 +115,16 @@ MAGDYN_TEMPL
 MAGDYN_TYPE::SofQE
 MAGDYN_INST::CalcEnergies(const t_vec3_real& Q_rlu, bool only_energies) const
 {
-	auto calc_EandS = [only_energies, this](const t_vec3_real& Q) -> SofQE
+	auto calc_EandS = [only_energies, this](const t_vec3_real& Q,
+		const t_vec3_real *Q_central = nullptr) -> SofQE
 	{
 		const t_mat H = CalcHamiltonian(Q);
-		return CalcEnergiesFromHamiltonian(H, Q, only_energies);
+		return CalcEnergiesFromHamiltonian(H, Q, only_energies, Q_central);
 	};
 
 	SofQE S;
 	S.Q_rlu = Q_rlu;
+	S.Q_invA = m_xtalB * Q_rlu;
 	if(m_calc_H)
 		S = calc_EandS(Q_rlu);
 
@@ -140,9 +142,9 @@ MAGDYN_INST::CalcEnergies(const t_vec3_real& Q_rlu, bool only_energies) const
 		// calculate additional hamiltonians for Q+-O
 		SofQE S_p{}, S_m{};
 		if(m_calc_Hp)
-			S_p = calc_EandS(Q_rlu + (*m_ordering));
+			S_p = calc_EandS(Q_rlu + (*m_ordering), &Q_rlu);
 		if(m_calc_Hm)
-			S_m = calc_EandS(Q_rlu - (*m_ordering));
+			S_m = calc_EandS(Q_rlu - (*m_ordering), &Q_rlu);
 
 		// move over additional hamiltonians for Q+-O
 		S.H_p = std::move(S_p.H);
@@ -267,7 +269,7 @@ MAGDYN_INST::CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 		if(progress_fkt && !(*progress_fkt)(Qs_finished + 1, num_Qs))
 			break;
 
-		const SofQE& result = task->get_future().get();
+		SofQE result = task->get_future().get();
 		if(result_fkt)
 			(*result_fkt)(&result);
 
@@ -336,7 +338,7 @@ MAGDYN_INST::CalcDispersion(const std::vector<t_vec3_real>& Qs,
 		if(progress_fkt && !(*progress_fkt)(Qs_finished + 1, num_Qs))
 			break;
 
-		const SofQE& result = task->get_future().get();
+		SofQE result = task->get_future().get();
 		if(result_fkt)
 			(*result_fkt)(&result);
 
@@ -422,7 +424,7 @@ MAGDYN_INST::CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 		if(progress_fkt && !(*progress_fkt)(Qs_finished + 1, num_Qs_sqrt * num_Qs_sqrt))
 			break;
 
-		const SofQE& result = task->get_future().get();
+		SofQE result = task->get_future().get();
 		if(result_fkt)
 			(*result_fkt)(&result);
 

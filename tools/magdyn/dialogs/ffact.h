@@ -134,7 +134,7 @@ private:
 
 	QPushButton *m_btnStartStop_ff{};   // start/stop calculation
 	bool m_calcEnabled_ff{};            // enable calculations
-	bool m_stopRequested_ff{};          // stop running calculations
+	std::atomic<bool> m_stopRequested_ff{};  // stop running calculations
 
 	QProgressBar *m_progress_ff{};      // progress bar
 	QMenu *m_menuPlot_ff{};             // context menu for plot

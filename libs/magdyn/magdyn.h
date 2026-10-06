@@ -208,7 +208,7 @@ public:
 	const Variables& GetVariables() const;
 	const MagneticSites& GetMagneticSites() const;
 	MagneticSites& GetMagneticSites();
-	t_size GetMagneticSitesCount(bool dont_count_equivalent = false) const;
+	t_size GetMagneticSitesCount(bool dont_count_equivalent = false, bool ignore_symidx0 = false) const;
 	const ExchangeTerms& GetExchangeTerms() const;
 	ExchangeTerms& GetExchangeTerms();
 	t_size GetExchangeTermsCount(bool dont_count_equivalent = false) const;
@@ -439,8 +439,8 @@ public:
 	// get the energies from a hamiltonian
 	// @note implements the formalism given by (Toth 2015)
 	SofQE CalcEnergiesFromHamiltonian(
-		const t_mat& _H, const t_vec3_real& Qvec,
-		bool only_energies = false) const;
+		const t_mat& _H, const t_vec3_real& Qvec, bool only_energies = false,
+		const t_vec3_real* Qvec_central = nullptr /* for incommensurate case */) const;
 
 	// get the dynamical structure factor from a hamiltonian
 	// @note implements the formalism given by (Toth 2015)
@@ -497,10 +497,10 @@ public:
 
 	// minimise energy to found ground state
 	bool CalcGroundState(const std::unordered_set<std::string>* fixed_params = nullptr,
-		bool verbose = false, const bool *stop_request = nullptr);
+		bool verbose = false, const std::atomic<bool> *stop_request = nullptr);
 
 	bool CalcGroundStateUniqueSymmetry(const std::unordered_set<std::string>* fixed_params = nullptr,
-		bool verbose = false, const bool *stop_request = nullptr);
+		bool verbose = false, const std::atomic<bool> *stop_request = nullptr);
 	// --------------------------------------------------------------------
 
 

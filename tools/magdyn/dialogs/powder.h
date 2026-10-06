@@ -134,7 +134,7 @@ private:
 
 	QPushButton *m_btnStartStop_powder{};   // start/stop calculation
 	bool m_calcEnabled_powder{};            // enable calculations
-	bool m_stopRequested_powder{};          // stop running calculations
+	std::atomic<bool> m_stopRequested_powder{};  // stop running calculations
 
 	QProgressBar *m_progress_powder{};      // progress bar
 	QMenu *m_menuPlot_powder{};             // context menu for plot

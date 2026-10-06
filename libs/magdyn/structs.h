@@ -142,6 +142,8 @@ struct t_ExchangeTerm
 	t_cplx J_calc{};             // Heisenberg interaction
 	std::optional<t_vec3> dmi_calc{};    // Dzyaloshinskij-Moriya interaction
 	std::optional<t_mat33> Jgen_calc{};  // general exchange interaction
+
+	t_mat33 J_real{};            // real-space J factors
 	// ------------------------------------------------------------------------
 };
 
@@ -222,6 +224,8 @@ struct t_SofQE
 {
 	t_vec3_real Q_rlu{};         // momentum transfer in rlu
 	t_vec3_real Q_invA{};        // momentum transfer in A^(-1)
+	t_vec3_real Q_central_rlu{}; // central momentum transfer in rlu, for incommensurate structures
+	t_vec3_real Q_central_invA{};// central momentum transfer in A^(-1), for incommensurate structures
 	t_mat comm{};                // commutators
 
 	t_mat H{};                   // hamiltonian
