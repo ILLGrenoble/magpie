@@ -1018,19 +1018,20 @@ void StructPlotDlg::AddFieldVector()
 		return;
 
 	t_vec3_gl dir;
-	if(field.xtal_sys == magdyn::SYS_REAL)
+	if(field.xtal_sys == magdyn::SYS_LAB)
 	{
-		const t_mat33_real& Ainv = m_dyn->GetCrystalATrafo(true);
+		const t_mat33_real& Ainv = m_dyn->GetCrystalATrafo(true);  // lab -> real
 		dir = tl2::convert<t_vec3_gl>(Ainv * (*field.dir));
+	}
+	else if(field.xtal_sys == magdyn::SYS_REAL)
+	{
+		dir = tl2::convert<t_vec3_gl>(*field.dir);
 	}
 	else if(field.xtal_sys == magdyn::SYS_RECIP)
 	{
-		const t_mat33_real& Binv = m_dyn->GetCrystalBTrafo(true);
-		dir = tl2::convert<t_vec3_gl>(Binv * (*field.dir));
-	}
-	else
-	{
-		dir = tl2::convert<t_vec3_gl>(*field.dir);
+		const t_mat33_real& B = m_dyn->GetCrystalBTrafo();         // recip -> lab
+		const t_mat33_real& Ainv = m_dyn->GetCrystalATrafo(true);  // lab -> real
+		dir = tl2::convert<t_vec3_gl>(Ainv * B * (*field.dir));
 	}
 
 	dir /= tl2::norm(dir);
