@@ -55,7 +55,7 @@ enum CoordSys
 {
 	SYS_LAB   = 0,  // orthogonal lab system
 	SYS_REAL  = 1,  // fractional crystal coordinates
-	SYS_RECIP = 2,  // reciprical lattice units
+	SYS_RECIP = 2,  // reciprocal lattice units
 };
 
 
