@@ -348,7 +348,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 			thefield.align_spins = *optVal;
 		if(auto optVal = field->get_optional<bool>("keep_signs"))
 			thefield.keep_spin_signs = *optVal;
-		if(auto optVal = field->get_optional<bool>("xtal_sys"))
+		if(auto optVal = field->get_optional<int>("xtal_sys"))
 			thefield.xtal_sys = *optVal;
 
 		SetExternalField(thefield);
@@ -459,7 +459,7 @@ bool MAGDYN_INST::Save(boost::property_tree::ptree& node) const
 	node.put<bool>("field.align_ordering", m_field.align_ordering);
 	node.put<bool>("field.align_spins", m_field.align_spins);
 	node.put<bool>("field.keep_signs", m_field.keep_spin_signs);
-	node.put<bool>("field.xtal_sys", m_field.xtal_sys);
+	node.put<int>("field.xtal_sys", m_field.xtal_sys);
 
 	// ordering vector
 	if(m_ordering)

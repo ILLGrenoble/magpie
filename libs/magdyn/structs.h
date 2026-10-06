@@ -51,6 +51,15 @@ using t_strarr33 = std::array<std::array<std::string, 3>, 3>;
 
 
 
+enum CoordSys
+{
+	SYS_LAB   = 0,  // orthogonal lab system
+	SYS_REAL  = 1,  // fractional crystal coordinates
+	SYS_RECIP = 2,  // reciprical lattice units
+};
+
+
+
 /**
  * magnetic sites
  */
@@ -148,7 +157,7 @@ requires tl2::is_vec<t_vec3_real>
 struct t_ExternalField
 {
 	std::optional<t_vec3_real> dir{};  // field direction
-	bool xtal_sys{ false };      // field direction in fractional units?
+	int xtal_sys{ SYS_LAB };     // field direction in fractional units?
 	t_real mag{};                // field magnitude
 
 	bool align_spins{};          // align spins along external field

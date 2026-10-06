@@ -237,7 +237,8 @@ protected:
 	QDoubleSpinBox *m_field_dir[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_field_mag{};
 	QCheckBox *m_align_spins{}, *m_keep_spin_signs{};
-	QCheckBox *m_align_ordering{}, *m_field_xtal_sys{};
+	QCheckBox *m_align_ordering{};
+	QComboBox *m_field_xtal_sys{};
 	QDoubleSpinBox *m_rot_axis[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_rot_angle{};
 	QTableWidget *m_fieldstab{};

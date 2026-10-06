@@ -114,7 +114,7 @@ void MagDynDlg::Clear(bool recalc)
 	m_unite_degeneracies->setChecked(true);
 	m_ignore_annihilation->setChecked(false);
 	m_force_incommensurate->setChecked(false);
-	m_field_xtal_sys->setChecked(false);
+	m_field_xtal_sys->setCurrentIndex(0);
 	m_align_ordering->setChecked(false);
 	m_keep_spin_signs->setChecked(false);
 	m_align_spins->setChecked(false);
@@ -434,7 +434,7 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 		m_align_spins->setChecked(m_dyn.GetExternalField().align_spins);
 		m_align_ordering->setChecked(m_dyn.GetExternalField().align_ordering);
 		m_keep_spin_signs->setChecked(m_dyn.GetExternalField().keep_spin_signs);
-		m_field_xtal_sys->setChecked(m_dyn.GetExternalField().xtal_sys);
+		m_field_xtal_sys->setCurrentIndex(m_dyn.GetExternalField().xtal_sys);
 		if(!m_use_field->isChecked())
 			m_dyn.ClearExternalField();
 

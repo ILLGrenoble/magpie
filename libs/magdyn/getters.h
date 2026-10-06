@@ -108,7 +108,7 @@ MAGDYN_TEMPL void MAGDYN_INST::ClearExternalField()
 	m_field.align_spins = false;
 	m_field.keep_spin_signs = false;
 	m_field.align_ordering = false;
-	m_field.xtal_sys = false;
+	m_field.xtal_sys = SYS_LAB;
 }
 
 
@@ -676,8 +676,10 @@ MAGDYN_TEMPL MAGDYN_INST::t_vec3_real MAGDYN_INST::GetExternalFieldLab(bool incl
 		return field;
 
 	field = *m_field.dir;
-	if(m_field.xtal_sys)
+	if(m_field.xtal_sys == SYS_REAL)
 		field = m_xtalA * field;
+	else if(m_field.xtal_sys == SYS_RECIP)
+		field = m_xtalB * field;
 	field /= tl2::norm<t_vec3_real>(field);
 
 	if(include_magnitude)

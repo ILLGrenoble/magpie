@@ -88,10 +88,12 @@ void MagDynDlg::CreateSampleEnvPanel()
 	m_align_ordering->setChecked(false);
 	m_align_ordering->setFocusPolicy(Qt::StrongFocus);
 
-	m_field_xtal_sys = new QCheckBox("Use Crystal Coordinates", m_sampleenviropanel);
-	m_field_xtal_sys->setChecked(false);
+	m_field_xtal_sys = new QComboBox(m_sampleenviropanel);
+	m_field_xtal_sys->addItem("Lab. System");
+	m_field_xtal_sys->addItem("Real Crystal System");
+	m_field_xtal_sys->addItem("Recip. Crystal System");
 	m_field_xtal_sys->setFocusPolicy(Qt::StrongFocus);
-	m_field_xtal_sys->setToolTip("The field vector and the rotation axis are given in the crystal basis.");
+	m_field_xtal_sys->setToolTip("Choose the coordinate basis for the field vector and the rotation axis.");
 
 	// predefined rotation axes
 	QPushButton *btnAxes = new QPushButton(m_reciprocalpanel);
@@ -386,7 +388,9 @@ void MagDynDlg::CreateSampleEnvPanel()
 	connect(m_align_spins, &QCheckBox::toggled, calc_all);
 	connect(m_align_ordering, &QCheckBox::toggled, calc_all);
 	connect(m_keep_spin_signs, &QCheckBox::toggled, calc_all);
-	connect(m_field_xtal_sys, &QCheckBox::toggled, calc_all);
+	connect(m_field_xtal_sys,
+	  static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+		calc_all);
 
 	connect(btn_rotate_ccw, &QAbstractButton::clicked, [this]()
 	{
@@ -494,7 +498,6 @@ void MagDynDlg::FieldsSelectionChanged()
  */
 void MagDynDlg::RotateField(const t_vec3_real& axis_rlu, t_real angle)
 {
-	const bool in_xtal_sys = m_field_xtal_sys->isChecked();
 	t_vec3_real axis = axis_rlu;
 
 	t_vec3_real B = tl2::create<t_vec3_real>(
@@ -506,19 +509,30 @@ void MagDynDlg::RotateField(const t_vec3_real& axis_rlu, t_real angle)
 
 	//const t_mat33_real& xtal = m_dyn.GetCrystalBTrafo();
 	//auto [xtal_inv, inv_ok] = tl2::inv(xtal);
-	const t_mat33_real& xtal = m_dyn.GetCrystalATrafo();
-	const t_mat33_real& xtal_inv = m_dyn.GetCrystalATrafo(true);
-	if(in_xtal_sys)
+	const t_mat33_real* xtal = nullptr;
+	const t_mat33_real* xtal_inv = nullptr;
+	switch(m_field_xtal_sys->currentIndex())
 	{
-		axis = xtal * axis;
-		B = xtal * B;
+		case 1:
+			xtal = &m_dyn.GetCrystalATrafo();
+			xtal_inv = &m_dyn.GetCrystalATrafo(true);
+			break;
+		case 2:
+			xtal = &m_dyn.GetCrystalBTrafo();
+			xtal_inv = &m_dyn.GetCrystalBTrafo(true);
+			break;
+	}
+	if(xtal && xtal_inv)
+	{
+		axis = (*xtal) * axis;
+		B = (*xtal) * B;
 	}
 
 	t_mat33_real R = tl2::rotation<t_mat33_real, t_vec3_real>(axis, angle, false);
 	B = R * B;
 
-	if(in_xtal_sys)
-		B = xtal_inv * B;
+	if(xtal && xtal_inv)
+		B = (*xtal_inv) * B;
 
 	tl2::set_eps_0(B, g_eps);
 
