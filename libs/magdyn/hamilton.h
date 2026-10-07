@@ -97,14 +97,15 @@ MAGDYN_INST::t_mat33 MAGDYN_INST::CalcRealJ(const MAGDYN_TYPE::ExchangeTerm& ter
 
 
 /**
- * calculate the reciprocal interaction matrices J(Q) and J(-Q) of
+ * calculate the Q-independent parts of the
+ * reciprocal interaction matrices J(Q) and J(-Q) of
  * equations (12) and (14) from (Toth 2015)
  */
 MAGDYN_TEMPL
-std::tuple<MAGDYN_TYPE::t_Jmap, MAGDYN_TYPE::t_Jmap>
-MAGDYN_INST::CalcReciprocalJs(const t_vec3_real& Qvec) const
+MAGDYN_TYPE::t_Jmap
+MAGDYN_INST::CalcReciprocalJs() const
 {
-	t_Jmap J_Q{}, J_Q0{};
+	t_Jmap J_Q0{};
 
 	t_size num_sites = GetMagneticSitesCount();
 	std::vector<bool> sites_ok;
@@ -128,16 +129,60 @@ MAGDYN_INST::CalcReciprocalJs(const t_vec3_real& Qvec) const
 		{
 			using namespace tl2_ops;
 			MAGDYN_CERR_OPT << "Magdyn error: Invalid site " << term.site1_calc
-				<< " at Q = " << Qvec << "." << std::endl;
+				<< "." << std::endl;
 			continue;
 		}
 		if(term.site2_calc >= num_sites || !sites_ok[term.site2_calc])
 		{
 			using namespace tl2_ops;
 			MAGDYN_CERR_OPT << "Magdyn error: Invalid site " << term.site2_calc
-				<< " at Q = " << Qvec << "." << std::endl;
+				<< "." << std::endl;
 			continue;
 		}
+
+		const t_indices indices = std::make_pair(term.site1_calc, term.site2_calc);
+		const t_indices indices_t = std::make_pair(term.site2_calc, term.site1_calc);
+
+		// symmetry: equation (15) from (Toth 2015)
+		insert_or_add(J_Q0, indices, term.J_real);
+		insert_or_add(J_Q0, indices_t, tl2::herm(term.J_real));
+	}  // end of iteration over couplings
+
+#ifdef __MAGDYN_DEBUG_OUTPUT__
+	for(const auto& pair : J_Q0)
+	{
+		std::cout << "Coupling J_Q0[" << pair.first.first << ", " << pair.first.second << "] =\n";
+		tl2::niceprint(std::cout, pair.second, 1e-4, 4);
+	}
+#endif
+
+	return J_Q0;
+}
+
+
+
+/**
+ * calculate the Q-dependent parts of the
+ * reciprocal interaction matrices J(Q) and J(-Q) of
+ * equations (12) and (14) from (Toth 2015)
+ */
+MAGDYN_TEMPL
+MAGDYN_TYPE::t_Jmap
+MAGDYN_INST::CalcReciprocalJs(const t_vec3_real& Qvec) const
+{
+	t_Jmap J_Q{};
+
+	// iterate couplings to pre-calculate corresponding J matrices
+	for(const ExchangeTerm& term : GetExchangeTerms())
+	{
+		// insert or add an exchange matrix at the given site indices
+		auto insert_or_add = [](t_Jmap& J, const t_indices& indices, const t_mat33& J33)
+		{
+			if(auto iter = J.find(indices); iter != J.end())
+				iter->second += J33;
+			else
+				J.emplace(std::move(std::make_pair(indices, J33)));
+		};
 
 		const t_indices indices = std::make_pair(term.site1_calc, term.site2_calc);
 		const t_indices indices_t = std::make_pair(term.site2_calc, term.site1_calc);
@@ -150,9 +195,6 @@ MAGDYN_INST::CalcReciprocalJs(const t_vec3_real& Qvec) const
 		// symmetry: equation (15) from (Toth 2015)
 		insert_or_add(J_Q, indices, J_fourier);
 		insert_or_add(J_Q, indices_t, tl2::herm(J_fourier));
-
-		insert_or_add(J_Q0, indices, term.J_real);
-		insert_or_add(J_Q0, indices_t, tl2::herm(term.J_real));
 	}  // end of iteration over couplings
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
@@ -161,14 +203,9 @@ MAGDYN_INST::CalcReciprocalJs(const t_vec3_real& Qvec) const
 		std::cout << "Coupling J_Q[" << pair.first.first << ", " << pair.first.second << "] =\n";
 		tl2::niceprint(std::cout, pair.second, 1e-4, 4);
 	}
-	for(const auto& pair : J_Q0)
-	{
-		std::cout << "Coupling J_Q0[" << pair.first.first << ", " << pair.first.second << "] =\n";
-		tl2::niceprint(std::cout, pair.second, 1e-4, 4);
-	}
 #endif
 
-	return std::make_tuple(J_Q, J_Q0);
+	return J_Q;
 }
 
 
@@ -222,7 +259,16 @@ t_mat MAGDYN_INST::CalcHamiltonian(const t_vec3_real& Qvec) const
 
 	// build the interaction matrices J(Q) and J(-Q) of
 	// equations (12) and (14) from (Toth 2015)
-	const auto [J_Q, J_Q0] = CalcReciprocalJs(Qvec);
+	t_Jmap _J_Q0;
+	if(!m_J_Q0_valid)
+	{
+		using namespace tl2_ops;
+		MAGDYN_CERR_OPT << "Magdyn warning: Q-independent reciprocal Js were not pre-calculated"
+			<< " at Q = " << Qvec << "." << std::endl;
+		_J_Q0 = CalcReciprocalJs();
+	}
+	const t_Jmap& J_Q0 = m_J_Q0_valid ? m_J_Q0 : _J_Q0;
+	const t_Jmap J_Q = CalcReciprocalJs(Qvec);
 
 	// create the hamiltonian of equation (25) and (26) from (Toth 2015)
 	const t_size num_branches = 2*N;

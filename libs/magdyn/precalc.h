@@ -431,6 +431,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerm(MAGDYN_TYPE::ExchangeTerm& term)
 
 		// pre-calculate J factors
 		term.J_real = CalcRealJ(term);
+		m_J_Q0_valid = false;
 	}
 	catch(const std::exception& ex)
 	{
@@ -450,6 +451,9 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExchangeTerms()
 {
 	for(ExchangeTerm& term : GetExchangeTerms())
 		CalcExchangeTerm(term);
+
+	m_J_Q0 = CalcReciprocalJs();
+	m_J_Q0_valid = true;
 }
 
 

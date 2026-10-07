@@ -423,7 +423,8 @@ public:
 
 	// calculate the reciprocal interaction matrices J(Q) and J(-Q) of
 	// equations (12) and (14) from (Toth 2015)
-	std::tuple<t_Jmap, t_Jmap> CalcReciprocalJs(const t_vec3_real& Qvec) const;
+	t_Jmap CalcReciprocalJs() const;
+	t_Jmap CalcReciprocalJs(const t_vec3_real& Qvec) const;
 
 	// sort eigenstates by their energies
 	void SortByEnergies(SofQE& S) const;
@@ -639,6 +640,10 @@ private:
 
 	// helix rotation axis for incommensurate structures
 	t_vec3_real m_rotaxis{ tl2::create<t_vec3_real>({ 1., 0., 0. }) };
+
+	// Q-independent part of the reciprocal J factors
+	t_Jmap m_J_Q0{};
+	bool m_J_Q0_valid { false };
 
 	// calculate the hamiltonian for Q, Q+ordering, and Q-ordering
 	bool m_calc_H{ true };
