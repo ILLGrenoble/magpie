@@ -373,6 +373,7 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 
 	// --------------------------------------------------------------------
 	const auto& field = m_dyn.GetExternalField();
+	const t_vec3_real& field_dir = m_dyn.GetExternalFieldLab(false);
 	bool use_field = !tl2::equals_0<t_real>(field.mag, g_eps);
 
 	if(use_field && field.dir)
@@ -380,9 +381,9 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 		ofstr << "\n# external field\n";
 		ofstr << "field = { ";
 		ofstr << "\"dir\" : -np.array([ "
-			<< (*field.dir)[0] << ", "
-			<< (*field.dir)[1] << ", "
-			<< (*field.dir)[2] << " ]), "
+			<< field_dir[0] << ", "
+			<< field_dir[1] << ", "
+			<< field_dir[2] << " ]), "
 			<< "\"mag\" : " << field.mag
 			<< " }\n";
 	}
@@ -438,9 +439,9 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 		if(field.align_spins && field.dir)
 		{
 			ofstr << ", \"Sdir\" : [ "
-				<< -(*field.dir)[0] << ", "
-				<< -(*field.dir)[1] << ", "
-				<< -(*field.dir)[2] << " ]";
+				<< -field_dir[0] << ", "
+				<< -field_dir[1] << ", "
+				<< -field_dir[2] << " ]";
 		}
 		else
 		{

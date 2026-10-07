@@ -112,7 +112,8 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "\n# options\n";
 	ofstr << "verbose          = true\n";
 	ofstr << "use_spacegroup   = false  # careful: the generated site order may be different!\n";
-	ofstr << "calc_groundstate = false\n";
+	ofstr << "calc_groundstate = false  # minimise the ground state energy?\n";
+	ofstr << "calc_powder      = false  # single-crystal or powder calculation?\n";
 	ofstr << "plot_structure   = true\n";
 	ofstr << "plot_dynamics    = true\n";
 	ofstr << "save_dynamics    = true\n";
@@ -156,9 +157,14 @@ bool MagDynDlg::ExportToSunny(const QString& _filename)
 	ofstr << "plane1      = [ " << peak1x << ", " << peak1y << ", " << peak1z << " ]\n";
 	ofstr << "plane2      = [ " << peak2x << ", " << peak2y << ", " << peak2z << " ]\n";
 	ofstr << "eps         = " << g_eps << "\n";
+	// powder settings
+	ofstr << "powder_Qs   = range(0., 5., Qpts)\n";
+	ofstr << "powder_Es   = range(0., 10., 256)\n";
+	ofstr << "powder_pts  = 512\n";
 
 	// field
 	const auto& field = m_dyn.GetExternalField();
+	const t_vec3_real& field_dir = m_dyn.GetExternalFieldLab(false);
 	bool use_field = !tl2::equals_0<t_real>(field.mag, g_eps);
 	if(use_field)
 		ofstr << "magfield    = " << field.mag << " * phys_units.T\n";
@@ -346,9 +352,9 @@ logprint("Using Sunny version %s running on interpreter version %s.\n",
 	{
 		// set all spins to field direction
 		ofstr << "polarize_spins!(magsys, [ "
-			<< (*field.dir)[0] << ", "
-			<< (*field.dir)[1] << ", "
-			<< (*field.dir)[2] << " ])\n";
+			<< field_dir[0] << ", "
+			<< field_dir[1] << ", "
+			<< field_dir[2] << " ])\n";
 	}
 	else
 	{
@@ -457,9 +463,9 @@ end)BLOCK" << "\n";
 	{
 		ofstr << "\n\n# external field\n";
 		ofstr << "set_field!(magsys, -[ "
-			<< (*field.dir)[0] << ", "
-			<< (*field.dir)[1] << ", "
-			<< (*field.dir)[2] << " ] * magfield"
+			<< field_dir[0] << ", "
+			<< field_dir[1] << ", "
+			<< field_dir[2] << " ] * magfield"
 			<< ")\n";
 	}
 	// --------------------------------------------------------------------
@@ -600,6 +606,8 @@ end)BLOCK" << "\n";
 	if(m_dyn.IsIncommensurate())
 		ofstr << "end\n";
 
+	ofstr << "\nif !calc_powder  # single-crystal dispersion calculation\n";
+
 	//ofstr << "momenta = collect(range(Qstart, Qend, Qpts))\n";
 	ofstr << "momenta = q_space_path(magsys.crystal, [ Qstart, Qend ], Qpts)\n";
 	ofstr << "global bands = nothing\n";
@@ -652,6 +660,19 @@ end)BLOCK" << "\n";
 	end
 end
 )BLOCK";
+
+	ofstr << "\nelse  # powder dispersion calculation\n";
+	ofstr << "\tpowder_dat = powder_average(magsites, powder_Qs, powder_pts) do Qs\n";
+	ofstr <<"\t\tintensities(calc, Qs; energies = powder_Es, kernel = kernel = lorentzian(fwhm = 0.5))\n";
+	ofstr << "\tend\n";
+
+	ofstr << "\n\ttime_calc_end = time_ns()\n";
+	ofstr << "\ttime_calc = (time_calc_end - time_calc_begin) / 1e6\n";
+	ofstr << "\tlogprint(\"Powder calculation took %.6f ms, total run took %.6f ms.\\n\"";
+	ofstr << ",\n\t\ttime_calc, time_setup + time_calc)\n";
+
+	ofstr << "\n\tplot_intensities(powder_dat; units = phys_units)\n";
+	ofstr << "\nend\n";
 	// --------------------------------------------------------------------
 
 	return true;

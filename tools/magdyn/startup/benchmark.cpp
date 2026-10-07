@@ -75,13 +75,13 @@ bool benchmark(const std::string& model_file,
 	// magnon calculator
 	t_magdyn magdyn{};
 
-	// load model from input file
-	if(!magdyn.Load(model_file))
-		return false;
-
 	// settings
 	magdyn.SetSilent(true);
 	magdyn.SetPerformChecks(false);
+
+	// load model from input file
+	if(!magdyn.Load(model_file))
+		return false;
 
 	stopwatch.stop();
 	const t_real startup_time = stopwatch.GetDur();

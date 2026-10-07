@@ -195,6 +195,7 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 	ofstr << "\n% spin directions\n";
 
 	const auto& field = m_dyn.GetExternalField();
+	const t_vec3_real& field_dir = m_dyn.GetExternalFieldLab(false);
 	const t_vec3_real& prop = m_dyn.GetOrderingWavevector();
 	const t_vec3_real& axis = m_dyn.GetRotationAxis();
 
@@ -204,7 +205,7 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 		for(const t_site& site : m_dyn.GetMagneticSites())
 		{
 			if(field.align_spins && field.dir)
-				ofstr << (*field.dir)[i] << " ";
+				ofstr << field_dir[i] << " ";
 			else
 				ofstr << get_str_var(site.spin_dir[i]) << " ";
 		}
@@ -331,9 +332,9 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 	if(!tl2::equals_0<t_real>(field.mag, g_eps) && field.dir)
 	{
 		ofstr << "\nsw_obj.field([ "
-			<< (*field.dir)[0] << ", "
-			<< (*field.dir)[1] << ", "
-			<< (*field.dir)[2] << " ] * " << field.mag
+			<< field_dir[0] << ", "
+			<< field_dir[1] << ", "
+			<< field_dir[2] << " ] * " << field.mag
 			<< ");\n";
 	}
 	// --------------------------------------------------------------------
