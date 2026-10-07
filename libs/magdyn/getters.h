@@ -122,6 +122,7 @@ MAGDYN_TEMPL void MAGDYN_INST::ClearExternalField()
  */
 MAGDYN_TEMPL void MAGDYN_INST::ClearMagneticFormFactors()
 {
+	m_magffacts_version = increment_magffacts_version();
 	m_magffacts.clear();
 }
 // --------------------------------------------------------------------
@@ -643,6 +644,8 @@ MAGDYN_TEMPL void MAGDYN_INST::SetCholeskyFailOnWrong(bool fail)
 
 MAGDYN_TEMPL void MAGDYN_INST::SetMagneticFormFactor(const std::string& ffact, t_size idx)
 {
+	m_magffacts_version = increment_magffacts_version();
+
 	if(idx >= m_magffacts.size())
 		m_magffacts.resize(idx + 1);
 

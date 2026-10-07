@@ -163,8 +163,21 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	tl2::niceprint(std::cout, boson_ops, 1e-4, 4);
 #endif
 
+	// cache magnetic form factors per individual thread of the thread pool
+	thread_local struct
+	{
+		std::vector<tl2::ExprParser<t_cplx>> magffacts{};
+		t_size version{};
+	} cached_magffacts{};
+
+	if(cached_magffacts.version != m_magffacts_version)
+	{
+		cached_magffacts.magffacts = m_magffacts;
+		cached_magffacts.version = m_magffacts_version;
+	}
+
 	// calculate form factors per site (or uniformly for all if only one is given)
-	std::vector<tl2::ExprParser<t_cplx>> magffacts = m_magffacts;
+	std::vector<tl2::ExprParser<t_cplx>>& magffacts = cached_magffacts.magffacts;
 	const t_size magffacts_size = magffacts.size();
 	std::vector<t_cplx> ffacts;
 	ffacts.reserve(magffacts_size);

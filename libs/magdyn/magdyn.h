@@ -663,6 +663,7 @@ private:
 
 	// formulas for the magnetic form factors
 	std::vector<tl2::ExprParser<t_cplx>> m_magffacts{};
+	t_size m_magffacts_version { increment_magffacts_version() };
 
 	// crystal lattice
 	t_real m_xtallattice[3]{ 5., 5., 5. };
@@ -713,6 +714,12 @@ private:
 	static constexpr const t_cplx s_imag { t_real(0), t_real(1) };
 	static constexpr const t_real s_twopi { t_real(2)*tl2::pi<t_real> };
 	static constexpr const std::array<std::string_view, 3> g_comp_names{{ "x", "y", "z" }};
+
+	static t_size increment_magffacts_version()
+	{
+		static std::atomic<t_size> version{};
+		return ++version;
+	}
 };
 
 }

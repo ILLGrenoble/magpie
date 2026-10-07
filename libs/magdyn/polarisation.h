@@ -67,10 +67,28 @@ bool MAGDYN_INST::CalcPolarisation(const t_vec3_real& Q_rlu,
 	Q_lab /= tl2::norm(Q_lab);
 
 	t_vec3_real up_lab = m_xtalB * m_scatteringplane[2];
-	up_lab /= tl2::norm(up_lab);
+	t_real len_up = norm(up_lab);
+	if(tl2::equals_0<t_real>(len_up, m_eps))
+	{
+		MAGDYN_CERR_OPT << "Magdyn error: Invalid scattering plane." << std::endl;
+		return false;
+	}
+	up_lab /= len_up;
 
 	t_vec3_real Qperp_lab = tl2::cross(up_lab, Q_lab);
-	Qperp_lab /= norm(Qperp_lab);
+	t_real len_Qperp = norm(Qperp_lab);
+	if(tl2::equals_0<t_real>(len_Qperp, m_eps))
+	{
+		MAGDYN_CERR_OPT << "Magdyn error: Invalid scattering plane." << std::endl;
+		return false;
+	}
+	Qperp_lab /= len_Qperp;
+
+	if(!tl2::equals_0<t_real>(tl2::inner(Q_lab, up_lab), m_eps))
+	{
+		MAGDYN_CERR_OPT << "Magdyn error: Q is not in the scattering plane." << std::endl;
+		return false;
+	}
 
 	t_mat33_real rotQ = tl2::create<t_mat33_real>(3, 3);
 	tl2::set_row<t_mat33_real, t_vec3_real>(rotQ, Q_lab, 0);
