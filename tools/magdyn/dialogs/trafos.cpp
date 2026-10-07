@@ -89,6 +89,7 @@ void TrafoCalculator::SetKernel(t_magdyn* dyn)
 	CalculateRotation();
 	CalculateProjection();
 	CalculateCrossProduct();
+	CalculateAngle();
 }
 
 
@@ -104,10 +105,12 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 	QWidget *rotationPanel = CreateRotationPanel();
 	QWidget *projectionPanel = CreateProjectionPanel();
 	QWidget *crossProdPanel = CreateCrossProductPanel();
+	QWidget *anglePanel = CreateAnglePanel();
 	QWidget *xtalPanel = CreateCrystalPanel();
 	rotationPanel->setParent(tabs);
 	projectionPanel->setParent(tabs);
 	crossProdPanel->setParent(tabs);
+	anglePanel->setParent(tabs);
 	xtalPanel->setParent(tabs);
 
 	// buttons
@@ -118,6 +121,7 @@ TrafoCalculator::TrafoCalculator(QWidget* pParent, QSettings *sett)
 	tabs->addTab(rotationPanel, "Axis Rotation");
 	tabs->addTab(projectionPanel, "Projection");
 	tabs->addTab(crossProdPanel, "Normal");
+	tabs->addTab(anglePanel, "Angle");
 	tabs->addTab(xtalPanel, "Crystal System");
 
 	// main grid
@@ -350,20 +354,20 @@ QWidget* TrafoCalculator::CreateProjectionPanel()
 	m_textProjection->setReadOnly(true);
 
 	// grid
-	auto grid_projection = new QGridLayout(projectionPanel);
-	grid_projection->setSpacing(4);
-	grid_projection->setContentsMargins(6, 6, 6, 6);
-	grid_projection->addWidget(labelAxis, 0, 0, 1, 1);
-	grid_projection->addWidget(m_spinProjAxis[0], 0, 1, 1, 1);
-	grid_projection->addWidget(m_spinProjAxis[1], 0, 2, 1, 1);
-	grid_projection->addWidget(m_spinProjAxis[2], 0, 3, 1, 1);
-	grid_projection->addWidget(labelVecToProj, 1, 0, 1, 1);
-	grid_projection->addWidget(m_spinVecToProj[0], 1, 1, 1, 1);
-	grid_projection->addWidget(m_spinVecToProj[1], 1, 2, 1, 1);
-	grid_projection->addWidget(m_spinVecToProj[2], 1, 3, 1, 1);
-	grid_projection->addWidget(m_checkXtalProj, 2, 2, 1, 1);
-	grid_projection->addWidget(btnRecalc, 2, 3, 1, 1);
-	grid_projection->addWidget(m_textProjection, 3, 0, 1, 4);
+	auto grid = new QGridLayout(projectionPanel);
+	grid->setSpacing(4);
+	grid->setContentsMargins(6, 6, 6, 6);
+	grid->addWidget(labelAxis, 0, 0, 1, 1);
+	grid->addWidget(m_spinProjAxis[0], 0, 1, 1, 1);
+	grid->addWidget(m_spinProjAxis[1], 0, 2, 1, 1);
+	grid->addWidget(m_spinProjAxis[2], 0, 3, 1, 1);
+	grid->addWidget(labelVecToProj, 1, 0, 1, 1);
+	grid->addWidget(m_spinVecToProj[0], 1, 1, 1, 1);
+	grid->addWidget(m_spinVecToProj[1], 1, 2, 1, 1);
+	grid->addWidget(m_spinVecToProj[2], 1, 3, 1, 1);
+	grid->addWidget(m_checkXtalProj, 2, 2, 1, 1);
+	grid->addWidget(btnRecalc, 2, 3, 1, 1);
+	grid->addWidget(m_textProjection, 3, 0, 1, 4);
 
 	// connections
 	for(QDoubleSpinBox* spin : {
@@ -437,20 +441,20 @@ QWidget* TrafoCalculator::CreateCrossProductPanel()
 	m_textCrossProd->setReadOnly(true);
 
 	// grid
-	auto grid_projection = new QGridLayout(crossProdPanel);
-	grid_projection->setSpacing(4);
-	grid_projection->setContentsMargins(6, 6, 6, 6);
-	grid_projection->addWidget(labelVec1, 0, 0, 1, 1);
-	grid_projection->addWidget(m_spinVec1[0], 0, 1, 1, 1);
-	grid_projection->addWidget(m_spinVec1[1], 0, 2, 1, 1);
-	grid_projection->addWidget(m_spinVec1[2], 0, 3, 1, 1);
-	grid_projection->addWidget(labelVec2, 1, 0, 1, 1);
-	grid_projection->addWidget(m_spinVec2[0], 1, 1, 1, 1);
-	grid_projection->addWidget(m_spinVec2[1], 1, 2, 1, 1);
-	grid_projection->addWidget(m_spinVec2[2], 1, 3, 1, 1);
-	grid_projection->addWidget(m_checkXtalCrossProd, 2, 2, 1, 1);
-	grid_projection->addWidget(btnRecalc, 2, 3, 1, 1);
-	grid_projection->addWidget(m_textCrossProd, 3, 0, 1, 4);
+	auto grid = new QGridLayout(crossProdPanel);
+	grid->setSpacing(4);
+	grid->setContentsMargins(6, 6, 6, 6);
+	grid->addWidget(labelVec1, 0, 0, 1, 1);
+	grid->addWidget(m_spinVec1[0], 0, 1, 1, 1);
+	grid->addWidget(m_spinVec1[1], 0, 2, 1, 1);
+	grid->addWidget(m_spinVec1[2], 0, 3, 1, 1);
+	grid->addWidget(labelVec2, 1, 0, 1, 1);
+	grid->addWidget(m_spinVec2[0], 1, 1, 1, 1);
+	grid->addWidget(m_spinVec2[1], 1, 2, 1, 1);
+	grid->addWidget(m_spinVec2[2], 1, 3, 1, 1);
+	grid->addWidget(m_checkXtalCrossProd, 2, 2, 1, 1);
+	grid->addWidget(btnRecalc, 2, 3, 1, 1);
+	grid->addWidget(m_textCrossProd, 3, 0, 1, 4);
 
 	// connections
 	for(QDoubleSpinBox* spin : {
@@ -469,6 +473,81 @@ QWidget* TrafoCalculator::CreateCrossProductPanel()
 	connect(btnRecalc, &QAbstractButton::clicked, this, &TrafoCalculator::CalculateCrossProduct);
 
 	return crossProdPanel;
+}
+
+
+
+QWidget* TrafoCalculator::CreateAnglePanel()
+{
+	// projection tab (crystal)
+	QWidget *anglePanel = new QWidget(this);
+
+	m_spinVec1Angle[0] = new QDoubleSpinBox(anglePanel);
+	m_spinVec1Angle[1] = new QDoubleSpinBox(anglePanel);
+	m_spinVec1Angle[2] = new QDoubleSpinBox(anglePanel);
+	m_spinVec1Angle[0]->setValue(1);
+	m_spinVec1Angle[1]->setValue(0);
+	m_spinVec1Angle[2]->setValue(0);
+
+	m_spinVec2Angle[0] = new QDoubleSpinBox(anglePanel);
+	m_spinVec2Angle[1] = new QDoubleSpinBox(anglePanel);
+	m_spinVec2Angle[2] = new QDoubleSpinBox(anglePanel);
+	m_spinVec2Angle[0]->setValue(0);
+	m_spinVec2Angle[1]->setValue(1);
+	m_spinVec2Angle[2]->setValue(0);
+
+	for(int i = 0; i < 3; ++i)
+	{
+		m_spinVec1Angle[i]->setMinimum(-999.);
+		m_spinVec1Angle[i]->setMaximum(999.);
+		m_spinVec1Angle[i]->setDecimals(4);
+		m_spinVec1Angle[i]->setSingleStep(0.1);
+
+		m_spinVec2Angle[i]->setMinimum(-999.);
+		m_spinVec2Angle[i]->setMaximum(999.);
+		m_spinVec2Angle[i]->setDecimals(4);
+		m_spinVec2Angle[i]->setSingleStep(0.1);
+	}
+
+	QPushButton *btnRecalc = new QPushButton(anglePanel);
+	btnRecalc->setText("Get Crystal");
+	btnRecalc->setToolTip("Get the crystallographic A and B matrices and recalculate.");
+
+	QLabel *labelVec1 = new QLabel("Vector 1: ");
+	QLabel *labelVec2 = new QLabel("Vector 2: ");
+	labelVec1->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
+	labelVec2->setSizePolicy(QSizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed});
+
+	m_textAngle = new QTextEdit(anglePanel);
+	m_textAngle->setReadOnly(true);
+
+	// grid
+	auto grid = new QGridLayout(anglePanel);
+	grid->setSpacing(4);
+	grid->setContentsMargins(6, 6, 6, 6);
+	grid->addWidget(labelVec1, 0, 0, 1, 1);
+	grid->addWidget(m_spinVec1Angle[0], 0, 1, 1, 1);
+	grid->addWidget(m_spinVec1Angle[1], 0, 2, 1, 1);
+	grid->addWidget(m_spinVec1Angle[2], 0, 3, 1, 1);
+	grid->addWidget(labelVec2, 1, 0, 1, 1);
+	grid->addWidget(m_spinVec2Angle[0], 1, 1, 1, 1);
+	grid->addWidget(m_spinVec2Angle[1], 1, 2, 1, 1);
+	grid->addWidget(m_spinVec2Angle[2], 1, 3, 1, 1);
+	grid->addWidget(btnRecalc, 2, 3, 1, 1);
+	grid->addWidget(m_textAngle, 3, 0, 1, 4);
+
+	// connections
+	for(QDoubleSpinBox* spin : {
+		m_spinVec1Angle[0], m_spinVec1Angle[1], m_spinVec1Angle[2],
+		m_spinVec2Angle[0], m_spinVec2Angle[1], m_spinVec2Angle[2] })
+	{
+		connect(spin,
+			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+			this, &TrafoCalculator::CalculateAngle);
+	}
+	connect(btnRecalc, &QAbstractButton::clicked, this, &TrafoCalculator::CalculateAngle);
+
+	return anglePanel;
 }
 
 
@@ -964,6 +1043,68 @@ void TrafoCalculator::CalculateCrossProduct()
 
 
 	m_textCrossProd->setHtml(ostrResult.str().c_str());
+}
+
+
+
+void TrafoCalculator::CalculateAngle()
+{
+	using namespace tl2_ops;
+
+	if(!m_textAngle)
+		return;
+
+	// get the input vectors
+	t_vec3_real vec1 = tl2::create<t_vec3_real>({
+		(t_real)m_spinVec1Angle[0]->value(),
+		(t_real)m_spinVec1Angle[1]->value(),
+		(t_real)m_spinVec1Angle[2]->value() });
+	t_vec3_real vec2 = tl2::create<t_vec3_real>({
+		(t_real)m_spinVec2Angle[0]->value(),
+		(t_real)m_spinVec2Angle[1]->value(),
+		(t_real)m_spinVec2Angle[2]->value() });
+
+	m_textAngle->clear();
+
+	// get crystal matrices
+	const t_mat33_real& xtalA = m_dyn->GetCrystalATrafo();
+	const t_mat33_real& xtalB = m_dyn->GetCrystalBTrafo();
+
+	const t_mat33_real metricA = tl2::metric<t_mat33_real>(xtalA);
+	const t_mat33_real metricB = tl2::metric<t_mat33_real>(xtalB);
+
+	// print the B and the rotation matrices
+	std::ostringstream ostrResult;
+	ostrResult.precision(g_prec);
+
+	print_matrix(xtalA, "Crystal A Matrix", ostrResult);
+	print_matrix(metricA, "Real Space Metric", ostrResult);
+	print_matrix(xtalB, "Crystal B Matrix", ostrResult);
+	print_matrix(metricB, "Reciprocal Space Metric", ostrResult);
+
+	t_real angle = tl2::r2d(tl2::angle(vec1, vec2));
+	t_real angleA = tl2::r2d(tl2::angle(metricA, vec1, vec2));
+	t_real angleB = tl2::r2d(tl2::angle(metricB, vec1, vec2));
+
+	t_real len1 = tl2::norm(vec1);
+	t_real len1A = tl2::norm(metricA, vec1);
+	t_real len1B = tl2::norm(metricB, vec1);
+	t_real len2 = tl2::norm(vec2);
+	t_real len2A = tl2::norm(metricA, vec2);
+	t_real len2B = tl2::norm(metricB, vec2);
+
+	ostrResult << "<p>";
+	ostrResult << "Angle between lab vectors 1 and 2: " << angle << "°<br>\n";
+	ostrResult << "Angle between real space vectors 1 and 2: " << angleA << "°<br>\n";
+	ostrResult << "Angle between reciprocal space vectors 1 and 2: " << angleB << "°\n";
+	ostrResult << "</p>\n";
+	ostrResult << "<p>";
+	ostrResult << "Lengths of lab vectors 1 and 2: " << len1 << ", " << len2 << "<br>\n";
+	ostrResult << "Lengths of real space vectors 1 and 2: " << len1A << ", " << len2A << "<br>\n";
+	ostrResult << "Lengths of reciprocal space vectors 1 and 2: " << len1B << ", " << len2B << "\n";
+	ostrResult << "</p>\n";
+
+	m_textAngle->setHtml(ostrResult.str().c_str());
 }
 
 

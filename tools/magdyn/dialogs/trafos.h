@@ -56,6 +56,7 @@ protected:
 	QWidget* CreateRotationPanel();
 	QWidget* CreateProjectionPanel();
 	QWidget* CreateCrossProductPanel();
+	QWidget* CreateAnglePanel();
 	QWidget* CreateCrystalPanel();
 
 
@@ -64,6 +65,7 @@ private:
 
 	QSettings *m_sett{};
 
+	// rotation tab
 	QTextEdit *m_textRotation{};
 	QDoubleSpinBox *m_spinAxis[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_spinAngle{};
@@ -71,16 +73,24 @@ private:
 	QCheckBox *m_checkXtalRot{};
 	t_vec3_real m_vec_rot{ tl2::zero<t_vec3_real>(3) };
 
+	// projection tab
 	QTextEdit *m_textProjection{};
 	QDoubleSpinBox *m_spinProjAxis[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_spinVecToProj[3]{nullptr, nullptr, nullptr};
 	QCheckBox *m_checkXtalProj{};
 
+	// normal tab
 	QTextEdit *m_textCrossProd{};
 	QDoubleSpinBox *m_spinVec1[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_spinVec2[3]{nullptr, nullptr, nullptr};
 	QCheckBox *m_checkXtalCrossProd{};
 
+	// angle tab
+	QTextEdit *m_textAngle{};
+	QDoubleSpinBox *m_spinVec1Angle[3]{nullptr, nullptr, nullptr};
+	QDoubleSpinBox *m_spinVec2Angle[3]{nullptr, nullptr, nullptr};
+
+	// crystal tab
 	t_mat33_real m_xtalA { tl2::unit<t_mat33_real>(3, 3) };
 	t_mat33_real m_xtalA_inv { tl2::unit<t_mat33_real>(3, 3) };
 	t_mat33_real m_xtalB { tl2::unit<t_mat33_real>(3, 3) };
@@ -100,6 +110,7 @@ protected slots:
 	void CalculateRotation();
 	void CalculateProjection();
 	void CalculateCrossProduct();
+	void CalculateAngle();
 
 
 signals:
