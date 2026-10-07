@@ -83,10 +83,13 @@ include_directories(
 
 # -----------------------------------------------------------------------------
 # build individual test cases
-add_executable(magdyn magdyn.cpp)
+add_executable(magdyn_fm magdyn_fm.cpp)
+add_executable(magdyn_afm magdyn_afm.cpp)
 add_executable(magdyn2 magdyn2.cpp)
 
-target_link_libraries(magdyn ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
+target_link_libraries(magdyn_fm ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
+	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
+target_link_libraries(magdyn_afm ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
 	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
 target_link_libraries(magdyn2 ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
 	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
@@ -95,7 +98,8 @@ target_link_libraries(magdyn2 ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LI
 
 # -----------------------------------------------------------------------------
 # run individual test cases
-add_test(magdyn magdyn)
+add_test(magdyn_fm magdyn_fm)
+add_test(magdyn_afm magdyn_afm)
 add_test(magdyn2 magdyn2)
 # -----------------------------------------------------------------------------
 
@@ -103,7 +107,7 @@ add_test(magdyn2 magdyn2)
 # -----------------------------------------------------------------------------
 # add rpaths
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	foreach(tool IN ITEMS magdyn magdyn2)
+	foreach(tool IN ITEMS magdyn_fm magdyn_afm magdyn2)
 		message(STATUS "Setting rpath for ${tool}...")
 
 		add_custom_command(TARGET ${tool} POST_BUILD

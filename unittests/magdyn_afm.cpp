@@ -36,7 +36,7 @@ namespace ty = boost::typeindex;
 using t_types_real = std::tuple<double, float>;
 
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn, t_real, t_types_real)
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_afm, t_real, t_types_real)
 {
 	// real type name
 	const std::string real_name = ty::type_id_with_cvr<t_real>().pretty_name();
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn, t_real, t_types_real)
 	std::cout << "================================================================================" << std::endl;
 
 	// constants
-	static constexpr t_real eps = 1e-4; //std::is_same_v<t_real, float> ? 1e-4 : 1e-8;
+	static constexpr t_real eps = std::is_same_v<t_real, float> ? 1e-4 : 1e-8;
 	const t_real pi = tl2::pi<t_real>;
 
 	// types
@@ -140,8 +140,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn, t_real, t_types_real)
 	auto Es_and_S = magdyn.CalcEnergies(h, 0., 0., false);
 	BOOST_TEST(Es_and_S.size() == 2);  // + and - energy branch
 	BOOST_TEST(tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps));
-	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), 2.*J*sin(h * 2. * pi), eps));
-	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), 0.6513, eps));
+	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), 2.*J*std::abs(sin(h * 2. * pi)), eps));
+	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), 0.6513, /*eps*/ 1e-4));
 
 
 	// calculate and save a dispersion branch
