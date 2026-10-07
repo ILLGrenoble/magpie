@@ -222,7 +222,10 @@ void MagDynDlg::CalcDispersion()
 
 	// keep the scanned Q component in ascending order
 	if(Q_start[m_Q_idx] > Q_end[m_Q_idx])
+	{
 		std::swap(Q_start, Q_end);
+		std::swap(m_Q_min, m_Q_max);
+	}
 
 
 	// reserve vector memory

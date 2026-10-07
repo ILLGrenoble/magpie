@@ -106,7 +106,7 @@ void MagDynDlg::SyncSitesFromKernel(boost::optional<const pt::ptree&> extra_info
 			spin_ortho_z = "auto";
 
 		AddSiteTabItem(-1,
-			site.name, site.sym_idx, *site.ffact_idx,
+			site.name, site.sym_idx, site.ffact_idx ? *site.ffact_idx : 0,
 			site.pos[0], site.pos[1], site.pos[2],
 			site.spin_dir[0], site.spin_dir[1], site.spin_dir[2], site.spin_mag,
 			spin_ortho_x, spin_ortho_y, spin_ortho_z,

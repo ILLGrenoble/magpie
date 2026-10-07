@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 	std::cout << "Running tests with " << real_name << " data type." << std::endl;
 	std::cout << "================================================================================" << std::endl;
 
-
+	// constants
 	static constexpr t_real eps = 1e-4;
 	const t_real pi = tl2::pi<t_real>;
 
@@ -68,10 +68,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 
 
 	// add a variable
+	t_real J = 0.5;
 	{
 		typename t_magdyn::Variable var{};
 		var.name = "J";
-		var.value = 0.5;
+		var.value = J;
 
 		magdyn.AddVariable(std::move(var));
 	}
@@ -92,7 +93,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 
 		site.spin_mag = "1";
 
-		magdyn.CalcMagneticSite(site);
+		//magdyn.CalcMagneticSite(site);
 		magdyn.AddMagneticSite(std::move(site));
 	}
 	{
@@ -110,7 +111,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 
 		site.spin_mag = "1";
 
-		magdyn.CalcMagneticSite(site);
+		//magdyn.CalcMagneticSite(site);
 		magdyn.AddMagneticSite(std::move(site));
 	}
 
@@ -130,7 +131,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 
 		coupling.J = "J";
 
-		magdyn.CalcExchangeTerm(coupling);
+		//magdyn.CalcExchangeTerm(coupling);
 		magdyn.AddExchangeTerm(std::move(coupling));
 	}
 	{
@@ -147,9 +148,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 
 		coupling.J = "J";
 
-		magdyn.CalcExchangeTerm(coupling);
+		//magdyn.CalcExchangeTerm(coupling);
 		magdyn.AddExchangeTerm(std::move(coupling));
 	}
+
+
+	magdyn.CalcMagneticSites();
+	magdyn.CalcExchangeTerms();
 
 
 	std::cout << "Calculating ground state..." << std::endl;
@@ -192,7 +197,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 		return;
 
 	BOOST_TEST(tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps));
-	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), 0.5878, eps));
+	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), 2.*J*sin(0.2/2. * 2. * pi), eps));
 	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), 0.6513, eps));
 
 

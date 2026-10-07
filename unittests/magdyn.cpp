@@ -45,7 +45,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn, t_real, t_types_real)
 	std::cout << "Running tests with " << real_name << " data type." << std::endl;
 	std::cout << "================================================================================" << std::endl;
 
+	// constants
 	static constexpr t_real eps = 1e-4; //std::is_same_v<t_real, float> ? 1e-4 : 1e-8;
+	const t_real pi = tl2::pi<t_real>;
 
 	// types
 	using t_cplx = std::complex<t_real>;
@@ -62,11 +64,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn, t_real, t_types_real)
 	// magnon calculator
 	t_magdyn magdyn{};
 
+	// crystal lattice
+	magdyn.SetCrystalLattice(5., 5., 5., pi/2., pi/2., pi/2.);
+
 
 	// add a variable
+	t_real J = 0.5;
 	typename t_magdyn::Variable var{};
 	var.name = "J";
-	var.value = 0.5;
+	var.value = J;
 
 	magdyn.AddVariable(std::move(var));
 
@@ -85,7 +91,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn, t_real, t_types_real)
 
 	site.spin_mag = "1";
 
-	magdyn.CalcMagneticSite(site);
+	//magdyn.CalcMagneticSite(site);
 	magdyn.AddMagneticSite(std::move(site));
 
 
@@ -103,7 +109,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn, t_real, t_types_real)
 
 	coupling.J = "J";
 
-	magdyn.CalcExchangeTerm(coupling);
+	//magdyn.CalcExchangeTerm(coupling);
 	magdyn.AddExchangeTerm(std::move(coupling));
 
 
@@ -115,11 +121,26 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn, t_real, t_types_real)
 	magdyn.SetRotationAxis(rotax);
 
 
-	// calculate a point on the dispersion
-	auto Es_and_S = magdyn.CalcEnergies(0.1, 0., 0., false);
+	// call this after setting the rotation axis to recalculate the Js
+	magdyn.CalcMagneticSites();
+	magdyn.CalcExchangeTerms();
+
+
+	// calculate dispersion
+	for(t_real h = 0.05; h <= 0.45; h += 0.01)
+	{
+		auto Es_and_S = magdyn.CalcEnergies(h, 0., 0., false);
+		BOOST_TEST(Es_and_S.size() == 2);  // + and - energy branch
+		BOOST_TEST(tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps));
+		BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), 2.*J*std::abs(sin(h * 2. * pi)), eps));
+	}
+
+	// calculate a single point on the dispersion
+	t_real h = 0.1;
+	auto Es_and_S = magdyn.CalcEnergies(h, 0., 0., false);
 	BOOST_TEST(Es_and_S.size() == 2);  // + and - energy branch
 	BOOST_TEST(tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps));
-	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), 0.5878, eps));
+	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), 2.*J*sin(h * 2. * pi), eps));
 	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), 0.6513, eps));
 
 

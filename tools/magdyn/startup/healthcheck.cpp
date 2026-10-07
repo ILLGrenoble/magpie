@@ -57,7 +57,7 @@ bool healthcheck()
 
 	site.spin_mag = "1";
 
-	magdyn.CalcMagneticSite(site);
+	//magdyn.CalcMagneticSite(site);
 	magdyn.AddMagneticSite(std::move(site));
 
 
@@ -75,7 +75,7 @@ bool healthcheck()
 
 	coupling.J = "J";
 
-	magdyn.CalcExchangeTerm(coupling);
+	//magdyn.CalcExchangeTerm(coupling);
 	magdyn.AddExchangeTerm(std::move(coupling));
 
 
@@ -85,6 +85,11 @@ bool healthcheck()
 
 	t_vec3_real rotax = tl2::create<t_vec3_real>({ 0., 1., 0. });
 	magdyn.SetRotationAxis(rotax);
+
+
+	// call this after setting the rotation axis to recalculate the Js
+	magdyn.CalcMagneticSites();
+	magdyn.CalcExchangeTerms();
 
 
 	// calculate a point on the dispersion

@@ -147,7 +147,7 @@ private:
 
 	QPushButton *m_btnStartStop_gv{};   // start/stop calculation
 	bool m_calcEnabled_gv{};            // enable calculations
-	bool m_stopRequested_gv{};          // stop running calculations
+	std::atomic<bool> m_stopRequested_gv{};  // stop running calculations
 
 	QProgressBar *m_progress_gv{};      // progress bar
 	QMenu *m_menuPlot_gv{};             // context menu for plot
