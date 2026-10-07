@@ -379,36 +379,45 @@ MAGDYN_INST::CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 	tasks.reserve(num_Qs_sqrt * num_Qs_sqrt);
 
 	// calculate dispersion
+	bool stop = false;
 	for(t_size i = 0; i < num_Qs_sqrt; ++i)
-	for(t_size j = 0; j < num_Qs_sqrt; ++j)
 	{
-		if(progress_fkt && !(*progress_fkt)(0, num_Qs_sqrt * num_Qs_sqrt))
+		if(stop)
 			break;
 
-		auto task = [this, i, j, num_Qs_sqrt, calc_weights,
-			h_start, k_start, l_start,
-			h_end1, k_end1, l_end1,
-			h_end2, k_end2, l_end2]() -> SofQE
+		for(t_size j = 0; j < num_Qs_sqrt; ++j)
 		{
-			// get Q
-			const t_real h = num_Qs_sqrt == 1 ? h_start :
-				std::lerp(h_start, h_end1, t_real(i) / t_real(num_Qs_sqrt - 1)) +
-				std::lerp(h_start, h_end2, t_real(j) / t_real(num_Qs_sqrt - 1)) - h_start;
-			const t_real k = num_Qs_sqrt == 1 ? k_start :
-				std::lerp(k_start, k_end1, t_real(i) / t_real(num_Qs_sqrt - 1)) +
-				std::lerp(k_start, k_end2, t_real(j) / t_real(num_Qs_sqrt - 1)) - k_start;
-			const t_real l = num_Qs_sqrt == 1 ? l_start :
-				std::lerp(l_start, l_end1, t_real(i) / t_real(num_Qs_sqrt - 1)) +
-				std::lerp(l_start, l_end2, t_real(j) / t_real(num_Qs_sqrt - 1)) - l_start;
-			const t_vec3_real Q = tl2::create<t_vec3_real>({ h, k, l });
+			if(progress_fkt && !(*progress_fkt)(0, num_Qs_sqrt * num_Qs_sqrt))
+			{
+				stop = true;
+				break;
+			}
 
-			// get E and S(Q, E) for this Q
-			return CalcEnergies(Q, !calc_weights);
-		};
+			auto task = [this, i, j, num_Qs_sqrt, calc_weights,
+				h_start, k_start, l_start,
+				h_end1, k_end1, l_end1,
+				h_end2, k_end2, l_end2]() -> SofQE
+			{
+				// get Q
+				const t_real h = num_Qs_sqrt == 1 ? h_start :
+					std::lerp(h_start, h_end1, t_real(i) / t_real(num_Qs_sqrt - 1)) +
+					std::lerp(h_start, h_end2, t_real(j) / t_real(num_Qs_sqrt - 1)) - h_start;
+				const t_real k = num_Qs_sqrt == 1 ? k_start :
+					std::lerp(k_start, k_end1, t_real(i) / t_real(num_Qs_sqrt - 1)) +
+					std::lerp(k_start, k_end2, t_real(j) / t_real(num_Qs_sqrt - 1)) - k_start;
+				const t_real l = num_Qs_sqrt == 1 ? l_start :
+					std::lerp(l_start, l_end1, t_real(i) / t_real(num_Qs_sqrt - 1)) +
+					std::lerp(l_start, l_end2, t_real(j) / t_real(num_Qs_sqrt - 1)) - l_start;
+				const t_vec3_real Q = tl2::create<t_vec3_real>({ h, k, l });
 
-		t_taskptr taskptr = std::make_shared<t_task>(task);
-		tasks.push_back(taskptr);
-		boost::asio::post(pool, [taskptr]() { (*taskptr)(); });
+				// get E and S(Q, E) for this Q
+				return CalcEnergies(Q, !calc_weights);
+			};
+
+			t_taskptr taskptr = std::make_shared<t_task>(task);
+			tasks.push_back(taskptr);
+			boost::asio::post(pool, [taskptr]() { (*taskptr)(); });
+		}
 	}
 
 	bool return_results = (result_fkt == nullptr);

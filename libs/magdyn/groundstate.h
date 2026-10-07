@@ -92,12 +92,10 @@ t_real MAGDYN_INST::CalcGroundStateEnergy() const
 		const MagneticSite& s_i = GetMagneticSite(term.site1_calc);
 		const MagneticSite& s_j = GetMagneticSite(term.site2_calc);
 
-		const t_mat33 J = CalcRealJ(term);  // Q = 0 -> no rotation needed
-
 		const t_vec3 Si = s_i.spin_mag_calc * s_i.trafo_z_calc;
 		const t_vec3 Sj = s_j.spin_mag_calc * s_j.trafo_z_calc;
 
-		E += tl2::inner_noconj<t_vec3>(Si, J * Sj).real();
+		E += tl2::inner_noconj<t_vec3>(Si, term.J_real * Sj).real();
 	}
 
 	// external field per site
