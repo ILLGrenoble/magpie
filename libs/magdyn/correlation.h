@@ -77,7 +77,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		// check commutator relations, see before equ. 7 in (McClarty 2022)
 		//t_mat check_comm = S.evec_mat * S.comm * tl2::herm(S.evec_mat);
 		t_mat check_comm = S.evec_mat * tl2::herm(S.evec_mat);
-		if(!tl2::equals(tl2::unit<t_mat>(S.comm.size1()), check_comm, m_eps))
+		if(!tl2::equals(tl2::unit<t_mat>(/*S.comm.size1()*/ num_branches), check_comm, m_eps))
 		{
 			MAGDYN_CERR_OPT << "Magdyn error: Wrong commutator at Q = "
 				<< S.Q_rlu << ": " << check_comm
@@ -111,7 +111,8 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		S.E_and_S.resize(energy_mat_size);
 	}
 
-	t_mat E_sqrt = S.comm * energy_mat;        // abs. energies
+	//t_mat E_sqrt = S.comm * energy_mat;        // abs. energies
+	t_mat E_sqrt = mult_comm(energy_mat, true);  // abs. energies
 	const t_size E_sqrt_size = E_sqrt.size1();
 	for(t_size i = 0; i < E_sqrt_size; ++i)
 		E_sqrt(i, i) = std::sqrt(E_sqrt(i, i));  // sqrt. of abs. energies
@@ -211,6 +212,65 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		//std::cout << "ffact(Q = |" << S.Q_central_rlu << "| rlu = " << Q_abs << " / A) = " << ffacts[ffact_idx] << std::endl;
 	}
 
+	// phase pre-factor calculation
+	t_mat M_pre00 = tl2::create<t_mat>(N, N);
+	t_mat M_pre0N = tl2::create<t_mat>(N, N);
+	t_mat M_preN0 = tl2::create<t_mat>(N, N);
+	t_mat M_preNN = tl2::create<t_mat>(N, N);
+
+	// building the spin correlation functions of equation (47) from (Toth 2015)
+	for(t_size i = 0; i < N; ++i)
+	{
+		// get the outer site
+		const MagneticSite& s_i = GetMagneticSite(i);
+
+		// magnetic form factor for site i
+		t_cplx ffact_i = 1., ffactc_i = 1.;
+		if(s_i.ffact_idx && *s_i.ffact_idx < ffacts.size())
+		{
+			ffact_i = ffacts[*s_i.ffact_idx];
+			ffactc_i = std::conj(ffacts[*s_i.ffact_idx]);
+		}
+
+		for(t_size j = 0; j < N; ++j)
+		{
+			// get the inner site
+			const MagneticSite& s_j = GetMagneticSite(j);
+
+			// magnetic form factor for site j
+			t_cplx ffact_j = 1., ffactc_j = 1.;
+			if(s_j.ffact_idx && *s_j.ffact_idx < ffacts.size())
+			{
+				ffact_j = ffacts[*s_j.ffact_idx];
+				ffactc_j = std::conj(ffacts[*s_j.ffact_idx]);
+			}
+
+			// pre-factors of equation (44) from (Toth 2015)
+			const t_real S_mag = std::sqrt(s_i.spin_mag_calc * s_j.spin_mag_calc);
+			const t_cplx phase = std::exp(-m_phase_sign * s_imag * s_twopi *
+				tl2::inner<t_vec3_real>(s_j.pos_calc - s_i.pos_calc, S.Q_rlu));
+			if(m_perform_checks)
+			{
+				// because A*B^T = diag(2pi), the phase is the same as:
+				const t_cplx phase_chk = std::exp(-m_phase_sign * s_imag *
+					tl2::inner<t_vec3_real>(m_xtalA*s_j.pos_calc - m_xtalA*s_i.pos_calc, S.Q_invA));
+
+				if(!tl2::equals<t_cplx>(phase, phase_chk, m_eps))
+				{
+					MAGDYN_CERR_OPT << "Magdyn error: Wrong phase at Q = "
+						<< S.Q_rlu << ": " << phase << " != " << phase_chk
+						<< "." << std::endl;
+				}
+			}
+
+			// matrix elements of equation (44) from (Toth 2015)
+			M_pre00(i, j) = ffact_i * ffactc_j  * phase * S_mag;  // b_i+ b_j terms
+			M_pre0N(i, j) = ffact_i * ffact_j   * phase * S_mag;  // b_i+ b_j+ terms
+			M_preN0(i, j) = ffactc_i * ffactc_j * phase * S_mag;  // b_i b_j terms
+			M_preNN(i, j) = ffactc_i * ffact_j  * phase * S_mag;  // b_i b_j+ terms
+		}  // end of inner site iteration
+	}  // end of outer site iteration
+
 	// building the spin correlation functions of equation (47) from (Toth 2015)
 	for(std::uint8_t x_idx = 0; x_idx < 3; ++x_idx)
 	for(std::uint8_t y_idx = 0; y_idx < 3; ++y_idx)
@@ -227,14 +287,6 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 			const t_vec3& u_i = s_i.ge_trafo_plane_calc;
 			const t_vec3& uc_i = s_i.ge_trafo_plane_conj_calc;
 
-			// magnetic form factor for site i
-			t_cplx ffact_i = 1., ffactc_i = 1.;
-			if(s_i.ffact_idx && *s_i.ffact_idx < ffacts.size())
-			{
-				ffact_i = ffacts[*s_i.ffact_idx];
-				ffactc_i = std::conj(ffacts[*s_i.ffact_idx]);
-			}
-
 			for(t_size j = 0; j < N; ++j)
 			{
 				// get the inner site
@@ -244,37 +296,11 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 				const t_vec3& u_j = s_j.ge_trafo_plane_calc;
 				const t_vec3& uc_j = s_j.ge_trafo_plane_conj_calc;
 
-				// magnetic form factor for site j
-				t_cplx ffact_j = 1., ffactc_j = 1.;
-				if(s_j.ffact_idx && *s_j.ffact_idx < ffacts.size())
-				{
-					ffact_j = ffacts[*s_j.ffact_idx];
-					ffactc_j = std::conj(ffacts[*s_j.ffact_idx]);
-				}
-
-				// pre-factors of equation (44) from (Toth 2015)
-				const t_real S_mag = std::sqrt(s_i.spin_mag_calc * s_j.spin_mag_calc);
-				const t_cplx phase = std::exp(-m_phase_sign * s_imag * s_twopi *
-					tl2::inner<t_vec3_real>(s_j.pos_calc - s_i.pos_calc, S.Q_rlu));
-				if(m_perform_checks)
-				{
-					// because A*B^T = diag(2pi), the phase is the same as:
-					const t_cplx phase_chk = std::exp(-m_phase_sign * s_imag *
-						tl2::inner<t_vec3_real>(m_xtalA*s_j.pos_calc - m_xtalA*s_i.pos_calc, S.Q_invA));
-
-					if(!tl2::equals<t_cplx>(phase, phase_chk, m_eps))
-					{
-						MAGDYN_CERR_OPT << "Magdyn error: Wrong phase at Q = "
-							<< S.Q_rlu << ": " << phase << " != " << phase_chk
-							<< "." << std::endl;
-					}
-				}
-
 				// matrix elements of equation (44) from (Toth 2015)
-				M(    i,     j) = ffact_i * ffactc_j  * phase * S_mag * u_i[x_idx]  * uc_j[y_idx];  // b_i+ b_j terms
-				M(    i, N + j) = ffact_i * ffact_j   * phase * S_mag * u_i[x_idx]  * u_j[y_idx];   // b_i+ b_j+ terms
-				M(N + i,     j) = ffactc_i * ffactc_j * phase * S_mag * uc_i[x_idx] * uc_j[y_idx];  // b_i b_j terms
-				M(N + i, N + j) = ffactc_i * ffact_j  * phase * S_mag * uc_i[x_idx] * u_j[y_idx];   // b_i b_j+ terms
+				M(    i,     j) = M_pre00(i, j) * u_i[x_idx]  * uc_j[y_idx];  // b_i+ b_j terms
+				M(    i, N + j) = M_pre0N(i, j) * u_i[x_idx]  * u_j[y_idx];   // b_i+ b_j+ terms
+				M(N + i,     j) = M_preN0(i, j) * uc_i[x_idx] * uc_j[y_idx];  // b_i b_j terms
+				M(N + i, N + j) = M_preNN(i, j) * uc_i[x_idx] * u_j[y_idx];   // b_i b_j+ terms
 			}  // end of inner site iteration
 		}  // end of outer site iteration
 

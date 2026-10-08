@@ -226,7 +226,7 @@ struct t_SofQE
 	t_vec3_real Q_invA{};        // momentum transfer in A^(-1)
 	t_vec3_real Q_central_rlu{}; // central momentum transfer in rlu, for incommensurate structures
 	t_vec3_real Q_central_invA{};// central momentum transfer in A^(-1), for incommensurate structures
-	t_mat comm{};                // commutators
+	//t_mat comm{};                // commutators
 
 	t_mat H{};                   // hamiltonian
 	t_mat H_triag{};             // triangulised hamiltonian after cholesky decomposition

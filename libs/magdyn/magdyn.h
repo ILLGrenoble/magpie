@@ -404,7 +404,7 @@ public:
 
 	// calculate the spin rotation trafo for the magnetic sites
 	// and parse any given expressions
-	void CalcMagneticSite(MagneticSite& site);
+	void CalcMagneticSite(MagneticSite& site, bool calc_spin_dir = true);
 	void CalcMagneticSite(t_size idx);
 
 	// calculate the spin rotation trafo for the magnetic sites

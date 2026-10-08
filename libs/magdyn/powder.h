@@ -93,8 +93,7 @@ MAGDYN_INST::CalcPowderBin(t_real Q_invA,
 	t_histo histE = histo::make_histogram(histo::axis::regular<t_real>(E_bins, E_start, E_end));
 
 	// calculate S(Q, E)
-	auto SQEs = CalcPowder(Q_invA, num_points, num_threads,
-		calc_weights, progress_fkt);
+	auto SQEs = CalcPowder(Q_invA, num_points, num_threads, calc_weights, progress_fkt);
 
 	// put S(Q, E) into energy bins
 	for(const auto& SQE : SQEs)

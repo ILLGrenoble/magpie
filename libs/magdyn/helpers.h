@@ -135,6 +135,39 @@ t_vec to_4vec(const t_vec_other& vec, t_val w = 0.)
 {
 	return tl2::create<t_vec>({ vec[0], vec[1], vec[2], w });
 }
+
+
+
+/**
+ * multiply a matrix with diag(1, -1)
+ */
+template<class t_mat>
+#ifndef SWIG  // TODO: remove this as soon as swig understands concepts
+requires tl2::is_mat<t_mat>
+#endif
+t_mat mult_comm(const t_mat& mat, bool pre_multiply = true)
+{
+	t_mat m = mat;
+	using t_size = decltype(mat.size1());
+
+	const t_size rows = mat.size1();
+	const t_size cols = mat.size2();
+
+	if(pre_multiply)  // C*M
+	{
+		for(t_size row = rows/2; row < rows; ++row)
+			for(t_size col = 0; col < cols; ++col)
+				m(row, col) = -m(row, col);
+	}
+	else              // M*C
+	{
+		for(t_size row = 0; row < rows; ++row)
+			for(t_size col = cols/2; col < cols; ++col)
+				m(row, col) = -m(row, col);
+	}
+
+	return m;
+}
 // ----------------------------------------------------------------------------
 
 

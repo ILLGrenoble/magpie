@@ -148,9 +148,13 @@ bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_p
 			site.spin_dir[0] = tl2::var_to_str(x, m_prec);
 			site.spin_dir[1] = tl2::var_to_str(y, m_prec);
 			site.spin_dir[2] = tl2::var_to_str(z, m_prec);
+			site.spin_dir_calc[0] = x;
+			site.spin_dir_calc[1] = y;
+			site.spin_dir_calc[2] = z;
 			site.xtal_sys = false;
 
-			dyn.CalcMagneticSite(site);
+			// directly set spin_dir_calc
+			dyn.CalcMagneticSite(site, false);
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
 			using namespace tl2_ops;
@@ -214,22 +218,26 @@ bool MAGDYN_INST::CalcGroundState(const std::unordered_set<std::string>* fixed_p
 			t_real u = vals[site_idx * 2 + 0];
 			t_real v = vals[site_idx * 2 + 1];
 			std::tie(u, v) = tl2::uv_mod(u, v);
-			tl2::set_eps_round<t_real>(u, m_eps);
-			tl2::set_eps_round<t_real>(v, m_eps);
+			//tl2::set_eps_round<t_real>(u, m_eps);
+			//tl2::set_eps_round<t_real>(v, m_eps);
 
 			const auto [ phi, theta ] = tl2::uv_to_sph<t_real>(u, v);
 			auto [ x, y, z ] = tl2::sph_to_cart<t_real>(1., phi, theta);
-			tl2::set_eps_round<t_real>(x, m_eps);
-			tl2::set_eps_round<t_real>(y, m_eps);
-			tl2::set_eps_round<t_real>(z, m_eps);
+			//tl2::set_eps_round<t_real>(x, m_eps);
+			//tl2::set_eps_round<t_real>(y, m_eps);
+			//tl2::set_eps_round<t_real>(z, m_eps);
 
 			MagneticSite& site = GetMagneticSites()[site_idx];
 			site.spin_dir[0] = tl2::var_to_str(x, m_prec);
 			site.spin_dir[1] = tl2::var_to_str(y, m_prec);
 			site.spin_dir[2] = tl2::var_to_str(z, m_prec);
+			site.spin_dir_calc[0] = x;
+			site.spin_dir_calc[1] = y;
+			site.spin_dir_calc[2] = z;
 			site.xtal_sys = false;
 
-			CalcMagneticSite(site);
+			// directly set spin_dir_calc
+			CalcMagneticSite(site, false);
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
 			using namespace tl2_ops;
@@ -294,17 +302,21 @@ bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::st
 				site.spin_dir[0] = sx;
 				site.spin_dir[1] = sy;
 				site.spin_dir[2] = sz;
+				site.spin_dir_calc[0] = x;
+				site.spin_dir_calc[1] = y;
+				site.spin_dir_calc[2] = z;
 				site.xtal_sys = false;
 
-				dyn.CalcMagneticSite(site);
+				// directly set spin_dir_calc
+				dyn.CalcMagneticSite(site, false);
 			}
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
 			using namespace tl2_ops;
-			std::cout << site.name
-				<< ": u = " << u << ", v = " << v << ", "
-				<< "phi = " << phi << ", theta = " << theta << ", "
-				<< "S = " << site.spin_dir_calc << std::endl;
+			std::cout
+				<< "u = " << u << ", v = " << v << ", "
+				<< "phi = " << phi << ", theta = " << theta
+				<< "." << std::endl;
 #endif
 		}
 
@@ -367,14 +379,14 @@ bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::st
 			t_real u = vals[(sym_idx - 1) * 2 + 0];
 			t_real v = vals[(sym_idx - 1) * 2 + 1];
 			std::tie(u, v) = tl2::uv_mod(u, v);
-			tl2::set_eps_round<t_real>(u, m_eps);
-			tl2::set_eps_round<t_real>(v, m_eps);
+			//tl2::set_eps_round<t_real>(u, m_eps);
+			//tl2::set_eps_round<t_real>(v, m_eps);
 
 			const auto [ phi, theta ] = tl2::uv_to_sph<t_real>(u, v);
 			auto [ x, y, z ] = tl2::sph_to_cart<t_real>(1., phi, theta);
-			tl2::set_eps_round<t_real>(x, m_eps);
-			tl2::set_eps_round<t_real>(y, m_eps);
-			tl2::set_eps_round<t_real>(z, m_eps);
+			//tl2::set_eps_round<t_real>(x, m_eps);
+			//tl2::set_eps_round<t_real>(y, m_eps);
+			//tl2::set_eps_round<t_real>(z, m_eps);
 
 			std::string sx = tl2::var_to_str(x, m_prec);
 			std::string sy = tl2::var_to_str(y, m_prec);
@@ -388,17 +400,21 @@ bool MAGDYN_INST::CalcGroundStateUniqueSymmetry(const std::unordered_set<std::st
 				site.spin_dir[0] = sx;
 				site.spin_dir[1] = sy;
 				site.spin_dir[2] = sz;
+				site.spin_dir_calc[0] = x;
+				site.spin_dir_calc[1] = y;
+				site.spin_dir_calc[2] = z;
 				site.xtal_sys = false;
 
-				CalcMagneticSite(site);
+				// directly set spin_dir_calc
+				CalcMagneticSite(site, false);
 			}
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
 			using namespace tl2_ops;
-			std::cout << site.name
-				<< ": u = " << u << ", v = " << v << ", "
-				<< "phi = " << phi << ", theta = " << theta << ", "
-				<< "S = " << site.spin_dir_calc << std::endl;
+			std::cout
+				<< "u = " << u << ", v = " << v << ", "
+				<< "phi = " << phi << ", theta = " << theta
+				<< "." << std::endl;
 #endif
 		}
 

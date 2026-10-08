@@ -93,7 +93,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcExternalField()
  * calculate the spin rotation trafo for the magnetic sites
  * and parse any given expressions
  */
-MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
+MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site, bool calc_spin_dir)
 {
 	try
 	{
@@ -104,10 +104,11 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 
 		// defaults
 		site.pos_calc = tl2::zero<t_vec3_real>(3);
-		site.spin_dir_calc = tl2::zero<t_vec3_real>(3);
 		site.trafo_z_calc = tl2::zero<t_vec3>(3);
 		site.trafo_plane_calc = tl2::zero<t_vec3>(3);
 		site.trafo_plane_conj_calc = tl2::zero<t_vec3>(3);
+		if(calc_spin_dir)
+			site.spin_dir_calc = tl2::zero<t_vec3_real>(3);
 		if(!site.g_e)
 			site.g_e = tl2::g_e<t_real> * tl2::unit<t_mat33>(3);
 
@@ -144,7 +145,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 			}
 
 			// spin direction
-			if(site.spin_dir[idx] != "")
+			if(calc_spin_dir && site.spin_dir[idx] != "")
 			{
 				if(parser.parse_noexcept(site.spin_dir[idx]))
 				{
@@ -185,7 +186,7 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site)
 			}
 		}  // idx
 
-		if(site.xtal_sys)
+		if(calc_spin_dir && site.xtal_sys)
 		{
 			site.spin_dir_calc = m_xtalA * site.spin_dir_calc;
 			site.spin_dir_calc /= tl2::norm<t_vec3_real>(site.spin_dir_calc);

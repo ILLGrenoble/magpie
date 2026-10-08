@@ -375,10 +375,10 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 		return S;
 
 	// equation (30) from (Toth 2015), to ensure correct commutators
-	const t_size num_branches = 2*N;
+	/*const t_size num_branches = 2*N;
 	S.comm = tl2::unit<t_mat>(num_branches);
 	for(t_size i = N; i < num_branches; ++i)
-		S.comm(i, i) = -1.;
+		S.comm(i, i) = -1.;*/
 
 	// equation (31) from (Toth 2015)
 	t_size chol_try = 0;
@@ -436,9 +436,15 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::CalcEnergiesFromHamiltonian(
 
 	// see p. 5 in (Toth 2015)
 	if(!chol_failed)
-		S.H_comm = S.H_triag * S.comm * tl2::herm<t_mat>(S.H_triag);
+	{
+		//S.H_comm = S.H_triag * S.comm * tl2::herm<t_mat>(S.H_triag);
+		S.H_comm = S.H_triag * mult_comm(tl2::herm<t_mat>(S.H_triag), true);
+	}
 	else
-		S.H_comm = S.H * S.comm;  // try to approximate
+	{
+		//S.H_comm = S.H * S.comm;  // try to approximate
+		S.H_comm = mult_comm(S.H, false);
+	}
 
 	const bool is_herm = tl2::is_symm_or_herm<t_mat, t_real>(S.H_comm, m_eps);
 	if(m_perform_checks && !is_herm)
