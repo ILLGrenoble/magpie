@@ -75,7 +75,7 @@ int g_allow_general_J = 1;
 int g_evecs_ortho = 1;
 
 // console messages
-int g_silent = 1;
+int g_silent = 0;
 int g_checks = 0;
 
 #ifndef DONT_USE_QT

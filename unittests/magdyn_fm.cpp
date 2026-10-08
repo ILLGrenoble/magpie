@@ -63,6 +63,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 
 	// magnon calculator
 	t_magdyn magdyn{};
+	magdyn.SetEpsilon(eps);
 
 	// crystal lattice
 	magdyn.SetCrystalLattice(5., 5., 5., pi/2., pi/2., pi/2.);

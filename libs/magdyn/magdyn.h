@@ -704,8 +704,8 @@ private:
 	bool m_fail_wrong_chol { true };            // return on cholesky failure
 
 	// precisions
-	t_real m_eps{ 1e-6 };
-	int m_prec{ 6 };
+	t_real m_eps{ std::is_same_v<t_real, float> ? 1e-4 : 1e-6 };
+	int m_prec{ std::is_same_v<t_real, float> ? 4 : 6 };
 
 	// conventions
 	t_real m_phase_sign{ -1. };
