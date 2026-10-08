@@ -138,7 +138,7 @@ public:
 	const MagDynDlg& operator=(const MagDynDlg&) = delete;
 
 
-protected:
+private:
 	QSettings *m_sett{};
 	QMenuBar *m_menu{};
 	QSplitter *m_split_inout{};
@@ -310,6 +310,8 @@ protected:
 	StructFactDlg *m_structfact_tool{};       // nuclear structure factor tool
 	MagStructFactDlg *m_magstructfact_tool{}; // magnetic structure factor tool
 	SgBrowserDlg *m_sg_browser{};             // space group browser
+
+	QWidget *m_lastFocus{};                   // widget that last had the focus
 
 
 protected:

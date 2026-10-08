@@ -1093,9 +1093,14 @@ void MagDynDlg::EnableInput(bool enable)
 		m_btnStartStop->setToolTip("Start calculation.");
 		if(g_use_icons)
 			m_btnStartStop->setIcon(QIcon::fromTheme("media-playback-start"));
+
+		if(m_lastFocus)
+			m_lastFocus->setFocus();
 	}
 	else
 	{
+		m_lastFocus = QApplication::focusWidget();
+
 		m_menu->setEnabled(false);
 		m_tabs_out->setEnabled(false);
 		m_tabs_in->setEnabled(false);
