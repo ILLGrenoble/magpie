@@ -77,6 +77,8 @@ void MagDynDlg::SyncSitesFromKernel(boost::optional<const pt::ptree&> extra_info
 	// clear old sites
 	DelTabItem(m_sitestab, -1);
 
+	m_unitcell01->setChecked(m_dyn.GetUnitCellExtents().first >= 0);
+
 	for(t_size site_index = 0; site_index < m_dyn.GetMagneticSitesCount(); ++site_index)
 	{
 		const t_site &site = m_dyn.GetMagneticSite(site_index);
@@ -325,6 +327,10 @@ void MagDynDlg::SyncToKernel()
 	}
 
 	m_dyn.SetCalcPolarisation(m_use_polcoords->isChecked());
+	if(m_unitcell01->isChecked())
+		m_dyn.SetUnitCellExtents(0., 1.);
+	else
+		m_dyn.SetUnitCellExtents(-0.5, 0.5);
 
 	// transfer magnetic sites
 	for(int row = 0; row < m_sitestab->rowCount(); ++row)

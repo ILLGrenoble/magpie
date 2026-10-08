@@ -103,11 +103,14 @@ void MagDynDlg::CreateSitesPanel()
 	QPushButton *btnDel = new QPushButton("Delete", m_sitespanel);
 	QPushButton *btnUp = new QPushButton("Up", m_sitespanel);
 	QPushButton *btnDown = new QPushButton("Down", m_sitespanel);
-
 	btnAdd->setToolTip("Add a site.");
 	btnDel->setToolTip("Delete selected site(s).");
 	btnUp->setToolTip("Move selected site(s) up.");
 	btnDown->setToolTip("Move selected site(s) down.");
+
+	m_unitcell01 = new QCheckBox("[0, 1] Unit Cell", m_sitespanel);
+	m_unitcell01->setChecked(true);
+	m_unitcell01->setToolTip("Unit cell range extends from 0 to 1. Otherwise from -0.5 to 0.5.");
 
 	QPushButton *btnMirrorAtoms = new QPushButton("Mirror", m_sitespanel);
 	QPushButton *btnShowNotes = new QPushButton("Notes...", m_sitespanel);
@@ -173,7 +176,8 @@ void MagDynDlg::CreateSitesPanel()
 	grid->addWidget(btnDel, y, 1, 1, 1);
 	grid->addWidget(btnUp, y, 2, 1, 1);
 	grid->addWidget(btnDown, y++, 3, 1, 1);
-	grid->addWidget(btnMirrorAtoms, y, 0, 1, 1);
+	grid->addWidget(m_unitcell01, y, 0, 1, 1);
+	grid->addWidget(btnMirrorAtoms, y, 1, 1, 1);
 	grid->addWidget(btnShowNotes, y, 2, 1, 1);
 	grid->addWidget(btnGroundState, y++, 3, 1, 1);
 
@@ -269,6 +273,13 @@ void MagDynDlg::CreateSitesPanel()
 		this->ShowTableContextMenu(m_sitestab, menuTableContext, menuTableContextNoItem, pt);
 	});
 
+	connect(m_unitcell01, &QCheckBox::toggled, [this](bool checked)
+	{
+		if(checked)
+			m_dyn.SetUnitCellExtents(0., 1.);
+		else
+			m_dyn.SetUnitCellExtents(-0.5, 0.5);
+	});
 
 	m_tabs_setup->addTab(m_sitespanel, "Sites");
 }

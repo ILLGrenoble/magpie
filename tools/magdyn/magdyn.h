@@ -204,6 +204,7 @@ private:
 	// sites panel
 	QTableWidget *m_sitestab{};
 	QSpinBox *m_extCell[3]{nullptr, nullptr, nullptr};
+	QCheckBox *m_unitcell01{};
 
 	// terms panel, ordering vector, and rotation axis
 	QTableWidget *m_termstab{};

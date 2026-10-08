@@ -68,7 +68,7 @@ void MagDynDlg::InitSettings()
 	m_dyn.SetCholeskyMaxTries(g_cholesky_maxtries);
 	m_dyn.SetCholeskyInc(g_cholesky_delta);
 	m_dyn.SetCholeskyFailOnWrong(g_cholesky_fail_when_wrong != 0);
-	if(g_uc_01)
+	if(m_unitcell01->isChecked())
 		m_dyn.SetUnitCellExtents(0., 1.);
 	else
 		m_dyn.SetUnitCellExtents(-0.5, 0.5);

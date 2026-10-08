@@ -117,7 +117,8 @@ template<class t_vec, class t_vec_real, class t_vecs = std::vector<t_vec>, class
 	typename t_real = typename t_cplx::value_type>
 std::tuple<t_vecs, t_S> berry_connections(
 	const std::function<std::tuple<t_vecs, t_S>(const t_vec_real& Q)>& get_evecs,
-	const t_vec_real& Q, t_real delta = std::numeric_limits<t_real>::epsilon())
+	const t_vec_real& Q, t_real delta = std::numeric_limits<t_real>::epsilon(),
+	[[__maybe_unused__]] bool enforce_commutator = false)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires (!tl2::is_mat<t_vecs>) && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
@@ -169,7 +170,7 @@ template<class t_vec, class t_vec_real, class t_mat, class t_S,
 std::tuple<std::vector<t_cplx>, t_S> berry_curvatures(
 	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q)>& get_evecs,
 	const t_vec_real& Q, t_real delta = std::numeric_limits<t_real>::epsilon(),
-	t_size dim1 = 0, t_size dim2 = 1)
+	t_size dim1 = 0, t_size dim2 = 1, bool enforce_commutator = false)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
@@ -190,13 +191,13 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 
 	std::vector<t_vec> connections =
 		std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real>(
-			get_evecs, Q, delta));
+			get_evecs, Q, delta, enforce_commutator));
 	std::vector<t_vec> connections_h =
 		std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real>(
-			get_evecs, h, delta));
+			get_evecs, h, delta, enforce_commutator));
 	std::vector<t_vec> connections_k =
 		std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real>(
-			get_evecs, k, delta));
+			get_evecs, k, delta, enforce_commutator));
 
 	std::vector<t_cplx> curvatures{};
 	curvatures.reserve(BANDS);
@@ -232,21 +233,23 @@ std::vector<t_cplx> chern_numbers(
 	t_real bz = 0.5,  // brillouin zone boundary
 	t_real delta_diff = std::numeric_limits<t_real>::epsilon(),
 	t_real delta_int = std::cbrt(std::numeric_limits<t_real>::epsilon()),
-	t_size dim1 = 0, t_size dim2 = 1, bool calc_via_boundary = true)
+	t_size dim1 = 0, t_size dim2 = 1, bool calc_via_boundary = true,
+	bool enforce_commutator = false)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
 {
 	std::vector<t_cplx> chern_nums;
 
-	auto int_boundary = [get_evecs, delta_diff, delta_int, bz, dim1, dim2, &chern_nums](
+	auto int_boundary = [get_evecs, delta_diff, delta_int, bz, dim1, dim2,
+		&chern_nums, enforce_commutator](
 		t_size dim, t_vec_real& Q, t_real sign)
 	{
 		for(Q[dim] = -bz; Q[dim] < bz; Q[dim] += delta_int)
 		{
 			std::vector<t_vec> conns =
 				std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real>(
-					get_evecs, Q, delta_diff));
+					get_evecs, Q, delta_diff, enforce_commutator));
 
 			// initialise by resetting chern numbers to zeros
 			if(!chern_nums.size())
@@ -295,7 +298,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		{
 			std::vector<t_cplx> curvs = std::get<0>(berry_curvatures<
 				t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
-					get_evecs, Q, delta_diff, dim1, dim2));
+					get_evecs, Q, delta_diff, dim1, dim2, enforce_commutator));
 
 			// initialise by resetting chern numbers to zeros
 			if(!chern_nums.size())
@@ -380,7 +383,8 @@ MAGDYN_TEMPL
 std::tuple<std::vector<typename MAGDYN_INST::t_vec3>, MAGDYN_TYPE::SofQE>
 MAGDYN_INST::CalcBerryConnections(
 	const t_vec3_real& Q, t_real delta,
-	const std::vector<t_size>* perm, bool evecs_ortho) const
+	const std::vector<t_size>* perm, bool evecs_ortho,
+	bool enforce_commutator) const
 {
 	//SetUniteDegenerateEnergies(false);
 
@@ -397,7 +401,7 @@ MAGDYN_INST::CalcBerryConnections(
 		auto evec_func = get_evecmat_func<t_mat, t_vec3, t_vec3_real>(this, perm);
 
 		return berry_connections<t_vec3, t_vec3_real, t_mat, SofQE, t_cplx, t_real>(
-			evec_func, Q, delta);
+			evec_func, Q, delta, enforce_commutator);
 	}
 }
 
@@ -409,8 +413,8 @@ MAGDYN_INST::CalcBerryConnections(
 MAGDYN_TEMPL
 std::tuple<std::vector<t_cplx>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryCurvatures(
 	const t_vec3_real& Q, t_real delta,
-	const std::vector<t_size>* perm,
-	t_size dim1, t_size dim2, bool evecs_ortho) const
+	const std::vector<t_size>* perm, t_size dim1, t_size dim2,
+	bool evecs_ortho, bool enforce_commutator) const
 {
 	//SetUniteDegenerateEnergies(false);
 
@@ -429,7 +433,7 @@ std::tuple<std::vector<t_cplx>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryCurvat
 
 		return berry_curvatures<
 			t_vec3, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
-				evec_func, Q, delta, dim1, dim2);
+				evec_func, Q, delta, dim1, dim2, enforce_commutator);
 	}
 }
 
@@ -440,8 +444,8 @@ std::tuple<std::vector<t_cplx>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryCurvat
  */
 MAGDYN_TEMPL
 std::vector<t_cplx> MAGDYN_INST::CalcChernNumbers(
-	t_real bz, t_real delta_diff, t_real delta_int,
-	t_size dim1, t_size dim2, bool evecs_ortho) const
+	t_real bz, t_real delta_diff, t_real delta_int, t_size dim1, t_size dim2,
+	bool evecs_ortho, bool enforce_commutator) const
 {
 	//SetUniteDegenerateEnergies(false);
 
@@ -455,8 +459,8 @@ std::vector<t_cplx> MAGDYN_INST::CalcChernNumbers(
 
 		return chern_numbers<
 			t_vec3, t_vec3_real, t_vecs, SofQE, t_cplx, t_real, t_size>(
-				evec_func, bz, delta_diff, delta_int,
-				dim1, dim2, calc_via_boundary);
+				evec_func, bz, delta_diff, delta_int, dim1, dim2,
+				calc_via_boundary, enforce_commutator);
 	}
 	else
 	{
@@ -464,8 +468,8 @@ std::vector<t_cplx> MAGDYN_INST::CalcChernNumbers(
 
 		return chern_numbers<
 			t_vec3, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
-				evec_func, bz, delta_diff, delta_int,
-				dim1, dim2, calc_via_boundary);
+				evec_func, bz, delta_diff, delta_int, dim1, dim2,
+				calc_via_boundary, enforce_commutator);
 	}
 }
 

@@ -118,6 +118,7 @@ void MagDynDlg::Clear(bool recalc)
 	m_align_ordering->setChecked(false);
 	m_keep_spin_signs->setChecked(false);
 	m_align_spins->setChecked(false);
+	m_unitcell01->setChecked(true);
 
 	if(m_groundstate_dlg)
 		m_groundstate_dlg->SyncFromKernel();
@@ -808,8 +809,9 @@ bool MagDynDlg::ImportCIF(const QString& filename)
 		}
 
 		// atom positions
-		const t_real uc_min = g_uc_01 ? 0. : -0.5;
-		const t_real uc_max = g_uc_01 ? 1. : +0.5;
+		const bool uc_01 = m_unitcell01->isChecked();
+		const t_real uc_min = uc_01 ? 0. : -0.5;
+		const t_real uc_max = uc_01 ? 1. : +0.5;
 		for(std::size_t atomnum = 0; atomnum < atoms.size(); ++atomnum)
 		{
 			const std::string& name = atomnames[atomnum];

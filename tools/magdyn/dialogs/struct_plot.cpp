@@ -556,7 +556,10 @@ void StructPlotDlg::CentreCamera()
  */
 void StructPlotDlg::CentreCameraOnUC()
 {
-	t_real_gl mid = g_uc_01 ? 0.5 : 0;
+	if(!m_dyn)
+		return;
+	const auto uc_ext = m_dyn->GetUnitCellExtents();
+	t_real_gl mid = t_real_gl(uc_ext.first + (uc_ext.second - uc_ext.first)*0.5);
 	t_mat_gl matCentre = tl2::hom_translation<t_mat_gl>(mid, mid, mid);
 	m_structplot->GetRenderer()->GetCamera().Centre(matCentre);
 	m_structplot->GetRenderer()->GetCamera().UpdateTransformation();
@@ -1067,10 +1070,15 @@ void StructPlotDlg::AddFieldVector()
  */
 void StructPlotDlg::AddUnitCell()
 {
+	if(!m_dyn)
+		return;
+	
 	// centring of unit cell
-	t_vec_gl offs = tl2::zero<t_vec_gl>(3);
-	if(!g_uc_01)
-		offs = tl2::create<t_vec_gl>({ -0.5, -0.5, -0.5 });
+	const auto uc_ext = m_dyn->GetUnitCellExtents();
+	t_vec_gl offs = tl2::create<t_vec_gl>({
+		t_real_gl(uc_ext.first),
+		t_real_gl(uc_ext.first),
+		t_real_gl(uc_ext.first) });
 
 	auto add_edge = [this, &offs](const t_vec_gl& pos_vec, const t_vec_gl& dir_vec)
 	{

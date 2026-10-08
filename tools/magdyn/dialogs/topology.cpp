@@ -318,6 +318,9 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	m_coords_bc[1]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_coords_bc[1]->setToolTip("Second component index of B_ij matrix.");
 
+	m_enforce_commutator_bc = new QCheckBox("Enforce Commutators", panelBerryCurvature);
+	m_enforce_commutator_bc->setChecked(true);
+
 	// maximum cutoff for filtering numerical artefacts in berry curvature
 	m_B_filter_enable_bc = new QCheckBox("Maximum B:", panelBerryCurvature);
 	m_B_filter_enable_bc->setChecked(true);
@@ -374,7 +377,8 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	grid->addWidget(btnQ, y++, 3, 1, 1);
 	grid->addWidget(new QLabel("B Component:", panelBerryCurvature), y, 0, 1, 1);
 	grid->addWidget(m_coords_bc[0], y, 1, 1, 1);
-	grid->addWidget(m_coords_bc[1], y++, 2, 1, 1);
+	grid->addWidget(m_coords_bc[1], y, 2, 1, 1);
+	grid->addWidget(m_enforce_commutator_bc, y++, 3, 1, 1);
 	grid->addWidget(m_B_filter_enable_bc, y, 0, 1, 1);
 	grid->addWidget(m_B_filter_bc, y, 1, 1, 1);
 	grid->addWidget(m_S_filter_enable_bc, y, 2, 1, 1);
@@ -727,9 +731,12 @@ void TopologyDlg::CalculateBerryCurvature()
 	m_data_bc.clear();
 	m_data_bc.reserve(Q_count);
 
+	const bool enforce_commutator = m_enforce_commutator_bc->isChecked();
+
 	for(t_size Q_idx = 0; Q_idx < Q_count; ++Q_idx)
 	{
-		auto task = [this, &mtx, &dyn, &Q_start, &Q_end, Q_idx, Q_count, perm, dim1, dim2]()
+		auto task = [this, &mtx, &dyn, &Q_start, &Q_end, Q_idx, Q_count, perm,
+			dim1, dim2, enforce_commutator]()
 		{
 			const t_vec3_real Q = Q_count > 1
 				? tl2::lerp(Q_start, Q_end, t_real(Q_idx) / t_real(Q_count - 1))
@@ -740,7 +747,8 @@ void TopologyDlg::CalculateBerryCurvature()
 			data_bc.momentum = Q;
 			typename t_magdyn::SofQE S;
 			std::tie(data_bc.curvatures, S) = dyn.CalcBerryCurvatures(
-				Q, g_delta_diff, perm, dim1, dim2, g_evecs_ortho != 0);
+				Q, g_delta_diff, perm, dim1, dim2, g_evecs_ortho != 0,
+				enforce_commutator);
 			t_size num_bands = data_bc.curvatures.size();
 			data_bc.energies.reserve(num_bands);
 			data_bc.weights.reserve(num_bands);

@@ -416,6 +416,10 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 	t_real gamma = tl2::d2r<t_real>(node.get<t_real>("xtal.gamma", 90.));
 	SetCrystalLattice(a, b, c, alpha, beta, gamma);
 
+	// unit cell extents
+	m_uc_min = node.get<t_real>("xtal.unitcell_min", 0.);
+	m_uc_max = node.get<t_real>("xtal.unitcell_max", 1.);
+
 	// scattering plane
 	t_real ah = node.get<t_real>("xtal.plane_ah", 1.);
 	t_real ak = node.get<t_real>("xtal.plane_ak", 0.);
@@ -597,6 +601,10 @@ bool MAGDYN_INST::Save(boost::property_tree::ptree& node) const
 	node.put<t_real>("xtal.alpha", tl2::r2d<t_real>(m_xtalangles[0]));
 	node.put<t_real>("xtal.beta", tl2::r2d<t_real>(m_xtalangles[1]));
 	node.put<t_real>("xtal.gamma", tl2::r2d<t_real>(m_xtalangles[2]));
+
+	// unit cell extents
+	node.put<t_real>("xtal.unitcell_min", m_uc_min);
+	node.put<t_real>("xtal.unitcell_max", m_uc_max);
 
 	// scattering plane
 	// x vector

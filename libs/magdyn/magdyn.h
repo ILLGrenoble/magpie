@@ -204,6 +204,7 @@ public:
 	// --------------------------------------------------------------------
 	t_real GetEpsilon() const;
 	int GetPrecision() const;
+	std::pair<t_real, t_real> GetUnitCellExtents() const;
 
 	const Variables& GetVariables() const;
 	const MagneticSites& GetMagneticSites() const;
@@ -510,15 +511,17 @@ public:
 	// --------------------------------------------------------------------
 	std::tuple<std::vector<t_vec3>, SofQE> CalcBerryConnections(const t_vec3_real& Q_start,
 		t_real delta = 1e-12, const std::vector<t_size>* perm = nullptr,
-		bool evecs_ortho = true) const;
+		bool evecs_ortho = true, bool enforce_commutator = false) const;
 
 	std::tuple<std::vector<t_cplx>, SofQE> CalcBerryCurvatures(const t_vec3_real& Q_start,
 		t_real delta = 1e-12, const std::vector<t_size>* perm = nullptr,
-		t_size dim1 = 0, t_size dim2 = 1, bool evecs_ortho = true) const;
+		t_size dim1 = 0, t_size dim2 = 1, bool evecs_ortho = true,
+		bool enforce_commutator = false) const;
 
 	std::vector<t_cplx> CalcChernNumbers(t_real bz = 0.5,
 		t_real delta_diff = 1e-12, t_real delta_int = 1e-3,
-		t_size dim1 = 0, t_size dim2 = 1, bool evecs_ortho = true) const;
+		t_size dim1 = 0, t_size dim2 = 1, bool evecs_ortho = true,
+		bool enforce_commutator = false) const;
 	// --------------------------------------------------------------------
 
 

@@ -65,6 +65,10 @@ MAGDYN_TEMPL void MAGDYN_INST::Clear()
 	m_scatteringplane[1] = tl2::create<t_vec3_real>({ 0., 1., 0. });
 	m_scatteringplane[2] = tl2::create<t_vec3_real>({ 0., 0., 1. });
 
+	// unit cell extents
+	m_uc_min = -0.5;
+	m_uc_max = +0.5;
+
 	// reciprocal Js
 	m_J_Q0.clear();
 	m_J_Q0_valid = false;
@@ -142,6 +146,14 @@ MAGDYN_TEMPL int MAGDYN_INST::GetPrecision() const
 {
 	return m_prec;
 }
+
+
+MAGDYN_TEMPL std::pair<t_real, t_real> MAGDYN_INST::GetUnitCellExtents() const
+{
+	return std::make_pair(m_uc_min, m_uc_max);
+}
+
+
 
 MAGDYN_TEMPL const MAGDYN_TYPE::Variables& MAGDYN_INST::GetVariables() const
 {
