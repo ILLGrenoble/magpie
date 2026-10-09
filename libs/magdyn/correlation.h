@@ -160,6 +160,8 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	tl2::niceprint(std::cout, E_sqrt, 1e-4, 4);
 	std::cout << "L_energy =\n";
 	tl2::niceprint(std::cout, energy_mat, 1e-4, 4);
+	std::cout << "evec_mat =\n";  // this corresponds to S.E_and_S[i].state
+	tl2::niceprint(std::cout, S.evec_mat, 1e-4, 4);
 	std::cout << "evec_mat_comm =\n";
 	tl2::niceprint(std::cout, S.evec_mat_comm, 1e-4, 4);
 #endif

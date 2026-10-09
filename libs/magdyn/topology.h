@@ -63,6 +63,21 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	using t_size = decltype(Q.size());
 	constexpr const t_cplx imag{0, 1};
 
+	auto sub_evecs = [enforce_commutator](
+		const t_mat& mat1, const t_mat& mat2) -> t_mat
+	{
+		t_mat m = mat1 - mat2;
+
+		for(t_size col = 0; col < mat1.size2(); ++col)
+		{
+			if(tl2::inner(tl2::col<t_mat, t_vec>(mat1, col),
+			  tl2::col<t_mat, t_vec>(mat2, col)).real() < 0.)
+				tl2::set_col<t_mat, t_vec>(m, -tl2::col<t_mat, t_vec>(m, col), col);
+		}
+
+		return m;
+	};
+
 	const auto [ evecs, S ] = get_evecs(Q);
 	const t_size BANDS = evecs.size1();
 	const t_size DIM = Q.size();
@@ -89,7 +104,7 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		Q1[dim] += delta;
 
 		// differentiate eigenvector matrix
-		t_mat evecs_diff = (std::get<0>(get_evecs(Q1)) - evecs) / delta;
+		t_mat evecs_diff = sub_evecs(std::get<0>(get_evecs(Q1)), evecs) / delta;
 
 		t_mat evecs_H = tl2::herm(evecs);
 		t_mat C;
@@ -126,6 +141,30 @@ requires (!tl2::is_mat<t_vecs>) && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	using t_size = decltype(Q.size());
 	constexpr const t_cplx imag{0, 1};
 
+	/* // test
+	auto sub_evecs_gauge = [enforce_commutator](
+		const t_vec& vec1, const t_vec& vec2) -> t_vec
+	{
+		t_real phase{};
+
+		if(enforce_commutator)
+			phase = std::arg(tl2::inner(vec1, mult_comm(vec2)));
+		else
+			phase = std::arg(tl2::inner(vec1, vec2));
+
+		// ensure that the vectors are on the same gauge
+		return vec1 - std::polar(1., -phase)*vec2;
+	};*/
+
+	auto sub_evecs = [enforce_commutator](
+		const t_vec& vec1, const t_vec& vec2) -> t_vec
+	{
+		t_real sign = 1.;
+		if(tl2::inner(vec1, vec2).real() >= 0.)
+			sign = -1.;
+		return sign * (vec1 - vec2);
+	};
+
 	const auto [ evecs, S ] = get_evecs(Q);
 	const t_size BANDS = evecs.size();
 	const t_size DIM = Q.size();
@@ -145,7 +184,7 @@ requires (!tl2::is_mat<t_vecs>) && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		for(t_size band = 0; band < BANDS; ++band)
 		{
 			// differentiate eigenvectors
-			t_vec evec_diff = (evecs_delta[band] - evecs[band]) / delta;
+			t_vec evec_diff = (sub_evecs/*_gauge*/(evecs_delta[band], evecs[band])) / delta;
 			// scalar product between eigenvector and its derivative
 			connections[band][dim] = tl2::inner(evecs[band], evec_diff) * imag;
 		}
@@ -360,8 +399,15 @@ get_evec_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
 		std::vector<t_vec> vecs;
 		vecs.reserve(S.E_and_S.size());
 
+		std::size_t evec_idx = 0;
 		for(const auto& E_and_S : S.E_and_S)
-			vecs.push_back(E_and_S.state);  // these are not the final evecs after commutator correction!
+		{
+			//vecs.push_back(E_and_S.state);  // these are not the final evecs after commutator correction!
+
+			t_vec evec = tl2::col<decltype(S.evec_mat_comm), t_vec>(S.evec_mat_comm, evec_idx);
+			vecs.emplace_back(std::move(evec));
+			++evec_idx;
+		}
 
 		if(perm)
 		{

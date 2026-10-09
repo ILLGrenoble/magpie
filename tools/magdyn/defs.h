@@ -110,7 +110,10 @@ extern unsigned int g_bz_draw_order;
 
 // optional features
 extern int g_allow_ortho_spin, g_allow_general_J;
+
+// topology settings
 extern int g_evecs_ortho;
+extern int g_enforce_commutator;
 
 // console messages
 extern int g_silent, g_checks;
@@ -156,7 +159,7 @@ extern int g_fail_on_gl_error;
 // ----------------------------------------------------------------------------
 #include "dialogs/settings.h"
 
-constexpr std::array<SettingsVariable, 28> g_settingsvariables
+constexpr std::array<SettingsVariable, 29> g_settingsvariables
 {{
 	// threads
 	{
@@ -302,6 +305,12 @@ constexpr std::array<SettingsVariable, 28> g_settingsvariables
 		.description = "Eigenstates of H are always orthogonal.",
 		.key = "evecs_ortho",
 		.value = &g_evecs_ortho,
+		.editor = SettingsVariableEditor::YESNO,
+	},
+	{
+		.description = "Enforce commutator relations.",
+		.key = "enforce_commutator",
+		.value = &g_enforce_commutator,
 		.editor = SettingsVariableEditor::YESNO,
 	},
 	{

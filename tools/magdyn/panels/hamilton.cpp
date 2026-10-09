@@ -508,6 +508,8 @@ void MagDynDlg::CalcHamiltonian()
 	// print eigenstates
 	if(S.E_and_S.size() && S.E_and_S[0].state.size())
 	{
+		bool has_state_comm = (S.evec_mat_comm.size1() == S.E_and_S[0].state.size());
+
 		ostr << "<hr>";
 
 		ostr << "<p><h3>Eigenstates</h3>";
@@ -516,8 +518,11 @@ void MagDynDlg::CalcHamiltonian()
 		ostr << "<th style=\"padding-right:16px\">Energy E</td>";
 		ostr << "<th style=\"padding-right:16px\">Degeneracy</td>";
 		ostr << "<th style=\"padding-right:16px\">State |s></td>";
+		if(has_state_comm)
+			ostr << "<th style=\"padding-right:16px\">State |s>, Corr. Comm.</td>";
 		ostr << "</tr>";
 
+		t_size evec_idx = 0;
 		for(const t_E_and_S& E_and_S : S.E_and_S)
 		{
 			t_size degen = E_and_S.degeneracy;
@@ -548,7 +553,25 @@ void MagDynDlg::CalcHamiltonian()
 					ostr << ", ";
 			}
 			ostr << "</td>";
+
+			if(has_state_comm)
+			{
+				// state, corrected commutators
+				ostr << "<td style=\"padding-right:16px\">";
+				for(t_size idx = 0; idx < state.size(); ++idx)
+				{
+					t_cplx elem = tl2::col<t_mat, t_vec>(
+						S.evec_mat_comm, S.evec_mat_comm.size1() - evec_idx - 1)[idx];
+					tl2::set_eps_0<t_cplx, t_real>(elem, g_eps);
+					ostr << elem;
+					if(idx < S.evec_mat_comm.size2() - 1)
+						ostr << ", ";
+				}
+				ostr << "</td>";
+			}
+
 			ostr << "</tr>";
+			++evec_idx;
 		}
 
 		ostr << "</table></p>";
