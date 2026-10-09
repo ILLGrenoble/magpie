@@ -54,7 +54,7 @@ template<class t_vec, class t_vec_real, class t_mat, class t_S,
 	typename t_real = typename t_cplx::value_type>
 std::tuple<std::vector<t_vec>, t_S> berry_connections(
 	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q)>& get_evecs,
-	const t_vec_real& Q, t_real delta = std::numeric_limits<t_real>::epsilon(),
+	const t_vec_real& Q, t_real delta = std::sqrt(std::numeric_limits<t_real>::epsilon()),
 	bool enforce_commutator = false)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
@@ -132,7 +132,7 @@ template<class t_vec, class t_vec_real, class t_vecs = std::vector<t_vec>, class
 	typename t_real = typename t_cplx::value_type>
 std::tuple<t_vecs, t_S> berry_connections(
 	const std::function<std::tuple<t_vecs, t_S>(const t_vec_real& Q)>& get_evecs,
-	const t_vec_real& Q, t_real delta = std::numeric_limits<t_real>::epsilon(),
+	const t_vec_real& Q, t_real delta = std::sqrt(std::numeric_limits<t_real>::epsilon()),
 	[[__maybe_unused__]] bool enforce_commutator = false)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires (!tl2::is_mat<t_vecs>) && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
@@ -208,7 +208,7 @@ template<class t_vec, class t_vec_real, class t_mat, class t_S,
 	typename t_size = std::size_t>
 std::tuple<std::vector<t_cplx>, t_S> berry_curvatures(
 	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q)>& get_evecs,
-	const t_vec_real& Q, t_real delta = std::numeric_limits<t_real>::epsilon(),
+	const t_vec_real& Q, t_real delta = std::sqrt(std::numeric_limits<t_real>::epsilon()),
 	t_size dim1 = 0, t_size dim2 = 1, bool enforce_commutator = false)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
@@ -270,7 +270,7 @@ template<class t_vec, class t_vec_real, class t_mat, class t_S,
 std::vector<t_cplx> chern_numbers(
 	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q)>& get_evecs,
 	t_real bz = 0.5,  // brillouin zone boundary
-	t_real delta_diff = std::numeric_limits<t_real>::epsilon(),
+	t_real delta_diff = std::sqrt(std::numeric_limits<t_real>::epsilon()),
 	t_real delta_int = std::cbrt(std::numeric_limits<t_real>::epsilon()),
 	t_size dim1 = 0, t_size dim2 = 1, bool calc_via_boundary = true,
 	bool enforce_commutator = false)
