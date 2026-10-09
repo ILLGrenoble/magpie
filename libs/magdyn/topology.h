@@ -71,7 +71,7 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		for(t_size col = 0; col < mat1.size2(); ++col)
 		{
 			if(tl2::inner(tl2::col<t_mat, t_vec>(mat1, col),
-			  tl2::col<t_mat, t_vec>(mat2, col)).real() < 0.)
+			  tl2::col<t_mat, t_vec>(mat2, col)).real() >= 0.)
 				tl2::set_col<t_mat, t_vec>(m, -tl2::col<t_mat, t_vec>(m, col), col);
 		}
 
