@@ -330,7 +330,8 @@ get_evecmat_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
 		-> std::tuple<t_mat, typename t_magdyn::SofQE>
 	{
 		typename t_magdyn::SofQE S = magdyn->CalcEnergies(Q, false);
-		t_mat M = S.evec_mat;
+		//t_mat M = S.evec_mat;
+		t_mat M = S.evec_mat_comm;  // eigenvectors after commutator correction
 
 		if(perm)
 		{
@@ -360,7 +361,7 @@ get_evec_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
 		vecs.reserve(S.E_and_S.size());
 
 		for(const auto& E_and_S : S.E_and_S)
-			vecs.push_back(E_and_S.state);
+			vecs.push_back(E_and_S.state);  // these are not the final evecs after commutator correction!
 
 		if(perm)
 		{
@@ -380,7 +381,7 @@ get_evec_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
  * get the berry connection for each magnon band
  */
 MAGDYN_TEMPL
-std::tuple<std::vector<typename MAGDYN_INST::t_vec3>, MAGDYN_TYPE::SofQE>
+std::tuple<std::vector<t_vec>, MAGDYN_TYPE::SofQE>
 MAGDYN_INST::CalcBerryConnections(
 	const t_vec3_real& Q, t_real delta,
 	const std::vector<t_size>* perm, bool evecs_ortho,
@@ -390,17 +391,17 @@ MAGDYN_INST::CalcBerryConnections(
 
 	if(evecs_ortho)
 	{
-		using t_vecs = std::vector<t_vec3>;
-		auto evec_func = get_evec_func<t_vec3, t_vec3_real>(this, perm);
+		using t_vecs = std::vector<t_vec>;
+		auto evec_func = get_evec_func<t_vec, t_vec3_real>(this, perm);
 
-		return berry_connections<t_vec3, t_vec3_real, t_vecs, SofQE, t_cplx, t_real>(
+		return berry_connections<t_vec, t_vec3_real, t_vecs, SofQE, t_cplx, t_real>(
 			evec_func, Q, delta);
 	}
 	else
 	{
-		auto evec_func = get_evecmat_func<t_mat, t_vec3, t_vec3_real>(this, perm);
+		auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
 
-		return berry_connections<t_vec3, t_vec3_real, t_mat, SofQE, t_cplx, t_real>(
+		return berry_connections<t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real>(
 			evec_func, Q, delta, enforce_commutator);
 	}
 }
@@ -420,19 +421,19 @@ std::tuple<std::vector<t_cplx>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryCurvat
 
 	if(evecs_ortho)
 	{
-		using t_vecs = std::vector<t_vec3>;
-		auto evec_func = get_evec_func<t_vec3, t_vec3_real>(this, perm);
+		using t_vecs = std::vector<t_vec>;
+		auto evec_func = get_evec_func<t_vec, t_vec3_real>(this, perm);
 
 		return berry_curvatures<
-			t_vec3, t_vec3_real, t_vecs, SofQE, t_cplx, t_real, t_size>(
+			t_vec, t_vec3_real, t_vecs, SofQE, t_cplx, t_real, t_size>(
 				evec_func, Q, delta, dim1, dim2);
 	}
 	else
 	{
-		auto evec_func = get_evecmat_func<t_mat, t_vec3, t_vec3_real>(this, perm);
+		auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
 
 		return berry_curvatures<
-			t_vec3, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
+			t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
 				evec_func, Q, delta, dim1, dim2, enforce_commutator);
 	}
 }
@@ -454,20 +455,20 @@ std::vector<t_cplx> MAGDYN_INST::CalcChernNumbers(
 
 	if(evecs_ortho)
 	{
-		using t_vecs = std::vector<t_vec3>;
-		auto evec_func = get_evec_func<t_vec3, t_vec3_real>(this, perm);
+		using t_vecs = std::vector<t_vec>;
+		auto evec_func = get_evec_func<t_vec, t_vec3_real>(this, perm);
 
 		return chern_numbers<
-			t_vec3, t_vec3_real, t_vecs, SofQE, t_cplx, t_real, t_size>(
+			t_vec, t_vec3_real, t_vecs, SofQE, t_cplx, t_real, t_size>(
 				evec_func, bz, delta_diff, delta_int, dim1, dim2,
 				calc_via_boundary, enforce_commutator);
 	}
 	else
 	{
-		auto evec_func = get_evecmat_func<t_mat, t_vec3, t_vec3_real>(this, perm);
+		auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
 
 		return chern_numbers<
-			t_vec3, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
+			t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
 				evec_func, bz, delta_diff, delta_int, dim1, dim2,
 				calc_via_boundary, enforce_commutator);
 	}

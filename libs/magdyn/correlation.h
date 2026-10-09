@@ -115,7 +115,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	t_mat E_sqrt = mult_comm(energy_mat, true);  // abs. energies
 	const t_size E_sqrt_size = E_sqrt.size1();
 	for(t_size i = 0; i < E_sqrt_size; ++i)
-		E_sqrt(i, i) = std::sqrt(E_sqrt(i, i));  // sqrt. of abs. energies
+		E_sqrt(i, i) = std::sqrt(E_sqrt(i, i));    // sqrt. of abs. energies
 
 	// re-create energies, to be consistent with the weights
 	for(t_size i = 0; i < energy_mat_size; ++i)
@@ -149,19 +149,19 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	}
 
 	// equation (34) from (Toth 2015)
-	const t_mat boson_ops = H_triag_inv * S.evec_mat * E_sqrt;
-	const t_mat boson_ops_herm = tl2::herm(boson_ops);
+	S.evec_mat_comm = H_triag_inv * S.evec_mat * E_sqrt;
+	const t_mat evec_mat_comm_herm = tl2::herm(S.evec_mat_comm);
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
-	t_mat D_mat = boson_ops_herm * S.H_comm * boson_ops;
+	t_mat D_mat = evec_mat_comm_herm * S.H_comm * S.evec_mat_comm;
 	std::cout << "D =\n";
 	tl2::niceprint(std::cout, D_mat, 1e-4, 4);
 	std::cout << "E_sqrt =\n";
 	tl2::niceprint(std::cout, E_sqrt, 1e-4, 4);
 	std::cout << "L_energy =\n";
 	tl2::niceprint(std::cout, energy_mat, 1e-4, 4);
-	std::cout << "boson_ops =\n";
-	tl2::niceprint(std::cout, boson_ops, 1e-4, 4);
+	std::cout << "evec_mat_comm =\n";
+	tl2::niceprint(std::cout, S.evec_mat_comm, 1e-4, 4);
 #endif
 
 	// cache magnetic form factors per individual thread of the thread pool
@@ -305,7 +305,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		}  // end of outer site iteration
 
 		// multiply with boson operators
-		const t_mat M_xy = boson_ops_herm * M * boson_ops;
+		const t_mat M_xy = evec_mat_comm_herm * M * S.evec_mat_comm;
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
 		std::cout << "M_{" << int(x_idx) << ", " << int(y_idx) << "}:\n";

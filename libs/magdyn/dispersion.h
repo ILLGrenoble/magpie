@@ -151,10 +151,12 @@ MAGDYN_INST::CalcEnergies(const t_vec3_real& Q_rlu, bool only_energies) const
 		S.H_triag_p = std::move(S_p.H_triag);
 		S.H_comm_p = std::move(S_p.H_comm);
 		S.evec_mat_p = std::move(S_p.evec_mat);
+		S.evec_mat_comm_p = std::move(S_p.evec_mat_comm);
 		S.H_m = std::move(S_m.H);
 		S.H_triag_m = std::move(S_m.H_triag);
 		S.H_comm_m = std::move(S_m.H_comm);
 		S.evec_mat_m = std::move(S_m.evec_mat);
+		S.evec_mat_comm_m = std::move(S_m.evec_mat_comm);
 
 		if(!only_energies)
 		{

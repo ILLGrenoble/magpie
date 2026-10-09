@@ -27,6 +27,7 @@
 
 
 #include <string>
+#include <vector>
 
 #include "tlibs2/libs/maths.h"
 
@@ -167,6 +168,28 @@ t_mat mult_comm(const t_mat& mat, bool pre_multiply = true)
 	}
 
 	return m;
+}
+
+
+
+/**
+ * multiply a vector with diag(1, -1)
+ */
+template<class t_vec>
+#ifndef SWIG  // TODO: remove this as soon as swig understands concepts
+requires tl2::is_vec<t_vec>
+#endif
+t_vec mult_comm(const t_vec& vec)
+{
+	t_vec v = vec;
+	using t_size = decltype(vec.size());
+
+	const t_size rows = vec.size();
+
+		for(t_size row = rows/2; row < rows; ++row)
+				v[row] = -v[row];
+
+	return v;
 }
 // ----------------------------------------------------------------------------
 

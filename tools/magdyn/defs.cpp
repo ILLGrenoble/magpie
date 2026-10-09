@@ -69,7 +69,7 @@ unsigned int g_bz_draw_order = 4;
 // optional features
 int g_allow_ortho_spin = 0;
 int g_allow_general_J = 1;
-int g_evecs_ortho = 1;
+int g_evecs_ortho = 0;
 
 // console messages
 int g_silent = 0;
