@@ -101,6 +101,16 @@ void MagDynDlg::Clear(bool recalc)
 	m_normaxis[1]->setValue(0.);
 	m_normaxis[2]->setValue(0.);
 
+	m_Q_start[0]->setValue(-1.);
+	m_Q_start[1]->setValue(0.);
+	m_Q_start[2]->setValue(0.);
+	m_Q_end[0]->setValue(1.);
+	m_Q_end[1]->setValue(0.);
+	m_Q_end[2]->setValue(0.);
+	m_Q[0]->setValue(0.);
+	m_Q[1]->setValue(0.);
+	m_Q[2]->setValue(0.);
+
 	m_weight_scale->setValue(1.);
 	m_weight_min->setValue(0.);
 	m_weight_max->setValue(99.);
@@ -137,6 +147,9 @@ void MagDynDlg::Clear(bool recalc)
 	m_ffact->clear();
 	m_cur_ffact->setValue(0);
 	m_num_ffacts->setValue(1);
+
+	EnableTemperature(true);
+	EnableField(false);
 
 	m_statusFixed->setText("Ready.");
 	m_status->setText("");
@@ -291,10 +304,6 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 			m_autocalc->setChecked(*optVal);
 		if(auto optVal = magdyn.get_optional<bool>("config.use_DMI"))
 			m_use_dmi->setChecked(*optVal);
-		if(auto optVal = magdyn.get_optional<bool>("config.use_field"))
-			m_use_field->setChecked(*optVal);
-		if(auto optVal = magdyn.get_optional<bool>("config.use_temperature"))
-			m_use_temperature->setChecked(*optVal);
 		if(auto optVal = magdyn.get_optional<bool>("config.use_magffact"))
 			m_use_formfact->setChecked(*optVal);
 		if(auto optVal = magdyn.get_optional<bool>("config.use_weights"))
@@ -333,6 +342,16 @@ bool MagDynDlg::Load(const QString& filename, bool calc_dynamics)
 			m_recip_trafo_delta->setValue(*optVal);
 		if(auto optVal = magdyn.get_optional<int>("config.recip_trafo"))
 			m_recip_trafo_mode->setCurrentIndex(*optVal);
+		if(auto optVal = magdyn.get_optional<bool>("config.use_temperature"))
+		{
+			m_use_temperature->setChecked(*optVal);
+			EnableTemperature(*optVal);
+		}
+		if(auto optVal = magdyn.get_optional<bool>("config.use_field"))
+		{
+			m_use_field->setChecked(*optVal);
+			EnableField(*optVal);
+		}
 		bool found_sg = false;
 		if(auto optVal = magdyn.get_optional<std::string>("config.spacegroup");
 			m_comboSG && optVal)

@@ -435,7 +435,12 @@ void MAGDYN_INST::RemoveUnusedExchangeTerms()
 			(term.Jgen[2][2] == "" || term.Jgen[2][2] == "0"))
 			no_genJ = true;
 
-		if(no_J && no_dmi && no_genJ)
+		bool invalid_site = false;
+		const t_size num_sites = GetMagneticSitesCount();
+		if(term.site1_calc >= num_sites || term.site2_calc >= num_sites)
+			invalid_site = true;
+
+		if(no_J && no_dmi && no_genJ || invalid_site)
 			iter = couplings.erase(iter);
 		else
 			++iter;

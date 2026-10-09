@@ -239,7 +239,7 @@ void MagDynDlg::CreateSampleEnvPanel()
 
 	// temperature
 	QCheckBox *m_checkTemperature = new QCheckBox("Temperature:", m_sampleenviropanel);
-	m_checkTemperature->setChecked(false);
+	m_checkTemperature->setChecked(true);
 
 	m_temperature = new QDoubleSpinBox(m_sampleenviropanel);
 	m_temperature->setDecimals(2);

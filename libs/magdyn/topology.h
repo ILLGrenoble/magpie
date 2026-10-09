@@ -66,13 +66,23 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	auto sub_evecs = [enforce_commutator](
 		const t_mat& mat1, const t_mat& mat2) -> t_mat
 	{
-		t_mat m = mat1 - mat2;
+		t_mat m = tl2::zero<t_mat>(mat1.size1(), mat1.size2());
 
 		for(t_size col = 0; col < mat1.size2(); ++col)
 		{
 			if(tl2::inner(tl2::col<t_mat, t_vec>(mat1, col),
 			  tl2::col<t_mat, t_vec>(mat2, col)).real() >= 0.)
-				tl2::set_col<t_mat, t_vec>(m, -tl2::col<t_mat, t_vec>(m, col), col);
+			{
+				tl2::set_col<t_mat, t_vec>(m,
+					+ tl2::col<t_mat, t_vec>(mat2, col)
+					- tl2::col<t_mat, t_vec>(mat1, col), col);
+			}
+			else
+			{
+				tl2::set_col<t_mat, t_vec>(m,
+					+ tl2::col<t_mat, t_vec>(mat2, col)
+					+ tl2::col<t_mat, t_vec>(mat1, col), col);
+			}
 		}
 
 		return m;
@@ -159,10 +169,9 @@ requires (!tl2::is_mat<t_vecs>) && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	auto sub_evecs = [enforce_commutator](
 		const t_vec& vec1, const t_vec& vec2) -> t_vec
 	{
-		t_real sign = 1.;
-		if(tl2::inner(vec1, vec2).real() >= 0.)
-			sign = -1.;
-		return sign * (vec1 - vec2);
+		if(tl2::inner(vec1, vec2).real() < 0.)
+			return vec2 + vec1;
+		return vec2 - vec1;
 	};
 
 	const auto [ evecs, S ] = get_evecs(Q);
@@ -281,8 +290,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	std::vector<t_cplx> chern_nums;
 
 	auto int_boundary = [get_evecs, delta_diff, delta_int, bz, dim1, dim2,
-		&chern_nums, enforce_commutator](
-		t_size dim, t_vec_real& Q, t_real sign)
+		&chern_nums, enforce_commutator](t_size dim, t_vec_real& Q, t_real sign)
 	{
 		for(Q[dim] = -bz; Q[dim] < bz; Q[dim] += delta_int)
 		{
@@ -441,7 +449,7 @@ MAGDYN_INST::CalcBerryConnections(
 		auto evec_func = get_evec_func<t_vec, t_vec3_real>(this, perm);
 
 		return berry_connections<t_vec, t_vec3_real, t_vecs, SofQE, t_cplx, t_real>(
-			evec_func, Q, delta);
+			evec_func, Q, delta, enforce_commutator);
 	}
 	else
 	{
@@ -472,7 +480,7 @@ std::tuple<std::vector<t_cplx>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryCurvat
 
 		return berry_curvatures<
 			t_vec, t_vec3_real, t_vecs, SofQE, t_cplx, t_real, t_size>(
-				evec_func, Q, delta, dim1, dim2);
+				evec_func, Q, delta, dim1, dim2, enforce_commutator);
 	}
 	else
 	{

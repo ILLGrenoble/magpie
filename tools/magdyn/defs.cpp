@@ -72,7 +72,7 @@ int g_allow_general_J = 1;
 
 // topology settings
 int g_evecs_ortho = 0;
-int g_enforce_commutator = 0;
+int g_enforce_commutator = 1;
 
 // console messages
 int g_silent = 0;
