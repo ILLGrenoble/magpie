@@ -63,21 +63,7 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	using t_size = decltype(Q.size());
 	constexpr const t_cplx imag{0, 1};
 
-	// gauge freedom, see above equ. 7 in (McClarty 2022)
-	auto get_gauge = [&imag, enforce_commutator](
-		const t_vec& vec1, const t_vec& vec2) -> std::pair<t_real, t_cplx>
-	{
-		t_real phase{};
-
-		if(enforce_commutator)
-			phase = std::arg(tl2::inner<t_vec>(vec1, mult_comm<t_vec>(vec2)));
-		else
-			phase = std::arg(tl2::inner<t_vec>(vec1, vec2));
-
-		return std::make_pair(phase, std::exp(-imag*phase));
-	};
-
-	auto sub_evecs = [&get_gauge, enforce_commutator](
+	auto sub_evecs = [enforce_commutator](
 		const t_mat& mat1, const t_mat& mat2) -> t_mat
 	{
 		t_mat m = tl2::zero<t_mat>(mat1.size1(), mat1.size2());
@@ -94,8 +80,6 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 
 			t_vec vec2 = tl2::col<t_mat, t_vec>(mat2, col);
 			t_vec vec1 = tl2::col<t_mat, t_vec>(mat1, col);
-			//auto [ phase, gauge ] = get_gauge(vec1, vec2);
-			//vec2 *= gauge;
 
 			tl2::set_col<t_mat, t_vec>(m, vec2 + sign*vec1, col);
 		}
@@ -186,7 +170,7 @@ requires (!tl2::is_mat<t_vecs>) && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		for(t_size band = 0; band < BANDS; ++band)
 		{
 			// differentiate eigenvectors
-			t_vec evec_diff = (sub_evecs/*_gauge*/(evecs_delta[band], evecs[band])) / delta;
+			t_vec evec_diff = (sub_evecs(evecs_delta[band], evecs[band])) / delta;
 			// scalar product between eigenvector and its derivative
 			connections[band][dim] = tl2::inner(evecs[band], evec_diff) * imag;
 		}
