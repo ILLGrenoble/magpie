@@ -68,6 +68,38 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	m_plot_bcm->setSelectionRectMode(QCP::srmZoom);
 	m_plot_bcm->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
+	m_plot_colour_bcm = new QCPColorScale(m_plot_bcm);
+	m_plot_colour_bcm->axis()->setScaleType(QCPAxis::stLinear);
+	m_plot_colour_bcm->axis()->setLabel("Berry Curvature B");
+	m_plot_colour_bcm->setRangeDrag(true);
+	m_plot_colour_bcm->setRangeZoom(true);
+	m_plot_colour_bcm->setType(QCPAxis::atRight);
+	m_plot_bcm->plotLayout()->addElement(0, 1, m_plot_colour_bcm);
+
+	m_plot_map_bcm = new QCPColorMap(m_plot_bcm->xAxis, m_plot_bcm->yAxis);
+	m_plot_map_bcm->setTightBoundary(true);
+	m_plot_map_bcm->setColorScale(m_plot_colour_bcm);
+	m_plot_map_bcm->setGradient(QCPColorGradient::gpHot);
+	m_plot_map_bcm->setInterpolate(true);
+	m_plot_map_bcm->setDataScaleType(QCPAxis::stLinear);
+
+	// context menu for plotter
+	m_menuPlot_bcm = new QMenu("Plotter", panel);
+	QAction *acRescalePlot = new QAction("Rescale Axes", m_menuPlot_bcm);
+	QAction *acSaveFigure = new QAction("Save Figure...", m_menuPlot_bcm);
+	QAction *acSaveData = new QAction("Save Data...", m_menuPlot_bcm);
+
+	if(g_use_icons)
+	{
+		acSaveFigure->setIcon(QIcon::fromTheme("image-x-generic"));
+		acSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
+	}
+
+	m_menuPlot_bcm->addAction(acRescalePlot);
+	m_menuPlot_bcm->addSeparator();
+	m_menuPlot_bcm->addAction(acSaveFigure);
+	m_menuPlot_bcm->addAction(acSaveData);
+
 	m_Q_origin_bcm[0] = new QDoubleSpinBox(panel);
 	m_Q_origin_bcm[1] = new QDoubleSpinBox(panel);
 	m_Q_origin_bcm[2] = new QDoubleSpinBox(panel);
@@ -234,6 +266,9 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	connect(m_S_filter_enable_bcm, &QCheckBox::toggled, m_S_filter_bcm, &QDoubleSpinBox::setEnabled);
 	connect(m_plot_bcm, &QCustomPlot::mouseMove, this, &TopologyDlg::BerryCurvatureMapPlotMouseMove);
 	connect(m_plot_bcm, &QCustomPlot::mousePress, this, &TopologyDlg::BerryCurvatureMapPlotMousePress);
+	connect(acRescalePlot, &QAction::triggered, this, &TopologyDlg::RescaleBerryCurvatureMapPlot);
+	connect(acSaveFigure, &QAction::triggered, this, &TopologyDlg::SaveBerryCurvatureMapPlotFigure);
+	connect(acSaveData, &QAction::triggered, this, &TopologyDlg::SaveBerryCurvatureMapData);
 
 	m_B_filter_bcm->setEnabled(m_B_filter_enable_bcm->isChecked());
 	m_S_filter_bcm->setEnabled(m_S_filter_enable_bcm->isChecked());
@@ -515,19 +550,68 @@ void TopologyDlg::CalculateBerryCurvatureMap()
  */
 void TopologyDlg::ClearBerryCurvatureMapPlot(bool replot)
 {
-	//m_curves_bcm.clear();
+	if(!m_plot_bcm || !m_plot_map_bcm)
+		return;
 
-	if(m_plot_bcm)
-	{
-		m_plot_bcm->clearPlottables();
-		if(replot)
-			m_plot_bcm->replot();
-	}
+	m_plot_map_bcm->data()->setSize(0, 0);
+	//m_plot_bcm->clearPlottables();
+
+	if(replot)
+		m_plot_bcm->replot();
+}
+
+
+
+/**
+ * rescale plot axes to fit the content
+ */
+void TopologyDlg::RescaleBerryCurvatureMapPlot()
+{
+	if(!m_plot_bcm || !m_plot_map_bcm)
+		return;
+
+	m_plot_map_bcm->rescaleDataRange();
+	m_plot_bcm->rescaleAxes();
+	m_plot_bcm->replot();
 }
 
 
 
 void TopologyDlg::PlotBerryCurvatureMap()
+{
+	
+}
+
+
+
+/**
+ * save plot as image file
+ */
+void TopologyDlg::SaveBerryCurvatureMapPlotFigure()
+{
+	if(!m_plot_bcm)
+		return;
+
+	QString dirLast;
+	if(m_sett)
+		dirLast = m_sett->value("topology/dir", "").toString();
+	QString filename = QFileDialog::getSaveFileName(
+		this, "Save Figure", dirLast, "PDF Files (*.pdf)");
+	if(filename == "")
+		return;
+	if(m_sett)
+		m_sett->setValue("topology/dir", QFileInfo(filename).path());
+
+	if(!m_plot_bcm->savePdf(filename))
+		ShowError(QString("Could not save figure to file \"%1\".").arg(filename).toStdString().c_str());
+}
+
+
+
+/**
+ * save plot as data file
+ */
+void TopologyDlg::SaveBerryCurvatureMapData()
 {
 	
 }
@@ -560,7 +644,7 @@ void TopologyDlg::BerryCurvatureMapPlotMousePress(QMouseEvent* evt)
 	// show context menu
 	if(evt->buttons() & Qt::RightButton)
 	{
-/*		if(!m_menuPlot_bcm)
+		if(!m_menuPlot_bcm)
 			return;
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 		QPoint pos = evt->globalPos();
@@ -568,7 +652,7 @@ void TopologyDlg::BerryCurvatureMapPlotMousePress(QMouseEvent* evt)
 		QPoint pos = evt->globalPosition().toPoint();
 #endif
 		m_menuPlot_bcm->popup(pos);
-		evt->accept();*/
+		evt->accept();
 	}
 }
 // ============================================================================

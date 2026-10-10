@@ -120,9 +120,12 @@ protected:
 
 	// plot functions
 	void ClearBerryCurvatureMapPlot(bool replot = true);
+	void RescaleBerryCurvatureMapPlot();
 	void PlotBerryCurvatureMap();
 	void BerryCurvatureMapPlotMouseMove(QMouseEvent *evt);
 	void BerryCurvatureMapPlotMousePress(QMouseEvent *evt);
+	void SaveBerryCurvatureMapData();
+	void SaveBerryCurvatureMapPlotFigure();
 
 	// calculation functions
 	void EnableBerryCurvatureMapCalculation(bool enable = true);
@@ -179,6 +182,8 @@ private:
 	// ------------------------------------------------------------------------
 	// berry curvature map tab
 	QCustomPlot *m_plot_bcm{};            // berry curvature plotter
+	QCPColorScale *m_plot_colour_bcm{};   // plot colour scale
+	QCPColorMap *m_plot_map_bcm{};        // plot colour map
 
 	QDoubleSpinBox *m_Q_origin_bcm[3]{};  // Q start coordinate
 	QDoubleSpinBox *m_Q_dir1_bcm[3]{};    // Q direction vector 1
@@ -201,6 +206,7 @@ private:
 	std::atomic<bool> m_stopRequested_bcm{};  // stop running calculations
 
 	QProgressBar *m_progress_bcm{};       // progress bar
+	QMenu *m_menuPlot_bcm{};              // context menu for plot
 	// ------------------------------------------------------------------------
 };
 
