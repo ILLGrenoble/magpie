@@ -225,8 +225,12 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	// context menu for plotter
 	m_menuPlot_bc = new QMenu("Plotter", panelBerryCurvature);
 	QAction *acRescalePlot = new QAction("Rescale Axes", m_menuPlot_bc);
+	QAction *acUseLog = new QAction("Logarithmic", m_menuPlot_bc);
 	QAction *acSaveFigure = new QAction("Save Figure...", m_menuPlot_bc);
 	QAction *acSaveData = new QAction("Save Data...", m_menuPlot_bc);
+
+	acUseLog->setCheckable(true);
+	acUseLog->setChecked(false);
 
 	if(g_use_icons)
 	{
@@ -240,6 +244,7 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	m_imag_bc->setToolTip("Show the imaginary component of the Berry curvature.");
 
 	m_menuPlot_bc->addAction(acRescalePlot);
+	m_menuPlot_bc->addAction(acUseLog);
 	m_menuPlot_bc->addSeparator();
 	m_menuPlot_bc->addAction(acSaveFigure);
 	m_menuPlot_bc->addAction(acSaveData);
@@ -416,6 +421,15 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 		[this]() { PlotBerryCurvature(); });
 	connect(m_S_filter_bc, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 		[this]() { PlotBerryCurvature(); });
+	connect(acUseLog, &QAction::toggled, [this](bool checked)
+	{
+		if(!m_plot_bc)
+			return;
+
+		m_plot_bc->yAxis->setScaleType(
+			checked ? QCPAxis::stLogarithmic : QCPAxis::stLinear);
+		m_plot_bc->replot();
+	});
 
 	m_B_filter_bc->setEnabled(m_B_filter_enable_bc->isChecked());
 	m_S_filter_bc->setEnabled(m_S_filter_enable_bc->isChecked());

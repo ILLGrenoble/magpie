@@ -1,7 +1,7 @@
 /**
- * magnetic dynamics -- topological calculations
+ * magnetic dynamics -- berry curvature map
  * @author Tobias Weber <tweber@ill.fr>
- * @date November 2024
+ * @date October 2026
  * @license GPLv3, see 'LICENSE' file
  *
  * ----------------------------------------------------------------------------
@@ -27,7 +27,6 @@
 #include <boost/asio.hpp>
 namespace asio = boost::asio;
 
-#include <limits>
 #include <mutex>
 #include <memory>
 #include <sstream>
@@ -86,8 +85,14 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	// context menu for plotter
 	m_menuPlot_bcm = new QMenu("Plotter", panel);
 	QAction *acRescalePlot = new QAction("Rescale Axes", m_menuPlot_bcm);
+	QAction *acUseLog = new QAction("Logarithmic", m_menuPlot_bcm);
 	QAction *acSaveFigure = new QAction("Save Figure...", m_menuPlot_bcm);
 	QAction *acSaveData = new QAction("Save Data...", m_menuPlot_bcm);
+	QAction *acSetStart = new QAction("Set Cursor to 1D Start Coordinate", m_menuPlot_bcm);
+	QAction *acSetEnd = new QAction("Set Cursor to 1D End Coordinate", m_menuPlot_bcm);
+
+	acUseLog->setCheckable(true);
+	acUseLog->setChecked(false);
 
 	if(g_use_icons)
 	{
@@ -101,9 +106,13 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	m_imag_bcm->setToolTip("Show the imaginary component of the Berry curvature.");
 
 	m_menuPlot_bcm->addAction(acRescalePlot);
+	m_menuPlot_bcm->addAction(acUseLog);
 	m_menuPlot_bcm->addSeparator();
 	m_menuPlot_bcm->addAction(acSaveFigure);
 	m_menuPlot_bcm->addAction(acSaveData);
+	m_menuPlot_bcm->addSeparator();
+	m_menuPlot_bcm->addAction(acSetStart);
+	m_menuPlot_bcm->addAction(acSetEnd);
 	m_menuPlot_bcm->addSeparator();
 	m_menuPlot_bcm->addAction(m_imag_bcm);
 
@@ -279,6 +288,27 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	connect(acSaveData, &QAction::triggered, this, &TopologyDlg::SaveBerryCurvatureMapData);
 	connect(m_band_bcm, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
 		this, &TopologyDlg::PlotBerryCurvatureMap);
+	connect(acSetStart, &QAction::triggered, [this]()
+	{
+		m_Q_start_bc[0]->setValue(m_Q_cursor_bcm[0]);
+		m_Q_start_bc[1]->setValue(m_Q_cursor_bcm[1]);
+		m_Q_start_bc[2]->setValue(m_Q_cursor_bcm[2]);
+	});
+	connect(acSetEnd, &QAction::triggered, [this]()
+	{
+		m_Q_end_bc[0]->setValue(m_Q_cursor_bcm[0]);
+		m_Q_end_bc[1]->setValue(m_Q_cursor_bcm[1]);
+		m_Q_end_bc[2]->setValue(m_Q_cursor_bcm[2]);
+	});
+	connect(acUseLog, &QAction::toggled, [this](bool checked)
+	{
+		if(!m_plot_colour_bcm || !m_plot_bcm)
+			return;
+
+		m_plot_colour_bcm->axis()->setScaleType(
+			checked ? QCPAxis::stLogarithmic : QCPAxis::stLinear);
+		m_plot_bcm->replot();
+	});
 
 	//m_B_filter_bcm->setEnabled(m_B_filter_enable_bcm->isChecked());
 	//m_S_filter_bcm->setEnabled(m_S_filter_enable_bcm->isChecked());
@@ -408,26 +438,6 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 
 	ClearBerryCurvatureMapPlot(false);
 
-	// get coordinates
-	//auto [Q_origin, Q_dir1, Q_dir2] = GetMapQVectors();
-
-/*
-	// get Q component with maximum range
-	t_vec3_real Q_range = Q_end - Q_start;
-	m_Q_idx_bc = 0;
-	if(std::abs(Q_range[1]) > std::abs(Q_range[m_Q_idx_bc]))
-		m_Q_idx_bc = 1;
-	if(std::abs(Q_range[2]) > std::abs(Q_range[m_Q_idx_bc]))
-		m_Q_idx_bc = 2;
-
-	// keep the scanned Q component in ascending order
-	if(Q_start[m_Q_idx_bc] > Q_end[m_Q_idx_bc])
-		std::swap(Q_start, Q_end);
-
-	// Q range
-	m_Q_min_bc = Q_start[m_Q_idx_bc];
-	m_Q_max_bc = Q_end[m_Q_idx_bc];
-*/
 	// get settings
 	t_size Q_count_1 = m_num_Q_bcm[0]->value();
 	t_size Q_count_2 = m_num_Q_bcm[1]->value();
@@ -593,9 +603,10 @@ void TopologyDlg::PlotBerryCurvatureMap()
 			}
 
 			const std::vector<t_cplx>& curvature = m_data_bcm[data_idx];
-			t_real data = show_imag ? curvature[band].imag() : curvature[band].real();
-			t_real val = band >= curvature.size() ? 0. : data;
-			m_plot_map_bcm->data()->setCell((int)Qidx1, (int)Qidx2, val);
+			t_real data = 0.;
+			if(band < curvature.size())
+				data = show_imag ? curvature[band].imag() : curvature[band].real();
+			m_plot_map_bcm->data()->setCell((int)Qidx1, (int)Qidx2, data);
 		}
 
 		if(stop)
@@ -636,7 +647,81 @@ void TopologyDlg::SaveBerryCurvatureMapPlotFigure()
  */
 void TopologyDlg::SaveBerryCurvatureMapData()
 {
-	
+	if(m_data_bcm.size() == 0)
+		return;
+
+	QString dirLast;
+	if(m_sett)
+		dirLast = m_sett->value("topology/dir", "").toString();
+	QString filename = QFileDialog::getSaveFileName(
+		this, "Save Data", dirLast, "Data Files (*.dat)");
+	if(filename == "")
+		return;
+	if(m_sett)
+		m_sett->setValue("topology/dir", QFileInfo(filename).path());
+
+	std::ofstream ofstr(filename.toStdString());
+	if(!ofstr)
+	{
+		ShowError(QString("Could not save data to file \"%1\".").arg(filename).toStdString().c_str());
+		return;
+	}
+
+	ofstr.precision(g_prec);
+	int field_len = g_prec * 2.5;
+
+	// write meta header
+	const char* user = std::getenv("USER");
+	if(!user)
+		user = "";
+
+	auto [Q_origin, Q_dir_1, Q_dir_2] = GetMapQVectors();
+
+	ofstr << "#\n"
+		<< "# Created by Magpie " << MAGPIE_VER << "\n"
+		<< "# Author: Tobias Weber\n"
+		<< "# URL: https://github.com/ILLGrenoble/magpie\n"
+		<< "# DOI: https://doi.org/10.5281/zenodo.16180814\n"
+		<< "# User: " << user << "\n"
+		<< "# Date: " << tl2::epoch_to_str<t_real>(tl2::epoch<t_real>()) << "\n"
+		<< "# Q_origin: " << Q_origin[0] << " " << Q_origin[1] << " " << Q_origin[2] << "\n"
+		<< "# Q_dir_1: " << Q_dir_1[0] << " " << Q_dir_1[1] << " " << Q_dir_1[2] << "\n"
+		<< "# Q_dir_2: " << Q_dir_2[0] << " " << Q_dir_2[1] << " " << Q_dir_2[2] << "\n"
+		<< "# command: gnuplot -p -e \"plot \\\"" << QFileInfo(filename).fileName().toStdString() << "\\\" matrix with image\"\n"
+		<< "#\n\n";
+
+	const bool show_imag = m_imag_bcm->isChecked();
+	const t_size Q_count_1 = m_num_Q_bcm[0]->value();
+	const t_size Q_count_2 = m_num_Q_bcm[1]->value();
+	const t_size band = m_band_bcm->value();
+
+	// write data
+	bool stop = false;
+	for(t_size Qidx1 = 0; Qidx1 < Q_count_1; ++Qidx1)
+	{
+		for(t_size Qidx2 = 0; Qidx2 < Q_count_2; ++Qidx2)
+		{
+			t_size data_idx = Qidx2*Q_count_1 + Qidx1;
+			if(data_idx >= m_data_bcm.size())
+			{
+				stop = true;
+				break;
+			}
+
+			const std::vector<t_cplx>& curvature = m_data_bcm[data_idx];
+			t_real data = 0.;
+			if(band < curvature.size())
+				data = show_imag ? curvature[band].imag() : curvature[band].real();
+
+			ofstr << std::setw(field_len) << std::left << data << " ";
+		}
+
+		ofstr << "\n";
+		if(stop)
+			break;
+	}
+
+	ofstr.flush();
 }
 
 
@@ -653,13 +738,13 @@ void TopologyDlg::BerryCurvatureMapPlotMouseMove(QMouseEvent* evt)
 	t_real Q2 = m_plot_bcm->yAxis->pixelToCoord(evt->pos().y());
 
 	auto [Q_origin, Q_dir_1, Q_dir_2] = GetMapQVectors();	
-	t_vec3_real Q = Q_origin + Q_dir_1*Q1 + Q_dir_2*Q2;
+	m_Q_cursor_bcm = Q_origin + Q_dir_1*Q1 + Q_dir_2*Q2;
 
 	QString status("Q = (%1, %2, %3) rlu.");
 	status = status
-		.arg(Q[0], 0, 'g', g_prec_gui)
-		.arg(Q[1], 0, 'g', g_prec_gui)
-		.arg(Q[2], 0, 'g', g_prec_gui);
+		.arg(m_Q_cursor_bcm[0], 0, 'g', g_prec_gui)
+		.arg(m_Q_cursor_bcm[1], 0, 'g', g_prec_gui)
+		.arg(m_Q_cursor_bcm[2], 0, 'g', g_prec_gui);
 	m_status->setText(status);
 }
 

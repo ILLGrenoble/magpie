@@ -181,6 +181,7 @@ private:
 	// ------------------------------------------------------------------------
 	// berry curvature map tab
 	std::vector<std::vector<t_cplx>> m_data_bcm{};  // data map
+	t_vec3_real m_Q_cursor_bcm{};         // current coordinate at cursor
 
 	QCustomPlot *m_plot_bcm{};            // berry curvature plotter
 	QCPColorScale *m_plot_colour_bcm{};   // plot colour scale
