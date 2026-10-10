@@ -70,8 +70,10 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 
 		for(t_size col = 0; col < mat1.size2(); ++col)
 		{
-			if(tl2::inner(tl2::col<t_mat, t_vec>(mat1, col),
-			  tl2::col<t_mat, t_vec>(mat2, col)).real() >= 0.)
+			t_real dot = enforce_commutator
+				? tl2::inner(tl2::col<t_mat, t_vec>(mat1, col), mult_comm(tl2::col<t_mat, t_vec>(mat2, col))).real()
+				: tl2::inner(tl2::col<t_mat, t_vec>(mat1, col), tl2::col<t_mat, t_vec>(mat2, col)).real();
+			if(dot >= 0.)
 			{
 				tl2::set_col<t_mat, t_vec>(m,
 					+ tl2::col<t_mat, t_vec>(mat2, col)
@@ -92,21 +94,11 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	const t_size BANDS = evecs.size1();
 	const t_size DIM = Q.size();
 
-	// to ensure correct commutators
-	t_mat comm;
-	if(enforce_commutator)
-		comm = tl2::unit<t_mat>(BANDS);
-
 	std::vector<t_vec> connections{};
 	connections.reserve(BANDS);
 
 	for(t_size band = 0; band < BANDS; ++band)
-	{
-		if(enforce_commutator && band >= BANDS / 2)
-			comm(band, band) = -1;
-
 		connections.emplace_back(tl2::create<t_vec>(DIM));
-	}
 
 	for(t_size dim = 0; dim < DIM; ++dim)
 	{
@@ -119,7 +111,7 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		t_mat evecs_H = tl2::herm(evecs);
 		t_mat C;
 		if(enforce_commutator)
-			C = comm * evecs_H * comm * evecs_diff;
+			C = mult_comm(evecs_H) * mult_comm(evecs_diff);
 		else
 			C = evecs_H * evecs_diff;
 
@@ -169,7 +161,10 @@ requires (!tl2::is_mat<t_vecs>) && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	auto sub_evecs = [enforce_commutator](
 		const t_vec& vec1, const t_vec& vec2) -> t_vec
 	{
-		if(tl2::inner(vec1, vec2).real() < 0.)
+		t_real dot = enforce_commutator
+			? tl2::inner(vec1, mult_comm(vec2)).real()
+			: tl2::inner(vec1, vec2).real();
+		if(dot < 0.)
 			return vec2 + vec1;
 		return vec2 - vec1;
 	};
@@ -280,7 +275,7 @@ std::vector<t_cplx> chern_numbers(
 	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q)>& get_evecs,
 	t_real bz = 0.5,  // brillouin zone boundary
 	t_real delta_diff = std::sqrt(std::numeric_limits<t_real>::epsilon()),
-	t_real delta_int = std::cbrt(std::numeric_limits<t_real>::epsilon()),
+	t_real delta_int = 1e-2, //std::cbrt(std::numeric_limits<t_real>::epsilon()),
 	t_size dim1 = 0, t_size dim2 = 1, bool calc_via_boundary = true,
 	bool enforce_commutator = false)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
@@ -316,22 +311,20 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	{
 		// bottom part of boundary
 		t_vec_real Q = tl2::zero<t_vec_real>(3);
-		Q[dim2] -= bz;
+		Q[dim2] = -bz;
 		int_boundary(dim1, Q, 1.);
 
 		// top part of boundary
-		Q = tl2::zero<t_vec_real>(3);
-		Q[dim2] += bz;
+		Q[dim2] = +bz;
 		int_boundary(dim1, Q, -1.);
 
 		// left part of boundary
 		Q = tl2::zero<t_vec_real>(3);
-		Q[dim1] -= bz;
+		Q[dim1] = -bz;
 		int_boundary(dim2, Q, 1.);
 
 		// right part of boundary
-		Q = tl2::zero<t_vec_real>(3);
-		Q[dim1] += bz;
+		Q[dim1] = +bz;
 		int_boundary(dim2, Q, -1.);
 	}
 
@@ -504,7 +497,7 @@ std::vector<t_cplx> MAGDYN_INST::CalcChernNumbers(
 {
 	//SetUniteDegenerateEnergies(false);
 
-	bool calc_via_boundary = true;
+	bool calc_via_boundary = false;
 	std::vector<t_size> *perm = nullptr;
 
 	if(evecs_ortho)
