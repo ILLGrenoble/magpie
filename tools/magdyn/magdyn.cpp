@@ -535,10 +535,10 @@ void MagDynDlg::CreateMenuBar()
 	acStructSymIdx->setShortcut(int(Qt::CTRL) | int(Qt::Key_I));
 	acStructSortCouplings->setShortcut(int(Qt::CTRL) | int(Qt::Key_L));
 	acStructRemoveUnused->setShortcut(int(Qt::CTRL) | int(Qt::Key_R));
-	acStructAssignCouplings->setShortcut(int(Qt::CTRL) | int(Qt::Key_A));
+	acStructAssignCouplings->setShortcut(int(Qt::CTRL) | int(Qt::Key_M));
 	acGroundState->setShortcut(int(Qt::CTRL) | int(Qt::Key_G));
-	acStructView->setShortcut(int(Qt::CTRL) | int(Qt::Key_M));
 	acBZView->setShortcut(int(Qt::CTRL) | int(Qt::Key_B));
+	acStructView->setShortcut(int(Qt::CTRL) | int(Qt::Key_2));
 	acDisp3D->setShortcut(int(Qt::CTRL) | int(Qt::Key_3));
 	acTopo->setShortcut(int(Qt::CTRL) | int(Qt::Key_T));
 	acDiff->setShortcut(int(Qt::CTRL) | int(Qt::Key_D));

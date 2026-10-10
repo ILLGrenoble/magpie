@@ -357,15 +357,15 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	QGridLayout *Qgrid = new QGridLayout(groupQ);
 	Qgrid->setSpacing(4);
 	Qgrid->setContentsMargins(6, 6, 6, 6);
-	Qgrid->addWidget(new QLabel("Q Origin:", this), y, 0, 1, 1);
+	Qgrid->addWidget(new QLabel("Q Origin (rlu):", this), y, 0, 1, 1);
 	Qgrid->addWidget(m_Q_origin[0], y, 1, 1, 1);
 	Qgrid->addWidget(m_Q_origin[1], y, 2, 1, 1);
 	Qgrid->addWidget(m_Q_origin[2], y++, 3, 1, 1);
-	Qgrid->addWidget(new QLabel("Q Direction 1:", this), y, 0, 1, 1);
+	Qgrid->addWidget(new QLabel("Q Direction 1 (rlu):", this), y, 0, 1, 1);
 	Qgrid->addWidget(m_Q_dir1[0], y, 1, 1, 1);
 	Qgrid->addWidget(m_Q_dir1[1], y, 2, 1, 1);
 	Qgrid->addWidget(m_Q_dir1[2], y++, 3, 1, 1);
-	Qgrid->addWidget(new QLabel("Q Direction 2:", this), y, 0, 1, 1);
+	Qgrid->addWidget(new QLabel("Q Direction 2 (rlu):", this), y, 0, 1, 1);
 	Qgrid->addWidget(m_Q_dir2[0], y, 1, 1, 1);
 	Qgrid->addWidget(m_Q_dir2[1], y, 2, 1, 1);
 	Qgrid->addWidget(m_Q_dir2[2], y++, 3, 1, 1);

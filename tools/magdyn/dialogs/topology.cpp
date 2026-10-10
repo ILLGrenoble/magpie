@@ -86,6 +86,7 @@ TopologyDlg::TopologyDlg(QWidget *parent, QSettings *sett)
 
 	// tab panels
 	m_tabs->addTab(CreateBerryCurvaturePanel(), "Berry Curvature");
+	m_tabs->addTab(CreateBerryCurvatureMapPanel(), "Berry Curvature Map");
 
 	// restore settings
 	if(m_sett)
@@ -825,7 +826,7 @@ void TopologyDlg::CalculateBerryCurvature()
 
 
 /**
- * clears the dispersion graph
+ * clears the berry curature graph
  */
 void TopologyDlg::ClearBerryCurvaturePlot(bool replot)
 {

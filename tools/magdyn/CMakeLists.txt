@@ -224,7 +224,7 @@ if(USE_QT)
 		# dialogs
 		dialogs/struct_plot.cpp dialogs/struct_plot.h
 		dialogs/ground_state.cpp dialogs/ground_state.h
-		dialogs/topology.cpp dialogs/topology.h
+		dialogs/topology.cpp dialogs/topology_map.cpp dialogs/topology.h
 		dialogs/diff.cpp dialogs/diff.h
 		dialogs/powder.cpp dialogs/powder.h
 		dialogs/ffact.cpp dialogs/ffact.h

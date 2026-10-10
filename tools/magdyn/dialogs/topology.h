@@ -45,6 +45,7 @@
 
 #include <qcustomplot.h>
 #include <vector>
+#include <tuple>
 
 #include "gui_defs.h"
 
@@ -108,6 +109,26 @@ protected:
 	void SetBerryCurvatureQ();
 	// ------------------------------------------------------------------------
 
+	// ------------------------------------------------------------------------
+	// berry curvature map tab
+	QWidget* CreateBerryCurvatureMapPanel();
+
+	// helper functions
+	std::tuple<t_vec3_real, t_vec3_real, t_vec3_real> GetMapQVectors() const;
+	t_vec3_real GetMapQFromIndices(std::size_t idx1, std::size_t idx2) const;
+	void MapQFromMainQ();
+
+	// plot functions
+	void ClearBerryCurvatureMapPlot(bool replot = true);
+	void PlotBerryCurvatureMap();
+	void BerryCurvatureMapPlotMouseMove(QMouseEvent *evt);
+	void BerryCurvatureMapPlotMousePress(QMouseEvent *evt);
+
+	// calculation functions
+	void EnableBerryCurvatureMapCalculation(bool enable = true);
+	void CalculateBerryCurvatureMap();
+	// ------------------------------------------------------------------------
+
 
 private:
 	// ------------------------------------------------------------------------
@@ -153,6 +174,33 @@ private:
 
 	QProgressBar *m_progress_bc{};      // progress bar
 	QMenu *m_menuPlot_bc{};             // context menu for plot
+	// ------------------------------------------------------------------------
+
+	// ------------------------------------------------------------------------
+	// berry curvature map tab
+	QCustomPlot *m_plot_bcm{};            // berry curvature plotter
+
+	QDoubleSpinBox *m_Q_origin_bcm[3]{};  // Q start coordinate
+	QDoubleSpinBox *m_Q_dir1_bcm[3]{};    // Q direction vector 1
+	QDoubleSpinBox *m_Q_dir2_bcm[3]{};    // Q direction vector 2
+	QSpinBox *m_num_Q_bcm[2]{};           // number of Q points
+
+	QCheckBox *m_B_filter_enable_bcm{};   // switch to enable maximum B value
+	QDoubleSpinBox *m_B_filter_bcm{};     // maximum B value
+
+	QCheckBox *m_S_filter_enable_bcm{};   // switch to enable minimum S(Q,E) value
+	QDoubleSpinBox *m_S_filter_bcm{};     // minimum S(Q,E) value
+
+	QSpinBox *m_coords_bcm[2]{};          // berry curvature component indices
+	QSpinBox *m_band_bcm{};               // band index
+	QAction *m_imag_bcm{};                // imaginary or real components?
+	QCheckBox *m_only_pos_E_bcm{};        // ignore magnon annihilation?
+
+	QPushButton *m_btnStartStop_bcm{};    // start/stop calculation
+	bool m_calcEnabled_bcm{};             // enable calculations
+	std::atomic<bool> m_stopRequested_bcm{};  // stop running calculations
+
+	QProgressBar *m_progress_bcm{};       // progress bar
 	// ------------------------------------------------------------------------
 };
 
