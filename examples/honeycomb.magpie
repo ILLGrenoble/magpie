@@ -4,7 +4,9 @@
 		<user>tw</user>
 		<url>https://github.com/ILLGrenoble/magpie</url>
 		<doi>https://doi.org/10.5281/zenodo.16180814</doi>
-		<notes>__base64__TW9kZWwgYmFzZWQgb246CiAgLSBodHRwczovL2RvaS5vcmcvMTAuMTE0Ni9hbm51cmV2LWNvbm1hdHBoeXMtMDMxNjIwLTEwNDcxNSAsCiAgLSBhbHNvIGF2YWlsYWJsZSBoZXJlOiBodHRwczovL2FyeGl2Lm9yZy9hYnMvMjEwNi4wMTQzMCAuCg==</notes>
+		<notes>Model based on:
+  - https://doi.org/10.1146/annurev-conmatphys-031620-104715 ,
+  - also available here: https://arxiv.org/abs/2106.01430 .</notes>
 		<info>magdyn_tool</info>
 		<date>Fri 2026-Oct-09 20:38:00 CEST</date>
 	</meta>

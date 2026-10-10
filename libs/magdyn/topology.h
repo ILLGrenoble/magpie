@@ -63,7 +63,21 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	using t_size = decltype(Q.size());
 	constexpr const t_cplx imag{0, 1};
 
-	auto sub_evecs = [enforce_commutator](
+	// gauge freedom, see above equ. 7 in (McClarty 2022)
+	auto get_gauge = [&imag, enforce_commutator](
+		const t_vec& vec1, const t_vec& vec2) -> std::pair<t_real, t_cplx>
+	{
+		t_real phase{};
+
+		if(enforce_commutator)
+			phase = std::arg(tl2::inner<t_vec>(vec1, mult_comm<t_vec>(vec2)));
+		else
+			phase = std::arg(tl2::inner<t_vec>(vec1, vec2));
+
+		return std::make_pair(phase, std::exp(-imag*phase));
+	};
+
+	auto sub_evecs = [&get_gauge, enforce_commutator](
 		const t_mat& mat1, const t_mat& mat2) -> t_mat
 	{
 		t_mat m = tl2::zero<t_mat>(mat1.size1(), mat1.size2());
@@ -71,20 +85,19 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		for(t_size col = 0; col < mat1.size2(); ++col)
 		{
 			t_real dot = enforce_commutator
-				? tl2::inner(tl2::col<t_mat, t_vec>(mat1, col), mult_comm(tl2::col<t_mat, t_vec>(mat2, col))).real()
+				? tl2::inner(tl2::col<t_mat, t_vec>(mat1, col), mult_comm<t_vec>(tl2::col<t_mat, t_vec>(mat2, col))).real()
 				: tl2::inner(tl2::col<t_mat, t_vec>(mat1, col), tl2::col<t_mat, t_vec>(mat2, col)).real();
-			if(dot >= 0.)
-			{
-				tl2::set_col<t_mat, t_vec>(m,
-					+ tl2::col<t_mat, t_vec>(mat2, col)
-					- tl2::col<t_mat, t_vec>(mat1, col), col);
-			}
-			else
-			{
-				tl2::set_col<t_mat, t_vec>(m,
-					+ tl2::col<t_mat, t_vec>(mat2, col)
-					+ tl2::col<t_mat, t_vec>(mat1, col), col);
-			}
+
+			t_real sign = -1.;
+			if(dot < 0.)
+				sign = 1.;
+
+			t_vec vec2 = tl2::col<t_mat, t_vec>(mat2, col);
+			t_vec vec1 = tl2::col<t_mat, t_vec>(mat1, col);
+			//auto [ phase, gauge ] = get_gauge(vec1, vec2);
+			//vec2 *= gauge;
+
+			tl2::set_col<t_mat, t_vec>(m, vec2 + sign*vec1, col);
 		}
 
 		return m;
@@ -111,7 +124,7 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		t_mat evecs_H = tl2::herm(evecs);
 		t_mat C;
 		if(enforce_commutator)
-			C = mult_comm(evecs_H) * mult_comm(evecs_diff);
+			C = mult_comm<t_mat>(evecs_H) * mult_comm<t_mat>(evecs_diff);
 		else
 			C = evecs_H * evecs_diff;
 
@@ -143,26 +156,11 @@ requires (!tl2::is_mat<t_vecs>) && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	using t_size = decltype(Q.size());
 	constexpr const t_cplx imag{0, 1};
 
-	/* // test
-	auto sub_evecs_gauge = [enforce_commutator](
-		const t_vec& vec1, const t_vec& vec2) -> t_vec
-	{
-		t_real phase{};
-
-		if(enforce_commutator)
-			phase = std::arg(tl2::inner(vec1, mult_comm(vec2)));
-		else
-			phase = std::arg(tl2::inner(vec1, vec2));
-
-		// ensure that the vectors are on the same gauge
-		return vec1 - std::polar(1., -phase)*vec2;
-	};*/
-
 	auto sub_evecs = [enforce_commutator](
 		const t_vec& vec1, const t_vec& vec2) -> t_vec
 	{
 		t_real dot = enforce_commutator
-			? tl2::inner(vec1, mult_comm(vec2)).real()
+			? tl2::inner(vec1, mult_comm<t_vec>(vec2)).real()
 			: tl2::inner(vec1, vec2).real();
 		if(dot < 0.)
 			return vec2 + vec1;
