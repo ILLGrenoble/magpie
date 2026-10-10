@@ -162,12 +162,10 @@ private:
 
 	QCheckBox *m_B_filter_enable_bc{};  // switch to enable maximum B value
 	QDoubleSpinBox *m_B_filter_bc{};    // maximum B value
-
 	QCheckBox *m_S_filter_enable_bc{};  // switch to enable minimum S(Q,E) value
 	QDoubleSpinBox *m_S_filter_bc{};    // minimum S(Q,E) value
 
 	QSpinBox *m_coords_bc[2]{};         // berry curvature component indices
-	QAction *m_imag_bc{};               // imaginary or real components?
 	QCheckBox *m_only_pos_E_bc{};       // ignore magnon annihilation?
 	//QCheckBox *m_enforce_commutator_bc{};
 
@@ -177,10 +175,13 @@ private:
 
 	QProgressBar *m_progress_bc{};      // progress bar
 	QMenu *m_menuPlot_bc{};             // context menu for plot
+	QAction *m_imag_bc{};               // imaginary or real components?
 	// ------------------------------------------------------------------------
 
 	// ------------------------------------------------------------------------
 	// berry curvature map tab
+	std::vector<std::vector<t_cplx>> m_data_bcm{};  // data map
+
 	QCustomPlot *m_plot_bcm{};            // berry curvature plotter
 	QCPColorScale *m_plot_colour_bcm{};   // plot colour scale
 	QCPColorMap *m_plot_map_bcm{};        // plot colour map
@@ -190,15 +191,13 @@ private:
 	QDoubleSpinBox *m_Q_dir2_bcm[3]{};    // Q direction vector 2
 	QSpinBox *m_num_Q_bcm[2]{};           // number of Q points
 
-	QCheckBox *m_B_filter_enable_bcm{};   // switch to enable maximum B value
-	QDoubleSpinBox *m_B_filter_bcm{};     // maximum B value
-
-	QCheckBox *m_S_filter_enable_bcm{};   // switch to enable minimum S(Q,E) value
-	QDoubleSpinBox *m_S_filter_bcm{};     // minimum S(Q,E) value
+	//QCheckBox *m_B_filter_enable_bcm{};   // switch to enable maximum B value
+	//QDoubleSpinBox *m_B_filter_bcm{};     // maximum B value
+	//QCheckBox *m_S_filter_enable_bcm{};   // switch to enable minimum S(Q,E) value
+	//QDoubleSpinBox *m_S_filter_bcm{};     // minimum S(Q,E) value
 
 	QSpinBox *m_coords_bcm[2]{};          // berry curvature component indices
 	QSpinBox *m_band_bcm{};               // band index
-	QAction *m_imag_bcm{};                // imaginary or real components?
 	QCheckBox *m_only_pos_E_bcm{};        // ignore magnon annihilation?
 
 	QPushButton *m_btnStartStop_bcm{};    // start/stop calculation
@@ -207,6 +206,7 @@ private:
 
 	QProgressBar *m_progress_bcm{};       // progress bar
 	QMenu *m_menuPlot_bcm{};              // context menu for plot
+	QAction *m_imag_bcm{};                // imaginary or real components?
 	// ------------------------------------------------------------------------
 };
 

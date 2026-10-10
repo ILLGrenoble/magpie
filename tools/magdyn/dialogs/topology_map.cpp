@@ -95,10 +95,17 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 		acSaveData->setIcon(QIcon::fromTheme("text-x-generic"));
 	}
 
+	m_imag_bcm = new QAction("Show Imaginary B Component", m_menuPlot_bcm);
+	m_imag_bcm->setCheckable(true);
+	m_imag_bcm->setChecked(false);
+	m_imag_bcm->setToolTip("Show the imaginary component of the Berry curvature.");
+
 	m_menuPlot_bcm->addAction(acRescalePlot);
 	m_menuPlot_bcm->addSeparator();
 	m_menuPlot_bcm->addAction(acSaveFigure);
 	m_menuPlot_bcm->addAction(acSaveData);
+	m_menuPlot_bcm->addSeparator();
+	m_menuPlot_bcm->addAction(m_imag_bcm);
 
 	m_Q_origin_bcm[0] = new QDoubleSpinBox(panel);
 	m_Q_origin_bcm[1] = new QDoubleSpinBox(panel);
@@ -184,7 +191,7 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	m_band_bcm->setToolTip("Magnon band index.");
 
 	// maximum cutoff for filtering numerical artefacts in berry curvature
-	m_B_filter_enable_bcm = new QCheckBox("Maximum B:", panel);
+	/*m_B_filter_enable_bcm = new QCheckBox("Maximum B:", panel);
 	m_B_filter_enable_bcm->setChecked(true);
 	m_B_filter_enable_bcm->setToolTip("Enable maximum cutoff Berry curvature for filtering numerical artefacts.");
 
@@ -209,7 +216,7 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	m_S_filter_bcm->setSingleStep(0.01);
 	m_S_filter_bcm->setValue(0.01);
 	m_S_filter_bcm->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
-	m_S_filter_bcm->setToolTip("Minimum S(Q, E) to keep.");
+	m_S_filter_bcm->setToolTip("Minimum S(Q, E) to keep.");*/
 
 	// progress bar
 	m_progress_bcm = new QProgressBar(panel);
@@ -244,10 +251,10 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	grid->addWidget(m_coords_bcm[0], y, 1, 1, 1);
 	grid->addWidget(m_coords_bcm[1], y, 2, 1, 1);
 	grid->addWidget(m_band_bcm, y++, 3, 1, 1);
-	grid->addWidget(m_B_filter_enable_bcm, y, 0, 1, 1);
+	/*grid->addWidget(m_B_filter_enable_bcm, y, 0, 1, 1);
 	grid->addWidget(m_B_filter_bcm, y, 1, 1, 1);
 	grid->addWidget(m_S_filter_enable_bcm, y, 2, 1, 1);
-	grid->addWidget(m_S_filter_bcm, y++, 3, 1, 1);
+	grid->addWidget(m_S_filter_bcm, y++, 3, 1, 1);*/
 	grid->addWidget(m_progress_bcm, y, 0, 1, 3);
 	grid->addWidget(m_btnStartStop_bcm, y++, 3, 1, 1);
 
@@ -262,16 +269,19 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	});
 	
 	connect(btnMainQ, &QAbstractButton::clicked, this, &TopologyDlg::MapQFromMainQ);
-	connect(m_B_filter_enable_bcm, &QCheckBox::toggled, m_B_filter_bcm, &QDoubleSpinBox::setEnabled);
-	connect(m_S_filter_enable_bcm, &QCheckBox::toggled, m_S_filter_bcm, &QDoubleSpinBox::setEnabled);
+	//connect(m_B_filter_enable_bcm, &QCheckBox::toggled, m_B_filter_bcm, &QDoubleSpinBox::setEnabled);
+	//connect(m_S_filter_enable_bcm, &QCheckBox::toggled, m_S_filter_bcm, &QDoubleSpinBox::setEnabled);
 	connect(m_plot_bcm, &QCustomPlot::mouseMove, this, &TopologyDlg::BerryCurvatureMapPlotMouseMove);
 	connect(m_plot_bcm, &QCustomPlot::mousePress, this, &TopologyDlg::BerryCurvatureMapPlotMousePress);
+	connect(m_imag_bcm, &QAction::toggled, [this]() { PlotBerryCurvatureMap(); });
 	connect(acRescalePlot, &QAction::triggered, this, &TopologyDlg::RescaleBerryCurvatureMapPlot);
 	connect(acSaveFigure, &QAction::triggered, this, &TopologyDlg::SaveBerryCurvatureMapPlotFigure);
 	connect(acSaveData, &QAction::triggered, this, &TopologyDlg::SaveBerryCurvatureMapData);
+	connect(m_band_bcm, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+		this, &TopologyDlg::PlotBerryCurvatureMap);
 
-	m_B_filter_bcm->setEnabled(m_B_filter_enable_bcm->isChecked());
-	m_S_filter_bcm->setEnabled(m_S_filter_enable_bcm->isChecked());
+	//m_B_filter_bcm->setEnabled(m_B_filter_enable_bcm->isChecked());
+	//m_S_filter_bcm->setEnabled(m_S_filter_enable_bcm->isChecked());
 	EnableBerryCurvatureMapCalculation();
 
 	return panel;
@@ -422,7 +432,6 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 	t_size Q_count_1 = m_num_Q_bcm[0]->value();
 	t_size Q_count_2 = m_num_Q_bcm[1]->value();
 
-	std::vector<t_size> *perm = nullptr;
 	t_size dim1 = m_coords_bcm[0]->value();
 	t_size dim2 = m_coords_bcm[1]->value();
 
@@ -449,41 +458,30 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 	std::vector<t_taskptr> tasks;
 	tasks.reserve(Q_count_1*Q_count_2);
 
-	//m_data_bcm.clear();
-	//m_data_bcm.reserve(Q_count);
+	t_size expected_bands = m_dyn->GetMagneticSitesCount() * 2;
+	if(m_dyn->IsIncommensurate())
+		expected_bands *= 3;
+	m_band_bcm->setMaximum(expected_bands - 1);
+
+	m_data_bcm.clear();
+	m_data_bcm.resize(Q_count_1*Q_count_2);
 
 	const bool enforce_commutator = g_enforce_commutator;
 
 	for(t_size Q_idx_1 = 0; Q_idx_1 < Q_count_1; ++Q_idx_1)
 	for(t_size Q_idx_2 = 0; Q_idx_2 < Q_count_2; ++Q_idx_2)
 	{
-		auto task = [this, &mtx, &dyn, Q_idx_1, Q_idx_2, Q_count_1, Q_count_2, perm,
+		auto task = [this, &mtx, &dyn, Q_idx_1, Q_idx_2, Q_count_1, /*Q_count_2,*/
 			dim1, dim2, enforce_commutator]()
 		{
 			// calculate the berry curvature at the given Q point
 			const t_vec3_real Q = GetMapQFromIndices(Q_idx_1, Q_idx_2);
-/*
-			BerryCurvatureData data_bc;
-			data_bc.momentum = Q;
-			typename t_magdyn::SofQE S;
-			std::tie(data_bc.curvatures, S) = dyn.CalcBerryCurvatures(
-				Q, g_delta_diff, perm, dim1, dim2, g_evecs_ortho != 0,
+			auto [curvatures, S] = dyn.CalcBerryCurvatures(
+				Q, g_delta_diff, nullptr, dim1, dim2, g_evecs_ortho != 0,
 				enforce_commutator);
-			t_size num_bands = data_bc.curvatures.size();
-			data_bc.energies.reserve(num_bands);
-			data_bc.weights.reserve(num_bands);
-
-			// calculate energies per band
-			assert(S.E_and_S.size() == num_bands);
-			for(t_size band = 0; band < num_bands; ++band)
-			{
-				data_bc.energies.push_back(S.E_and_S[band].E);
-				data_bc.weights.push_back(S.E_and_S[band].weight_perp);
-			}
 
 			std::lock_guard<std::mutex> _lck{mtx};
-			m_data_bc.emplace_back(std::move(data_bc));
-*/
+			m_data_bcm[Q_idx_2*Q_count_1 + Q_idx_1] = std::move(curvatures);
 		};
 
 		t_taskptr taskptr = std::make_shared<t_task>(task);
@@ -530,16 +528,6 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 	ostrMsg << "after " << stopwatch.GetDur() << " s.";
 	m_status->setText(ostrMsg.str().c_str());
 
-	// sort raw unfiltered data by Q
-	/*std::vector<std::size_t> perm_all = tl2::get_perm(m_data_bc.size(),
-		[this](std::size_t idx1, std::size_t idx2) -> bool
-	{
-		return m_data_bc[idx1].momentum[m_Q_idx_bc]
-			< m_data_bc[idx2].momentum[m_Q_idx_bc];
-	});
-
-	m_data_bcm = tl2::reorder(m_data_bc, perm_all);*/
-
 	PlotBerryCurvatureMap();
 }
 
@@ -579,7 +567,42 @@ void TopologyDlg::RescaleBerryCurvatureMapPlot()
 
 void TopologyDlg::PlotBerryCurvatureMap()
 {
-	
+	if(!m_plot_bcm)
+		return;
+
+	ClearBerryCurvatureMapPlot(false);
+
+	const bool show_imag = m_imag_bcm->isChecked();
+	const t_size Q_count_1 = m_num_Q_bcm[0]->value();
+	const t_size Q_count_2 = m_num_Q_bcm[1]->value();
+	const t_size band = m_band_bcm->value();
+
+	m_plot_map_bcm->data()->setSize((int)Q_count_1, (int)Q_count_2);
+	m_plot_map_bcm->data()->setRange(QCPRange{ 0., 1. }, QCPRange{ 0., 1. });
+
+	bool stop = false;
+	for(t_size Qidx1 = 0; Qidx1 < Q_count_1; ++Qidx1)
+	{
+		for(t_size Qidx2 = 0; Qidx2 < Q_count_2; ++Qidx2)
+		{
+			t_size data_idx = Qidx2*Q_count_1 + Qidx1;
+			if(data_idx >= m_data_bcm.size())
+			{
+				stop = true;
+				break;
+			}
+
+			const std::vector<t_cplx>& curvature = m_data_bcm[data_idx];
+			t_real data = show_imag ? curvature[band].imag() : curvature[band].real();
+			t_real val = band >= curvature.size() ? 0. : data;
+			m_plot_map_bcm->data()->setCell((int)Qidx1, (int)Qidx2, val);
+		}
+
+		if(stop)
+			break;
+	}
+
+	RescaleBerryCurvatureMapPlot();
 }
 
 
@@ -629,8 +652,14 @@ void TopologyDlg::BerryCurvatureMapPlotMouseMove(QMouseEvent* evt)
 	t_real Q1 = m_plot_bcm->xAxis->pixelToCoord(evt->pos().x());
 	t_real Q2 = m_plot_bcm->yAxis->pixelToCoord(evt->pos().y());
 
-	QString status("Q = %1 rlu, Q2 = %2 rlu.");
-	status = status.arg(Q1, 0, 'g', g_prec_gui).arg(Q2, 0, 'g', g_prec_gui);
+	auto [Q_origin, Q_dir_1, Q_dir_2] = GetMapQVectors();	
+	t_vec3_real Q = Q_origin + Q_dir_1*Q1 + Q_dir_2*Q2;
+
+	QString status("Q = (%1, %2, %3) rlu.");
+	status = status
+		.arg(Q[0], 0, 'g', g_prec_gui)
+		.arg(Q[1], 0, 'g', g_prec_gui)
+		.arg(Q[2], 0, 'g', g_prec_gui);
 	m_status->setText(status);
 }
 

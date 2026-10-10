@@ -92,13 +92,18 @@ MAGDYN_INST::CalcPowderBin(t_real Q_invA,
 	namespace histo = boost::histogram;
 	t_histo histE = histo::make_histogram(histo::axis::regular<t_real>(E_bins, E_start, E_end));
 
-	// calculate S(Q, E)
-	auto SQEs = CalcPowder(Q_invA, num_points, num_threads, calc_weights, progress_fkt);
+	std::function<void(const MAGDYN_TYPE::SofQE*)> result_fkt = 
+		[&histE, ortho_proj](const SofQE* S)
+	{
+		if(!S)
+			return;
 
-	// put S(Q, E) into energy bins
-	for(const auto& SQE : SQEs)
-		for(const auto& E_and_S : SQE.E_and_S)
+		for(const auto& E_and_S : S->E_and_S)
 			histE(E_and_S.E, histo::weight(ortho_proj ? E_and_S.weight_perp : E_and_S.weight_full));
+	};
+
+	// calculate S(Q, E)
+	CalcPowder(Q_invA, num_points, num_threads, calc_weights, progress_fkt, &result_fkt);
 
 	return histE;
 }
