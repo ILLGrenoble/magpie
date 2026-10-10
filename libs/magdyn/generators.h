@@ -440,7 +440,7 @@ void MAGDYN_INST::RemoveUnusedExchangeTerms()
 		if(term.site1_calc >= num_sites || term.site2_calc >= num_sites)
 			invalid_site = true;
 
-		if(no_J && no_dmi && no_genJ || invalid_site)
+		if((no_J && no_dmi && no_genJ) || invalid_site)
 			iter = couplings.erase(iter);
 		else
 			++iter;
