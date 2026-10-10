@@ -382,14 +382,13 @@ get_evec_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
 		std::vector<t_vec> vecs;
 		vecs.reserve(S.E_and_S.size());
 
-		std::size_t evec_idx = 0;
-		for(const auto& E_and_S : S.E_and_S)
+		for(std::size_t evec_idx = 0; evec_idx < S.E_and_S.size(); ++evec_idx)
 		{
+			//const auto& E_and_S = S.E_and_S[evec_idx];
 			//vecs.push_back(E_and_S.state);  // these are not the final evecs after commutator correction!
 
 			t_vec evec = tl2::col<decltype(S.evec_mat_comm), t_vec>(S.evec_mat_comm, evec_idx);
 			vecs.emplace_back(std::move(evec));
-			++evec_idx;
 		}
 
 		if(perm)
