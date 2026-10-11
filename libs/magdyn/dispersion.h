@@ -206,6 +206,39 @@ MAGDYN_INST::CalcEnergies(t_real h, t_real k, t_real l, bool only_energies) cons
 
 
 
+template<class t_taskptr, class SofQE, class SofQEs, class t_size = std::size_t>
+SofQEs collect_dispersion_results(
+	const std::vector<t_taskptr>& tasks, t_size num_Qs,
+	std::function<bool(int, int)> *progress_fkt = nullptr,
+	std::function<void(const SofQE*)> *result_fkt = nullptr)
+{
+	bool return_results = (result_fkt == nullptr);
+
+	// collect results
+	SofQEs results;
+	if(return_results)
+		results.reserve(tasks.size());
+
+	t_size Qs_finished = 0;
+	for(auto& task : tasks)
+	{
+		if(progress_fkt && !(*progress_fkt)(Qs_finished + 1, num_Qs))
+			break;
+
+		SofQE result = task->get_future().get();
+		if(result_fkt)
+			(*result_fkt)(&result);
+
+		if(return_results)
+			results.emplace_back(std::move(result));
+		++Qs_finished;
+	}
+
+	return results;
+}
+
+
+
 /**
  * generates the dispersion plot along the given Q path
  * if a result_fkt is given, directly send the result to this callback and don't return it
@@ -258,29 +291,8 @@ MAGDYN_INST::CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 		boost::asio::post(pool, [taskptr]() { (*taskptr)(); });
 	}
 
-	bool return_results = (result_fkt == nullptr);
-
-	// collect results
-	SofQEs results;
-	if(return_results)
-		results.reserve(tasks.size());
-
-	t_size Qs_finished = 0;
-	for(auto& task : tasks)
-	{
-		if(progress_fkt && !(*progress_fkt)(Qs_finished + 1, num_Qs))
-			break;
-
-		SofQE result = task->get_future().get();
-		if(result_fkt)
-			(*result_fkt)(&result);
-
-		if(return_results)
-			results.emplace_back(std::move(result));
-		++Qs_finished;
-	}
-
-	return results;
+	return collect_dispersion_results<t_taskptr, SofQE, SofQEs, t_size>(
+		tasks, num_Qs, progress_fkt, result_fkt);
 }
 
 
@@ -327,29 +339,8 @@ MAGDYN_INST::CalcDispersion(const std::vector<t_vec3_real>& Qs,
 		boost::asio::post(pool, [taskptr]() { (*taskptr)(); });
 	}
 
-	bool return_results = (result_fkt == nullptr);
-
-	// collect results
-	SofQEs results;
-	if(return_results)
-		results.reserve(tasks.size());
-
-	t_size Qs_finished = 0;
-	for(auto& task : tasks)
-	{
-		if(progress_fkt && !(*progress_fkt)(Qs_finished + 1, num_Qs))
-			break;
-
-		SofQE result = task->get_future().get();
-		if(result_fkt)
-			(*result_fkt)(&result);
-
-		if(return_results)
-			results.emplace_back(std::move(result));
-		++Qs_finished;
-	}
-
-	return results;
+	return collect_dispersion_results<t_taskptr, SofQE, SofQEs, t_size>(
+		tasks, num_Qs, progress_fkt, result_fkt);
 }
 
 
@@ -422,29 +413,8 @@ MAGDYN_INST::CalcDispersion(t_real h_start, t_real k_start, t_real l_start,
 		}
 	}
 
-	bool return_results = (result_fkt == nullptr);
-
-	// collect results
-	SofQEs results;
-	if(return_results)
-		results.reserve(tasks.size());
-
-	t_size Qs_finished = 0;
-	for(auto& task : tasks)
-	{
-		if(progress_fkt && !(*progress_fkt)(Qs_finished + 1, num_Qs_sqrt * num_Qs_sqrt))
-			break;
-
-		SofQE result = task->get_future().get();
-		if(result_fkt)
-			(*result_fkt)(&result);
-
-		if(return_results)
-			results.emplace_back(std::move(result));
-		++Qs_finished;
-	}
-
-	return results;
+	return collect_dispersion_results<t_taskptr, SofQE, SofQEs, t_size>(
+		tasks, num_Qs_sqrt * num_Qs_sqrt, progress_fkt, result_fkt);
 }
 // --------------------------------------------------------------------
 

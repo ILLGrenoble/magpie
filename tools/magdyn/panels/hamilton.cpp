@@ -508,7 +508,8 @@ void MagDynDlg::CalcHamiltonian()
 	// print eigenstates
 	if(S.E_and_S.size() && S.E_and_S[0].state.size())
 	{
-		bool has_state_comm = (S.evec_mat_comm.size1() == S.E_and_S[0].state.size());
+		const t_size N1 = S.evec_mat_comm.size1();
+		bool has_state_comm = (N1 == S.E_and_S[0].state.size());
 
 		ostr << "<hr>";
 
@@ -531,6 +532,7 @@ void MagDynDlg::CalcHamiltonian()
 				continue;
 
 			t_vec state = E_and_S.state;
+			const t_size N = state.size();
 
 			tl2::set_eps_0(E);
 			tl2::set_eps_0(state);
@@ -546,10 +548,10 @@ void MagDynDlg::CalcHamiltonian()
 
 			// state
 			ostr << "<td style=\"padding-right:16px\">";
-			for(t_size idx = 0; idx < state.size(); ++idx)
+			for(t_size idx = 0; idx < N; ++idx)
 			{
 				ostr << state[idx];
-				if(idx < state.size() - 1)
+				if(idx < N - 1)
 					ostr << ", ";
 			}
 			ostr << "</td>";
@@ -558,10 +560,13 @@ void MagDynDlg::CalcHamiltonian()
 			{
 				// state, corrected commutators
 				ostr << "<td style=\"padding-right:16px\">";
-				for(t_size idx = 0; idx < state.size(); ++idx)
+				t_size start_idx = ignore_annihilation ? N/2 : 0;
+				for(t_size idx = 0; idx < N; ++idx)
 				{
+					if(evec_idx + start_idx + 1 > N1)
+						break;
 					t_cplx elem = tl2::col<t_mat, t_vec>(
-						S.evec_mat_comm, S.evec_mat_comm.size1() - evec_idx - 1)[idx];
+						S.evec_mat_comm, N1 - (evec_idx + start_idx) - 1)[idx];
 					tl2::set_eps_0<t_cplx, t_real>(elem, g_eps);
 					ostr << elem;
 					if(idx < S.evec_mat_comm.size2() - 1)
