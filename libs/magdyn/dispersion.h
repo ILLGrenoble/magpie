@@ -206,6 +206,8 @@ MAGDYN_INST::CalcEnergies(t_real h, t_real k, t_real l, bool only_energies) cons
 
 
 
+namespace magdyn {
+
 template<class t_taskptr, class SofQE, class SofQEs, class t_size = std::size_t>
 SofQEs collect_dispersion_results(
 	const std::vector<t_taskptr>& tasks, t_size num_Qs,
@@ -236,6 +238,8 @@ SofQEs collect_dispersion_results(
 
 	return results;
 }
+
+}  // namespace magdyn
 
 
 
