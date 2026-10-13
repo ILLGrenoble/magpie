@@ -1579,6 +1579,7 @@ requires tl2::is_basic_mat<t_mat>
 			matRet(i, l) = 0;
 
 			for(size_t j = 0; j < outersize; ++j)
+			{
 				for(size_t k = 0; k < innersize; ++k)
 				{
 					if constexpr(is_complex<typename t_mat::value_type>)
@@ -1586,6 +1587,7 @@ requires tl2::is_basic_mat<t_mat>
 					else
 						matRet(i, l) += T(j, i) * M(j, k) * T(k, l);
 				}
+			}
 		}
 	}
 
