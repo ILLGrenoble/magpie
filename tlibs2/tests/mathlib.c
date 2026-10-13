@@ -27,7 +27,7 @@
  * ----------------------------------------------------------------------------
  */
 
-#include "../libs/mathlib.h"
+#include "../libs_c/mathlib.h"
 #include <stdio.h>
 #include <stdlib.h>
 

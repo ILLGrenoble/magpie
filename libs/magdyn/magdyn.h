@@ -701,14 +701,14 @@ private:
 	bool m_perform_checks{ true };
 	bool m_silent { false };
 
-	// settings for cholesky decomposition
-	t_size m_tries_chol{ 50 };
-	t_real m_delta_chol{ 0.0025 };
-	bool m_fail_wrong_chol { true };            // return on cholesky failure
-
 	// precisions
 	t_real m_eps{ std::is_same_v<t_real, float> ? 1e-4 : 1e-6 };
 	int m_prec{ std::is_same_v<t_real, float> ? 4 : 6 };
+
+	// settings for cholesky decomposition
+	t_size m_tries_chol{ 50 };
+	t_real m_delta_chol{ m_eps };
+	bool m_fail_wrong_chol { true };            // return on cholesky failure
 
 	// conventions
 	t_real m_phase_sign{ -1. };

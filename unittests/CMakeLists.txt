@@ -85,13 +85,16 @@ include_directories(
 # build individual test cases
 add_executable(magdyn_fm magdyn_fm.cpp)
 add_executable(magdyn_afm magdyn_afm.cpp)
-add_executable(magdyn2 magdyn2.cpp)
+add_executable(magdyn_afm2 magdyn_afm2.cpp)
+add_executable(magdyn_topo magdyn_topo.cpp)
 
 target_link_libraries(magdyn_fm ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
 	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
 target_link_libraries(magdyn_afm ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
 	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
-target_link_libraries(magdyn2 ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
+target_link_libraries(magdyn_afm2 ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
+	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
+target_link_libraries(magdyn_topo ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
 	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
 # -----------------------------------------------------------------------------
 
@@ -100,14 +103,15 @@ target_link_libraries(magdyn2 ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LI
 # run individual test cases
 add_test(magdyn_fm magdyn_fm)
 add_test(magdyn_afm magdyn_afm)
-add_test(magdyn2 magdyn2)
+add_test(magdyn_afm2 magdyn_afm2)
+add_test(magdyn_topo magdyn_topo)
 # -----------------------------------------------------------------------------
 
 
 # -----------------------------------------------------------------------------
 # add rpaths
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	foreach(tool IN ITEMS magdyn_fm magdyn_afm magdyn2)
+	foreach(tool IN ITEMS magdyn_fm magdyn_afm magdyn_afm2 magdyn_topo)
 		message(STATUS "Setting rpath for ${tool}...")
 
 		add_custom_command(TARGET ${tool} POST_BUILD

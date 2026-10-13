@@ -45,7 +45,7 @@ int main()
 {
 	using t_real = double;
 	using t_vec = tl2::vec<t_real, std::vector>;
-	using t_mat = tl2::mat<t_real, std::vector>;
+	using t_mat = tl2::mat<t_real, std::vector<t_real>>;
 
 	using t_vertex = geo::model::point<t_real, 3, geo::cs::cartesian>;
 	using t_rtree_leaf = std::tuple<t_vertex, std::size_t>;

@@ -113,8 +113,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		if(!tl2::equals(energy_mat, energy_mat2, m_eps) || !tl2::equals(energy_mat, energy_mat3, m_eps) ||
 			!tl2::equals(energy_mat, energy_mat4, m_eps))
 		{
-			MAGDYN_CERR_OPT << "Magdyn error: Energy matrix mismatch at Q = "
-				<< S.Q_rlu << ": "
+			MAGDYN_CERR_OPT << "Magdyn error: Energy matrix mismatch at Q = " << S.Q_rlu << ": "
 				<< "\n(1) " << energy_mat.size1() << "x" << energy_mat.size2() << ": " << energy_mat
 				<< "\n(2) " << energy_mat2.size1() << "x" << energy_mat2.size2() << ": " << energy_mat2
 				<< "\n(3) " << energy_mat3.size1() << "x" << energy_mat3.size2() << ": " << energy_mat3
@@ -298,27 +297,29 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 
 		for(t_size i = 0; i < N; ++i)
 		{
-			// get the outer site
+			// get the outer site and the pre-calculated u vectors
 			const MagneticSite& s_i = GetMagneticSite(i);
-
-			// get the pre-calculated u vectors
 			const t_vec3& u_i = s_i.ge_trafo_plane_calc;
 			const t_vec3& uc_i = s_i.ge_trafo_plane_conj_calc;
 
+			// matrix elements of equation (44) from (Toth 2015)
+			const t_cplx factors_i_00 = S_and_ffacts[i]  / phases[i] * u_i[x_idx];   // b_i+ b_j terms
+			const t_cplx factors_i_0N = S_and_ffacts[i]  / phases[i] * u_i[x_idx];   // b_i+ b_j+ terms
+			const t_cplx factors_i_N0 = S_and_ffactsc[i] / phases[i] * uc_i[x_idx];  // b_i b_j terms
+			const t_cplx factors_i_NN = S_and_ffactsc[i] / phases[i] * uc_i[x_idx];  // b_i b_j+ terms
+
 			for(t_size j = 0; j < N; ++j)
 			{
-				// get the inner site
+				// get the inner site and the pre-calculated u vectors
 				const MagneticSite& s_j = GetMagneticSite(j);
-
-				// get the pre-calculated u vectors
 				const t_vec3& u_j = s_j.ge_trafo_plane_calc;
 				const t_vec3& uc_j = s_j.ge_trafo_plane_conj_calc;
 
 				// matrix elements of equation (44) from (Toth 2015)
-				M(    i,     j) = S_and_ffacts[i]  * S_and_ffactsc[j] * phases[j] / phases[i] * u_i[x_idx]  * uc_j[y_idx];  // b_i+ b_j terms
-				M(    i, N + j) = S_and_ffacts[i]  * S_and_ffacts[j]  * phases[j] / phases[i] * u_i[x_idx]  * u_j[y_idx];   // b_i+ b_j+ terms
-				M(N + i,     j) = S_and_ffactsc[i] * S_and_ffactsc[j] * phases[j] / phases[i] * uc_i[x_idx] * uc_j[y_idx];  // b_i b_j terms
-				M(N + i, N + j) = S_and_ffactsc[i] * S_and_ffacts[j]  * phases[j] / phases[i] * uc_i[x_idx] * u_j[y_idx];   // b_i b_j+ terms
+				M(    i,     j) = factors_i_00 * S_and_ffactsc[j] * phases[j] * uc_j[y_idx];  // b_i+ b_j terms
+				M(    i, N + j) = factors_i_0N * S_and_ffacts[j]  * phases[j] * u_j[y_idx];   // b_i+ b_j+ terms
+				M(N + i,     j) = factors_i_N0 * S_and_ffactsc[j] * phases[j] * uc_j[y_idx];  // b_i b_j terms
+				M(N + i, N + j) = factors_i_NN * S_and_ffacts[j]  * phases[j] * u_j[y_idx];   // b_i b_j+ terms
 			}  // end of inner site iteration
 		}  // end of outer site iteration
 
@@ -340,11 +341,11 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 			if(!tl2::equals(M_xy, tl2::diag_vec<t_vec>(M_xy2), m_eps) || !tl2::equals(M_xy, M_xy3, m_eps) ||
 				!tl2::equals(M_xy, M_xy4, m_eps))
 			{
-				MAGDYN_CERR_OPT << "Magdyn error: Correlation matrix mismatch at Q = "
-					<< S.Q_rlu << ": "
+				MAGDYN_CERR_OPT << "Magdyn error: Correlation matrix mismatch at Q = " << S.Q_rlu << ": "
 					<< "\n(1) " << M_xy.size() << ": " << M_xy
 					<< "\n(2) " << M_xy2.size1() << "x" << M_xy2.size2() << ": " << M_xy2
 					<< "\n(3) " << M_xy3.size() << ": " << M_xy3
+					<< "\n(4) " << M_xy4.size() << ": " << M_xy3
 					<< "." << std::endl;
 			}
 		}

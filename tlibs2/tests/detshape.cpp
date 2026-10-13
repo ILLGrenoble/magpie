@@ -34,7 +34,7 @@
 
 using t_real = double;
 using t_vec = tl2::vec<t_real, std::vector>;
-using t_mat = tl2::mat<t_real, std::vector>;
+using t_mat = tl2::mat<t_real, std::vector<t_real>>;
 
 
 t_vec get_spherical_pos(t_real theta, t_real phi)
