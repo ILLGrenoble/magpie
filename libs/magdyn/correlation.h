@@ -101,7 +101,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		const t_mat energy_mat2 = tl2::prod_THMT(S.H_comm, S.evec_mat);
 		const t_mat energy_mat3 = tl2::herm(S.evec_mat) * S.H_comm * S.evec_mat;
 
-		if(!tl2::is_diag(energy_mat, m_eps))
+		if(!tl2::is_diag(energy_mat3, m_eps))
 		{
 			MAGDYN_CERR_OPT << "Magdyn error: Energy matrix is not diagonal at Q = "
 				<< S.Q_rlu << ": " << energy_mat
