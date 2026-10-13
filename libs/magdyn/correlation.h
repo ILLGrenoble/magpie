@@ -85,8 +85,9 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		}
 	}
 
+	// energies
 	// equation (32) from (Toth 2015)
-	const t_mat energy_mat = tl2::herm(S.evec_mat) * S.H_comm * S.evec_mat;  // energies
+	const t_mat energy_mat = tl2::diag<t_mat>(tl2::prod_THMT_diag<t_mat, t_vec>(S.H_comm, S.evec_mat));
 	const t_size energy_mat_size = energy_mat.size1();
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
@@ -95,11 +96,27 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 #endif
 
 	// check that the energy matrix is diagonal
-	if(m_perform_checks && !tl2::is_diag(energy_mat, m_eps))
+	if(m_perform_checks)
 	{
-		MAGDYN_CERR_OPT << "Magdyn error: Energy matrix is not diagonal at Q = "
-			<< S.Q_rlu << ": " << energy_mat
-			<< "." << std::endl;
+		const t_mat energy_mat2 = tl2::prod_THMT(S.H_comm, S.evec_mat);
+		const t_mat energy_mat3 = tl2::herm(S.evec_mat) * S.H_comm * S.evec_mat;
+
+		if(!tl2::is_diag(energy_mat, m_eps))
+		{
+			MAGDYN_CERR_OPT << "Magdyn error: Energy matrix is not diagonal at Q = "
+				<< S.Q_rlu << ": " << energy_mat
+				<< "." << std::endl;
+		}
+
+		if(!tl2::equals(energy_mat, energy_mat2, m_eps) || !tl2::equals(energy_mat, energy_mat3, m_eps))
+		{
+			MAGDYN_CERR_OPT << "Magdyn error: Energy matrix mismatch at Q = "
+				<< S.Q_rlu << ": "
+				<< "\n(1) " << energy_mat.size1() << "x" << energy_mat.size2() << ": " << energy_mat
+				<< "\n(2) " << energy_mat2.size1() << "x" << energy_mat2.size2() << ": " << energy_mat2
+				<< "\n(3) " << energy_mat3.size1() << "x" << energy_mat3.size2() << ": " << energy_mat3
+				<< "." << std::endl;
+		}
 	}
 
 	if(energy_mat_size != num_energies)
@@ -307,15 +324,32 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		}  // end of outer site iteration
 
 		// multiply with boson operators
-		const t_mat M_xy = evec_mat_comm_herm * M * S.evec_mat_comm;
+		// no need to calculate the full M_xy matrix, since only the diagonal elements are needed
+		const t_vec M_xy = prod_THMT_diag<t_mat, t_vec>(M, S.evec_mat_comm);
+
+		if(m_perform_checks)
+		{
+			const t_mat M_xy2 = evec_mat_comm_herm * M * S.evec_mat_comm;
+			const t_vec M_xy3 = prod_diag<t_mat, t_vec>(evec_mat_comm_herm, M * S.evec_mat_comm);
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
-		std::cout << "M_{" << int(x_idx) << ", " << int(y_idx) << "}:\n";
-		tl2::niceprint(std::cout, M_xy, 1e-4, 4);
+			std::cout << "M_{" << int(x_idx) << ", " << int(y_idx) << "}:\n";
+			tl2::niceprint(std::cout, M_xy2, 1e-4, 4);
 #endif
 
+			if(!tl2::equals(M_xy, tl2::diag_vec<t_vec>(M_xy2), m_eps) || !tl2::equals(M_xy, M_xy3, m_eps))
+			{
+				MAGDYN_CERR_OPT << "Magdyn error: Correlation matrix mismatch at Q = "
+					<< S.Q_rlu << ": "
+					<< "\n(1) " << M_xy.size() << ": " << M_xy
+					<< "\n(2) " << M_xy2.size1() << "x" << M_xy2.size2() << ": " << M_xy2
+					<< "\n(3) " << M_xy3.size() << ": " << M_xy3
+					<< "." << std::endl;
+			}
+		}
+
 		for(t_size i = 0; i < energy_mat_size; ++i)
-			S.E_and_S[i].S(x_idx, y_idx) += M_xy(i, i) / t_real(2*N);
+			S.E_and_S[i].S(x_idx, y_idx) += /*M_xy(i, i)*/ M_xy[i] / t_real(2*N);
 	} // end of coordinate iteration
 
 	return true;

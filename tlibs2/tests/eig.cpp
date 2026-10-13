@@ -286,7 +286,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_eig, t_real, t_types)
 		t_mat_cplx eval_mat = tl2::diag<t_mat_cplx>(evals);
 		t_mat_cplx evec_mat = tl2::create<t_mat_cplx>(evecs);
 		t_mat_cplx diag = tl2::herm(evec_mat) * mat * evec_mat;
+		t_mat_cplx diag2 = tl2::prod_THMT(mat, evec_mat);
 		bool diag_equ = tl2::equals<t_mat_cplx, t_cplx>(eval_mat, diag, eps);
+		bool diag_equ2 = tl2::equals<t_mat_cplx, t_cplx>(eval_mat, diag2, eps);
 		BOOST_TEST(diag_equ);
 		tl2::set_eps_0<t_mat_cplx>(eval_mat, eps);
 		tl2::set_eps_0<t_mat_cplx>(diag, eps);

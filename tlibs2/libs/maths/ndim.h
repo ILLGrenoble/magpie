@@ -1500,6 +1500,152 @@ requires tl2::is_basic_mat<t_mat>
 
 
 /**
+ * matrix-matrix product: c_ij = a_ik b_kj, but only calculating the diagonal
+ */
+template<class t_mat, class t_vec>
+t_vec prod_diag(const t_mat& mat1, const t_mat& mat2, bool assert_sizes = true)
+requires tl2::is_basic_mat<t_mat> && tl2::is_basic_vec<t_vec>
+{
+	using size_t = decltype(mat1.size1());
+	const size_t mat1_size1 = mat1.size1();
+	const size_t mat1_size2 = mat1.size2();
+	const size_t mat2_size1 = mat2.size1();
+	const size_t mat2_size2 = mat2.size2();
+
+	// if not asserting sizes, the inner size will use the minimum of the two matrix sizes
+	if(assert_sizes)
+	{
+		if constexpr(tl2::is_dyn_mat<t_mat>)
+			assert((mat1_size2 == mat2_size1));
+		else
+			static_assert(t_mat::size2() == t_mat::size1());
+	}
+
+	const size_t outersize = std::min(mat1_size1, mat2_size2);
+	const size_t innersize = std::min(mat1_size2, mat2_size1);
+
+	t_vec matRet;
+	if constexpr(tl2::is_dyn_vec<t_vec>)
+		matRet = t_vec(outersize);
+
+	for(size_t row = 0; row < outersize; ++row)
+	{
+		matRet[row] = 0;
+		for(size_t i = 0; i < innersize; ++i)
+			matRet[row] += mat1(row, i) * mat2(i, row);
+	}
+
+	return matRet;
+}
+
+
+/**
+ * calculates the product T^H * M * T
+ */
+template<class t_mat>
+t_mat prod_THMT(const t_mat& M, const t_mat& T, bool assert_sizes = true)
+requires tl2::is_basic_mat<t_mat>
+{
+	using size_t = decltype(M.size1());
+	const size_t M_size1 = M.size1();
+	const size_t M_size2 = M.size2();
+	const size_t T_size1 = T.size1();
+	const size_t T_size2 = T.size2();
+
+	if(assert_sizes)
+	{
+		if constexpr(tl2::is_dyn_mat<t_mat>)
+		{
+			assert((M_size2 == T_size1));
+			assert((M_size1 == T_size1));
+		}
+		else
+		{
+			static_assert(t_mat::size2() == t_mat::size1());
+		}
+	}
+
+	const size_t outersize = std::min(M_size1, T_size1);
+	const size_t innersize = std::min(M_size2, T_size1);
+
+	t_mat matRet;
+	if constexpr(tl2::is_dyn_mat<t_mat>)
+		matRet = t_mat{T_size2, T_size2};
+
+	for(size_t i = 0; i < T_size2; ++i)
+	{
+		for(size_t l = 0; l < T_size2; ++l)
+		{
+			matRet(i, l) = 0;
+
+			for(size_t j = 0; j < outersize; ++j)
+				for(size_t k = 0; k < innersize; ++k)
+				{
+					if constexpr(is_complex<typename t_mat::value_type>)
+						matRet(i, l) += std::conj(T(j, i)) * M(j, k) * T(k, l);
+					else
+						matRet(i, l) += T(j, i) * M(j, k) * T(k, l);
+				}
+		}
+	}
+
+	return matRet;
+}
+
+
+/**
+ * calculates the diagonal elements of the product T^H * M * T
+ */
+template<class t_mat, class t_vec>
+t_vec prod_THMT_diag(const t_mat& M, const t_mat& T, bool assert_sizes = true)
+requires tl2::is_basic_mat<t_mat> && tl2::is_basic_vec<t_vec>
+{
+	using size_t = decltype(M.size1());
+	const size_t M_size1 = M.size1();
+	const size_t M_size2 = M.size2();
+	const size_t T_size1 = T.size1();
+	const size_t T_size2 = T.size2();
+
+	if(assert_sizes)
+	{
+		if constexpr(tl2::is_dyn_mat<t_mat>)
+		{
+			assert((M_size2 == T_size1));
+			assert((M_size1 == T_size1));
+		}
+		else
+		{
+			static_assert(t_mat::size2() == t_mat::size1());
+		}
+	}
+
+	const size_t outersize = std::min(M_size1, T_size1);
+	const size_t innersize = std::min(M_size2, T_size1);
+
+	t_vec matRet;
+	if constexpr(tl2::is_dyn_vec<t_vec>)
+		matRet = t_vec(T_size2);
+
+	for(size_t i = 0; i < T_size2; ++i)
+	{
+		matRet[i] = 0;
+		for(size_t j = 0; j < outersize; ++j)
+		{
+			for(size_t k = 0; k < innersize; ++k)
+			{
+				if constexpr(is_complex<typename t_mat::value_type>)
+					matRet[i] += std::conj(T(j, i)) * M(j, k) * T(k, i);
+				else
+					matRet[i] += T(j, i) * M(j, k) * T(k, i);
+			}
+		}
+	}
+
+	return matRet;
+}
+
+
+/**
  * matrix-vector product: c_i = a_ij b_j
 */
 template<class t_mat, class t_vec, bool hom/* = true*/>
