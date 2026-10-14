@@ -88,8 +88,9 @@ InfoDlg::InfoDlg(QWidget* parent, QSettings *sett)
 	}
 
 	auto labelPaper = new QLabel(
-		"Paper upcoming!"  // TODO: Put DOI when published.
-		"<br>Paper DOI for Predecessor Software: "
+		"<br>Paper on Magpie: "
+		"<a href=\"https://doi.org/10.48550/arXiv.2610.15790\">10.48550/arXiv.2610.15790</a>."
+		"<br>Paper on its Predecessor Software: "
 		"<a href=\"https://doi.org/10.1016/j.softx.2023.101471\">10.1016/j.softx.2023.101471</a>."
 		"<br>This program implements the formalism from "
 		"<a href=\"https://doi.org/10.1088/0953-8984/27/16/166002\">this paper</a> "

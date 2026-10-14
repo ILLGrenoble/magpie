@@ -18,5 +18,5 @@ This application is entirely hand-crafted, **no AI** has been used in its develo
 
 
 ## Papers
-  - The new standalone version of *Magpie* will soon be published in a paper.
+  - The new standalone version of *Magpie* is described in [arxiv:2610.15790](https://arxiv.org/abs/2610.15790).
   - *Magpie's* predecessor, the *Magdyn* module included in the *Takin* package, is described in the *Takin 2.5* paper (2023): [10.1016/j.softx.2023.101471](https://doi.org/10.1016/j.softx.2023.101471).

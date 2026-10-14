@@ -6,6 +6,7 @@
  *
  * References:
  *   - (McClarty 2022) https://doi.org/10.1146/annurev-conmatphys-031620-104715
+ *   - (Nakamura 2024) https://doi.org/10.1103/PhysRevB.110.075144
  *
  * @note Forked on 5-November-2024 from my privately developed "mathlibs" project (https://github.com/t-weber/mathlibs).
  * @desc For references, see the 'LITERATURE' file.
@@ -53,9 +54,9 @@ template<class t_vec, class t_vec_real, class t_mat, class t_S,
 	typename t_cplx = typename t_vec::value_type,
 	typename t_real = typename t_cplx::value_type>
 std::tuple<std::vector<t_vec>, t_S> berry_connections(
-	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q)>& get_evecs,
+	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q, bool)>& get_evecs,
 	const t_vec_real& Q, t_real delta = std::sqrt(std::numeric_limits<t_real>::epsilon()),
-	bool enforce_commutator = false)
+	bool enforce_commutator = true)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
@@ -71,8 +72,10 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		for(t_size col = 0; col < mat1.size2(); ++col)
 		{
 			t_real dot = enforce_commutator
-				? tl2::inner(tl2::col<t_mat, t_vec>(mat1, col), mult_comm<t_vec>(tl2::col<t_mat, t_vec>(mat2, col))).real()
-				: tl2::inner(tl2::col<t_mat, t_vec>(mat1, col), tl2::col<t_mat, t_vec>(mat2, col)).real();
+				? tl2::inner(tl2::col<t_mat, t_vec>(mat1, col),
+					mult_comm<t_vec>(tl2::col<t_mat, t_vec>(mat2, col))).real()
+				: tl2::inner(tl2::col<t_mat, t_vec>(mat1, col),
+				  tl2::col<t_mat, t_vec>(mat2, col)).real();
 
 			t_real sign = -1.;
 			if(dot < 0.)
@@ -87,7 +90,7 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		return m;
 	};
 
-	const auto [ evecs, S ] = get_evecs(Q);
+	const auto [ evecs, S ] = get_evecs(Q, enforce_commutator);
 	const t_size BANDS = evecs.size1();
 	const t_size DIM = Q.size();
 
@@ -103,7 +106,7 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		Q1[dim] += delta;
 
 		// differentiate eigenvector matrix
-		t_mat evecs_diff = sub_evecs(std::get<0>(get_evecs(Q1)), evecs) / delta;
+		t_mat evecs_diff = sub_evecs(std::get<0>(get_evecs(Q1, enforce_commutator)), evecs) / delta;
 
 		t_mat evecs_H = tl2::herm(evecs);
 		t_mat C;
@@ -130,9 +133,9 @@ template<class t_vec, class t_vec_real, class t_vecs = std::vector<t_vec>, class
 	typename t_cplx = typename t_vec::value_type,
 	typename t_real = typename t_cplx::value_type>
 std::tuple<t_vecs, t_S> berry_connections(
-	const std::function<std::tuple<t_vecs, t_S>(const t_vec_real& Q)>& get_evecs,
+	const std::function<std::tuple<t_vecs, t_S>(const t_vec_real& Q, bool)>& get_evecs,
 	const t_vec_real& Q, t_real delta = std::sqrt(std::numeric_limits<t_real>::epsilon()),
-	[[__maybe_unused__]] bool enforce_commutator = false)
+	[[__maybe_unused__]] bool enforce_commutator = true)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires (!tl2::is_mat<t_vecs>) && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
@@ -151,7 +154,7 @@ requires (!tl2::is_mat<t_vecs>) && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		return vec2 - vec1;
 	};
 
-	const auto [ evecs, S ] = get_evecs(Q);
+	const auto [ evecs, S ] = get_evecs(Q, enforce_commutator);
 	const t_size BANDS = evecs.size();
 	const t_size DIM = Q.size();
 
@@ -165,7 +168,7 @@ requires (!tl2::is_mat<t_vecs>) && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		// differentiate with respect to component "dim"
 		t_vec_real Q1 = Q;
 		Q1[dim] += delta;
-		const t_vecs evecs_delta = std::get<0>(get_evecs(Q1));
+		const t_vecs evecs_delta = std::get<0>(get_evecs(Q1, enforce_commutator));
 
 		for(t_size band = 0; band < BANDS; ++band)
 		{
@@ -193,14 +196,14 @@ template<class t_vec, class t_vec_real, class t_mat, class t_S,
 	typename t_real = typename t_cplx::value_type,
 	typename t_size = std::size_t>
 std::tuple<std::vector<t_cplx>, t_S> berry_curvatures(
-	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q)>& get_evecs,
+	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q, bool)>& get_evecs,
 	const t_vec_real& Q, t_real delta = std::sqrt(std::numeric_limits<t_real>::epsilon()),
-	t_size dim1 = 0, t_size dim2 = 1, bool enforce_commutator = false)
+	t_size dim1 = 0, t_size dim2 = 1, bool enforce_commutator = true)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
 {
-	const auto [ evecs, S ] = get_evecs(Q);
+	const auto [ evecs, S ] = get_evecs(Q, enforce_commutator);
 	t_size BANDS{};
 	if constexpr (tl2::is_mat<t_mat>)
 		BANDS = evecs.size1();  // matrix
@@ -254,64 +257,20 @@ template<class t_vec, class t_vec_real, class t_mat, class t_S,
 	typename t_real = typename t_cplx::value_type,
 	typename t_size = std::size_t>
 std::vector<t_cplx> chern_numbers(
-	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q)>& get_evecs,
+	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q, bool)>& get_evecs,
 	t_real bz = 0.5,  // brillouin zone boundary
 	t_real delta_diff = std::sqrt(std::numeric_limits<t_real>::epsilon()),
 	t_real delta_int = 1e-2, //std::cbrt(std::numeric_limits<t_real>::epsilon()),
-	t_size dim1 = 0, t_size dim2 = 1, bool calc_via_boundary = true,
-	bool enforce_commutator = false)
+	t_size dim1 = 0, t_size dim2 = 1, int calc_method = 0,
+	bool enforce_commutator = true)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
 {
 	std::vector<t_cplx> chern_nums;
 
-	auto int_boundary = [get_evecs, delta_diff, delta_int, bz, dim1, dim2,
-		&chern_nums, enforce_commutator](t_size dim, t_vec_real& Q, t_real sign)
-	{
-		for(Q[dim] = -bz; Q[dim] < bz; Q[dim] += delta_int)
-		{
-			std::vector<t_vec> conns =
-				std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real>(
-					get_evecs, Q, delta_diff, enforce_commutator));
-
-			// initialise by resetting chern numbers to zeros
-			if(!chern_nums.size())
-				chern_nums.resize(conns.size(), t_cplx{});
-
-			// numerically integrate along boundary segment
-			for(t_size band = 0; band < conns.size(); ++band)
-			{
-				chern_nums[band] += conns[band][dim1] * delta_int * sign;
-				chern_nums[band] -= conns[band][dim2] * delta_int * sign;
-			}
-		}
-	};
-
-	// calculate via boundary over berry connections
-	if(calc_via_boundary)
-	{
-		// bottom part of boundary
-		t_vec_real Q = tl2::zero<t_vec_real>(3);
-		Q[dim2] = -bz;
-		int_boundary(dim1, Q, 1.);
-
-		// top part of boundary
-		Q[dim2] = +bz;
-		int_boundary(dim1, Q, -1.);
-
-		// left part of boundary
-		Q = tl2::zero<t_vec_real>(3);
-		Q[dim1] = -bz;
-		int_boundary(dim2, Q, 1.);
-
-		// right part of boundary
-		Q[dim1] = +bz;
-		int_boundary(dim2, Q, -1.);
-	}
-
 	// calculate via area over berry curvatures
-	else
+	if(calc_method == 0)
 	{
 		t_vec_real Q = tl2::zero<t_vec_real>(3);
 
@@ -335,6 +294,116 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 			num /= t_real(2) * tl2::pi<t_real>;
 	}
 
+	// calculate via boundary over berry connections
+	else if(calc_method == 1)
+	{
+		auto int_boundary = [get_evecs, delta_diff, delta_int, bz, dim1, dim2,
+			&chern_nums, enforce_commutator](t_size dim, t_vec_real& Q, t_real sign)
+		{
+			for(Q[dim] = -bz; Q[dim] < bz; Q[dim] += delta_int)
+			{
+				std::vector<t_vec> conns =
+					std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real>(
+						get_evecs, Q, delta_diff, enforce_commutator));
+	
+				// initialise by resetting chern numbers to zeros
+				if(!chern_nums.size())
+					chern_nums.resize(conns.size(), t_cplx{});
+	
+				// numerically integrate along boundary segment
+				for(t_size band = 0; band < conns.size(); ++band)
+				{
+					chern_nums[band] += conns[band][dim1] * delta_int * sign;
+					chern_nums[band] -= conns[band][dim2] * delta_int * sign;
+				}
+			}
+		};
+
+		// bottom part of boundary
+		t_vec_real Q = tl2::zero<t_vec_real>(3);
+		Q[dim2] = -bz;
+		int_boundary(dim1, Q, 1.);
+
+		// top part of boundary
+		Q[dim2] = +bz;
+		int_boundary(dim1, Q, -1.);
+
+		// left part of boundary
+		Q = tl2::zero<t_vec_real>(3);
+		Q[dim1] = -bz;
+		int_boundary(dim2, Q, 1.);
+
+		// right part of boundary
+		Q[dim1] = +bz;
+		int_boundary(dim2, Q, -1.);
+	}
+
+	// FHS method, see (Nakamura 2024)
+	else
+	{		
+		if constexpr (tl2::is_mat<t_mat>)
+		{
+			// create grid
+			const t_size N = t_size(2.*bz / delta_int);
+			std::vector<t_mat> grid(N*N);
+
+			t_vec_real Q = tl2::zero<t_vec_real>(3);
+			Q[dim1] = -bz;
+
+			for(t_size i = 0; i < N; ++i)
+			{
+				Q[dim2] = -bz;
+
+				for(t_size j = 0; j < N; ++j)
+				{
+					auto [ evecs, S ] = get_evecs(Q, enforce_commutator);
+					grid[i*N + j] = std::move(evecs);
+
+					Q[dim2] += delta_int;
+				}
+
+				Q[dim1] += delta_int;
+			}
+
+			// initialise by resetting chern numbers to zeros
+			const t_size num_bands = grid[0].size1();
+			if(!chern_nums.size())
+				chern_nums.resize(num_bands, t_cplx{});
+
+			// calculate chern numbers per magnon band
+			for(std::size_t band = 0; band < num_bands; ++band)
+			{
+				// see equ. 2 in (Nakamura 2024)
+				auto dot = [enforce_commutator](const t_vec& v1, const t_vec& v2) -> t_cplx
+				{
+					t_cplx s = enforce_commutator
+						? tl2::inner(v1, mult_comm<t_vec>(v2))
+						: tl2::inner(v1, v2);
+					return s / std::abs(s);
+				};
+
+				t_cplx chern_num{};
+
+				// see equs. 3a & 3b in (Nakamura 2024)
+				for(std::size_t i = 0; i < N; ++i)
+				for(std::size_t j = 0; j < N; ++j)
+				{
+					t_vec v00 = tl2::col<t_mat, t_vec>(grid[i*N           + j          ], band);
+					t_vec v01 = tl2::col<t_mat, t_vec>(grid[i*N           + ((j + 1)%N)], band);
+					t_vec v10 = tl2::col<t_mat, t_vec>(grid[((i + 1)%N)*N + j          ], band);
+					t_vec v11 = tl2::col<t_mat, t_vec>(grid[((i + 1)%N)*N + ((j + 1)%N)], band);
+
+					chern_num += std::arg(
+						dot(v00, v10) * dot(v01, v00) *
+						dot(v11, v01) * dot(v10, v11));
+				}
+
+				chern_num /= t_real(2) * tl2::pi<t_real>;
+				chern_nums[band] = std::move(chern_num);
+			}
+		}
+	}
+
 	// should be integers
 	return chern_nums;
 }
@@ -345,15 +414,14 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
  * get a function returning the matrix of eigenstates at specific Q
  */
 template<class t_mat, class t_vec, class t_vec_real, class t_magdyn, class t_perm>
-static std::function<std::tuple<t_mat, typename t_magdyn::SofQE>(const t_vec_real& Q)>
+static std::function<std::tuple<t_mat, typename t_magdyn::SofQE>(const t_vec_real& Q, bool)>
 get_evecmat_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
 {
-	return [magdyn, perm](const t_vec_real& Q)
+	return [magdyn, perm](const t_vec_real& Q, bool enforce_commutator)
 		-> std::tuple<t_mat, typename t_magdyn::SofQE>
 	{
 		typename t_magdyn::SofQE S = magdyn->CalcEnergies(Q, false);
-		//t_mat M = S.evec_mat;
-		t_mat M = S.evec_mat_comm;  // eigenvectors after commutator correction
+		t_mat M = enforce_commutator ? S.evec_mat_comm : S.evec_mat;
 
 		if(perm)
 		{
@@ -371,10 +439,10 @@ get_evecmat_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
  * get a function returning the eigenstates at specific Q
  */
 template<class t_vec, class t_vec_real, class t_magdyn, class t_perm>
-static std::function<std::tuple<std::vector<t_vec>, typename t_magdyn::SofQE>(const t_vec_real& Q)>
+static std::function<std::tuple<std::vector<t_vec>, typename t_magdyn::SofQE>(const t_vec_real& Q, bool)>
 get_evec_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
 {
-	return [magdyn, perm](const t_vec_real& Q)
+	return [magdyn, perm](const t_vec_real& Q, bool enforce_commutator)
 		-> std::tuple<std::vector<t_vec>, typename t_magdyn::SofQE>
 	{
 		typename t_magdyn::SofQE S = magdyn->CalcEnergies(Q, false);
@@ -384,11 +452,16 @@ get_evec_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
 
 		for(std::size_t evec_idx = 0; evec_idx < S.E_and_S.size(); ++evec_idx)
 		{
-			//const auto& E_and_S = S.E_and_S[evec_idx];
-			//vecs.push_back(E_and_S.state);  // these are not the final evecs after commutator correction!
-
-			t_vec evec = tl2::col<decltype(S.evec_mat_comm), t_vec>(S.evec_mat_comm, evec_idx);
-			vecs.emplace_back(std::move(evec));
+			if(enforce_commutator)
+			{
+				t_vec evec = tl2::col<decltype(S.evec_mat_comm), t_vec>(S.evec_mat_comm, evec_idx);
+				vecs.emplace_back(std::move(evec));
+			}
+			else
+			{
+				const auto& E_and_S = S.E_and_S[evec_idx];
+				vecs.push_back(E_and_S.state);  // these are not the final evecs after commutator correction!
+			}
 		}
 
 		if(perm)
@@ -478,7 +551,7 @@ std::vector<t_cplx> MAGDYN_INST::CalcChernNumbers(
 {
 	//SetUniteDegenerateEnergies(false);
 
-	bool calc_via_boundary = false;
+	int calc_method = 2;
 	std::vector<t_size> *perm = nullptr;
 
 	if(evecs_ortho)
@@ -489,7 +562,7 @@ std::vector<t_cplx> MAGDYN_INST::CalcChernNumbers(
 		return chern_numbers<
 			t_vec, t_vec3_real, t_vecs, SofQE, t_cplx, t_real, t_size>(
 				evec_func, bz, delta_diff, delta_int, dim1, dim2,
-				calc_via_boundary, enforce_commutator);
+				calc_method, enforce_commutator);
 	}
 	else
 	{
@@ -498,7 +571,7 @@ std::vector<t_cplx> MAGDYN_INST::CalcChernNumbers(
 		return chern_numbers<
 			t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
 				evec_func, bz, delta_diff, delta_int, dim1, dim2,
-				calc_via_boundary, enforce_commutator);
+				calc_method, enforce_commutator);
 	}
 }
 
