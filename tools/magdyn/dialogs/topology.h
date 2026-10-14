@@ -120,7 +120,8 @@ protected:
 
 	// plot functions
 	void ClearBerryCurvatureMapPlot(bool replot = true);
-	void RescaleBerryCurvatureMapPlot();
+	void RescaleBerryCurvatureMapPlot(bool replot = true);
+	void RescaleBerryCurvatureMapColour(bool replot = true);
 	void PlotBerryCurvatureMap();
 	void BerryCurvatureMapPlotMouseMove(QMouseEvent *evt);
 	void BerryCurvatureMapPlotMousePress(QMouseEvent *evt);
@@ -192,8 +193,10 @@ private:
 	QDoubleSpinBox *m_Q_dir2_bcm[3]{};    // Q direction vector 2
 	QSpinBox *m_num_Q_bcm[2]{};           // number of Q points
 
-	//QCheckBox *m_B_filter_enable_bcm{};   // switch to enable maximum B value
-	//QDoubleSpinBox *m_B_filter_bcm{};     // maximum B value
+	QCheckBox *m_B_filter_min_enable_bcm{};   // switch to enable minimum B value
+	QDoubleSpinBox *m_B_filter_min_bcm{};     // minumum B value
+	QCheckBox *m_B_filter_max_enable_bcm{};   // switch to enable maximum B value
+	QDoubleSpinBox *m_B_filter_max_bcm{};     // maximum B value
 	//QCheckBox *m_S_filter_enable_bcm{};   // switch to enable minimum S(Q,E) value
 	//QDoubleSpinBox *m_S_filter_bcm{};     // minimum S(Q,E) value
 

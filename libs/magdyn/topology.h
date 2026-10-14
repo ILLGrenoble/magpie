@@ -402,6 +402,10 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 				chern_nums[band] = std::move(chern_num);
 			}
 		}
+		else
+		{
+			// TODO: implement for vectors
+		}
 	}
 
 	// should be integers

@@ -199,21 +199,35 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	m_band_bcm->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_band_bcm->setToolTip("Magnon band index.");
 
+	// minimum cutoff for filtering numerical artefacts in berry curvature
+	m_B_filter_min_enable_bcm = new QCheckBox("Minimum B:", panel);
+	m_B_filter_min_enable_bcm->setChecked(false);
+	m_B_filter_min_enable_bcm->setToolTip("Enable minimum cutoff Berry curvature for filtering numerical artefacts.");
+
+	m_B_filter_min_bcm = new QDoubleSpinBox(panel);
+	m_B_filter_min_bcm->setDecimals(2);
+	m_B_filter_min_bcm->setMinimum(-999999.99);
+	m_B_filter_min_bcm->setMaximum(999999.99);
+	m_B_filter_min_bcm->setSingleStep(1.);
+	m_B_filter_min_bcm->setValue(-100.);
+	m_B_filter_min_bcm->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+	m_B_filter_min_bcm->setToolTip("Minimum cutoff Berry curvature for filtering numerical artefacts.");
+
 	// maximum cutoff for filtering numerical artefacts in berry curvature
-	/*m_B_filter_enable_bcm = new QCheckBox("Maximum B:", panel);
-	m_B_filter_enable_bcm->setChecked(true);
-	m_B_filter_enable_bcm->setToolTip("Enable maximum cutoff Berry curvature for filtering numerical artefacts.");
+	m_B_filter_max_enable_bcm = new QCheckBox("Maximum B:", panel);
+	m_B_filter_max_enable_bcm->setChecked(false);
+	m_B_filter_max_enable_bcm->setToolTip("Enable maximum cutoff Berry curvature for filtering numerical artefacts.");
 
-	m_B_filter_bcm = new QDoubleSpinBox(panel);
-	m_B_filter_bcm->setDecimals(2);
-	m_B_filter_bcm->setMinimum(0.);
-	m_B_filter_bcm->setMaximum(999999.99);
-	m_B_filter_bcm->setSingleStep(1.);
-	m_B_filter_bcm->setValue(m_B_filter_bc->maximum());
-	m_B_filter_bcm->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
-	m_B_filter_bcm->setToolTip("Maximum cutoff Berry curvature for filtering numerical artefacts.");
+	m_B_filter_max_bcm = new QDoubleSpinBox(panel);
+	m_B_filter_max_bcm->setDecimals(2);
+	m_B_filter_max_bcm->setMinimum(-999999.99);
+	m_B_filter_max_bcm->setMaximum(999999.99);
+	m_B_filter_max_bcm->setSingleStep(1.);
+	m_B_filter_max_bcm->setValue(100.);
+	m_B_filter_max_bcm->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
+	m_B_filter_max_bcm->setToolTip("Maximum cutoff Berry curvature for filtering numerical artefacts.");
 
-	// minimum cutoff for filtering S(Q, E)
+	/*// minimum cutoff for filtering S(Q, E)
 	m_S_filter_enable_bcm = new QCheckBox("Minimum S(Q, E):", panel);
 	m_S_filter_enable_bcm->setChecked(false);
 	m_S_filter_enable_bcm->setToolTip("Enable minimum S(Q, E).");
@@ -260,10 +274,12 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	grid->addWidget(m_coords_bcm[0], y, 1, 1, 1);
 	grid->addWidget(m_coords_bcm[1], y, 2, 1, 1);
 	grid->addWidget(m_band_bcm, y++, 3, 1, 1);
-	/*grid->addWidget(m_B_filter_enable_bcm, y, 0, 1, 1);
-	grid->addWidget(m_B_filter_bcm, y, 1, 1, 1);
-	grid->addWidget(m_S_filter_enable_bcm, y, 2, 1, 1);
-	grid->addWidget(m_S_filter_bcm, y++, 3, 1, 1);*/
+	grid->addWidget(m_B_filter_min_enable_bcm, y, 0, 1, 1);
+	grid->addWidget(m_B_filter_min_bcm, y, 1, 1, 1);
+	grid->addWidget(m_B_filter_max_enable_bcm, y, 2, 1, 1);
+	grid->addWidget(m_B_filter_max_bcm, y++, 3, 1, 1);
+	//grid->addWidget(m_S_filter_enable_bcm, y, 2, 1, 1);
+	//grid->addWidget(m_S_filter_bcm, y++, 3, 1, 1);
 	grid->addWidget(m_progress_bcm, y, 0, 1, 3);
 	grid->addWidget(m_btnStartStop_bcm, y++, 3, 1, 1);
 
@@ -278,12 +294,21 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	});
 	
 	connect(btnMainQ, &QAbstractButton::clicked, this, &TopologyDlg::MapQFromMainQ);
-	//connect(m_B_filter_enable_bcm, &QCheckBox::toggled, m_B_filter_bcm, &QDoubleSpinBox::setEnabled);
+	connect(m_B_filter_min_enable_bcm, &QCheckBox::toggled, m_B_filter_min_bcm, &QDoubleSpinBox::setEnabled);
+	connect(m_B_filter_min_enable_bcm, &QCheckBox::toggled, [this]() { RescaleBerryCurvatureMapColour(); });
+	connect(m_B_filter_min_bcm, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		[this]() { RescaleBerryCurvatureMapColour(); });
+	connect(m_B_filter_max_enable_bcm, &QCheckBox::toggled, m_B_filter_max_bcm, &QDoubleSpinBox::setEnabled);
+	connect(m_B_filter_max_enable_bcm, &QCheckBox::toggled, [this]() { RescaleBerryCurvatureMapColour(); });
+	connect(m_B_filter_max_bcm, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		[this]() { RescaleBerryCurvatureMapColour(); });
 	//connect(m_S_filter_enable_bcm, &QCheckBox::toggled, m_S_filter_bcm, &QDoubleSpinBox::setEnabled);
+	//connect(m_S_filter_bc, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+	//	[this]() { RescaleBerryCurvatureMapColour(); });
 	connect(m_plot_bcm, &QCustomPlot::mouseMove, this, &TopologyDlg::BerryCurvatureMapPlotMouseMove);
 	connect(m_plot_bcm, &QCustomPlot::mousePress, this, &TopologyDlg::BerryCurvatureMapPlotMousePress);
 	connect(m_imag_bcm, &QAction::toggled, [this]() { PlotBerryCurvatureMap(); });
-	connect(acRescalePlot, &QAction::triggered, this, &TopologyDlg::RescaleBerryCurvatureMapPlot);
+	connect(acRescalePlot, &QAction::triggered, [this]() { RescaleBerryCurvatureMapPlot(); } );
 	connect(acSaveFigure, &QAction::triggered, this, &TopologyDlg::SaveBerryCurvatureMapPlotFigure);
 	connect(acSaveData, &QAction::triggered, this, &TopologyDlg::SaveBerryCurvatureMapData);
 	connect(m_band_bcm, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
@@ -310,7 +335,8 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 		m_plot_bcm->replot();
 	});
 
-	//m_B_filter_bcm->setEnabled(m_B_filter_enable_bcm->isChecked());
+	m_B_filter_min_bcm->setEnabled(m_B_filter_min_enable_bcm->isChecked());
+	m_B_filter_max_bcm->setEnabled(m_B_filter_max_enable_bcm->isChecked());
 	//m_S_filter_bcm->setEnabled(m_S_filter_enable_bcm->isChecked());
 	EnableBerryCurvatureMapCalculation();
 
@@ -563,14 +589,43 @@ void TopologyDlg::ClearBerryCurvatureMapPlot(bool replot)
 /**
  * rescale plot axes to fit the content
  */
-void TopologyDlg::RescaleBerryCurvatureMapPlot()
+void TopologyDlg::RescaleBerryCurvatureMapPlot(bool replot)
 {
 	if(!m_plot_bcm || !m_plot_map_bcm)
 		return;
 
 	m_plot_map_bcm->rescaleDataRange();
 	m_plot_bcm->rescaleAxes();
-	m_plot_bcm->replot();
+
+	RescaleBerryCurvatureMapColour(false);
+
+	if(replot)
+		m_plot_bcm->replot();
+}
+
+
+
+/**
+ * rescale plot colour bar
+ */
+void TopologyDlg::RescaleBerryCurvatureMapColour(bool replot)
+{
+	if(!m_plot_bcm || !m_plot_colour_bcm)
+		return;
+
+	m_plot_colour_bcm->rescaleDataRange(true);
+	QCPRange range = m_plot_colour_bcm->dataRange();
+
+	if(m_B_filter_min_enable_bcm->isChecked())
+		range.lower = m_B_filter_min_bcm->value();
+
+	if(m_B_filter_max_enable_bcm->isChecked())
+		range.upper = m_B_filter_max_bcm->value();
+
+	m_plot_colour_bcm->setDataRange(range);
+
+	if(replot)
+		m_plot_bcm->replot();
 }
 
 

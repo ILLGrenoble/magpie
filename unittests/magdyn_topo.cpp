@@ -64,7 +64,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 
 	magdyn.Load("../../examples/honeycomb.magpie");
 	//magdyn.Load("../../examples/ferromagnetic_chain.magpie");
+
 	magdyn.SetEpsilon(eps);
+	magdyn.SetUniteDegenerateEnergies(false);
 
 	std::vector<t_cplx> cs = magdyn.CalcChernNumbers(
 	  0.5,             // zone boundary
