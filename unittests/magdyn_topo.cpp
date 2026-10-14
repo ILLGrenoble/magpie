@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 	  0.5,             // zone boundary
 		diff_eps, 1e-1,  // diff and int deltas
 		0, 1,            // dims
-		false, true);
+		true);           // use commutator corrected eigensystems
 	for(t_cplx& c : cs)
 	{
 		BOOST_TEST(tl2::equals<t_real>(c.imag(), 0., eps));

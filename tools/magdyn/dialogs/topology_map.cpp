@@ -60,8 +60,8 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	// plotter
 	m_plot_bcm = new QCustomPlot(panel);
 	m_plot_bcm->setFont(font());
-	m_plot_bcm->xAxis->setLabel("Momentum Transfer Q1 (rlu)");
-	m_plot_bcm->yAxis->setLabel("Momentum Transfer Q1 (rlu)");
+	m_plot_bcm->xAxis->setLabel("Momentum Transfer along Q Direction 1");
+	m_plot_bcm->yAxis->setLabel("Momentum Transfer along Q Direction 2");
 	m_plot_bcm->setInteraction(QCP::iRangeDrag, true);
 	m_plot_bcm->setInteraction(QCP::iRangeZoom, true);
 	m_plot_bcm->setSelectionRectMode(QCP::srmZoom);
@@ -513,8 +513,7 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 			// calculate the berry curvature at the given Q point
 			const t_vec3_real Q = GetMapQFromIndices(Q_idx_1, Q_idx_2);
 			auto [curvatures, S] = dyn.CalcBerryCurvatures(
-				Q, g_delta_diff, nullptr, dim1, dim2, g_evecs_ortho != 0,
-				enforce_commutator);
+				Q, g_delta_diff, nullptr, dim1, dim2, enforce_commutator);
 
 			std::lock_guard<std::mutex> _lck{mtx};
 			m_data_bcm[Q_idx_2*Q_count_1 + Q_idx_1] = std::move(curvatures);
@@ -551,6 +550,14 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 	}
 
 	pool.join();
+
+	// calculate chern numbers for the magnon bands
+	m_chern = m_dyn->CalcChernNumbers(
+		0.5,                        // zone boundary
+		g_delta_diff, g_delta_int,  // diff and int deltas
+		0, 1,                       // dims
+		true);                      // use commutator corrected eigensystems
+
 	stopwatch.stop();
 
 	// show elapsed time
@@ -669,6 +676,7 @@ void TopologyDlg::PlotBerryCurvatureMap()
 	}
 
 	RescaleBerryCurvatureMapPlot();
+	BerryCurvatureMapPlotMouseMove(nullptr);  // update status message
 }
 
 
@@ -789,17 +797,37 @@ void TopologyDlg::BerryCurvatureMapPlotMouseMove(QMouseEvent* evt)
 	if(!m_status)
 		return;
 
-	t_real Q1 = m_plot_bcm->xAxis->pixelToCoord(evt->pos().x());
-	t_real Q2 = m_plot_bcm->yAxis->pixelToCoord(evt->pos().y());
+	if(evt)
+	{
+		t_real Q1 = m_plot_bcm->xAxis->pixelToCoord(evt->pos().x());
+		t_real Q2 = m_plot_bcm->yAxis->pixelToCoord(evt->pos().y());
 
-	auto [Q_origin, Q_dir_1, Q_dir_2] = GetMapQVectors();	
-	m_Q_cursor_bcm = Q_origin + Q_dir_1*Q1 + Q_dir_2*Q2;
+		auto [Q_origin, Q_dir_1, Q_dir_2] = GetMapQVectors();	
+		m_Q_cursor_bcm = Q_origin + Q_dir_1*Q1 + Q_dir_2*Q2;
+	}
+
+	const t_size band = m_band_bcm->value();
+	std::optional<t_real> chern;
+	if(band < m_chern.size())
+	{
+		chern = m_chern[band].real();
+		tl2::set_eps_0(*chern, g_eps);
+	}
 
 	QString status("Q = (%1, %2, %3) rlu.");
 	status = status
 		.arg(m_Q_cursor_bcm[0], 0, 'g', g_prec_gui)
 		.arg(m_Q_cursor_bcm[1], 0, 'g', g_prec_gui)
 		.arg(m_Q_cursor_bcm[2], 0, 'g', g_prec_gui);
+
+	if(chern)
+	{
+		QString statusChern("Chern number = %1.");
+		statusChern = statusChern.arg(*chern, 0, 'g', g_prec_gui);
+
+		status += " " + statusChern;
+	}
+
 	m_status->setText(status);
 }
 

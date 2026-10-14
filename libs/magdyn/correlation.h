@@ -100,8 +100,8 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	{
 		const t_mat energy_mat = tl2::diag<t_mat>(energy_vec);
 		const t_mat energy_mat2 = tl2::herm(S.evec_mat) * S.H_comm * S.evec_mat;
-		const t_mat energy_mat3 = tl2::prod_THMT(S.H_comm, S.evec_mat);
-		const t_mat energy_mat4 = tl2::diag<t_mat>(tl2::prod_THMT_diag<t_mat, t_vec>(S.H_comm, S.evec_mat));
+		//const t_mat energy_mat3 = tl2::prod_THMT(S.H_comm, S.evec_mat);
+		//const t_mat energy_mat4 = tl2::diag<t_mat>(tl2::prod_THMT_diag<t_mat, t_vec>(S.H_comm, S.evec_mat));
 
 		if(!tl2::is_diag(energy_mat2, m_eps))
 		{
@@ -110,14 +110,11 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 				<< "." << std::endl;
 		}
 
-		if(!tl2::equals(energy_mat, energy_mat2, m_eps) || !tl2::equals(energy_mat, energy_mat3, m_eps) ||
-			!tl2::equals(energy_mat, energy_mat4, m_eps))
+		if(!tl2::equals(energy_mat, energy_mat2, m_eps))
 		{
 			MAGDYN_CERR_OPT << "Magdyn error: Energy matrix mismatch at Q = " << S.Q_rlu << ": "
 				<< "\n(1) " << energy_mat.size1() << "x" << energy_mat.size2() << ": " << energy_mat
 				<< "\n(2) " << energy_mat2.size1() << "x" << energy_mat2.size2() << ": " << energy_mat2
-				<< "\n(3) " << energy_mat3.size1() << "x" << energy_mat3.size2() << ": " << energy_mat3
-				<< "\n(4) " << energy_mat4.size1() << "x" << energy_mat4.size2() << ": " << energy_mat4
 				<< "." << std::endl;
 		}
 	}
@@ -330,22 +327,20 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		if(m_perform_checks)
 		{
 			const t_mat M_xy2 = evec_mat_comm_herm * M * S.evec_mat_comm;
-			const t_vec M_xy3 = prod_diag<t_mat, t_vec>(evec_mat_comm_herm, M * S.evec_mat_comm);
-			const t_vec M_xy4 = prod_THMT_diag<t_mat, t_vec>(M, S.evec_mat_comm);
+			//const t_vec M_xy3 = prod_diag<t_mat, t_vec>(evec_mat_comm_herm, M * S.evec_mat_comm);
+			//const t_mat M_xy3 = prod_THMT(M, S.evec_mat_comm);
+			//const t_vec M_xy4 = prod_THMT_diag<t_mat, t_vec>(M, S.evec_mat_comm);
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
 			std::cout << "M_{" << int(x_idx) << ", " << int(y_idx) << "}:\n";
 			tl2::niceprint(std::cout, M_xy2, 1e-4, 4);
 #endif
 
-			if(!tl2::equals(M_xy, tl2::diag_vec<t_vec>(M_xy2), m_eps) || !tl2::equals(M_xy, M_xy3, m_eps) ||
-				!tl2::equals(M_xy, M_xy4, m_eps))
+			if(!tl2::equals(M_xy, tl2::diag_vec<t_vec>(M_xy2), m_eps))
 			{
 				MAGDYN_CERR_OPT << "Magdyn error: Correlation matrix mismatch at Q = " << S.Q_rlu << ": "
 					<< "\n(1) " << M_xy.size() << ": " << M_xy
 					<< "\n(2) " << M_xy2.size1() << "x" << M_xy2.size2() << ": " << M_xy2
-					<< "\n(3) " << M_xy3.size() << ": " << M_xy3
-					<< "\n(4) " << M_xy4.size() << ": " << M_xy3
 					<< "." << std::endl;
 			}
 		}

@@ -125,66 +125,6 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 
 
 /**
- * calculates the berry connections for orthonormal eigenvectors
- * @see equ. 7 in (McClarty 2022)
- * @see https://en.wikipedia.org/wiki/Berry_connection_and_curvature
- */
-template<class t_vec, class t_vec_real, class t_vecs = std::vector<t_vec>, class t_S,
-	typename t_cplx = typename t_vec::value_type,
-	typename t_real = typename t_cplx::value_type>
-std::tuple<t_vecs, t_S> berry_connections(
-	const std::function<std::tuple<t_vecs, t_S>(const t_vec_real& Q, bool)>& get_evecs,
-	const t_vec_real& Q, t_real delta = std::sqrt(std::numeric_limits<t_real>::epsilon()),
-	[[__maybe_unused__]] bool enforce_commutator = true)
-#ifndef SWIG  // TODO: remove this as soon as swig understands concepts
-requires (!tl2::is_mat<t_vecs>) && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
-#endif
-{
-	using t_size = decltype(Q.size());
-	constexpr const t_cplx imag{0, 1};
-
-	auto sub_evecs = [enforce_commutator](
-		const t_vec& vec1, const t_vec& vec2) -> t_vec
-	{
-		t_real dot = enforce_commutator
-			? tl2::inner(vec1, mult_comm<t_vec>(vec2)).real()
-			: tl2::inner(vec1, vec2).real();
-		if(dot < 0.)
-			return vec2 + vec1;
-		return vec2 - vec1;
-	};
-
-	const auto [ evecs, S ] = get_evecs(Q, enforce_commutator);
-	const t_size BANDS = evecs.size();
-	const t_size DIM = Q.size();
-
-	t_vecs connections{};
-	connections.reserve(BANDS);
-	for(t_size band = 0; band < BANDS; ++band)
-		connections.emplace_back(tl2::create<t_vec>(DIM));
-
-	for(t_size dim = 0; dim < DIM; ++dim)
-	{
-		// differentiate with respect to component "dim"
-		t_vec_real Q1 = Q;
-		Q1[dim] += delta;
-		const t_vecs evecs_delta = std::get<0>(get_evecs(Q1, enforce_commutator));
-
-		for(t_size band = 0; band < BANDS; ++band)
-		{
-			// differentiate eigenvectors
-			t_vec evec_diff = (sub_evecs(evecs_delta[band], evecs[band])) / delta;
-			// scalar product between eigenvector and its derivative
-			connections[band][dim] = tl2::inner(evecs[band], evec_diff) * imag;
-		}
-	}
-
-	return std::make_tuple(connections, S);
-}
-
-
-
-/**
  * calculates the berry curvatures
  * @see equ. 8 in (McClarty 2022)
  * @see https://en.wikipedia.org/wiki/Berry_connection_and_curvature
@@ -204,11 +144,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
 {
 	const auto [ evecs, S ] = get_evecs(Q, enforce_commutator);
-	t_size BANDS{};
-	if constexpr (tl2::is_mat<t_mat>)
-		BANDS = evecs.size1();  // matrix
-	else
-		BANDS = evecs.size();   // collection of vectors
+	t_size BANDS = evecs.size1();  // matrix
 
 	// only valid in three dimensions
 	assert(Q.size() == 3);
@@ -249,8 +185,6 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
  * calculates the chern numbers
  * @see equ. 9 in (McClarty 2022)
  * @see https://en.wikipedia.org/wiki/Berry_connection_and_curvature
- *
- * t_mat: either matrix or vector container
  */
 template<class t_vec, class t_vec_real, class t_mat, class t_S,
 	typename t_cplx = typename t_vec::value_type,
@@ -341,70 +275,63 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	// FHS method, see (Nakamura 2024)
 	else
 	{		
-		if constexpr (tl2::is_mat<t_mat>)
+		// create grid
+		const t_size N = t_size(2.*bz / delta_int);
+		std::vector<t_mat> grid(N*N);
+
+		t_vec_real Q = tl2::zero<t_vec_real>(3);
+		Q[dim1] = -bz;
+
+		for(t_size i = 0; i < N; ++i)
 		{
-			// create grid
-			const t_size N = t_size(2.*bz / delta_int);
-			std::vector<t_mat> grid(N*N);
+			Q[dim2] = -bz;
 
-			t_vec_real Q = tl2::zero<t_vec_real>(3);
-			Q[dim1] = -bz;
-
-			for(t_size i = 0; i < N; ++i)
+			for(t_size j = 0; j < N; ++j)
 			{
-				Q[dim2] = -bz;
+				auto [ evecs, S ] = get_evecs(Q, enforce_commutator);
+				grid[i*N + j] = std::move(evecs);
 
-				for(t_size j = 0; j < N; ++j)
-				{
-					auto [ evecs, S ] = get_evecs(Q, enforce_commutator);
-					grid[i*N + j] = std::move(evecs);
-
-					Q[dim2] += delta_int;
-				}
-
-				Q[dim1] += delta_int;
+				Q[dim2] += delta_int;
 			}
 
-			// initialise by resetting chern numbers to zeros
-			const t_size num_bands = grid[0].size1();
-			if(!chern_nums.size())
-				chern_nums.resize(num_bands, t_cplx{});
-
-			// calculate chern numbers per magnon band
-			for(std::size_t band = 0; band < num_bands; ++band)
-			{
-				// see equ. 2 in (Nakamura 2024)
-				auto dot = [enforce_commutator](const t_vec& v1, const t_vec& v2) -> t_cplx
-				{
-					t_cplx s = enforce_commutator
-						? tl2::inner(v1, mult_comm<t_vec>(v2))
-						: tl2::inner(v1, v2);
-					return s / std::abs(s);
-				};
-
-				t_cplx chern_num{};
-
-				// see equs. 3a & 3b in (Nakamura 2024)
-				for(std::size_t i = 0; i < N; ++i)
-				for(std::size_t j = 0; j < N; ++j)
-				{
-					t_vec v00 = tl2::col<t_mat, t_vec>(grid[i*N           + j          ], band);
-					t_vec v01 = tl2::col<t_mat, t_vec>(grid[i*N           + ((j + 1)%N)], band);
-					t_vec v10 = tl2::col<t_mat, t_vec>(grid[((i + 1)%N)*N + j          ], band);
-					t_vec v11 = tl2::col<t_mat, t_vec>(grid[((i + 1)%N)*N + ((j + 1)%N)], band);
-
-					chern_num += std::arg(
-						dot(v00, v10) * dot(v01, v00) *
-						dot(v11, v01) * dot(v10, v11));
-				}
-
-				chern_num /= t_real(2) * tl2::pi<t_real>;
-				chern_nums[band] = std::move(chern_num);
-			}
+			Q[dim1] += delta_int;
 		}
-		else
+
+		// initialise by resetting chern numbers to zeros
+		const t_size num_bands = grid[0].size1();
+		if(!chern_nums.size())
+			chern_nums.resize(num_bands, t_cplx{});
+
+		// calculate chern numbers per magnon band
+		for(std::size_t band = 0; band < num_bands; ++band)
 		{
-			// TODO: implement for vectors
+			// see equ. 2 in (Nakamura 2024)
+			auto dot = [enforce_commutator](const t_vec& v1, const t_vec& v2) -> t_cplx
+			{
+				t_cplx s = enforce_commutator
+					? tl2::inner(v1, mult_comm<t_vec>(v2))
+					: tl2::inner(v1, v2);
+				return s / std::abs(s);
+			};
+
+			t_cplx chern_num{};
+
+			// see equs. 3a & 3b in (Nakamura 2024)
+			for(std::size_t i = 0; i < N; ++i)
+			for(std::size_t j = 0; j < N; ++j)
+			{
+				t_vec v00 = tl2::col<t_mat, t_vec>(grid[i*N           + j          ], band);
+				t_vec v01 = tl2::col<t_mat, t_vec>(grid[i*N           + ((j + 1)%N)], band);
+				t_vec v10 = tl2::col<t_mat, t_vec>(grid[((i + 1)%N)*N + j          ], band);
+				t_vec v11 = tl2::col<t_mat, t_vec>(grid[((i + 1)%N)*N + ((j + 1)%N)], band);
+
+				chern_num += std::arg(
+					dot(v00, v10) * dot(v01, v00) *
+					dot(v11, v01) * dot(v10, v11));
+			}
+
+			chern_num /= t_real(2) * tl2::pi<t_real>;
+			chern_nums[band] = std::move(chern_num);
 		}
 	}
 
@@ -436,48 +363,6 @@ get_evecmat_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
 		return std::make_tuple(M, S);
 	};
 }
-
-
-
-/**
- * get a function returning the eigenstates at specific Q
- */
-template<class t_vec, class t_vec_real, class t_magdyn, class t_perm>
-static std::function<std::tuple<std::vector<t_vec>, typename t_magdyn::SofQE>(const t_vec_real& Q, bool)>
-get_evec_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
-{
-	return [magdyn, perm](const t_vec_real& Q, bool enforce_commutator)
-		-> std::tuple<std::vector<t_vec>, typename t_magdyn::SofQE>
-	{
-		typename t_magdyn::SofQE S = magdyn->CalcEnergies(Q, false);
-
-		std::vector<t_vec> vecs;
-		vecs.reserve(S.E_and_S.size());
-
-		for(std::size_t evec_idx = 0; evec_idx < S.E_and_S.size(); ++evec_idx)
-		{
-			if(enforce_commutator)
-			{
-				t_vec evec = tl2::col<decltype(S.evec_mat_comm), t_vec>(S.evec_mat_comm, evec_idx);
-				vecs.emplace_back(std::move(evec));
-			}
-			else
-			{
-				const auto& E_and_S = S.E_and_S[evec_idx];
-				vecs.push_back(E_and_S.state);  // these are not the final evecs after commutator correction!
-			}
-		}
-
-		if(perm)
-		{
-			vecs = tl2::reorder(vecs, *perm);
-			S.E_and_S = tl2::reorder(S.E_and_S, *perm);
-		}
-
-		return std::make_tuple(vecs, S);
-	};
-}
-
 }   // namespace magdyn
 
 
@@ -487,28 +372,15 @@ get_evec_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
  */
 MAGDYN_TEMPL
 std::tuple<std::vector<t_vec>, MAGDYN_TYPE::SofQE>
-MAGDYN_INST::CalcBerryConnections(
-	const t_vec3_real& Q, t_real delta,
-	const std::vector<t_size>* perm, bool evecs_ortho,
-	bool enforce_commutator) const
+MAGDYN_INST::CalcBerryConnections(const t_vec3_real& Q, t_real delta,
+	const std::vector<t_size>* perm, bool enforce_commutator) const
 {
 	//SetUniteDegenerateEnergies(false);
 
-	if(evecs_ortho)
-	{
-		using t_vecs = std::vector<t_vec>;
-		auto evec_func = get_evec_func<t_vec, t_vec3_real>(this, perm);
+	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
 
-		return berry_connections<t_vec, t_vec3_real, t_vecs, SofQE, t_cplx, t_real>(
-			evec_func, Q, delta, enforce_commutator);
-	}
-	else
-	{
-		auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
-
-		return berry_connections<t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real>(
-			evec_func, Q, delta, enforce_commutator);
-	}
+	return berry_connections<t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real>(
+		evec_func, Q, delta, enforce_commutator);
 }
 
 
@@ -520,27 +392,15 @@ MAGDYN_TEMPL
 std::tuple<std::vector<t_cplx>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryCurvatures(
 	const t_vec3_real& Q, t_real delta,
 	const std::vector<t_size>* perm, t_size dim1, t_size dim2,
-	bool evecs_ortho, bool enforce_commutator) const
+	bool enforce_commutator) const
 {
 	//SetUniteDegenerateEnergies(false);
 
-	if(evecs_ortho)
-	{
-		using t_vecs = std::vector<t_vec>;
-		auto evec_func = get_evec_func<t_vec, t_vec3_real>(this, perm);
+	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
 
-		return berry_curvatures<
-			t_vec, t_vec3_real, t_vecs, SofQE, t_cplx, t_real, t_size>(
-				evec_func, Q, delta, dim1, dim2, enforce_commutator);
-	}
-	else
-	{
-		auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
-
-		return berry_curvatures<
-			t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
-				evec_func, Q, delta, dim1, dim2, enforce_commutator);
-	}
+	return berry_curvatures<
+		t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
+			evec_func, Q, delta, dim1, dim2, enforce_commutator);
 }
 
 
@@ -551,32 +411,19 @@ std::tuple<std::vector<t_cplx>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryCurvat
 MAGDYN_TEMPL
 std::vector<t_cplx> MAGDYN_INST::CalcChernNumbers(
 	t_real bz, t_real delta_diff, t_real delta_int, t_size dim1, t_size dim2,
-	bool evecs_ortho, bool enforce_commutator) const
+	bool enforce_commutator) const
 {
 	//SetUniteDegenerateEnergies(false);
 
 	int calc_method = 2;
 	std::vector<t_size> *perm = nullptr;
 
-	if(evecs_ortho)
-	{
-		using t_vecs = std::vector<t_vec>;
-		auto evec_func = get_evec_func<t_vec, t_vec3_real>(this, perm);
+	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
 
-		return chern_numbers<
-			t_vec, t_vec3_real, t_vecs, SofQE, t_cplx, t_real, t_size>(
-				evec_func, bz, delta_diff, delta_int, dim1, dim2,
-				calc_method, enforce_commutator);
-	}
-	else
-	{
-		auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
-
-		return chern_numbers<
-			t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
-				evec_func, bz, delta_diff, delta_int, dim1, dim2,
-				calc_method, enforce_commutator);
-	}
+	return chern_numbers<
+		t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
+			evec_func, bz, delta_diff, delta_int, dim1, dim2,
+			calc_method, enforce_commutator);
 }
 
 // --------------------------------------------------------------------

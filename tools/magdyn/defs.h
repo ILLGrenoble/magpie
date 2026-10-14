@@ -95,6 +95,7 @@ extern t_real g_eps;
 
 // delta for numerical differentiation
 extern t_real g_delta_diff;
+extern t_real g_delta_int;
 
 // bose cutoff energy
 extern t_real g_bose_cutoff;
@@ -112,7 +113,6 @@ extern unsigned int g_bz_draw_order;
 extern int g_allow_ortho_spin, g_allow_general_J;
 
 // topology settings
-extern int g_evecs_ortho;
 extern int g_enforce_commutator;
 
 // console messages
@@ -189,6 +189,11 @@ constexpr std::array<SettingsVariable, 29> g_settingsvariables
 		.description = "Differentiation delta.",
 		.key = "delta_diff",
 		.value = &g_delta_diff,
+	},
+	{
+		.description = "Integration delta.",
+		.key = "delta_int",
+		.value = &g_delta_int,
 	},
 	{
 		.description = "Bose cutoff energy.",
@@ -299,12 +304,6 @@ constexpr std::array<SettingsVariable, 29> g_settingsvariables
 		.description = "Allow setting of general exchange matrix J.",
 		.key = "allow_gen_J",
 		.value = &g_allow_general_J,
-		.editor = SettingsVariableEditor::YESNO,
-	},
-	{
-		.description = "Eigenstates of H are always orthogonal.",
-		.key = "evecs_ortho",
-		.value = &g_evecs_ortho,
 		.editor = SettingsVariableEditor::YESNO,
 	},
 	{

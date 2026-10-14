@@ -53,6 +53,7 @@ t_real g_eps = 1e-6;
 
 // delta for numerical differentiation
 t_real g_delta_diff = 1e-12;
+t_real g_delta_int = 1e-1;
 
 // bose cutoff energy
 t_real g_bose_cutoff = 0.025;
@@ -71,7 +72,6 @@ int g_allow_ortho_spin = 0;
 int g_allow_general_J = 1;
 
 // topology settings
-int g_evecs_ortho = 0;
 int g_enforce_commutator = 1;
 
 // console messages
