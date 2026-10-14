@@ -844,10 +844,18 @@ public:
 	}
 
 	mat(mat<T, t_cont>&& other) noexcept
-	: m_data{ std::move(other.m_data) },
-	m_rowsize{ std::exchange(other.m_rowsize, 0) },
-	m_colsize{ std::exchange(other.m_colsize, 0) }
+		: m_data{ std::move(other.m_data) },
+			m_rowsize{ std::exchange(other.m_rowsize, 0) },
+			m_colsize{ std::exchange(other.m_colsize, 0) }
 	{ }
+
+
+	void resize(size_type rows, size_type cols)
+	{
+		m_data.resize(rows, cols);
+		m_rowsize = rows;
+		m_colsize = cols;
+	}
 
 
 	// assignment operators

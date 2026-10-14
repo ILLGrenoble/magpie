@@ -183,6 +183,7 @@ struct t_EnergyAndWeight
 {
 	t_real E{};                  // eigenenergy of hamiltonian
 	t_vec state{};               // eigenstate of hamiltonian
+	t_vec state_comm{};          // eigenstate of hamiltonian after commutator correction
 
 	t_mat33 S{};                 // full dynamical structure factor
 	t_cplx S_sum{};

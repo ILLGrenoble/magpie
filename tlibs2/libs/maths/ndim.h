@@ -1907,13 +1907,12 @@ void set_submat(t_mat& mat, const t_mat& submat,
 requires is_basic_mat<t_mat> && is_dyn_mat<t_mat>
 {
 	using size_t = decltype(mat.size1());
-
 	num_rows = std::min(num_rows, submat.size1());
 	num_cols = std::min(num_cols, submat.size2());
 
 	for(size_t row = 0; row < num_rows; ++row)
 		for(size_t col = 0; col < num_cols; ++col)
-			mat(row+row_start, col+col_start) = submat(row, col);
+			mat(row + row_start, col + col_start) = submat(row, col);
 }
 
 
@@ -1930,10 +1929,8 @@ requires is_basic_mat<t_mat> && is_dyn_mat<t_mat>
 	const size_t submat_size2 = submat.size2();
 
 	for(size_t row = 0; row < submat_size1; ++row)
-	{
 		for(size_t col = 0; col < submat_size2; ++col)
 			mat(row + row_start, col + col_start) += submat(row, col);
-	}
 }
 
 

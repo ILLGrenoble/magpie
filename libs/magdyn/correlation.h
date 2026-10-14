@@ -169,6 +169,9 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	S.evec_mat_comm = H_triag_inv * S.evec_mat * E_sqrt;
 	const t_mat evec_mat_comm_herm = tl2::herm(S.evec_mat_comm);
 
+	for(t_size idx = 0; idx < num_energies; ++idx)
+		S.E_and_S[idx].state_comm = tl2::col<t_mat, t_vec>(S.evec_mat_comm, idx);
+
 #ifdef __MAGDYN_DEBUG_OUTPUT__
 	t_mat D_mat = evec_mat_comm_herm * S.H_comm * S.evec_mat_comm;
 	std::cout << "D =\n";

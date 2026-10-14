@@ -91,7 +91,7 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	};
 
 	const auto [ evecs, S ] = get_evecs(Q, enforce_commutator);
-	const t_size BANDS = evecs.size1();
+	const t_size BANDS = evecs.size2();
 	const t_size DIM = Q.size();
 
 	std::vector<t_vec> connections{};
@@ -106,7 +106,8 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		Q1[dim] += delta;
 
 		// differentiate eigenvector matrix
-		t_mat evecs_diff = sub_evecs(std::get<0>(get_evecs(Q1, enforce_commutator)), evecs) / delta;
+		t_mat evecs_diff = sub_evecs(std::get<0>(
+			get_evecs(Q1, enforce_commutator)), evecs) / delta;
 
 		t_mat evecs_H = tl2::herm(evecs);
 		t_mat C;
@@ -144,7 +145,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
 {
 	const auto [ evecs, S ] = get_evecs(Q, enforce_commutator);
-	t_size BANDS = evecs.size1();  // matrix
+	t_size BANDS = evecs.size2();
 
 	// only valid in three dimensions
 	assert(Q.size() == 3);
@@ -298,7 +299,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		}
 
 		// initialise by resetting chern numbers to zeros
-		const t_size num_bands = grid[0].size1();
+		const t_size num_bands = grid[0].size2();
 		if(!chern_nums.size())
 			chern_nums.resize(num_bands, t_cplx{});
 
@@ -352,7 +353,16 @@ get_evecmat_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
 		-> std::tuple<t_mat, typename t_magdyn::SofQE>
 	{
 		typename t_magdyn::SofQE S = magdyn->CalcEnergies(Q, false);
-		t_mat M = enforce_commutator ? S.evec_mat_comm : S.evec_mat;
+
+		const t_mat& evec_mat = enforce_commutator ? S.evec_mat_comm : S.evec_mat;
+		//t_mat M = evec_mat;  // incommensurate parts not considered in evec_mat
+
+		t_mat M = tl2::create<t_mat>(evec_mat.size1(), S.E_and_S.size());
+		for(std::size_t E_idx = 0; E_idx < S.E_and_S.size(); ++E_idx)
+		{
+			const auto& E_and_S = S.E_and_S[E_idx];
+			set_col<t_mat, t_vec>(M, E_and_S.state_comm, E_idx);
+		}
 
 		if(perm)
 		{

@@ -396,7 +396,7 @@ void MagDynDlg::CalcHamiltonian()
 		for(const t_E_and_S& E_and_S : Es_pos)
 		{
 			t_real E = E_and_S.E;
-			tl2::set_eps_0(E);
+			tl2::set_eps_0(E, g_eps);
 
 			ostr << "<td style=\"padding-right:8px\">"
 				<< E << " meV" << "</td>";
@@ -410,7 +410,7 @@ void MagDynDlg::CalcHamiltonian()
 			for(const t_E_and_S& E_and_S : Es_neg)
 			{
 				t_real E = E_and_S.E;
-				tl2::set_eps_0(E);
+				tl2::set_eps_0(E, g_eps);
 
 				ostr << "<td style=\"padding-right:8px\">"
 					<< E << " meV" << "</td>";
@@ -452,8 +452,8 @@ void MagDynDlg::CalcHamiltonian()
 			if(!use_projector)
 				weight = tl2::trace<t_mat33>(S).real();
 
-			tl2::set_eps_0(E);
-			tl2::set_eps_0(weight);
+			tl2::set_eps_0(E, g_eps);
+			tl2::set_eps_0(weight, g_eps);
 
 			// E
 			ostr << "<tr>";
@@ -508,8 +508,7 @@ void MagDynDlg::CalcHamiltonian()
 	// print eigenstates
 	if(S.E_and_S.size() && S.E_and_S[0].state.size())
 	{
-		const t_size N1 = S.evec_mat_comm.size1();
-		bool has_state_comm = (N1 == S.E_and_S[0].state.size());
+		bool has_state_comm = (S.E_and_S[0].state_comm.size() == S.E_and_S[0].state.size());
 
 		ostr << "<hr>";
 
@@ -523,7 +522,6 @@ void MagDynDlg::CalcHamiltonian()
 			ostr << "<th style=\"padding-right:16px\">State |s>, Corr. Comm.</td>";
 		ostr << "</tr>";
 
-		t_size evec_idx = 0;
 		for(const t_E_and_S& E_and_S : S.E_and_S)
 		{
 			t_size degen = E_and_S.degeneracy;
@@ -534,8 +532,8 @@ void MagDynDlg::CalcHamiltonian()
 			t_vec state = E_and_S.state;
 			const t_size N = state.size();
 
-			tl2::set_eps_0(E);
-			tl2::set_eps_0(state);
+			tl2::set_eps_0(E, g_eps);
+			tl2::set_eps_0(state, g_eps);
 
 			// energy
 			ostr << "<tr>";
@@ -559,24 +557,20 @@ void MagDynDlg::CalcHamiltonian()
 			if(has_state_comm)
 			{
 				// state, corrected commutators
+				t_vec state_comm = E_and_S.state_comm;
+				tl2::set_eps_0(state_comm, g_eps);
+
 				ostr << "<td style=\"padding-right:16px\">";
-				t_size start_idx = ignore_annihilation ? N/2 : 0;
 				for(t_size idx = 0; idx < N; ++idx)
 				{
-					if(evec_idx + start_idx + 1 > N1)
-						break;
-					t_cplx elem = tl2::col<t_mat, t_vec>(
-						S.evec_mat_comm, N1 - (evec_idx + start_idx) - 1)[idx];
-					tl2::set_eps_0<t_cplx, t_real>(elem, g_eps);
-					ostr << elem;
-					if(idx < S.evec_mat_comm.size2() - 1)
+					ostr << state_comm[idx];
+					if(idx < N - 1)
 						ostr << ", ";
 				}
 				ostr << "</td>";
 			}
 
 			ostr << "</tr>";
-			++evec_idx;
 		}
 
 		ostr << "</table></p>";
