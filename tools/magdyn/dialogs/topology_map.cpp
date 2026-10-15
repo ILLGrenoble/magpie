@@ -494,8 +494,8 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 	std::vector<t_taskptr> tasks;
 	tasks.reserve(Q_count_1*Q_count_2);
 
-	t_size expected_bands = m_dyn->GetMagneticSitesCount() * 2;
-	if(m_dyn->IsIncommensurate())
+	t_size expected_bands = dyn.GetMagneticSitesCount() * 2;
+	if(dyn.IsIncommensurate())
 		expected_bands *= 3;
 	m_band_bcm->setMaximum(expected_bands - 1);
 
@@ -552,7 +552,7 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 	pool.join();
 
 	// calculate chern numbers for the magnon bands
-	m_chern = m_dyn->CalcChernNumbers(
+	m_chern = dyn.CalcChernNumbers(
 		0.5,                        // zone boundary
 		g_delta_diff, g_delta_int,  // diff and int deltas
 		0, 1,                       // dims

@@ -52,7 +52,8 @@ namespace magdyn {
  */
 template<class t_vec, class t_vec_real, class t_mat, class t_S,
 	typename t_cplx = typename t_vec::value_type,
-	typename t_real = typename t_cplx::value_type>
+	typename t_real = typename t_cplx::value_type,
+	typename t_size = std::size_t>
 std::tuple<std::vector<t_vec>, t_S> berry_connections(
 	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q, bool)>& get_evecs,
 	const t_vec_real& Q, t_real delta = std::sqrt(std::numeric_limits<t_real>::epsilon()),
@@ -61,7 +62,6 @@ std::tuple<std::vector<t_vec>, t_S> berry_connections(
 requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
 {
-	using t_size = decltype(Q.size());
 	constexpr const t_cplx imag{0, 1};
 
 	auto sub_evecs = [enforce_commutator](
@@ -155,13 +155,13 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	k[dim2] += delta;
 
 	std::vector<t_vec> connections =
-		std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real>(
+		std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
 			get_evecs, Q, delta, enforce_commutator));
 	std::vector<t_vec> connections_h =
-		std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real>(
+		std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
 			get_evecs, h, delta, enforce_commutator));
 	std::vector<t_vec> connections_k =
-		std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real>(
+		std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
 			get_evecs, k, delta, enforce_commutator));
 
 	std::vector<t_cplx> curvatures{};
@@ -238,7 +238,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 			for(Q[dim] = -bz; Q[dim] < bz; Q[dim] += delta_int)
 			{
 				std::vector<t_vec> conns =
-					std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real>(
+					std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
 						get_evecs, Q, delta_diff, enforce_commutator));
 	
 				// initialise by resetting chern numbers to zeros
@@ -304,7 +304,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 			chern_nums.resize(num_bands, t_cplx{});
 
 		// calculate chern numbers per magnon band
-		for(std::size_t band = 0; band < num_bands; ++band)
+		for(t_size band = 0; band < num_bands; ++band)
 		{
 			// see equ. 2 in (Nakamura 2024)
 			auto dot = [enforce_commutator](const t_vec& v1, const t_vec& v2) -> t_cplx
@@ -318,8 +318,8 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 			t_cplx chern_num{};
 
 			// see equs. 3a & 3b in (Nakamura 2024)
-			for(std::size_t i = 0; i < N; ++i)
-			for(std::size_t j = 0; j < N; ++j)
+			for(t_size i = 0; i < N; ++i)
+			for(t_size j = 0; j < N; ++j)
 			{
 				t_vec v00 = tl2::col<t_mat, t_vec>(grid[i*N           + j          ], band);
 				t_vec v01 = tl2::col<t_mat, t_vec>(grid[i*N           + ((j + 1)%N)], band);
@@ -389,7 +389,7 @@ MAGDYN_INST::CalcBerryConnections(const t_vec3_real& Q, t_real delta,
 
 	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
 
-	return berry_connections<t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real>(
+	return berry_connections<t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
 		evec_func, Q, delta, enforce_commutator);
 }
 
