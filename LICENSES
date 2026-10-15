@@ -262,6 +262,15 @@ License URL: https://raw.githubusercontent.com/BLAKE2/libb2/refs/heads/master/CO
 
 
 --------------------------------------------------------------------------------
+libbrotlicommon.1.dylib, libbrotlidec.1.dylib
+--------------------------------------------------------------------------------
+URL: https://brotli.org
+License URL: https://raw.githubusercontent.com/google/brotli/refs/heads/master/LICENSE
+--------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------
 libz2
 -------------------------------------------------------------------------------- 
 URL: https://github.com/libarchive/bzip2
@@ -387,6 +396,15 @@ URL: https://www.mingw-w64.org
 License URL: https://raw.githubusercontent.com/mingw-w64/mingw-w64/refs/heads/master/COPYING
 
 Copyright (c) 2009-2013 by mingw-w64 project.
+--------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------
+OpenSSL
+-------------------------------------------------------------------------------- 
+URL: https://openssl-library.org
+License URL: https://raw.githubusercontent.com/openssl/openssl/refs/heads/master/LICENSE.txt
 --------------------------------------------------------------------------------
 
 

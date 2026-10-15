@@ -36,7 +36,7 @@ clean_frameworks=1
 
 
 # tools
-STRIP=/opt/homebrew/Cellar/llvm/23.1.1_1/bin/llvm-strip
+STRIP=/opt/homebrew/Cellar/llvm/23.1.3_1/bin/llvm-strip
 if [ ! -e $STRIP ]; then
 	STRIP=llvm-strip
 fi
@@ -82,6 +82,8 @@ declare -a LOCAL_LIBS=(
 	libglib-2.0.0.dylib libgthread-2.0.0.dylib libintl.8.dylib
 	libdbus-1.3.dylib libsz.2.dylib libaec.0.dylib
 	libb2.1.dylib libmd4c.0.dylib libgraphite2.3.dylib
+	libssl.4.dylib libcrypto.4.dylib
+	libbrotlicommon.1.dylib libbrotlidec.1.dylib
 )
 
 
