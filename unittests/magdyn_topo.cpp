@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 
 	// constants
 	static constexpr t_real eps = std::is_same_v<t_real, float> ? 1e-1 : 1e-4;
-	static constexpr t_real diff_eps = std::is_same_v<t_real, float> ? 1e-3 : 1e-5;
+	static constexpr t_real diff_eps = std::is_same_v<t_real, float> ? 1e-4 : 1e-5;
 
 	// types
 	using t_cplx = std::complex<t_real>;
@@ -73,10 +73,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 		diff_eps, 1e-1,  // diff and int deltas
 		0, 1,            // dims
 		true);           // use commutator corrected eigensystems
+
+	BOOST_TEST(cs.size() == 4);
+	if(cs.size() == 4)
+	{
+		BOOST_TEST(tl2::equals<t_real>(cs[0].real(), 1., eps));
+		BOOST_TEST(tl2::equals<t_real>(cs[1].real(), -1., eps));
+		BOOST_TEST(tl2::equals<t_real>(cs[2].real(), 1., eps));
+		BOOST_TEST(tl2::equals<t_real>(cs[3].real(), -1., eps));
+	}
+
 	for(t_cplx& c : cs)
 	{
 		BOOST_TEST(tl2::equals<t_real>(c.imag(), 0., eps));
 		BOOST_TEST(tl2::equals<t_real>(std::abs(c.real()), 1., eps));
+
 		tl2::set_eps_0(c, eps);
 		std::cout << "chern number: " << c << std::endl;
 	}

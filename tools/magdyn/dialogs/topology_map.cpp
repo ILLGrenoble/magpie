@@ -555,7 +555,7 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 	m_chern = dyn.CalcChernNumbers(
 		0.5,                        // zone boundary
 		g_delta_diff, g_delta_int,  // diff and int deltas
-		0, 1,                       // dims
+		dim1, dim2,                 // dims
 		true);                      // use commutator corrected eigensystems
 
 	stopwatch.stop();
@@ -797,10 +797,27 @@ void TopologyDlg::BerryCurvatureMapPlotMouseMove(QMouseEvent* evt)
 	if(!m_status)
 		return;
 
+	t_cplx B = 0.;
+
 	if(evt)
 	{
-		t_real Q1 = m_plot_bcm->xAxis->pixelToCoord(evt->pos().x());
-		t_real Q2 = m_plot_bcm->yAxis->pixelToCoord(evt->pos().y());
+		const t_real Q1 = m_plot_bcm->xAxis->pixelToCoord(evt->pos().x());
+		const t_real Q2 = m_plot_bcm->yAxis->pixelToCoord(evt->pos().y());
+
+		const t_size Q1_count = m_num_Q_bcm[0]->value();
+		const t_size Q2_count = m_num_Q_bcm[1]->value();
+
+		// the Qs just use a 0..1 range
+		const t_size Q1_idx = t_size(Q1 * t_real(Q1_count));
+		const t_size Q2_idx = t_size(Q2 * t_real(Q2_count));
+		const t_size band = m_band_bcm->value();
+
+		const t_size idx = Q2_idx*Q1_count + Q1_idx;
+		if(idx < m_data_bcm.size())
+		{
+			B = m_data_bcm[idx][band];
+			tl2::set_eps_0(B, g_eps);
+		}
 
 		auto [Q_origin, Q_dir_1, Q_dir_2] = GetMapQVectors();	
 		m_Q_cursor_bcm = Q_origin + Q_dir_1*Q1 + Q_dir_2*Q2;
@@ -814,11 +831,13 @@ void TopologyDlg::BerryCurvatureMapPlotMouseMove(QMouseEvent* evt)
 		tl2::set_eps_0(*chern, g_eps);
 	}
 
-	QString status("Q = (%1, %2, %3) rlu.");
+	QString status("Q = (%1, %2, %3) rlu, B = (%4, %5).");
 	status = status
 		.arg(m_Q_cursor_bcm[0], 0, 'g', g_prec_gui)
 		.arg(m_Q_cursor_bcm[1], 0, 'g', g_prec_gui)
-		.arg(m_Q_cursor_bcm[2], 0, 'g', g_prec_gui);
+		.arg(m_Q_cursor_bcm[2], 0, 'g', g_prec_gui)
+		.arg(B.real(), 0, 'g', g_prec_gui)
+		.arg(B.imag(), 0, 'g', g_prec_gui);
 
 	if(chern)
 	{

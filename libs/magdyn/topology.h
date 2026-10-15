@@ -64,27 +64,26 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 {
 	constexpr const t_cplx imag{0, 1};
 
-	auto sub_evecs = [enforce_commutator](
+	auto sub_evecs = [enforce_commutator, imag](
 		const t_mat& mat1, const t_mat& mat2) -> t_mat
 	{
 		t_mat m = tl2::zero<t_mat>(mat1.size1(), mat1.size2());
 
 		for(t_size col = 0; col < mat1.size2(); ++col)
 		{
-			t_real dot = enforce_commutator
+			t_real dot = /*enforce_commutator
 				? tl2::inner(tl2::col<t_mat, t_vec>(mat1, col),
 					mult_comm<t_vec>(tl2::col<t_mat, t_vec>(mat2, col))).real()
-				: tl2::inner(tl2::col<t_mat, t_vec>(mat1, col),
+				:*/ tl2::inner(tl2::col<t_mat, t_vec>(mat1, col),
 				  tl2::col<t_mat, t_vec>(mat2, col)).real();
-
-			t_real sign = -1.;
-			if(dot < 0.)
-				sign = 1.;
 
 			t_vec vec2 = tl2::col<t_mat, t_vec>(mat2, col);
 			t_vec vec1 = tl2::col<t_mat, t_vec>(mat1, col);
+			//vec1 *= std::exp(-imag * std::acos(dot));
+			if(dot < 0.)
+				vec1 = -vec1;
 
-			tl2::set_col<t_mat, t_vec>(m, vec2 + sign*vec1, col);
+			tl2::set_col<t_mat, t_vec>(m, vec2 - vec1, col);
 		}
 
 		return m;
@@ -190,14 +189,14 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 template<class t_vec, class t_vec_real, class t_mat, class t_S,
 	typename t_cplx = typename t_vec::value_type,
 	typename t_real = typename t_cplx::value_type,
-	typename t_size = std::size_t>
+	typename t_size = std::size_t, int calc_method = 2>
 std::vector<t_cplx> chern_numbers(
 	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q, bool)>& get_evecs,
 	t_real bz = 0.5,  // brillouin zone boundary
-	t_real delta_diff = std::sqrt(std::numeric_limits<t_real>::epsilon()),
+	t_real eps = std::numeric_limits<t_real>::epsilon(),
+	t_real delta_diff = 1e-6, //std::sqrt(std::numeric_limits<t_real>::epsilon()),
 	t_real delta_int = 1e-2, //std::cbrt(std::numeric_limits<t_real>::epsilon()),
-	t_size dim1 = 0, t_size dim2 = 1, int calc_method = 0,
-	bool enforce_commutator = true)
+	t_size dim1 = 0, t_size dim2 = 1, bool enforce_commutator = true)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
@@ -205,7 +204,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	std::vector<t_cplx> chern_nums;
 
 	// calculate via area over berry curvatures
-	if(calc_method == 0)
+	if constexpr(calc_method == 0)
 	{
 		t_vec_real Q = tl2::zero<t_vec_real>(3);
 
@@ -230,7 +229,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	}
 
 	// calculate via boundary over berry connections
-	else if(calc_method == 1)
+	else if constexpr(calc_method == 1)
 	{
 		auto int_boundary = [get_evecs, delta_diff, delta_int, bz, dim1, dim2,
 			&chern_nums, enforce_commutator](t_size dim, t_vec_real& Q, t_real sign)
@@ -307,12 +306,17 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		for(t_size band = 0; band < num_bands; ++band)
 		{
 			// see equ. 2 in (Nakamura 2024)
-			auto dot = [enforce_commutator](const t_vec& v1, const t_vec& v2) -> t_cplx
+			auto dot = [enforce_commutator, eps](const t_vec& v1, const t_vec& v2) -> t_cplx
 			{
 				t_cplx s = enforce_commutator
 					? tl2::inner(v1, mult_comm<t_vec>(v2))
 					: tl2::inner(v1, v2);
-				return s / std::abs(s);
+
+				t_real len = std::abs(s);
+				if(len > eps)
+					s /= len;
+
+				return s;
 			};
 
 			t_cplx chern_num{};
@@ -425,15 +429,15 @@ std::vector<t_cplx> MAGDYN_INST::CalcChernNumbers(
 {
 	//SetUniteDegenerateEnergies(false);
 
-	int calc_method = 2;
+	constexpr const int calc_method = 2;
 	std::vector<t_size> *perm = nullptr;
 
 	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
 
-	return chern_numbers<
-		t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
-			evec_func, bz, delta_diff, delta_int, dim1, dim2,
-			calc_method, enforce_commutator);
+	return chern_numbers<t_vec, t_vec3_real, t_mat, SofQE,
+		t_cplx, t_real, t_size, calc_method>(
+			evec_func, bz, m_eps, delta_diff, delta_int, dim1, dim2,
+			enforce_commutator);
 }
 
 // --------------------------------------------------------------------

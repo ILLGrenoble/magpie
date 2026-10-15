@@ -863,11 +863,60 @@ void TopologyDlg::BerryCurvaturePlotMouseMove(QMouseEvent* evt)
 	if(!m_status)
 		return;
 
+	// get coordinates
+	t_vec3_real Q1 = tl2::create<t_vec3_real>(
+	{
+		(t_real)m_Q_start_bc[0]->value(),
+		(t_real)m_Q_start_bc[1]->value(),
+		(t_real)m_Q_start_bc[2]->value(),
+	});
+
+	t_vec3_real Q2 = tl2::create<t_vec3_real>(
+	{
+		(t_real)m_Q_end_bc[0]->value(),
+		(t_real)m_Q_end_bc[1]->value(),
+		(t_real)m_Q_end_bc[2]->value(),
+	});
+
 	t_real Q = m_plot_bc->xAxis->pixelToCoord(evt->pos().x());
 	t_real berry = m_plot_bc->yAxis->pixelToCoord(evt->pos().y());
 
-	QString status("Q = %1 rlu, B = %2.");
-	status = status.arg(Q, 0, 'g', g_prec_gui).arg(berry, 0, 'g', g_prec_gui);
+	// lerp parameter
+	t_size Q_idx = m_Q_idx_bc;
+	if(Q_idx > 2)
+		Q_idx = 2;
+	const t_real t = (Q - Q1[Q_idx]) / (Q2[Q_idx] - Q1[Q_idx]);
+	t_vec3_real Qvec = tl2::create<t_vec3_real>({
+		std::lerp(Q1[0], Q2[0], t),
+		std::lerp(Q1[1], Q2[1], t),
+		std::lerp(Q1[2], Q2[2], t) });
+
+	std::optional<t_real> Q_invA;
+	if(m_dyn)
+	{
+		const t_mat33_real& B = m_dyn->GetCrystalBTrafo();
+		const t_vec3_real Qvec_invA = B * Qvec;
+		Q_invA = tl2::norm(Qvec_invA);
+	}
+
+	// write status
+	QString status("Q = (%1, %2, %3) rlu");
+	QString status_invA("|Q| = %1 Å⁻¹");
+	QString status_B("B = %1 meV");
+
+	status = status
+		.arg(Qvec[0], 0, 'g', g_prec_gui)
+		.arg(Qvec[1], 0, 'g', g_prec_gui)
+		.arg(Qvec[2], 0, 'g', g_prec_gui);
+	if(Q_invA)
+	{
+		status_invA = status_invA.arg(*Q_invA, 0, 'g', g_prec_gui);
+		status += ", " + status_invA;
+	}
+	status_B = status_B.arg(berry, 0, 'g', g_prec_gui);
+	status += ", " + status_B;
+	status += ".";
+
 	m_status->setText(status);
 }
 
