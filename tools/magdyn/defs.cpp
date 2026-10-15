@@ -52,7 +52,7 @@ int g_prec_gui = 3;
 t_real g_eps = 1e-6;
 
 // delta for numerical differentiation
-t_real g_delta_diff = 1e-12;
+t_real g_delta_diff = 1e-6;
 t_real g_delta_int = 1e-1;
 
 // bose cutoff energy
