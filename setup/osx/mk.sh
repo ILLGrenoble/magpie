@@ -321,8 +321,8 @@ if [ $create_appdir -ne 0 ]; then
 		find ${APPDIRNAME}/Contents/Frameworks/ -type l -name "Headers" -exec rm -rv {} \;
 		find ${APPDIRNAME} -type d -name "_CodeSignature" -exec rm -rfv {} \;
 
-		find ${APPDIRNAME} -type f -name ".DS_Store" -exec rm -rfv {} \;
-		find ${APPDIRNAME} -type f -name "*.pyc" -exec rm -rfv {} \;
+		find ${APPDIRNAME} -type f -name ".DS_Store" -exec rm -fv {} \;
+		find ${APPDIRNAME} -type f -name "*.pyc" -exec rm -fv {} \;
 		echo -e "--------------------------------------------------------------------------------"
 	fi
 
