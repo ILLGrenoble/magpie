@@ -48,11 +48,11 @@
 // --------------------------------------------------------------------
 
 /**
- * get the energy minimum
+ * get the energy minimum at Q = (000)
  * @note a first version for a simplified ferromagnetic dispersion was based on (Heinsdorf 2021)
  */
 MAGDYN_TEMPL
-t_real MAGDYN_INST::CalcMinimumEnergy() const
+t_real MAGDYN_INST::CalcMinimumEnergyQ0() const
 {
 	// energies at (000)
 	const auto E_and_S = CalcEnergies(0., 0., 0., true);
@@ -101,8 +101,10 @@ t_real MAGDYN_INST::CalcGroundStateEnergy() const
 	// external field per site
 	for(t_size i = 0; i < GetMagneticSitesCount(); ++i)
 	{
+		const MagneticSite& s_i = GetMagneticSite(i);
+
 		t_cplx E_field = CalcFieldEnergy(i);
-		E += E_field.real();
+		E += s_i.spin_mag_calc * E_field.real();
 #ifdef __MAGDYN_DEBUG_OUTPUT__
 		std::cout << "Field energy for site " << i << ": "
 			<< E_field << " meV." << std::endl;

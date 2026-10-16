@@ -88,7 +88,7 @@ mag.CalcExchangeTerms();
 
 
 # minimum energy
-print("Energy minimum at Q=(000): {:.4f} meV".format(mag.CalcMinimumEnergy()))
+print("Energy minimum at Q=(000): {:.4f} meV".format(mag.CalcMinimumEnergyQ0()))
 print("Ground state energy: {:.4f} meV".format(mag.CalcGroundStateEnergy()))
 
 

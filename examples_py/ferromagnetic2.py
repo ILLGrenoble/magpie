@@ -76,7 +76,7 @@ magpy.add_coupling(mag, "coupling_1",  "site_1", "site_1",  1, 0, 0,  J)
 
 
 # minimum energy
-print("Energy minimum at Q=(000): {:.4f} meV".format(mag.CalcMinimumEnergy()))
+print("Energy minimum at Q=(000): {:.4f} meV".format(mag.CalcMinimumEnergyQ0()))
 print("Ground state energy: {:.4f} meV".format(mag.CalcGroundStateEnergy()))
 
 

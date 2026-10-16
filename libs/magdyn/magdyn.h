@@ -489,9 +489,9 @@ public:
 		std::function<bool(int, int)> *progress_fkt = nullptr,
 		std::function<void(const SofQE*)> *result_fkt = nullptr) const;
 
-	// get the energy minimum
+	// get the energy minimum at Q = (000)
 	// @note a first version for a simplified ferromagnetic dispersion was based on (Heinsdorf 2021)
-	t_real CalcMinimumEnergy() const;
+	t_real CalcMinimumEnergyQ0() const;
 
 	// get the ground-state energy
 	// @note zero-operator term in expansion of equation (20) in (Toth 2015)

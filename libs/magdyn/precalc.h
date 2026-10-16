@@ -200,9 +200,15 @@ MAGDYN_TEMPL void MAGDYN_INST::CalcMagneticSite(MagneticSite& site, bool calc_sp
 			else
 				std::tie(site.trafo_plane_calc, site.trafo_z_calc) = rot_to_trafo(m_rot_field);
 		}
-		else
+		else  // no field
 		{
-			if(!has_explicit_trafo)
+			if(has_explicit_trafo)
+			{
+				// calculate only v from the spin rotation
+				std::tie(std::ignore, site.trafo_z_calc) =
+					spin_to_trafo(site.spin_dir_calc);
+			}
+			else
 			{
 				// calculate u and v from the spin rotation
 				std::tie(site.trafo_plane_calc, site.trafo_z_calc) =

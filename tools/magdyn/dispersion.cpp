@@ -252,7 +252,7 @@ void MagDynDlg::CalcDispersion()
 	const bool use_polcoords = m_use_polcoords->isChecked();;
 	const bool force_incommensurate = m_force_incommensurate->isChecked();
 
-	t_real E0 = use_min_E ? m_dyn.CalcMinimumEnergy() : 0.;
+	t_real E0 = use_min_E ? m_dyn.CalcMinimumEnergyQ0() : 0.;
 	m_dyn.SetUniteDegenerateEnergies(unite_degeneracies);
 	m_dyn.SetForceIncommensurate(force_incommensurate);
 	m_dyn.SetCalcHamiltonian(

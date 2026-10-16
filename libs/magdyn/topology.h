@@ -57,18 +57,37 @@ template<class t_vec, class t_vec_real, class t_mat, class t_S,
 std::tuple<std::vector<t_vec>, t_S> berry_connections(
 	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q, bool)>& get_evecs,
 	const t_vec_real& Q, t_real delta = std::sqrt(std::numeric_limits<t_real>::epsilon()),
-	bool enforce_commutator = true)
+	bool enforce_commutator = true, const t_mat* evecs_ref = nullptr)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
 {
 	constexpr const t_cplx imag{0, 1};
 
+	// get the eigenvector phases to the same as the reference eigenvectors' phases
+	auto align_phases = [evecs_ref, &imag](t_mat& evecs)
+	{
+		if(!evecs_ref)
+			return;
+
+		// iterate bands
+		for(t_size col = 0; col < evecs.size2(); ++col)
+		{
+			t_vec evec_ref = tl2::col<t_mat, t_vec>(*evecs_ref, col);
+			t_vec evec = tl2::col<t_mat, t_vec>(evecs, col);
+			t_cplx ph = std::exp(-imag * std::arg(tl2::inner(evec_ref, evec)));
+
+			for(t_size row = 0; row < evecs.size1(); ++row)
+				evecs(row, col) *= ph;
+		}
+	};
+
 	auto sub_evecs = [enforce_commutator, imag](
 		const t_mat& mat1, const t_mat& mat2) -> t_mat
 	{
 		t_mat m = tl2::zero<t_mat>(mat1.size1(), mat1.size2());
 
+		// iterate bands
 		for(t_size col = 0; col < mat1.size2(); ++col)
 		{
 			t_real dot = /*enforce_commutator
@@ -89,7 +108,9 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		return m;
 	};
 
-	const auto [ evecs, S ] = get_evecs(Q, enforce_commutator);
+	auto [ evecs, S ] = get_evecs(Q, enforce_commutator);
+	align_phases(evecs);
+
 	const t_size BANDS = evecs.size2();
 	const t_size DIM = Q.size();
 
@@ -104,9 +125,11 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		t_vec_real Q1 = Q;
 		Q1[dim] += delta;
 
+		t_mat evecs_Q1 = std::get<0>(get_evecs(Q1, enforce_commutator));
+		align_phases(evecs_Q1);
+
 		// differentiate eigenvector matrix
-		t_mat evecs_diff = sub_evecs(std::get<0>(
-			get_evecs(Q1, enforce_commutator)), evecs) / delta;
+		t_mat evecs_diff = sub_evecs(evecs_Q1, evecs) / delta;
 
 		t_mat evecs_H = tl2::herm(evecs);
 		t_mat C;
@@ -155,13 +178,13 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 
 	std::vector<t_vec> connections =
 		std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
-			get_evecs, Q, delta, enforce_commutator));
+			get_evecs, Q, delta, enforce_commutator, &evecs));
 	std::vector<t_vec> connections_h =
 		std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
-			get_evecs, h, delta, enforce_commutator));
+			get_evecs, h, delta, enforce_commutator, &evecs));
 	std::vector<t_vec> connections_k =
 		std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
-			get_evecs, k, delta, enforce_commutator));
+			get_evecs, k, delta, enforce_commutator, &evecs));
 
 	std::vector<t_cplx> curvatures{};
 	curvatures.reserve(BANDS);
@@ -365,7 +388,8 @@ get_evecmat_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
 		for(std::size_t E_idx = 0; E_idx < S.E_and_S.size(); ++E_idx)
 		{
 			const auto& E_and_S = S.E_and_S[E_idx];
-			set_col<t_mat, t_vec>(M, E_and_S.state_comm, E_idx);
+			set_col<t_mat, t_vec>(M,
+				enforce_commutator ? E_and_S.state_comm : E_and_S.state, E_idx);
 		}
 
 		if(perm)
@@ -390,6 +414,12 @@ MAGDYN_INST::CalcBerryConnections(const t_vec3_real& Q, t_real delta,
 	const std::vector<t_size>* perm, bool enforce_commutator) const
 {
 	//SetUniteDegenerateEnergies(false);
+	if(m_unite_degenerate_energies)
+	{
+		MAGDYN_CERR_OPT << "Magdyn warning: "
+			<< "Merging of degeneracies should be disabled for topological calculations."
+			<< std::endl;
+	}
 
 	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
 
@@ -409,6 +439,12 @@ std::tuple<std::vector<t_cplx>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryCurvat
 	bool enforce_commutator) const
 {
 	//SetUniteDegenerateEnergies(false);
+	if(m_unite_degenerate_energies)
+	{
+		MAGDYN_CERR_OPT << "Magdyn warning: "
+			<< "Merging of degeneracies should be disabled for topological calculations."
+			<< std::endl;
+	}
 
 	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
 
@@ -428,6 +464,13 @@ std::vector<t_cplx> MAGDYN_INST::CalcChernNumbers(
 	bool enforce_commutator) const
 {
 	//SetUniteDegenerateEnergies(false);
+	if(m_unite_degenerate_energies)
+	{
+		MAGDYN_CERR_OPT << "Magdyn warning: "
+			<< "Merging of degeneracies should be disabled for topological calculations."
+			<< std::endl;
+	}
+
 
 	constexpr const int calc_method = 2;
 	std::vector<t_size> *perm = nullptr;

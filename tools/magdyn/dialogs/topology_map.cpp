@@ -551,12 +551,15 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 
 	pool.join();
 
-	// calculate chern numbers for the magnon bands
-	m_chern = dyn.CalcChernNumbers(
-		0.5,                        // zone boundary
-		g_delta_diff, g_delta_int,  // diff and int deltas
-		dim1, dim2,                 // dims
-		true);                      // use commutator corrected eigensystems
+	if(!m_stopRequested_bcm)
+	{
+		// calculate chern numbers for the magnon bands
+		m_chern = dyn.CalcChernNumbers(
+			0.5,                        // zone boundary
+			g_delta_diff, g_delta_int,  // diff and int deltas
+			dim1, dim2,                 // dims
+			true);                      // use commutator corrected eigensystems
+	}
 
 	stopwatch.stop();
 
