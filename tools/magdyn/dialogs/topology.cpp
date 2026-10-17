@@ -762,7 +762,7 @@ void TopologyDlg::CalculateBerryCurvature()
 			data_bc.momentum = Q;
 			typename t_magdyn::SofQE S;
 			std::tie(data_bc.curvatures, S) = dyn.CalcBerryCurvatures(
-				Q, g_delta_diff, perm, dim1, dim2, enforce_commutator);
+				Q, g_delta_diff, g_delta_int, perm, dim1, dim2, enforce_commutator);
 			t_size num_bands = data_bc.curvatures.size();
 			data_bc.energies.reserve(num_bands);
 			data_bc.weights.reserve(num_bands);

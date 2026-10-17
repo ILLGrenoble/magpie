@@ -513,7 +513,7 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 			// calculate the berry curvature at the given Q point
 			const t_vec3_real Q = GetMapQFromIndices(Q_idx_1, Q_idx_2);
 			auto [curvatures, S] = dyn.CalcBerryCurvatures(
-				Q, g_delta_diff, nullptr, dim1, dim2, enforce_commutator);
+				Q, g_delta_diff, g_delta_int, nullptr, dim1, dim2, enforce_commutator);
 
 			std::lock_guard<std::mutex> _lck{mtx};
 			m_data_bcm[Q_idx_2*Q_count_1 + Q_idx_1] = std::move(curvatures);
