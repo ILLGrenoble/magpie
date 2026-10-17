@@ -373,7 +373,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		t_vec_real Q = Q_start + Q_step1*t_real(i) + Q_step2*t_real(j);
 
 		auto [ evecs, S ] = get_evecs(Q, commutator);
-		grid[i*grid_x + j] = std::move(evecs);
+		grid[i*grid_y + j] = std::move(evecs);
 	}
 
 	// initialise by resetting chern numbers to zeros
@@ -390,10 +390,10 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		for(t_size i = 0; i < grid_x; ++i)
 		for(t_size j = 0; j < grid_y; ++j)
 		{
-			t_vec v00 = tl2::col<t_mat, t_vec>(grid[i*grid_x                + j               ], band);
-			t_vec v01 = tl2::col<t_mat, t_vec>(grid[i*grid_x                + ((j + 1)%grid_y)], band);
-			t_vec v10 = tl2::col<t_mat, t_vec>(grid[((i + 1)%grid_x)*grid_x + j               ], band);
-			t_vec v11 = tl2::col<t_mat, t_vec>(grid[((i + 1)%grid_x)*grid_x + ((j + 1)%grid_y)], band);
+			t_vec v00 = tl2::col<t_mat, t_vec>(grid[i*grid_y                + j               ], band);
+			t_vec v01 = tl2::col<t_mat, t_vec>(grid[i*grid_y                + ((j + 1)%grid_y)], band);
+			t_vec v10 = tl2::col<t_mat, t_vec>(grid[((i + 1)%grid_x)*grid_y + j               ], band);
+			t_vec v11 = tl2::col<t_mat, t_vec>(grid[((i + 1)%grid_x)*grid_y + ((j + 1)%grid_y)], band);
 
 			chern_num += std::arg(
 				berry_dot(v00, v10, commutator, eps) * berry_dot(v01, v00, commutator, eps) *

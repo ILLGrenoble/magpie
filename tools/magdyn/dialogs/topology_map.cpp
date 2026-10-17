@@ -388,6 +388,22 @@ std::tuple<t_vec3_real, t_vec3_real, t_vec3_real> TopologyDlg::GetMapQVectors() 
 /**
  * converts array indices to Q position
  */
+template<class t_vec3_real>
+static t_vec3_real get_map_Q_from_indices(std::size_t idx1, std::size_t idx2,
+	const t_vec3_real& Q_origin, const t_vec3_real& Q_dir_1, const t_vec3_real& Q_dir_2,
+	std::size_t Q_count_1, std::size_t Q_count_2)
+{
+	t_vec3_real Q_step_1 = Q_dir_1 / t_real(Q_count_1 - 1);
+	t_vec3_real Q_step_2 = Q_dir_2 / t_real(Q_count_2 - 1);
+
+	return Q_origin + Q_step_1*t_real(idx1) + Q_step_2*t_real(idx2);
+}
+
+
+
+/**
+ * converts array indices to Q position
+ */
 t_vec3_real TopologyDlg::GetMapQFromIndices(std::size_t idx1, std::size_t idx2) const
 {
 	t_size Q_count_1 = m_num_Q_bcm[0]->value();
@@ -396,10 +412,8 @@ t_vec3_real TopologyDlg::GetMapQFromIndices(std::size_t idx1, std::size_t idx2) 
 	// get coordinates
 	auto [Q_origin, Q_dir_1, Q_dir_2] = GetMapQVectors();
 
-	t_vec3_real Q_step_1 = Q_dir_1 / t_real(Q_count_1 - 1);
-	t_vec3_real Q_step_2 = Q_dir_2 / t_real(Q_count_2 - 1);
-
-	return Q_origin + Q_step_1*t_real(idx1) + Q_step_2*t_real(idx2);
+	return get_map_Q_from_indices<t_vec3_real>(idx1, idx2,
+		Q_origin, Q_dir_1, Q_dir_2, Q_count_1, Q_count_2);
 }
 
 
@@ -489,13 +503,15 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 	for(t_size Q_idx_2 = 0; Q_idx_2 < Q_count_2; ++Q_idx_2)
 	{
 		auto task = [this, &mtx, &dyn, Q_idx_1, Q_idx_2, Q_count_1, Q_count_2,
-			&Q_step_1, &Q_step_2]()
+			&Q_origin, &Q_dir_1, &Q_dir_2, &Q_step_1, &Q_step_2]()
 		{
 			// calculate the berry curvature at the given Q point
-			const t_vec3_real Q = GetMapQFromIndices(Q_idx_1, Q_idx_2);
+			const t_vec3_real Q =  get_map_Q_from_indices<t_vec3_real>(
+			  Q_idx_1, Q_idx_2, Q_origin, Q_dir_1, Q_dir_2, Q_count_1, Q_count_2);
+
 			auto [curvatures, S, chern_partial] = dyn.CalcBerryCurvatures(Q,
 				Q_idx_1 == Q_count_1 - 1 ? -Q_step_1*t_real(Q_count_1 - 1) : Q_step_1,
-				Q_idx_2 == Q_count_2 - 1 ? -Q_step_2*t_real(Q_count_1 - 1) : Q_step_2);
+				Q_idx_2 == Q_count_2 - 1 ? -Q_step_2*t_real(Q_count_2 - 1) : Q_step_2);
 
 			std::lock_guard<std::mutex> _lck{mtx};
 			if(m_chern_bcm.size() == chern_partial.size())
@@ -549,7 +565,7 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 	std::ostringstream ostrMsg;
 	ostrMsg.precision(g_prec_gui);
 	ostrMsg << "Calculation";
-	if(m_stopRequested_bc)
+	if(m_stopRequested_bcm)
 		ostrMsg << " stopped ";
 	else
 		ostrMsg << " finished ";
