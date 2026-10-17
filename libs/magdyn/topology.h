@@ -160,9 +160,9 @@ std::tuple<std::vector<t_cplx>, t_S, t_vec> berry_curvatures(
 	const t_vec_real& Q, bool)>& get_evecs,
 	const t_vec_real& Q, const t_vec_real& Q_step1, const t_vec_real& Q_step2,
 	t_real delta_diff = 1e-6, t_real delta_int = 1e-2,
+	t_real eps = std::numeric_limits<t_real>::epsilon(),
 	t_size dim1 = 0, t_size dim2 = 1,
-	bool commutator = true,
-	t_real eps = std::numeric_limits<t_real>::epsilon())
+	bool commutator = true)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
@@ -210,7 +210,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		// differentiate connection's x component with respect to k
 		t_cplx curv2 = (connections_k[band][dim1] - connections[band][dim1]) / delta_diff;
 		t_cplx curv = curv1 - curv2;
-		
+
 		chern_partial[band] = curv * delta_int * delta_int;
 		curvatures.emplace_back(std::move(curv));
 	}
@@ -318,7 +318,9 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 
 		std::vector<t_cplx> curvs = std::get<0>(berry_curvatures<
 			t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
-				get_evecs, Q, delta_diff, delta_int, dim1, dim2, commutator));
+				get_evecs, Q, Q_step1, Q_step2,
+				delta_diff, delta_int, eps,
+				dim1, dim2, commutator));
 
 		// initialise by resetting chern numbers to zeros
 		if(!chern_nums.size())
@@ -412,7 +414,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
  * get a function returning the matrix of eigenstates at specific Q
  */
 template<class t_mat, class t_vec, class t_vec_real, class t_magdyn, class t_perm>
-static std::function<std::tuple<t_mat, typename t_magdyn::SofQE>(const t_vec_real& Q, bool)>
+std::function<std::tuple<t_mat, typename t_magdyn::SofQE>(const t_vec_real& Q, bool)>
 get_evecmat_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
 {
 	return [magdyn, perm](const t_vec_real& Q, bool commutator)
@@ -501,8 +503,8 @@ MAGDYN_INST::CalcBerryCurvatures(
 		return berry_curvatures<
 			t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
 				evec_func, Q, Q_step1, Q_step2,
-				delta_diff, delta_int,
-				dim1, dim2, commutator, m_eps);
+				delta_diff, delta_int, m_eps,
+				dim1, dim2, commutator);
 	}
 	else
 	{
@@ -535,7 +537,6 @@ t_vec MAGDYN_INST::CalcChernNumbers(
 	}
 
 	std::vector<t_size> *perm = nullptr;
-
 	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
 
 	if constexpr(calc_method == 0)
