@@ -166,7 +166,6 @@ private:
 	QCheckBox *m_S_filter_enable_bc{};  // switch to enable minimum S(Q,E) value
 	QDoubleSpinBox *m_S_filter_bc{};    // minimum S(Q,E) value
 
-	QSpinBox *m_coords_bc[2]{};         // berry curvature component indices
 	QCheckBox *m_only_pos_E_bc{};       // ignore magnon annihilation?
 	//QCheckBox *m_enforce_commutator_bc{};
 
@@ -183,7 +182,7 @@ private:
 	// berry curvature map tab
 	std::vector<std::vector<t_cplx>> m_data_bcm{};  // data map
 	t_vec3_real m_Q_cursor_bcm{};         // current coordinate at cursor
-	std::vector<t_cplx> m_chern{};        // chern numbers
+	t_vec m_chern_bcm{};                  // chern numbers
 
 	QCustomPlot *m_plot_bcm{};            // berry curvature plotter
 	QCPColorScale *m_plot_colour_bcm{};   // plot colour scale
@@ -201,7 +200,6 @@ private:
 	//QCheckBox *m_S_filter_enable_bcm{};   // switch to enable minimum S(Q,E) value
 	//QDoubleSpinBox *m_S_filter_bcm{};     // minimum S(Q,E) value
 
-	QSpinBox *m_coords_bcm[2]{};          // berry curvature component indices
 	QSpinBox *m_band_bcm{};               // band index
 	QCheckBox *m_only_pos_E_bcm{};        // ignore magnon annihilation?
 

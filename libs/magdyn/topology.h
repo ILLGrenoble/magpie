@@ -147,21 +147,19 @@ requires tl2::is_vec<t_vec>
 
 
 /**
- * calculates the berry curvatures
+ * calculates the berry curvatures directly (numerically not very stable)
  * @see equ. 8 in (McClarty 2022)
  * @see https://en.wikipedia.org/wiki/Berry_connection_and_curvature
- *
- * t_mat: either matrix or vector container
  */
 template<class t_vec, class t_vec_real, class t_mat, class t_S,
 	typename t_cplx = typename t_vec::value_type,
 	typename t_real = typename t_cplx::value_type,
-	typename t_size = std::size_t, int calc_method = 1>
-std::tuple<std::vector<t_cplx>, t_S> berry_curvatures(
-	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q, bool)>& get_evecs,
-	const t_vec_real& Q,
-	t_real delta_diff = 1e-6, // std::sqrt(std::numeric_limits<t_real>::epsilon()),
-	t_real delta_int = 1e-2,
+	typename t_size = std::size_t>
+std::tuple<std::vector<t_cplx>, t_S, t_vec> berry_curvatures(
+	const std::function<std::tuple<t_mat, t_S>(
+	const t_vec_real& Q, bool)>& get_evecs,
+	const t_vec_real& Q, const t_vec_real& Q_step1, const t_vec_real& Q_step2,
+	t_real delta_diff = 1e-6, t_real delta_int = 1e-2,
 	t_size dim1 = 0, t_size dim2 = 1,
 	bool commutator = true,
 	t_real eps = std::numeric_limits<t_real>::epsilon())
@@ -177,214 +175,231 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 
 	std::vector<t_cplx> curvatures{};
 	curvatures.reserve(BANDS);
+	t_vec chern_partial = tl2::zero<t_vec>(BANDS);
 
-	// direct implementation of equ. 8 in (McClarty 2022)
-	if constexpr(calc_method == 0)
+	t_vec_real _Q_step1 = Q_step1;
+	t_real lenQstep1 = tl2::norm<t_vec_real>(Q_step1);
+	if(lenQstep1 > eps)
 	{
-		t_vec_real h = Q, k = Q;
-		h[dim1] += delta_diff;
-		k[dim2] += delta_diff;
-
-		std::vector<t_vec> connections =
-			std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
-				get_evecs, Q, delta_diff, commutator, &evecs));
-		std::vector<t_vec> connections_h =
-			std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
-				get_evecs, h, delta_diff, commutator, &evecs));
-		std::vector<t_vec> connections_k =
-			std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
-				get_evecs, k, delta_diff, commutator, &evecs));
-
-		for(t_size band = 0; band < BANDS; ++band)
-		{
-			// differentiate connection's y component with respect to h
-			t_cplx curv1 = (connections_h[band][dim2] - connections[band][dim2]) / delta_diff;
-			// differentiate connection's x component with respect to k
-			t_cplx curv2 = (connections_k[band][dim1] - connections[band][dim1]) / delta_diff;
-
-			curvatures.emplace_back(curv1 - curv2);
-		}
+		_Q_step1 /= lenQstep1;
+		_Q_step1 *= delta_diff;
 	}
 
-	// FHS method, see (Nakamura 2024)
-	else
+	t_vec_real _Q_step2 = Q_step2;
+	t_real lenQstep2 = tl2::norm<t_vec_real>(Q_step2);
+	if(lenQstep2 > eps)
 	{
-		t_vec_real Q01 = Q;  Q01[dim2] += delta_int;
-		t_vec_real Q10 = Q;  Q10[dim1] += delta_int;
-		t_vec_real Q11 = Q;  Q11[dim1] += delta_int;  Q11[dim2] += delta_int;
-
-		const t_mat& evecs00 = evecs;
-		const auto [ evecs01, S01 ] = get_evecs(Q01, commutator);
-		const auto [ evecs10, S10 ] = get_evecs(Q10, commutator);
-		const auto [ evecs11, S11 ] = get_evecs(Q11, commutator);
-
-		// see equs. 3a & 3b in (Nakamura 2024)
-		for(t_size band = 0; band < BANDS; ++band)
-		{
-				t_vec v00 = tl2::col<t_mat, t_vec>(evecs00, band);
-				t_vec v01 = tl2::col<t_mat, t_vec>(evecs01, band);
-				t_vec v10 = tl2::col<t_mat, t_vec>(evecs10, band);
-				t_vec v11 = tl2::col<t_mat, t_vec>(evecs11, band);
-
-				t_cplx curv = std::arg(
-					berry_dot(v00, v10, commutator, eps) * berry_dot(v01, v00, commutator, eps) *
-					berry_dot(v11, v01, commutator, eps) * berry_dot(v10, v11, commutator, eps));
-				curv /= delta_int*delta_int;
-
-				curvatures.emplace_back(std::move(curv));
-		}
+		_Q_step2 /= lenQstep2;
+		_Q_step2 *= delta_diff;
 	}
 
-	return std::make_tuple(curvatures, S);
+	std::vector<t_vec> connections =
+		std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
+			get_evecs, Q, delta_diff, commutator, &evecs));
+	std::vector<t_vec> connections_h =
+		std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
+			get_evecs, Q + _Q_step1, delta_diff, commutator, &evecs));
+	std::vector<t_vec> connections_k =
+		std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
+			get_evecs, Q + _Q_step2, delta_diff, commutator, &evecs));
+
+	for(t_size band = 0; band < BANDS; ++band)
+	{
+		// differentiate connection's y component with respect to h
+		t_cplx curv1 = (connections_h[band][dim2] - connections[band][dim2]) / delta_diff;
+		// differentiate connection's x component with respect to k
+		t_cplx curv2 = (connections_k[band][dim1] - connections[band][dim1]) / delta_diff;
+		t_cplx curv = curv1 - curv2;
+		
+		chern_partial[band] = curv * delta_int * delta_int;
+		curvatures.emplace_back(std::move(curv));
+	}
+
+	chern_partial /= t_real(2) * tl2::pi<t_real>;
+	return std::make_tuple(curvatures, S, chern_partial);
 }
 
 
 
 /**
- * calculates the chern numbers
+ * calculates the berry curvatures via the FHS method
+ * @see (Nakamura 2024)
+ * @see equ. 8 in (McClarty 2022)
+ * @see https://en.wikipedia.org/wiki/Berry_connection_and_curvature
+ */
+template<class t_vec, class t_vec_real, class t_mat, class t_S,
+	typename t_cplx = typename t_vec::value_type,
+	typename t_real = typename t_cplx::value_type,
+	typename t_size = std::size_t>
+std::tuple<std::vector<t_cplx>, t_S, t_vec> berry_curvatures_fhs(
+	const std::function<std::tuple<t_mat, t_S>(
+	const t_vec_real& Q, bool)>& get_evecs,
+	const t_vec_real& Q, const t_vec_real& Q_step1, const t_vec_real& Q_step2,
+	bool commutator = true,
+	t_real eps = std::numeric_limits<t_real>::epsilon())
+#ifndef SWIG  // TODO: remove this as soon as swig understands concepts
+requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
+#endif
+{
+	// only valid in three dimensions
+	assert(Q.size() == 3);
+
+	const auto [ evecs, S ] = get_evecs(Q, commutator);
+	t_size BANDS = evecs.size2();
+
+	std::vector<t_cplx> curvatures{};
+	curvatures.reserve(BANDS);
+	t_vec chern_partial = tl2::zero<t_vec>(BANDS);
+
+	t_vec_real Q01 = Q + Q_step2;
+	t_vec_real Q10 = Q + Q_step1;
+	t_vec_real Q11 = Q + Q_step1 + Q_step2;
+
+	t_real Q_area = tl2::norm(Q_step1)*tl2::norm(Q_step2);
+
+	const t_mat& evecs00 = evecs;
+	const auto [ evecs01, S01 ] = get_evecs(Q01, commutator);
+	const auto [ evecs10, S10 ] = get_evecs(Q10, commutator);
+	const auto [ evecs11, S11 ] = get_evecs(Q11, commutator);
+
+	// see equs. 3a & 3b in (Nakamura 2024)
+	for(t_size band = 0; band < BANDS; ++band)
+	{
+			t_vec v00 = tl2::col<t_mat, t_vec>(evecs00, band);
+			t_vec v01 = tl2::col<t_mat, t_vec>(evecs01, band);
+			t_vec v10 = tl2::col<t_mat, t_vec>(evecs10, band);
+			t_vec v11 = tl2::col<t_mat, t_vec>(evecs11, band);
+
+			t_cplx curv = std::arg(
+				berry_dot(v00, v10, commutator, eps) * berry_dot(v01, v00, commutator, eps) *
+				berry_dot(v11, v01, commutator, eps) * berry_dot(v10, v11, commutator, eps));
+
+			chern_partial[band] = curv;
+			curvatures.emplace_back(curv / Q_area);
+	}
+
+	chern_partial /= t_real(2) * tl2::pi<t_real>;
+	return std::make_tuple(curvatures, S, chern_partial);
+}
+
+
+
+/**
+ * calculates the chern numbers directly (numerically not very stable)
  * @see equ. 9 in (McClarty 2022)
  * @see https://en.wikipedia.org/wiki/Berry_connection_and_curvature
  */
 template<class t_vec, class t_vec_real, class t_mat, class t_S,
 	typename t_cplx = typename t_vec::value_type,
 	typename t_real = typename t_cplx::value_type,
-	typename t_size = std::size_t, int calc_method = 2>
-std::vector<t_cplx> chern_numbers(
+	typename t_size = std::size_t>
+t_vec chern_numbers(
 	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q, bool)>& get_evecs,
-	t_real bz = 0.5,  // brillouin zone boundary
+	const t_vec_real& Q_start, const t_vec_real& Q_dir1, const t_vec_real& Q_dir2,
 	t_real eps = std::numeric_limits<t_real>::epsilon(),
-	t_real delta_diff = 1e-6, //std::sqrt(std::numeric_limits<t_real>::epsilon()),
-	t_real delta_int = 1e-2, //std::cbrt(std::numeric_limits<t_real>::epsilon()),
+	t_real delta_diff = 1e-6, t_real delta_int = 1e-2,
 	t_size dim1 = 0, t_size dim2 = 1, bool commutator = true)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
 {
-	std::vector<t_cplx> chern_nums;
+	// grid size
+	const t_size N = t_size(1. / delta_int);
 
-	// calculate via area over berry curvatures
-	// direct implementation of equ. 9 in (McClarty 2022)
-	if constexpr(calc_method == 0)
+	t_vec_real Q_step1 = Q_dir1 / t_real(N - 1);
+	t_vec_real Q_step2 = Q_dir2 / t_real(N - 1);
+
+	t_vec chern_nums{};
+
+	for(t_size i = 0; i < N; ++i)
+	for(t_size j = 0; j < N; ++j)
 	{
-		t_vec_real Q = tl2::zero<t_vec_real>(3);
+		t_vec_real Q = Q_start + Q_step1*t_real(i) + Q_step2*t_real(j);
 
-		for(Q[dim1] = -bz; Q[dim1] < bz; Q[dim1] += delta_int)
-		for(Q[dim2] = -bz; Q[dim2] < bz; Q[dim2] += delta_int)
-		{
-			std::vector<t_cplx> curvs = std::get<0>(berry_curvatures<
-				t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
-					get_evecs, Q, delta_diff, delta_int, dim1, dim2, commutator));
-
-			// initialise by resetting chern numbers to zeros
-			if(!chern_nums.size())
-				chern_nums.resize(curvs.size(), t_cplx{});
-
-			// numerically integrate the brillouin zone area for each band
-			for(t_size band = 0; band < curvs.size(); ++band)
-				chern_nums[band] += curvs[band] * delta_int * delta_int;
-		}
-
-		for(t_cplx& num : chern_nums)
-			num /= t_real(2) * tl2::pi<t_real>;
-	}
-
-	// calculate via boundary over berry connections
-	// direct implementation of equ. 9 in (McClarty 2022)
-	else if constexpr(calc_method == 1)
-	{
-		auto int_boundary = [get_evecs, delta_diff, delta_int, bz, dim1, dim2,
-			&chern_nums, commutator](t_size dim, t_vec_real& Q, t_real sign)
-		{
-			for(Q[dim] = -bz; Q[dim] < bz; Q[dim] += delta_int)
-			{
-				std::vector<t_vec> conns =
-					std::get<0>(berry_connections<t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
-						get_evecs, Q, delta_diff, commutator));
-	
-				// initialise by resetting chern numbers to zeros
-				if(!chern_nums.size())
-					chern_nums.resize(conns.size(), t_cplx{});
-	
-				// numerically integrate along boundary segment
-				for(t_size band = 0; band < conns.size(); ++band)
-				{
-					chern_nums[band] += conns[band][dim1] * delta_int * sign;
-					chern_nums[band] -= conns[band][dim2] * delta_int * sign;
-				}
-			}
-		};
-
-		// bottom part of boundary
-		t_vec_real Q = tl2::zero<t_vec_real>(3);
-		Q[dim2] = -bz;
-		int_boundary(dim1, Q, 1.);
-
-		// top part of boundary
-		Q[dim2] = +bz;
-		int_boundary(dim1, Q, -1.);
-
-		// left part of boundary
-		Q = tl2::zero<t_vec_real>(3);
-		Q[dim1] = -bz;
-		int_boundary(dim2, Q, 1.);
-
-		// right part of boundary
-		Q[dim1] = +bz;
-		int_boundary(dim2, Q, -1.);
-	}
-
-	// FHS method, see (Nakamura 2024)
-	else
-	{		
-		// create grid
-		const t_size N = t_size(2.*bz / delta_int);
-		std::vector<t_mat> grid(N*N);
-
-		t_vec_real Q = tl2::zero<t_vec_real>(3);
-		Q[dim1] = -bz;
-
-		for(t_size i = 0; i < N; ++i)
-		{
-			Q[dim2] = -bz;
-
-			for(t_size j = 0; j < N; ++j)
-			{
-				auto [ evecs, S ] = get_evecs(Q, commutator);
-				grid[i*N + j] = std::move(evecs);
-
-				Q[dim2] += delta_int;
-			}
-
-			Q[dim1] += delta_int;
-		}
+		std::vector<t_cplx> curvs = std::get<0>(berry_curvatures<
+			t_vec, t_vec_real, t_mat, t_S, t_cplx, t_real, t_size>(
+				get_evecs, Q, delta_diff, delta_int, dim1, dim2, commutator));
 
 		// initialise by resetting chern numbers to zeros
-		const t_size num_bands = grid[0].size2();
 		if(!chern_nums.size())
-			chern_nums.resize(num_bands, t_cplx{});
+			chern_nums = tl2::zero<t_vec>(curvs.size());
 
-		// calculate chern numbers per magnon band
-		for(t_size band = 0; band < num_bands; ++band)
+		// numerically integrate the brillouin zone area for each band
+		for(t_size band = 0; band < curvs.size(); ++band)
+			chern_nums[band] += curvs[band] * delta_int * delta_int;
+	}
+
+	chern_nums /= t_real(2) * tl2::pi<t_real>;
+
+	// should be integers
+	return chern_nums;
+}
+
+
+
+/**
+ * calculates the chern numbers via the fhs methos
+ * @see (Nakamura 2024)
+ * @see equ. 9 in (McClarty 2022)
+ * @see https://en.wikipedia.org/wiki/Berry_connection_and_curvature
+ */
+template<class t_vec, class t_vec_real, class t_mat, class t_S,
+	typename t_cplx = typename t_vec::value_type,
+	typename t_real = typename t_cplx::value_type,
+	typename t_size = std::size_t>
+t_vec chern_numbers_fhs(
+	const std::function<std::tuple<t_mat, t_S>(const t_vec_real& Q, bool)>& get_evecs,
+	const t_vec_real& Q_start, const t_vec_real& Q_dir1, const t_vec_real& Q_dir2,
+	t_size grid_x = 64, t_size grid_y = 64,
+	t_real eps = std::numeric_limits<t_real>::epsilon(),
+	bool commutator = true)
+#ifndef SWIG  // TODO: remove this as soon as swig understands concepts
+requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
+#endif
+{
+	t_vec_real Q_step1 = Q_dir1 / t_real(grid_x - 1);
+	t_vec_real Q_step2 = Q_dir2 / t_real(grid_y - 1);
+
+	t_vec chern_nums{};
+
+	// create grid
+	std::vector<t_mat> grid(grid_x * grid_y);
+
+	for(t_size i = 0; i < grid_x; ++i)
+	for(t_size j = 0; j < grid_y; ++j)
+	{
+		t_vec_real Q = Q_start + Q_step1*t_real(i) + Q_step2*t_real(j);
+
+		auto [ evecs, S ] = get_evecs(Q, commutator);
+		grid[i*grid_x + j] = std::move(evecs);
+	}
+
+	// initialise by resetting chern numbers to zeros
+	const t_size num_bands = grid[0].size2();
+	if(!chern_nums.size())
+		chern_nums = tl2::zero<t_vec>(num_bands);
+
+	// calculate chern numbers per magnon band
+	for(t_size band = 0; band < num_bands; ++band)
+	{
+		t_cplx chern_num{};
+
+		// see equs. 3a & 3b in (Nakamura 2024)
+		for(t_size i = 0; i < grid_x; ++i)
+		for(t_size j = 0; j < grid_y; ++j)
 		{
-			t_cplx chern_num{};
+			t_vec v00 = tl2::col<t_mat, t_vec>(grid[i*grid_x                + j               ], band);
+			t_vec v01 = tl2::col<t_mat, t_vec>(grid[i*grid_x                + ((j + 1)%grid_y)], band);
+			t_vec v10 = tl2::col<t_mat, t_vec>(grid[((i + 1)%grid_x)*grid_x + j               ], band);
+			t_vec v11 = tl2::col<t_mat, t_vec>(grid[((i + 1)%grid_x)*grid_x + ((j + 1)%grid_y)], band);
 
-			// see equs. 3a & 3b in (Nakamura 2024)
-			for(t_size i = 0; i < N; ++i)
-			for(t_size j = 0; j < N; ++j)
-			{
-				t_vec v00 = tl2::col<t_mat, t_vec>(grid[i*N           + j          ], band);
-				t_vec v01 = tl2::col<t_mat, t_vec>(grid[i*N           + ((j + 1)%N)], band);
-				t_vec v10 = tl2::col<t_mat, t_vec>(grid[((i + 1)%N)*N + j          ], band);
-				t_vec v11 = tl2::col<t_mat, t_vec>(grid[((i + 1)%N)*N + ((j + 1)%N)], band);
-
-				chern_num += std::arg(
-					berry_dot(v00, v10, commutator, eps) * berry_dot(v01, v00, commutator, eps) *
-					berry_dot(v11, v01, commutator, eps) * berry_dot(v10, v11, commutator, eps));
-			}
-
-			chern_num /= t_real(2) * tl2::pi<t_real>;
-			chern_nums[band] = std::move(chern_num);
+			chern_num += std::arg(
+				berry_dot(v00, v10, commutator, eps) * berry_dot(v01, v00, commutator, eps) *
+				berry_dot(v11, v01, commutator, eps) * berry_dot(v10, v11, commutator, eps));
 		}
+
+		chern_num /= t_real(2) * tl2::pi<t_real>;
+		chern_nums[band] = std::move(chern_num);
 	}
 
 	// should be integers
@@ -435,8 +450,10 @@ get_evecmat_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
 MAGDYN_TEMPL
 std::tuple<std::vector<t_vec>, MAGDYN_TYPE::SofQE>
 MAGDYN_INST::CalcBerryConnections(const t_vec3_real& Q, t_real delta,
-	const std::vector<t_size>* perm, bool commutator) const
+	const std::vector<t_size>* perm) const
 {
+	constexpr const bool commutator = true;
+
 	//SetUniteDegenerateEnergies(false);
 	if(m_unite_degenerate_energies)
 	{
@@ -457,11 +474,14 @@ MAGDYN_INST::CalcBerryConnections(const t_vec3_real& Q, t_real delta,
  * get the berry curvature for each magnon band
  */
 MAGDYN_TEMPL
-std::tuple<std::vector<t_cplx>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryCurvatures(
-	const t_vec3_real& Q, t_real delta_diff, t_real delta_int,
-	const std::vector<t_size>* perm, t_size dim1, t_size dim2,
-	bool commutator) const
+std::tuple<std::vector<t_cplx>, MAGDYN_TYPE::SofQE, t_vec>
+MAGDYN_INST::CalcBerryCurvatures(
+	const t_vec3_real& Q, const t_vec3_real& Q_step1, const t_vec3_real& Q_step2,
+	const std::vector<t_size>* perm) const
 {
+	constexpr const int calc_method = 1;
+	constexpr const bool commutator = true;
+
 	//SetUniteDegenerateEnergies(false);
 	if(m_unite_degenerate_energies)
 	{
@@ -471,11 +491,26 @@ std::tuple<std::vector<t_cplx>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryCurvat
 	}
 
 	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
-	constexpr const int calc_method = 1;
 
-	return berry_curvatures<
-		t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size, calc_method>(
-			evec_func, Q, delta_diff, delta_int, dim1, dim2, commutator, m_eps);
+	if constexpr(calc_method == 0)
+	{
+		const t_real delta_diff = 1e-6;
+		const t_real delta_int = 1e-2;
+		t_size dim1 = 0, dim2 = 1;
+
+		return berry_curvatures<
+			t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
+				evec_func, Q, Q_step1, Q_step2,
+				delta_diff, delta_int,
+				dim1, dim2, commutator, m_eps);
+	}
+	else
+	{
+		return berry_curvatures_fhs<
+			t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
+				evec_func, Q, Q_step1, Q_step2,
+				commutator, m_eps);
+	}
 }
 
 
@@ -484,10 +519,13 @@ std::tuple<std::vector<t_cplx>, MAGDYN_TYPE::SofQE> MAGDYN_INST::CalcBerryCurvat
  * get the chern number for each magnon band
  */
 MAGDYN_TEMPL
-std::vector<t_cplx> MAGDYN_INST::CalcChernNumbers(
-	t_real bz, t_real delta_diff, t_real delta_int, t_size dim1, t_size dim2,
-	bool commutator) const
+t_vec MAGDYN_INST::CalcChernNumbers(
+	const t_vec3_real& Q_start, const t_vec3_real& Q_dir1, const t_vec3_real& Q_dir2,
+	t_size grid_x, t_size grid_y) const
 {
+	constexpr const int calc_method = 1;
+	constexpr const bool commutator = true;
+
 	//SetUniteDegenerateEnergies(false);
 	if(m_unite_degenerate_energies)
 	{
@@ -496,16 +534,30 @@ std::vector<t_cplx> MAGDYN_INST::CalcChernNumbers(
 			<< std::endl;
 	}
 
-
-	constexpr const int calc_method = 2;
 	std::vector<t_size> *perm = nullptr;
 
 	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
 
-	return chern_numbers<t_vec, t_vec3_real, t_mat, SofQE,
-		t_cplx, t_real, t_size, calc_method>(
-			evec_func, bz, m_eps, delta_diff, delta_int, dim1, dim2,
-			commutator);
+	if constexpr(calc_method == 0)
+	{
+		const t_real delta_diff = 1e-6;
+		const t_real delta_int = 1e-2;
+		t_size dim1 = 0, dim2 = 1;
+
+		return chern_numbers<t_vec, t_vec3_real, t_mat, SofQE,
+			t_cplx, t_real, t_size>(
+				evec_func, Q_start, Q_dir1, Q_dir2, m_eps,
+				delta_diff, delta_int, dim1, dim2,
+				commutator);
+	}
+	else
+	{
+		return chern_numbers_fhs<t_vec, t_vec3_real, t_mat, SofQE,
+			t_cplx, t_real, t_size>(
+				evec_func, Q_start, Q_dir1, Q_dir2,
+				grid_x, grid_y,
+				m_eps, commutator);
+	}
 }
 
 // --------------------------------------------------------------------

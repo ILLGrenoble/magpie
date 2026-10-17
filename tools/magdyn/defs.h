@@ -93,10 +93,6 @@ extern int g_prec, g_prec_gui;
 // epsilon
 extern t_real g_eps;
 
-// delta for numerical differentiation
-extern t_real g_delta_diff;
-extern t_real g_delta_int;
-
 // bose cutoff energy
 extern t_real g_bose_cutoff;
 
@@ -111,9 +107,6 @@ extern unsigned int g_bz_draw_order;
 
 // optional features
 extern int g_allow_ortho_spin, g_allow_general_J;
-
-// topology settings
-extern int g_enforce_commutator;
 
 // console messages
 extern int g_silent, g_checks;
@@ -159,7 +152,7 @@ extern int g_fail_on_gl_error;
 // ----------------------------------------------------------------------------
 #include "dialogs/settings.h"
 
-constexpr std::array<SettingsVariable, 29> g_settingsvariables
+constexpr std::array<SettingsVariable, 26> g_settingsvariables
 {{
 	// threads
 	{
@@ -183,17 +176,6 @@ constexpr std::array<SettingsVariable, 29> g_settingsvariables
 		.description = "GUI number precision.",
 		.key = "prec_gui",
 		.value = &g_prec_gui,
-	},
-	// deltas for numerical calculations
-	{
-		.description = "Differentiation delta.",
-		.key = "delta_diff",
-		.value = &g_delta_diff,
-	},
-	{
-		.description = "Integration delta.",
-		.key = "delta_int",
-		.value = &g_delta_int,
 	},
 	{
 		.description = "Bose cutoff energy.",
@@ -304,12 +286,6 @@ constexpr std::array<SettingsVariable, 29> g_settingsvariables
 		.description = "Allow setting of general exchange matrix J.",
 		.key = "allow_gen_J",
 		.value = &g_allow_general_J,
-		.editor = SettingsVariableEditor::YESNO,
-	},
-	{
-		.description = "Enforce commutator relations.",
-		.key = "enforce_commutator",
-		.value = &g_enforce_commutator,
 		.editor = SettingsVariableEditor::YESNO,
 	},
 	{

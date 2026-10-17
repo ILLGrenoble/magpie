@@ -307,26 +307,6 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	btnQ->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	btnQ->setToolTip("Set the Q start and end points from the dispersion in the main window.");
 
-	// coordinate components
-	m_coords_bc[0] = new QSpinBox(panelBerryCurvature);
-	m_coords_bc[0]->setMinimum(0);
-	m_coords_bc[0]->setMaximum(2);
-	m_coords_bc[0]->setValue(0);
-	m_coords_bc[0]->setPrefix("i = ");
-	m_coords_bc[0]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
-	m_coords_bc[0]->setToolTip("First component index of B_ij matrix.");
-
-	m_coords_bc[1] = new QSpinBox(panelBerryCurvature);
-	m_coords_bc[1]->setMinimum(0);
-	m_coords_bc[1]->setMaximum(2);
-	m_coords_bc[1]->setValue(1);
-	m_coords_bc[1]->setPrefix("j = ");
-	m_coords_bc[1]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
-	m_coords_bc[1]->setToolTip("Second component index of B_ij matrix.");
-
-	//m_enforce_commutator_bc = new QCheckBox("Enforce Commutators", panelBerryCurvature);
-	//m_enforce_commutator_bc->setChecked(true);
-
 	// maximum cutoff for filtering numerical artefacts in berry curvature
 	m_B_filter_enable_bc = new QCheckBox("Maximum B:", panelBerryCurvature);
 	m_B_filter_enable_bc->setChecked(true);
@@ -381,10 +361,6 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	grid->addWidget(new QLabel("Q Count:", panelBerryCurvature), y, 0, 1, 1);
 	grid->addWidget(m_num_Q_bc, y, 1, 1, 1);
 	grid->addWidget(btnQ, y++, 3, 1, 1);
-	grid->addWidget(new QLabel("B Component:", panelBerryCurvature), y, 0, 1, 1);
-	grid->addWidget(m_coords_bc[0], y, 1, 1, 1);
-	grid->addWidget(m_coords_bc[1], y++, 2, 1, 1);
-	//grid->addWidget(m_enforce_commutator_bc, y++, 3, 1, 1);
 	grid->addWidget(m_B_filter_enable_bc, y, 0, 1, 1);
 	grid->addWidget(m_B_filter_bc, y, 1, 1, 1);
 	grid->addWidget(m_S_filter_enable_bc, y, 2, 1, 1);
@@ -717,8 +693,6 @@ void TopologyDlg::CalculateBerryCurvature()
 	// get settings
 	t_size Q_count = m_num_Q_bc->value();
 	std::vector<t_size> *perm = nullptr;
-	t_size dim1 = m_coords_bc[0]->value();
-	t_size dim2 = m_coords_bc[1]->value();
 
 	// calculate berry curvature
 	t_magdyn dyn = *m_dyn;
@@ -746,12 +720,13 @@ void TopologyDlg::CalculateBerryCurvature()
 	m_data_bc.clear();
 	m_data_bc.reserve(Q_count);
 
-	const bool enforce_commutator = g_enforce_commutator; //m_enforce_commutator_bc->isChecked();
+	t_vec3_real Q_step1 = tl2::create<t_vec3_real>({ 1./t_real(Q_count), 0., 0. });
+	t_vec3_real Q_step2 = tl2::create<t_vec3_real>({ 0., 1./t_real(Q_count), 0. });
 
 	for(t_size Q_idx = 0; Q_idx < Q_count; ++Q_idx)
 	{
-		auto task = [this, &mtx, &dyn, &Q_start, &Q_end, Q_idx, Q_count, perm,
-			dim1, dim2, enforce_commutator]()
+		auto task = [this, &mtx, &dyn, &Q_start, &Q_end, Q_idx, Q_count,
+			&Q_step1, &Q_step2, perm]()
 		{
 			const t_vec3_real Q = Q_count > 1
 				? tl2::lerp(Q_start, Q_end, t_real(Q_idx) / t_real(Q_count - 1))
@@ -761,8 +736,8 @@ void TopologyDlg::CalculateBerryCurvature()
 			BerryCurvatureData data_bc;
 			data_bc.momentum = Q;
 			typename t_magdyn::SofQE S;
-			std::tie(data_bc.curvatures, S) = dyn.CalcBerryCurvatures(
-				Q, g_delta_diff, g_delta_int, perm, dim1, dim2, enforce_commutator);
+			std::tie(data_bc.curvatures, S, std::ignore) = dyn.CalcBerryCurvatures(
+				Q, Q_step1, Q_step2, perm);
 			t_size num_bands = data_bc.curvatures.size();
 			data_bc.energies.reserve(num_bands);
 			data_bc.weights.reserve(num_bands);
@@ -902,7 +877,7 @@ void TopologyDlg::BerryCurvaturePlotMouseMove(QMouseEvent* evt)
 	// write status
 	QString status("Q = (%1, %2, %3) rlu");
 	QString status_invA("|Q| = %1 Å⁻¹");
-	QString status_B("B = %1 meV");
+	QString status_B("B = %1");
 
 	status = status
 		.arg(Qvec[0], 0, 'g', g_prec_gui)

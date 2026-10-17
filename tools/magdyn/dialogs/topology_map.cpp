@@ -174,28 +174,11 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	btnMainQ->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	btnMainQ->setToolTip("Set the Q origin and directions from the dispersion in the main window.");
 
-	// coordinate components
-	m_coords_bcm[0] = new QSpinBox(panel);
-	m_coords_bcm[0]->setMinimum(0);
-	m_coords_bcm[0]->setMaximum(2);
-	m_coords_bcm[0]->setValue(0);
-	m_coords_bcm[0]->setPrefix("i = ");
-	m_coords_bcm[0]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
-	m_coords_bcm[0]->setToolTip("First component index of B_ij matrix.");
-
-	m_coords_bcm[1] = new QSpinBox(panel);
-	m_coords_bcm[1]->setMinimum(0);
-	m_coords_bcm[1]->setMaximum(2);
-	m_coords_bcm[1]->setValue(1);
-	m_coords_bcm[1]->setPrefix("j = ");
-	m_coords_bcm[1]->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
-	m_coords_bcm[1]->setToolTip("Second component index of B_ij matrix.");
-
 	m_band_bcm = new QSpinBox(panel);
 	m_band_bcm->setMinimum(0);
 	m_band_bcm->setMaximum(999);
 	m_band_bcm->setValue(0);
-	m_band_bcm->setPrefix("band = ");
+	//m_band_bcm->setPrefix("band = ");
 	m_band_bcm->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_band_bcm->setToolTip("Magnon band index.");
 
@@ -270,10 +253,8 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	grid->addWidget(m_num_Q_bcm[0], y, 1, 1, 1);
 	grid->addWidget(m_num_Q_bcm[1], y, 2, 1, 1);
 	grid->addWidget(btnMainQ, y++, 3, 1, 1);
-	grid->addWidget(new QLabel("B Component:", panel), y, 0, 1, 1);
-	grid->addWidget(m_coords_bcm[0], y, 1, 1, 1);
-	grid->addWidget(m_coords_bcm[1], y, 2, 1, 1);
-	grid->addWidget(m_band_bcm, y++, 3, 1, 1);
+	grid->addWidget(new QLabel("Band Index:", this), y, 0, 1, 1);
+	grid->addWidget(m_band_bcm, y++, 1, 1, 1);
 	grid->addWidget(m_B_filter_min_enable_bcm, y, 0, 1, 1);
 	grid->addWidget(m_B_filter_min_bcm, y, 1, 1, 1);
 	grid->addWidget(m_B_filter_max_enable_bcm, y, 2, 1, 1);
@@ -468,9 +449,6 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 	t_size Q_count_1 = m_num_Q_bcm[0]->value();
 	t_size Q_count_2 = m_num_Q_bcm[1]->value();
 
-	t_size dim1 = m_coords_bcm[0]->value();
-	t_size dim2 = m_coords_bcm[1]->value();
-
 	// calculate berry curvature
 	t_magdyn dyn = *m_dyn;
 	dyn.SetUniteDegenerateEnergies(false);
@@ -501,21 +479,26 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 
 	m_data_bcm.clear();
 	m_data_bcm.resize(Q_count_1*Q_count_2);
+	m_chern_bcm = tl2::zero<t_vec>(expected_bands);
 
-	const bool enforce_commutator = g_enforce_commutator;
+	auto [Q_origin, Q_dir_1, Q_dir_2] = GetMapQVectors();
+	t_vec3_real Q_step_1 = Q_dir_1 / t_real(Q_count_1 - 1);
+	t_vec3_real Q_step_2 = Q_dir_2 / t_real(Q_count_2 - 1);
 
 	for(t_size Q_idx_1 = 0; Q_idx_1 < Q_count_1; ++Q_idx_1)
 	for(t_size Q_idx_2 = 0; Q_idx_2 < Q_count_2; ++Q_idx_2)
 	{
-		auto task = [this, &mtx, &dyn, Q_idx_1, Q_idx_2, Q_count_1, /*Q_count_2,*/
-			dim1, dim2, enforce_commutator]()
+		auto task = [this, &mtx, &dyn, Q_idx_1, Q_idx_2, Q_count_1, Q_count_2,
+			&Q_step_1, &Q_step_2]()
 		{
 			// calculate the berry curvature at the given Q point
 			const t_vec3_real Q = GetMapQFromIndices(Q_idx_1, Q_idx_2);
-			auto [curvatures, S] = dyn.CalcBerryCurvatures(
-				Q, g_delta_diff, g_delta_int, nullptr, dim1, dim2, enforce_commutator);
+			auto [curvatures, S, chern_partial] = dyn.CalcBerryCurvatures(Q,
+				Q_idx_1 == Q_count_1 - 1 ? -Q_step_1*t_real(Q_count_1 - 1) : Q_step_1,
+				Q_idx_2 == Q_count_2 - 1 ? -Q_step_2*t_real(Q_count_1 - 1) : Q_step_2);
 
 			std::lock_guard<std::mutex> _lck{mtx};
+			m_chern_bcm += chern_partial;
 			m_data_bcm[Q_idx_2*Q_count_1 + Q_idx_1] = std::move(curvatures);
 		};
 
@@ -551,15 +534,13 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 
 	pool.join();
 
-	if(!m_stopRequested_bcm)
+	/*if(!m_stopRequested_bcm)
 	{
 		// calculate chern numbers for the magnon bands
-		m_chern = dyn.CalcChernNumbers(
-			0.5,                        // zone boundary
-			g_delta_diff, g_delta_int,  // diff and int deltas
-			dim1, dim2,                 // dims
-			true);                      // use commutator corrected eigensystems
-	}
+		m_chern_bcm = dyn.CalcChernNumbers(
+			Q_origin, Q_dir_1, Q_dir_2,  // path
+			Q_count_1, Q_count_2);       // dims
+	}*/
 
 	stopwatch.stop();
 
@@ -828,9 +809,9 @@ void TopologyDlg::BerryCurvatureMapPlotMouseMove(QMouseEvent* evt)
 
 	const t_size band = m_band_bcm->value();
 	std::optional<t_real> chern;
-	if(band < m_chern.size())
+	if(band < m_chern_bcm.size())
 	{
-		chern = m_chern[band].real();
+		chern = m_chern_bcm[band].real();
 		tl2::set_eps_0(*chern, g_eps);
 	}
 

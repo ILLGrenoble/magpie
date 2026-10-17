@@ -509,18 +509,17 @@ public:
 	// --------------------------------------------------------------------
 	// topological calculations
 	// --------------------------------------------------------------------
-	std::tuple<std::vector<t_vec>, SofQE> CalcBerryConnections(const t_vec3_real& Q_start,
-		t_real delta = 1e-6, const std::vector<t_size>* perm = nullptr,
-		bool commutator = true) const;
+	std::tuple<std::vector<t_vec>, SofQE> CalcBerryConnections(
+	  const t_vec3_real& Q_start, t_real delta = 1e-6,
+	  const std::vector<t_size>* perm = nullptr) const;
 
-	std::tuple<std::vector<t_cplx>, SofQE> CalcBerryCurvatures(const t_vec3_real& Q_start,
-		t_real delta_diff = 1e-6, t_real delta_int = 1e-2,
-		const std::vector<t_size>* perm = nullptr,
-		t_size dim1 = 0, t_size dim2 = 1, bool commutator = true) const;
+	std::tuple<std::vector<t_cplx>, SofQE, t_vec> CalcBerryCurvatures(
+	  const t_vec3_real& Q_start, const t_vec3_real& Q_step1, const t_vec3_real& Q_step2,
+		const std::vector<t_size>* perm = nullptr) const;
 
-	std::vector<t_cplx> CalcChernNumbers(t_real bz = 0.5,
-		t_real delta_diff = 1e-6, t_real delta_int = 1e-3,
-		t_size dim1 = 0, t_size dim2 = 1, bool commutator = true) const;
+	t_vec CalcChernNumbers(
+		const t_vec3_real& Q_start, const t_vec3_real& Q_dir1, const t_vec3_real& Q_dir2,
+		t_size grid_x = 64, t_size grid_y = 64) const;
 	// --------------------------------------------------------------------
 
 

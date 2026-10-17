@@ -59,6 +59,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 		t_cplx, t_real,
 		std::size_t>;
 
+	using t_vec3_real = typename t_magdyn::t_vec3_real;
+
 	// magnon calculator
 	t_magdyn magdyn{};
 
@@ -68,11 +70,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 	magdyn.SetEpsilon(eps);
 	magdyn.SetUniteDegenerateEnergies(false);
 
-	std::vector<t_cplx> cs = magdyn.CalcChernNumbers(
-	  0.5,             // zone boundary
-		diff_eps, 1e-1,  // diff and int deltas
-		0, 1,            // dims
-		true);           // use commutator corrected eigensystems
+	t_vec3_real Q_start = tl2::create<t_vec3_real>({ -0.5, -0.5, 0. });
+	t_vec3_real Q_dir1 = tl2::create<t_vec3_real>({ 1., 0., 0. });
+	t_vec3_real Q_dir2 = tl2::create<t_vec3_real>({ 0., 1., 0. });
+
+	t_vec cs = magdyn.CalcChernNumbers(
+		Q_start, Q_dir1, Q_dir2,  // path
+		64, 64);                  // grid
 
 	BOOST_TEST(cs.size() == 4);
 	if(cs.size() == 4)
