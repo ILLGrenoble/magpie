@@ -72,7 +72,7 @@ magpy.add_coupling(mag, "coupling_1",  "site_1", "site_1",  1, 0, 0,  J)
 
 # explicitly re-calculate all sites and couplings if needed
 # (e.g., when changing the external field after adding the sites)
-#magpy.calc(mag)
+magpy.calc(mag)
 
 
 # minimum energy

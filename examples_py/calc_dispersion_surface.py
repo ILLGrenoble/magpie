@@ -225,8 +225,12 @@ def plot_disp_2d(data, Q_idx1 = -1, Q_idx2 = -1):
 			continue
 
 		# choose branch colour
-		r = int(0xff - 0xff * (E_branch_idx / E_branch_max))
-		b = int(0x00 + 0xff * (E_branch_idx / E_branch_max))
+		if E_branch_max != 0:
+			r = int(0xff - 0xff * (E_branch_idx / E_branch_max))
+			b = int(0x00 + 0xff * (E_branch_idx / E_branch_max))
+		else:
+			r = 0xff
+			b = 0x00
 
 		light = colors.LightSource(azdeg = -135, altdeg = 45.)
 		axis.plot_trisurf(data_Q[0], data_Q[1], data_E,

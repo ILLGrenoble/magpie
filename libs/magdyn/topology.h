@@ -84,28 +84,6 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		}
 	};
 
-	/*auto sub_evecs = [commutator, imag](
-		const t_mat& mat1, const t_mat& mat2) -> t_mat
-	{
-		t_mat m = tl2::zero<t_mat>(mat1.size1(), mat1.size2());
-
-		// iterate bands
-		for(t_size col = 0; col < mat1.size2(); ++col)
-		{
-			t_vec vec2 = tl2::col<t_mat, t_vec>(mat2, col);
-			t_vec vec1 = tl2::col<t_mat, t_vec>(mat1, col);
-
-			t_real dot = tl2::inner(vec1, vec2).real();
-
-			if(dot < 0.)
-				vec1 = -vec1;
-
-			tl2::set_col<t_mat, t_vec>(m, vec2 - vec1, col);
-		}
-
-		return m;
-	};*/
-
 	auto [ evecs, S ] = get_evecs(Q, commutator);
 	align_phases(evecs);
 
@@ -127,7 +105,6 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		align_phases(evecs_Q1);
 
 		// differentiate eigenvector matrix
-		//t_mat evecs_diff = sub_evecs(evecs_Q1, evecs) / delta;
 		t_mat evecs_diff = (evecs - evecs_Q1) / delta;
 
 		t_mat evecs_H = tl2::herm(evecs);
@@ -201,6 +178,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	std::vector<t_cplx> curvatures{};
 	curvatures.reserve(BANDS);
 
+	// direct implementation of equ. 8 in (McClarty 2022)
 	if constexpr(calc_method == 0)
 	{
 		t_vec_real h = Q, k = Q;
@@ -227,6 +205,8 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 			curvatures.emplace_back(curv1 - curv2);
 		}
 	}
+
+	// FHS method, see (Nakamura 2024)
 	else
 	{
 		t_vec_real Q01 = Q;  Q01[dim2] += delta_int;
@@ -283,6 +263,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	std::vector<t_cplx> chern_nums;
 
 	// calculate via area over berry curvatures
+	// direct implementation of equ. 9 in (McClarty 2022)
 	if constexpr(calc_method == 0)
 	{
 		t_vec_real Q = tl2::zero<t_vec_real>(3);
@@ -308,6 +289,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	}
 
 	// calculate via boundary over berry connections
+	// direct implementation of equ. 9 in (McClarty 2022)
 	else if constexpr(calc_method == 1)
 	{
 		auto int_boundary = [get_evecs, delta_diff, delta_int, bz, dim1, dim2,
