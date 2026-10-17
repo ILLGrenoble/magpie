@@ -175,7 +175,7 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	btnMainQ->setToolTip("Set the Q origin and directions from the dispersion in the main window.");
 
 	m_band_bcm = new QSpinBox(panel);
-	m_band_bcm->setMinimum(0);
+	m_band_bcm->setMinimum(1);
 	m_band_bcm->setMaximum(999);
 	m_band_bcm->setValue(0);
 	//m_band_bcm->setPrefix("band = ");
@@ -475,7 +475,7 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 	t_size expected_bands = dyn.GetMagneticSitesCount() * 2;
 	if(dyn.IsIncommensurate())
 		expected_bands *= 3;
-	m_band_bcm->setMaximum(expected_bands - 1);
+	m_band_bcm->setMaximum(expected_bands);
 
 	m_data_bcm.clear();
 	m_data_bcm.resize(Q_count_1*Q_count_2);
@@ -498,7 +498,8 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 				Q_idx_2 == Q_count_2 - 1 ? -Q_step_2*t_real(Q_count_1 - 1) : Q_step_2);
 
 			std::lock_guard<std::mutex> _lck{mtx};
-			m_chern_bcm += chern_partial;
+			if(m_chern_bcm.size() == chern_partial.size())
+				m_chern_bcm += chern_partial;
 			m_data_bcm[Q_idx_2*Q_count_1 + Q_idx_1] = std::move(curvatures);
 		};
 
@@ -631,7 +632,7 @@ void TopologyDlg::PlotBerryCurvatureMap()
 	const bool show_imag = m_imag_bcm->isChecked();
 	const t_size Q_count_1 = m_num_Q_bcm[0]->value();
 	const t_size Q_count_2 = m_num_Q_bcm[1]->value();
-	const t_size band = m_band_bcm->value();
+	const t_size band = m_band_bcm->value() - 1;
 
 	m_plot_map_bcm->data()->setSize((int)Q_count_1, (int)Q_count_2);
 	m_plot_map_bcm->data()->setRange(QCPRange{ 0., 1. }, QCPRange{ 0., 1. });
@@ -740,7 +741,7 @@ void TopologyDlg::SaveBerryCurvatureMapData()
 	const bool show_imag = m_imag_bcm->isChecked();
 	const t_size Q_count_1 = m_num_Q_bcm[0]->value();
 	const t_size Q_count_2 = m_num_Q_bcm[1]->value();
-	const t_size band = m_band_bcm->value();
+	const t_size band = m_band_bcm->value() - 1;
 
 	// write data
 	bool stop = false;
@@ -783,6 +784,8 @@ void TopologyDlg::BerryCurvatureMapPlotMouseMove(QMouseEvent* evt)
 
 	t_cplx B = 0.;
 
+	const t_size band = m_band_bcm->value() - 1;
+
 	if(evt)
 	{
 		const t_real Q1 = m_plot_bcm->xAxis->pixelToCoord(evt->pos().x());
@@ -794,10 +797,9 @@ void TopologyDlg::BerryCurvatureMapPlotMouseMove(QMouseEvent* evt)
 		// the Qs just use a 0..1 range
 		const t_size Q1_idx = t_size(Q1 * t_real(Q1_count));
 		const t_size Q2_idx = t_size(Q2 * t_real(Q2_count));
-		const t_size band = m_band_bcm->value();
 
 		const t_size idx = Q2_idx*Q1_count + Q1_idx;
-		if(idx < m_data_bcm.size())
+		if(idx < m_data_bcm.size() && band < m_data_bcm[idx].size())
 		{
 			B = m_data_bcm[idx][band];
 			tl2::set_eps_0(B, g_eps);
@@ -807,7 +809,6 @@ void TopologyDlg::BerryCurvatureMapPlotMouseMove(QMouseEvent* evt)
 		m_Q_cursor_bcm = Q_origin + Q_dir_1*Q1 + Q_dir_2*Q2;
 	}
 
-	const t_size band = m_band_bcm->value();
 	std::optional<t_real> chern;
 	if(band < m_chern_bcm.size())
 	{
