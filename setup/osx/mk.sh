@@ -36,7 +36,7 @@ clean_frameworks=1
 
 
 # tools
-STRIP=/opt/homebrew/Cellar/llvm/23.1.3_1/bin/llvm-strip
+STRIP=/opt/homebrew/Cellar/llvm/23.1.3_2/bin/llvm-strip
 if [ ! -e $STRIP ]; then
 	STRIP=llvm-strip
 fi
