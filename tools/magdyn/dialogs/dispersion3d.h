@@ -155,6 +155,7 @@ private:
 	t_size m_Q_count_1{}, m_Q_count_2{}; // number of Q points along the two directions
 	t_data_bands m_data{};               // data for all energy bands
 	std::array<t_real, 2> m_minmax_E{};  // minimum and maximum band energy
+	std::array<t_real, 2> m_minmax_S{};  // minimum and maximum S(Q, E)
 	std::array<t_vec3_real, 2> m_minmax_Q1{};  // minimum and maximum Q
 	std::array<t_vec3_real, 2> m_minmax_Q2{};  // minimum and maximum Q
 	t_size m_first_band{};               // index of first visible band
@@ -184,7 +185,7 @@ private:
 	bool m_show_main_Q{false};           // indicate the main dialog's scan
 
 	// correlation options
-	QCheckBox *m_S_filter_enable{};      // switch to enable minimum S(Q,E) value
+	QCheckBox *m_S_enable{};             // switch to enable S(Q,E) calculation
 	QDoubleSpinBox *m_S_filter{};        // minimum S(Q,E) value
 	QCheckBox *m_S_pointwise{};          // remove points or otherwise entire bands with S = 0
 	QCheckBox *m_unite_degeneracies{};   // unite degenerate energies

@@ -632,10 +632,10 @@ requires is_vec<t_vec>
 
 /**
  * triangulates polygon object, takes input from e.g. create_cube()
- * @returns [triangles, face normals, vertex uvs]
+ * @returns [triangles, face normals, vertex uvs, vertex indices]
  */
 template<class t_vec, template<class...> class t_cont = std::vector>
-std::tuple<t_cont<t_vec>, t_cont<t_vec>, t_cont<t_vec>>
+std::tuple<t_cont<t_vec>, t_cont<t_vec>, t_cont<t_vec>, t_cont<std::size_t>>
 create_triangles(const std::tuple<t_cont<t_vec>, t_cont<t_cont<std::size_t>>,
 	t_cont<t_vec>, t_cont<t_cont<t_vec>>>& tup)
 requires is_vec<t_vec>
@@ -645,9 +645,17 @@ requires is_vec<t_vec>
 	const t_cont<t_vec>& normals = std::get<2>(tup);
 	const t_cont<t_cont<t_vec>>& uvs = std::get<3>(tup);
 
+	const std::size_t num_faces = faces.end() - faces.begin();
+
 	t_cont<t_vec> triangles;
 	t_cont<t_vec> triag_normals;
 	t_cont<t_vec> vert_uvs;
+	t_cont<std::size_t> vert_indices;
+
+	triangles.reserve(num_faces * 3);
+	triag_normals.reserve(num_faces * 3);
+	vert_uvs.reserve(num_faces * 3);
+	vert_indices.reserve(num_faces * 3);
 
 	auto iterFaces = faces.begin();
 	auto iterNorms = normals.begin();
@@ -708,6 +716,9 @@ requires is_vec<t_vec>
 				vert_uvs.push_back(*puv3);
 			}
 
+			vert_indices.push_back(vert1Idx);
+			vert_indices.push_back(vert2Idx);
+			vert_indices.push_back(vert3Idx);
 
 			// next vertex
 			vert2Idx = vert3Idx;
@@ -722,7 +733,7 @@ requires is_vec<t_vec>
 			std::advance(iterUVs, 1);
 	}
 
-	return std::make_tuple(triangles, triag_normals, vert_uvs);
+	return std::make_tuple(triangles, triag_normals, vert_uvs, vert_indices);
 }
 
 

@@ -70,6 +70,8 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 	t_real Q_scale1 = m_Q_scale1->value();
 	t_real Q_scale2 = m_Q_scale2->value();
 
+	bool use_weights = m_S_enable->isChecked();
+
 	// reset plot
 	ClearBands();
 	m_cam_centre = tl2::zero<t_vec_gl>(3);
@@ -140,13 +142,13 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 			t_data_Qs& data = m_data[band_idx];
 
 			// dispersion surface function
-			auto patch_fkt = [this, &data, E_scale](
+			auto patch_fkt = [this, &data, E_scale, use_weights](
 				t_real_gl /*x2*/, t_real_gl /*x1*/, t_size idx_1, t_size idx_2)
-					-> std::pair<t_real_gl, bool>
+					-> std::tuple<t_real_gl, bool, t_real_gl>
 			{
 				t_size idx = idx_1 * m_Q_count_2 + idx_2;
 				if(idx >= data.size())
-					return std::make_pair(0., false);
+					return std::make_tuple(0., false, 0.);
 
 				bool valid = std::get<6>(data[idx]);
 				if(std::get<3>(data[idx]) != idx_1 || std::get<4>(data[idx]) != idx_2)
@@ -159,33 +161,35 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 				}
 
 				t_real_gl E = std::get<1>(data[idx]);
-				return std::make_pair(E * E_scale, valid);
+				t_real_gl S = use_weights ? std::get<2>(data[idx]) / m_minmax_S[1] : 1.;
+
+				return std::make_tuple(E * E_scale, valid, S);
 			};
 
 			// dispersion surface border line 1
 			auto line1_fkt = [&patch_fkt](
-				t_real_gl x, t_size idx) -> std::pair<t_real_gl, bool>
+				t_real_gl x, t_size idx) -> std::tuple<t_real_gl, bool, t_real_gl>
 			{
 				return patch_fkt(x, 0., idx, 0);
 			};
 
 			// dispersion surface border line 2
 			auto line2_fkt = [this, &patch_fkt](
-				t_real_gl x, t_size idx) -> std::pair<t_real_gl, bool>
+				t_real_gl x, t_size idx) -> std::tuple<t_real_gl, bool, t_real_gl>
 			{
 				return patch_fkt(x, 0., idx, m_Q_count_2 - 1);
 			};
 
 			// dispersion surface border line 3
 			auto line3_fkt = [&patch_fkt](
-				t_real_gl y, t_size idx) -> std::pair<t_real_gl, bool>
+				t_real_gl y, t_size idx) -> std::tuple<t_real_gl, bool, t_real_gl>
 			{
 				return patch_fkt(0., y, 0, idx);
 			};
 
 			// dispersion surface border line 4
 			auto line4_fkt = [this, &patch_fkt](
-				t_real_gl y, t_size idx) -> std::pair<t_real_gl, bool>
+				t_real_gl y, t_size idx) -> std::tuple<t_real_gl, bool, t_real_gl>
 			{
 				return patch_fkt(0., y, m_Q_count_1 - 1, idx);
 			};

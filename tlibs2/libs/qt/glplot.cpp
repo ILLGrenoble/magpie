@@ -142,6 +142,18 @@ QPointF GlPlotRenderer::GlToScreenCoords(const t_vec_gl& vec4,
 
 GlRenderObj GlPlotRenderer::CreateTriangleObject(const std::vector<t_vec3_gl>& verts,
 	const std::vector<t_vec3_gl>& triagverts, const std::vector<t_vec3_gl>& norms,
+	const std::vector<t_vec_gl>& colours, bool bUseVertsAsNorm, const std::vector<t_vec3_gl>* uvs)
+{
+	GlRenderObj obj;
+	create_triangle_object(m_pPlot, obj, verts, triagverts, norms,
+	  uvs ? *uvs : std::vector<t_vec3_gl>{}, colours, bUseVertsAsNorm,
+		m_attrVertex, m_attrVertexNorm, m_attrVertexCol, m_attrTexCoords);
+	return obj;
+}
+
+
+GlRenderObj GlPlotRenderer::CreateTriangleObject(const std::vector<t_vec3_gl>& verts,
+	const std::vector<t_vec3_gl>& triagverts, const std::vector<t_vec3_gl>& norms,
 	const t_vec_gl& colour, bool bUseVertsAsNorm, const std::vector<t_vec3_gl>* uvs)
 {
 	GlRenderObj obj;
@@ -419,7 +431,7 @@ std::size_t GlPlotRenderer::AddCuboid(
 	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a)
 {
 	auto solid = tl2::create_cuboid<t_vec3_gl>(lx, ly, lz);
-	auto [triagverts, norms, uvs] = tl2::create_triangles<t_vec3_gl>(solid);
+	auto [triagverts, norms, uvs, indices] = tl2::create_triangles<t_vec3_gl>(solid);
 	auto [boundingSpherePos, boundingSphereRad] =
 		tl2::bounding_sphere<t_vec3_gl>(triagverts);
 
@@ -451,7 +463,7 @@ std::vector<std::size_t> GlPlotRenderer::AddCuboidFaces(
 
 	for(const auto& solid : solids)
 	{
-		auto [triagverts, norms, uvs] = tl2::create_triangles<t_vec3_gl>(solid);
+		auto [triagverts, norms, uvs, indices] = tl2::create_triangles<t_vec3_gl>(solid);
 		auto [boundingSpherePos, boundingSphereRad] =
 			tl2::bounding_sphere<t_vec3_gl>(triagverts);
 
@@ -479,9 +491,12 @@ std::size_t GlPlotRenderer::AddSphere(
 	constexpr int numsubdivs = 2;
 
 	auto solid = tl2::create_icosahedron<t_vec3_gl>(1);
+	auto [_triagverts, _norms, _uvs, _indices] = tl2::create_triangles<t_vec3_gl>(solid);
+		
 	auto [triagverts, norms, uvs] = tl2::spherify<t_vec3_gl>(
 		tl2::subdivide_triangles<t_vec3_gl>(
-			tl2::create_triangles<t_vec3_gl>(solid), numsubdivs), rad);
+			std::make_tuple(_triagverts, _norms, _uvs),
+			numsubdivs), rad);
 	auto [boundingSpherePos, boundingSphereRad] =
 		tl2::bounding_sphere<t_vec3_gl>(triagverts);
 
@@ -505,7 +520,7 @@ std::size_t GlPlotRenderer::AddCylinder(t_real_gl rad, t_real_gl h,
 	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a)
 {
 	auto solid = tl2::create_cylinder<t_vec3_gl>(rad, h, true);
-	auto [triagverts, norms, uvs] = tl2::create_triangles<t_vec3_gl>(solid);
+	auto [triagverts, norms, uvs, indices] = tl2::create_triangles<t_vec3_gl>(solid);
 	auto [boundingSpherePos, boundingSphereRad] =
 		tl2::bounding_sphere<t_vec3_gl>(triagverts);
 
@@ -528,7 +543,7 @@ std::size_t GlPlotRenderer::AddCone(t_real_gl rad, t_real_gl h,
 	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a)
 {
 	auto solid = tl2::create_cone<t_vec3_gl>(rad, h);
-	auto [triagverts, norms, uvs] = tl2::create_triangles<t_vec3_gl>(solid);
+	auto [triagverts, norms, uvs, indices] = tl2::create_triangles<t_vec3_gl>(solid);
 	auto [boundingSpherePos, boundingSphereRad] =
 		tl2::bounding_sphere<t_vec3_gl>(triagverts);
 
@@ -553,7 +568,7 @@ std::size_t GlPlotRenderer::AddArrow(t_real_gl rad, t_real_gl h,
 	const t_real_gl arrow_r = rad * 2.;
 	const t_real_gl arrow_h = rad * 2.5;
 	auto solid = tl2::create_cylinder<t_vec3_gl>(rad, h, 2, 32, arrow_r, arrow_h);
-	auto [triagverts, norms, uvs] = tl2::create_triangles<t_vec3_gl>(solid);
+	auto [triagverts, norms, uvs, indices] = tl2::create_triangles<t_vec3_gl>(solid);
 	auto [boundingSpherePos, boundingSphereRad] =
 		tl2::bounding_sphere<t_vec3_gl>(triagverts);
 
@@ -586,7 +601,7 @@ std::size_t GlPlotRenderer::AddPlane(
 	norm /= tl2::norm<t_vec3_gl>(norm);
 
 	auto solid = tl2::create_plane<t_mat_gl, t_vec3_gl>(norm, size1, size2, in_xz);
-	auto [triagverts, norms, uvs] = tl2::create_triangles<t_vec3_gl>(solid);
+	auto [triagverts, norms, uvs, indices] = tl2::create_triangles<t_vec3_gl>(solid);
 	auto [boundingSpherePos, boundingSphereRad] =
 		tl2::bounding_sphere<t_vec3_gl>(triagverts);
 
@@ -609,7 +624,7 @@ std::size_t GlPlotRenderer::AddRectangle(const t_vec3_gl& pt_lb, const t_vec3_gl
 	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a)
 {
 	auto solid = tl2::create_rectangle<t_vec3_gl>(pt_lb, pt_lt, pt_rt, pt_rb);
-	auto [triagverts, norms, uvs] = tl2::create_triangles<t_vec3_gl>(solid);
+	auto [triagverts, norms, uvs, indices] = tl2::create_triangles<t_vec3_gl>(solid);
 	auto [boundingSpherePos, boundingSphereRad] =
 		tl2::bounding_sphere<t_vec3_gl>(triagverts);
 
@@ -628,24 +643,38 @@ std::size_t GlPlotRenderer::AddRectangle(const t_vec3_gl& pt_lb, const t_vec3_gl
 
 
 std::size_t GlPlotRenderer::AddPatch(
-	std::function<std::pair<t_real_gl, bool>(
+	std::function<std::tuple<t_real_gl, bool, t_real_gl>(
 		t_real_gl, t_real_gl, std::size_t, std::size_t)> fkt,
 	t_real_gl x, t_real_gl y, t_real_gl z,
 	t_real_gl w, t_real_gl h, std::size_t pts_x, std::size_t pts_y,
 	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a)
 {
-	using t_fkt = std::function<std::pair<t_real_gl, bool>(t_real_gl, t_real_gl, std::size_t, std::size_t)>;
+	using t_fkt = std::function<std::tuple<t_real_gl, bool, t_real_gl>(
+		t_real_gl, t_real_gl, std::size_t, std::size_t)>;
 
-	auto solid = tl2::create_patch<t_fkt, t_mat_gl, t_vec3_gl>(fkt, w, h, pts_x, pts_y);
-	auto [verts, norms, uvs] = tl2::create_triangles<t_vec3_gl>(solid);
-	auto [boundingSpherePos, boundingSphereRad] =
-		tl2::bounding_sphere<t_vec3_gl>(verts);
+	auto [_vertices, _faces, _normals, _uvs, intensities] =
+		tl2::create_patch<t_fkt, t_mat_gl, t_vec3_gl>(fkt, w, h, pts_x, pts_y);
+	auto solid = std::make_tuple(_vertices, _faces, _normals, _uvs);
+
+	auto [verts, norms, uvs, indices] = tl2::create_triangles<t_vec3_gl>(solid);
+
+	// vertex colours
+	t_vec_gl col = tl2::create<t_vec_gl>({ r, g, b, a });
+	std::vector<t_vec_gl> colours;
+	colours.reserve(indices.size());
+	for(std::size_t idx : indices)
+	{
+		if(idx < intensities.size())
+			colours.push_back(intensities[idx] * col);
+		else
+			colours.push_back(col);
+	}
+
+	auto [boundingSpherePos, boundingSphereRad] = tl2::bounding_sphere<t_vec3_gl>(verts);
 
 	QMutexLocker _locker{&m_mutexObj};
 
-	auto obj = CreateTriangleObject(std::get<0>(solid),
-		verts, norms, tl2::create<t_vec_gl>({ r, g, b, a }),
-		false, &uvs);
+	auto obj = CreateTriangleObject(std::get<0>(solid), verts, norms, colours, false, &uvs);
 	obj.m_mat = tl2::hom_translation<t_mat_gl>(x, y, z);
 	obj.m_boundingSpherePos = std::move(boundingSpherePos);
 	obj.m_boundingSphereRad = boundingSphereRad;
@@ -656,13 +685,13 @@ std::size_t GlPlotRenderer::AddPatch(
 
 
 std::size_t GlPlotRenderer::AddLine(
-	std::function<std::pair<t_real_gl, bool>(t_real_gl, std::size_t)> fkt,
+	std::function<std::tuple<t_real_gl, bool, t_real_gl>(t_real_gl, std::size_t)> fkt,
 	t_real_gl x, t_real_gl y, t_real_gl z,
 	t_real_gl w, std::size_t pts_x,
 	t_real_gl r, t_real_gl g, t_real_gl b, t_real_gl a,
 	t_real_gl pt_y, bool flip_xy)
 {
-	using t_fkt = std::function<std::pair<t_real_gl, bool>(t_real_gl, std::size_t)>;
+	using t_fkt = std::function<std::tuple<t_real_gl, bool, t_real_gl>(t_real_gl, std::size_t)>;
 
 	auto verts = tl2::create_line<t_fkt, t_mat_gl, t_vec3_gl>(fkt, w, pts_x, pt_y, flip_xy);
 	auto [boundingSpherePos, boundingSphereRad] =

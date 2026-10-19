@@ -215,6 +215,10 @@ public:
 		const std::vector<t_vec3_gl>& triag_verts, const std::vector<t_vec3_gl>& norms,
 		const t_vec_gl& colour, bool bUseVertsAsNorm = false,
 		const std::vector<t_vec3_gl>* uvs = nullptr);
+	GlRenderObj CreateTriangleObject(const std::vector<t_vec3_gl>& verts,
+		const std::vector<t_vec3_gl>& triag_verts, const std::vector<t_vec3_gl>& norms,
+		const std::vector<t_vec_gl>& colour, bool bUseVertsAsNorm = false,
+		const std::vector<t_vec3_gl>* uvs = nullptr);
 	GlRenderObj CreateLineObject(const std::vector<t_vec3_gl>& verts, const t_vec_gl& colour);
 
 	std::size_t GetNumObjects() const { return m_objs.size(); }
@@ -252,13 +256,14 @@ public:
 	  const t_vec3_gl& pt_rt, const t_vec3_gl& pt_rb,
 		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);
 	std::size_t AddPatch(
-		std::function<std::pair<t_real_gl /*z*/, bool /*valid*/>(
+		std::function<std::tuple<t_real_gl /*z*/, bool /*valid*/, t_real_gl /*intensity*/>(
 			t_real_gl, t_real_gl, std::size_t, std::size_t)> fkt,
 		t_real_gl x = 0, t_real_gl y = 0, t_real_gl z = 0,
 		t_real_gl w = 10, t_real_gl h = 10, std::size_t pts_x = 16, std::size_t pts_y = 16,
 		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1);
 	std::size_t AddLine(
-		std::function<std::pair<t_real_gl /*z*/, bool /*valid*/>(t_real_gl, std::size_t)> fkt,
+		std::function<std::tuple<t_real_gl /*z*/, bool /*valid*/, t_real_gl /*intensity*/>(
+			t_real_gl, std::size_t)> fkt,
 		t_real_gl x = 0, t_real_gl y = 0, t_real_gl z = 0,
 		t_real_gl w = 10, std::size_t pts_x = 16,
 		t_real_gl r = 0, t_real_gl g = 0, t_real_gl b = 0, t_real_gl a = 1,

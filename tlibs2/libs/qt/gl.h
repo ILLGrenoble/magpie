@@ -266,6 +266,13 @@ extern qgl_funcs* get_gl_functions(QOpenGLWidget *pGLWidget);
 extern bool create_triangle_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 	const std::vector<t_vec3_gl>& verts, const std::vector<t_vec3_gl>& triagverts,
 	const std::vector<t_vec3_gl>& norms, const std::vector<t_vec3_gl>& uvs,
+	const std::vector<t_vec_gl>& colours, bool bUseVertsAsNorm, GLint attrVertex,
+	GLint attrVertexNormal, GLint attrVertexcolour, GLint attrTextureCoords = -1);
+
+// create a triangle-based object
+extern bool create_triangle_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
+	const std::vector<t_vec3_gl>& verts, const std::vector<t_vec3_gl>& triagverts,
+	const std::vector<t_vec3_gl>& norms, const std::vector<t_vec3_gl>& uvs,
 	const t_vec_gl& colour, bool bUseVertsAsNorm, GLint attrVertex,
 	GLint attrVertexNormal, GLint attrVertexcolour, GLint attrTextureCoords = -1);
 

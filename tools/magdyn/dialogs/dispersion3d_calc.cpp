@@ -204,6 +204,8 @@ void Dispersion3DDlg::ClearData()
 {
 	m_minmax_E[0] = +std::numeric_limits<t_real>::max();
 	m_minmax_E[1] = -std::numeric_limits<t_real>::max();
+	m_minmax_S[0] = +std::numeric_limits<t_real>::max();
+	m_minmax_S[1] = -std::numeric_limits<t_real>::max();
 	m_minmax_Q1[0] = m_minmax_Q1[1] = tl2::zero<t_vec3_real>(3);
 	m_minmax_Q2[0] = m_minmax_Q2[1] = tl2::zero<t_vec3_real>(3);
 	m_data.clear();
@@ -233,7 +235,7 @@ void Dispersion3DDlg::Calculate()
 	bool E_minmax_valid = false;
 
 	t_real min_S = m_S_filter->value();
-	bool use_weights = m_S_filter_enable->isChecked();
+	bool use_weights = m_S_enable->isChecked();
 	bool use_projector = true;
 	bool unite_degen = m_unite_degeneracies->isChecked();
 	bool pointwise = m_S_pointwise->isChecked();
@@ -321,6 +323,9 @@ void Dispersion3DDlg::Calculate()
 					// filter minimum S(Q, E)
 					if(pointwise && min_S > 0. && std::abs(weight) < min_S)
 						valid = false;
+
+					m_minmax_S[0] = std::min(m_minmax_S[0], weight);
+					m_minmax_S[1] = std::max(m_minmax_S[1], weight);
 				}  // weights
 
 

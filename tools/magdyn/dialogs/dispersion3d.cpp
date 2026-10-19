@@ -246,9 +246,9 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	btnMainQ->setToolTip("Set the Q origin and directions from the dispersion in the main window.");
 
 	// minimum cutoff for filtering S(Q, E)
-	m_S_filter_enable = new QCheckBox("Minimum S(Q, E):", groupQ);
-	m_S_filter_enable->setChecked(false);
-	m_S_filter_enable->setToolTip("Enable minimum S(Q, E).");
+	m_S_enable = new QCheckBox("Enable S(Q, E)", groupQ);
+	m_S_enable->setChecked(false);
+	m_S_enable->setToolTip("Enable S(Q, E) calculation.");
 
 	m_S_filter = new QDoubleSpinBox(groupQ);
 	m_S_filter->setDecimals(5);
@@ -256,6 +256,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	m_S_filter->setMaximum(9999.99999);
 	m_S_filter->setSingleStep(0.01);
 	m_S_filter->setValue(0.01);
+	m_S_filter->setPrefix("S_min = ");
 	m_S_filter->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_S_filter->setToolTip("Minimum S(Q, E) to keep.");
 
@@ -373,7 +374,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	Qgrid->addWidget(m_num_Q_points[0], y, 1, 1, 1);
 	Qgrid->addWidget(m_num_Q_points[1], y, 2, 1, 1);
 	Qgrid->addWidget(btnMainQ, y++, 3, 1, 1);
-	Qgrid->addWidget(m_S_filter_enable, y, 0, 1, 1);
+	Qgrid->addWidget(m_S_enable, y, 0, 1, 1);
 	Qgrid->addWidget(m_S_filter, y, 1, 1, 1);
 	Qgrid->addWidget(m_S_pointwise, y, 2, 1, 1);
 	Qgrid->addWidget(m_unite_degeneracies, y++, 3, 1, 1);
@@ -459,8 +460,8 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	connect(m_enable_E_range[0], &QCheckBox::toggled, [this](bool enabled) { m_E_range[0]->setEnabled(enabled); Plot(true); });
 	connect(m_enable_E_range[1], &QCheckBox::toggled, [this](bool enabled) { m_E_range[1]->setEnabled(enabled); Plot(true); });
 	connect(btnMainQ, &QAbstractButton::clicked, this, &Dispersion3DDlg::FromMainQ);
-	connect(m_S_filter_enable, &QCheckBox::toggled, m_S_filter, &QDoubleSpinBox::setEnabled);
-	connect(m_S_filter_enable, &QCheckBox::toggled, m_S_pointwise, &QDoubleSpinBox::setEnabled);
+	connect(m_S_enable, &QCheckBox::toggled, m_S_filter, &QDoubleSpinBox::setEnabled);
+	connect(m_S_enable, &QCheckBox::toggled, m_S_pointwise, &QDoubleSpinBox::setEnabled);
 	connect(m_E_range[0], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 		[this]() { Plot(true); });
 	connect(m_E_range[1], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
@@ -496,8 +497,8 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 			m_stop_requested = true;
 	});
 
-	m_S_filter->setEnabled(m_S_filter_enable->isChecked());
-	m_S_pointwise->setEnabled(m_S_filter_enable->isChecked());
+	m_S_filter->setEnabled(m_S_enable->isChecked());
+	m_S_pointwise->setEnabled(m_S_enable->isChecked());
 	EnableCalculation(true);
 }
 

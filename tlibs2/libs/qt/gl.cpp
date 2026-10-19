@@ -139,9 +139,9 @@ qgl_funcs* get_gl_functions(QOpenGLWidget *pGLWidget)
 bool create_triangle_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 	const std::vector<t_vec3_gl>& verts, const std::vector<t_vec3_gl>& triagverts,
 	const std::vector<t_vec3_gl>& norms, const std::vector<t_vec3_gl>& uvs,
-	const t_vec_gl& colour, bool bUseVertsAsNorm,
+	const std::vector<t_vec_gl>& colours, bool bUseVertsAsNorm,
 	GLint attrVertex, GLint attrVertexNormal,
-	GLint attrVertexcolour, GLint attrTextureCoords)
+	GLint attrVertexColour, GLint attrTextureCoords)
 {
 	// TODO: move context to calling thread
 	BOOST_SCOPE_EXIT(pGLWidget)
@@ -155,20 +155,20 @@ bool create_triangle_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 		return false;
 
 	obj.m_type = GlRenderObjType::TRIANGLES;
-	obj.m_colour = colour;
+	obj.m_colour = tl2::create<t_vec_gl>({ 1, 1, 1, 1 });
 
 	// flatten vertex array into raw float array
-	auto to_float_array = [](const std::vector<t_vec3_gl>& verts,
+	auto to_float_array = [](const auto& verts,
 		int iRepeat = 1, int iElems = 3, bool bNorm = false, t_real_gl lastElem = 1.)
-		-> std::vector<t_real_gl>
+			-> std::vector<t_real_gl>
 	{
 		std::vector<t_real_gl> vecRet;
 		vecRet.reserve(iRepeat*verts.size()*iElems);
 
-		for(const t_vec3_gl& vert : verts)
+		for(const auto& vert : verts)
 		{
 			const int vert_size = (int)vert.size();
-			t_real_gl norm = bNorm ? tl2::norm<t_vec3_gl>(vert) : 1;
+			t_real_gl norm = bNorm ? tl2::norm(vert) : 1;
 
 			for(int i = 0; i < iRepeat; ++i)
 			{
@@ -184,6 +184,7 @@ bool create_triangle_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 
 		return vecRet;
 	};
+
 
 	// main vertex array object
 	obj.m_vertex_array = std::make_shared<QOpenGLVertexArrayObject>();
@@ -237,7 +238,7 @@ bool create_triangle_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 	}
 
 	// colours
-	if(attrVertexcolour >= 0)
+	if(attrVertexColour >= 0)
 	{
 		obj.m_colour_buffer = std::make_shared<QOpenGLBuffer>(
 			QOpenGLBuffer::VertexBuffer);
@@ -250,20 +251,11 @@ bool create_triangle_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 		obj.m_colour_buffer->create();
 		obj.m_colour_buffer->bind();
 
-		std::vector<t_real_gl> vecCols;
-		const std::size_t triagverts_size = triagverts.size();
-		vecCols.reserve(4*triagverts_size);
-		for(std::size_t iVert = 0; iVert < triagverts_size; ++iVert)
-		{
-			const int col_size = (int)obj.m_colour.size();
-			for(int icol = 0; icol < col_size; ++icol)
-				vecCols.push_back(obj.m_colour[icol]);
-		}
-
+		auto vecCols = to_float_array(colours, 1, 4, false, 1.);
 		obj.m_colour_buffer->allocate(
 			vecCols.data(),
 			vecCols.size()*sizeof(typename decltype(vecCols)::value_type));
-		pGl->glVertexAttribPointer(attrVertexcolour, 4, GL_FLOAT, 0, 0, nullptr);
+		pGl->glVertexAttribPointer(attrVertexColour, 4, GL_FLOAT, 0, 0, nullptr);
 	}
 
 	// texture uv coordinates
@@ -298,11 +290,36 @@ bool create_triangle_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 
 
 /**
+ * creates a triangle-based 3d object with a single colour
+ */
+bool create_triangle_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
+	const std::vector<t_vec3_gl>& verts, const std::vector<t_vec3_gl>& triagverts,
+	const std::vector<t_vec3_gl>& norms, const std::vector<t_vec3_gl>& uvs,
+	const t_vec_gl& colour, bool bUseVertsAsNorm,
+	GLint attrVertex, GLint attrVertexNormal,
+	GLint attrVertexColour, GLint attrTextureCoords)
+{
+	// repeat the same colour for all vertices
+	std::vector<t_vec_gl> colours;
+	std::size_t num = triagverts.size();
+	colours.reserve(num);
+	for(std::size_t i = 0; i < num; ++i)
+		colours.push_back(colour);
+
+	auto triag = create_triangle_object(pGLWidget, obj, verts, triagverts, norms, uvs, colours,
+		bUseVertsAsNorm, attrVertex, attrVertexNormal, attrVertexColour, attrTextureCoords);
+	obj.m_colour = colour;
+
+	return triag;
+}
+
+
+/**
  * creates a line-based 3d object
  */
 bool create_line_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 	const std::vector<t_vec3_gl>& verts, const t_vec_gl& colour,
-	GLint attrVertex, GLint attrVertexcolour)
+	GLint attrVertex, GLint attrVertexColour)
 {
 	// TODO: move context to calling thread
 	BOOST_SCOPE_EXIT(pGLWidget)
@@ -383,7 +400,7 @@ bool create_line_object(QOpenGLWidget* pGLWidget, GlRenderObj& obj,
 		obj.m_colour_buffer->allocate(
 			vecCols.data(),
 			vecCols.size()*sizeof(typename decltype(vecCols)::value_type));
-		pGl->glVertexAttribPointer(attrVertexcolour, 4, GL_FLOAT, 0, 0, nullptr);
+		pGl->glVertexAttribPointer(attrVertexColour, 4, GL_FLOAT, 0, 0, nullptr);
 	}
 
 	obj.m_vertices = std::move(verts);

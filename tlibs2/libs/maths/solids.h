@@ -238,12 +238,17 @@ requires is_vec<t_vec>
 
 /**
  * create a patch, z = f(x, y)
- * @returns [vertices, face vertex indices, face normals, face uvs]
+ * @returns [vertices, face vertex indices, face normals, face uvs, intensities]
  */
 template<class t_func, class t_mat, class t_vec,
 	template<class...> class t_cont = std::vector,
 	class t_real = typename t_vec::value_type>
-std::tuple<t_cont<t_vec>, t_cont<t_cont<std::size_t>>, t_cont<t_vec>, t_cont<t_cont<t_vec>>>
+std::tuple<
+	t_cont<t_vec>,                // vertices
+	t_cont<t_cont<std::size_t>>,  // face vertex indices
+	t_cont<t_vec>,                // face normals
+	t_cont<t_cont<t_vec>>,        // face uvs
+	t_cont<t_real>>               // intensities
 create_patch(const t_func& func,
 	t_real width = 1., t_real height = 1.,
 	std::size_t num_points_x = 16, std::size_t num_points_y = 16)
@@ -252,12 +257,14 @@ requires is_vec<t_vec>
 	// create 2d grid in (x, y) for patch
 	t_cont<t_vec> vertices;
 	t_cont<bool> valid_vertices;
+	t_cont<t_real> intensities;
 	t_cont<t_cont<std::size_t>> faces;
 	t_cont<t_vec> normals;
 	t_cont<t_cont<t_vec>> uvs;
 
 	vertices.reserve(num_points_x * num_points_y);
 	valid_vertices.reserve(num_points_x * num_points_y);
+	intensities.reserve((num_points_x - 1) * (num_points_y - 1));
 	faces.reserve((num_points_x - 1) * (num_points_y - 1));
 	normals.reserve((num_points_x - 1) * (num_points_y - 1));
 	uvs.reserve((num_points_x - 1) * (num_points_y - 1));
@@ -276,9 +283,10 @@ requires is_vec<t_vec>
 			t_real x = -width*0.5 + width *
 				static_cast<t_real>(i)/static_cast<t_real>(num_points_x - 1);
 
-			auto [z, valid] = func(x, y, i, j);
+			auto [z, valid, intensity] = func(x, y, i, j);
 			vertices.emplace_back(tl2::create<t_vec>({ x, y, z }));
 			valid_vertices.emplace_back(valid);
+			intensities.emplace_back(intensity);
 
 			if(i == 0 || j == 0 || !valid)
 				continue;
@@ -318,7 +326,7 @@ requires is_vec<t_vec>
 		}
 	}
 
-	return std::make_tuple(vertices, faces, normals, uvs);
+	return std::make_tuple(vertices, faces, normals, uvs, intensities);
 }
 
 
@@ -347,8 +355,8 @@ requires is_vec<t_vec>
 		t_real x2 = -width*0.5 + width *
 			static_cast<t_real>(i + 1)/static_cast<t_real>(num_points_x - 1);
 
-		auto [z1, valid1] = func(x1, i);
-		auto [z2, valid2] = func(x2, i + 1);
+		auto [z1, valid1, intensity1] = func(x1, i);
+		auto [z2, valid2, intensity2] = func(x2, i + 1);
 
 		if(!valid1 || !valid2)
 			continue;

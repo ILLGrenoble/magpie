@@ -124,11 +124,11 @@ void Plot3DDlg::Plot(bool clear_settings)
 
 			auto patch_fkt = [this, &data, z_scale](
 				t_real_gl /*x2*/, t_real_gl /*x1*/, t_size idx_1, t_size idx_2)
-					-> std::pair<t_real_gl, bool>
+					-> std::tuple<t_real_gl, bool, t_real_gl>
 			{
 				t_size idx = idx_1 * m_y_count + idx_2;
 				if(idx >= data.size())
-					return std::make_pair(0., false);
+					return std::make_tuple(0., false, 0.);
 
 				bool valid = std::get<4>(data[idx]);
 				if(std::get<2>(data[idx]) != idx_1 || std::get<3>(data[idx]) != idx_2)
@@ -141,7 +141,7 @@ void Plot3DDlg::Plot(bool clear_settings)
 				}
 
 				t_real_gl E = std::get<1>(data[idx]);
-				return std::make_pair(E * z_scale, valid);
+				return std::make_tuple(E * z_scale, valid, t_real_gl(1.));
 			};
 
 			std::ostringstream objLabel;
