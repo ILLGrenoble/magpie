@@ -342,6 +342,30 @@ if [ $create_appdir -ne 0 ]; then
 	echo -e "\nChanging linked names..."
 	rm -fv tmp/local_bindings.txt
 
+	# libraries and frameworks
+	for library in $(find "${APPDIRNAME}/Contents/Libraries/" -type f && \
+		find "${APPDIRNAME}/Contents/Frameworks/" -type f && \
+		find "${APPDIRNAME}/Contents/py/" -type f)
+	do
+		is_binary ${library}
+		if [[ $? == 0 ]]; then
+			continue
+		fi
+
+		echo -e "\nProcessing library ${library}..."
+
+		change_to_rpath      "${library}"
+		check_local_bindings "${library}"
+		chmod a-wx+r         "${library}"
+
+		if [ $strip_binaries -ne 0 ]; then
+			${STRIP}           "${library}"
+		fi
+
+		codesign --remove-signature "${library}"
+		codesign --force --sign -   "${library}"
+	done
+
 	# binaries
 	for binary in $(ls "${APPDIRNAME}/Contents/MacOS/"); do
 		echo -e "\nProcessing binary ${binary}..."
@@ -362,27 +386,9 @@ if [ $create_appdir -ne 0 ]; then
 		if [ $strip_binaries -ne 0 ]; then
 			${STRIP}           "${APPDIRNAME}/Contents/MacOS/${binary}"
 		fi
-	done
 
-	# libraries and frameworks
-	for library in $(find "${APPDIRNAME}/Contents/Libraries/" -type f && \
-		find "${APPDIRNAME}/Contents/Frameworks/" -type f && \
-		find "${APPDIRNAME}/Contents/py/" -type f)
-	do
-		is_binary ${library}
-		if [[ $? == 0 ]]; then
-			continue
-		fi
-
-		echo -e "\nProcessing library ${library}..."
-
-		change_to_rpath      "${library}"
-		check_local_bindings "${library}"
-		chmod a-wx+r         "${library}"
-
-		if [ $strip_binaries -ne 0 ]; then
-			${STRIP}           "${library}"
-		fi
+		codesign --remove-signature "${APPDIRNAME}/Contents/MacOS/${binary}"
+		codesign --force --sign - "${APPDIRNAME}/Contents/MacOS/${binary}"
 	done
 
 	echo -e "--------------------------------------------------------------------------------"
