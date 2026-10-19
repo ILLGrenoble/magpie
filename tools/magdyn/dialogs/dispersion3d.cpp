@@ -237,7 +237,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 		m_num_Q_points[i]->setMinimum(2);
 		m_num_Q_points[i]->setMaximum(9999);
 		m_num_Q_points[i]->setSingleStep(1);
-		m_num_Q_points[i]->setValue(64);
+		m_num_Q_points[i]->setValue(128);
 	}
 
 	// main dispersion button
