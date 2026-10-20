@@ -70,7 +70,7 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 	t_real Q_scale1 = m_Q_scale1->value();
 	t_real Q_scale2 = m_Q_scale2->value();
 
-	bool use_weights = m_S_enable->isChecked();
+	int use_weights = m_S_enable->currentIndex();
 
 	// reset plot
 	ClearBands();
@@ -161,9 +161,18 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 				}
 
 				t_real_gl E = std::get<1>(data[idx]);
-				t_real_gl S = use_weights ? std::get<2>(data[idx]) / m_minmax_S[1] : 1.;
+				t_real_gl I = 1.;
+				switch(use_weights)
+				{
+					case 1:  // S(Q, E)
+						I = std::get<2>(data[idx]) / m_minmax_S[1];
+						break;
+					case 2:  // berry curvature
+						I =  std::get<7>(data[idx]) / m_minmax_B[1];
+						break;
+				}
 
-				return std::make_tuple(E * E_scale, valid, S);
+				return std::make_tuple(E * E_scale, valid, I);
 			};
 
 			// dispersion surface border line 1

@@ -665,9 +665,15 @@ std::size_t GlPlotRenderer::AddPatch(
 	for(std::size_t idx : indices)
 	{
 		if(idx < intensities.size())
-			colours.push_back(intensities[idx] * col);
+		{
+			t_vec_gl thecol = intensities[idx] * col;
+			thecol[3] = a;
+			colours.emplace_back(std::move(thecol));
+		}
 		else
+		{
 			colours.push_back(col);
+		}
 	}
 
 	auto [boundingSpherePos, boundingSphereRad] = tl2::bounding_sphere<t_vec3_gl>(verts);

@@ -163,15 +163,32 @@ std::tuple<t_size, t_size> Dispersion3DDlg::GetQIndices() const
 /**
  * converts array indices to Q position
  */
+template<class t_vec3_real>
+static t_vec3_real get_Q_from_indices(std::size_t idx1, std::size_t idx2,
+	const t_vec3_real& Q_origin, const t_vec3_real& Q_dir_1, const t_vec3_real& Q_dir_2,
+	std::size_t Q_count_1, std::size_t Q_count_2)
+{
+	t_vec3_real Q_step_1 = Q_dir_1 / t_real(Q_count_1 - 1);
+	t_vec3_real Q_step_2 = Q_dir_2 / t_real(Q_count_2 - 1);
+
+	return Q_origin + Q_step_1*t_real(idx1) + Q_step_2*t_real(idx2);
+}
+
+
+
+/**
+ * converts array indices to Q position
+ */
 t_vec3_real Dispersion3DDlg::GetQFromIndices(std::size_t idx1, std::size_t idx2) const
 {
+	t_size Q_count_1 = m_num_Q_points[0]->value();
+	t_size Q_count_2 = m_num_Q_points[1]->value();
+
 	// get coordinates
 	auto [Q_origin, Q_dir_1, Q_dir_2] = GetQVectors();
 
-	t_vec3_real Q_step_1 = Q_dir_1 / t_real(m_Q_count_1 - 1);
-	t_vec3_real Q_step_2 = Q_dir_2 / t_real(m_Q_count_2 - 1);
-
-	return Q_origin + Q_step_1*t_real(idx1) + Q_step_2*t_real(idx2);
+	return get_Q_from_indices<t_vec3_real>(idx1, idx2,
+		Q_origin, Q_dir_1, Q_dir_2, Q_count_1, Q_count_2);
 }
 
 
@@ -206,6 +223,8 @@ void Dispersion3DDlg::ClearData()
 	m_minmax_E[1] = -std::numeric_limits<t_real>::max();
 	m_minmax_S[0] = +std::numeric_limits<t_real>::max();
 	m_minmax_S[1] = -std::numeric_limits<t_real>::max();
+	m_minmax_B[0] = +std::numeric_limits<t_real>::max();
+	m_minmax_B[1] = -std::numeric_limits<t_real>::max();
 	m_minmax_Q1[0] = m_minmax_Q1[1] = tl2::zero<t_vec3_real>(3);
 	m_minmax_Q2[0] = m_minmax_Q2[1] = tl2::zero<t_vec3_real>(3);
 	m_data.clear();
@@ -235,11 +254,13 @@ void Dispersion3DDlg::Calculate()
 	bool E_minmax_valid = false;
 
 	t_real min_S = m_S_filter->value();
-	bool use_weights = m_S_enable->isChecked();
+	bool use_weights = m_S_enable->currentIndex() > 0;
+	bool use_berry = m_S_enable->currentIndex() == 2;
 	bool use_projector = true;
 	bool unite_degen = m_unite_degeneracies->isChecked();
 	bool pointwise = m_S_pointwise->isChecked();
 
+	auto [Q_origin, Q_dir_1, Q_dir_2] = GetQVectors();
 
 	// calculate the dispersion
 	t_magdyn dyn = *m_dyn;
@@ -273,12 +294,18 @@ void Dispersion3DDlg::Calculate()
 	for(t_size Q_idx_1 = 0; Q_idx_1 < m_Q_count_1; ++Q_idx_1)
 	for(t_size Q_idx_2 = 0; Q_idx_2 < m_Q_count_2; ++Q_idx_2)
 	{
-		auto task = [this, &mtx, &dyn, Q_idx_1, Q_idx_2, &E_minmax_valid, expected_bands,
-			unite_degen, use_weights, use_projector, min_S, pointwise]()
+		auto task = [this, &mtx, &dyn, Q_idx_1, Q_idx_2, &E_minmax_valid, &Q_origin, &Q_dir_1, &Q_dir_2,
+			expected_bands, unite_degen, use_weights, use_berry, use_projector, min_S, pointwise]()
 		{
 			// calculate the dispersion at the given Q point
-			t_vec3_real Q = GetQFromIndices(Q_idx_1, Q_idx_2);
+			const t_vec3_real Q =  get_Q_from_indices<t_vec3_real>(
+				Q_idx_1, Q_idx_2, Q_origin, Q_dir_1, Q_dir_2, m_Q_count_1, m_Q_count_2);
 			auto Es_and_S = dyn.CalcEnergies(Q, !use_weights).E_and_S;
+
+			std::vector<t_cplx> curvs;
+			if(use_berry)
+				curvs = std::get<0>(dyn.CalcBerryCurvatures(Q, Q_dir_1/m_Q_count_1, Q_dir_2/m_Q_count_2));
+
 
 			// iterate the energies for this Q point
 			t_size data_band_idx = 0;
@@ -329,6 +356,22 @@ void Dispersion3DDlg::Calculate()
 				}  // weights
 
 
+				// berry curvature
+				t_real berry = 0.;
+				if(use_berry)
+				{
+					if(band_idx < curvs.size())
+						berry = std::abs(curvs[band_idx].real());
+
+					// filter invalid B(Q, E)
+					if(std::isnan(berry) || std::isinf(berry))
+						berry = 0.;
+
+					m_minmax_B[0] = std::min(m_minmax_B[0], berry);
+					m_minmax_B[1] = std::max(m_minmax_B[1], berry);
+				}  // berry
+
+
 				// count energy degeneracy
 				t_size degeneracy = E_and_S.degeneracy;
 				for(t_size band_idx2 = 0; band_idx2 < Es_and_S.size(); ++band_idx2)
@@ -349,7 +392,7 @@ void Dispersion3DDlg::Calculate()
 
 
 				// generate and add data point
-				t_data_Q dat{std::make_tuple(Q, E, weight, Q_idx_1, Q_idx_2, degeneracy, valid)};
+				t_data_Q dat{std::make_tuple(Q, E, weight, Q_idx_1, Q_idx_2, degeneracy, valid, berry)};
 
 				std::lock_guard<std::mutex> _lck{mtx};
 				m_data[data_band_idx].emplace_back(std::move(dat));
@@ -358,7 +401,7 @@ void Dispersion3DDlg::Calculate()
 				{
 					// skip degeneracies to keep matching bands together
 					for(t_size band_idx2 = data_band_idx + 1; band_idx2 < data_band_idx + degeneracy; ++band_idx2)
-						m_data[band_idx2].emplace_back(std::make_tuple(Q, 0., 0., Q_idx_1, Q_idx_2, 1, false));
+						m_data[band_idx2].emplace_back(std::make_tuple(Q, 0., 0., Q_idx_1, Q_idx_2, 1, false, 0.));
 
 					data_band_idx += degeneracy - 1;
 				}
@@ -368,7 +411,7 @@ void Dispersion3DDlg::Calculate()
 			// fill up band data in case some indices were skipped due to invalid hamiltonians
 			for(; data_band_idx < expected_bands; ++data_band_idx)
 			{
-				t_data_Q dat{std::make_tuple(Q, 0., 0., Q_idx_1, Q_idx_2, 1, false)};
+				t_data_Q dat{std::make_tuple(Q, 0., 0., Q_idx_1, Q_idx_2, 1, false, 0.)};
 
 				std::lock_guard<std::mutex> _lck{mtx};
 				m_data[data_band_idx].emplace_back(std::move(dat));

@@ -69,7 +69,7 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 
 	m_plot_colour_bcm = new QCPColorScale(m_plot_bcm);
 	m_plot_colour_bcm->axis()->setScaleType(QCPAxis::stLinear);
-	m_plot_colour_bcm->axis()->setLabel("Berry Curvature B");
+	m_plot_colour_bcm->axis()->setLabel("Berry Curvature Ω");
 	m_plot_colour_bcm->setRangeDrag(true);
 	m_plot_colour_bcm->setRangeZoom(true);
 	m_plot_colour_bcm->setType(QCPAxis::atRight);
@@ -183,7 +183,7 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	m_band_bcm->setToolTip("Magnon band index.");
 
 	// minimum cutoff for filtering numerical artefacts in berry curvature
-	m_B_filter_min_enable_bcm = new QCheckBox("Minimum B:", panel);
+	m_B_filter_min_enable_bcm = new QCheckBox("Minimum Ω:", panel);
 	m_B_filter_min_enable_bcm->setChecked(false);
 	m_B_filter_min_enable_bcm->setToolTip("Enable minimum cutoff Berry curvature for filtering numerical artefacts.");
 
@@ -197,7 +197,7 @@ QWidget* TopologyDlg::CreateBerryCurvatureMapPanel()
 	m_B_filter_min_bcm->setToolTip("Minimum cutoff Berry curvature for filtering numerical artefacts.");
 
 	// maximum cutoff for filtering numerical artefacts in berry curvature
-	m_B_filter_max_enable_bcm = new QCheckBox("Maximum B:", panel);
+	m_B_filter_max_enable_bcm = new QCheckBox("Maximum Ω:", panel);
 	m_B_filter_max_enable_bcm->setChecked(false);
 	m_B_filter_max_enable_bcm->setToolTip("Enable maximum cutoff Berry curvature for filtering numerical artefacts.");
 

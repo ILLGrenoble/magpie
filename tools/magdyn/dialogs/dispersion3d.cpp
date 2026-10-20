@@ -246,9 +246,12 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	btnMainQ->setToolTip("Set the Q origin and directions from the dispersion in the main window.");
 
 	// minimum cutoff for filtering S(Q, E)
-	m_S_enable = new QCheckBox("Enable S(Q, E)", groupQ);
-	m_S_enable->setChecked(false);
-	m_S_enable->setToolTip("Enable S(Q, E) calculation.");
+	m_S_enable = new QComboBox(groupQ);
+	m_S_enable->addItem("Disable S(Q, E)");
+	m_S_enable->addItem("Enable S(Q, E)");
+	m_S_enable->addItem("Enable Ω(Q, E)");
+	m_S_enable->setCurrentIndex(0);
+	m_S_enable->setToolTip("Enable dynamical structure factor S(Q, E) or Berry curvature Ω(Q, E) calculation.");
 
 	m_S_filter = new QDoubleSpinBox(groupQ);
 	m_S_filter->setDecimals(5);
@@ -460,8 +463,11 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	connect(m_enable_E_range[0], &QCheckBox::toggled, [this](bool enabled) { m_E_range[0]->setEnabled(enabled); Plot(true); });
 	connect(m_enable_E_range[1], &QCheckBox::toggled, [this](bool enabled) { m_E_range[1]->setEnabled(enabled); Plot(true); });
 	connect(btnMainQ, &QAbstractButton::clicked, this, &Dispersion3DDlg::FromMainQ);
-	connect(m_S_enable, &QCheckBox::toggled, m_S_filter, &QDoubleSpinBox::setEnabled);
-	connect(m_S_enable, &QCheckBox::toggled, m_S_pointwise, &QDoubleSpinBox::setEnabled);
+	connect(m_S_enable, &QComboBox::currentIndexChanged, [this](int idx)
+	{
+		m_S_filter->setEnabled(idx > 0);
+		m_S_pointwise->setEnabled(idx > 0);
+	});
 	connect(m_E_range[0], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 		[this]() { Plot(true); });
 	connect(m_E_range[1], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
@@ -497,8 +503,8 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 			m_stop_requested = true;
 	});
 
-	m_S_filter->setEnabled(m_S_enable->isChecked());
-	m_S_pointwise->setEnabled(m_S_enable->isChecked());
+	m_S_filter->setEnabled(m_S_enable->currentIndex() > 0);
+	m_S_pointwise->setEnabled(m_S_enable->currentIndex() > 0);
 	EnableCalculation(true);
 }
 

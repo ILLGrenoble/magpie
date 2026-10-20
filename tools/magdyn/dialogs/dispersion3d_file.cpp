@@ -76,7 +76,7 @@ void Dispersion3DDlg::WriteHeader(std::ostream& ostr) const
 void Dispersion3DDlg::SaveData()
 {
 	bool skip_invalid_points = true;
-	bool use_weights = m_S_enable->isChecked();
+	bool use_weights = m_S_enable->currentIndex() > 0;
 
 	if(m_data.size() == 0)
 		return;
@@ -161,7 +161,7 @@ void Dispersion3DDlg::SaveScript()
 	using namespace tl2_ops;
 
 	bool skip_invalid_points = true;
-	bool use_weights = m_S_enable->isChecked();
+	bool use_weights = m_S_enable->currentIndex() > 0;
 
 	if(m_data.size() == 0)
 		return;

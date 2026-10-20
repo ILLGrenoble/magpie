@@ -85,7 +85,7 @@ TopologyDlg::TopologyDlg(QWidget *parent, QSettings *sett)
 	maingrid->addWidget(btnbox, 1, 3, 1, 1);
 
 	// tab panels
-	m_tabs->addTab(CreateBerryCurvaturePanel(), "Berry Curvature");
+	m_tabs->addTab(CreateBerryCurvaturePanel(), "Berry Curvature Ω");
 	m_tabs->addTab(CreateBerryCurvatureMapPanel(), "Berry Curvature Map");
 
 	// restore settings
@@ -184,7 +184,7 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	m_plot_bc = new QCustomPlot(panelBerryCurvature);
 	m_plot_bc->setFont(font());
 	m_plot_bc->xAxis->setLabel("Momentum Transfer Q (rlu)");
-	m_plot_bc->yAxis->setLabel("Berry Curvature B");
+	m_plot_bc->yAxis->setLabel("Berry Curvature Ω");
 	m_plot_bc->setInteraction(QCP::iRangeDrag, true);
 	m_plot_bc->setInteraction(QCP::iRangeZoom, true);
 	m_plot_bc->setSelectionRectMode(QCP::srmZoom);
@@ -308,7 +308,7 @@ QWidget* TopologyDlg::CreateBerryCurvaturePanel()
 	btnQ->setToolTip("Set the Q start and end points from the dispersion in the main window.");
 
 	// maximum cutoff for filtering numerical artefacts in berry curvature
-	m_B_filter_enable_bc = new QCheckBox("Maximum B:", panelBerryCurvature);
+	m_B_filter_enable_bc = new QCheckBox("Maximum Ω:", panelBerryCurvature);
 	m_B_filter_enable_bc->setChecked(true);
 	m_B_filter_enable_bc->setToolTip("Enable maximum cutoff Berry curvature for filtering numerical artefacts.");
 
