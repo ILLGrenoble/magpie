@@ -258,7 +258,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	m_S_filter->setMinimum(0.);
 	m_S_filter->setMaximum(9999.99999);
 	m_S_filter->setSingleStep(0.01);
-	m_S_filter->setValue(0.01);
+	m_S_filter->setValue(0.);
 	m_S_filter->setPrefix("S_min = ");
 	m_S_filter->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Preferred});
 	m_S_filter->setToolTip("Minimum S(Q, E) to keep.");
