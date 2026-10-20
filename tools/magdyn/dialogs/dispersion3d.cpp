@@ -31,6 +31,7 @@
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QDialogButtonBox>
+#include <QtGui/QActionGroup>
 
 #include "dispersion3d.h"
 
@@ -139,6 +140,23 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 
 	// general plot context menu
 	m_context = new QMenu(this);
+
+	QMenu *menuLighting = new QMenu("Lighting", m_context);
+	QAction *acLightingPhong = new QAction("Phong", menuLighting);
+	QAction *acLightingFlat = new QAction("Flat", menuLighting);
+	QAction *acLightingUniform = new QAction("Uniform", menuLighting);
+	QActionGroup *grpLighting = new QActionGroup(menuLighting);
+	acLightingPhong->setCheckable(true);
+	acLightingFlat->setCheckable(true);
+	acLightingUniform->setCheckable(true);
+	acLightingPhong->setChecked(true);
+	grpLighting->addAction(acLightingPhong);
+	grpLighting->addAction(acLightingFlat);
+	grpLighting->addAction(acLightingUniform);
+	menuLighting->addAction(acLightingPhong);
+	menuLighting->addAction(acLightingFlat);
+	menuLighting->addAction(acLightingUniform);
+
 	QAction *acCentre = new QAction("Centre Camera", m_context);
 	QAction *acShowCoords = new QAction("Show Coordinate Planes", m_context);
 	QAction *acShowMainQ = new QAction("Show Main Scan Area", m_context);
@@ -156,6 +174,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 		acSaveImage->setIcon(QIcon::fromTheme("image-x-generic"));
 	}
 	m_context->addAction(acCentre);
+	m_context->addMenu(menuLighting);
 	m_context->addSeparator();
 	m_context->addAction(acShowCoords);
 	m_context->addAction(acShowMainQ);
@@ -173,6 +192,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	m_context_band->addSeparator();
 	m_context_band->addAction(acCentre);
 	m_context_band->addAction(acCentreOnObject);
+	m_context_band->addMenu(menuLighting);
 	m_context_band->addSeparator();
 	m_context_band->addAction(acShowCoords);
 	m_context_band->addAction(acShowMainQ);
@@ -449,6 +469,22 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	connect(acSaveImage, &QAction::triggered, this, &Dispersion3DDlg::SaveImage);
 	connect(btnSaveData, &QAbstractButton::clicked, this, &Dispersion3DDlg::SaveData);
 	connect(btnSaveScript, &QAbstractButton::clicked, this, &Dispersion3DDlg::SaveScript);
+	connect(grpLighting, &QActionGroup::triggered, [this, acLightingPhong, acLightingFlat, acLightingUniform]()
+	{
+		if(acLightingPhong->isChecked())
+			m_lighting_model = 1;
+		else if(acLightingFlat->isChecked())
+			m_lighting_model = 2;
+		else if(acLightingUniform->isChecked())
+			m_lighting_model = 3;
+
+		if(m_dispplot)
+		{
+			for(const auto& obj : m_band_objs)
+				m_dispplot->GetRenderer()->SetObjectLighting(obj.first, m_lighting_model);
+			m_dispplot->update();
+		}
+	});
 
 	connect(m_dispplot, &tl2::GlPlot::AfterGLInitialisation,
 		this, &Dispersion3DDlg::AfterPlotGLInitialisation);

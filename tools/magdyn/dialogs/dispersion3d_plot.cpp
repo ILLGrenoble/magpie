@@ -218,6 +218,7 @@ void Dispersion3DDlg::Plot(bool clear_settings)
 			std::size_t obj = m_dispplot->GetRenderer()->AddPatch(patch_fkt, 0., 0., 0.,
 				Q_scale1, Q_scale2, m_Q_count_1, m_Q_count_2, r, g, b, 1.);
 			m_dispplot->GetRenderer()->SetObjectLabel(obj, objLabel.str());
+			m_dispplot->GetRenderer()->SetObjectLighting(obj, m_lighting_model);
 			m_band_objs.insert(std::make_pair(obj, band_idx));
 
 			// border line 1
