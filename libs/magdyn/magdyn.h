@@ -513,7 +513,7 @@ public:
 	  const t_vec3_real& Q_start, t_real delta = 1e-6,
 	  const std::vector<t_size>* perm = nullptr) const;
 
-	std::tuple<std::vector<t_cplx>, SofQE, t_vec> CalcBerryCurvatures(
+	std::tuple<std::vector<t_cplx>, SofQE, t_vec /*chern_partial*/> CalcBerryCurvatures(
 	  const t_vec3_real& Q_start, const t_vec3_real& Q_step1, const t_vec3_real& Q_step2,
 		const std::vector<t_size>* perm = nullptr) const;
 

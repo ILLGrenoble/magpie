@@ -254,7 +254,7 @@ void Dispersion3DDlg::Calculate()
 	bool E_minmax_valid = false;
 
 	t_real min_S = m_S_filter->value();
-	bool use_weights = m_S_enable->currentIndex() > 0;
+	bool use_weights = m_S_enable->currentIndex() == 1;
 	bool use_berry = m_S_enable->currentIndex() == 2;
 	bool use_projector = true;
 	bool unite_degen = m_unite_degeneracies->isChecked();
@@ -300,11 +300,17 @@ void Dispersion3DDlg::Calculate()
 			// calculate the dispersion at the given Q point
 			const t_vec3_real Q =  get_Q_from_indices<t_vec3_real>(
 				Q_idx_1, Q_idx_2, Q_origin, Q_dir_1, Q_dir_2, m_Q_count_1, m_Q_count_2);
-			auto Es_and_S = dyn.CalcEnergies(Q, !use_weights).E_and_S;
+			auto Es_and_S = dyn.CalcEnergies(Q, !use_weights || use_berry).E_and_S;
 
 			std::vector<t_cplx> curvs;
+			typename t_magdyn::SofQE _S;
+			bool S_already_calculated = false;  // CalcBerryCurvature also calculates the weights
 			if(use_berry)
-				curvs = std::get<0>(dyn.CalcBerryCurvatures(Q, Q_dir_1/m_Q_count_1, Q_dir_2/m_Q_count_2));
+			{
+				std::tie(curvs, _S, std::ignore) = dyn.CalcBerryCurvatures(
+					Q, Q_dir_1/m_Q_count_1, Q_dir_2/m_Q_count_2);
+				S_already_calculated = true;
+			}
 
 
 			// iterate the energies for this Q point
@@ -331,31 +337,6 @@ void Dispersion3DDlg::Calculate()
 				}
 
 
-				// weights
-				t_real weight = -1;
-				if(use_weights)
-				{
-					weight = E_and_S.weight_perp;
-
-					if(!use_projector)
-					{
-						const t_mat33& S = E_and_S.S;
-						weight = tl2::trace<t_mat33>(S).real();
-					}
-
-					// filter invalid S(Q, E)
-					if(std::isnan(weight) || std::isinf(weight))
-						weight = 0.;
-
-					// filter minimum S(Q, E)
-					if(pointwise && min_S > 0. && std::abs(weight) < min_S)
-						valid = false;
-
-					m_minmax_S[0] = std::min(m_minmax_S[0], weight);
-					m_minmax_S[1] = std::max(m_minmax_S[1], weight);
-				}  // weights
-
-
 				// berry curvature
 				t_real berry = 0.;
 				if(use_berry)
@@ -370,6 +351,32 @@ void Dispersion3DDlg::Calculate()
 					m_minmax_B[0] = std::min(m_minmax_B[0], berry);
 					m_minmax_B[1] = std::max(m_minmax_B[1], berry);
 				}  // berry
+
+
+				// weights
+				t_real weight = -1;
+				if(use_weights || S_already_calculated)
+				{
+					const auto& _E_and_S = S_already_calculated ? _S.E_and_S[band_idx] : E_and_S;
+					weight = _E_and_S.weight_perp;
+
+					if(!use_projector)
+					{
+						const t_mat33& S = _E_and_S.S;
+						weight = tl2::trace<t_mat33>(S).real();
+					}
+
+					// filter invalid S(Q, E)
+					if(std::isnan(weight) || std::isinf(weight))
+						weight = 0.;
+
+					// filter minimum S(Q, E)
+					if(pointwise && min_S > 0. && std::abs(weight) < min_S)
+						valid = false;
+
+					m_minmax_S[0] = std::min(m_minmax_S[0], weight);
+					m_minmax_S[1] = std::max(m_minmax_S[1], weight);
+				}  // weights
 
 
 				// count energy degeneracy
