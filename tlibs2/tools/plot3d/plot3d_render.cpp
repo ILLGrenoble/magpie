@@ -55,7 +55,7 @@ std::array<int, 3> Plot3DDlg::GetSurfColour(t_size surf_idx, t_size num_surfs) c
  */
 void Plot3DDlg::Plot(bool clear_settings)
 {
-	if(!m_dispplot)
+	if(!m_plot)
 		return;
 
 	// keep some settings from previous plot, e.g. the surface visibility flags
@@ -74,16 +74,16 @@ void Plot3DDlg::Plot(bool clear_settings)
 	// reset plot
 	ClearSurfaces();
 	m_cam_centre = tl2::zero<t_vec_gl>(3);
-	m_dispplot->GetRenderer()->RemoveObjects();
-	m_dispplot->GetRenderer()->SetLight(0, tl2::create<t_vec3_gl>(
+	m_plot->GetRenderer()->RemoveObjects();
+	m_plot->GetRenderer()->SetLight(0, tl2::create<t_vec3_gl>(
 		{ static_cast<t_real_gl>(1.5 * x_scale), static_cast<t_real_gl>(1.5 * y_scale),
 			static_cast<t_real_gl>(2.5 * (m_minmax_z[1] + 4.) * z_scale) }));
-	m_dispplot->GetRenderer()->SetLight(1, -tl2::create<t_vec3_gl>(
+	m_plot->GetRenderer()->SetLight(1, -tl2::create<t_vec3_gl>(
 		{ static_cast<t_real_gl>(1.5 * x_scale), static_cast<t_real_gl>(1.5 * y_scale),
 			static_cast<t_real_gl>(2.5 * (m_minmax_z[1] + 4.) * z_scale) }));
 
 	// set coordinate cube size
-	if(m_dispplot->GetRenderer()->GetCoordCube().size())
+	if(m_plot->GetRenderer()->GetCoordCube().size())
 	{
 		t_real E_range = m_minmax_z[1];
 		t_real E_min = m_minmax_z[0];
@@ -95,13 +95,13 @@ void Plot3DDlg::Plot(bool clear_settings)
 			0.5 * x_scale, 0.5 * y_scale, 0.5 * z_scale * E_range);
 		t_mat_gl obj_shift = tl2::hom_translation<t_mat_gl>(t_real(0.), t_real(0.), z_scale * E_mean);
 
-		for(auto obj : m_dispplot->GetRenderer()->GetCoordCube())
+		for(auto obj : m_plot->GetRenderer()->GetCoordCube())
 		{
 			using namespace tl2_ops;
-			m_dispplot->GetRenderer()->SetObjectMatrix(obj, obj_shift * obj_scale);
+			m_plot->GetRenderer()->SetObjectMatrix(obj, obj_shift * obj_scale);
 		}
 
-		m_dispplot->GetRenderer()->UpdateCoordCubeTextures(
+		m_plot->GetRenderer()->UpdateCoordCubeTextures(
 			m_minmax_x[0], m_minmax_x[1], -1.,
 			m_minmax_y[0], m_minmax_y[1], -1.,
 			E_min, m_minmax_z[1], -1.);
@@ -151,9 +151,10 @@ void Plot3DDlg::Plot(bool clear_settings)
 			t_real_gl g = t_real_gl(col[1]) / t_real_gl(255.);
 			t_real_gl b = t_real_gl(col[2]) / t_real_gl(255.);
 
-			std::size_t obj = m_dispplot->GetRenderer()->AddPatch(patch_fkt, 0., 0., 0.,
+			std::size_t obj = m_plot->GetRenderer()->AddPatch(patch_fkt, 0., 0., 0.,
 				x_scale, y_scale, m_x_count, m_y_count, r, g, b);
-			m_dispplot->GetRenderer()->SetObjectLabel(obj, objLabel.str());
+			m_plot->GetRenderer()->SetObjectLabel(obj, objLabel.str());
+			m_plot->GetRenderer()->SetObjectLighting(obj, m_lighting_model);
 			m_surf_objs.insert(std::make_pair(obj, surf_idx));
 
 			m_cam_centre[2] += GetMeanZ(surf_idx);
@@ -169,7 +170,7 @@ void Plot3DDlg::Plot(bool clear_settings)
 	if(clear_settings)
 		CentrePlotCamera();    // centre camera and update
 	else
-		m_dispplot->update();  // only update renderer
+		m_plot->update();  // only update renderer
 }
 
 
@@ -186,7 +187,7 @@ void Plot3DDlg::PlotPickerIntersection(
 	m_status->setText("");
 	m_cur_obj = std::nullopt;
 
-	m_dispplot->GetRenderer()->SetObjectsHighlight(false);
+	m_plot->GetRenderer()->SetObjectsHighlight(false);
 
 	if(!pos)
 		return;
@@ -204,7 +205,7 @@ void Plot3DDlg::PlotPickerIntersection(
 	ostr.precision(g_prec_gui);
 	ostr << "(" << gx << ", " << gy << ", " << gz << ")";
 
-	const std::string& label = m_dispplot->GetRenderer()->GetObjectLabel(objIdx);
+	const std::string& label = m_plot->GetRenderer()->GetObjectLabel(objIdx);
 	if(label != "")
 		ostr << ", " << label;
 	ostr << ".";

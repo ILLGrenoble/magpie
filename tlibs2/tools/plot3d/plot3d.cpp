@@ -32,6 +32,7 @@
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QHeaderView>
+#include <QtGui/QActionGroup>
 
 #include "plot3d.h"
 
@@ -53,18 +54,18 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett, bool fail_on_gl_error)
 	setSizeGripEnabled(true);
 
 	// create gl plotter
-	m_dispplot = new tl2::GlPlot(this);
-	m_dispplot->SetFailOnGlError(fail_on_gl_error);
-	m_dispplot->GetRenderer()->SetAxisLabels("x", "y", "z");
-	m_dispplot->GetRenderer()->SetRestrictCamTheta(false);
-	m_dispplot->GetRenderer()->SetLight(0, tl2::create<t_vec3_gl>({ 50, 50, 50 }));
-	m_dispplot->GetRenderer()->SetLight(1, tl2::create<t_vec3_gl>({ -50, -50, -50 }));
-	m_dispplot->GetRenderer()->SetCoordMax(50.);
-	m_dispplot->GetRenderer()->GetCamera().SetParallelRange(5.);
-	m_dispplot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real>(g_cam_fov));
-	m_dispplot->GetRenderer()->GetCamera().SetDist(2.);
-	m_dispplot->GetRenderer()->GetCamera().UpdateTransformation();
-	m_dispplot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
+	m_plot = new tl2::GlPlot(this);
+	m_plot->SetFailOnGlError(fail_on_gl_error);
+	m_plot->GetRenderer()->SetAxisLabels("x", "y", "z");
+	m_plot->GetRenderer()->SetRestrictCamTheta(false);
+	m_plot->GetRenderer()->SetLight(0, tl2::create<t_vec3_gl>({ 50, 50, 50 }));
+	m_plot->GetRenderer()->SetLight(1, tl2::create<t_vec3_gl>({ -50, -50, -50 }));
+	m_plot->GetRenderer()->SetCoordMax(50.);
+	m_plot->GetRenderer()->GetCamera().SetParallelRange(5.);
+	m_plot->GetRenderer()->GetCamera().SetFOV(tl2::d2r<t_real>(g_cam_fov));
+	m_plot->GetRenderer()->GetCamera().SetDist(2.);
+	m_plot->GetRenderer()->GetCamera().UpdateTransformation();
+	m_plot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
 
 	// surfaces table
 	QWidget *surfs_panel = new QWidget(this);
@@ -87,11 +88,11 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett, bool fail_on_gl_error)
 	m_split_plot = new QSplitter(this);
 	m_split_plot->setOrientation(Qt::Horizontal);
 	m_split_plot->setSizePolicy(QSizePolicy{QSizePolicy::Expanding, QSizePolicy::Expanding});
-	m_split_plot->addWidget(m_dispplot);
+	m_split_plot->addWidget(m_plot);
 	m_split_plot->addWidget(surfs_panel);
 	m_split_plot->setCollapsible(0, false);
 	m_split_plot->setCollapsible(1, true);
-	m_split_plot->setStretchFactor(m_split_plot->indexOf(m_dispplot), 24);
+	m_split_plot->setStretchFactor(m_split_plot->indexOf(m_plot), 24);
 	m_split_plot->setStretchFactor(m_split_plot->indexOf(surfs_panel), 1);
 
 	// splitter for plot and the controls
@@ -108,6 +109,23 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett, bool fail_on_gl_error)
 
 	// general plot context menu
 	m_context = new QMenu(this);
+
+	QMenu *menuLighting = new QMenu("Lighting", m_context);
+	QAction *acLightingPhong = new QAction("Phong", menuLighting);
+	QAction *acLightingFlat = new QAction("Flat", menuLighting);
+	QAction *acLightingUniform = new QAction("Uniform", menuLighting);
+	QActionGroup *grpLighting = new QActionGroup(menuLighting);
+	acLightingPhong->setCheckable(true);
+	acLightingFlat->setCheckable(true);
+	acLightingUniform->setCheckable(true);
+	acLightingPhong->setChecked(true);
+	grpLighting->addAction(acLightingPhong);
+	grpLighting->addAction(acLightingFlat);
+	grpLighting->addAction(acLightingUniform);
+	menuLighting->addAction(acLightingPhong);
+	menuLighting->addAction(acLightingFlat);
+	menuLighting->addAction(acLightingUniform);
+
 	QAction *acCentre = new QAction("Centre Camera", m_context);
 	QAction *acShowCoords = new QAction("Show Coordinate Planes", m_context);
 	QAction *acSaveData = new QAction("Save Data...", m_context);
@@ -119,6 +137,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett, bool fail_on_gl_error)
 	acSaveScript->setIcon(QIcon::fromTheme("text-x-script"));
 	acSaveImage->setIcon(QIcon::fromTheme("image-x-generic"));
 	m_context->addAction(acCentre);
+	m_context->addMenu(menuLighting);
 	m_context->addSeparator();
 	m_context->addAction(acShowCoords);
 	m_context->addSeparator();
@@ -135,6 +154,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett, bool fail_on_gl_error)
 	m_context_surf->addSeparator();
 	m_context_surf->addAction(acCentre);
 	m_context_surf->addAction(acCentreOnObject);
+	m_context_surf->addMenu(menuLighting);
 	m_context_surf->addSeparator();
 	m_context_surf->addAction(acShowCoords);
 	m_context_surf->addSeparator();
@@ -385,12 +405,12 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett, bool fail_on_gl_error)
 	connect(btnSaveData, &QAbstractButton::clicked, this, &Plot3DDlg::SaveData);
 	connect(btnSaveScript, &QAbstractButton::clicked, this, &Plot3DDlg::SaveScript);
 
-	connect(m_dispplot, &tl2::GlPlot::AfterGLInitialisation, this, &Plot3DDlg::AfterPlotGLInitialisation);
-	connect(m_dispplot->GetRenderer(), &tl2::GlPlotRenderer::PickerIntersection, this, &Plot3DDlg::PlotPickerIntersection);
-	connect(m_dispplot->GetRenderer(), &tl2::GlPlotRenderer::CameraHasUpdated, this, &Plot3DDlg::PlotCameraHasUpdated);
-	connect(m_dispplot, &tl2::GlPlot::MouseClick, this, &Plot3DDlg::PlotMouseClick);
-	connect(m_dispplot, &tl2::GlPlot::MouseDown, this, &Plot3DDlg::PlotMouseDown);
-	connect(m_dispplot, &tl2::GlPlot::MouseUp, this, &Plot3DDlg::PlotMouseUp);
+	connect(m_plot, &tl2::GlPlot::AfterGLInitialisation, this, &Plot3DDlg::AfterPlotGLInitialisation);
+	connect(m_plot->GetRenderer(), &tl2::GlPlotRenderer::PickerIntersection, this, &Plot3DDlg::PlotPickerIntersection);
+	connect(m_plot->GetRenderer(), &tl2::GlPlotRenderer::CameraHasUpdated, this, &Plot3DDlg::PlotCameraHasUpdated);
+	connect(m_plot, &tl2::GlPlot::MouseClick, this, &Plot3DDlg::PlotMouseClick);
+	connect(m_plot, &tl2::GlPlot::MouseDown, this, &Plot3DDlg::PlotMouseDown);
+	connect(m_plot, &tl2::GlPlot::MouseUp, this, &Plot3DDlg::PlotMouseUp);
 	connect(m_perspective, &QCheckBox::toggled, this, &Plot3DDlg::SetPlotPerspectiveProjection);
 
 	connect(btnbox, &QDialogButtonBox::accepted, this, &Plot3DDlg::accept);
@@ -413,6 +433,23 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett, bool fail_on_gl_error)
 		[this](t_real_gl theta) -> void
 	{
 		this->SetPlotCameraRotation(m_cam_phi->value(), theta);
+	});
+
+	connect(grpLighting, &QActionGroup::triggered, [this, acLightingPhong, acLightingFlat, acLightingUniform]()
+	{
+		if(acLightingPhong->isChecked())
+			m_lighting_model = 1;
+		else if(acLightingFlat->isChecked())
+			m_lighting_model = 2;
+		else if(acLightingUniform->isChecked())
+			m_lighting_model = 3;
+
+		if(m_plot)
+		{
+			for(const auto& obj : m_surf_objs)
+				m_plot->GetRenderer()->SetObjectLighting(obj.first, m_lighting_model);
+			m_plot->update();
+		}
 	});
 
 	// t paramter slider moved
@@ -489,7 +526,7 @@ void Plot3DDlg::EnableCalculation(bool enable)
  */
 void Plot3DDlg::PlotCameraHasUpdated()
 {
-	auto [phi, theta] = m_dispplot->GetRenderer()->GetCamera().GetRotation();
+	auto [phi, theta] = m_plot->GetRenderer()->GetCamera().GetRotation();
 
 	phi = tl2::r2d<t_real>(phi);
 	theta = tl2::r2d<t_real>(theta);
@@ -516,8 +553,8 @@ void Plot3DDlg::PlotMouseClick(
 	[[maybe_unused]] bool mid,
 	[[maybe_unused]] bool right)
 {
-	const QPointF& _pt = m_dispplot->GetRenderer()->GetMousePosition();
-	QPoint pt = m_dispplot->mapToGlobal(_pt.toPoint());
+	const QPointF& _pt = m_plot->GetRenderer()->GetMousePosition();
+	QPoint pt = m_plot->mapToGlobal(_pt.toPoint());
 
 	auto surf_iter = m_surf_objs.end();
 	if(m_cur_obj)
@@ -572,16 +609,16 @@ void Plot3DDlg::PlotMouseUp(
  */
 void Plot3DDlg::AfterPlotGLInitialisation()
 {
-	if(!m_dispplot)
+	if(!m_plot)
 		return;
 
 	// GL device infos
 	auto [ver, shader_ver, vendor, renderer]
-		= m_dispplot->GetRenderer()->GetGlDescr();
+		= m_plot->GetRenderer()->GetGlDescr();
 
 	emit GlDeviceInfos(ver, shader_ver, vendor, renderer);
 
-	m_dispplot->GetRenderer()->SetCull(false);
+	m_plot->GetRenderer()->SetCull(false);
 
 	ShowPlotCoordCube(SHOW_COORD_CUBE);
 	ShowPlotLabels(false);
@@ -599,14 +636,14 @@ void Plot3DDlg::AfterPlotGLInitialisation()
 void Plot3DDlg::ShowPlotCoordCube(bool show)
 {
 	// always hide coordinate cross
-	if(auto obj = m_dispplot->GetRenderer()->GetCoordCross(); obj)
-		m_dispplot->GetRenderer()->SetObjectVisible(*obj, false);
+	if(auto obj = m_plot->GetRenderer()->GetCoordCross(); obj)
+		m_plot->GetRenderer()->SetObjectVisible(*obj, false);
 
 	// show coordinate cube
-	for(auto obj : m_dispplot->GetRenderer()->GetCoordCube())
-		m_dispplot->GetRenderer()->SetObjectVisible(obj, show);
+	for(auto obj : m_plot->GetRenderer()->GetCoordCube())
+		m_plot->GetRenderer()->SetObjectVisible(obj, show);
 
-	m_dispplot->update();
+	m_plot->update();
 }
 
 
@@ -616,8 +653,8 @@ void Plot3DDlg::ShowPlotCoordCube(bool show)
  */
 void Plot3DDlg::ShowPlotLabels(bool show)
 {
-	m_dispplot->GetRenderer()->SetLabelsVisible(show);
-	m_dispplot->update();
+	m_plot->GetRenderer()->SetLabelsVisible(show);
+	m_plot->update();
 }
 
 
@@ -654,10 +691,10 @@ void Plot3DDlg::ToggleSurface()
  */
 void Plot3DDlg::SetPlotPerspectiveProjection(bool proj)
 {
-	m_dispplot->GetRenderer()->GetCamera().SetPerspectiveProjection(proj);
-	m_dispplot->GetRenderer()->RequestViewportUpdate();
-	m_dispplot->GetRenderer()->GetCamera().UpdateTransformation();
-	m_dispplot->update();
+	m_plot->GetRenderer()->GetCamera().SetPerspectiveProjection(proj);
+	m_plot->GetRenderer()->RequestViewportUpdate();
+	m_plot->GetRenderer()->GetCamera().UpdateTransformation();
+	m_plot->update();
 }
 
 
@@ -670,10 +707,10 @@ void Plot3DDlg::SetPlotCameraRotation(t_real_gl phi, t_real_gl theta)
 	phi = tl2::d2r<t_real>(phi);
 	theta = tl2::d2r<t_real>(theta);
 
-	m_dispplot->GetRenderer()->GetCamera().SetRotation(phi, theta);
-	m_dispplot->GetRenderer()->GetCamera().UpdateTransformation();
+	m_plot->GetRenderer()->GetCamera().SetRotation(phi, theta);
+	m_plot->GetRenderer()->GetCamera().UpdateTransformation();
 	PlotCameraHasUpdated();
-	m_dispplot->update();
+	m_plot->update();
 }
 
 
@@ -686,7 +723,7 @@ void Plot3DDlg::CentrePlotCameraOnObject()
 	if(!m_cur_obj)
 		return;
 
-	t_mat_gl mat = m_dispplot->GetRenderer()->GetObjectMatrix(*m_cur_obj);
+	t_mat_gl mat = m_plot->GetRenderer()->GetObjectMatrix(*m_cur_obj);
 
 	// selected a surface?
 	auto surf_iter = m_surf_objs.find(*m_cur_obj);
@@ -697,9 +734,9 @@ void Plot3DDlg::CentrePlotCameraOnObject()
 		mat(2, 3) = z_mean;
 	}
 
-	m_dispplot->GetRenderer()->GetCamera().Centre(mat);
-	m_dispplot->GetRenderer()->GetCamera().UpdateTransformation();
-	m_dispplot->update();
+	m_plot->GetRenderer()->GetCamera().Centre(mat);
+	m_plot->GetRenderer()->GetCamera().UpdateTransformation();
+	m_plot->update();
 }
 
 
@@ -714,9 +751,9 @@ void Plot3DDlg::CentrePlotCamera()
 		m_cam_centre[1] * m_y_scale->value(),
 		m_cam_centre[2] * m_z_scale->value());
 
-	m_dispplot->GetRenderer()->GetCamera().Centre(matCentre);
-	m_dispplot->GetRenderer()->GetCamera().UpdateTransformation();
-	m_dispplot->update();
+	m_plot->GetRenderer()->GetCamera().Centre(matCentre);
+	m_plot->GetRenderer()->GetCamera().UpdateTransformation();
+	m_plot->update();
 }
 
 
@@ -726,7 +763,7 @@ void Plot3DDlg::CentrePlotCamera()
  */
 void Plot3DDlg::SetPlotCoordinateSystem(int which)
 {
-	m_dispplot->GetRenderer()->SetCoordSys(which);
+	m_plot->GetRenderer()->SetCoordSys(which);
 }
 
 

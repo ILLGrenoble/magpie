@@ -415,7 +415,7 @@ if __name__ == "__main__":
  */
 void Plot3DDlg::SaveImage()
 {
-	if(!m_dispplot)
+	if(!m_plot)
 		return;
 
 	QString dirLast;
@@ -429,6 +429,6 @@ void Plot3DDlg::SaveImage()
 	if(m_sett)
 		m_sett->setValue("plot3d/dir", QFileInfo(filename).path());
 
-	if(!m_dispplot->grabFramebuffer().save(filename, nullptr, 90))
+	if(!m_plot->grabFramebuffer().save(filename, nullptr, 90))
 		ShowError(QString("Could not save plot image to file \"%1\".").arg(filename));
 }

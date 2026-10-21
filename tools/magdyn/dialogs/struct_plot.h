@@ -148,6 +148,7 @@ private:
 	std::optional<std::string> m_cur_site{};
 	std::optional<std::string> m_cur_term{};
 	t_vec_gl m_centre{tl2::zero<t_vec_gl>(3)};
+	int m_lighting_model{1};             // lighting for the 3d objects
 
 	// reference object handles
 	std::size_t m_sphere{};

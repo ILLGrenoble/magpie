@@ -35,6 +35,7 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMessageBox>
+#include <QtGui/QActionGroup>
 
 #include <unordered_set>
 #include <functional>
@@ -126,6 +127,23 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 
 	// general context menu
 	m_context = new QMenu(this);
+
+	QMenu *menuLighting = new QMenu("Lighting", m_context);
+	QAction *acLightingPhong = new QAction("Phong", menuLighting);
+	QAction *acLightingFlat = new QAction("Flat", menuLighting);
+	QAction *acLightingUniform = new QAction("Uniform", menuLighting);
+	QActionGroup *grpLighting = new QActionGroup(menuLighting);
+	acLightingPhong->setCheckable(true);
+	acLightingFlat->setCheckable(true);
+	acLightingUniform->setCheckable(true);
+	acLightingPhong->setChecked(true);
+	grpLighting->addAction(acLightingPhong);
+	grpLighting->addAction(acLightingFlat);
+	grpLighting->addAction(acLightingUniform);
+	menuLighting->addAction(acLightingPhong);
+	menuLighting->addAction(acLightingFlat);
+	menuLighting->addAction(acLightingUniform);
+
 	QAction *acCentre = new QAction("Centre Camera on Midpoint", m_context);
 	QAction *acCentreUC = new QAction("Centre Camera on Unit Cell", m_context);
 	QAction *acSaveImage = new QAction("Save Image...", m_context);
@@ -133,6 +151,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 		acSaveImage->setIcon(QIcon::fromTheme("image-x-generic"));
 	m_context->addAction(acCentre);
 	m_context->addAction(acCentreUC);
+	m_context->addMenu(menuLighting);
 	m_context->addSeparator();
 	m_context->addAction(acSaveImage);
 
@@ -147,6 +166,7 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 	m_context_site->addAction(acCentre);
 	m_context_site->addAction(acCentreUC);
 	m_context_site->addAction(acCentreOnObject);
+	m_context_site->addMenu(menuLighting);
 	m_context_site->addSeparator();
 	m_context_site->addAction(acSaveImage);
 
@@ -230,6 +250,26 @@ StructPlotDlg::StructPlotDlg(QWidget *parent, QSettings *sett)
 		[this](t_real_gl theta) -> void
 	{
 		this->SetCameraRotation(m_cam_phi->value(), theta);
+	});
+
+	connect(grpLighting, &QActionGroup::triggered, [this, acLightingPhong, acLightingFlat, acLightingUniform]()
+	{
+		if(acLightingPhong->isChecked())
+			m_lighting_model = 1;
+		else if(acLightingFlat->isChecked())
+			m_lighting_model = 2;
+		else if(acLightingUniform->isChecked())
+			m_lighting_model = 3;
+
+		if(m_structplot)
+		{
+			for(const auto& obj : m_sites)
+				m_structplot->GetRenderer()->SetObjectLighting(obj.first, m_lighting_model);
+			for(const auto& obj : m_terms)
+				m_structplot->GetRenderer()->SetObjectLighting(obj.first, m_lighting_model);
+
+			m_structplot->update();
+		}
 	});
 
 	if(m_sett && m_sett->contains("struct_view/geo"))
@@ -632,16 +672,19 @@ void StructPlotDlg::AfterGLInitialisation()
 	// reference sphere for linked objects
 	m_sphere = m_structplot->GetRenderer()->AddSphere(
 		g_structplot_site_rad, 0.,0.,0., 1.,1.,1.,1.);
+	m_structplot->GetRenderer()->SetObjectLighting(m_sphere, m_lighting_model);
 	m_structplot->GetRenderer()->SetObjectVisible(m_sphere, false);
 
 	// reference arrow for linked objects
 	m_arrow = m_structplot->GetRenderer()->AddArrow(
 		g_structplot_dmi_rad, g_structplot_dmi_len, 0.,0.,0.5,  1.,1.,1.,1.);
+	m_structplot->GetRenderer()->SetObjectLighting(m_arrow, m_lighting_model);
 	m_structplot->GetRenderer()->SetObjectVisible(m_arrow, false);
 
 	// reference cylinder for linked objects
 	m_cyl = m_structplot->GetRenderer()->AddCylinder(
 		g_structplot_term_rad, 1., 0.,0.,0.5,  1.,1.,1.,1.);
+	m_structplot->GetRenderer()->SetObjectLighting(m_cyl, m_lighting_model);
 	m_structplot->GetRenderer()->SetObjectVisible(m_cyl, false);
 
 	auto [ver, shader_ver, vendor, renderer]
@@ -800,9 +843,11 @@ void StructPlotDlg::Sync()
 
 		std::size_t obj = m_structplot->GetRenderer()->AddLinkedObject(
 			m_sphere, 0,0,0, rgb[0], rgb[1], rgb[2], 1);
+		m_structplot->GetRenderer()->SetObjectLighting(obj, m_lighting_model);
 
 		std::size_t arrow = m_structplot->GetRenderer()->AddLinkedObject(
 			m_arrow, 0,0,0, rgb[0], rgb[1], rgb[2], 1);
+		m_structplot->GetRenderer()->SetObjectLighting(arrow, m_lighting_model);
 
 		t_vec3_real _pos_vec = site.pos_calc;
 		if(sc_dist)
@@ -917,6 +962,7 @@ void StructPlotDlg::Sync()
 
 		std::size_t obj = m_structplot->GetRenderer()->AddLinkedObject(
 			m_cyl, 0, 0, 0, rgb[0], rgb[1], rgb[2], 1);
+		m_structplot->GetRenderer()->SetObjectLighting(obj, m_lighting_model);
 
 		{
 			ExchangeTermInfo terminfo;
@@ -967,6 +1013,7 @@ void StructPlotDlg::Sync()
 		{
 			std::size_t objDmi = m_structplot->GetRenderer()->AddLinkedObject(
 				m_arrow, 0,0,0, rgb[0], rgb[1], rgb[2], 1);
+			m_structplot->GetRenderer()->SetObjectLighting(objDmi, m_lighting_model);
 
 			{
 				ExchangeTermInfo terminfo;
@@ -1043,6 +1090,7 @@ void StructPlotDlg::AddFieldVector()
 
 	m_field = m_structplot->GetRenderer()->AddArrow(
 		0.025, len,  0., 0., 0.5,  0.25, 0.25, 1., 1.);
+	m_structplot->GetRenderer()->SetObjectLighting(*m_field, m_lighting_model);
 
 	m_structplot->GetRenderer()->SetObjectMatrix(*m_field,
 		tl2::get_arrow_matrix<t_vec3_gl, t_mat_gl, t_real_gl>(
@@ -1084,6 +1132,7 @@ void StructPlotDlg::AddUnitCell()
 	{
 		std::size_t edge = m_structplot->GetRenderer()->AddLinkedObject(
 			m_cyl,  0., 0., 0.,  0., 0., 0., 1.);
+		m_structplot->GetRenderer()->SetObjectLighting(edge, m_lighting_model);
 		m_cell.push_back(edge);
 
 		t_real_gl dir_len = 1.; //tl2::norm<t_vec_gl>(dir_vec);

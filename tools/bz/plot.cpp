@@ -33,6 +33,7 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStyle>
 #include <QtWidgets/QFileDialog>
+#include <QtGui/QActionGroup>
 
 #include <sstream>
 
@@ -128,9 +129,28 @@ BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett, bool fail_on_gl_error)
 
 	// plot context menu
 	m_context = new QMenu(this);
+
+	QMenu *menuLighting = new QMenu("Lighting", m_context);
+	QAction *acLightingPhong = new QAction("Phong", menuLighting);
+	QAction *acLightingFlat = new QAction("Flat", menuLighting);
+	QAction *acLightingUniform = new QAction("Uniform", menuLighting);
+	QActionGroup *grpLighting = new QActionGroup(menuLighting);
+	acLightingPhong->setCheckable(true);
+	acLightingFlat->setCheckable(true);
+	acLightingUniform->setCheckable(true);
+	acLightingPhong->setChecked(true);
+	grpLighting->addAction(acLightingPhong);
+	grpLighting->addAction(acLightingFlat);
+	grpLighting->addAction(acLightingUniform);
+	menuLighting->addAction(acLightingPhong);
+	menuLighting->addAction(acLightingFlat);
+	menuLighting->addAction(acLightingUniform);
+
 	QAction *acSaveImage = new QAction("Save Image...", m_context);
 	acSaveImage->setIcon(QIcon::fromTheme("image-x-generic"));
 	m_context->addAction(acSaveImage);
+	m_context->addSeparator();
+	m_context->addMenu(menuLighting);
 
 	auto grid = new QGridLayout(this);
 	grid->setSpacing(4);
@@ -216,6 +236,31 @@ BZPlotDlg::BZPlotDlg(QWidget* parent, QSettings *sett, bool fail_on_gl_error)
 		[this](t_real_gl theta) -> void
 	{
 		this->SetCameraRotation(m_cam_phi->value(), theta);
+	});
+
+	connect(grpLighting, &QActionGroup::triggered, [this, acLightingPhong, acLightingFlat, acLightingUniform]()
+	{
+		if(acLightingPhong->isChecked())
+			m_lighting_model = 1;
+		else if(acLightingFlat->isChecked())
+			m_lighting_model = 2;
+		else if(acLightingUniform->isChecked())
+			m_lighting_model = 3;
+
+		if(m_plot)
+		{
+			for(const auto& obj : m_objsBragg)
+				m_plot->GetRenderer()->SetObjectLighting(obj, m_lighting_model);
+			for(const auto& obj : m_objsVoronoi)
+				m_plot->GetRenderer()->SetObjectLighting(obj, m_lighting_model);
+			for(const auto& obj : m_objsBZ)
+				m_plot->GetRenderer()->SetObjectLighting(obj, m_lighting_model);
+			for(const auto& obj : m_objsLines)
+				m_plot->GetRenderer()->SetObjectLighting(obj, m_lighting_model);
+			m_plot->GetRenderer()->SetObjectLighting(m_plane, m_lighting_model);
+
+			m_plot->update();
+		}
 	});
 
 	if(m_sett && m_sett->contains("bz3d/geo"))
@@ -356,6 +401,7 @@ void BZPlotDlg::AddVertex(const t_vec3_real& pos,
 
 	auto obj = m_plot->GetRenderer()->AddLinkedObject(m_sphere, 0,0,0, r,g,b,1);
 	//auto obj = m_plot->GetRenderer()->AddSphere(0.05, 0,0,0, r,g,b,1);
+	m_plot->GetRenderer()->SetObjectLighting(obj, m_lighting_model);
 	m_plot->GetRenderer()->SetObjectMatrix(obj,
 		tl2::hom_translation<t_mat_gl>(posx, posy, posz) *
 		tl2::hom_scaling<t_mat_gl>(scale, scale, scale));
@@ -402,6 +448,7 @@ void BZPlotDlg::AddLine(const t_vec3_real& start, const t_vec3_real& end, bool a
 
 	auto arrow = m_plot->GetRenderer()->AddArrow(
 		0.025, len,  0., 0., 0.5,  1., 1., 1., 1.);
+	m_plot->GetRenderer()->SetObjectLighting(arrow, m_lighting_model);
 	m_plot->GetRenderer()->SetObjectMatrix(arrow,
 		tl2::get_arrow_matrix<t_vec3_gl, t_mat_gl, t_real_gl>(
 			dir,                                 // to
@@ -463,6 +510,7 @@ void BZPlotDlg::AddTriangles(const std::vector<t_vec3_real>& _vecs,
 	}
 
 	auto obj = m_plot->GetRenderer()->AddTriangleObject(vecs, norms, r, g, b, 1);
+	m_plot->GetRenderer()->SetObjectLighting(obj, m_lighting_model);
 	m_objsBZ.push_back(obj);
 
 	// set (or clear) the face indices of this object's triangles
@@ -662,8 +710,10 @@ void BZPlotDlg::AfterGLInitialisation()
 	// reference sphere and plane for linked objects
 	m_sphere = m_plot->GetRenderer()->AddSphere(0.05, 0.,0.,0., 1.,1.,1.,1.);
 	m_plane = m_plot->GetRenderer()->AddPlane(0.,0.,1., 0.,0.,0., 5.,5., 0.75,0.75,0.75,0.5);
+	m_plot->GetRenderer()->SetObjectLighting(m_sphere, m_lighting_model);
 	m_plot->GetRenderer()->SetObjectVisible(m_sphere, false);
 	m_plot->GetRenderer()->SetObjectIntersectable(m_sphere, false);
+	m_plot->GetRenderer()->SetObjectLighting(m_plane, m_lighting_model);
 	m_plot->GetRenderer()->SetObjectVisible(m_plane, true);
 	m_plot->GetRenderer()->SetObjectPriority(m_plane, 0);
 

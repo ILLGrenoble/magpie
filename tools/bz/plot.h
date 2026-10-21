@@ -114,6 +114,7 @@ private:
 
 	std::shared_ptr<tl2::GlPlot> m_plot{};
 	std::size_t m_sphere{ 0 }, m_plane{ 0 };
+	int m_lighting_model{1};                  // lighting for the 3d objects
 
 	QLabel *m_status{};
 	QCheckBox *m_show_coordcross_lab{}, *m_show_coordcross_xtal{};

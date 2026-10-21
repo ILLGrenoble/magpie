@@ -150,10 +150,11 @@ private:
 	QSettings *m_sett{};                 // program settings
 
 	// surface plot
-	tl2::GlPlot *m_dispplot{};           // 3d plotter
+	tl2::GlPlot *m_plot{};               // 3d plotter
 	std::optional<std::size_t> m_cur_obj{};
 	std::unordered_map<std::size_t /*plot object*/, t_size /*surface index*/> m_surf_objs{};
 	t_vec_gl m_cam_centre{tl2::zero<t_vec_gl>(3)};
+	int m_lighting_model{1};             // lighting for the 3d objects
 
 	QSplitter *m_split_controls{};
 	QSplitter *m_split_plot{};
