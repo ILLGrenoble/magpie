@@ -100,8 +100,11 @@ private:
 	QDoubleSpinBox *m_spinVecReal[3]{nullptr, nullptr, nullptr};
 	QDoubleSpinBox *m_spinVecRecip[3]{nullptr, nullptr, nullptr};
 
+
 protected:
 	void SyncToKernel();
+
+	void CalcXtalAB();
 
 
 protected slots:
@@ -111,6 +114,7 @@ protected slots:
 	void CalculateProjection();
 	void CalculateCrossProduct();
 	void CalculateAngle();
+	void CalculateCrystal();
 
 
 signals:

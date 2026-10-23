@@ -544,7 +544,7 @@ void MagDynDlg::CreateMenuBar()
 	acDiff->setShortcut(int(Qt::CTRL) | int(Qt::Key_D));
 	acPowder->setShortcut(int(Qt::CTRL) | int(Qt::Key_P));
 	acCalc->setShortcut(int(Qt::ALT) | int(Qt::Key_C));
-	acTrafoCalc->setShortcut(int(Qt::CTRL) | int(Qt::Key_C));
+	acTrafoCalc->setShortcut(int(Qt::CTRL) | int(Qt::Key_Z));
 
 	// icons
 	if(g_use_icons)
