@@ -6,7 +6,7 @@
 		<doi>https://doi.org/10.5281/zenodo.16180814</doi>
 		<notes>__base64__</notes>
 		<info>magdyn_tool</info>
-		<date>Mon 2026-Oct-19 20:32:51 CEST</date>
+		<date>Sat 2026-Oct-24 00:37:57 CEST</date>
 	</meta>
 	<config>
 		<h_start>0</h_start>
@@ -21,7 +21,7 @@
 		<num_Q_points>512</num_Q_points>
 		<weight_scale>1</weight_scale>
 		<weight_min>0</weight_min>
-		<weight_max>50</weight_max>
+		<weight_max>9999</weight_max>
 		<plot_total>true</plot_total>
 		<plot_bands>false</plot_bands>
 		<plot_channels>false</plot_channels>
@@ -93,8 +93,12 @@
 	</magnetic_form_factors>
 	<variables>
 		<variable>
-			<name>J</name>
+			<name>Jx</name>
 			<value>(-1,0)</value>
+		</variable>
+		<variable>
+			<name>Jy</name>
+			<value>(-0.5,0)</value>
 		</variable>
 	</variables>
 	<atom_sites>
@@ -127,7 +131,7 @@
 	</atom_sites>
 	<exchange_terms>
 		<term>
-			<name>fm</name>
+			<name>fm_x</name>
 			<atom_1_index>0</atom_1_index>
 			<atom_2_index>0</atom_2_index>
 			<atom_1_name>atom</atom_1_name>
@@ -136,7 +140,7 @@
 			<distance_y>0</distance_y>
 			<distance_z>0</distance_z>
 			<symmetry_index>1</symmetry_index>
-			<interaction>J</interaction>
+			<interaction>Jx</interaction>
 			<dmi_x>0</dmi_x>
 			<gen_xx>0</gen_xx>
 			<gen_xy>0</gen_xy>
@@ -152,7 +156,7 @@
 			<colour>#00bf00</colour>
 		</term>
 		<term>
-			<name>coupling</name>
+			<name>fm_y</name>
 			<atom_1_index>0</atom_1_index>
 			<atom_2_index>0</atom_2_index>
 			<atom_1_name>atom</atom_1_name>
@@ -161,7 +165,7 @@
 			<distance_y>1</distance_y>
 			<distance_z>0</distance_z>
 			<symmetry_index>2</symmetry_index>
-			<interaction>J</interaction>
+			<interaction>Jy</interaction>
 			<dmi_x>0</dmi_x>
 			<gen_xx>0</gen_xx>
 			<gen_xy>0</gen_xy>
