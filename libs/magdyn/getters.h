@@ -716,7 +716,10 @@ MAGDYN_TEMPL MAGDYN_INST::t_vec3_real MAGDYN_INST::GetExternalFieldLab(bool incl
 		field = m_xtalA * field;
 	else if(m_field.xtal_sys == SYS_RECIP)
 		field = m_xtalB * field;
-	field /= tl2::norm<t_vec3_real>(field);
+
+	t_real field_len = tl2::norm<t_vec3_real>(field);
+	if(!tl2::equals_0<t_real>(field_len, m_eps))
+		field /= field_len;
 
 	if(include_magnitude)
 		field *= m_field.mag;

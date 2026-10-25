@@ -388,6 +388,7 @@ protected:
 	void ImportStructure();
 	void ExportToSunny();
 	void ExportToSpinW();
+	void ExportToPySpinW();
 	void ExportToScript();
 	void ExportSQE();
 
@@ -516,6 +517,7 @@ public:
 	bool ImportStructure(const QString& filename);
 	bool ExportToSunny(const QString& filename);
 	bool ExportToSpinW(const QString& filename);
+	bool ExportToPySpinW(const QString& filename);
 	bool ExportToScript(const QString& filename);
 	bool ExportSQE(const QString& filename);
 

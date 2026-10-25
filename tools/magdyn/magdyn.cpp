@@ -335,7 +335,9 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acStructImport = new QAction("Import From Table...", menuExport);
 	QAction *acStructExportSun = new QAction("Export To Sunny Code...", menuExport);
 	QAction *acStructExportSW = new QAction("Export To SpinW Code...", menuExport);
+	QAction *acStructExportPySW = new QAction("Export To PySpinW Code...", menuExport);
 	QAction *acStructExportScript = new QAction("Export To Python Code...", menuExport);
+	acStructExportPySW->setEnabled(false);  // TODO
 
 	// dispersion plot menu
 	m_menuDisp = new QMenu("Dispersion Plot", m_menu);
@@ -562,6 +564,7 @@ void MagDynDlg::CreateMenuBar()
 		acSaveMultiDispScr->setIcon(QIcon::fromTheme("text-x-script"));
 		acStructExportSun->setIcon(QIcon::fromTheme("weather-clear"));
 		acStructExportSW->setIcon(QIcon::fromTheme("weather-clear-night"));
+		acStructExportPySW->setIcon(QIcon::fromTheme("weather-clear-night"));
 		acStructExportScript->setIcon(QIcon::fromTheme("text-x-script"));
 		acStructNotes->setIcon(QIcon::fromTheme("accessories-text-editor"));
 		acStructView->setIcon(QIcon::fromTheme("applications-graphics"));
@@ -601,6 +604,7 @@ void MagDynDlg::CreateMenuBar()
 	menuExport->addSeparator();
 	menuExport->addAction(acStructExportSun);
 	menuExport->addAction(acStructExportSW);
+	menuExport->addAction(acStructExportPySW);
 	menuExport->addAction(acStructExportScript);
 
 	menuPlotMode->addAction(m_plot_total);
@@ -756,6 +760,8 @@ void MagDynDlg::CreateMenuBar()
 		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::ExportToSunny));
 	connect(acStructExportSW, &QAction::triggered,
 		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::ExportToSpinW));
+	connect(acStructExportPySW, &QAction::triggered,
+		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::ExportToPySpinW));
 	connect(acStructExportScript, &QAction::triggered,
 		this, static_cast<void (MagDynDlg::*)()>(&MagDynDlg::ExportToScript));
 	connect(m_use_formfact, &QAction::toggled, this, &MagDynDlg::EnableFormFactors);

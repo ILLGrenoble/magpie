@@ -197,7 +197,7 @@ if(USE_QT)
 		dialogs.cpp
 		structure.cpp tables.cpp
 		config.cpp file.cpp
-		export/sunny.cpp export/sw.cpp
+		export/sunny.cpp export/sw.cpp export/pysw.cpp
 		export/script.cpp export/sqe.cpp
 		kernel.cpp dispersion.cpp
 		defs.cpp defs.h gui_defs.h
