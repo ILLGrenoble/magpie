@@ -259,11 +259,11 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 		if(!tl2::equals_0(term.J_calc, g_eps))
 		{
 			ofstr << "\tsw.HeisenbergExchange(sites.sites[" << local_site_indices[term.site1] << "], "
-				<< "sites.sites[" << local_site_indices[term.site2] << "], " << "cell_offset = ("
+				<< "sites.sites[" << local_site_indices[term.site2] << "], " << "cell_offset = [ "
 				<< term.dist_calc[0]
 				<< ", " << term.dist_calc[1]
 				<< ", " << term.dist_calc[2]
-				<< "), j = " << get_str_var(term.J) << "),"
+				<< " ], j = " << get_str_var(term.J) << "),"
 				<< "\t\t# " << term.name << "\n";
 		}
 
@@ -271,10 +271,10 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 		if(term.dmi_calc && !tl2::equals_0(*term.dmi_calc, g_eps))
 		{
 			ofstr << "\tsw.DMExchange(sites.sites[" << local_site_indices[term.site1] << "], "
-				<< "sites.sites[" << local_site_indices[term.site2] << "], " << "cell_offset = ("
+				<< "sites.sites[" << local_site_indices[term.site2] << "], " << "cell_offset = [ "
 				<< term.dist_calc[0]
 				<< ", " << term.dist_calc[1]
-				<< ", " << term.dist_calc[2] << "), "
+				<< ", " << term.dist_calc[2] << " ], "
 				<< "d_x = " << get_str_var(term.dmi[0]) << ", "
 				<< "d_y = " << get_str_var(term.dmi[1]) << ", "
 				<< "d_z = " << get_str_var(term.dmi[2]) << "),"
@@ -284,11 +284,11 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 		if(term.Jgen_calc && !tl2::equals_0(*term.Jgen_calc, g_eps))
 		{
 			ofstr << "\tsw.Exchange(sites.sites[" << local_site_indices[term.site1] << "], "
-				<< "sites.sites[" << local_site_indices[term.site2] << "], " << "cell_offset = ("
+				<< "sites.sites[" << local_site_indices[term.site2] << "], " << "cell_offset = [ "
 				<< term.dist_calc[0]
 				<< ", " << term.dist_calc[1]
 				<< ", " << term.dist_calc[2]
-				<< "), exchange_matrix = [[ "
+				<< " ], exchange_matrix = [[ "
 				<< get_str_var(term.Jgen[0][0]) << ", "
 				<< get_str_var(term.Jgen[0][1]) << ", "
 				<< get_str_var(term.Jgen[0][2]) << " ], [ "
