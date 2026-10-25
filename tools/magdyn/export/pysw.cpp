@@ -58,6 +58,12 @@ extern std::string get_str_var(const std::string& var, bool add_brackets = false
  */
 void MagDynDlg::ExportToPySpinW()
 {
+	if(m_dyn.IsIncommensurate())
+	{
+		ShowError("Incommensurate structure export is not yet supported.", true);
+		return;
+	}
+
 	QString dirLast = m_sett->value("dir_export_pysw", "").toString();
 	QString filename = QFileDialog::getSaveFileName(
 		this, "Save As py File", dirLast, "py files (*.py)");
@@ -103,6 +109,7 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 		<< "#\n\n";
 
 	ofstr << "import pyspinw as sw\n";
+	ofstr << "import numpy as np\n";
 	ofstr << "import time\n\n";
 
 	ofstr << "time_begin = time.perf_counter()\n\n";
@@ -143,6 +150,19 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 	// --------------------------------------------------------------------
 
 
+	/*// --------------------------------------------------------------------
+	// TODO
+	const t_vec3_real& prop = m_dyn.GetOrderingWavevector();
+	const t_vec3_real& axis = m_dyn.GetRotationAxis();
+
+	std::string mode = m_dyn.IsIncommensurate() ? "\"helical\"" : "\"direct\"";
+	ofstr << "sw_obj.genmagstr(\"mode\", " << mode << ", \"S\", spins, "
+		<< "\"k\", [ " << prop[0] << " " << prop[1] << " " << prop[2] << " ], "
+		<< "\"n\", [ " << axis[0] << " " << axis[1] << " " << axis[2] << " ]"
+		<< ")\n";*/
+	// --------------------------------------------------------------------
+
+
 	// --------------------------------------------------------------------
 	/*const auto& symops = GetSymOpsForCurrentSG();
 
@@ -163,6 +183,9 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 
 
 	const auto& xtal = m_dyn.GetCrystalLattice();
+	const auto& field = m_dyn.GetExternalField();
+	const t_vec3_real& field_dir = m_dyn.GetExternalFieldLab(false);
+
 	ofstr << "\n# xtal lattice and magnetic sites\n";
 	ofstr << "sites = sw.Structure([\n";
 
@@ -182,11 +205,22 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 		ofstr << "\tsw.Site("
 			<< get_str_var(site.pos[0]) << ", "
 			<< get_str_var(site.pos[1]) << ", "  
-			<< get_str_var(site.pos[2]) << ", "
-			<< get_str_var(site.spin_dir[0]) << " * " << get_str_var(site.spin_mag) << ", "
-			<< get_str_var(site.spin_dir[1]) << " * " << get_str_var(site.spin_mag) << ", "  
-			<< get_str_var(site.spin_dir[2]) << " * " << get_str_var(site.spin_mag) << ", "
-			<< "name = \"" << site.name << "\"),\n";
+			<< get_str_var(site.pos[2]) << ", ";
+		if(field.align_spins && field.dir)
+		{
+			ofstr
+				<< -field_dir[0] << " * " << get_str_var(site.spin_mag) << ", "
+				<< -field_dir[1] << " * " << get_str_var(site.spin_mag) << ", "  
+				<< -field_dir[2] << " * " << get_str_var(site.spin_mag) << ", ";
+		}
+		else
+		{
+			ofstr
+				<< get_str_var(site.spin_dir[0]) << " * " << get_str_var(site.spin_mag) << ", "
+				<< get_str_var(site.spin_dir[1]) << " * " << get_str_var(site.spin_mag) << ", "  
+				<< get_str_var(site.spin_dir[2]) << " * " << get_str_var(site.spin_mag) << ", ";
+		}
+		ofstr << "name = \"" << site.name << "\"),\n";
 
 		local_site_indices.insert(std::make_pair(site.name, local_site_idx));
 		++local_site_idx;
@@ -202,39 +236,6 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 	// --------------------------------------------------------------------
 
 
-	/*// --------------------------------------------------------------------
-	// TODO
-	ofstr << "\n# spin directions\n";
-
-	const auto& field = m_dyn.GetExternalField();
-	const t_vec3_real& field_dir = m_dyn.GetExternalFieldLab(false);
-	const t_vec3_real& prop = m_dyn.GetOrderingWavevector();
-	const t_vec3_real& axis = m_dyn.GetRotationAxis();
-
-	ofstr << "spins = [ ";
-	for(int i = 0; i < 3; ++i)
-	{
-		for(const t_site& site : m_dyn.GetMagneticSites())
-		{
-			if(field.align_spins && field.dir)
-				ofstr << field_dir[i] << " ";
-			else
-				ofstr << get_str_var(site.spin_dir[i]) << " ";
-		}
-
-		if(i < 2)
-			ofstr << "; ";
-	}
-	ofstr << "]\n";
-
-	std::string mode = m_dyn.IsIncommensurate() ? "\"helical\"" : "\"direct\"";
-	ofstr << "sw_obj.genmagstr(\"mode\", " << mode << ", \"S\", spins, "
-		<< "\"k\", [ " << prop[0] << " " << prop[1] << " " << prop[2] << " ], "
-		<< "\"n\", [ " << axis[0] << " " << axis[1] << " " << axis[2] << " ]"
-		<< ")\n";*/
-	// --------------------------------------------------------------------
-
-
 	// --------------------------------------------------------------------
 	ofstr << "\n# magnetic couplings\n";
 	ofstr << "couplings = [\n";
@@ -242,12 +243,10 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 	std::unordered_set<t_size> seen_term_sym_indices;
 	for(const t_term& term : m_dyn.GetExchangeTerms())
 	{
-		t_size idx1 = m_dyn.GetMagneticSiteIndex(term.site1);
-		t_size idx2 = m_dyn.GetMagneticSiteIndex(term.site2);
-		bool is_aniso = (idx1 == idx2 && tl2::equals_0(term.dist_calc, g_eps));
-
-		if(is_aniso)
-			continue;
+		// TODO
+		//bool is_aniso = (idx1 == idx2 && tl2::equals_0(term.dist_calc, g_eps));
+		//if(is_aniso)
+		//	continue;
 
 		if(only_unique)
 		{
@@ -315,10 +314,6 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 	// TODO
 	/*if(m_dyn.GetTemperature() >= 0.)
 	{
-	}
-
-	if(!tl2::equals_0<t_real>(field.mag, g_eps) && field.dir)
-	{
 	}*/
 	// --------------------------------------------------------------------
 
@@ -326,11 +321,20 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 	// --------------------------------------------------------------------
 	ofstr << "\n# spin-wave calculation\n";
 	ofstr << "H = sw.Hamiltonian(sites, couplings, sia_couplings)\n";
+	ofstr << "# H.print_summary()\n";
 
 	std::string Scomp = m_use_projector->isChecked() ? "\"Sperp\"" : "\"Sxx+Syy+Szz\"";
 	ofstr << "H.spaghetti_plot("
-		<< "sw.Path([ Qstart, Qend ], Qpts), dE = 0.1, "
-		<< "components = " << Scomp << ")\n";
+		<< "sw.Path([ Qstart, Qend ], Qpts), dE = 0.1"
+		<< ", components = " << Scomp;
+	if(!tl2::equals_0<t_real>(field.mag, g_eps) && field.dir)
+	{
+		ofstr << ", field = np.array([ "
+			<< field_dir[0] << ", "
+			<< field_dir[1] << ", "
+			<< field_dir[2] << " ]) * " << field.mag;
+	}
+	ofstr << ")\n";
 	// --------------------------------------------------------------------
 
 

@@ -337,7 +337,6 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acStructExportSW = new QAction("Export To SpinW Code...", menuExport);
 	QAction *acStructExportPySW = new QAction("Export To PySpinW Code...", menuExport);
 	QAction *acStructExportScript = new QAction("Export To Python Code...", menuExport);
-	acStructExportPySW->setEnabled(false);  // TODO
 
 	// dispersion plot menu
 	m_menuDisp = new QMenu("Dispersion Plot", m_menu);
