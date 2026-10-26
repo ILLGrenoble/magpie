@@ -880,17 +880,17 @@ t_cont get_py_array(const t_str& str)
 	std::size_t iEnd = str.find(']');
 
 	// search for list instead
-	if(iStart==t_str::npos || iEnd==t_str::npos)
+	if(iStart == t_str::npos || iEnd == t_str::npos)
 	{
 		iStart = str.find('(');
 		iEnd = str.find(')');
 	}
 
 	// invalid array
-	if(iStart==t_str::npos || iEnd==t_str::npos || iEnd<iStart)
+	if(iStart == t_str::npos || iEnd == t_str::npos || iEnd<iStart)
 		return vecArr;
 
-	t_str strArr = str.substr(iStart+1, iEnd-iStart-1);
+	t_str strArr = str.substr(iStart + 1, iEnd - iStart - 1);
 	get_tokens<t_elems, t_str>(strArr, ",", vecArr);
 
 	return vecArr;
@@ -904,10 +904,10 @@ t_str get_py_string(const t_str& str)
 	std::size_t iEnd = str.find_last_of("\'\"");
 
 	// invalid string
-	if(iStart==t_str::npos || iEnd==t_str::npos || iEnd<iStart)
+	if(iStart == t_str::npos || iEnd == t_str::npos || iEnd < iStart)
 		return "";
 
-	return str.substr(iStart+1, iEnd-iStart-1);
+	return str.substr(iStart + 1, iEnd - iStart - 1);
 }
 
 

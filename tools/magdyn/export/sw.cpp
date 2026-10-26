@@ -243,7 +243,7 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 		}
 		else
 		{
-			std::string S = get_str_var(m_dyn.GetMagneticSites()[idx1 - 1].spin_mag);
+			std::string S = get_str_var(m_dyn.GetMagneticSites()[idx1].spin_mag);
 			ofstr << "_S_mag = " << S << ";\n";
 		}
 

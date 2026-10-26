@@ -24,8 +24,10 @@
  */
 
 #include <boost/scope_exit.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 namespace pt = boost::property_tree;
+namespace algo = boost::algorithm;
 
 #include "../magdyn.h"
 
@@ -49,6 +51,16 @@ extern t_real g_eps;
 
 
 extern std::string get_str_var(const std::string& var, bool add_brackets = false);
+
+
+static std::string get_str_var_repl(const std::string& _var, const std::string& S_mag, bool add_brackets = false)
+{
+	std::string var = _var;
+	if(S_mag != "")
+		algo::replace_all(var, "_S_mag", S_mag);
+
+	return get_str_var(var, add_brackets);
+}
 
 
 
@@ -243,10 +255,13 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 	std::unordered_set<t_size> seen_term_sym_indices;
 	for(const t_term& term : m_dyn.GetExchangeTerms())
 	{
-		// TODO
-		//bool is_aniso = (idx1 == idx2 && tl2::equals_0(term.dist_calc, g_eps));
-		//if(is_aniso)
-		//	continue;
+		const t_size idx1 = m_dyn.GetMagneticSiteIndex(term.site1);
+		const t_size idx2 = m_dyn.GetMagneticSiteIndex(term.site2);
+		const bool is_aniso = (idx1 == idx2 && tl2::equals_0(term.dist_calc, g_eps));
+	
+		std::string S1_mag;
+		if(is_aniso)
+			S1_mag = get_str_var(m_dyn.GetMagneticSites()[idx1].spin_mag);
 
 		if(only_unique)
 		{
@@ -263,7 +278,7 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 				<< term.dist_calc[0]
 				<< ", " << term.dist_calc[1]
 				<< ", " << term.dist_calc[2]
-				<< " ], j = " << get_str_var(term.J) << "),"
+				<< " ], j = " << get_str_var_repl(term.J, S1_mag) << "),"
 				<< "\t\t# " << term.name << "\n";
 		}
 
@@ -275,29 +290,29 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 				<< term.dist_calc[0]
 				<< ", " << term.dist_calc[1]
 				<< ", " << term.dist_calc[2] << " ], "
-				<< "d_x = " << get_str_var(term.dmi[0]) << ", "
-				<< "d_y = " << get_str_var(term.dmi[1]) << ", "
-				<< "d_z = " << get_str_var(term.dmi[2]) << "),"
+				<< "d_x = " << get_str_var_repl(term.dmi[0], S1_mag) << ", "
+				<< "d_y = " << get_str_var_repl(term.dmi[1], S1_mag) << ", "
+				<< "d_z = " << get_str_var_repl(term.dmi[2], S1_mag) << "),"
 				<< "\t\t# " << term.name << "\n";
 		}
 
 		if(term.Jgen_calc && !tl2::equals_0(*term.Jgen_calc, g_eps))
 		{
-			ofstr << "\tsw.Exchange(sites.sites[" << local_site_indices[term.site1] << "], "
+			ofstr << "\tsw.exchange.Exchange(sites.sites[" << local_site_indices[term.site1] << "], "
 				<< "sites.sites[" << local_site_indices[term.site2] << "], " << "cell_offset = [ "
 				<< term.dist_calc[0]
 				<< ", " << term.dist_calc[1]
 				<< ", " << term.dist_calc[2]
-				<< " ], exchange_matrix = [[ "
-				<< get_str_var(term.Jgen[0][0]) << ", "
-				<< get_str_var(term.Jgen[0][1]) << ", "
-				<< get_str_var(term.Jgen[0][2]) << " ], [ "
-				<< get_str_var(term.Jgen[1][0]) << ", "
-				<< get_str_var(term.Jgen[1][1]) << ", "
-				<< get_str_var(term.Jgen[1][2]) << " ], [ "
-				<< get_str_var(term.Jgen[2][0]) << ", "
-				<< get_str_var(term.Jgen[2][1]) << ", "
-				<< get_str_var(term.Jgen[2][2]) << " ]]),"
+				<< " ], exchange_matrix = np.array([[ "
+				<< get_str_var_repl(term.Jgen[0][0], S1_mag) << ", "
+				<< get_str_var_repl(term.Jgen[0][1], S1_mag) << ", "
+				<< get_str_var_repl(term.Jgen[0][2], S1_mag) << " ], [ "
+				<< get_str_var_repl(term.Jgen[1][0], S1_mag) << ", "
+				<< get_str_var_repl(term.Jgen[1][1], S1_mag) << ", "
+				<< get_str_var_repl(term.Jgen[1][2], S1_mag) << " ], [ "
+				<< get_str_var_repl(term.Jgen[2][0], S1_mag) << ", "
+				<< get_str_var_repl(term.Jgen[2][1], S1_mag) << ", "
+				<< get_str_var_repl(term.Jgen[2][2], S1_mag) << " ]])),"
 				<< "\t\t# " << term.name << "\n";
 		}
 	}
