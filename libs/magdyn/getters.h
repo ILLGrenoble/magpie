@@ -573,15 +573,19 @@ MAGDYN_INST::GetSupercellMinMax() const
 // --------------------------------------------------------------------
 // setter
 // --------------------------------------------------------------------
-MAGDYN_TEMPL void MAGDYN_INST::SetEpsilon(t_real eps)
+MAGDYN_TEMPL void MAGDYN_INST::SetEpsilon(t_real eps, bool set_prec)
 {
 	m_eps = eps;
+	if(set_prec)
+		m_prec = static_cast<int>(std::abs(std::round(std::log10(m_eps))));
 }
 
 
-MAGDYN_TEMPL void MAGDYN_INST::SetPrecision(int prec)
+MAGDYN_TEMPL void MAGDYN_INST::SetPrecision(int prec, bool set_eps)
 {
 	m_prec = prec;
+	if(set_eps)
+		m_eps = std::pow(t_real(10.), -static_cast<t_real>(std::abs(m_prec)));
 }
 
 

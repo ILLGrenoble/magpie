@@ -152,7 +152,7 @@ extern int g_fail_on_gl_error;
 // ----------------------------------------------------------------------------
 #include "dialogs/settings.h"
 
-constexpr std::array<SettingsVariable, 26> g_settingsvariables
+constexpr std::array<SettingsVariable, 25> g_settingsvariables
 {{
 	// threads
 	{
@@ -166,11 +166,6 @@ constexpr std::array<SettingsVariable, 26> g_settingsvariables
 		.description = "Calculation epsilon.",
 		.key = "eps",
 		.value = &g_eps,
-	},
-	{
-		.description = "Number precision.",
-		.key = "prec",
-		.value = &g_prec,
 	},
 	{
 		.description = "GUI number precision.",

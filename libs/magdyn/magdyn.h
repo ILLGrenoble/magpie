@@ -263,8 +263,8 @@ public:
 	// --------------------------------------------------------------------
 	// setter
 	// --------------------------------------------------------------------
-	void SetEpsilon(t_real eps);
-	void SetPrecision(int prec);
+	void SetEpsilon(t_real eps, bool set_prec = true);
+	void SetPrecision(int prec, bool set_eps = true);
 	void SetUnitCellExtents(t_real uc_min, t_real uc_max);
 
 	void SetTemperature(t_real T);
