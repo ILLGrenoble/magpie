@@ -34,6 +34,7 @@ namespace algo = boost::algorithm;
 #include <QtCore/QString>
 
 #include <fstream>
+#include <sstream>
 #include <unordered_set>
 #include <unordered_map>
 #include <cstdlib>
@@ -124,8 +125,6 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 	ofstr << "import numpy as np\n";
 	ofstr << "import time\n\n";
 
-	ofstr << "time_begin = time.perf_counter()\n\n";
-
 
 	// --------------------------------------------------------------------
 	t_real h1 = (t_real)m_Q_start[0]->value();
@@ -140,6 +139,14 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 	t_real peak2x = (t_real)m_scatteringplane[3]->value();
 	t_real peak2y = (t_real)m_scatteringplane[4]->value();
 	t_real peak2z = (t_real)m_scatteringplane[5]->value();
+
+
+	ofstr << "# options\n";
+	ofstr << "only_pos_E    = True     # ignore magnon annihilation?\n";
+	ofstr << "print_results = False    # output final results\n";
+	ofstr << "weight_scale  = 16.      # S(Q, E) scaling factor for plotting\n";
+	ofstr << "\n";
+
 
 	ofstr << "# variables\n";
 
@@ -160,6 +167,9 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 		ofstr << "\n";
 	}
 	// --------------------------------------------------------------------
+
+
+	ofstr << "\ntime_begin = time.perf_counter()\n";
 
 
 	/*// --------------------------------------------------------------------
@@ -338,23 +348,67 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 	ofstr << "H = sw.Hamiltonian(sites, couplings, sia_couplings)\n";
 	ofstr << "# H.print_summary()\n";
 
+	ofstr << "Qs = sw.Path([ Qstart, Qend ], Qpts)\n";
 	std::string Scomp = m_use_projector->isChecked() ? "\"Sperp\"" : "\"Sxx+Syy+Szz\"";
-	ofstr << "H.spaghetti_plot("
-		<< "sw.Path([ Qstart, Qend ], Qpts), dE = 0.1"
-		<< ", components = " << Scomp;
+
+	std::ostringstream ostrField;
+	ostrField.precision(g_prec);
+	
 	if(!tl2::equals_0<t_real>(field.mag, g_eps) && field.dir)
 	{
-		ofstr << ", field = np.array([ "
+		ostrField << ", field = np.array([ "
 			<< field_dir[0] << ", "
 			<< field_dir[1] << ", "
 			<< field_dir[2] << " ]) * " << field.mag;
 	}
-	ofstr << ")\n";
+
+	ofstr << "# H.spaghetti_plot(Qs, dE = 0.1, components = " << Scomp;
+	ofstr << ostrField.str() << ")\n";
+	ofstr << "[ allEs, allws ] = H.energies_and_intensities(Qs, components = " << Scomp;
+	ofstr << ostrField.str() << ")\n";
+
+	ofstr << R"BLOCK(
+if print_results:
+	print("%-15s %-15s %-15s %-15s %-15s" % ("# h (rlu)", "k (rlu)", "l (rlu)", "E (meV)", "S (a.u.)"))
+
+hs, ks, ls, Es, ws = [], [], [], [], []
+for Q, _Es, _ws in zip(Qs.q_points(), allEs, allws):
+	for E, w in zip(_Es, _ws):
+		E = E.real
+		if only_pos_E and E < 0.:
+			continue
+
+		hs.append(Q[0])
+		ks.append(Q[1])
+		ls.append(Q[2])
+		Es.append(E)
+		ws.append(w * weight_scale)
+
+		if print_results:
+			print("%-15.6f %-15.6f %-15.6f %-15.6f %-15.6f" % (Q[0], Q[1], Q[2], E, w))
+
+time_total = time.perf_counter() - time_begin
+print("Calculation took %.6f seconds." % time_total)
+
+# choose the Q component with the most change
+qs = hs
+if np.std(ks) > np.std(qs):
+	qs = ks
+if np.std(ls) > np.std(qs):
+	qs = ls
+
+# plotting
+print("Plotting dispersion...")
+import matplotlib.pyplot as plt
+
+plt.plot()
+plt.xlabel("q (rlu)")
+plt.ylabel("E (meV)")
+plt.scatter(qs, Es, marker = '.', s = ws)
+plt.show()
+)BLOCK";
 	// --------------------------------------------------------------------
 
-
-	ofstr << "\ntime_total = time.perf_counter() - time_begin\n";
-	ofstr << "print(\"Calculation took %.6f seconds.\" % time_total)\n";
 
 	return true;
 }

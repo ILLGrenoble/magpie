@@ -543,7 +543,7 @@ def get_correlations(Qvec, states, H, C, signs, sites, xtal):
 
 	// --------------------------------------------------------------------
 
-	ofstr <<  R"BLOCK(
+	ofstr << R"BLOCK(
 print("Setting up magnetic sites...")
 time_setup_begin = time.perf_counter()
 init(sites, couplings)
