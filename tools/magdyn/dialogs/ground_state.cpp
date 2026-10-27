@@ -101,16 +101,16 @@ GroundStateDlg::GroundStateDlg(QWidget *parent, QSettings *sett)
 	m_checkSym->setToolTip("Keep the same spin for symmetry-equivalent sites.");
 
 	m_btnFromKernel = new QPushButton("Get Config.", this);
-	m_btnToKernel = new QPushButton("Set Spins", this);
 	m_btnMinimise = new QPushButton("Minimise", this);
+	m_btnToKernel = new QPushButton("Set Spins", this);
 
 	m_btnFromKernel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-	m_btnToKernel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	m_btnMinimise->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	m_btnToKernel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
-	m_btnFromKernel->setToolTip("Fetch spins from main dialog.");
-	m_btnToKernel->setToolTip("Send spins back to main dialog.");
-	m_btnMinimise->setToolTip("Minimise ground state energy.");
+	m_btnFromKernel->setToolTip("Fetch the magnetic configuration from the main dialog.");
+	m_btnMinimise->setToolTip("Minimise the ground state energy.");
+	m_btnToKernel->setToolTip("Send the minimised spin configuration back to the main dialog.");
 
 	// close button
 	QDialogButtonBox *btnbox = new QDialogButtonBox(this);
@@ -131,8 +131,8 @@ GroundStateDlg::GroundStateDlg(QWidget *parent, QSettings *sett)
 	grid->addWidget(m_spinstab, y++, 0, 1, 4);
 	grid->addWidget(m_checkSym, y++, 0, 1, 1);
 	grid->addWidget(m_btnFromKernel, y, 0, 1, 1);
-	grid->addWidget(m_btnToKernel, y, 1, 1, 1);
-	grid->addWidget(m_btnMinimise, y, 2, 1, 1);
+	grid->addWidget(m_btnMinimise, y, 1, 1, 1);
+	grid->addWidget(m_btnToKernel, y, 2, 1, 1);
 	grid->addWidget(btnbox, y++, 3, 1, 1);
 	grid->addWidget(m_status, y, 0, 1, 4);
 

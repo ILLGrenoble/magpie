@@ -37,6 +37,7 @@ add_compile_options(-Wall -Wextra)
 
 
 option(USE_NATIVE  "use native code"   FALSE)
+option(USE_MINUIT  "use Minuit"        TRUE)
 
 
 list(APPEND CMAKE_MODULE_PATH
@@ -102,6 +103,23 @@ endif()
 
 
 # -----------------------------------------------------------------------------
+# Minuit
+if(USE_MINUIT)
+	find_package(Minuit2)
+endif()
+
+if(Minuit2_FOUND)
+	message("Using Minuit 2.")
+	include_directories("${Minuit2_INCLUDE_DIRS}")
+	add_definitions(-D__TLIBS2_USE_MINUIT__ -D__MAGDYN_USE_MINUIT__)
+else()
+	message("Disabling Minuit support.")
+	set(Minuit2_LIBRARIES "")
+endif()
+# -----------------------------------------------------------------------------
+
+
+# -----------------------------------------------------------------------------
 # Python
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development REQUIRED)
 
@@ -145,6 +163,7 @@ target_link_libraries(magpy
 	Python3::Python
 	${Boost_LIBRARIES}
 	${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES} ${GFortran_LIBRARIES}
+	${Minuit2_LIBRARIES}
 	${Qhull_LIBRARIES}
 	#/usr/local/lib/libgemmi_cpp.a
 	gemmi::gemmi_cpp
