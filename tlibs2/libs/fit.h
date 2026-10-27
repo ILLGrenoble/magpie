@@ -38,7 +38,9 @@
 	#include <Minuit2/MnSimplex.h>
 	#include <Minuit2/MnPrint.h>
 
-	#define __TLIBS2_USE_MINUIT__
+	#ifndef __TLIBS2_USE_MINUIT__
+		#define __TLIBS2_USE_MINUIT__
+	#endif
 #else
 	//#pragma message("tlibs2: Disabling Minuit library (not found).")
 #endif
