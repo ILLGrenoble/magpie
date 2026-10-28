@@ -71,12 +71,6 @@ static std::string get_str_var_repl(const std::string& _var, const std::string& 
  */
 void MagDynDlg::ExportToPySpinW()
 {
-	if(m_dyn.IsIncommensurate())
-	{
-		ShowError("Incommensurate structure export is not yet supported.", true);
-		return;
-	}
-
 	QString dirLast = m_sett->value("dir_export_pysw", "").toString();
 	QString filename = QFileDialog::getSaveFileName(
 		this, "Save As py File", dirLast, "py files (*.py)");
@@ -151,7 +145,7 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 	ofstr << "# variables\n";
 
 	// internal constants and variables
-	ofstr << "g_e     = " << tl2::g_e<t_real> << "\n";
+	ofstr << "g_e     = " << std::abs(tl2::g_e<t_real>) << "\n";
 	ofstr << "Qstart  = [ " << h1 << ", " << k1 << ", " << l1 << " ]\n";
 	ofstr << "Qend    = [ " << h2 << ", " << k2 << ", " << l2 << " ]\n";
 	ofstr << "Qpts    = " << m_num_points->value() << "\n";
@@ -170,19 +164,6 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 
 
 	ofstr << "\ntime_begin = time.perf_counter()\n";
-
-
-	/*// --------------------------------------------------------------------
-	// TODO
-	const t_vec3_real& prop = m_dyn.GetOrderingWavevector();
-	const t_vec3_real& axis = m_dyn.GetRotationAxis();
-
-	std::string mode = m_dyn.IsIncommensurate() ? "\"helical\"" : "\"direct\"";
-	ofstr << "sw_obj.genmagstr(\"mode\", " << mode << ", \"S\", spins, "
-		<< "\"k\", [ " << prop[0] << " " << prop[1] << " " << prop[2] << " ], "
-		<< "\"n\", [ " << axis[0] << " " << axis[1] << " " << axis[2] << " ]"
-		<< ")\n";*/
-	// --------------------------------------------------------------------
 
 
 	// --------------------------------------------------------------------
@@ -207,9 +188,11 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 	const auto& xtal = m_dyn.GetCrystalLattice();
 	const auto& field = m_dyn.GetExternalField();
 	const t_vec3_real& field_dir = m_dyn.GetExternalFieldLab(false);
+	const t_vec3_real& prop = m_dyn.GetOrderingWavevector();
+	const t_vec3_real& axis = m_dyn.GetRotationAxis();
 
 	ofstr << "\n# xtal lattice and magnetic sites\n";
-	ofstr << "sites = sw.Structure([\n";
+	ofstr << "sites = sw.Structure(sites = [\n";
 
 	std::unordered_set<t_size> seen_site_sym_indices;
 	std::unordered_map<std::string, t_size> local_site_indices;
@@ -225,34 +208,46 @@ bool MagDynDlg::ExportToPySpinW(const QString& _filename)
 		}
 
 		ofstr << "\tsw.Site("
-			<< get_str_var(site.pos[0]) << ", "
-			<< get_str_var(site.pos[1]) << ", "  
-			<< get_str_var(site.pos[2]) << ", ";
+			<< "i = " << get_str_var(site.pos[0]) << ", "
+			<< "j = " << get_str_var(site.pos[1]) << ", "  
+			<< "k = " << get_str_var(site.pos[2]) << ", ";
 		if(field.align_spins && field.dir)
 		{
 			ofstr
-				<< -field_dir[0] << " * " << get_str_var(site.spin_mag) << ", "
-				<< -field_dir[1] << " * " << get_str_var(site.spin_mag) << ", "  
-				<< -field_dir[2] << " * " << get_str_var(site.spin_mag) << ", ";
+				<< "sx = " << -field_dir[0] << " * " << get_str_var(site.spin_mag) << ", "
+				<< "sy = " << -field_dir[1] << " * " << get_str_var(site.spin_mag) << ", "
+				<< "sz = " << -field_dir[2] << " * " << get_str_var(site.spin_mag) << ", ";
 		}
 		else
 		{
 			ofstr
-				<< get_str_var(site.spin_dir[0]) << " * " << get_str_var(site.spin_mag) << ", "
-				<< get_str_var(site.spin_dir[1]) << " * " << get_str_var(site.spin_mag) << ", "  
-				<< get_str_var(site.spin_dir[2]) << " * " << get_str_var(site.spin_mag) << ", ";
+				<< "sx = " << get_str_var(site.spin_dir[0]) << " * " << get_str_var(site.spin_mag) << ", "
+				<< "sy = " << get_str_var(site.spin_dir[1]) << " * " << get_str_var(site.spin_mag) << ", "  
+				<< "sz = " << get_str_var(site.spin_dir[2]) << " * " << get_str_var(site.spin_mag) << ", ";
 		}
+		ofstr << "g = g_e, ";
 		ofstr << "name = \"" << site.name << "\"),\n";
 
 		local_site_indices.insert(std::make_pair(site.name, local_site_idx));
 		++local_site_idx;
 	}
 
-	ofstr << "\t], sw.UnitCell("
+	ofstr << "\t]";
+
+	if(m_dyn.IsIncommensurate())
+	{
+		ofstr << ",\n\tsupercell = sw.RotationSupercell("
+			<< "[ " << axis[0] << ", " << axis[1] << ", " << axis[2] << " ], "
+			<< "[ " << prop[0] << ", " << prop[1] << ", " << prop[2] << " ])";
+	}
+
+	ofstr << ",\n\tunit_cell = sw.UnitCell("
 		<< xtal[0] << ", " << xtal[1] << ", " << xtal[2] << ", "
 		<< tl2::r2d<t_real>(xtal[3]) << ", "
 		<< tl2::r2d<t_real>(xtal[4]) << ", "
-		<< tl2::r2d<t_real>(xtal[5]) << ")\n";
+		<< tl2::r2d<t_real>(xtal[5]) << ")";
+
+	ofstr << ", spacegroup = None";
 
 	ofstr << ")\n";
 	// --------------------------------------------------------------------

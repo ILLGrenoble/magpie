@@ -370,6 +370,7 @@ void MagDynDlg::SyncToKernel()
 		// TODO: make this field configurable, currently it
 		// overrides any other values in the kernel
 		site.g_e = tl2::g_e<t_real> * tl2::unit<t_mat33>(3);
+		//site.g_e = -2. * tl2::unit<t_mat33>(3);
 
 		site.pos[0] = pos_x->text().toStdString();
 		site.pos[1] = pos_y->text().toStdString();
