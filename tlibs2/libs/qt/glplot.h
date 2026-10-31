@@ -92,44 +92,46 @@ protected:
 	QFont m_font{};
 
 	// vertices
-	GLint m_attrVertex = -1, m_attrVertexNorm = -1;
-	GLint m_attrVertexCol = -1, m_attrTexCoords = -1;
+	GLint m_attrVertex { -1 }, m_attrVertexNorm { -1 };
+	GLint m_attrVertexCol { -1 }, m_attrTexCoords { -1 };
 
 	// texture
-	GLint m_uniTextureIndex = -1, m_uniTextureActive = -1;
+	GLint m_uniTextureIndex { -1 }, m_uniTextureActive { -1 };
 
 	// lighting
-	GLint m_uniLightPos = -1, m_uniNumActiveLights = -1, m_uniLighting = -1;
-	GLint m_uniConstCol = -1;
+	GLint m_uniLightPos { -1 }, m_uniNumActiveLights { -1 }, m_uniLighting { -1 };
+	GLint m_uniConstCol { -1 };
 
 	// matrices
-	GLint m_uniMatrixProj = -1, m_uniMatrixObjAfterProj = -1;
-	GLint m_uniMatrixCam = -1, m_uniMatrixCamInv = -1;
-	GLint m_uniMatrixObj = -1, m_uniMatrixObjCam = -1;
-	GLint m_uniMatrixA = -1, m_uniMatrixB = -1;
+	GLint m_uniMatrixProj { -1 }, m_uniMatrixObjAfterProj { -1 };
+	GLint m_uniMatrixCam { -1 }, m_uniMatrixCamInv { -1 };
+	GLint m_uniMatrixObj { -1 }, m_uniMatrixObjCam { -1 };
+	GLint m_uniMatrixA { -1 }, m_uniMatrixB { -1 };
 
 	// flags
-	GLint m_uniIsRealSpace = -1, m_uniCoordSys = -1;
-	GLint m_uniCamInvar = -1;
+	GLint m_uniIsRealSpace { -1 }, m_uniCoordSys{ -1 };
+	GLint m_uniCamInvar { -1 };
 
-	t_mat_gl m_matA = tl2::unit<t_mat_gl>();
-	t_mat_gl m_matB = tl2::unit<t_mat_gl>();
-	t_real_gl m_CoordMax = 2.5;       // extent of coordinate axes
+	t_mat_gl m_matA { tl2::unit<t_mat_gl>() };
+	t_mat_gl m_matB { tl2::unit<t_mat_gl>() };
+	t_real_gl m_CoordMax { 2.5 };       // extent of coordinate axes
 
-	std::atomic<bool> m_initialised = false;
-	std::atomic<bool> m_fail_on_gl_error = false;
-	std::atomic<bool> m_viewport_needs_update = false;
-	std::atomic<bool> m_picker_enabled = true;
-	std::atomic<bool> m_picker_needs_update = false;
-	std::atomic<bool> m_lights_need_update = false;
-	std::atomic<bool> m_Btrafo_needs_update = false;
-	std::atomic<bool> m_cull = true;
-	std::atomic<bool> m_blend = false;
-	std::atomic<bool> m_is_real_space = true;
-	std::atomic<int> m_coordsys = 0;  // 0: orthogonal, 1: using crystal matrix
-	std::atomic<bool> m_showLabels = true;
+	t_real_gl m_eps{ 1e-6 };
 
-	t_real_gl m_pickerSphereRadius = 1;
+	std::atomic<bool> m_initialised { false };
+	std::atomic<bool> m_fail_on_gl_error { false };
+	std::atomic<bool> m_viewport_needs_update { false };
+	std::atomic<bool> m_picker_enabled { true };
+	std::atomic<bool> m_picker_needs_update { false };
+	std::atomic<bool> m_lights_need_update { false };
+	std::atomic<bool> m_Btrafo_needs_update { false };
+	std::atomic<bool> m_cull = { true };
+	std::atomic<bool> m_blend = { false };
+	std::atomic<bool> m_is_real_space { true };
+	std::atomic<int> m_coordsys { 0} ;  // 0: orthogonal, 1: using crystal matrix
+	std::atomic<bool> m_showLabels { true };
+
+	t_real_gl m_pickerSphereRadius { 1 };
 	std::array<std::string, 3> m_axisLabels{};
 	std::array<t_real_gl, 6> m_coordCubeRanges{};
 	std::array<t_real_gl, 3> m_coordCubeTicks{};
@@ -141,8 +143,8 @@ protected:
 
 	QPointF m_posMouse{};
 	QPointF m_posMouseRotationStart{}, m_posMouseRotationEnd{};
-	bool m_in_rotation = false;
-	bool m_restrict_cam_theta = true;
+	bool m_in_rotation { false };
+	bool m_restrict_cam_theta { true };
 
 	QTimer m_timer{};
 	t_cam m_cam{};

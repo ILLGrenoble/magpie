@@ -35,6 +35,9 @@
 #define __TL2_QT_HELPERS_H__
 
 #include <QtCore/QLocale>
+#include <QtCore/QSizeF>
+#include <QtCore/QPointF>
+
 #include <locale>
 
 
@@ -54,6 +57,23 @@ static inline void set_locales()
 	std::locale::global(C_loc);
 
 	QLocale::setDefault(QLocale::C);
+}
+
+
+
+static inline QPointF to_pointf(const QSizeF& size)
+{
+  return QPointF{size.width(), size.height()};
+}
+
+
+
+/**
+ * 2d point with absolute components
+ */
+static inline QPointF pointf_abs(const QPointF& pt)
+{
+  return QPointF{std::abs(pt.x()), std::abs(pt.y())};
 }
 
 

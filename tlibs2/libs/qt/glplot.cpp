@@ -38,10 +38,13 @@
  */
 
 #include "glplot.h"
+#include "helper.h"
 #include "../voronoi.h"
 
 #include <QtGui/QPainter>
 #include <QtGui/QGuiApplication>
+#include <QtGui/QFontMetricsF>
+
 #include <QtCore/QtGlobal>
 
 #include <QtWidgets/QGestureEvent>
@@ -792,34 +795,50 @@ std::vector<std::size_t> GlPlotRenderer::AddCoordinateCube(t_real_gl min, t_real
 
 /**
  * calculate a possible tick spacing
+ * @see P. S. Heckbert, Graphics Gems, pp. 61-63 (1990)
  */
 std::pair<t_real_gl, t_real_gl>
 GlPlotRenderer::CalcTickMarks(t_real_gl min, t_real_gl max, t_real_gl tick_delta)
 {
-	if(tick_delta <= 0.)  // calculate tick spacing if none given
+	if(tick_delta > 0.)
 	{
-		t_real_gl range = max - min;
-		if(!tl2::equals_0(range))
-		{
-			int power = static_cast<int>(std::log10(std::abs(range)));
-			tick_delta = std::pow(10., power);
-		}
-		else
-		{
-			tick_delta = 1e-4;
-		}
-
-		// if there's too little ticks, decrease the delta
-		if(range / tick_delta < 3.)
-			tick_delta /= 5.;
-
-		// if there's too many ticks, increase the delta
-		if(range / tick_delta > 4.)
-			tick_delta *= 2.;
+		// tick spacing already given
+		t_real_gl start = std::ceil(min / tick_delta - m_eps)*tick_delta;
+		return std::make_pair(tick_delta, start);
 	}
 
-	t_real_gl start = std::floor(min / tick_delta)*tick_delta;
+	constexpr const std::array<std::pair<t_real_gl, t_real_gl>, 3> ranges_and_ticks
+	{
+		std::make_pair(t_real_gl(1.5), t_real_gl(1.) /*0, 1,  2, ...*/),
+		std::make_pair(t_real_gl(3.),  t_real_gl(2.) /*0, 2,  4, ...*/),
+		std::make_pair(t_real_gl(7.),  t_real_gl(5.) /*0, 5, 10, ...*/),
+	};
 
+	t_real_gl range = std::abs(max - min);
+	if(!tl2::equals_0(range, m_eps))
+	{
+		t_real_gl power = std::floor(std::log10(t_real_gl(0.25) * range));
+		t_real_gl delta = std::pow(t_real_gl(10.), power);
+		t_real_gl range_1_10 = t_real_gl(0.25) * range / delta;
+
+		tick_delta = 10.;
+		for(const auto [ range, tick ] : ranges_and_ticks)
+		{
+			if(range_1_10 >= range)
+				continue;
+
+			tick_delta = tick;
+			break;
+		}
+
+		tick_delta *= delta;
+	}
+	else
+	{
+		tick_delta = m_eps;
+	}
+
+	t_real_gl start = std::ceil(min / tick_delta - m_eps)*tick_delta;
 	return std::make_pair(tick_delta, start);
 };
 
@@ -833,7 +852,7 @@ GlPlotRenderer::CalcTickMarks(t_real_gl min, t_real_gl max, t_real_gl tick_delta
  */
 t_real_gl GlPlotRenderer::TickTrafo(t_real_gl min, t_real_gl max, t_real_gl val)
 {
-	if(tl2::equals_0(max - min))
+	if(tl2::equals_0(max - min, m_eps))
 		return 0.;
 	return (val - min) / (max - min);
 };
@@ -890,10 +909,17 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 		painter.setFont(m_font);
 		painter.setPen(pen);
 
+		bool swapped[2] = { false, false };
 		if(x_min > x_max)
+		{
 			std::swap(x_min, x_max);
+			swapped[0] = true;
+		}
 		if(y_min > y_max)
+		{
 			std::swap(y_min, y_max);
+			swapped[1] = true;
+		}
 
 		t_real_gl x_start = 0., y_start = 0.;
 		std::tie(x_tick, x_start) = CalcTickMarks(x_min, x_max, x_tick);
@@ -905,7 +931,7 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 			t_real_gl x_img = TickTrafo(x_min, x_max, x) * t_real_gl(texture_width);
 			t_real_gl y_img_min = 0.;
 			t_real_gl y_img_max = t_real_gl(texture_height);
-			if(!pos_x)
+			if(pos_x == swapped[0])
 				x_img = texture_width - x_img;
 			painter.drawLine(QLineF{QPointF{x_img, y_img_min}, QPointF{x_img, y_img_max}});
 		}
@@ -916,7 +942,7 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 			t_real_gl y_img = TickTrafo(y_min, y_max, y) * t_real_gl(texture_height);
 			t_real_gl x_img_min = 0.;
 			t_real_gl x_img_max = t_real_gl(texture_width);
-			if(!pos_y)
+			if(pos_y == swapped[1])
 				y_img = texture_height - y_img;
 			painter.drawLine(QLineF{QPointF{x_img_min, y_img}, QPointF{x_img_max, y_img}});
 		}
@@ -927,6 +953,9 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 		m_pPlot->makeCurrent();
 		BOOST_SCOPE_EXIT(m_pPlot) { m_pPlot->doneCurrent(); } BOOST_SCOPE_EXIT_END
 		obj->m_texture = std::make_shared<QOpenGLTexture>(img);
+		obj->m_texture->setMaximumAnisotropy(8);
+		obj->m_texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+		obj->m_texture->setMagnificationFilter(QOpenGLTexture::LinearMipMapLinear);
 	};
 
 	constexpr const bool dbg = false;
@@ -1305,7 +1334,7 @@ void main()
 
 
 	// 3d coordinate system objects
-	if(!tl2::equals_0(m_CoordMax))
+	if(!tl2::equals_0(m_CoordMax, m_eps))
 	{
 		m_coordCrossLab = AddCoordinateCross(-m_CoordMax, m_CoordMax);
 		m_coordCrossXtal = AddCoordinateCross(-m_CoordMax, m_CoordMax);
@@ -2006,14 +2035,17 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
  */
 void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 {
+	painter.setRenderHint(QPainter::Antialiasing);
+
 	const t_mat_gl matUnit = tl2::unit<t_mat_gl>();
 
 	QFont fontOrig = painter.font();
 	QPen penOrig = painter.pen();
 
 	QPen penLabel(Qt::black);
-	painter.setPen(penLabel);
 	painter.setFont(m_font);
+	painter.setPen(penLabel);
+	QFontMetricsF metrics{painter.font()};
 
 
 	// draw coordinate system in orthogonal lab system in 1/A
@@ -2092,7 +2124,8 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 			geo::calc_delaunay(2, proj_cube, true, false);
 
 		// draw edge labels and ticks
-		auto draw_edge = [this, &painter, &cube_hull_verts](
+		std::vector<QRectF> other_rects;
+		auto draw_edge = [this, &painter, &metrics, &cube_hull_verts, &other_rects](
 		  const t_vec_gl& corner0, const t_vec_gl& corner1,
 		  const t_vec_gl& centre, std::size_t coord_idx)
 		{
@@ -2112,57 +2145,83 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 			constexpr const t_real_gl eps_hull = 1e-1;
 			constexpr const t_real_gl label_offs = 0.25;
 			constexpr const t_real_gl tick_offs = 0.05;
+			constexpr const t_real_gl tick_pad = 8.;
 
 			t_vec_gl edge_mid = corner0 + 0.5*(corner1 - corner0);
 			QPointF proj = GlToScreenCoords(edge_mid);
-			QPointF proj_centre = GlToScreenCoords(centre);
 
 			t_vec_gl proj_vert = tl2::create<t_vec_gl>({
 				static_cast<t_real_gl>(proj.x()), static_cast<t_real_gl>(proj.y()) });
 			if(std::get<0>(geo::is_vert_in_hull<t_vec_gl>(cube_hull_verts, proj_vert, nullptr, true, eps_hull)))
 				return;
 
-			// axis label
-			bool is_on_left = false;
-			t_vec_gl offs = label_offs * (edge_mid - centre);
-			proj = GlToScreenCoords(edge_mid + offs);
-
-			// move text rendered on the left side further out
-			if(proj.x() < proj_centre.x())
+			auto draw_label = [&painter, &metrics, this](
+				const QPointF& pt, const QPointF& offs, const QString& label,
+				t_real_gl pad, const std::vector<QRectF>* other_rects = nullptr)
+					-> std::pair<QRectF, t_real_gl>
 			{
-				is_on_left = true;
-				offs *= 1.25;
-				proj = GlToScreenCoords(edge_mid + offs);
-			}
+				QPointF dir = offs - pt;
+				t_real_gl lenSq = QPointF::dotProduct(dir, dir);
+				if(lenSq > m_eps)
+					dir /= std::sqrt(lenSq);
 
-			if(label.length())
-				painter.drawText(proj, label);
+				QPointF label_size = to_pointf(metrics.size(Qt::TextSingleLine, label));
+				t_real_gl extent = QPointF::dotProduct(label_size, pointf_abs(dir));
+				pad += 0.5*extent;
+
+				QPointF ptLeftTop = pt + dir*pad - 0.5*label_size;
+				QRectF rect{ptLeftTop, ptLeftTop + label_size};
+
+				if(other_rects)  // don't draw over the other text labels
+				{
+					for(const QRectF& other_rect : *other_rects)
+						if(rect.intersects(other_rect))
+							return std::make_pair(QRectF{}, extent);
+				}
+
+				painter.drawText(rect, Qt::AlignCenter, label);
+				return std::make_pair(rect, extent);
+			};
 
 			// ticks
 			t_vec_gl centre_axis = centre;
-
+			t_real_gl max_extent = 0.;
 			t_real_gl tick_start = 0.;
 			std::tie(tick, tick_start) = CalcTickMarks(min, max, tick);
 
-			for(t_real_gl t = tick_start; t < max; t += tick)
+			for(t_real_gl t = tick_start; t <= max; t += tick)
 			{
 				t_real_gl t_img = TickTrafo(min, max, t);
+				if(swapped)
+					t_img = t_real_gl(1.) - t_img;
+
 				t_vec_gl edge_pt = corner0 + t_img*(corner1 - corner0);
 
 				centre_axis[coord_idx] = edge_pt[coord_idx];
-				offs = tick_offs * (edge_pt - centre_axis);
-
-				// move text rendered on the left side further out
-				if(is_on_left)
-					offs *= 2.5;
-
-				proj = GlToScreenCoords(edge_pt + offs);
+				t_vec_gl offs = tick_offs * (edge_pt - centre_axis);
 
 				t_real_gl t_disp = t;
-				if(swapped)  // invert the range
-					t_disp = max - (t - tick_start);
-				tl2::set_eps_0(t_disp);
-				painter.drawText(proj, QString{"%1"}.arg(t_disp));
+				tl2::set_eps_0(t_disp, m_eps);
+
+				QPointF edge_pt_scr = GlToScreenCoords(edge_pt);
+				QPointF edge_pt_offs_scr = GlToScreenCoords(edge_pt + offs);
+				QString label = QString{"%1"}.arg(t_disp);
+
+				auto [rect, extent] = draw_label(
+					edge_pt_scr, edge_pt_offs_scr, label, tick_pad, &other_rects);
+				if(rect.width() && rect.height())
+				{
+					other_rects.emplace_back(std::move(rect));
+					max_extent = std::max(max_extent, extent);
+				}
+			}
+
+			if(label.length())
+			{
+				t_vec_gl offs = label_offs * (edge_mid - centre);
+				QPointF edge_mid_scr = GlToScreenCoords(edge_mid);
+				QPointF edge_mid_offs_scr = GlToScreenCoords(edge_mid + offs);
+				draw_label(edge_mid_scr, edge_mid_offs_scr, label, 2.*tick_pad + max_extent);
 			}
 		};
 
