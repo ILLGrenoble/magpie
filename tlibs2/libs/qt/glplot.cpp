@@ -2036,6 +2036,7 @@ void GlPlotRenderer::DoPaintGL(qgl_funcs *pGl)
 void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 {
 	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setRenderHint(QPainter::TextAntialiasing);
 
 	const t_mat_gl matUnit = tl2::unit<t_mat_gl>();
 

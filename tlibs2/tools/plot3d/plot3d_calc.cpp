@@ -108,7 +108,8 @@ void Plot3DDlg::Calculate()
 	QString _formulas = m_formulas->toPlainText();
 
 	// if no variables are given, treat it as data grid
-	if(_formulas.indexOf("x") == -1 && _formulas.indexOf("y") == -1)
+	if(_formulas.indexOf("x") == -1 && _formulas.indexOf("y") == -1 &&
+		_formulas.indexOf("r") == -1 && _formulas.indexOf("phi") == -1)
 	{
 		CalculateGrid();
 		return;
@@ -129,6 +130,8 @@ void Plot3DDlg::Calculate()
 		parser.SetAutoregisterVariables(false);
 		parser.register_var("x", 0.);
 		parser.register_var("y", 0.);
+		parser.register_var("r", 0.);
+		parser.register_var("phi", 0.);
 		parser.register_var("t", 0.);
 
 		if(!parser.parse_noexcept(formula))
@@ -185,6 +188,7 @@ void Plot3DDlg::Calculate()
 		{
 			// calculate the surface at the given coordinate
 			t_vec_real pos = GetPosFromIndices(x_idx, y_idx);
+			auto [rho, phi] = tl2::cart_to_cyl(pos[0], pos[1]);
 
 			// iterate the z components for this position
 			for(t_size surf_idx = 0; surf_idx < parsers.size(); ++surf_idx)
@@ -192,6 +196,8 @@ void Plot3DDlg::Calculate()
 				tl2::ExprParser<t_real> localparser = parsers[surf_idx];
 				localparser.register_var("x", pos[0]);
 				localparser.register_var("y", pos[1]);
+				localparser.register_var("r", rho);
+				localparser.register_var("phi", phi);
 				localparser.register_var("t", t);
 
 				bool valid = true;

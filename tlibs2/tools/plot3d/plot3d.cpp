@@ -167,7 +167,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett, bool fail_on_gl_error)
 	QGroupBox *groupFormulas = new QGroupBox("Formulas or Data", this);
 	m_formulas = new QTextEdit(groupFormulas);
 	m_formulas->setPlaceholderText("Enter formulas separated by ';'."
-		" Variables are 'x' and 'y', with parameter 't'.");
+		" Variables are 'x', 'y', 'r', and 'phi', with parameter 't'.");
 	m_formulas->setReadOnly(false);
 	m_formulas->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
 	//m_formulas->setFixedHeight(QFontMetrics{m_formulas->font()}.lineSpacing() * 4);
@@ -222,7 +222,7 @@ Plot3DDlg::Plot3DDlg(QWidget *parent, QSettings *sett, bool fail_on_gl_error)
 		m_num_points[i]->setMaximum(9999);
 		m_num_points[i]->setSingleStep(1);
 		m_num_points[i]->setPrefix(prefix[i]);
-		m_num_points[i]->setValue(64);
+		m_num_points[i]->setValue(128);
 	}
 
 	// t parameter slider

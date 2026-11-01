@@ -198,6 +198,21 @@ requires is_scalar<T>
 
 
 /**
+ * cartesian -> cylindrical
+ * @see https://en.wikipedia.org/wiki/Cylindrical_coordinate_system
+ */
+template<class T = double>
+std::tuple<T, T> cart_to_cyl(T x, T y)
+requires is_scalar<T>
+{
+	T rho = std::sqrt(x*x + y*y);
+	T phi = std::atan2(y, x);
+
+	return std::make_tuple(rho, phi);
+}
+
+
+/**
  * gnomonic projection (similar to perspective projection with fov=90°)
  * @return [x,y]
  * @see see http://mathworld.wolfram.com/GnomonicProjection.html

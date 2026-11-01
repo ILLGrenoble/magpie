@@ -109,6 +109,32 @@ requires is_basic_vec<t_vec>
 
 	return area / t_scalar(2);
 }
+
+
+/**
+ * tests if a given point is inside a (convex) polygon
+ */
+template<class t_vecs, class t_vec, typename t_scalar = typename t_vec::value_type>
+bool in_poly_2d(const t_vec& pt, const t_vecs& poly, bool is_loop = false)
+requires is_basic_vec<t_vec>
+{
+	const t_scalar poly_area = area_2d<t_vecs, t_vec>(poly, is_loop);
+
+	const std::size_t num_pts = poly.size();
+	for(std::size_t idx = 0; idx < num_pts; ++idx)
+	{
+		const t_vec& vec1 = poly[idx];
+		const t_vec& vec2 = poly[(idx + 1) % num_pts];
+
+		t_scalar side = cross_2d(pt - vec1, vec2 - vec1);
+		if(poly_area < t_scalar(0))
+			side = -side;
+		if(side > t_scalar(0))
+			return false;
+	}
+
+	return true;
+}
 // ----------------------------------------------------------------------------
 
 }

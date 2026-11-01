@@ -340,7 +340,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 
 
 /**
- * calculates the chern numbers via the fhs methos
+ * calculates the chern numbers via the fhs method
  * @see (Nakamura 2024)
  * @see equ. 9 in (McClarty 2022)
  * @see https://en.wikipedia.org/wiki/Berry_connection_and_curvature
