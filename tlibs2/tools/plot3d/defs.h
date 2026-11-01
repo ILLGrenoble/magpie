@@ -67,8 +67,8 @@ extern int g_prec, g_prec_gui;
 // epsilon
 extern t_real g_eps;
 
-// fraction of points to check if the stop button was pressed
-extern unsigned int g_stop_check_fraction;
+// time delay to check if the stop button was pressed
+extern t_real g_stop_check_millisecs;
 
 // camera fov
 extern t_real g_cam_fov;

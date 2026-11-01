@@ -45,8 +45,9 @@ int g_prec = 6;
 int g_prec_gui = 3;
 t_real g_eps = 1e-6;
 
-// fraction of points to check if the stop button was pressed
-unsigned int g_stop_check_fraction = 100;
+// time delay to check if the stop button was pressed
+t_real g_stop_check_millisecs = 100.;
+
 
 t_real g_cam_fov = 90.;
 

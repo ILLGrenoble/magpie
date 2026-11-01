@@ -128,8 +128,8 @@ extern t_real g_cam_fov;
 extern t_real g_cam_speed;
 extern t_real g_cam_zoom;
 
-// fraction of points to check if the stop button was pressed
-extern unsigned int g_stop_check_fraction;
+// time delay to check if the stop button was pressed
+extern t_real g_stop_check_millisecs;
 
 extern int g_fail_on_gl_error;
 
@@ -284,9 +284,9 @@ constexpr std::array<SettingsVariable, 25> g_settingsvariables
 		.editor = SettingsVariableEditor::YESNO,
 	},
 	{
-		.description = "Number of times to check for GUI events.",
-		.key = "stop_check_fraction",
-		.value = &g_stop_check_fraction,
+		.description = "Delay to check for GUI events.",
+		.key = "stop_check_millisecs",
+		.value = &g_stop_check_millisecs,
 	},
 
 	// console messages

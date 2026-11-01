@@ -720,6 +720,9 @@ void Plot2DDlg::Calculate()
 
 	m_status->setText(QString("Calculating in %1 threads...").arg(g_num_threads));
 
+	tl2::Stopwatch<t_real> timer;
+	timer.start();
+
 	// get results from tasks
 	for(std::size_t task_idx = 0; task_idx < tasks.size(); ++task_idx)
 	{
@@ -727,8 +730,14 @@ void Plot2DDlg::Calculate()
 
 		// process events to see if the stop button was clicked
 		// only do this for a fraction of the points to avoid gui overhead
-		if(task_idx % std::max<t_size>(tasks.size() / g_stop_check_fraction, 1) == 0)
+		timer.stop();
+		bool process_evts = timer.GetDur()*1000. > g_stop_check_millisecs;
+		//bool process_evts = task_idx % std::max<t_size>(tasks.size() / g_stop_check_fraction, 1) == 0;
+		if(process_evts)
+		{
+			timer.start();
 			qApp->processEvents();
+		}
 
 		if(m_stopRequested)
 		{

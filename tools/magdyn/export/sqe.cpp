@@ -233,6 +233,8 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 
 	// tread pool
 	asio::thread_pool pool{g_num_threads};
+	tl2::Stopwatch<t_real> timer;
+	timer.start();
 
 	std::size_t task_idx = 0;
 	// iterate first two Q dimensions
@@ -248,9 +250,14 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 
 			// process events to see if the stop button was clicked
 			// only do this for a fraction of the points to avoid gui overhead
-			bool process_evts = (h_idx*k_idx % std::max<t_size>(num_pts_h*num_pts_k / g_stop_check_fraction, 1) == 0);
+			timer.stop();
+			bool process_evts = timer.GetDur()*1000. > g_stop_check_millisecs;
+			//bool process_evts = (h_idx*k_idx % std::max<t_size>(num_pts_h*num_pts_k / g_stop_check_fraction, 1) == 0);
 			if(process_evts)
+			{
+				timer.start();
 				qApp->processEvents();
+			}
 
 			if(m_stopRequested)
 				break;
@@ -303,13 +310,20 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 	data_num_branches.reserve(num_pts_h * num_pts_k * num_pts_l);
 #endif  // USE_HDF5
 
+	timer.start();
+
 	for(std::size_t future_idx = 0; future_idx < futures.size(); ++future_idx)
 	{
 		// process events to see if the stop button was clicked
 		// only do this for a fraction of the points to avoid gui overhead
-		bool process_evts = (future_idx % std::max<t_size>(futures.size() / g_stop_check_fraction, 1) == 0);
+		timer.stop();
+		bool process_evts = timer.GetDur()*1000. > g_stop_check_millisecs;
+		//bool process_evts = (future_idx % std::max<t_size>(futures.size() / g_stop_check_fraction, 1) == 0);		
 		if(process_evts)
+		{
+			timer.start();
 			qApp->processEvents();
+		}
 
 		if(m_stopRequested)
 		{

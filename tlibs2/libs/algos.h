@@ -122,6 +122,9 @@ T min4(T t1, T t2, T t3, T t4)
  * like std::chrono::seconds/minutes/hours, but with variable type
  */
 template<typename T = long >
+using t_dur_millisecs = std::chrono::duration<T, std::ratio<1, 1000>>;
+
+template<typename T = long >
 using t_dur_secs = std::chrono::duration<T, std::ratio<1, 1>>;
 template<typename T = long >
 using t_dur_mins = std::chrono::duration<T, std::ratio<60, 1>>;
@@ -319,6 +322,7 @@ class Stopwatch
 		typedef std::chrono::duration<T> t_dur;
 		typedef std::chrono::system_clock::duration t_dur_sys;
 
+
 	protected:
 		t_tp_sys m_timeStart{};
 		t_tp_st m_timeStart_st{}, m_timeStop_st{};
@@ -327,6 +331,7 @@ class Stopwatch
 		t_dur_sys m_dur_sys{};
 
 		T m_dDur{};
+
 
 	public:
 		Stopwatch() = default;
@@ -358,7 +363,7 @@ class Stopwatch
 
 
 		/**
-		 * get the amount of time that passed
+		 * get the amount of time that passed, in seconds
 		 */
 		T GetDur() const
 		{

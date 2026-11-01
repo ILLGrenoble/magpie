@@ -16,9 +16,9 @@
 	<key>CFBundleIconFile</key>                      <string>magpie.icns</string>
 
 	<key>NSPrincipalClass</key>                      <string>NSApplication</string>
-	<key>NSSupportsSuddenTermination</key>           <string>True</string>
-	<key>NSHighResolutionCapable</key>               <string>True</string>
-	<key>NSSupportsAutomaticGraphicsSwitching</key>  <string>True</string>
+	<key>NSSupportsSuddenTermination</key>           <true/>
+	<key>NSHighResolutionCapable</key>               <true/>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>  <true/>
 	<key>NSHumanReadableCopyright</key>              <string>Copyright (C) 2022-2026 by Tobias Weber (ILL, Grenoble, France). Copyleft: GPLv3.</string>
 
 	<key>CFBundleDocumentTypes</key>

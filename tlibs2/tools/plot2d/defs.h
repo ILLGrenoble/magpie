@@ -49,8 +49,8 @@ extern int g_prec, g_prec_gui;
 // epsilon
 extern t_real g_eps;
 
-// fraction of points to check if the stop button was pressed
-extern unsigned int g_stop_check_fraction;
+// time delay to check if the stop button was pressed
+extern t_real g_stop_check_millisecs;
 
 // use native menubar and dialogs?
 extern int g_use_native_menubar, g_use_native_dialogs;

@@ -104,9 +104,12 @@ void MagDynDlg::SaveDispersion(bool as_scr)
 
 	const t_size num_pts = m_num_points->value();
 
+	tl2::Stopwatch<t_real> timer;
+	timer.start();
+
 	// function to track progress and request stopping
 	std::function<bool(int, int)> progress_fkt =
-		[this](int progress, int total) -> bool
+		[this, &timer](int progress, int total) -> bool
 	{
 		if(total >= 0)
 			m_progress->setMaximum(total);
@@ -115,8 +118,14 @@ void MagDynDlg::SaveDispersion(bool as_scr)
 
 		// process events to see if the stop button was clicked
 		// only do this for a fraction of the points to avoid gui overhead
-		if(progress % std::max<t_size>(total / g_stop_check_fraction, 1) == 0)
+		timer.stop();
+		bool process_evts = timer.GetDur()*1000. > g_stop_check_millisecs;
+		//bool process_evts = progress % std::max<t_size>(total / g_stop_check_fraction, 1) == 0;
+		if(process_evts)
+		{
+			timer.start();
 			qApp->processEvents();
+		}
 
 		return !m_stopRequested;
 	};
@@ -219,9 +228,12 @@ void MagDynDlg::SaveMultiDispersion(bool as_scr)
 	int prev_progress = -1;
 	int total_progress = -1;
 
+	tl2::Stopwatch<t_real> timer;
+	timer.start();
+
 	// function to track progress and request stopping
 	std::function<bool(int, int)> progress_fkt =
-		[this, num_disps, &cur_disp, &prev_progress, &total_progress](
+		[this, num_disps, &cur_disp, &prev_progress, &total_progress, &timer](
 			int progress, int total) -> bool
 	{
 		if(progress == 0 && prev_progress == total)
@@ -244,8 +256,14 @@ void MagDynDlg::SaveMultiDispersion(bool as_scr)
 
 		// process events to see if the stop button was clicked
 		// only do this for a fraction of the points to avoid gui overhead
-		if(progress % std::max<t_size>(total / g_stop_check_fraction, 1) == 0)
+		timer.stop();
+		bool process_evts = timer.GetDur()*1000. > g_stop_check_millisecs;
+		//bool process_evts = progress % std::max<t_size>(total / g_stop_check_fraction, 1) == 0;
+		if(process_evts)
+		{
+			timer.start();
 			qApp->processEvents();
+		}
 
 		return !m_stopRequested;
 	};
