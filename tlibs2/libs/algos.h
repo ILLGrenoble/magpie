@@ -35,6 +35,8 @@
 
 #include <algorithm>
 #include <numeric>
+#include <limits>
+#include <array>
 #include <string>
 #include <chrono>
 #include <vector>
@@ -310,6 +312,59 @@ t_cont<T> bit_reverse_indices(T imax)
 
 	return vec;
 }
+
+
+
+/**
+ * calculate a possible tick spacing
+ * @see P. S. Heckbert, Graphics Gems, pp. 61-63 (1990)
+ */
+template<class t_real>
+std::pair<t_real, t_real>
+calc_tick_marks(t_real min, t_real max, t_real tick_delta,
+	t_real eps = std::numeric_limits<t_real>::epsilon())
+{
+	if(tick_delta > 0.)
+	{
+		// tick spacing already given
+		t_real start = std::ceil(min / tick_delta - eps)*tick_delta;
+		return std::make_pair(tick_delta, start);
+	}
+
+	constexpr const std::array<std::pair<t_real, t_real>, 3> ranges_and_ticks
+	{
+		std::make_pair(t_real(1.5), t_real(1.) /*0, 1,  2, ...*/),
+		std::make_pair(t_real(3.),  t_real(2.) /*0, 2,  4, ...*/),
+		std::make_pair(t_real(7.),  t_real(5.) /*0, 5, 10, ...*/),
+	};
+
+	t_real range = std::abs(max - min);
+	if(!tl2::equals_0(range, eps))
+	{
+		t_real power = std::floor(std::log10(t_real(0.25) * range));
+		t_real delta = std::pow(t_real(10.), power);
+		t_real range_1_10 = t_real(0.25) * range / delta;
+
+		tick_delta = 10.;
+		for(const auto [ range, tick ] : ranges_and_ticks)
+		{
+			if(range_1_10 >= range)
+				continue;
+
+			tick_delta = tick;
+			break;
+		}
+
+		tick_delta *= delta;
+	}
+	else
+	{
+		tick_delta = eps;
+	}
+
+	t_real start = std::ceil(min / tick_delta - eps)*tick_delta;
+	return std::make_pair(tick_delta, start);
+};
 
 
 

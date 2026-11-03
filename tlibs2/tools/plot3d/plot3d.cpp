@@ -613,9 +613,7 @@ void Plot3DDlg::AfterPlotGLInitialisation()
 		return;
 
 	// GL device infos
-	auto [ver, shader_ver, vendor, renderer]
-		= m_plot->GetRenderer()->GetGlDescr();
-
+	auto [ver, shader_ver, vendor, renderer] = m_plot->GetRenderer()->GetGlDescr();
 	emit GlDeviceInfos(ver, shader_ver, vendor, renderer);
 
 	m_plot->GetRenderer()->SetCull(false);

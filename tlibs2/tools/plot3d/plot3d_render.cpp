@@ -57,6 +57,7 @@ void Plot3DDlg::Plot(bool clear_settings)
 {
 	if(!m_plot)
 		return;
+	//LOGGLERR(m_plot->GetRenderer()->GetGlFunctions());
 
 	// keep some settings from previous plot, e.g. the surface visibility flags
 	std::vector<bool> active_surfs;

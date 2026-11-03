@@ -39,6 +39,7 @@
 
 #include "glplot.h"
 #include "helper.h"
+#include "../algos.h"
 #include "../voronoi.h"
 
 #include <QtGui/QPainter>
@@ -794,56 +795,6 @@ std::vector<std::size_t> GlPlotRenderer::AddCoordinateCube(t_real_gl min, t_real
 
 
 /**
- * calculate a possible tick spacing
- * @see P. S. Heckbert, Graphics Gems, pp. 61-63 (1990)
- */
-std::pair<t_real_gl, t_real_gl>
-GlPlotRenderer::CalcTickMarks(t_real_gl min, t_real_gl max, t_real_gl tick_delta)
-{
-	if(tick_delta > 0.)
-	{
-		// tick spacing already given
-		t_real_gl start = std::ceil(min / tick_delta - m_eps)*tick_delta;
-		return std::make_pair(tick_delta, start);
-	}
-
-	constexpr const std::array<std::pair<t_real_gl, t_real_gl>, 3> ranges_and_ticks
-	{
-		std::make_pair(t_real_gl(1.5), t_real_gl(1.) /*0, 1,  2, ...*/),
-		std::make_pair(t_real_gl(3.),  t_real_gl(2.) /*0, 2,  4, ...*/),
-		std::make_pair(t_real_gl(7.),  t_real_gl(5.) /*0, 5, 10, ...*/),
-	};
-
-	t_real_gl range = std::abs(max - min);
-	if(!tl2::equals_0(range, m_eps))
-	{
-		t_real_gl power = std::floor(std::log10(t_real_gl(0.25) * range));
-		t_real_gl delta = std::pow(t_real_gl(10.), power);
-		t_real_gl range_1_10 = t_real_gl(0.25) * range / delta;
-
-		tick_delta = 10.;
-		for(const auto [ range, tick ] : ranges_and_ticks)
-		{
-			if(range_1_10 >= range)
-				continue;
-
-			tick_delta = tick;
-			break;
-		}
-
-		tick_delta *= delta;
-	}
-	else
-	{
-		tick_delta = m_eps;
-	}
-
-	t_real_gl start = std::ceil(min / tick_delta - m_eps)*tick_delta;
-	return std::make_pair(tick_delta, start);
-};
-
-
-/**
  * transform coordinate component into a [0, 1] range
  *
  *   min + (max - min)*lam = val
@@ -922,8 +873,8 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 		}
 
 		t_real_gl x_start = 0., y_start = 0.;
-		std::tie(x_tick, x_start) = CalcTickMarks(x_min, x_max, x_tick);
-		std::tie(y_tick, y_start) = CalcTickMarks(y_min, y_max, y_tick);
+		std::tie(x_tick, x_start) = tl2::calc_tick_marks<t_real_gl>(x_min, x_max, x_tick, m_eps);
+		std::tie(y_tick, y_start) = tl2::calc_tick_marks<t_real_gl>(y_min, y_max, y_tick, m_eps);
 
 		// lines in y direction
 		for(t_real_gl x = x_start; x <= x_max; x += x_tick)
@@ -954,8 +905,7 @@ void GlPlotRenderer::UpdateCoordCubeTextures(
 		BOOST_SCOPE_EXIT(m_pPlot) { m_pPlot->doneCurrent(); } BOOST_SCOPE_EXIT_END
 		obj->m_texture = std::make_shared<QOpenGLTexture>(img);
 		obj->m_texture->setMaximumAnisotropy(8);
-		obj->m_texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
-		obj->m_texture->setMagnificationFilter(QOpenGLTexture::LinearMipMapLinear);
+		//obj->m_texture->setMinMagFilters(QOpenGLTexture::LinearMipMapLinear, QOpenGLTexture::LinearMipMapLinear);
 	};
 
 	constexpr const bool dbg = false;
@@ -2188,7 +2138,7 @@ void GlPlotRenderer::DoPaintNonGL(QPainter &painter)
 			t_vec_gl centre_axis = centre;
 			t_real_gl max_extent = 0.;
 			t_real_gl tick_start = 0.;
-			std::tie(tick, tick_start) = CalcTickMarks(min, max, tick);
+			std::tie(tick, tick_start) = tl2::calc_tick_marks<t_real_gl>(min, max, tick, m_eps);
 
 			for(t_real_gl t = tick_start; t <= max; t += tick)
 			{
