@@ -331,7 +331,7 @@ void MagDynDlg::CreateMenuBar()
 	QAction *acGroundState = new QAction("Minimise Ground State...", menuStruct);
 
 	// import / export menu
-	QMenu *menuExport = new QMenu("Import / Export", m_menu);
+	QMenu *menuExport = new QMenu("Code Generation", m_menu);
 	QAction *acStructImport = new QAction("Import From Table...", menuExport);
 	QAction *acStructExportSun = new QAction("Export To Sunny Code...", menuExport);
 	QAction *acStructExportSW = new QAction("Export To SpinW Code...", menuExport);
