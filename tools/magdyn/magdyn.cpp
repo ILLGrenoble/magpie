@@ -333,10 +333,10 @@ void MagDynDlg::CreateMenuBar()
 	// import / export menu
 	QMenu *menuExport = new QMenu("Code Generation", m_menu);
 	QAction *acStructImport = new QAction("Import From Table...", menuExport);
-	QAction *acStructExportSun = new QAction("Export To Sunny Code...", menuExport);
-	QAction *acStructExportSW = new QAction("Export To SpinW Code...", menuExport);
-	QAction *acStructExportPySW = new QAction("Export To PySpinW Code...", menuExport);
-	QAction *acStructExportScript = new QAction("Export To Python Code...", menuExport);
+	QAction *acStructExportSun = new QAction("Generate Sunny Code...", menuExport);
+	QAction *acStructExportSW = new QAction("Generate SpinW Code...", menuExport);
+	QAction *acStructExportPySW = new QAction("Generate PySpinW Code...", menuExport);
+	QAction *acStructExportScript = new QAction("Generate Python Code...", menuExport);
 
 	// dispersion plot menu
 	m_menuDisp = new QMenu("Dispersion Plot", m_menu);
