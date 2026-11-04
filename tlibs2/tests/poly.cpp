@@ -135,13 +135,115 @@ void poly2()
 	};
 	std::vector<t_vec4> poly2
 	{
-		tl2::create<t_vec4>({ -15., -10., -25., 1. }),
-		tl2::create<t_vec4>({ 15., -10., -25., 1. }),
-		tl2::create<t_vec4>({ 0., 10., -25., 1. }),
+		tl2::create<t_vec4>({ -16., -9., -16., 1. }),
+		tl2::create<t_vec4>({ 16., -9., -16., 1. }),
+		tl2::create<t_vec4>({ 0., 10., -14., 1. }),
+	};
+	std::vector<t_vec4> poly3
+	{
+		tl2::create<t_vec4>({ -20., -13., -17., 1. }),
+		tl2::create<t_vec4>({ -20., 13., -17., 1. }),
+		tl2::create<t_vec4>({ 20., 13., -17., 1. }),
+		tl2::create<t_vec4>({ 20., -13., -17., 1. }),
 	};
 
 	draw(poly, '*');
 	draw(poly2, '.');
+	draw(poly3, '-');
+
+	for(int y = 0.; y < h; ++y)
+	{
+		for(int x = 0.; x < w; ++x)
+			std::cout << screen[y*w + x];
+		std::cout << std::endl;
+	}
+
+	delete[] screen;
+	delete[] zbuf;
+}
+
+
+void poly3()
+{
+	using t_real = double;
+	using t_vec3 = tl2::vec_static<t_real, 3>;
+	using t_vec4 = tl2::vec_static<t_real, 4>;
+	using t_mat33 = tl2::mat_static<t_real, 3, 3>;
+	using t_mat44 = tl2::mat_static<t_real, 4, 4>;
+
+	int w = 80, h = 40;
+
+	tl2::Camera<t_mat44, t_vec4, t_vec3, t_real> cam;
+	cam.SetScreenDimensions(w, h);
+	cam.SetRotation(0., tl2::pi<t_real>/4.9);
+	cam.SetPosition(tl2::create<t_vec3>({ 0., 0., 0. }));
+	cam.SetDist(12.);
+	cam.UpdateViewport();
+	cam.UpdatePerspective();
+	cam.UpdateTransformation();
+
+	std::cout << "viewp: " << cam.GetViewport() << std::endl;
+	std::cout << "perps: " << cam.GetPerspective() << std::endl;
+	std::cout << "trafo: " << cam.GetTransformation() << std::endl;
+
+	char* screen = new char[w*h];
+	t_real* zbuf = new t_real[w*h];
+	for(int y = 0.; y < h; ++y)
+	{
+		for(int x = 0.; x < w; ++x)
+		{
+			screen[y*w + x] = ' ';
+			zbuf[y*w + x] = 999.;
+		}
+	}
+
+
+	auto draw = [w, h, screen, zbuf, &cam](const std::vector<t_vec4>& poly, char sym)
+	{
+		std::vector<t_vec4> poly_proj = cam.ToScreenCoords(poly);
+		std::cout << poly_proj[0] << std::endl;
+		std::cout << poly_proj[1] << std::endl;
+		std::cout << poly_proj[2] << std::endl;
+
+		t_real z = poly_proj[0][2];
+
+		for(int y = 0.; y < h; ++y)
+		{
+			for(int x = 0.; x < w; ++x)
+			{
+				if(x == 0 || y == 0 || x == w - 1 || y == h - 1)
+					screen[y*w + x] = '#';
+
+				t_vec4 pt = tl2::create<t_vec4>({ t_real(x), t_real(y), 0., 0. });
+
+				bool inside = tl2::in_poly_2d(pt, poly_proj, false, &z);
+				//std::cout << z << " " << poly_proj[0][2] << std::endl;
+				if(inside && z < zbuf[y*w + x])
+				{
+					screen[y*w + x] = sym;
+					zbuf[y*w + x] = z;
+				}
+			}
+		}
+	};
+
+	auto solid = tl2::create_cuboid<t_vec3>(5., 5., 5.);
+
+	char fill[] = { '*', '-', '~', '+', '.', '|' };
+	std::size_t face_idx = 0;
+	for(const auto& face : std::get<1>(solid))
+	{
+		std::vector<t_vec4> poly;
+		for(std::size_t vert_idx : face)
+		{
+			t_vec3 vert = std::get<0>(solid)[vert_idx];
+			vert = tl2::givens<t_mat33>(3, 2, 0, tl2::pi<t_real>/4.) * vert;
+			poly.push_back(tl2::create<t_vec4>({ vert[0], vert[1], vert[2], 1. }));
+		}
+
+		draw(poly, fill[face_idx % sizeof(fill)]);
+		++face_idx;
+	}
 
 	for(int y = 0.; y < h; ++y)
 	{
@@ -158,7 +260,10 @@ void poly2()
 int main()
 {
 	poly1();
+	std::cout << "--------------------------------------------------------------------------------" << std::endl;
 	poly2();
+	std::cout << "--------------------------------------------------------------------------------" << std::endl;
+	poly3();
 
 	return 0;
 }
