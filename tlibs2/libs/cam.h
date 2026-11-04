@@ -495,6 +495,24 @@ public:
 
 
 	/**
+	 * convert vectors into screen coordinates
+	 */
+	std::vector<t_vec> ToScreenCoords(const std::vector<t_vec>& vecs) const
+	{
+		std::vector<t_vec> vecs_proj;
+		vecs_proj.reserve(vecs.size());
+
+		for(const t_vec& vec : vecs)
+		{
+			t_vec vecProj = ToScreenCoords(vec);
+			vecs_proj.emplace_back(std::move(vecProj));
+		}
+
+		return vecs_proj;
+	}
+
+
+	/**
 	 * convert a vector for a camera-invariant object into screen coordinates
 	 */
 	t_vec ToScreenCoordsInvar(const t_vec& vec4,
@@ -667,10 +685,8 @@ public:
 			tl2::create<t_vec3>({ 0. ,0., 1. })
 		};
 
-		m_matRot = tl2::hom_rotation<t_mat, t_vec3>(
-			vecCamDir[0], m_theta, 0);
-		m_matRot *= tl2::hom_rotation<t_mat, t_vec3>(
-			vecCamDir[1], m_phi, 0);
+		m_matRot = tl2::hom_rotation<t_mat, t_vec3>(vecCamDir[0], m_theta, 0);
+		m_matRot *= tl2::hom_rotation<t_mat, t_vec3>(vecCamDir[1], m_phi, 0);
 
 		t_real zoom = GetPerspectiveProjection() ? m_zoom : 0.5;
 		t_mat matDist = hom_translation<t_mat, t_real>(0., 0., -m_dist / zoom);
