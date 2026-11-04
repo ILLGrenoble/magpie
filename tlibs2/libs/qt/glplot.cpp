@@ -104,12 +104,11 @@ GlPlotRenderer::~GlPlotRenderer()
 	// delete gl objects within current gl context
 	m_pShaders.reset();
 
-	qgl_funcs* pGl = GetGlFunctions();
+	QMutexLocker _locker{&m_mutexObj};
 	for(auto &obj : m_objs)
 		delete_render_object(obj);
 
 	m_objs.clear();
-	LOGGLERR(pGl);
 }
 
 
