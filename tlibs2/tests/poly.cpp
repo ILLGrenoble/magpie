@@ -93,7 +93,7 @@ void poly2()
 		for(int x = 0.; x < w; ++x)
 		{
 			screen[y*w + x] = ' ';
-			zbuf[y*w + x] = -999.;
+			zbuf[y*w + x] = 999.;
 		}
 	}
 
@@ -105,7 +105,7 @@ void poly2()
 		std::cout << poly_proj[1] << std::endl;
 		std::cout << poly_proj[2] << std::endl;
 
-		t_real z = poly[0][2];  // TODO: per pixel
+		t_real z = poly_proj[0][2];
 
 		for(int y = 0.; y < h; ++y)
 		{
@@ -116,8 +116,9 @@ void poly2()
 
 				t_vec4 pt = tl2::create<t_vec4>({ t_real(x), t_real(y), 0., 0. });
 
-				bool inside = tl2::in_poly_2d(pt, poly_proj);
-				if(inside && z > zbuf[y*w + x])
+				bool inside = tl2::in_poly_2d(pt, poly_proj, false, &z);
+				//std::cout << z << " " << poly_proj[0][2] << std::endl;
+				if(inside && z < zbuf[y*w + x])
 				{
 					screen[y*w + x] = sym;
 					zbuf[y*w + x] = z;

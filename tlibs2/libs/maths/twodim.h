@@ -115,12 +115,13 @@ requires is_basic_vec<t_vec>
  * tests if a given point is inside a (convex) polygon
  */
 template<class t_vecs, class t_vec, typename t_scalar = typename t_vec::value_type>
-bool in_poly_2d(const t_vec& pt, const t_vecs& poly, bool is_loop = false)
+bool in_poly_2d(const t_vec& pt, const t_vecs& poly, bool is_loop = false, t_scalar *z = nullptr)
 requires is_basic_vec<t_vec>
 {
 	const t_scalar poly_area = area_2d<t_vecs, t_vec>(poly, is_loop);
-
 	const std::size_t num_pts = poly.size();
+	bool inside = true;
+
 	for(std::size_t idx = 0; idx < num_pts; ++idx)
 	{
 		const t_vec& vec1 = poly[idx];
@@ -130,10 +131,46 @@ requires is_basic_vec<t_vec>
 		if(poly_area < t_scalar(0))
 			side = -side;
 		if(side > t_scalar(0))
-			return false;
+		{
+			inside = false;
+			break;
+		}
 	}
 
-	return true;
+	// get the z component at the point
+	if(z && poly[0].size() > 2)
+	{
+		t_vec vec12 = poly[1] - poly[0];
+		t_vec vec13 = poly[2] - poly[0];
+
+		// ----------------------------------------------------
+		// orthonormalisation
+		const t_scalar len12 = norm<t_vec>(vec12);
+		const t_scalar len13 = norm<t_vec>(vec13);
+		auto vecBasis = orthonorm_sys<t_vec, std::initializer_list, std::vector>({vec12, vec13});
+		vec12 = vecBasis[0]*len12; vec13 = vecBasis[1]*len13;
+		// ----------------------------------------------------
+
+		const t_vec _pt = pt - poly[0];
+
+		// project a point onto a vector and return the fraction along that vector
+		auto project_lam = [](const t_vec& vec, const t_vec& vecProj) -> t_scalar
+		{
+			const t_scalar len = norm<t_vec>(vecProj);
+			const t_vec _vecProj = vecProj / len;
+			t_scalar lam = inner<t_vec>(_vecProj, vec);
+			return lam / len;
+		};
+
+		t_scalar lam12 = project_lam(_pt, vec12);
+		t_scalar lam13 = project_lam(_pt, vec13);
+
+		// position inside polygon
+		const t_vec pos = poly[0] + lam12*vec12 + lam13*vec13;
+		*z = pos[2];
+	}
+
+	return inside;
 }
 // ----------------------------------------------------------------------------
 
