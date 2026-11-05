@@ -1545,8 +1545,7 @@ void GlPlotRenderer::UpdatePicker()
 			tl2::create<t_vec3_gl>({ 0, 0, 0 }), t_real_gl(m_pickerSphereRadius));
 	for(const auto& result : intersUnitSphere)
 	{
-		t_vec_gl vecInters4 = tl2::create<t_vec_gl>(
-			{ result[0], result[1], result[2], 1 });
+		t_vec_gl vecInters4 = tl2::create<t_vec_gl>({ result[0], result[1], result[2], 1 });
 
 		if(!hasSphereInters)
 		{	// first intersection
@@ -1582,7 +1581,7 @@ void GlPlotRenderer::UpdatePicker()
 	bool hasInters = false;
 	t_vec_gl vecClosestInters = tl2::create<t_vec_gl>({ 0, 0, 0, 0 });
 	std::size_t triagInters = 0xffffffff;  // intersecting triangle index
-	std::size_t objInters = 0xffffffff;  // intersecting object handle
+	std::size_t objInters = 0xffffffff;    // intersecting object handle
 
 
 	QMutexLocker _locker{&m_mutexObj};

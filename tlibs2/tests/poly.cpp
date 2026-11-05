@@ -178,6 +178,7 @@ void poly3()
 	cam.SetRotation(0., tl2::pi<t_real>/4.9);
 	cam.SetPosition(tl2::create<t_vec3>({ 0., 0., 0. }));
 	cam.SetDist(12.);
+	cam.SetAspectRatio(0.5*t_real(w)/t_real(h));
 	cam.UpdateViewport();
 	cam.UpdatePerspective();
 	cam.UpdateTransformation();
