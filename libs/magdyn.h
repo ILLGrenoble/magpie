@@ -65,6 +65,7 @@
 #include "magdyn/topology.h"
 #include "magdyn/diff.h"
 #include "magdyn/powder.h"
+#include "magdyn/landau.h"
 
 
 #endif

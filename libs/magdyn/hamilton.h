@@ -198,6 +198,8 @@ MAGDYN_INST::CalcReciprocalJs(const t_vec3_real& Qvec) const
 	}  // end of iteration over couplings
 
 #ifdef __MAGDYN_DEBUG_OUTPUT__
+	using namespace tl2_ops;
+	std::cout << "Q = " << Qvec << "\n";
 	for(const auto& pair : J_Q)
 	{
 		std::cout << "Coupling J_Q[" << pair.first.first << ", " << pair.first.second << "] =\n";

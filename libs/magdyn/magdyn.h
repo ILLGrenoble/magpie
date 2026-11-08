@@ -550,6 +550,14 @@ public:
 
 
 	// --------------------------------------------------------------------
+	// conversion to landau-lifshitz formalism
+	// --------------------------------------------------------------------
+	t_mat CalcFluctuationMatrix(const t_vec3_real& Qvec) const;
+	t_mat CalcMCrossMatrix() const;
+	// --------------------------------------------------------------------
+
+
+	// --------------------------------------------------------------------
 	// loading and saving
 	// --------------------------------------------------------------------
 	// generates the dispersion plot along the given Q path
