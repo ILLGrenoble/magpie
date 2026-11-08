@@ -43,6 +43,8 @@
 
 #include <boost/date_time/c_time.hpp>
 
+#include "maths.h"
+
 
 namespace tl2 {
 

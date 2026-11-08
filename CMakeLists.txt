@@ -34,7 +34,10 @@ option(BUILD_MAGPIE        "build main program"             TRUE)
 option(BUILD_LIBRARY       "build program library"          TRUE)
 option(BUILD_MODULES       "build standalone tool programs" TRUE)
 option(BUILD_PY_MODULES    "build py scripting modules"     TRUE)
+
+option(BUILD_UNITTESTS     "build unit tests"               FALSE)
 option(ONLY_BUILD_FINISHED "only build finished tools"      TRUE)
+
 option(USE_QT6             "use Qt version 6"               TRUE)
 option(USE_NATIVE          "use native code"                FALSE)
 
@@ -58,6 +61,20 @@ if(BUILD_MAGPIE)
 	message("Configuring magpie...")
 	message("================================================================================")
 	add_subdirectory(tools/magdyn magpie)
+endif()
+
+
+# unit tests
+if(BUILD_UNITTESTS)
+	message("\n================================================================================")
+	message("Configuring magpie unit tests...")
+	message("================================================================================")
+	add_subdirectory(unittests)
+
+	message("\n================================================================================")
+	message("Configuring tlibs2 unit tests...")
+	message("================================================================================")
+	add_subdirectory(tlibs2/unittests)
 endif()
 
 

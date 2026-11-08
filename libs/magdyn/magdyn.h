@@ -148,6 +148,13 @@ public:
 	using t_mat33_real = tl2::mat_static<t_real, 3, 3>;
 #endif
 
+	// shadow template parameters
+	using t_real_ = t_real;
+	using t_cplx_ = t_cplx;
+	using t_size_ = t_size;
+	using t_mat_ = t_mat;
+	using t_vec_ = t_vec;
+
 	using MagneticSite = t_MagneticSite<t_mat33, t_vec3, t_vec3_real, t_size, t_real>;
 	using MagneticSites = std::vector<MagneticSite>;
 
@@ -546,14 +553,6 @@ public:
 		t_size num_points = 4096, t_size num_threads = 4,
 		bool calc_weights = true, bool ortho_proj = true,
 		std::function<bool(int, int)> *progress_fkt = nullptr) const;
-	// --------------------------------------------------------------------
-
-
-	// --------------------------------------------------------------------
-	// conversion to landau-lifshitz formalism
-	// --------------------------------------------------------------------
-	t_mat CalcFluctuationMatrix(const t_vec3_real& Qvec) const;
-	t_mat CalcMCrossMatrix() const;
 	// --------------------------------------------------------------------
 
 
