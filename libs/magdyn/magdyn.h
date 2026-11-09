@@ -264,6 +264,9 @@ public:
 
 	// get the needed supercell ranges from the exchange terms
 	std::tuple<t_vec3_real, t_vec3_real> GetSupercellMinMax() const;
+
+	// local basis for the site spins
+	t_mat GetSiteTrafo(bool include_z = true) const;
 	// --------------------------------------------------------------------
 
 

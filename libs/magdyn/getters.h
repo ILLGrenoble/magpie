@@ -566,6 +566,37 @@ MAGDYN_INST::GetSupercellMinMax() const
 
 	return std::make_tuple(min, max);
 }
+
+
+
+/**
+ * local basis for the site spins
+ */
+MAGDYN_TEMPL t_mat MAGDYN_INST::GetSiteTrafo(bool include_z) const
+{
+	const t_size N = GetMagneticSitesCount();
+
+	t_size cols = include_z ? 3 : 2;
+	t_mat rot = tl2::zero<t_mat>(3*N, cols*N);
+
+	for(t_size site_idx = 0; site_idx < N; ++site_idx)
+	{
+		const MagneticSite& s = GetMagneticSite(site_idx);
+		auto [x, y] = tl2::split_cplx<t_vec3, t_vec3_real>(s.trafo_plane_calc);
+		x /= tl2::norm(x);
+		y /= tl2::norm(y);
+
+		for(t_size comp = 0; comp < x.size(); ++comp)
+		{
+			rot(3*site_idx + comp, cols*site_idx + 0) = x[comp];
+			rot(3*site_idx + comp, cols*site_idx + 1) = y[comp];
+			if(include_z)
+				rot(3*site_idx + comp, cols*site_idx + 2) = s.trafo_z_calc[comp];
+		}
+	}
+
+	return rot;
+}
 // --------------------------------------------------------------------
 
 
