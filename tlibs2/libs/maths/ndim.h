@@ -1960,6 +1960,30 @@ requires is_basic_vec<t_vec>
 
 
 /**
+ * subvector of the given rows
+ */
+template<class t_vec>
+t_vec subvec(const t_vec& vec, decltype(vec.size()) row_begin, decltype(vec.size()) row_end)
+requires is_basic_vec<t_vec>
+{
+	using size_t = decltype(vec.size());
+	size_t vec_size = vec.size();
+
+	size_t act_row_end = std::min(vec_size, row_end);
+	t_vec vecRet = create<t_vec>(act_row_end - row_begin);
+
+	size_t res_row = 0;
+	for(size_t row = row_begin; row < act_row_end; ++row)
+	{
+		vecRet[res_row] = vec[row];
+		++res_row;
+	}
+
+	return vecRet;
+}
+
+
+/**
  * determinant from a square matrix stored in a vector container
  * @see (Merziger 2006), p. 185
  */

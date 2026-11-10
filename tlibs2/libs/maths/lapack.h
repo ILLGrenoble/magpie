@@ -1112,7 +1112,7 @@ requires tl2::is_mat<t_mat>
 	using t_scalar = typename t_mat::value_type;
 	using t_real = tl2::underlying_value_type<t_scalar>;
 
-	auto [ ok, U, Vh, vals ] = singval<t_mat>(mat);
+	auto [ ok, U, Vh, vals ] = singval<t_mat, t_scalar, t_real>(mat);
 
 	auto V = tl2::herm(Vh);
 	auto Uh = tl2::herm(U);
