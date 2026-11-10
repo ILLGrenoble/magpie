@@ -327,14 +327,14 @@ requires tl2::is_mat<t_mat>
 
 	for(std::size_t k = 1; k <= minor; ++k)
 	{
-		for(std::size_t i = 1; i <= k-1; ++i)
+		for(std::size_t i = 1; i <= k - 1; ++i)
 			v[i - 1] = t_real{0};
 		v[k - 1] = t_real{1};
 
 		for(std::size_t i = k + 1; i <= minor; ++i)
 			v[i - 1] = outmat[(i - 1)*cols + (k - 1)];
 
-		Q *= (I - outvec[k - 1]*tl2::outer<t_mat, t_vec>(v, v));
+		Q = Q * (I - outvec[k - 1]*tl2::conj(tl2::outer<t_mat, t_vec>(v, v)));
 	}
 
 	return std::make_tuple(err == 0, std::move(Q), std::move(R));
@@ -770,8 +770,8 @@ eigenvec(const t_mat_cplx& mat,
 
 			if(normalise && (err == 0))
 			{
-				t_cplx n = tl2::norm(evecs[i]);
-				if(!tl2::equals<t_cplx>(n, t_cplx{0, 0}))
+				t_real n = std::sqrt(tl2::inner(evecs[i], evecs[i]).real());
+				if(!tl2::equals<t_real>(n, t_real{0}))
 					evecs[i] /= n;
 			}
 		}
@@ -1088,8 +1088,10 @@ requires tl2::is_mat<t_mat>
 	{
 		for(std::size_t j = 0; j < Nmax; ++j)
 		{
-			if(i < U.size1() && j < U.size2()) U(i,j) = outU[i*cols + j];
-			if(i < Vh.size1() && j < Vh.size2()) Vh(i,j) = outVh[i*cols + j];
+			if(i < U.size1() && j < U.size2())
+				U(i, j) = outU[i*cols + j];
+			if(i < Vh.size1() && j < Vh.size2())
+				Vh(i, j) = outVh[i*cols + j];
 		}
 	}
 

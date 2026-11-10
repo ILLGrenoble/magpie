@@ -102,7 +102,7 @@ requires is_vec<t_vec>
 /**
  * project vec1 onto vec2
  *
- * proj_op = |vec2><vec2¦/ len(vec2)^2,  len(vec2) = sqrt(<vec2|vec2>)
+ * proj_op = |vec2><vec2| / len(vec2)^2,  len(vec2) = sqrt(<vec2|vec2>)
  * proj = proj_op * vec1 = |vec2> * <vec2|vec1> / <vec2|vec2>
  *
  * @see (Arens 2015), p. 814 for the projection tensor

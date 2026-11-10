@@ -45,25 +45,32 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mat0, t_real, t_types)
 
 	#include "defs.h"
 
+	t_cplx imag(0., 1.);
 	t_real eps = std::pow(std::numeric_limits<t_real>::epsilon(), 1./2.);
 	std::cout << "eps = " << eps << std::endl;
 
 
-	auto M = tl2::create<t_mat>({1, 2, 3, 3, 2, 6, 4, 2, 4});
-	auto Z = tl2::create<t_mat_cplx>({1, 2, 3, 3, 2, 6, 4, 2, 4});
+	auto M = tl2::create<t_mat>({
+		1, 2, 3,
+		3, 2, 6,
+		4, 2, 4 });
+	auto Z = tl2::create<t_mat_cplx>({
+		1,                             t_real(2) + t_real(0.5)*imag, 3,
+		t_real(3) + t_real(0.25)*imag, 2,                            t_real(6) + t_real(1.23)*imag,
+		4,                             2,                            t_real(4) - t_real(2.)*imag });
 	std::cout << "M = " << M << std::endl;
 	std::cout << "Z = " << Z << std::endl;
 
 
 	{
 		auto [ok, Q, R] = tl2::qr<t_mat, t_vec>(M);
-		t_real d = tl2::det<t_mat>(Q);
+		t_real d = tl2::det<t_mat>(tl2::trans(Q) * Q);
 		auto QR = Q*R;
 
 		std::cout << "\nok = " << std::boolalpha << ok << std::endl;
 		std::cout << "Q = " << Q << std::endl;
 		std::cout << "R = " << R << std::endl;
-		std::cout << "det(Q) = " << d << std::endl;
+		std::cout << "det(Q^t Q) = " << d << std::endl;
 		std::cout << "QR = " << QR << std::endl;
 
 		BOOST_TEST(ok);
@@ -87,13 +94,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mat0, t_real, t_types)
 
 	{
 		auto [ok, Q, R] = tl2::qr<t_mat_cplx, t_vec_cplx>(Z);
-		t_cplx d = tl2::det<t_mat_cplx>(Q);
+		t_cplx d = tl2::det<t_mat_cplx>(tl2::herm(Q) * Q);
 		auto QR = Q*R;
 
 		std::cout << "\nok = " << std::boolalpha << ok << std::endl;
 		std::cout << "Q = " << Q << std::endl;
 		std::cout << "R = " << R << std::endl;
-		std::cout << "det(Q) = " << d << std::endl;
+		std::cout << "det(Q^h Q) = " << d << std::endl;
 		std::cout << "QR = " << QR << std::endl;
 
 		BOOST_TEST(ok);
@@ -133,6 +140,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mat0, t_real, t_types)
 		std::cout << "U = " << U << "\nVh = " << Vh << std::endl;
 
 		std::cout << "diag{vals} * UVh = " << U*tl2::diag<t_mat_cplx>(vals)*Vh << std::endl;
+		BOOST_TEST(tl2::equals(U*tl2::diag<t_mat_cplx>(vals)*Vh, Z, eps));
 
 
 		auto [inva, ok3a] = tl2_la::pseudoinv<t_mat_cplx>(Z);
@@ -177,6 +185,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mat0, t_real, t_types)
 		std::cout << "U = " << U << "\nVt = " << Vt << std::endl;
 
 		std::cout << "diag{vals} * UVt = " << U*tl2::diag<t_mat>(vals)*Vt << std::endl;
+		BOOST_TEST(tl2::equals(U*tl2::diag<t_mat>(vals)*Vt, M, eps));
 
 
 		auto [inva, ok3a] = tl2_la::pseudoinv<t_mat>(M);

@@ -2207,7 +2207,7 @@ requires is_mat<t_mat> && is_vec<t_vec>
 	std::vector<t_vec> sysM;
 	sysM.reserve(cols);
 	for(std::size_t i = 0; i < cols; ++i)
-		sysM.push_back(col<t_mat, t_vec>(mat, i));
+		sysM.emplace_back(col<t_mat, t_vec>(mat, i));
 
 	std::vector<t_vec> Qsys = orthonorm_sys<t_vec, std::vector, std::vector>(sysM);
 	t_mat Q = create<t_mat>(Qsys, false);
