@@ -33,7 +33,6 @@
 #ifndef __MAGDYN_LANDAU_H__
 #define __MAGDYN_LANDAU_H__
 
-
 #include "magdyn.h"
 
 #include <limits>
@@ -126,14 +125,14 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec3_real>
 /**
  * convert Mx matrix from holstein-primakoff formalism
  */
-template<class t_magdyn, class t_mat = typename t_magdyn::t_mat_>
-std::tuple<t_mat, t_mat, t_mat> calc_mcross_matrix(const t_magdyn& mag)
+template<class t_magdyn, class t_mat = typename t_magdyn::t_mat_,
+	class t_real = typename t_magdyn::t_real_>
+std::tuple<t_mat, t_mat, t_mat> calc_mcross_matrix(const t_magdyn& mag, t_real eps = 1e-6)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_mat<t_mat>
 #endif
 {
 	using t_size = typename t_magdyn::t_size_;
-	using t_real = typename t_magdyn::t_real_;
 	using t_cplx = typename t_magdyn::t_cplx_;
 	using t_vec = typename t_magdyn::t_vec_;
 	using t_vec3 = typename t_magdyn::t_vec3;
@@ -141,7 +140,6 @@ requires tl2::is_mat<t_mat>
 	using MagneticSite = typename t_magdyn::MagneticSite;
 
 	constexpr const t_cplx imag(0., 1.);
-	constexpr const t_real eps = 1e-6;
 
 	const t_size N = mag.GetMagneticSitesCount();
 	t_mat Mx = tl2::zero<t_mat>(N*3, N*3);
@@ -167,26 +165,31 @@ requires tl2::is_mat<t_mat>
 	tl2::niceprint(std::cout, Nx, 1e-4, 4);*/
 
 	// basis removing longitudinal modes
+	t_mat basis;
 	auto [evecs_ok, evals, evecs] =
 		tl2_la::eigenvec<t_mat, t_vec, t_cplx, t_real>(-imag * Mx,
 			false /*only_evals*/, true /*is_herm*/, false /*normalise*/);
-
-	t_real eval_max = std::abs(std::max_element(evals.begin(), evals.end(),
-		[](const t_cplx& val1, const t_cplx& val2)
-		{
-			return std::abs(val1.real()) < std::abs(val2.real());
-		})->real());
-	std::vector<t_vec> evecs_nonzero;
-	for(t_size idx = 0; idx < evecs.size(); ++idx)
+	if(evecs_ok)
 	{
-		if(std::abs(evals[idx].real()) < eps * eval_max)
-			continue;
-		evecs_nonzero.push_back(evecs[idx]);
-	}
+		t_real eval_max = std::abs(std::max_element(evals.begin(), evals.end(),
+			[](const t_cplx& val1, const t_cplx& val2)
+			{
+				return std::abs(val1.real()) < std::abs(val2.real());
+			})->real());
 
-	t_mat basis = tl2::create<t_mat, t_vec>(evecs_nonzero);
-	//std::cout << "basis =\n";
-	//tl2::niceprint(std::cout, basis, 1e-4, 4);
+		std::vector<t_vec> evecs_nonzero;
+		evecs_nonzero.reserve(evecs.size());
+		for(t_size idx = 0; idx < evecs.size(); ++idx)
+		{
+			if(std::abs(evals[idx].real()) < eps * eval_max)
+				continue;
+			evecs_nonzero.push_back(evecs[idx]);
+		}
+
+		basis = tl2::create<t_mat, t_vec>(evecs_nonzero);
+		//std::cout << "basis =\n";
+		//tl2::niceprint(std::cout, basis, 1e-4, 4);
+	}
 
 	return std::make_tuple(Mx, Nx, basis);
 }
@@ -194,18 +197,19 @@ requires tl2::is_mat<t_mat>
 
 
 template<class t_mat, class t_vec,
+	class t_mat33, class t_vec3,
 	class t_cplx = typename t_mat::value_type,
 	class t_real = typename t_cplx::value_type>
 std::tuple<std::vector<t_real>, std::vector<t_vec>, std::vector<t_real>>
 calc_energies_landau(const t_mat& F, const t_mat& Mx, const t_mat& Nx, const t_mat& basis,
-  bool only_energies = true, bool unite_degenerate = true)
+  bool only_energies = true, bool unite_degenerate = true,
+	const t_mat33* proj_neutron = nullptr, t_real eps = 1e-6)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
 #endif
 {
 	using t_size = typename t_mat::size_type;
 	constexpr const t_cplx imag(0., 1.);
-	constexpr const t_real eps = 1e-6;
 
 	t_size num_sites = Mx.size1() / 3;
 
@@ -214,6 +218,9 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
 	auto [evecs_ok, evals, evecs] =
 		tl2_la::eigenvec<t_mat, t_vec, t_cplx, t_real>(mat_trans,
 			only_energies, false /*is_herm*/, false /*normalise*/);
+	if(!evecs_ok)
+		return std::make_tuple(std::vector<t_real>{}, std::vector<t_vec>{}, std::vector<t_real>{});
+
 	for(t_vec& evec : evecs)
 		evec = basis * evec;
 
@@ -237,48 +244,92 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
 
 	std::vector<t_real> energies;
 	std::vector<t_vec> states;
+	std::vector<t_real> weights;
 	energies.reserve(evals.size());
 	states.reserve(evecs.size());
+	weights.reserve(states.size());
 
-	if(!unite_degenerate)
+	for(const t_cplx& eval : evals)
+		energies.push_back(eval.real());
+	for(t_size idx = 0; idx < evecs.size(); ++idx)
 	{
-		for(const t_cplx& eval : evals)
-			energies.push_back(eval.real());
-		for(t_size idx = 0; idx < evecs.size(); ++idx)
-		{
-			// symplectic norm
-			t_cplx norm = std::sqrt(tl2::inner(evecs[idx], Nx, evecs[idx]));
-			if(tl2::equals_0<t_real>(std::abs(norm), eps))
-				norm = 1;
-			states.emplace_back(evecs[idx] / norm);
-		}
-	}
-	else
-	{
-		// TODO
+		// symplectic norm
+		t_cplx norm = std::sqrt(tl2::inner(evecs[idx], Nx, evecs[idx]));
+		if(tl2::equals_0<t_real>(std::abs(norm), eps))
+			norm = 1;
+		states.emplace_back(evecs[idx] / norm);
 	}
 
 	// spin-spin correlations
-	std::vector<t_real> weights;
 	if(!only_energies)
 	{
-		weights.reserve(states.size());
-
 		for(t_size state_idx = 0; state_idx < states.size(); ++state_idx)
 		{
 			// TODO: use the sites' g factors instead
 			t_vec state = std::abs(tl2::g_e<t_real>) * states[state_idx];
 
-			t_vec state_sum = tl2::zero<t_vec>(3);
+			t_vec3 state_sum = tl2::zero<t_vec3>(3);
 			for(t_size row_beg = 0; row_beg < state.size(); row_beg += 3)
-				state_sum += tl2::subvec<t_vec>(state, row_beg, row_beg + 3);
+				state_sum += tl2::convert<t_vec3>(tl2::subvec<t_vec>(state, row_beg, row_beg + 3));
 
-			t_mat S = tl2::outer<t_mat, t_vec>(state_sum, state_sum);
+			t_mat33 S = tl2::outer<t_mat33, t_vec3>(state_sum, state_sum);
 			S /= t_real(num_sites);
 
-			t_real weight = std::abs(tl2::trace(S).real());
+			// apply orthogonal neutron projector
+			if(proj_neutron)
+				S = (*proj_neutron) * S /** (*proj_neutron)*/;
+
+			t_real weight = std::abs(tl2::trace<t_mat33>(S).real());
 			weights.push_back(weight);
 		}
+	}
+	else
+	{
+		for(t_size state_idx = 0; state_idx < states.size(); ++state_idx)
+			weights.push_back(1.);
+	}
+
+	if(unite_degenerate)
+	{
+		std::vector<t_real> unique_energies;
+		std::vector<t_vec> unique_states;
+		std::vector<t_real> unique_weights;
+		unique_energies.reserve(evals.size());
+		unique_states.reserve(evecs.size());
+
+		t_size degen_begin = 0;
+		while(degen_begin < energies.size())
+		{
+			// find range of degenerate energies
+			t_size degen_end = degen_begin + 1;
+			while(degen_end < energies.size())
+			{
+				if(!tl2::equals(energies[degen_begin], energies[degen_end], eps))
+					break;
+				++degen_end;
+			}
+
+			// mean of degenerate energies (as they can still vary within epsilon)
+			t_real E = 0.;
+			t_real w = 0.;
+			for(t_size idx = degen_begin; idx < degen_end; ++idx)
+			{
+				E += energies[idx];
+				w += weights[idx];  // TODO: save individual S matrices and recalculate total traces
+			}
+			E /= t_real(degen_end - degen_begin);
+			unique_energies.emplace_back(E);
+			unique_weights.push_back(w);
+
+			// TODO: construct united state
+			unique_states.emplace_back(states[degen_begin]);
+
+			degen_begin = degen_end;
+		}
+
+		energies = std::move(unique_energies);
+		weights = std::move(unique_weights);
+		states = std::move(unique_states);
 	}
 
 	return std::make_tuple(energies, states, weights);

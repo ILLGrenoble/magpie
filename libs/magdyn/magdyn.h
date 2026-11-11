@@ -458,6 +458,10 @@ public:
 	// @note implements the formalism given by (Toth 2015)
 	bool CalcCorrelationsFromHamiltonian(SofQE& S) const;
 
+	// calculate orthogonal projector for magnetic neutron scattering,
+	// see (Shirane 2002), p. 37, equation (2.64)
+	t_mat33 CalcOrthoProjector(const t_vec3_real& Q, bool Q_in_invA = true) const;
+
 	// applies projectors, form and weight factors to get neutron intensities
 	// @note implements the formalism given by (Toth 2015)
 	void CalcIntensities(SofQE& S) const;

@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 		BOOST_TEST(Es_and_S.size() == 2);  // + and - energy branch
 		BOOST_TEST(tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps));
 		BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), -2.*J*(1. - std::cos(h * 2. * pi)), eps));
-		BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), 2.*std::abs(tl2::g_e<t_real>) - 2., /*eps*/ 5e-6));
+		BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), std::pow(tl2::g_e<t_real>, 2.) / 2., /*eps*/ 5e-6));
 	}
 
 

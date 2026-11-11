@@ -81,8 +81,11 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::UniteEnergies(const MAGDYN_TYPE::SofQE& S) const
 			iter->S_perp      += curState.S_perp;
 			iter->S_sum       += curState.S_sum;
 			iter->S_perp_sum  += curState.S_perp_sum;
-			iter->weight_perp += curState.weight_perp;
-			iter->weight_full += curState.weight_full;
+			//iter->weight_perp += curState.weight_perp;
+			//iter->weight_full += curState.weight_full;
+			iter->weight_full = std::abs(iter->S_sum.real());
+			iter->weight_perp = std::abs(iter->S_perp_sum.real());
+
 
 			if(m_calc_pol)
 			{
@@ -90,8 +93,10 @@ MAGDYN_TYPE::SofQE MAGDYN_INST::UniteEnergies(const MAGDYN_TYPE::SofQE& S) const
 				iter->S_pol_perp      += curState.S_pol_perp;
 				iter->S_pol_sum       += curState.S_pol_sum;
 				iter->S_pol_perp_sum  += curState.S_pol_perp_sum;
-				iter->weight_pol_perp += curState.weight_pol_perp;
-				iter->weight_pol_full += curState.weight_pol_full;
+				//iter->weight_pol_perp += curState.weight_pol_perp;
+				//iter->weight_pol_full += curState.weight_pol_full;
+				iter->weight_pol_perp = std::abs(iter->S_pol_perp_sum.real());
+				iter->weight_pol_full = std::abs(iter->S_pol_sum.real());
 			}
 
 			iter->degeneracy += curState.degeneracy;
@@ -161,14 +166,17 @@ MAGDYN_INST::CalcEnergies(const t_vec3_real& Q_rlu, bool only_energies) const
 		if(!only_energies)
 		{
 			const t_mat33 rot_incomm_conj = tl2::conj(rot_incomm);
+			//const t_mat33 rot_incomm_herm = tl2::herm(rot_incomm);
 
 			// formula 40 from (Toth 2015)
 			for(EnergyAndWeight& EandW : S.E_and_S)
 				EandW.S = EandW.S * proj_norm;
 			for(EnergyAndWeight& EandW : S_p.E_and_S)
 				EandW.S = EandW.S * rot_incomm;
+				//EandW.S = rot_incomm * EandW.S;
 			for(EnergyAndWeight& EandW : S_m.E_and_S)
 				EandW.S = EandW.S * rot_incomm_conj;
+				//EandW.S = EandW.S * rot_incomm_herm;
 		}
 
 		// merge energies and weights

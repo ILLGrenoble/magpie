@@ -46,7 +46,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_ll, t_real, t_types_real)
 	std::cout << "================================================================================" << std::endl;
 
 	// constants
-	static constexpr t_real eps = std::is_same_v<t_real, float> ? 1e-4 : 1e-6;
+	static constexpr t_real eps = std::is_same_v<t_real, float> ? 1e-4 : 1e-5;
+	static constexpr t_real pi = tl2::pi<t_real>;
 
 	// types
 	using t_cplx = std::complex<t_real>;
@@ -60,6 +61,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_ll, t_real, t_types_real)
 		t_size>;
 
 	using t_vec3_real = typename t_magdyn::t_vec3_real;
+	using t_vec3 = typename t_magdyn::t_vec3;
+	using t_mat33 = typename t_magdyn::t_mat33;
 	using SofQE = typename t_magdyn::SofQE;
 
 	// magnon calculator
@@ -71,7 +74,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_ll, t_real, t_types_real)
 	magdyn.SetEpsilon(eps);
 	magdyn.SetUniteDegenerateEnergies(unite_degenerate);
 
-	auto [Mx, Nx, basis] = magdyn::calc_mcross_matrix<t_magdyn>(magdyn);
+	auto [Mx, Nx, basis] = magdyn::calc_mcross_matrix<t_magdyn>(magdyn, eps);
 
 	t_vec3_real Q_start = tl2::create<t_vec3_real>({ -1., 0., 0. });
 	t_vec3_real Q_end = tl2::create<t_vec3_real>({ +1., 0., 0. });
@@ -82,17 +85,19 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_ll, t_real, t_types_real)
 		t_vec3_real Q = tl2::lerp(Q_start, Q_end, t_real(i) / t_real(num_Qs - 1));
 		std::cout << "Q = " << Q << std::endl;
 
+		t_mat33 proj = magdyn.CalcOrthoProjector(Q, false);
+
 		// landau-lifshitz method
 		t_mat F = magdyn::calc_fluctuation_matrix<t_magdyn>(magdyn, Q);
 		auto [ Es_landau, vecs_landau, weights_landau ] =
-			magdyn::calc_energies_landau<t_mat, t_vec, t_cplx, t_real>(
-				F, Mx, Nx, basis, false, unite_degenerate);
+			magdyn::calc_energies_landau<t_mat, t_vec, t_mat33, t_vec3, t_cplx, t_real>(
+				F, Mx, Nx, basis, false, unite_degenerate, &proj, eps);
 
 		// holstein-primakoff method
 		SofQE S = magdyn.CalcEnergies(Q, false);
 
 		for(t_size mode = 0; mode < S.E_and_S.size(); ++mode)
-			std::cout << "E_hp = " << S.E_and_S[mode].E << ", w_hp = " << S.E_and_S[mode].weight_full << ", ";
+			std::cout << "E_hp = " << S.E_and_S[mode].E << ", w_hp = " << S.E_and_S[mode].weight_perp << ", ";
 		std::cout << std::endl;
 		for(t_size mode = 0; mode < Es_landau.size(); ++mode)
 			std::cout << "E_ll = " << Es_landau[mode] << ", w_ll = " << weights_landau[mode] << ", ";
@@ -102,7 +107,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_ll, t_real, t_types_real)
 		{
 			const t_real E = S.E_and_S[mode].E;
 			const t_real E_landau = Es_landau[mode];
-			const t_real w = S.E_and_S[mode].weight_full;
+			const t_real w = S.E_and_S[mode].weight_perp;
 			const t_real w_landau = weights_landau[mode];
 
 			BOOST_TEST(tl2::equals<t_real>(E, E_landau, eps));

@@ -378,7 +378,7 @@ bool MAGDYN_INST::Load(const boost::property_tree::ptree& node)
 			}
 		}
 
-		SetMagneticFormFactor(ffact);
+		SetMagneticFormFactor(ffact, i);
 	}
 
 	// ordering vector

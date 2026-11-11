@@ -97,7 +97,8 @@ bool MagDynDlg::ExportSQE(const QString& filename)
 	const int format = m_exportFormat->currentData().toInt();
 	if(format == EXPORT_GRID || format == EXPORT_TEXT)
 	{
-		ofstr = std::make_unique<std::ofstream>(filename.toStdString());
+		ofstr = std::make_unique<std::ofstream>(filename.toStdString(),
+			format == EXPORT_TEXT ? std::ios_base::out : std::ios_base::out | std::ios_base::binary);
 		ofstr->precision(g_prec);
 		file_opened = ofstr->operator bool();
 

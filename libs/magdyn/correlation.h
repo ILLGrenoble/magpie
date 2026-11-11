@@ -358,6 +358,35 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 
 
 /**
+ * calculate orthogonal projector for magnetic neutron scattering,
+ * see (Shirane 2002), p. 37, equation (2.64)
+ */
+MAGDYN_TEMPL
+MAGDYN_TYPE::t_mat33 MAGDYN_INST::CalcOrthoProjector(const MAGDYN_TYPE::t_vec3_real& Q, bool Q_in_invA) const
+{
+	t_vec3_real Q_invA = (Q_in_invA ? Q : m_xtalB * Q);
+
+	t_mat33 proj_neutron;
+	if(!tl2::equals_0(Q_invA, m_eps))
+	{
+		proj_neutron = tl2::convert<t_mat33>(
+			tl2::ortho_projector<t_mat33_real, t_vec3_real>(Q_invA, false));
+	}
+	else
+	{
+		// replacement for the projector at Q = 0,
+		//   - see the discussion here: https://github.com/SunnySuite/Sunny.jl/pull/131#issuecomment-2254290782
+		//   - see: ./tlibs2/tests/proj.cpp
+		proj_neutron = tl2::unit<t_mat33>(3, 3) * 2./3.;
+		//MAGDYN_CERR_OPT << "Magdyn error: Cannot calculate orthogonal projector for Q = 0." << std::endl;
+	}
+
+	return proj_neutron;
+}
+
+
+
+/**
  * applies projectors, form and weight factors to get neutron intensities
  * @note implements the formalism given by (Toth 2015)
  */
@@ -372,24 +401,8 @@ void MAGDYN_INST::CalcIntensities(MAGDYN_TYPE::SofQE& S) const
 		if(m_temperature >= m_eps)
 			E_and_S.S *= tl2::bose_cutoff(E_and_S.E, m_temperature, m_bose_cutoff);
 
-		// calculate orthogonal projector for magnetic neutron scattering,
-		// see (Shirane 2002), p. 37, equation (2.64)
-		t_mat33 proj_neutron;
-		bool Q_is_zero = false;
-		if(!tl2::equals_0(S.Q_invA, m_eps))
-		{
-			proj_neutron = tl2::convert<t_mat33>(
-				tl2::ortho_projector<t_mat33_real, t_vec3_real>(S.Q_invA, false));
-		}
-		else
-		{
-			// replacement for the projector at Q = 0,
-			//   - see the discussion here: https://github.com/SunnySuite/Sunny.jl/pull/131#issuecomment-2254290782
-			//   - see: ./tlibs2/tests/proj.cpp
-			proj_neutron = tl2::unit<t_mat33>(3, 3) * 2./3.;
-			Q_is_zero = true;
-			//MAGDYN_CERR_OPT << "Magdyn error: Cannot calculate orthogonal projector for Q = 0." << std::endl;
-		}
+		const t_mat33 proj_neutron = CalcOrthoProjector(S.Q_invA, true);
+		const bool Q_is_zero = tl2::equals_0(S.Q_invA, m_eps);
 
 		// apply orthogonal projector
 		E_and_S.S_perp = proj_neutron * E_and_S.S;
