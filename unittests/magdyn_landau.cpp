@@ -72,13 +72,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_ll, t_real, t_types_real)
 	magdyn.SetUniteDegenerateEnergies(unite_degenerate);
 
 	auto [Mx, Nx, basis] = magdyn::calc_mcross_matrix<t_magdyn>(magdyn);
-	//t_mat rot = magdyn.GetSiteTrafo(false);
-
 
 	t_vec3_real Q_start = tl2::create<t_vec3_real>({ -1., 0., 0. });
 	t_vec3_real Q_end = tl2::create<t_vec3_real>({ +1., 0., 0. });
+	t_size num_Qs = 32;
 
-	t_size num_Qs = 16;
 	for(t_size i = 0; i < num_Qs; ++i)
 	{
 		t_vec3_real Q = tl2::lerp(Q_start, Q_end, t_real(i) / t_real(num_Qs - 1));

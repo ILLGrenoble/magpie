@@ -5,6 +5,9 @@
  * @license GPLv3, see 'LICENSE' file
  *
  * References:
+ *	- https://en.wikipedia.org/wiki/Landau%E2%80%93Lifshitz%E2%80%93Gilbert_equation
+ *	- M. Garst, J. Waizner, and D. Grundler, J. Phys. D: Appl. Phys. 50, 293002 (2017), https://doi.org/10.1088/1361-6463/aa7573
+ *	- J. Waizner, PhD thesis (2017), https://kups.ub.uni-koeln.de/7937/
  *
  * @note Forked on 5-November-2024 from my privately developed "mathlibs" project (https://github.com/t-weber/mathlibs).
  * @desc For references, see the 'LITERATURE' file.
@@ -52,14 +55,18 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec3_real>
 #endif
 {
 	using t_cplx = typename t_magdyn::t_cplx_;
+	using t_real = typename t_magdyn::t_real_;
 	using t_size = typename t_magdyn::t_size_;
-	using t_vec3 = typename t_magdyn::t_vec3;
 	using MagneticSite = typename t_magdyn::MagneticSite;
 	using t_Jmap = typename t_magdyn::t_Jmap;
 
 	const t_Jmap J_Q0 = mag.CalcReciprocalJs();
 	const t_Jmap J_Q = mag.CalcReciprocalJs(Qvec);
 	const t_size N = mag.GetMagneticSitesCount();
+
+	constexpr const t_cplx imag(0., 1.);
+	constexpr const t_real twopi = t_real(2) * tl2::pi<t_real>;
+	constexpr const t_real phase_sign = -1;  // as in magdyn.h
 
 	t_mat F = tl2::zero<t_mat>(N*3, N*3);
 
@@ -71,11 +78,22 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec3_real>
 
 		const MagneticSite& s_i = mag.GetMagneticSite(idx1);
 		const MagneticSite& s_j = mag.GetMagneticSite(idx2);
-		t_cplx JS = -tl2::inner_noconj(s_i.trafo_z_calc, J * s_j.trafo_z_calc);
+		t_cplx JS = tl2::inner_noconj(s_i.trafo_z_calc, J * s_j.trafo_z_calc);
+		JS *= s_j.spin_mag_calc / s_i.spin_mag_calc;
 
-		t_cplx field_energy = -mag.CalcFieldEnergy(idx1);
 		for(int i = 0; i < 3; ++i)
-			F(idx1*3 + i, idx1*3 + i) += JS + field_energy;;
+			F(idx1*3 + i, idx1*3 + i) -= JS;
+	}
+
+	// phases based on site positions
+	std::vector<t_cplx> phases;
+	phases.reserve(N);
+	for(t_size site_idx = 0; site_idx < N; ++site_idx)
+	{
+		const MagneticSite& s = mag.GetMagneticSite(site_idx);
+		phases.emplace_back(
+			std::exp(-phase_sign * imag * twopi *
+				tl2::inner<t_vec3_real>(s.pos_calc, Qvec)));
 	}
 
 	// Q-dependent parts
@@ -86,7 +104,16 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec3_real>
 
 		for(int i = 0; i < 3; ++i)
 		for(int j = 0; j < 3; ++j)
-			F(idx1*3 + i, idx2*3 + j) += J(i, j);
+			F(idx1*3 + i, idx2*3 + j) += phases[idx1] * std::conj(phases[idx2]) * J(i, j);
+	}
+
+	// field
+	for(t_size site_idx = 0; site_idx < N; ++site_idx)
+	{
+		const MagneticSite& s = mag.GetMagneticSite(site_idx);
+		t_cplx field_energy = mag.CalcFieldEnergy(site_idx);
+		for(int i = 0; i < 3; ++i)
+			F(site_idx*3 + i, site_idx*3 + i) -= field_energy / s.spin_mag_calc;
 	}
 
 	//std::cout << "F =\n";
@@ -142,7 +169,7 @@ requires tl2::is_mat<t_mat>
 	// basis removing longitudinal modes
 	auto [evecs_ok, evals, evecs] =
 		tl2_la::eigenvec<t_mat, t_vec, t_cplx, t_real>(-imag * Mx,
-			false /*only_evals*/, true /*is_herm*/, true /*normalise*/);
+			false /*only_evals*/, true /*is_herm*/, false /*normalise*/);
 
 	t_real eval_max = std::abs(std::max_element(evals.begin(), evals.end(),
 		[](const t_cplx& val1, const t_cplx& val2)
@@ -186,7 +213,7 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
 	t_mat mat_trans = tl2::herm(basis) * mat * basis;
 	auto [evecs_ok, evals, evecs] =
 		tl2_la::eigenvec<t_mat, t_vec, t_cplx, t_real>(mat_trans,
-			only_energies, false /*is_herm*/, true /*normalise*/);
+			only_energies, false /*is_herm*/, false /*normalise*/);
 	for(t_vec& evec : evecs)
 		evec = basis * evec;
 
@@ -197,7 +224,8 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
 		return evals[idx1].real() > evals[idx2].real();
 	});
 	evals = tl2::reorder(evals, sorting);
-	evecs = tl2::reorder(evecs, sorting);
+	if(!only_energies)
+		evecs = tl2::reorder(evecs, sorting);
 
 	//std::cout << "mat =\n";
 	//tl2::niceprint(std::cout, mat, 1e-4, 4);
@@ -217,7 +245,13 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
 		for(const t_cplx& eval : evals)
 			energies.push_back(eval.real());
 		for(t_size idx = 0; idx < evecs.size(); ++idx)
-			states.emplace_back(evecs[idx]);
+		{
+			// symplectic norm
+			t_cplx norm = std::sqrt(tl2::inner(evecs[idx], Nx, evecs[idx]));
+			if(tl2::equals_0<t_real>(std::abs(norm), eps))
+				norm = 1;
+			states.emplace_back(evecs[idx] / norm);
+		}
 	}
 	else
 	{
@@ -232,14 +266,15 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
 
 		for(t_size state_idx = 0; state_idx < states.size(); ++state_idx)
 		{
-			const t_vec& state = states[state_idx];
+			// TODO: use the sites' g factors instead
+			t_vec state = std::abs(tl2::g_e<t_real>) * states[state_idx];
 
 			t_vec state_sum = tl2::zero<t_vec>(3);
 			for(t_size row_beg = 0; row_beg < state.size(); row_beg += 3)
 				state_sum += tl2::subvec<t_vec>(state, row_beg, row_beg + 3);
 
-			t_mat S = tl2::trans(tl2::outer<t_mat, t_vec>(state_sum, state_sum));
-			S *= std::abs(tl2::g_e<t_real>*tl2::g_e<t_real>) / t_real(num_sites);
+			t_mat S = tl2::outer<t_mat, t_vec>(state_sum, state_sum);
+			S /= t_real(num_sites);
 
 			t_real weight = std::abs(tl2::trace(S).real());
 			weights.push_back(weight);

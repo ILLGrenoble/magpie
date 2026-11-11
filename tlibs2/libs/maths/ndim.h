@@ -1423,6 +1423,51 @@ requires is_basic_vec<t_vec>
 
 
 /**
+ * inner product with matrix <vec1|mat|vec2>
+ * @see https://en.wikipedia.org/wiki/Symplectic_vector_space
+ */
+template<class t_vec, class t_mat>
+constexpr typename t_vec::value_type inner(const t_vec& vec1, const t_mat& mat, const t_vec& vec2)
+requires is_basic_vec<t_vec> && is_basic_mat<t_mat>
+{
+	const auto size = vec1.size();
+	using local_size_t = std::decay_t<decltype(size)>;
+
+	typename t_vec::value_type val{0};
+	for(local_size_t i = 0; i < size; ++i)
+	for(local_size_t j = 0; j < size; ++j)
+	{
+		if constexpr(is_complex<typename t_vec::value_type>)
+			val += std::conj(vec1[i]) * mat(i, j) * vec2[j];
+		else
+			val += vec1[i] * mat(i, j) * vec2[j];
+	}
+
+	return val;
+}
+
+
+/**
+ * inner product with matrix <vec1|mat|vec2> (without conjugation of complex vectors)
+ * @see https://en.wikipedia.org/wiki/Symplectic_vector_space
+ */
+template<class t_vec, class t_mat>
+constexpr typename t_vec::value_type inner_noconj(const t_vec& vec1, const t_mat& mat, const t_vec& vec2)
+requires is_basic_vec<t_vec> && is_basic_mat<t_mat>
+{
+	const auto size = vec1.size();
+	using local_size_t = std::decay_t<decltype(size)>;
+
+	typename t_vec::value_type val{0};
+	for(local_size_t i = 0; i < size; ++i)
+	for(local_size_t j = 0; j < size; ++j)
+			val += vec1[i] * mat(i, j) * vec2[j];
+
+	return val;
+}
+
+
+/**
  * inner product between two vectors of different type
  */
 template<class t_vec1, class t_vec2>
@@ -1655,6 +1700,10 @@ t_vec prod_mv(const t_mat& mat, const t_vec& vec)
 requires tl2::is_basic_mat<t_mat> && tl2::is_basic_vec<t_vec>
 {
 	const std::size_t vec_rows = static_cast<std::size_t>(vec.size());
+	const std::size_t mat_rows = static_cast<std::size_t>(mat.size1());
+	const std::size_t mat_cols = static_cast<std::size_t>(mat.size2());
+	//if(mat_rows != mat_cols || mat_rows != vec_rows || mat_cols != vec_rows)
+	//	std::cout << "prod_mv, dims: " << mat_rows << " x " << mat_cols << " x " << vec_rows << std::endl;
 
 	if constexpr(hom)
 	{
@@ -1673,12 +1722,10 @@ requires tl2::is_basic_mat<t_mat> && tl2::is_basic_vec<t_vec>
 
 	t_vec vecRet;
 	if constexpr(tl2::is_dyn_vec<t_vec>)
-		vecRet = t_vec(mat.size1());
+		vecRet = t_vec(mat_rows);
 
 	// matrix-vector product
-	const std::size_t mat_rows = static_cast<std::size_t>(mat.size1());
-	const std::size_t mat_cols = static_cast<std::size_t>(mat.size2());
-	for(std::size_t row = 0; row < std::min(mat_rows, vec_rows); ++row)
+	for(std::size_t row = 0; row < mat_rows; ++row)
 	{
 		vecRet[row] = typename t_vec::value_type{};
 		for(std::size_t col = 0; col < std::min(mat_cols, vec_rows); ++col)
@@ -1692,7 +1739,7 @@ requires tl2::is_basic_mat<t_mat> && tl2::is_basic_vec<t_vec>
 	if(hom && mat_cols == vec_rows + 1)
 	{
 		std::size_t col = vec_rows;
-		for(std::size_t row = 0; row < std::min(mat_rows, vec_rows); ++row)
+		for(std::size_t row = 0; row < mat_rows; ++row)
 		{
 			auto elem = mat(row, col);
 			vecRet[row] = vecRet[row] + elem;
