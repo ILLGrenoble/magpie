@@ -119,7 +119,7 @@ namespace tl2_la {
 	template<class t_mat, class t_scalar = typename t_mat::value_type,
 		class t_real = tl2::underlying_value_type<t_scalar>>
 	std::tuple<bool, t_mat, t_mat, std::vector<t_real>>
-	singval(const t_mat& mat)
+	singval(const t_mat& mat, bool trim_U = false)
 	requires tl2::is_mat<t_mat>;
 
 	template<class t_mat>

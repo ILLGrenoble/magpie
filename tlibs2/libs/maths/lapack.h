@@ -1017,7 +1017,7 @@ eigenvec(const t_mat& mat, bool only_evals, bool is_symmetric, bool normalise,
  */
 template<class t_mat, class t_scalar, class t_real>
 std::tuple<bool, t_mat, t_mat, std::vector<t_real>>
-singval(const t_mat& mat)
+singval(const t_mat& mat, bool trim_U)
 requires tl2::is_mat<t_mat>
 {
 	const std::size_t rows = mat.size1();
@@ -1026,7 +1026,7 @@ requires tl2::is_mat<t_mat>
 	const auto [Nmin, Nmax] = std::minmax(rows, cols);
 	std::vector<t_scalar> inmat(rows*cols), outU(rows*rows), outVh(cols*cols);
 	std::vector<t_real> vals(Nmin);
-	std::vector<t_real> _tmp(Nmax * Nmax * 2);
+	//std::vector<t_real> _tmp(Nmax * Nmax * 2);
 
 	for(std::size_t i = 0; i < rows; ++i)
 		for(std::size_t j = 0; j < cols; ++j)
@@ -1037,21 +1037,33 @@ requires tl2::is_mat<t_mat>
 	{
 		if constexpr(std::is_same_v<t_real, float>)
 		{
-			err = LAPACKE_cgesvd(LAPACK_ROW_MAJOR,
+			/*err = LAPACKE_cgesvd(LAPACK_ROW_MAJOR,
 				'A', 'A', rows, cols,
 				inmat.data(), cols,
 				vals.data(), outU.data(),
 				rows, outVh.data(),
-				cols, _tmp.data());
+				cols, _tmp.data());*/
+			err = LAPACKE_cgesdd(LAPACK_ROW_MAJOR,
+				'A', rows, cols,
+				inmat.data(), cols,
+				vals.data(), outU.data(),
+				rows, outVh.data(),
+				cols);
 		}
 		else if constexpr(std::is_same_v<t_real, double>)
 		{
-			err = LAPACKE_zgesvd(LAPACK_ROW_MAJOR,
+			/*err = LAPACKE_zgesvd(LAPACK_ROW_MAJOR,
 				'A', 'A', rows, cols,
 				inmat.data(), cols,
 				vals.data(), outU.data(),
 				rows, outVh.data(),
-				cols, _tmp.data());
+				cols, _tmp.data());*/
+			err = LAPACKE_zgesdd(LAPACK_ROW_MAJOR,
+				'A', rows, cols,
+				inmat.data(), cols,
+				vals.data(), outU.data(),
+				rows, outVh.data(),
+				cols);
 		}
 		else
 		{
@@ -1062,17 +1074,25 @@ requires tl2::is_mat<t_mat>
 	{
 		if constexpr(std::is_same_v<t_real, float>)
 		{
-			err = LAPACKE_sgesvd(LAPACK_ROW_MAJOR,
+			/*err = LAPACKE_sgesvd(LAPACK_ROW_MAJOR,
 				'A', 'A', rows, cols, inmat.data(), cols,
 				vals.data(), outU.data(),
-				rows, outVh.data(), cols, _tmp.data());
+				rows, outVh.data(), cols, _tmp.data());*/
+			err = LAPACKE_sgesdd(LAPACK_ROW_MAJOR,
+				'A', rows, cols, inmat.data(), cols,
+				vals.data(), outU.data(),
+				rows, outVh.data(), cols);
 		}
 		else if constexpr(std::is_same_v<t_real, double>)
 		{
-			err = LAPACKE_dgesvd(LAPACK_ROW_MAJOR,
+			/*err = LAPACKE_dgesvd(LAPACK_ROW_MAJOR,
 				'A', 'A', rows, cols, inmat.data(), cols,
 				vals.data(), outU.data(),
-				rows, outVh.data(), cols, _tmp.data());
+				rows, outVh.data(), cols, _tmp.data());*/
+			err = LAPACKE_dgesdd(LAPACK_ROW_MAJOR,
+				'A', rows, cols, inmat.data(), cols,
+				vals.data(), outU.data(),
+				rows, outVh.data(), cols);
 		}
 		else
 		{
@@ -1081,8 +1101,17 @@ requires tl2::is_mat<t_mat>
 	}
 
 
-	t_mat U = tl2::unit<t_mat>(rows);
-	t_mat Vh = tl2::unit<t_mat>(cols);
+	t_mat U, Vh;
+	if(trim_U)  // keep the same number of columns as there are singular values
+	{
+		U = tl2::zero<t_mat>(rows, vals.size());
+		Vh = tl2::zero<t_mat>(vals.size(), cols);
+	}
+	else
+	{
+		U = tl2::unit<t_mat>(rows);
+		Vh = tl2::unit<t_mat>(cols);
+	}
 
 	for(std::size_t i = 0; i < Nmax; ++i)
 	{
