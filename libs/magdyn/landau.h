@@ -33,6 +33,10 @@
 
 #include "magdyn.h"
 
+#include <limits>
+#include <tuple>
+#include <algorithm>
+
 
 namespace magdyn {
 
@@ -67,12 +71,9 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec3_real>
 
 		const MagneticSite& s_i = mag.GetMagneticSite(idx1);
 		const MagneticSite& s_j = mag.GetMagneticSite(idx2);
-		const t_vec3& v_i = s_i.trafo_z_calc;
-		const t_vec3& v_j = s_j.trafo_z_calc;
-		t_cplx JS = -tl2::inner_noconj(v_i, J * v_j);
+		t_cplx JS = -tl2::inner_noconj(s_i.trafo_z_calc, J * s_j.trafo_z_calc);
 
 		t_cplx field_energy = -mag.CalcFieldEnergy(idx1);
-
 		for(int i = 0; i < 3; ++i)
 			F(idx1*3 + i, idx1*3 + i) += JS + field_energy;;
 	}
@@ -99,18 +100,25 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec3_real>
  * convert Mx matrix from holstein-primakoff formalism
  */
 template<class t_magdyn, class t_mat = typename t_magdyn::t_mat_>
-t_mat calc_mcross_matrix(const t_magdyn& mag)
+std::tuple<t_mat, t_mat, t_mat> calc_mcross_matrix(const t_magdyn& mag)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_mat<t_mat>
 #endif
 {
 	using t_size = typename t_magdyn::t_size_;
+	using t_real = typename t_magdyn::t_real_;
+	using t_cplx = typename t_magdyn::t_cplx_;
+	using t_vec = typename t_magdyn::t_vec_;
 	using t_vec3 = typename t_magdyn::t_vec3;
 	using t_mat33 = typename t_magdyn::t_mat33;
 	using MagneticSite = typename t_magdyn::MagneticSite;
 
+	constexpr const t_cplx imag(0., 1.);
+	constexpr const t_real eps = 1e-6;
+
 	const t_size N = mag.GetMagneticSitesCount();
 	t_mat Mx = tl2::zero<t_mat>(N*3, N*3);
+	t_mat Nx = tl2::zero<t_mat>(N*3, N*3);
 
 	for(t_size site_idx = 0; site_idx < N; ++site_idx)
 	{
@@ -120,12 +128,40 @@ requires tl2::is_mat<t_mat>
 
 		for(int i = 0; i < 3; ++i)
 		for(int j = 0; j < 3; ++j)
-			Mx(site_idx*3 + i, site_idx*3 + j) = matx(i, j);
+		{
+			Mx(site_idx*3 + i, site_idx*3 + j) = s.spin_mag_calc * matx(i, j);
+			Nx(site_idx*3 + i, site_idx*3 + j) = -imag * matx(i, j) / s.spin_mag_calc;
+		}
 	}
 
-	//std::cout << "Mx =\n";
-	//tl2::niceprint(std::cout, Mx, 1e-4, 4);
-	return Mx;
+	/*std::cout << "Mx =\n";
+	tl2::niceprint(std::cout, Mx, 1e-4, 4);
+	std::cout << "Nx =\n";
+	tl2::niceprint(std::cout, Nx, 1e-4, 4);*/
+
+	// basis removing longitudinal modes
+	auto [evecs_ok, evals, evecs] =
+		tl2_la::eigenvec<t_mat, t_vec, t_cplx, t_real>(-imag * Mx,
+			false /*only_evals*/, true /*is_herm*/, true /*normalise*/);
+
+	t_real eval_max = std::abs(std::max_element(evals.begin(), evals.end(),
+		[](const t_cplx& val1, const t_cplx& val2)
+		{
+			return std::abs(val1.real()) < std::abs(val2.real());
+		})->real());
+	std::vector<t_vec> evecs_nonzero;
+	for(t_size idx = 0; idx < evecs.size(); ++idx)
+	{
+		if(std::abs(evals[idx].real()) < eps * eval_max)
+			continue;
+		evecs_nonzero.push_back(evecs[idx]);
+	}
+
+	t_mat basis = tl2::create<t_mat, t_vec>(evecs_nonzero);
+	//std::cout << "basis =\n";
+	//tl2::niceprint(std::cout, basis, 1e-4, 4);
+
+	return std::make_tuple(Mx, Nx, basis);
 }
 
 
@@ -133,24 +169,84 @@ requires tl2::is_mat<t_mat>
 template<class t_mat, class t_vec,
 	class t_cplx = typename t_mat::value_type,
 	class t_real = typename t_cplx::value_type>
-std::vector<t_cplx> calc_energies_landau(const t_mat& F, const t_mat& Mx)
+std::tuple<std::vector<t_real>, std::vector<t_vec>, std::vector<t_real>>
+calc_energies_landau(const t_mat& F, const t_mat& Mx, const t_mat& Nx, const t_mat& basis,
+  bool only_energies = true, bool unite_degenerate = true)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
 #endif
 {
-	t_mat mat = -t_cplx(0, 1) * Mx * F;
-	bool is_herm = false;
+	using t_size = typename t_mat::size_type;
+	constexpr const t_cplx imag(0., 1.);
+	constexpr const t_real eps = 1e-6;
+
+	t_size num_sites = Mx.size1() / 3;
+
+	t_mat mat = -imag * Mx * F;
+	t_mat mat_trans = tl2::herm(basis) * mat * basis;
+	auto [evecs_ok, evals, evecs] =
+		tl2_la::eigenvec<t_mat, t_vec, t_cplx, t_real>(mat_trans,
+			only_energies, false /*is_herm*/, true /*normalise*/);
+	for(t_vec& evec : evecs)
+		evec = basis * evec;
+
+	// sort states by energies in descending order
+	const std::vector<t_size> sorting = tl2::get_perm(evals.size(),
+		[&evals](t_size idx1, t_size idx2) -> bool
+	{
+		return evals[idx1].real() > evals[idx2].real();
+	});
+	evals = tl2::reorder(evals, sorting);
+	evecs = tl2::reorder(evecs, sorting);
+
 	//std::cout << "mat =\n";
 	//tl2::niceprint(std::cout, mat, 1e-4, 4);
+	/*for(std::size_t i = 0; i < evals.size(); ++i)
+	{
+		using namespace tl2_ops;
+		std::cout << i << ", eval = " << evals[i] << ", evec = " << evecs[i] << std::endl;
+	}*/
 
-	const auto [evecs_ok, evals, evecs] =
-		tl2_la::eigenvec<t_mat, t_vec, t_cplx, t_real>(
-			mat, true, is_herm, true);
+	std::vector<t_real> energies;
+	std::vector<t_vec> states;
+	energies.reserve(evals.size());
+	states.reserve(evecs.size());
 
-	/*for(const t_cplx& eval : evals)
-		std::cout << eval << ", ";
-	std::cout << std::endl;*/
-	return evals;
+	if(!unite_degenerate)
+	{
+		for(const t_cplx& eval : evals)
+			energies.push_back(eval.real());
+		for(t_size idx = 0; idx < evecs.size(); ++idx)
+			states.emplace_back(evecs[idx]);
+	}
+	else
+	{
+		// TODO
+	}
+
+	// spin-spin correlations
+	std::vector<t_real> weights;
+	if(!only_energies)
+	{
+		weights.reserve(states.size());
+
+		for(t_size state_idx = 0; state_idx < states.size(); ++state_idx)
+		{
+			const t_vec& state = states[state_idx];
+
+			t_vec state_sum = tl2::zero<t_vec>(3);
+			for(t_size row_beg = 0; row_beg < state.size(); row_beg += 3)
+				state_sum += tl2::subvec<t_vec>(state, row_beg, row_beg + 3);
+
+			t_mat S = tl2::trans(tl2::outer<t_mat, t_vec>(state_sum, state_sum));
+			S *= std::abs(tl2::g_e<t_real>*tl2::g_e<t_real>) / t_real(num_sites);
+
+			t_real weight = std::abs(tl2::trace(S).real());
+			weights.push_back(weight);
+		}
+	}
+
+	return std::make_tuple(energies, states, weights);
 }
 
 

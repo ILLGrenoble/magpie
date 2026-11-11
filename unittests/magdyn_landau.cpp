@@ -31,7 +31,7 @@ namespace testtools = boost::test_tools;
 namespace ty = boost::typeindex;
 
 #include "libs/magdyn.h"
-
+using namespace tl2_ops;
 
 using t_types_real = std::tuple<double, float>;
 
@@ -67,10 +67,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_ll, t_real, t_types_real)
 
 	magdyn.Load("../../examples/ferromagnetic_chain.magpie");
 
+	bool unite_degenerate = false;
 	magdyn.SetEpsilon(eps);
-	magdyn.SetUniteDegenerateEnergies(false);
+	magdyn.SetUniteDegenerateEnergies(unite_degenerate);
 
-	t_mat Mx = magdyn::calc_mcross_matrix<t_magdyn>(magdyn);
+	auto [Mx, Nx, basis] = magdyn::calc_mcross_matrix<t_magdyn>(magdyn);
+	//t_mat rot = magdyn.GetSiteTrafo(false);
+
 
 	t_vec3_real Q_start = tl2::create<t_vec3_real>({ -1., 0., 0. });
 	t_vec3_real Q_end = tl2::create<t_vec3_real>({ +1., 0., 0. });
@@ -78,20 +81,34 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_ll, t_real, t_types_real)
 	t_size num_Qs = 16;
 	for(t_size i = 0; i < num_Qs; ++i)
 	{
-		// landau-lifshitz method
 		t_vec3_real Q = tl2::lerp(Q_start, Q_end, t_real(i) / t_real(num_Qs - 1));
-		t_mat F = magdyn::calc_fluctuation_matrix<t_magdyn>(magdyn, Q);
-		auto Es_landau = magdyn::calc_energies_landau<t_mat, t_vec, t_cplx, t_real>(F, Mx);
+		std::cout << "Q = " << Q << std::endl;
 
-		// holdstein-primakoff method
+		// landau-lifshitz method
+		t_mat F = magdyn::calc_fluctuation_matrix<t_magdyn>(magdyn, Q);
+		auto [ Es_landau, vecs_landau, weights_landau ] =
+			magdyn::calc_energies_landau<t_mat, t_vec, t_cplx, t_real>(
+				F, Mx, Nx, basis, false, unite_degenerate);
+
+		// holstein-primakoff method
 		SofQE S = magdyn.CalcEnergies(Q, false);
+
+		for(t_size mode = 0; mode < S.E_and_S.size(); ++mode)
+			std::cout << "E_hp = " << S.E_and_S[mode].E << ", w_hp = " << S.E_and_S[mode].weight_full << ", ";
+		std::cout << std::endl;
+		for(t_size mode = 0; mode < Es_landau.size(); ++mode)
+			std::cout << "E_ll = " << Es_landau[mode] << ", w_ll = " << weights_landau[mode] << ", ";
+		std::cout << std::endl;
 
 		for(t_size mode = 0; mode < std::min(S.E_and_S.size(), Es_landau.size()); ++mode)
 		{
-			const t_cplx& E = S.E_and_S[mode].E;
-			const t_cplx& E_landau = Es_landau[mode];
+			const t_real E = S.E_and_S[mode].E;
+			const t_real E_landau = Es_landau[mode];
+			const t_real w = S.E_and_S[mode].weight_full;
+			const t_real w_landau = weights_landau[mode];
 
-			BOOST_TEST(tl2::equals<t_cplx>(E, E_landau, eps));
+			BOOST_TEST(tl2::equals<t_real>(E, E_landau, eps));
+			BOOST_TEST(tl2::equals<t_real>(w, w_landau, eps));
 		}
 	}
 
