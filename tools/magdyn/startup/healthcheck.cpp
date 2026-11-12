@@ -94,13 +94,13 @@ bool healthcheck()
 
 	// calculate a point on the dispersion
 	const t_real h = 0.1;
-	const t_real w = 0.5878;
+	const t_real E = 0.5878;
 	const t_real w_perp = 0.6513;
 
 	using EnergiesAndWeights = typename t_magdyn::EnergiesAndWeights;
 	EnergiesAndWeights Es_and_S = magdyn.CalcEnergies(h, 0., 0., false);
 
-	auto check_E = [](const EnergiesAndWeights& Es_and_S, t_real w, t_real w_perp) -> bool
+	auto check_E = [](const EnergiesAndWeights& Es_and_S, t_real E, t_real w_perp) -> bool
 	{
 		const t_real eps = 1e-4; //g_eps;
 
@@ -108,14 +108,14 @@ bool healthcheck()
 			return false;
 		if(!tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps))
 			return false;
-		if(!tl2::equals<t_real>(std::abs(Es_and_S[0].E), w, eps))
+		if(!tl2::equals<t_real>(std::abs(Es_and_S[0].E), E, eps))
 			return false;
 		if(!tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), w_perp, eps))
 			return false;
 		return true;
 	};
 
-	if(!check_E(Es_and_S, w, w_perp))
+	if(!check_E(Es_and_S, E, w_perp))
 		return false;
 
 
@@ -129,7 +129,7 @@ bool healthcheck()
 
 	if(all_Es_and_S.size() != num_Qs)
 		return false;
-	if(!check_E(all_Es_and_S[0].E_and_S, w, w_perp))
+	if(!check_E(all_Es_and_S[0].E_and_S, E, w_perp))
 		return false;
 
 	return true;
