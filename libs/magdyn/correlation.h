@@ -289,69 +289,105 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	}
 
 	// building the spin correlation functions of equation (47) from (Toth 2015)
-	for(std::uint8_t x_idx = 0; x_idx < 3; ++x_idx)
-	for(std::uint8_t y_idx = 0; y_idx < 3; ++y_idx)
+	std::vector<t_vec3> factors;
+	factors.resize(energy_size);
+
+	// equations (44) and (47) from (Toth 2015)
+	for(t_size i = 0; i < N; ++i)
 	{
-		// equations (44) and (47) from (Toth 2015)
-		t_mat M = tl2::create<t_mat>(num_branches, num_branches);
+		const MagneticSite& s_i = GetMagneticSite(i);
+		const t_vec3& u_i = s_i.ge_trafo_plane_calc;
+		const t_vec3& uc_i = s_i.ge_trafo_plane_conj_calc;
 
-		for(t_size i = 0; i < N; ++i)
+		// matrix elements of equation (44) from (Toth 2015)
+		factors[i]     = S_and_ffacts[i] / phases[i] * u_i;
+		factors[i + N] = S_and_ffactsc[i] / phases[i] * uc_i;
+	}
+
+	for(t_size i = 0; i < energy_size; ++i)
+	{
+		t_vec3 M_xy = tl2::zero<t_vec3>(3);
+		for(t_size j = 0; j < energy_size; ++j)
+			M_xy += std::conj(S.evec_mat_comm(j, i)) * factors[j];
+
+		for(std::uint8_t x_idx = 0; x_idx < 3; ++x_idx)
+		for(std::uint8_t y_idx = 0; y_idx < 3; ++y_idx)
+			S.E_and_S[i].S(x_idx, y_idx) = M_xy[x_idx] * std::conj(M_xy[y_idx]) / t_real(2*N);
+	}
+
+	if(m_perform_checks)
+	{
+		// building the spin correlation functions of equation (47) from (Toth 2015)
+		std::vector<t_mat33> Smats;
+		Smats.reserve(energy_size);
+		for(t_size i = 0; i < energy_size; ++i)
+			Smats.emplace_back(tl2::zero<t_mat33>(3, 3));
+
+		for(std::uint8_t x_idx = 0; x_idx < 3; ++x_idx)
+		for(std::uint8_t y_idx = 0; y_idx < 3; ++y_idx)
 		{
-			// get the outer site and the pre-calculated u vectors
-			const MagneticSite& s_i = GetMagneticSite(i);
-			const t_vec3& u_i = s_i.ge_trafo_plane_calc;
-			const t_vec3& uc_i = s_i.ge_trafo_plane_conj_calc;
+			// equations (44) and (47) from (Toth 2015)
+			t_mat M = tl2::create<t_mat>(num_branches, num_branches);
 
-			// matrix elements of equation (44) from (Toth 2015)
-			const t_cplx factors_i_00 = S_and_ffacts[i]  / phases[i] * u_i[x_idx];   // b_i+ b_j terms
-			const t_cplx factors_i_0N = S_and_ffacts[i]  / phases[i] * u_i[x_idx];   // b_i+ b_j+ terms
-			const t_cplx factors_i_N0 = S_and_ffactsc[i] / phases[i] * uc_i[x_idx];  // b_i b_j terms
-			const t_cplx factors_i_NN = S_and_ffactsc[i] / phases[i] * uc_i[x_idx];  // b_i b_j+ terms
-
-			for(t_size j = 0; j < N; ++j)
+			for(t_size i = 0; i < N; ++i)
 			{
-				// get the inner site and the pre-calculated u vectors
-				const MagneticSite& s_j = GetMagneticSite(j);
-				const t_vec3& u_j = s_j.ge_trafo_plane_calc;
-				const t_vec3& uc_j = s_j.ge_trafo_plane_conj_calc;
+				// get the outer site and the pre-calculated u vectors
+				const MagneticSite& s_i = GetMagneticSite(i);
+				const t_vec3& u_i = s_i.ge_trafo_plane_calc;
+				const t_vec3& uc_i = s_i.ge_trafo_plane_conj_calc;
 
 				// matrix elements of equation (44) from (Toth 2015)
-				M(    i,     j) = factors_i_00 * S_and_ffactsc[j] * phases[j] * uc_j[y_idx];  // b_i+ b_j terms
-				M(    i, N + j) = factors_i_0N * S_and_ffacts[j]  * phases[j] * u_j[y_idx];   // b_i+ b_j+ terms
-				M(N + i,     j) = factors_i_N0 * S_and_ffactsc[j] * phases[j] * uc_j[y_idx];  // b_i b_j terms
-				M(N + i, N + j) = factors_i_NN * S_and_ffacts[j]  * phases[j] * u_j[y_idx];   // b_i b_j+ terms
-			}  // end of inner site iteration
-		}  // end of outer site iteration
+				const t_cplx factors_i_00 = S_and_ffacts[i]  / phases[i] * u_i[x_idx];   // b_i+ b_j terms
+				const t_cplx factors_i_0N = S_and_ffacts[i]  / phases[i] * u_i[x_idx];   // b_i+ b_j+ terms
+				const t_cplx factors_i_N0 = S_and_ffactsc[i] / phases[i] * uc_i[x_idx];  // b_i b_j terms
+				const t_cplx factors_i_NN = S_and_ffactsc[i] / phases[i] * uc_i[x_idx];  // b_i b_j+ terms
 
-		// multiply with boson operators
-		// no need to calculate the full M_xy matrix, since only the diagonal elements are needed
-		const t_vec M_xy = prod_diag<t_mat, t_vec>(evec_mat_comm_herm, M * S.evec_mat_comm);
+				for(t_size j = 0; j < N; ++j)
+				{
+					// get the inner site and the pre-calculated u vectors
+					const MagneticSite& s_j = GetMagneticSite(j);
+					const t_vec3& u_j = s_j.ge_trafo_plane_calc;
+					const t_vec3& uc_j = s_j.ge_trafo_plane_conj_calc;
 
-		if(m_perform_checks)
-		{
-			const t_mat M_xy2 = evec_mat_comm_herm * M * S.evec_mat_comm;
+					// matrix elements of equation (44) from (Toth 2015)
+					M(    i,     j) = factors_i_00 * S_and_ffactsc[j] * phases[j] * uc_j[y_idx];  // b_i+ b_j terms
+					M(    i, N + j) = factors_i_0N * S_and_ffacts[j]  * phases[j] * u_j[y_idx];   // b_i+ b_j+ terms
+					M(N + i,     j) = factors_i_N0 * S_and_ffactsc[j] * phases[j] * uc_j[y_idx];  // b_i b_j terms
+					M(N + i, N + j) = factors_i_NN * S_and_ffacts[j]  * phases[j] * u_j[y_idx];   // b_i b_j+ terms
+				}  // end of inner site iteration
+			}  // end of outer site iteration
+
+			// multiply with boson operators
+			// no need to calculate the full M_xy matrix, since only the diagonal elements are needed
+			const t_vec M_xy = prod_diag<t_mat, t_vec>(evec_mat_comm_herm, M * S.evec_mat_comm);
+			//const t_mat M_xy2 = evec_mat_comm_herm * M * S.evec_mat_comm;
 			//const t_vec M_xy3 = prod_diag<t_mat, t_vec>(evec_mat_comm_herm, M * S.evec_mat_comm);
 			//const t_mat M_xy3 = prod_THMT(M, S.evec_mat_comm);
 			//const t_vec M_xy4 = prod_THMT_diag<t_mat, t_vec>(M, S.evec_mat_comm);
 
-#ifdef __MAGDYN_DEBUG_OUTPUT__
-			std::cout << "M_{" << int(x_idx) << ", " << int(y_idx) << "}:\n";
-			tl2::niceprint(std::cout, M_xy2, 1e-4, 4);
-#endif
-
-			if(!tl2::equals(M_xy, tl2::diag_vec<t_vec>(M_xy2), m_eps))
+			/*if(!tl2::equals(M_xy, tl2::diag_vec<t_vec>(M_xy2), m_eps))
 			{
 				MAGDYN_CERR_OPT << "Magdyn error: Correlation matrix mismatch at Q = " << S.Q_rlu << ": "
 					<< "\n(1) " << M_xy.size() << ": " << M_xy
 					<< "\n(2) " << M_xy2.size1() << "x" << M_xy2.size2() << ": " << M_xy2
 					<< "." << std::endl;
-			}
-		}
+			}*/
+
+			for(t_size i = 0; i < energy_size; ++i)
+				Smats[i](x_idx, y_idx) += M_xy[i] / t_real(2*N);
+		} // end of coordinate iteration
 
 		for(t_size i = 0; i < energy_size; ++i)
-			S.E_and_S[i].S(x_idx, y_idx) += M_xy[i] / t_real(2*N);
-	} // end of coordinate iteration
-
+		{
+			if(!tl2::equals(S.E_and_S[i].S, Smats[i], m_eps))
+			{
+				MAGDYN_CERR_OPT << "Magdyn error: Correlation matrix mismatch at Q = " << S.Q_rlu << ": "
+					<< "\n(1) " << S.E_and_S[i].S.size1() << "x" << S.E_and_S[i].S.size2() << ": " << S.E_and_S[i].S
+					<< "\n(2) " << Smats[i].size1() << "x" << Smats[i].size2() << ": " << Smats[i]
+					<< "." << std::endl;
+			}
+		}
+	} // checks
 	return true;
 }
 
