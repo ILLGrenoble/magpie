@@ -36,7 +36,7 @@ clean_frameworks=1
 
 
 # tools
-STRIP=/opt/homebrew/Cellar/llvm/23.1.4/bin/llvm-strip
+STRIP=/opt/homebrew/Cellar/llvm/23.1.5/bin/llvm-strip
 if [ ! -e $STRIP ]; then
 	STRIP=llvm-strip
 fi
@@ -59,7 +59,7 @@ fi
 QT_PLUGIN_DIR=${LOCAL_DIR}/share/qt/plugins
 GCC_LIB_DIR=${LOCAL_DIR}/Cellar/gcc/16.2.0/lib/gcc/current/
 LOCAL_FRAMEWORKS_DIR=${LOCAL_DIR}/Frameworks
-ICU_LIB_DIR=${LOCAL_DIR}/Cellar/icu4c@78/78.3/lib
+ICU_LIB_DIR=${LOCAL_DIR}/Cellar/icu4c@79/79.1/lib
 
 
 # qt libraries
@@ -95,9 +95,9 @@ declare -a MISC_LIBS=(
 	${GCC_LIB_DIR}/libgcc_s.1.1.dylib
 
 	# icu libraries
-	${ICU_LIB_DIR}/libicui18n.78.dylib
-	${ICU_LIB_DIR}/libicuuc.78.dylib
-	${ICU_LIB_DIR}/libicudata.78.dylib
+	${ICU_LIB_DIR}/libicui18n.79.dylib
+	${ICU_LIB_DIR}/libicuuc.79.dylib
+	${ICU_LIB_DIR}/libicudata.79.dylib
 )
 
 
@@ -290,21 +290,30 @@ if [ $create_appdir -ne 0 ]; then
 	for (( libidx=0; libidx<${#LOCAL_LIBS[@]}; ++libidx )); do
 		LOCAL_LIB=${LOCAL_LIBS[$libidx]}
 
-		cp -v ${LOCAL_DIR}/lib/${LOCAL_LIB} "${APPDIRNAME}/Contents/Libraries/"
+		if ! cp -v ${LOCAL_DIR}/lib/${LOCAL_LIB} "${APPDIRNAME}/Contents/Libraries/"; then
+			echo -e "${COL_ERR}Error: Cannot find library ${LOCAL_DIR}/lib/${LOCAL_LIB}.${COL_NORM}"
+			exit -1
+		fi
 	done
 
 	# libraries with full path
 	for (( libidx=0; libidx<${#MISC_LIBS[@]}; ++libidx )); do
 		MISC_LIB=${MISC_LIBS[$libidx]}
 
-		cp -v ${MISC_LIB} "${APPDIRNAME}/Contents/Libraries/"
+		if ! cp -v ${MISC_LIB} "${APPDIRNAME}/Contents/Libraries/"; then
+			echo -e "${COL_ERR}Error: Cannot find library ${MISC_LIB}.${COL_NORM}"
+			exit -1
+		fi
 	done
 
 	# frameworks
 	for (( libidx=0; libidx<${#QT_LIBS[@]}; ++libidx )); do
 		QT_LIB=${QT_LIBS[$libidx]}
 
-		cp -rv ${LOCAL_FRAMEWORKS_DIR}/${QT_LIB}.framework "${APPDIRNAME}/Contents/Frameworks/"
+		if ! cp -rv ${LOCAL_FRAMEWORKS_DIR}/${QT_LIB}.framework "${APPDIRNAME}/Contents/Frameworks/"; then
+			echo -e "${COL_ERR}Error: Cannot find framework ${LOCAL_FRAMEWORKS_DIR}/${QT_LIB}.framework.${COL_NORM}"
+			exit -1
+		fi
 		rm -fv "${APPDIRNAME}/Contents/Frameworks/${QT_LIB}.framework/${QT_LIB}"
 		rm -rf "${APPDIRNAME}/Contents/Frameworks/${QT_LIB}.framework/Resources"
 		rm -rf "${APPDIRNAME}/Contents/Frameworks/${QT_LIB}.framework/Versions/Current"

@@ -721,7 +721,7 @@ void TopologyDlg::CalculateBerryCurvature()
 	m_data_bc.reserve(Q_count);
 
 	//t_vec3_real Q_step1 = tl2::create<t_vec3_real>({ 1./t_real(Q_count), 0., 0. });
-	t_vec3_real Q_step2 = tl2::create<t_vec3_real>({ 0., 1./t_real(Q_count), 0. });
+	t_vec3_real Q_step2 = tl2::create<t_vec3_real>({ t_real(0), t_real(1)/t_real(Q_count), t_real(0) });
 
 	t_vec3_real Q_step1 = (Q_end - Q_start);
 	t_real len1 = tl2::norm(Q_step1);
