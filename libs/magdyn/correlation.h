@@ -300,8 +300,8 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 		const t_vec3& uc_i = s_i.ge_trafo_plane_conj_calc;
 
 		// matrix elements of equation (44) from (Toth 2015)
-		factors[i]     = S_and_ffacts[i] / phases[i] * u_i;
-		factors[i + N] = S_and_ffactsc[i] / phases[i] * uc_i;
+		factors[i]     = S_and_ffacts[i]  / phases[i] * u_i;   // b_i+ terms
+		factors[i + N] = S_and_ffactsc[i] / phases[i] * uc_i;  // b_i terms
 	}
 
 	for(t_size i = 0; i < energy_size; ++i)
@@ -337,10 +337,8 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 				const t_vec3& uc_i = s_i.ge_trafo_plane_conj_calc;
 
 				// matrix elements of equation (44) from (Toth 2015)
-				const t_cplx factors_i_00 = S_and_ffacts[i]  / phases[i] * u_i[x_idx];   // b_i+ b_j terms
-				const t_cplx factors_i_0N = S_and_ffacts[i]  / phases[i] * u_i[x_idx];   // b_i+ b_j+ terms
-				const t_cplx factors_i_N0 = S_and_ffactsc[i] / phases[i] * uc_i[x_idx];  // b_i b_j terms
-				const t_cplx factors_i_NN = S_and_ffactsc[i] / phases[i] * uc_i[x_idx];  // b_i b_j+ terms
+				const t_cplx factors_i_0 = S_and_ffacts[i]  / phases[i] * u_i[x_idx];   // b_i+ terms
+				const t_cplx factors_i_N = S_and_ffactsc[i] / phases[i] * uc_i[x_idx];  // b_i terms
 
 				for(t_size j = 0; j < N; ++j)
 				{
@@ -350,10 +348,10 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 					const t_vec3& uc_j = s_j.ge_trafo_plane_conj_calc;
 
 					// matrix elements of equation (44) from (Toth 2015)
-					M(    i,     j) = factors_i_00 * S_and_ffactsc[j] * phases[j] * uc_j[y_idx];  // b_i+ b_j terms
-					M(    i, N + j) = factors_i_0N * S_and_ffacts[j]  * phases[j] * u_j[y_idx];   // b_i+ b_j+ terms
-					M(N + i,     j) = factors_i_N0 * S_and_ffactsc[j] * phases[j] * uc_j[y_idx];  // b_i b_j terms
-					M(N + i, N + j) = factors_i_NN * S_and_ffacts[j]  * phases[j] * u_j[y_idx];   // b_i b_j+ terms
+					M(    i,     j) = factors_i_0 * S_and_ffactsc[j] * phases[j] * uc_j[y_idx];  // b_i+ b_j terms
+					M(    i, N + j) = factors_i_0 * S_and_ffacts[j]  * phases[j] * u_j[y_idx];   // b_i+ b_j+ terms
+					M(N + i,     j) = factors_i_N * S_and_ffactsc[j] * phases[j] * uc_j[y_idx];  // b_i b_j terms
+					M(N + i, N + j) = factors_i_N * S_and_ffacts[j]  * phases[j] * u_j[y_idx];   // b_i b_j+ terms
 				}  // end of inner site iteration
 			}  // end of outer site iteration
 
