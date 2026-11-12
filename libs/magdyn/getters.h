@@ -273,8 +273,36 @@ MAGDYN_TEMPL const typename MAGDYN_INST::t_vec3_real& MAGDYN_INST::GetOrderingWa
 	if(m_ordering)
 		return *m_ordering;
 
-	static t_vec3_real zero = tl2::zero<t_vec3_real>(3);
+	static const t_vec3_real zero = tl2::zero<t_vec3_real>(3);
 	return zero;
+}
+
+
+/**
+ * get the number of times the term distances correspond to a full helix rotation?
+ */
+MAGDYN_TEMPL std::optional<t_size> MAGDYN_INST::GetFullOrderingRotation(t_size max_times) const
+{
+	for(t_size times = 1; times <= max_times; ++times)
+	{
+		bool no_mismatch = true;
+		for(const ExchangeTerm& term : GetExchangeTerms())
+		{
+			t_vec3_real dist = term.dist_calc * t_real(times);
+			t_real total_rotations = tl2::inner(GetOrderingWavevector(), dist);
+
+			if(!tl2::equals_0(total_rotations - std::round(total_rotations), m_eps))
+			{
+				no_mismatch = false;
+				continue;
+			}
+		}
+
+		if(no_mismatch)
+			return times;
+	}
+
+	return std::nullopt;
 }
 
 

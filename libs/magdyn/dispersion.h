@@ -135,15 +135,6 @@ MAGDYN_INST::CalcEnergies(const t_vec3_real& Q_rlu, bool only_energies) const
 
 	if(IsIncommensurate())
 	{
-		// equations (39) and (40) from (Toth 2015)
-		const t_mat33 proj_norm = tl2::convert<t_mat33>(
-			tl2::projector<t_mat33_real, t_vec3_real>(m_rotaxis, true));
-
-		t_mat33 rot_incomm = tl2::unit<t_mat33>(3);
-		rot_incomm -= s_imag * m_phase_sign * tl2::skewsymmetric<t_mat33, t_vec3>(m_rotaxis);
-		rot_incomm -= proj_norm;
-		rot_incomm *= 0.5;
-
 		// calculate additional hamiltonians for Q+-O
 		SofQE S_p{}, S_m{};
 		if(m_calc_Hp)
@@ -165,18 +156,58 @@ MAGDYN_INST::CalcEnergies(const t_vec3_real& Q_rlu, bool only_energies) const
 
 		if(!only_energies)
 		{
-			const t_mat33 rot_incomm_conj = tl2::conj(rot_incomm);
-			//const t_mat33 rot_incomm_herm = tl2::herm(rot_incomm);
+			// equations (39) and (40) from (Toth 2015)
+			const t_mat33 proj_norm = tl2::convert<t_mat33>(
+				tl2::projector<t_mat33_real, t_vec3_real>(m_rotaxis, true));
 
-			// formula 40 from (Toth 2015)
-			for(EnergyAndWeight& EandW : S.E_and_S)
-				EandW.S = EandW.S * proj_norm;
-			for(EnergyAndWeight& EandW : S_p.E_and_S)
-				EandW.S = EandW.S * rot_incomm;
-				//EandW.S = rot_incomm * EandW.S;
-			for(EnergyAndWeight& EandW : S_m.E_and_S)
-				EandW.S = EandW.S * rot_incomm_conj;
-				//EandW.S = EandW.S * rot_incomm_herm;
+			std::optional<t_size> num_rots = GetFullOrderingRotation(2);
+			if(num_rots && *num_rots == 2)  // commensurate, magnetic peaks at half positions
+			{
+				//std::cout << "System is commensurate with O = 1/2." << std::endl;
+
+				// equations (39) and (40) from (Toth 2015)
+				const t_mat33 proj_ortho = tl2::convert<t_mat33>(
+					tl2::ortho_projector<t_mat33_real, t_vec3_real>(m_rotaxis, true));
+
+				// formulas (38) and (40) from (Toth 2015)
+				for(EnergyAndWeight& EandW : S.E_and_S)
+					EandW.S = proj_norm * EandW.S * proj_norm;
+				for(EnergyAndWeight& EandW : S_p.E_and_S)
+					EandW.S = t_real(0.5) * proj_ortho * EandW.S * proj_ortho;
+				for(EnergyAndWeight& EandW : S_m.E_and_S)
+					EandW.S = t_real(0.5) * proj_ortho * EandW.S * proj_ortho;
+			}
+			else if(num_rots && *num_rots == 1) // commensurate case, magnetic peaks coincide with nuclear ones
+			{
+				//std::cout << "System is fully commensurate with O = 0." << std::endl;
+
+				// formulas (38) and (40) from (Toth 2015)
+				for(EnergyAndWeight& EandW : S.E_and_S)
+					EandW.S = EandW.S / t_real(3);
+				for(EnergyAndWeight& EandW : S_p.E_and_S)
+					EandW.S = EandW.S / t_real(3);
+				for(EnergyAndWeight& EandW : S_m.E_and_S)
+					EandW.S = EandW.S / t_real(3);
+			}
+			else  // incommensurate case
+			{
+				//std::cout << "System is fully incommensurate." << std::endl;
+
+				t_mat33 rot_incomm = tl2::unit<t_mat33>(3);
+				rot_incomm -= s_imag * m_phase_sign * tl2::skewsymmetric<t_mat33, t_vec3>(m_rotaxis);
+				rot_incomm -= proj_norm;
+				rot_incomm *= 0.5;
+
+				const t_mat33 rot_incomm_conj = tl2::conj(rot_incomm);
+
+				// formulas (38) and (40) from (Toth 2015)
+				for(EnergyAndWeight& EandW : S.E_and_S)
+					EandW.S = proj_norm * EandW.S * proj_norm;
+				for(EnergyAndWeight& EandW : S_p.E_and_S)
+					EandW.S = rot_incomm * EandW.S * rot_incomm;
+				for(EnergyAndWeight& EandW : S_m.E_and_S)
+					EandW.S = rot_incomm_conj * EandW.S * rot_incomm_conj;
+			}
 		}
 
 		// merge energies and weights

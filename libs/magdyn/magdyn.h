@@ -297,6 +297,7 @@ public:
 
 	// set the ordering wave vector (e.g., the helix pitch) for incommensurate structures
 	void SetOrderingWavevector(const t_vec3_real& ordering);
+	std::optional<t_size> GetFullOrderingRotation(t_size max_times = 2) const;
 
 	// set the rotation axis for the ordering wave vector
 	void SetRotationAxis(const t_vec3_real& axis);

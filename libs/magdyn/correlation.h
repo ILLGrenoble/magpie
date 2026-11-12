@@ -244,7 +244,8 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 	{
 		const MagneticSite& s_i = GetMagneticSite(i);
 
-		phases[i] = std::exp(-m_phase_sign * s_imag * s_twopi * tl2::inner<t_vec3_real>(s_i.pos_calc, S.Q_rlu));
+		phases[i] = std::exp(-m_phase_sign * s_imag * s_twopi *
+			tl2::inner<t_vec3_real>(s_i.pos_calc, S.Q_central_rlu));
 
 		// magnetic form factor for site i
 		S_and_ffacts[i] = S_and_ffactsc[i] = 1;
@@ -275,7 +276,7 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 				// pre-factors of equation (44) from (Toth 2015)
 				// because A*B^T = diag(2pi), the phase is the same as:
 				const t_cplx phase_chk = std::exp(-m_phase_sign * s_imag *
-					tl2::inner<t_vec3_real>(m_xtalA*s_j.pos_calc - m_xtalA*s_i.pos_calc, S.Q_invA));
+					tl2::inner<t_vec3_real>(m_xtalA*s_j.pos_calc - m_xtalA*s_i.pos_calc, S.Q_central_invA));
 
 				const t_cplx phase = phases[j] / phases[i];
 				if(!tl2::equals<t_cplx>(phase, phase_chk, m_eps))

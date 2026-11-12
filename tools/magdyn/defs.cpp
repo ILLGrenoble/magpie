@@ -55,8 +55,8 @@ t_real g_eps = 1e-6;
 t_real g_bose_cutoff = 0.025;
 
 // settings for cholesky decomposition
-unsigned int g_cholesky_maxtries = 50;
-t_real g_cholesky_delta = 0.0025;
+unsigned int g_cholesky_maxtries = 16;
+t_real g_cholesky_delta = 0.0025;  // meV
 int g_cholesky_fail_when_wrong = 1;
 
 // brillouin zone calculation settings
