@@ -1720,12 +1720,10 @@ requires tl2::is_basic_mat<t_mat> && tl2::is_basic_vec<t_vec>
 			static_assert(t_mat::size2() == t_vec::size());
 	}
 
-	t_vec vecRet;
-	if constexpr(tl2::is_dyn_vec<t_vec>)
-		vecRet = t_vec(mat_rows);
-
 	// matrix-vector product
-	for(std::size_t row = 0; row < mat_rows; ++row)
+	t_vec vecRet = tl2::create<t_vec>(mat_rows);
+	const std::size_t vecret_rows = static_cast<std::size_t>(vecRet.size());
+	for(std::size_t row = 0; row < std::min(vecret_rows, mat_rows); ++row)
 	{
 		vecRet[row] = typename t_vec::value_type{};
 		for(std::size_t col = 0; col < std::min(mat_cols, vec_rows); ++col)
@@ -1739,7 +1737,7 @@ requires tl2::is_basic_mat<t_mat> && tl2::is_basic_vec<t_vec>
 	if(hom && mat_cols == vec_rows + 1)
 	{
 		std::size_t col = vec_rows;
-		for(std::size_t row = 0; row < mat_rows; ++row)
+		for(std::size_t row = 0; row < std::min(vecret_rows, mat_rows); ++row)
 		{
 			auto elem = mat(row, col);
 			vecRet[row] = vecRet[row] + elem;
