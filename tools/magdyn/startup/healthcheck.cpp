@@ -27,6 +27,7 @@
 
 #include "libs/magdyn.h"
 #include "defs.h"
+#include "../../../unittests/analytic.h"
 
 
 bool healthcheck()
@@ -35,12 +36,18 @@ bool healthcheck()
 	t_magdyn magdyn{};
 
 
-	// add a variable
-	typename t_magdyn::Variable var{};
-	var.name = "J";
-	var.value = 0.5;
+	// add variables
+	t_real J = 0.456;
+	typename t_magdyn::Variable varJ{};
+	varJ.name = "J";
+	varJ.value = J;
+	magdyn.AddVariable(std::move(varJ));
 
-	magdyn.AddVariable(std::move(var));
+	t_real S = 2.;
+	typename t_magdyn::Variable varS{};
+	varS.name = "S";
+	varS.value = S;
+	magdyn.AddVariable(std::move(varS));
 
 
 	// add a site
@@ -55,7 +62,7 @@ bool healthcheck()
 	site.spin_dir[1] = "0";
 	site.spin_dir[2] = "1";
 
-	site.spin_mag = "1";
+	site.spin_mag = "S";
 
 	//magdyn.CalcMagneticSite(site);
 	magdyn.AddMagneticSite(std::move(site));
@@ -92,45 +99,50 @@ bool healthcheck()
 	magdyn.CalcExchangeTerms();
 
 
-	// calculate a point on the dispersion
-	const t_real h = 0.1;
-	const t_real E = 0.5878;
-	const t_real w_perp = 0.6513;
-
+	using SofQE = typename t_magdyn::SofQE;
 	using EnergiesAndWeights = typename t_magdyn::EnergiesAndWeights;
-	EnergiesAndWeights Es_and_S = magdyn.CalcEnergies(h, 0., 0., false);
 
-	auto check_E = [](const EnergiesAndWeights& Es_and_S, t_real E, t_real w_perp) -> bool
+
+	// compare dispersion and correlation with analytical formula
+	auto check_E = [J, S](const SofQE& SQE) -> bool
 	{
-		const t_real eps = 1e-4; //g_eps;
+		const t_real eps = g_eps;
 
+		auto [exact_E, exact_w] = antiferro<t_real>(SQE.Q_rlu[0], J, S);
+
+		const EnergiesAndWeights& Es_and_S = SQE.E_and_S;
 		if(Es_and_S.size() != 2)
 			return false;
 		if(!tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps))
 			return false;
-		if(!tl2::equals<t_real>(std::abs(Es_and_S[0].E), E, eps))
+		if(!tl2::equals<t_real>(std::abs(Es_and_S[0].E), exact_E, eps))
 			return false;
-		if(!tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), w_perp, eps))
+		if(!tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), exact_w, eps))
 			return false;
+
 		return true;
 	};
 
-	if(!check_E(Es_and_S, E, w_perp))
-		return false;
 
+	// calculate a single point
+	//EnergiesAndWeights Es_and_S = magdyn.CalcEnergies(0.1, 0., 0., false);
 
 	// calculate a dispersion branch
+	const t_real h_beg = 0.6;
 	const t_real h_end = 0.9;
 	const t_size num_Qs = 64;
 	const t_size num_threads = 2;
 
-	auto all_Es_and_S = magdyn.CalcDispersion(h, 0., 0.,
+	auto all_Es_and_S = magdyn.CalcDispersion(h_beg, 0., 0.,
 		h_end, 0., 0., num_Qs, num_threads, true);
 
 	if(all_Es_and_S.size() != num_Qs)
 		return false;
-	if(!check_E(all_Es_and_S[0].E_and_S, E, w_perp))
-		return false;
+	for(const SofQE& SQE : all_Es_and_S)
+	{
+		if(!check_E(SQE))
+			return false;
+	}
 
 	return true;
 }

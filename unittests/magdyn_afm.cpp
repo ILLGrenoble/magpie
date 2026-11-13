@@ -31,6 +31,7 @@ namespace testtools = boost::test_tools;
 namespace ty = boost::typeindex;
 
 #include "libs/magdyn.h"
+#include "analytic.h"
 
 
 using t_types_real = std::tuple<double, float>;
@@ -69,13 +70,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_afm, t_real, t_types_real)
 	magdyn.SetCrystalLattice(5., 5., 5., pi/2., pi/2., pi/2.);
 
 
-	// add a variable
+	// add variables
 	t_real J = 0.5;
-	typename t_magdyn::Variable var{};
-	var.name = "J";
-	var.value = J;
+	typename t_magdyn::Variable varJ{ .name = "J", .value = J };
+	magdyn.AddVariable(std::move(varJ));
 
-	magdyn.AddVariable(std::move(var));
+	t_real S = 1.;
+	typename t_magdyn::Variable varS{ .name = "S", .value = S };
+	magdyn.AddVariable(std::move(varS));
 
 
 	// add a site
@@ -90,7 +92,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_afm, t_real, t_types_real)
 	site.spin_dir[1] = "0";
 	site.spin_dir[2] = "1";
 
-	site.spin_mag = "1";
+	site.spin_mag = "S";
 
 	//magdyn.CalcMagneticSite(site);
 	magdyn.AddMagneticSite(std::move(site));
@@ -130,19 +132,24 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_afm, t_real, t_types_real)
 	// calculate dispersion
 	for(t_real h = 0.05; h <= 0.45; h += 0.01)
 	{
+		auto [exact_E, exact_w] = antiferro<t_real>(h, J, S);
+
 		auto Es_and_S = magdyn.CalcEnergies(h, 0., 0., false);
 		BOOST_TEST(Es_and_S.size() == 2);  // + and - energy branch
 		BOOST_TEST(tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps));
-		BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), 2.*J*std::abs(sin(h * 2. * pi)), eps));
+		BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), exact_E, eps));
+		BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), exact_w, /*eps*/ 1e-4));
 	}
 
 	// calculate a single point on the dispersion
 	t_real h = 0.1;
+	auto [exact_E, exact_w] = antiferro<t_real>(h, J, S);
+
 	auto Es_and_S = magdyn.CalcEnergies(h, 0., 0., false);
 	BOOST_TEST(Es_and_S.size() == 2);  // + and - energy branch
 	BOOST_TEST(tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps));
-	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), 2.*J*std::abs(sin(h * 2. * pi)), eps));
-	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), 0.6513, /*eps*/ 1e-4));
+	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), exact_E, eps));
+	BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), exact_w, /*eps*/ 1e-4));
 
 
 	// calculate and save a dispersion branch
