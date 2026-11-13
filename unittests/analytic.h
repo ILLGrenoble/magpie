@@ -1,5 +1,5 @@
 /**
- * analytical results for comparions
+ * analytical results for comparisons
  * @author Tobias Weber <tweber@ill.fr>
  * @date 13-nov-2026
  * @license GPLv3, see 'LICENSE' file
