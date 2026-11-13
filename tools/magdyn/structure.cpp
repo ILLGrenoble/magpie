@@ -515,10 +515,12 @@ void MagDynDlg::ImportCouplings(const std::vector<TableImportCoupling>& coupling
 /**
  * assign symmetry groups to sites and couplings
  */
-void MagDynDlg::CalcSymmetryIndices()
+void MagDynDlg::CalcSymmetryIndices(bool sync)
 {
 	m_dyn.CalcSymmetryIndices(GetSymOpsForCurrentSG());
-	SyncSymmetryIndicesFromKernel();
+
+	if(sync)
+		SyncSymmetryIndicesFromKernel();
 }
 
 
@@ -526,10 +528,12 @@ void MagDynDlg::CalcSymmetryIndices()
 /**
  * sort couplings by their lengths
  */
-void MagDynDlg::SortTerms()
+void MagDynDlg::SortTerms(bool sync)
 {
 	m_dyn.SortExchangeTerms();
-	SyncTermsFromKernel();
+
+	if(sync)
+		SyncTermsFromKernel();
 }
 
 

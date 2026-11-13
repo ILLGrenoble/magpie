@@ -76,7 +76,8 @@ void MagDynDlg::ExportToSpinW()
 bool MagDynDlg::ExportToSpinW(const QString& _filename)
 {
 	// make sure the symmetry indices are up-to-date
-	CalcSymmetryIndices();
+	SortTerms(false);
+	CalcSymmetryIndices(true);
 	std::string filename = _filename.toStdString();
 
 	std::ofstream ofstr(filename);
@@ -122,12 +123,14 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 	ofstr << "% variables\n";
 
 	// internal constants and variables
-	ofstr << "g_e     = " << tl2::g_e<t_real> << ";\n";
-	ofstr << "Qstart  = [ " << h1 << " " << k1 << " " << l1 << " ];\n";
-	ofstr << "Qend    = [ " << h2 << " " << k2 << " " << l2 << " ];\n";
-	ofstr << "Qpts    = " << m_num_points->value() << ";\n";
-	ofstr << "plane1  = [ " << peak1x << ", " << peak1y << ", " << peak1z << " ];\n";
-	ofstr << "plane2  = [ " << peak2x << ", " << peak2y << ", " << peak2z << " ];\n";
+	ofstr << "g_e      = " << tl2::g_e<t_real> << ";\n";
+	ofstr << "Qstart   = [ " << h1 << " " << k1 << " " << l1 << " ];\n";
+	ofstr << "Qend     = [ " << h2 << " " << k2 << " " << l2 << " ];\n";
+	ofstr << "Qpts     = " << m_num_points->value() << ";\n";
+	ofstr << "plane1   = [ " << peak1x << ", " << peak1y << ", " << peak1z << " ];\n";
+	ofstr << "plane2   = [ " << peak2x << ", " << peak2y << ", " << peak2z << " ];\n";
+	ofstr << "idx_offs = 0;  % coupling symmetry indices between magpie and spinw don't necessarily match\n";
+	ofstr << "\n";
 
 	// user variables
 	for(const auto &var : m_dyn.GetVariables())
@@ -225,7 +228,8 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 
 	// --------------------------------------------------------------------
 	ofstr << "\n% magnetic couplings\n";
-	ofstr << "sw_obj.gencoupling();\n";
+	ofstr << "sw_obj.gencoupling(maxDistance = " << m_maxdist->value()
+		<< ", nCell = " << m_maxSC->value() << ");\n";
 
 	std::unordered_set<t_size> seen_term_sym_indices;
 	for(const t_term& term : m_dyn.GetExchangeTerms())
@@ -243,6 +247,7 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 		}
 		else
 		{
+			// TODO: rename variable because leading underscores cause problems
 			std::string S = get_str_var(m_dyn.GetMagneticSites()[idx1].spin_mag);
 			ofstr << "_S_mag = " << S << ";\n";
 		}
@@ -264,7 +269,7 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 			}
 			else
 			{
-				ofstr << "sw_obj.addcoupling(\"mat\", " << J << ", \"bond\", "
+				ofstr << "sw_obj.addcoupling(\"mat\", " << J << ", \"bond\", idx_offs + "
 					<< term.sym_idx << ");\n";
 			}
 		}
