@@ -22,10 +22,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * ----------------------------------------------------------------------------
  */
-
 #include <boost/scope_exit.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 namespace pt = boost::property_tree;
+namespace algo = boost::algorithm;
 
 #include "../magdyn.h"
 
@@ -48,6 +49,21 @@ extern t_real g_eps;
 
 
 extern std::string get_str_var(const std::string& var, bool add_brackets = false);
+
+
+std::string get_str_var_sw(std::string var, bool add_brackets = false)
+{
+	// remove leading underscores in variable names
+	//if(var.length() > 1 && var[0] == '_')
+	//	var = var.substr(1);
+
+	// remove leading underscores in the internal variables
+	algo::replace_all(var, "_S_mag", "S_mag");
+	algo::replace_all(var, "_S1_mag", "S1_mag");
+	algo::replace_all(var, "_S2_mag", "S2_mag");
+
+	return get_str_var(var, add_brackets);
+}
 
 
 
@@ -184,10 +200,10 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 		ofstr << "sw_obj.addatom(\"r\", "
 			//<< "\"label\", \"" << site.name << "\", ";
 			<< "[ "
-			<< get_str_var(site.pos[0]) << " "
-			<< get_str_var(site.pos[1]) << " "
-			<< get_str_var(site.pos[2]) << " ]"
-			<< ", \"S\", " << get_str_var(site.spin_mag)
+			<< get_str_var_sw(site.pos[0]) << " "
+			<< get_str_var_sw(site.pos[1]) << " "
+			<< get_str_var_sw(site.pos[2]) << " ]"
+			<< ", \"S\", " << get_str_var_sw(site.spin_mag)
 			<< ");";
 		ofstr << " % " << site.name << "\n";
 	}
@@ -210,7 +226,7 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 			if(field.align_spins && field.dir)
 				ofstr << field_dir[i] << " ";
 			else
-				ofstr << get_str_var(site.spin_dir[i]) << " ";
+				ofstr << get_str_var_sw(site.spin_dir[i]) << " ";
 		}
 
 		if(i < 2)
@@ -247,9 +263,9 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 		}
 		else
 		{
-			// TODO: rename variable because leading underscores cause problems
-			std::string S = get_str_var(m_dyn.GetMagneticSites()[idx1].spin_mag);
-			ofstr << "_S_mag = " << S << ";\n";
+			// rename variable because leading underscores cause problems
+			std::string S = get_str_var_sw(m_dyn.GetMagneticSites()[idx1].spin_mag);
+			ofstr << "S_mag = " << S << ";\n";
 		}
 
 		ofstr << "% " << term.name << "\n";
@@ -260,7 +276,7 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 
 			ofstr << "sw_obj.addmatrix(\"label\", "
 				<< J << ", \"value\", "
-				<< get_str_var(term.J)
+				<< get_str_var_sw(term.J)
 				<< ");\n";
 
 			if(is_aniso)
@@ -280,9 +296,9 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 
 			ofstr << "sw_obj.addmatrix(\"label\", "
 				<< DMI << ", \"value\", [ "
-				<< get_str_var(term.dmi[0]) << " "
-				<< get_str_var(term.dmi[1]) << " "
-				<< get_str_var(term.dmi[2])
+				<< get_str_var_sw(term.dmi[0]) << " "
+				<< get_str_var_sw(term.dmi[1]) << " "
+				<< get_str_var_sw(term.dmi[2])
 				<< " ]);\n";
 
 			if(is_aniso)
@@ -302,15 +318,15 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 
 			ofstr << "sw_obj.addmatrix(\"label\", "
 				<< GEN << ", \"value\", [ "
-				<< get_str_var(term.Jgen[0][0]) << " "
-				<< get_str_var(term.Jgen[0][1]) << " "
-				<< get_str_var(term.Jgen[0][2]) << "; "
-				<< get_str_var(term.Jgen[1][0]) << " "
-				<< get_str_var(term.Jgen[1][1]) << " "
-				<< get_str_var(term.Jgen[1][2]) << "; "
-				<< get_str_var(term.Jgen[2][0]) << " "
-				<< get_str_var(term.Jgen[2][1]) << " "
-				<< get_str_var(term.Jgen[2][2]) << " "
+				<< get_str_var_sw(term.Jgen[0][0]) << " "
+				<< get_str_var_sw(term.Jgen[0][1]) << " "
+				<< get_str_var_sw(term.Jgen[0][2]) << "; "
+				<< get_str_var_sw(term.Jgen[1][0]) << " "
+				<< get_str_var_sw(term.Jgen[1][1]) << " "
+				<< get_str_var_sw(term.Jgen[1][2]) << "; "
+				<< get_str_var_sw(term.Jgen[2][0]) << " "
+				<< get_str_var_sw(term.Jgen[2][1]) << " "
+				<< get_str_var_sw(term.Jgen[2][2]) << " "
 				<< " ]);\n";
 
 			if(is_aniso)
@@ -349,7 +365,7 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 	ofstr << "\n% spin-wave calculation\n";
 
 	std::string Scomp = m_use_projector->isChecked() ? "\'Sperp\'" : "\'Sxx+Syy+Szz\'";
-	ofstr << "calc = sw_neutron(sw_obj.spinwave({ Qstart, Qend, Qpts }, \"hermit\", false));\n";
+	ofstr << "calc = sw_neutron(sw_obj.spinwave({ Qstart, Qend, Qpts }, \"hermit\", false, \"formfact\", false, \"gtensor\", true));\n";
 	ofstr << "bins = sw_egrid(calc, \"component\", " << Scomp << ");\n";
 	ofstr << "toc();\n";
 
