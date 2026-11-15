@@ -6,7 +6,7 @@
 # @license GPLv3, see 'LICENSE' file
 #
 
-set term pngcairo enhanced font "Helvetica, 28" size 1000,1000
+set term pngcairo enhanced font "NimbusSans-Regular, 28" size 1000,1000
 set output "0.png"
 
 set border lw 4
@@ -22,9 +22,9 @@ set ytics 0.2 offset screen -0.005, screen 0
 #set mytics 2
 
 #set key top right samplen 1 width -3 Left reverse
-set xlabel "{/Helvetica-Italic q} (rlu)" offset 0,0.25
-set ylabel "{/Helvetica-Italic E} (meV)" offset 0.25,0
-set cblabel "{/Helvetica-Italic S(q, E)}"
+set xlabel "{/NimbusSans-Italic q} (rlu)" offset 0,0.25
+set ylabel "{/NimbusSans-Italic E} (meV)" offset 0.25,0
+set cblabel "{/NimbusSans-Italic S(q, E)}"
 #unset colorbox
 
 set palette defined \

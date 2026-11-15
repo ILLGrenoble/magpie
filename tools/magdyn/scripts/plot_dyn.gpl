@@ -11,10 +11,10 @@
 out_term = 1
 
 if(out_term == 1) {
-	set term pdf color enhanced font "Helvetica, 50" size 20, 15
+	set term pdf color enhanced font "NimbusSans, 50" size 20, 15
 }
 if(out_term == 2) {
-	set term pngcairo enhanced font "Helvetica, 28" size 1333, 1000
+	set term pngcairo enhanced font "NimbusSans, 28" size 1333, 1000
 }
 
 
@@ -55,8 +55,8 @@ set mytics 2
 
 
 # labels
-set xlabel "{/Helvetica-Italic q}_{h} (rlu)"
-set ylabel "{/Helvetica-Italic E} (meV)"
+set xlabel "{/NimbusSans-Italic q}_{h} (rlu)"
+set ylabel "{/NimbusSans-Italic E} (meV)"
 
 
 # legend
@@ -77,6 +77,7 @@ else {
 #set arrow 1 from 0,-Erange to 0,Erange lw 2 dt 2 lc rgb col_axis nohead
 #set arrow 2 from -qrange,0 to qrange,0 lw 2 dt 2 lc rgb col_axis nohead
 
+#set border lw 8
 
 plot \
 	file_dyn using ($1):($4):($5*point_size) \

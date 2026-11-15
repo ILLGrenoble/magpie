@@ -366,14 +366,27 @@ bool MagDynDlg::ExportToSpinW(const QString& _filename)
 
 	std::string Scomp = m_use_projector->isChecked() ? "\'Sperp\'" : "\'Sxx+Syy+Szz\'";
 	ofstr << "calc = sw_neutron(sw_obj.spinwave({ Qstart, Qend, Qpts }, \"hermit\", false, \"formfact\", false, \"gtensor\", true));\n";
-	ofstr << "bins = sw_egrid(calc, \"component\", " << Scomp << ");\n";
 	ofstr << "toc();\n";
 
+	ofstr << R"BLOCK(
+% save dispersion data
+fdisp = fopen("disp.dat", "w");
+fprintf(fdisp, "# %10s %12s %12s %12s %12s\n", "h", "k", "l", "E", "S");
+for Qidx = 1 : Qpts
+	for Eidx = 1 : length(calc.omega(:,Qidx))
+		fprintf(fdisp, "%12.6f %12.6f %12.6f %12.6f %12.6f\n", ...
+			calc.hkl(1, Qidx), calc.hkl(2, Qidx), calc.hkl(3, Qidx), ...
+			calc.omega(Eidx, Qidx), calc.Sperp(Eidx, Qidx));
+	end
+end
+fclose(fdisp);
+)BLOCK";
+
 	ofstr << "\n% plotting\n";
+	ofstr << "bins = sw_egrid(calc, \"component\", " << Scomp << ");\n";
 	ofstr << "figure();\n";
 	ofstr << "sw_plotspec(bins, \"mode\", 3, \"dE\", 0.1);\n";
 	// --------------------------------------------------------------------
 
 	return true;
 }
-
