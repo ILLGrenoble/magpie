@@ -49,8 +49,10 @@
 #include <QtWidgets/QMenu>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 	#include <QtWidgets/QAction>
+	#include <QtWidgets/QActionGroup>
 #else
 	#include <QtGui/QAction>
+	#include <QtGui/QActionGroup>
 #endif
 
 #include <qcustomplot.h>

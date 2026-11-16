@@ -35,7 +35,11 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMessageBox>
-#include <QtGui/QActionGroup>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+	#include <QtWidgets/QActionGroup>
+#else
+	#include <QtGui/QActionGroup>
+#endif
 
 #include <unordered_set>
 #include <functional>

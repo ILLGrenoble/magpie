@@ -31,7 +31,11 @@
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QDialogButtonBox>
-#include <QtGui/QActionGroup>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+	#include <QtWidgets/QActionGroup>
+#else
+	#include <QtGui/QActionGroup>
+#endif
 
 #include "dispersion3d.h"
 
@@ -499,7 +503,7 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	connect(m_enable_E_range[0], &QCheckBox::toggled, [this](bool enabled) { m_E_range[0]->setEnabled(enabled); Plot(true); });
 	connect(m_enable_E_range[1], &QCheckBox::toggled, [this](bool enabled) { m_E_range[1]->setEnabled(enabled); Plot(true); });
 	connect(btnMainQ, &QAbstractButton::clicked, this, &Dispersion3DDlg::FromMainQ);
-	connect(m_S_enable, &QComboBox::currentIndexChanged, [this](int idx)
+	connect(m_S_enable, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), [this](int idx)
 	{
 		m_S_filter->setEnabled(idx > 0);
 		m_S_pointwise->setEnabled(idx > 0);

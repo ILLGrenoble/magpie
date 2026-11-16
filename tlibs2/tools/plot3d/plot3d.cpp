@@ -32,7 +32,11 @@
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QHeaderView>
-#include <QtGui/QActionGroup>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+	#include <QtWidgets/QActionGroup>
+#else
+	#include <QtGui/QActionGroup>
+#endif
 
 #include "plot3d.h"
 
