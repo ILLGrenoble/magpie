@@ -1111,15 +1111,18 @@ requires is_mat<t_mat>
  * create matrix from column (or row) vectors
  */
 template<class t_mat, class t_vec, template<class...> class t_cont_outer = std::initializer_list>
-t_mat create(const t_cont_outer<t_vec>& lst, bool bRow = false)
+t_mat create(const t_cont_outer<t_vec>& lst, bool bRow = false,
+	std::size_t vec_beg = 0, std::optional<std::size_t> vec_num = std::nullopt)
 requires is_mat<t_mat> && is_basic_vec<t_vec>
 {
-	const std::size_t iCols = lst.size();
+	const std::size_t iCols = vec_num ? *vec_num : lst.size();
 	const std::size_t iRows = lst.begin()->size();
 
 	t_mat mat = unit<t_mat>(iRows, iCols);
 
 	auto iterCol = lst.begin();
+	std::advance(iterCol, vec_beg);
+
 	for(std::size_t iCol = 0; iCol < iCols; ++iCol)
 	{
 		for(std::size_t iRow = 0; iRow < iRows; ++iRow)
@@ -1127,7 +1130,8 @@ requires is_mat<t_mat> && is_basic_vec<t_vec>
 		std::advance(iterCol, 1);
 	}
 
-	if(bRow) mat = trans<t_mat>(mat);
+	if(bRow)
+		mat = trans<t_mat>(mat);
 	return mat;
 }
 

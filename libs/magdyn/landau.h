@@ -310,6 +310,7 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
 			}
 
 			// mean of degenerate energies (as they can still vary within epsilon)
+			t_size num_degen = degen_end - degen_begin;
 			t_real E = 0.;
 			t_real w = 0.;
 			for(t_size idx = degen_begin; idx < degen_end; ++idx)
@@ -317,13 +318,43 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
 				E += energies[idx];
 				w += weights[idx];  // TODO: save individual S matrices and recalculate total traces
 			}
-			E /= t_real(degen_end - degen_begin);
+			E /= t_real(num_degen);
 			unique_energies.emplace_back(E);
 			unique_weights.push_back(w);
 
-			// TODO: construct united state
-			unique_states.emplace_back(states[degen_begin]);
+			if(num_degen <= 1)
+			{
+				unique_states.emplace_back(states[degen_begin]);
+				degen_begin = degen_end;
+				continue;
+			}
 
+			// construct unified state
+			t_mat degen_states = tl2::create<t_mat, t_vec>(states, false, degen_begin, num_degen);
+			t_mat degen_overlap = tl2::herm(degen_states) * Nx * degen_states;
+			degen_overlap += tl2::herm(degen_overlap);
+			degen_overlap /= t_real(2);
+
+			auto [degen_ok, degen_evals, degen_evecs] =
+				tl2_la::eigenvec<t_mat, t_vec, t_cplx, t_real>(degen_overlap,
+					false /*only_evals*/, true /*is_herm*/, true /*normalise*/);
+			if(!degen_ok)
+			{
+				unique_states.emplace_back(states[degen_begin]);
+				degen_begin = degen_end;
+				continue;
+			}
+
+			t_mat degen_M = tl2::zero<t_mat>(num_degen, num_degen);
+			for(t_size eval_idx = 0; eval_idx < degen_evals.size(); ++eval_idx)
+			{
+				if(tl2::equals_0<t_real>(degen_evals[eval_idx].real(), eps))
+					continue;
+				degen_M += tl2::outer<t_mat, t_vec>(degen_evecs[eval_idx], degen_evecs[eval_idx])
+					/ std::sqrt(std::abs(degen_evals[eval_idx].real()));
+			}
+
+			unique_states.emplace_back(degen_M * tl2::col<t_mat, t_vec>(degen_states, 0));
 			degen_begin = degen_end;
 		}
 
