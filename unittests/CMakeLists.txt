@@ -83,39 +83,43 @@ include_directories(
 
 # -----------------------------------------------------------------------------
 # build individual test cases
-add_executable(magdyn_fm magdyn_fm.cpp)
-add_executable(magdyn_afm magdyn_afm.cpp)
-add_executable(magdyn_afm2 magdyn_afm2.cpp)
-add_executable(magdyn_topo magdyn_topo.cpp)
-add_executable(magdyn_landau magdyn_landau.cpp)
+add_executable(fm fm.cpp)
+add_executable(nonrecip nonrecip.cpp)
+add_executable(afm afm.cpp)
+add_executable(afm2 afm2.cpp)
+add_executable(topo topo.cpp)
+add_executable(landau landau.cpp)
 
-target_link_libraries(magdyn_fm ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
+target_link_libraries(fm ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
 	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
-target_link_libraries(magdyn_afm ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
+target_link_libraries(nonrecip ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
 	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
-target_link_libraries(magdyn_afm2 ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
+target_link_libraries(afm ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
 	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
-target_link_libraries(magdyn_topo ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
+target_link_libraries(afm2 ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
 	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
-target_link_libraries(magdyn_landau ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
+target_link_libraries(topo ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
+	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
+target_link_libraries(landau ${Lapacke_LIBRARIES} ${Lapack_LIBRARIES} ${Blas_LIBRARIES}
 	${GFortran_LIBRARIES} ${Minuit2_LIBRARIES} Threads::Threads)
 # -----------------------------------------------------------------------------
 
 
 # -----------------------------------------------------------------------------
 # run individual test cases
-add_test(magdyn_fm magdyn_fm)
-add_test(magdyn_afm magdyn_afm)
-add_test(magdyn_afm2 magdyn_afm2)
-add_test(magdyn_topo magdyn_topo)
-add_test(magdyn_landau magdyn_landau)
+add_test(fm fm)
+add_test(nonrecip nonrecip)
+add_test(afm afm)
+add_test(afm2 afm2)
+add_test(topo topo)
+add_test(landau landau)
 # -----------------------------------------------------------------------------
 
 
 # -----------------------------------------------------------------------------
 # add rpaths
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	foreach(tool IN ITEMS magdyn_fm magdyn_afm magdyn_afm2 magdyn_topo magdyn_landau)
+	foreach(tool IN ITEMS fm nonrecip afm afm2 topo landau)
 		message(STATUS "Setting rpath for ${tool}...")
 
 		add_custom_command(TARGET ${tool} POST_BUILD

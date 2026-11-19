@@ -273,9 +273,9 @@ Dispersion3DDlg::Dispersion3DDlg(QWidget *parent, QSettings *sett)
 	m_S_enable = new QComboBox(groupQ);
 	m_S_enable->addItem("Disable S(Q, E)");
 	m_S_enable->addItem("Enable S(Q, E)");
-	m_S_enable->addItem("Enable Ω(Q, E)");
+	m_S_enable->addItem("Enable B(Q, E)");
 	m_S_enable->setCurrentIndex(0);
-	m_S_enable->setToolTip("Enable dynamical structure factor S(Q, E) or Berry curvature Ω(Q, E) calculation.");
+	m_S_enable->setToolTip("Enable dynamical structure factor S(Q, E) or Berry curvature B(Q, E) calculation.");
 
 	m_S_filter = new QDoubleSpinBox(groupQ);
 	m_S_filter->setDecimals(5);

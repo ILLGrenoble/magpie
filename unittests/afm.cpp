@@ -1,5 +1,5 @@
 /**
- * magnetic dynamics test
+ * magnetic dynamics test, 1d antiferromagnetic chain
  * @author Tobias Weber <tweber@ill.fr>
  * @date 10-june-2024
  * @license GPLv3, see 'LICENSE' file

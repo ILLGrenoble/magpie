@@ -1,5 +1,5 @@
 /**
- * magnetic dynamics test
+ * magnetic dynamics test, 1d ferromagnetic chain with dmi
  * @author Tobias Weber <tweber@ill.fr>
  * @date 7-oct-2026
  * @license GPLv3, see 'LICENSE' file
@@ -37,7 +37,7 @@ namespace ty = boost::typeindex;
 using t_types_real = std::tuple<double, float>;
 
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm_nonrecip, t_real, t_types_real)
 {
 	// real type name
 	const std::string real_name = ty::type_id_with_cvr<t_real>().pretty_name();
@@ -54,8 +54,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 	using t_cplx = std::complex<t_real>;
 	using t_mat = tl2::mat<t_cplx>;
 	using t_vec = tl2::vec<t_cplx>;
-	//using t_vec_real = tl2::vec<t_real>;
-	//using t_mat_real = tl2::mat<t_real>;
 
 	using t_magdyn = magdyn::MagDyn<
 		t_mat, t_vec,
@@ -74,6 +72,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 	t_real J = -0.5;
 	typename t_magdyn::Variable varJ{ .name = "J", .value = J };
 	magdyn.AddVariable(std::move(varJ));
+
+	t_real D = 0.25;
+	typename t_magdyn::Variable varD{ .name = "D", .value = D };
+	magdyn.AddVariable(std::move(varD));
+
+	t_real A = -0.06;
+	typename t_magdyn::Variable varA{ .name = "A", .value = A };
+	magdyn.AddVariable(std::move(varA));
 
 	t_real S = 1.;
 	typename t_magdyn::Variable varS{ .name = "S", .value = S};
@@ -112,6 +118,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 
 	coupling.J = "J";
 
+	coupling.dmi[0] = "0";
+	coupling.dmi[1] = "0";
+	coupling.dmi[2] = "D";
+
+	coupling.Jgen[2][2] = "A";
+
 	//magdyn.CalcExchangeTerm(coupling);
 	magdyn.AddExchangeTerm(std::move(coupling));
 
@@ -122,13 +134,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 
 
 	// calculate dispersion
-	for(t_real h = 0.05; h <= 0.45; h += 0.01)
+	for(t_real h = 0.1; h <= 0.45; h += 0.01)
 	{
-		auto [exact_E, exact_w] = ferro<t_real>(h, J, S);
+		auto [exact_E, exact_w] = ferro<t_real>(h, J, S, D);
+		exact_E += std::abs(A)*2.;
 
 		auto Es_and_S = magdyn.CalcEnergies(h, 0., 0., false);
 		BOOST_TEST(Es_and_S.size() == 2);  // + and - energy branch
-		BOOST_TEST(tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps));
+		BOOST_TEST(!tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps));
 		BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), exact_E, eps));
 		BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), exact_w, /*eps*/ 5e-6));
 	}

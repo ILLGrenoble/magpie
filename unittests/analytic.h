@@ -36,9 +36,15 @@
  * 1-d ferromagnetic chain
  */
 template<class t_real = double>
-std::pair<t_real, t_real> ferro(t_real h, t_real J = -1., t_real S = 1.)
+std::pair<t_real, t_real> ferro(t_real h, t_real J = -1., t_real S = 1., t_real D = 0.)
 {
+  // symmetric exchange
 	t_real E = -2.*S*J*(1. - std::cos(h * 2. * tl2::pi<t_real>));
+
+  // antisymmetric exchange (DMI)
+	E += -2.*S*D*std::sin(h * 2. * tl2::pi<t_real>);
+
+  // weight
 	t_real w = std::pow(tl2::g_e<t_real>, 2.) * S / 2.;
 
 	return std::make_pair(E, w);
