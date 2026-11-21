@@ -70,6 +70,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 	//magdyn.Load("../../examples/ferromagnetic_chain.magpie");
 
 	magdyn.SetEpsilon(eps);
+	magdyn.SetPerformChecks(true);
+	magdyn.SetSilent(false);
 	magdyn.SetUniteDegenerateEnergies(false);
 
 	t_vec3_real Q = tl2::create<t_vec3_real>({ 0.65, 0.65, 0. });

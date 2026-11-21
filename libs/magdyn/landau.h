@@ -202,7 +202,7 @@ template<class t_mat, class t_vec,
 	class t_real = typename t_cplx::value_type>
 std::tuple<std::vector<t_real>, std::vector<t_vec>, std::vector<t_real>>
 calc_energies_landau(const t_mat& F, const t_mat& Mx, const t_mat& Nx, const t_mat& basis,
-  bool only_energies = true, bool unite_degenerate = true,
+  bool only_energies = false, bool unite_degenerate = false,
 	const t_mat33* proj_neutron = nullptr, t_real eps = 1e-6)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
@@ -295,7 +295,8 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
 		std::vector<t_vec> unique_states;
 		std::vector<t_real> unique_weights;
 		unique_energies.reserve(evals.size());
-		unique_states.reserve(evecs.size());
+		if(!only_energies)
+			unique_states.reserve(evecs.size());
 
 		t_size degen_begin = 0;
 		while(degen_begin < energies.size())
@@ -322,39 +323,46 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec>
 			unique_energies.emplace_back(E);
 			unique_weights.push_back(w);
 
-			if(num_degen <= 1)
-			{
-				unique_states.emplace_back(states[degen_begin]);
-				degen_begin = degen_end;
-				continue;
-			}
-
 			// construct unified state
-			t_mat degen_states = tl2::create<t_mat, t_vec>(states, false, degen_begin, num_degen);
-			t_mat degen_overlap = tl2::herm(degen_states) * Nx * degen_states;
-			degen_overlap += tl2::herm(degen_overlap);
-			degen_overlap /= t_real(2);
-
-			auto [degen_ok, degen_evals, degen_evecs] =
-				tl2_la::eigenvec<t_mat, t_vec, t_cplx, t_real>(degen_overlap,
-					false /*only_evals*/, true /*is_herm*/, true /*normalise*/);
-			if(!degen_ok)
+			if(!only_energies)
 			{
-				unique_states.emplace_back(states[degen_begin]);
-				degen_begin = degen_end;
-				continue;
-			}
-
-			t_mat degen_M = tl2::zero<t_mat>(num_degen, num_degen);
-			for(t_size eval_idx = 0; eval_idx < degen_evals.size(); ++eval_idx)
-			{
-				if(tl2::equals_0<t_real>(degen_evals[eval_idx].real(), eps))
+				if(num_degen <= 1)
+				{
+					unique_states.emplace_back(states[degen_begin]);
+					degen_begin = degen_end;
 					continue;
-				degen_M += tl2::outer<t_mat, t_vec>(degen_evecs[eval_idx], degen_evecs[eval_idx])
-					/ std::sqrt(std::abs(degen_evals[eval_idx].real()));
+				}
+
+				t_mat degen_states = tl2::create<t_mat, t_vec>(states, false, degen_begin, num_degen);
+				t_mat degen_overlap = tl2::herm(degen_states) * Nx * degen_states;
+				degen_overlap += tl2::herm(degen_overlap);
+				degen_overlap /= t_real(2);
+
+				auto [degen_ok, degen_evals, degen_evecs] =
+					tl2_la::eigenvec<t_mat, t_vec, t_cplx, t_real>(degen_overlap,
+						false /*only_evals*/, true /*is_herm*/, true /*normalise*/);
+				if(!degen_ok)
+				{
+					unique_states.emplace_back(states[degen_begin]);
+					degen_begin = degen_end;
+					continue;
+				}
+
+				t_mat degen_M = tl2::zero<t_mat>(num_degen, num_degen);
+				for(t_size eval_idx = 0; eval_idx < degen_evals.size(); ++eval_idx)
+				{
+					if(tl2::equals_0<t_real>(degen_evals[eval_idx].real(), eps))
+						continue;
+					degen_M += tl2::outer<t_mat, t_vec>(degen_evecs[eval_idx], degen_evecs[eval_idx])
+						/ std::sqrt(std::abs(degen_evals[eval_idx].real()));
+				}
+
+				t_vec corr_state = tl2::zero<t_vec>(degen_M.size2());
+				for(t_size eval_idx = 0; eval_idx < num_degen; ++eval_idx)
+					corr_state += tl2::col<t_mat, t_vec>(degen_M, eval_idx) * degen_states(eval_idx, 0);
+				unique_states.emplace_back(corr_state);
 			}
 
-			unique_states.emplace_back(degen_M * tl2::col<t_mat, t_vec>(degen_states, 0));
 			degen_begin = degen_end;
 		}
 

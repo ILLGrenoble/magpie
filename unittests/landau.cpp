@@ -72,6 +72,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_ll, t_real, t_types_real)
 
 	bool unite_degenerate = false;
 	magdyn.SetEpsilon(eps);
+	magdyn.SetPerformChecks(true);
+	magdyn.SetSilent(false);
 	magdyn.SetUniteDegenerateEnergies(unite_degenerate);
 
 	auto [Mx, Nx, basis] = magdyn::calc_mcross_matrix<t_magdyn>(magdyn, eps);

@@ -63,6 +63,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn2, t_real, t_types_real)
 	// magnon calculator
 	t_magdyn magdyn{};
 	magdyn.SetEpsilon(eps);
+	magdyn.SetPerformChecks(true);
+	magdyn.SetSilent(false);
 
 
 	// crystal lattice
