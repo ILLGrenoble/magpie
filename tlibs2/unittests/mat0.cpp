@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mat0, t_real, t_types)
 	}
 
 	// test rotation
-	for(std::size_t iteration=0; iteration<1000; ++iteration)
+	for(std::size_t iteration = 0; iteration < 1000; ++iteration)
 	{
 		t_vec axis = tl2::create<t_vec>({
 			tl2::get_rand<t_real>(-10., 10.),
@@ -222,7 +222,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mat0, t_real, t_types)
 		//std::cout << "\nok = " << std::boolalpha << ok << std::endl;
 
 		bool axis_found = false;
-		for(std::size_t i=0; i<evals_re.size(); ++i)
+		for(std::size_t i = 0; i < evals_re.size(); ++i)
 		{
 			if(tl2::equals<t_real>(evals_re[i], 1., eps) && tl2::equals_0<t_real>(evals_im[i], eps))
 			{
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mat0, t_real, t_types)
 				if(!evec_ok)
 				{
 					std::cerr << "rotation axis: " << axis << ", angle: " << angle << std::endl;
-					for(std::size_t j=0; j<evals_re.size(); ++j)
+					for(std::size_t j = 0; j < evals_re.size(); ++j)
 					{
 						std::cerr << "eval: " << evals_re[j] << " + i*" << evals_im[j]
 							<< ", evec: " << evecs_re[j] << " +i*" << evecs_im[j] 
@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mat0, t_real, t_types)
 		{
 			std::cerr << "Error: axis not found!" << std::endl;
 			std::cerr << "rotation axis: " << axis << ", angle: " << angle << std::endl;
-			for(std::size_t i=0; i<evals_re.size(); ++i)
+			for(std::size_t i = 0; i < evals_re.size(); ++i)
 			{
 				std::cerr << "eval: " << evals_re[i] << " + i*" << evals_im[i]
 					<< ", evec: " << evecs_re[i] << " +i*" << evecs_im[i] 

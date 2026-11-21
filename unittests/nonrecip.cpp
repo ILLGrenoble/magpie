@@ -134,16 +134,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm_nonrecip, t_real, t_types_real)
 
 
 	// calculate dispersion
-	for(t_real h = 0.1; h <= 0.45; h += 0.01)
+	for(t_real h = -0.5; h <= 0.5; h += 0.01)
 	{
 		auto [exact_E, exact_w] = ferro<t_real>(h, J, S, D);
 		exact_E += std::abs(A)*2.;
 
 		auto Es_and_S = magdyn.CalcEnergies(h, 0., 0., false);
 		BOOST_TEST(Es_and_S.size() == 2);  // + and - energy branch
-		BOOST_TEST(!tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps));
 		BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].E), exact_E, eps));
-		BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), exact_w, /*eps*/ 5e-6));
+		if(std::abs(h) > eps)
+			BOOST_TEST(tl2::equals<t_real>(std::abs(Es_and_S[0].weight_perp), exact_w, /*eps*/ 5e-6));
+		if(std::abs(h) > eps && std::abs(h) < 0.5 - eps)
+		{
+			//std::cout << h << " " << Es_and_S[0].E << " " << Es_and_S[1].E << std::endl;
+			BOOST_TEST(!tl2::equals<t_real>(Es_and_S[0].E, -Es_and_S[1].E, eps));
+		}
 	}
 
 

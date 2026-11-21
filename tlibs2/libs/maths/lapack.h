@@ -334,7 +334,7 @@ requires tl2::is_mat<t_mat>
 		for(std::size_t i = k + 1; i <= minor; ++i)
 			v[i - 1] = outmat[(i - 1)*cols + (k - 1)];
 
-		Q = Q * (I - outvec[k - 1]*tl2::conj(tl2::outer<t_mat, t_vec>(v, v)));
+		Q = Q * (I - outvec[k - 1]*tl2::outer<t_mat, t_vec>(v, v));
 	}
 
 	return std::make_tuple(err == 0, std::move(Q), std::move(R));

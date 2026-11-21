@@ -1157,7 +1157,7 @@ requires is_mat<t_mat> && is_vec<t_vec>
 
 	t_cplx N2 = N * NConj;
 	t_cplx M2 = inner<t_vec>(Mperp, Mperp);
-	t_mat Mo = t_real(2) * outer<t_mat, t_vec>(Mperp, Mperp);
+	t_mat Mo = t_real(2) * tl2::conj(outer<t_mat, t_vec>(Mperp, Mperp));
 	t_vec NM = t_real(2) * N * MperpConj;
 
 	auto [ Mor, Moi ] = split_cplx<t_mat, t_mat>(Mo);

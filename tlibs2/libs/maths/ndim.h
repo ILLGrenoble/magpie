@@ -1811,7 +1811,7 @@ requires is_basic_vec<t_vec>
 
 
 /**
- * outer product
+ * outer product |u><v|
  */
 template<class t_mat, class t_vec>
 t_mat outer(const t_vec& vec1, const t_vec& vec2)
@@ -1829,7 +1829,7 @@ requires is_basic_vec<t_vec> && is_mat<t_mat>
 		for(std::size_t n2 = 0; n2 < N2; ++n2)
 		{
 			if constexpr(is_complex<typename t_vec::value_type>)
-				mat(n1, n2) = std::conj(vec1[n1]) * vec2[n2];
+				mat(n1, n2) = vec1[n1] * std::conj(vec2[n2]);
 			else
 				mat(n1, n2) = vec1[n1]*vec2[n2];
 		}
