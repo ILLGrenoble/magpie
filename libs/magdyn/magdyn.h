@@ -244,6 +244,8 @@ public:
 	bool GetPerformChecks() const;
 	bool GetSilent() const;
 
+	t_real GetPhaseSign() const;
+
 	// get number of magnetic sites with the given name (to check if the name is unique)
 	std::vector<const MagneticSite*> FindMagneticSites(const std::string& name) const;
 

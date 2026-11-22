@@ -426,6 +426,13 @@ MAGDYN_TEMPL bool MAGDYN_INST::GetPerformChecks() const
 
 
 
+MAGDYN_TEMPL t_real MAGDYN_INST::GetPhaseSign() const
+{
+	return m_phase_sign;
+}
+
+
+
 /**
  * get number of magnetic sites with the given name (to check if the name is unique)
  */

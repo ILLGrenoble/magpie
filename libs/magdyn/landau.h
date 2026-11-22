@@ -62,10 +62,10 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec3_real>
 	const t_Jmap J_Q0 = mag.CalcReciprocalJs();
 	const t_Jmap J_Q = mag.CalcReciprocalJs(Qvec);
 	const t_size N = mag.GetMagneticSitesCount();
+	const t_real phase_sign = mag.GetPhaseSign();
 
 	constexpr const t_cplx imag(0., 1.);
 	constexpr const t_real twopi = t_real(2) * tl2::pi<t_real>;
-	constexpr const t_real phase_sign = -1;  // as in magdyn.h
 
 	t_mat F = tl2::zero<t_mat>(N*3, N*3);
 

@@ -177,6 +177,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	curvatures.reserve(BANDS);
 	t_vec chern_partial = tl2::zero<t_vec>(BANDS);
 
+	// TODO: include xtalB for the metric
 	t_vec_real _Q_step1 = Q_step1;
 	t_real lenQstep1 = tl2::norm<t_vec_real>(Q_step1);
 	if(lenQstep1 > eps)
@@ -227,7 +228,8 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
  * @see equ. 8 in (McClarty 2022)
  * @see https://en.wikipedia.org/wiki/Berry_connection_and_curvature
  */
-template<class t_vec, class t_vec_real, class t_mat, class t_S,
+template<class t_vec, class t_vec_real,
+	class t_mat, class t_mat33_real, class t_S,
 	typename t_cplx = typename t_vec::value_type,
 	typename t_real = typename t_cplx::value_type,
 	typename t_size = std::size_t>
@@ -236,7 +238,8 @@ std::tuple<std::vector<t_cplx>, t_S, t_vec> berry_curvatures_fhs(
 	const t_vec_real& Q, bool)>& get_evecs,
 	const t_vec_real& Q, const t_vec_real& Q_step1, const t_vec_real& Q_step2,
 	bool commutator = true,
-	t_real eps = std::numeric_limits<t_real>::epsilon())
+	t_real eps = std::numeric_limits<t_real>::epsilon(),
+	const t_mat33_real *xtalB = nullptr)
 #ifndef SWIG  // TODO: remove this as soon as swig understands concepts
 requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
@@ -255,7 +258,9 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	t_vec_real Q10 = Q + Q_step1;
 	t_vec_real Q11 = Q + Q_step1 + Q_step2;
 
-	t_real Q_area = tl2::norm(Q_step1)*tl2::norm(Q_step2);
+	t_real Q_area = xtalB
+		? tl2::norm(tl2::cross(*xtalB * Q_step1, *xtalB * Q_step2))
+		: tl2::norm(tl2::cross(Q_step1, Q_step2));
 
 	const t_mat& evecs00 = evecs;
 	const auto [ evecs01, S01 ] = get_evecs(Q01, commutator);
@@ -306,8 +311,8 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	// grid size
 	const t_size N = t_size(1. / delta_int);
 
-	t_vec_real Q_step1 = Q_dir1 / t_real(N - 1);
-	t_vec_real Q_step2 = Q_dir2 / t_real(N - 1);
+	t_vec_real Q_step1 = Q_dir1 / t_real(N /*- 1*/);
+	t_vec_real Q_step2 = Q_dir2 / t_real(N /*- 1*/);
 
 	t_vec chern_nums{};
 
@@ -359,8 +364,8 @@ t_vec chern_numbers_fhs(
 requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 #endif
 {
-	t_vec_real Q_step1 = Q_dir1 / t_real(grid_x - 1);
-	t_vec_real Q_step2 = Q_dir2 / t_real(grid_y - 1);
+	t_vec_real Q_step1 = Q_dir1 / t_real(grid_x /*- 1*/);
+	t_vec_real Q_step2 = Q_dir2 / t_real(grid_y /*- 1*/);
 
 	t_vec chern_nums{};
 
@@ -415,9 +420,16 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
  */
 template<class t_mat, class t_vec, class t_vec_real, class t_magdyn, class t_perm>
 std::function<std::tuple<t_mat, typename t_magdyn::SofQE>(const t_vec_real& Q, bool)>
-get_evecmat_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
+get_evecmat_func(const t_magdyn *magdyn, const t_perm *perm = nullptr, bool use_site_phases = false)
 {
-	return [magdyn, perm](const t_vec_real& Q, bool commutator)
+	using t_cplx = typename t_magdyn::t_cplx_;
+	using t_real = typename t_magdyn::t_real_;
+	using MagneticSite = typename t_magdyn::MagneticSite;
+
+	constexpr const t_cplx imag(0., 1.);
+	constexpr const t_real twopi = t_real(2) * tl2::pi<t_real>;
+
+	return [magdyn, perm, &imag, &twopi, use_site_phases](const t_vec_real& Q, bool commutator)
 		-> std::tuple<t_mat, typename t_magdyn::SofQE>
 	{
 		typename t_magdyn::SofQE S = magdyn->CalcEnergies(Q, false);
@@ -429,8 +441,26 @@ get_evecmat_func(const t_magdyn *magdyn, const t_perm *perm = nullptr)
 		for(std::size_t E_idx = 0; E_idx < S.E_and_S.size(); ++E_idx)
 		{
 			const auto& E_and_S = S.E_and_S[E_idx];
-			set_col<t_mat, t_vec>(M,
-				commutator ? E_and_S.state_comm : E_and_S.state, E_idx);
+			set_col<t_mat, t_vec>(M, commutator ? E_and_S.state_comm : E_and_S.state, E_idx);
+		}
+
+		if(use_site_phases)
+		{
+			const std::size_t N = magdyn->GetMagneticSitesCount();
+			const t_real phase_sign = magdyn->GetPhaseSign();
+
+			for(std::size_t site_idx = 0; site_idx < N; ++site_idx)
+			{
+				const MagneticSite& s = magdyn->GetMagneticSite(site_idx);
+				t_cplx site_phase = std::exp(-phase_sign * imag * twopi *
+					tl2::inner<t_vec_real>(s.pos_calc, S.Q_central_rlu));
+
+				for(std::size_t col_idx = 0; col_idx < M.size2(); ++col_idx)
+				{
+					M(    site_idx, col_idx) *= site_phase;
+					M(N + site_idx, col_idx) *= site_phase;
+				}
+			}
 		}
 
 		if(perm)
@@ -464,7 +494,7 @@ MAGDYN_INST::CalcBerryConnections(const t_vec3_real& Q, t_real delta,
 			<< std::endl;
 	}
 
-	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
+	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm, true);
 
 	return berry_connections<t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
 		evec_func, Q, delta, commutator);
@@ -492,7 +522,7 @@ MAGDYN_INST::CalcBerryCurvatures(
 			<< std::endl;
 	}
 
-	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
+	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm, true);
 
 	if constexpr(calc_method == 0)
 	{
@@ -509,9 +539,9 @@ MAGDYN_INST::CalcBerryCurvatures(
 	else
 	{
 		return berry_curvatures_fhs<
-			t_vec, t_vec3_real, t_mat, SofQE, t_cplx, t_real, t_size>(
+			t_vec, t_vec3_real, t_mat, t_mat33_real, SofQE, t_cplx, t_real, t_size>(
 				evec_func, Q, Q_step1, Q_step2,
-				commutator, m_eps);
+				commutator, m_eps, &m_xtalB);
 	}
 }
 
@@ -537,7 +567,7 @@ t_vec MAGDYN_INST::CalcChernNumbers(
 	}
 
 	std::vector<t_size> *perm = nullptr;
-	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm);
+	auto evec_func = get_evecmat_func<t_mat, t_vec, t_vec3_real>(this, perm, false);
 
 	if constexpr(calc_method == 0)
 	{
