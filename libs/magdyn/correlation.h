@@ -384,6 +384,8 @@ bool MAGDYN_INST::CalcCorrelationsFromHamiltonian(MAGDYN_TYPE::SofQE& S) const
 					<< "\n(1) " << S.E_and_S[i].S.size1() << "x" << S.E_and_S[i].S.size2() << ": " << S.E_and_S[i].S
 					<< "\n(2) " << Smats[i].size1() << "x" << Smats[i].size2() << ": " << Smats[i]
 					<< "." << std::endl;
+
+				S.E_and_S[i].S = Smats[i];  // use the more expensive calculation as result
 			}
 		}
 	} // checks
