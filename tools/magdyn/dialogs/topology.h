@@ -183,6 +183,7 @@ private:
 	std::vector<std::vector<t_cplx>> m_data_bcm{};  // data map
 	t_vec3_real m_Q_cursor_bcm{};         // current coordinate at cursor
 	t_vec m_chern_bcm{};                  // chern numbers
+	t_real m_min_bcm{}, m_max_bcm{};      // minimum and maximum berry curvature
 
 	QCustomPlot *m_plot_bcm{};            // berry curvature plotter
 	QCPColorScale *m_plot_colour_bcm{};   // plot colour scale

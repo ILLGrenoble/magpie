@@ -33,6 +33,7 @@ namespace asio = boost::asio;
 #include <fstream>
 #include <iomanip>
 #include <cstdlib>
+#include <limits>
 
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QMessageBox>
@@ -393,8 +394,8 @@ static t_vec3_real get_map_Q_from_indices(std::size_t idx1, std::size_t idx2,
 	const t_vec3_real& Q_origin, const t_vec3_real& Q_dir_1, const t_vec3_real& Q_dir_2,
 	std::size_t Q_count_1, std::size_t Q_count_2)
 {
-	t_vec3_real Q_step_1 = Q_dir_1 / t_real(Q_count_1 - 1);
-	t_vec3_real Q_step_2 = Q_dir_2 / t_real(Q_count_2 - 1);
+	t_vec3_real Q_step_1 = Q_dir_1 / t_real(Q_count_1 /*- 1*/);
+	t_vec3_real Q_step_2 = Q_dir_2 / t_real(Q_count_2 /*- 1*/);
 
 	return Q_origin + Q_step_1*t_real(idx1) + Q_step_2*t_real(idx2);
 }
@@ -496,8 +497,8 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 	m_chern_bcm = tl2::zero<t_vec>(expected_bands);
 
 	auto [Q_origin, Q_dir_1, Q_dir_2] = GetMapQVectors();
-	t_vec3_real Q_step_1 = Q_dir_1 / t_real(Q_count_1 - 1);
-	t_vec3_real Q_step_2 = Q_dir_2 / t_real(Q_count_2 - 1);
+	t_vec3_real Q_step_1 = Q_dir_1 / t_real(Q_count_1 /*- 1*/);
+	t_vec3_real Q_step_2 = Q_dir_2 / t_real(Q_count_2 /*- 1*/);
 
 	for(t_size Q_idx_1 = 0; Q_idx_1 < Q_count_1; ++Q_idx_1)
 	for(t_size Q_idx_2 = 0; Q_idx_2 < Q_count_2; ++Q_idx_2)
@@ -509,12 +510,22 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 			const t_vec3_real Q =  get_map_Q_from_indices<t_vec3_real>(
 			  Q_idx_1, Q_idx_2, Q_origin, Q_dir_1, Q_dir_2, Q_count_1, Q_count_2);
 
-			auto [curvatures, S, chern_partial] = dyn.CalcBerryCurvatures(Q,
-				Q_idx_1 == Q_count_1 - 1 ? -Q_step_1*t_real(Q_count_1 - 1) : Q_step_1,
-				Q_idx_2 == Q_count_2 - 1 ? -Q_step_2*t_real(Q_count_2 - 1) : Q_step_2);
+			auto [curvatures, S, chern_partial] = dyn.CalcBerryCurvatures(Q, Q_step_1, Q_step_2);
+
+			bool on_border = Q_idx_1 == Q_count_1 - 1 || Q_idx_2 == Q_count_2 - 1;
+			if(on_border)
+			{
+				auto [curvatures_border, S_border, chern_partial_border] = dyn.CalcBerryCurvatures(Q,
+					Q_idx_1 == Q_count_1 - 1 ? -Q_step_1*t_real(Q_count_1 - 1) : Q_step_1,
+					Q_idx_2 == Q_count_2 - 1 ? -Q_step_2*t_real(Q_count_2 - 1) : Q_step_2);
+
+				std::lock_guard<std::mutex> _lck{mtx};
+				if(m_chern_bcm.size() == chern_partial_border.size())
+					m_chern_bcm += chern_partial_border;
+			}
 
 			std::lock_guard<std::mutex> _lck{mtx};
-			if(m_chern_bcm.size() == chern_partial.size())
+			if(!on_border && m_chern_bcm.size() == chern_partial.size())
 				m_chern_bcm += chern_partial;
 			m_data_bcm[Q_idx_2*Q_count_1 + Q_idx_1] = std::move(curvatures);
 		};
@@ -634,9 +645,13 @@ void TopologyDlg::RescaleBerryCurvatureMapColour(bool replot)
 
 	if(m_B_filter_min_enable_bcm->isChecked())
 		range.lower = m_B_filter_min_bcm->value();
+	else
+		range.lower = m_min_bcm;
 
 	if(m_B_filter_max_enable_bcm->isChecked())
 		range.upper = m_B_filter_max_bcm->value();
+	else
+		range.upper = m_max_bcm;
 
 	m_plot_colour_bcm->setDataRange(range);
 
@@ -661,6 +676,9 @@ void TopologyDlg::PlotBerryCurvatureMap()
 	m_plot_map_bcm->data()->setSize((int)Q_count_1, (int)Q_count_2);
 	m_plot_map_bcm->data()->setRange(QCPRange{ 0., 1. }, QCPRange{ 0., 1. });
 
+	m_min_bcm = std::numeric_limits<t_real>::max();
+	m_max_bcm = -m_min_bcm;
+
 	bool stop = false;
 	for(t_size Qidx1 = 0; Qidx1 < Q_count_1; ++Qidx1)
 	{
@@ -678,12 +696,16 @@ void TopologyDlg::PlotBerryCurvatureMap()
 			if(band < curvature.size())
 				data = show_imag ? curvature[band].imag() : curvature[band].real();
 			m_plot_map_bcm->data()->setCell((int)Qidx1, (int)Qidx2, data);
+
+			m_min_bcm = std::min(m_min_bcm, data);
+			m_max_bcm = std::max(m_max_bcm, data);
 		}
 
 		if(stop)
 			break;
 	}
 
+	//std::cout << "min_bc = " << m_min_bcm << ", max_bc = " << m_max_bcm << std::endl;
 	RescaleBerryCurvatureMapPlot();
 	BerryCurvatureMapPlotMouseMove(nullptr);  // update status message
 }

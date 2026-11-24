@@ -124,10 +124,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 	BOOST_TEST(cs.size() == 4);
 	if(cs.size() == 4)
 	{
-		BOOST_TEST(tl2::equals<t_real>(cs[0].real(), 1., eps));
-		BOOST_TEST(tl2::equals<t_real>(cs[1].real(), -1., eps));
-		BOOST_TEST(tl2::equals<t_real>(cs[2].real(), 1., eps));
-		BOOST_TEST(tl2::equals<t_real>(cs[3].real(), -1., eps));
+		BOOST_TEST(tl2::equals<t_real>(cs[0].real(), -1., eps));
+		BOOST_TEST(tl2::equals<t_real>(cs[1].real(), 1., eps));
+		BOOST_TEST(tl2::equals<t_real>(cs[2].real(), -1., eps));
+		BOOST_TEST(tl2::equals<t_real>(cs[3].real(), 1., eps));
 	}
 
 	for(t_cplx& c : cs)

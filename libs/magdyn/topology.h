@@ -105,7 +105,7 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		align_phases(evecs_Q1);
 
 		// differentiate eigenvector matrix
-		t_mat evecs_diff = (evecs - evecs_Q1) / delta;
+		t_mat evecs_diff = -(evecs - evecs_Q1) / delta;
 
 		t_mat evecs_H = tl2::herm(evecs);
 		t_mat C;
@@ -275,7 +275,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 			t_vec v10 = tl2::col<t_mat, t_vec>(evecs10, band);
 			t_vec v11 = tl2::col<t_mat, t_vec>(evecs11, band);
 
-			t_cplx curv = std::arg(
+			t_cplx curv = -std::arg(
 				berry_dot(v00, v10, commutator, eps) * berry_dot(v01, v00, commutator, eps) *
 				berry_dot(v11, v01, commutator, eps) * berry_dot(v10, v11, commutator, eps));
 
@@ -400,7 +400,7 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 			t_vec v10 = tl2::col<t_mat, t_vec>(grid[((i + 1)%grid_x)*grid_y + j               ], band);
 			t_vec v11 = tl2::col<t_mat, t_vec>(grid[((i + 1)%grid_x)*grid_y + ((j + 1)%grid_y)], band);
 
-			chern_num += std::arg(
+			chern_num += -std::arg(
 				berry_dot(v00, v10, commutator, eps) * berry_dot(v01, v00, commutator, eps) *
 				berry_dot(v11, v01, commutator, eps) * berry_dot(v10, v11, commutator, eps));
 		}
@@ -429,7 +429,7 @@ get_evecmat_func(const t_magdyn *magdyn, const t_perm *perm = nullptr, bool use_
 	constexpr const t_cplx imag(0., 1.);
 	constexpr const t_real twopi = t_real(2) * tl2::pi<t_real>;
 
-	return [magdyn, perm, &imag, &twopi, use_site_phases](const t_vec_real& Q, bool commutator)
+	return [magdyn, perm, imag, twopi, use_site_phases](const t_vec_real& Q, bool commutator)
 		-> std::tuple<t_mat, typename t_magdyn::SofQE>
 	{
 		typename t_magdyn::SofQE S = magdyn->CalcEnergies(Q, false);
