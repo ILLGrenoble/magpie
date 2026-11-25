@@ -40,11 +40,12 @@
 #ifndef __TLIBS2_MATHS_PEAKS_H__
 #define __TLIBS2_MATHS_PEAKS_H__
 
-#include <cmath>
-#include <complex>
-
 #include <boost/math/special_functions/factorials.hpp>
 #include <boost/math/special_functions/spherical_harmonic.hpp>
+
+#include <cmath>
+#include <complex>
+#include <limits>
 
 #include "decls.h"
 #include "constants.h"
@@ -292,13 +293,41 @@ T CG_coeff(T S, T s1, T s2, T ms1, T ms2)
 	T kmin, kmax;
 	std::tie(kmin, kmax) = k_minmax();
 	T kfact = T(0);
-	for(T k=kmin; k<=kmax; k+=T(1))
+	for(T k = kmin; k <= kmax; k+=T(1))
 		kfact += k_fkt(k);
 	tCG *= kfact;
 
 	return tCG;
 }
 // -----------------------------------------------------------------------------
+
+
+
+/**
+ * polylogarithm
+ * @see https://mathworld.wolfram.com/Polylogarithm.html
+ */
+template<class T = std::complex<double>, typename t_real = tl2::underlying_value_type<T>>
+T polylog(const T& z, T order = 2, std::size_t maxiter = 128,
+	t_real eps = std::numeric_limits<t_real>::epsilon())
+{
+	T sum(0);
+
+	for(std::size_t k = 1; k < maxiter; ++k)
+	{
+		T num = std::pow(z, k);
+		T denom = std::pow(k, order);
+
+		T frac = num / denom;
+		sum += frac;
+
+		if(std::abs(frac) < std::abs(eps*sum))
+			break;
+	}
+
+	return sum;
+}
+
 
 }
 
