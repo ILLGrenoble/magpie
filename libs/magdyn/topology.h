@@ -46,7 +46,7 @@
 namespace magdyn {
 
 /**
- * calculates the berry connections
+ * calculates the berry connections (only valid along axis-aligned directions)
  * @see equ. 7 in (McClarty 2022)
  * @see https://en.wikipedia.org/wiki/Berry_connection_and_curvature
  */
@@ -147,7 +147,8 @@ requires tl2::is_vec<t_vec>
 
 
 /**
- * calculates the berry curvatures directly (numerically not very stable)
+ * calculates the berry curvatures directly
+ * (numerically not very stable and only valid along axis-aligned directions)
  * @see equ. 8 in (McClarty 2022)
  * @see https://en.wikipedia.org/wiki/Berry_connection_and_curvature
  */
@@ -254,6 +255,8 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	curvatures.reserve(BANDS);
 	t_vec chern_partial = tl2::zero<t_vec>(BANDS);
 
+	const t_vec_real& Q00 = Q;
+	//t_vec_real Q00 = Q - 0.5*Q_step1 - 0.5*Q_step2;
 	t_vec_real Q01 = Q + Q_step2;
 	t_vec_real Q10 = Q + Q_step1;
 	t_vec_real Q11 = Q + Q_step1 + Q_step2;
@@ -263,9 +266,17 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		: tl2::norm(tl2::cross(Q_step1, Q_step2));
 
 	const t_mat& evecs00 = evecs;
+	//const auto [ evecs00, S00 ] = get_evecs(Q00, commutator);
 	const auto [ evecs01, S01 ] = get_evecs(Q01, commutator);
 	const auto [ evecs10, S10 ] = get_evecs(Q10, commutator);
 	const auto [ evecs11, S11 ] = get_evecs(Q11, commutator);
+
+	if(evecs00.size2() != evecs01.size2()
+	   || evecs00.size2() != evecs10.size2()
+	   || evecs00.size2() != evecs11.size2())
+	{
+		return std::make_tuple(curvatures, S, t_vec{});
+	}
 
 	// see equs. 3a & 3b in (Nakamura 2024)
 	for(t_size band = 0; band < BANDS; ++band)
@@ -290,7 +301,8 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 
 
 /**
- * calculates the chern numbers directly (numerically not very stable)
+ * calculates the chern numbers times the number of brillouin zones directly (numerically not very stable)
+ * (or the berry flux in case the region is not a full brillouin zone)
  * @see equ. 9 in (McClarty 2022)
  * @see https://en.wikipedia.org/wiki/Berry_connection_and_curvature
  */
@@ -345,7 +357,8 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 
 
 /**
- * calculates the chern numbers via the fhs method
+ * calculates the chern numbers times the number of brillouin zones via the fhs method
+ * (or the berry flux in case the region is not a full brillouin zone)
  * @see (Nakamura 2024)
  * @see equ. 9 in (McClarty 2022)
  * @see https://en.wikipedia.org/wiki/Berry_connection_and_curvature
@@ -548,7 +561,8 @@ MAGDYN_INST::CalcBerryCurvatures(
 
 
 /**
- * get the chern number for each magnon band
+ * get the chern number times the number of brillouin zones for each magnon band
+ * (or the berry flux in case the region is not a full brillouin zone)
  */
 MAGDYN_TEMPL
 t_vec MAGDYN_INST::CalcChernNumbers(

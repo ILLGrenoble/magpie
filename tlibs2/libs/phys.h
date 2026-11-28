@@ -41,6 +41,7 @@
 #include "maths.h"
 #include "string.h"
 
+#include <limits>
 #include <stdexcept>
 #include <optional>
 #include <boost/units/pow.hpp>
@@ -1466,6 +1467,36 @@ template<class T = double>
 T eff_magnetons(T gJ, T J)
 {
 	return gJ * std::sqrt(J * (J + T(1)));
+}
+// ----------------------------------------------------------------------------
+
+
+
+// ----------------------------------------------------------------------------
+// helper functions
+// ----------------------------------------------------------------------------
+/**
+ * get the number of full brillouin zones in the range
+ * (returns 0 if only a fraction is given)
+ */
+template<class t_vec, class t_real = typename t_vec::value_type>
+std::size_t count_bz(const t_vec& Qdir1, const t_vec& Qdir2,
+	t_real eps = std::numeric_limits<t_real>::epsilon())
+requires is_vec<t_vec>
+{
+	t_vec Qdir1_rd = tl2::round(Qdir1);
+	t_vec Qdir2_rd = tl2::round(Qdir2);
+
+	if(!tl2::equals<t_vec>(Qdir1, Qdir1_rd, eps)
+		|| !tl2::equals<t_vec>(Qdir2, Qdir2_rd, eps))
+		return 0;
+
+	t_vec Qdir3 = tl2::abs(tl2::cross(Qdir1_rd, Qdir2_rd));
+
+	std::size_t gcd = 0;
+	for(std::size_t i = 0; i < Qdir3.size(); ++i)
+		gcd = std::gcd(gcd, std::size_t(Qdir3[i]));
+	return gcd;
 }
 // ----------------------------------------------------------------------------
 

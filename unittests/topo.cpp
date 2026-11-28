@@ -66,8 +66,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 	// magnon calculator
 	t_magdyn magdyn{};
 
-	magdyn.Load("../../examples/honeycomb.magpie");
-	//magdyn.Load("../../examples/ferromagnetic_chain.magpie");
+	bool ok = magdyn.Load("../../examples/honeycomb.magpie");
+	//bool ok = magdyn.Load("../../examples/ferromagnetic_chain.magpie");
+	BOOST_TEST(ok);
+	if(!ok)
+		return;
 
 	magdyn.SetEpsilon(eps);
 	magdyn.SetPerformChecks(true);
@@ -81,8 +84,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 
 
 	// berry curvatures -- standard calculation
-	std::vector<t_cplx> curvs = std::get<0>(
-		magdyn.CalcBerryCurvatures(Q, Q_dir1/64., Q_dir2/64.));
+	auto [curvs, S, cs_inc] = magdyn.CalcBerryCurvatures(Q, Q_dir1/64., Q_dir2/64.);
 	BOOST_TEST(curvs.size() == 4);
 	for(t_cplx& curv : curvs)
 	{
@@ -120,6 +122,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_magdyn_fm, t_real, t_types_real)
 	t_vec cs = magdyn.CalcChernNumbers(
 		Q_start, Q_dir1, Q_dir2,  // path
 		64, 64);                  // grid
+
+	//BOOST_TEST(tl2::equals<t_vec>(cs, cs_inc, eps));
 
 	BOOST_TEST(cs.size() == 4);
 	if(cs.size() == 4)

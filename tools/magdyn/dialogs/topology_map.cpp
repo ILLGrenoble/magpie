@@ -500,6 +500,8 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 	t_vec3_real Q_step_1 = Q_dir_1 / t_real(Q_count_1 /*- 1*/);
 	t_vec3_real Q_step_2 = Q_dir_2 / t_real(Q_count_2 /*- 1*/);
 
+	m_num_bz_bcm = tl2::count_bz<t_vec3_real>(Q_dir_1 /*- Q_origin*/, Q_dir_2 /*- Q_origin*/, g_eps);
+
 	for(t_size Q_idx_1 = 0; Q_idx_1 < Q_count_1; ++Q_idx_1)
 	for(t_size Q_idx_2 = 0; Q_idx_2 < Q_count_2; ++Q_idx_2)
 	{
@@ -512,7 +514,8 @@ void TopologyDlg::CalculateBerryCurvatureMap()
 
 			auto [curvatures, S, chern_partial] = dyn.CalcBerryCurvatures(Q, Q_step_1, Q_step_2);
 
-			bool on_border = Q_idx_1 == Q_count_1 - 1 || Q_idx_2 == Q_count_2 - 1;
+			bool on_border = (Q_idx_1 == Q_count_1 - 1 || Q_idx_2 == Q_count_2 - 1)
+				&& (m_num_bz_bcm > 0);
 			if(on_border)
 			{
 				auto [curvatures_border, S_border, chern_partial_border] = dyn.CalcBerryCurvatures(Q,
@@ -872,11 +875,15 @@ void TopologyDlg::BerryCurvatureMapPlotMouseMove(QMouseEvent* evt)
 
 	if(chern)
 	{
-		// chern number * selected region size
-		QString statusChern("Chern*Region = %1.");
-		statusChern = statusChern.arg(*chern, 0, 'g', g_prec_gui);
+		// berry flux
+		status += QString(" Berry Flux = %1.").arg(*chern, 0, 'g', g_prec_gui);
 
-		status += " " + statusChern;
+		// chern number if the region spans full brillouin zones
+		if(m_num_bz_bcm)
+		{
+			t_real ch = *chern / t_real(m_num_bz_bcm);
+			status += QString(" Chern = %1.").arg(ch, 0, 'g', g_prec_gui);
+		}
 	}
 
 	m_status->setText(status);

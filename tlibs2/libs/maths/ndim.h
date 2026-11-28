@@ -42,6 +42,7 @@
 
 #include <cmath>
 #include <complex>
+#include <cstdlib>
 #include <tuple>
 #include <vector>
 #include <initializer_list>
@@ -1296,6 +1297,84 @@ requires (is_vec<t_obj_dst> || is_mat<t_obj_dst>) && (is_vec<t_obj_src> || is_ma
 		dst_objs.emplace_back(tl2::convert<t_obj_dst, t_obj_src>(src_obj, size));
 
 	return dst_objs;
+}
+
+
+/**
+ * rounded vector
+ */
+template<class t_vec>
+t_vec round(const t_vec& v)
+requires is_basic_vec<t_vec>
+{
+	using size_t = decltype(t_vec{}.size());
+	using t_scalar = typename t_vec::value_type;
+
+	t_vec vec = create<t_vec>(v.size());
+
+	for(size_t i = 0; i < v.size(); ++i)
+		vec[i] = std::round<t_scalar>(v[i]);
+
+	return vec;
+}
+
+
+/**
+ * rounded matrix
+ */
+template<class t_mat>
+t_mat round(const t_mat& m)
+requires is_basic_mat<t_mat>
+{
+	using size_t = decltype(t_mat{}.size1());
+	using t_scalar = typename t_mat::value_type;
+
+	t_mat mat = create<t_mat>(m.size1(), m.size2());
+
+	for(size_t i = 0; i < m.size1(); ++i)
+		for(size_t j = 0; j < m.size2(); ++j)
+			mat(i, j) = std::round<t_scalar>(m(i, j));
+
+	return mat;
+}
+
+
+/**
+ * absolute vector
+ */
+template<class t_vec>
+t_vec abs(const t_vec& v)
+requires is_basic_vec<t_vec>
+{
+	using size_t = decltype(t_vec{}.size());
+	using t_scalar = typename t_vec::value_type;
+
+	t_vec vec = create<t_vec>(v.size());
+
+	for(size_t i = 0; i < v.size(); ++i)
+		vec[i] = std::abs(v[i]);
+
+	return vec;
+}
+
+
+/**
+ * absolute matrix
+ */
+template<class t_mat>
+t_mat abs(const t_mat& m)
+requires is_basic_mat<t_mat>
+{
+	using size_t = decltype(t_mat{}.size1());
+	using t_scalar = typename t_mat::value_type;
+
+	t_mat mat = create<t_mat>(m.size1(), m.size2());
+
+	for(size_t i = 0; i < m.size1(); ++i)
+		for(size_t j = 0; j < m.size2(); ++j)
+			mat(i, j) = std::abs(m(i, j));
+
+	return mat;
 }
 
 

@@ -69,7 +69,7 @@ TopologyDlg::TopologyDlg(QWidget *parent, QSettings *sett)
 	m_status->setFrameShape(QFrame::Panel);
 	m_status->setFrameShadow(QFrame::Sunken);
 	m_status->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-	m_status->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+	m_status->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
 	// close button
 	QDialogButtonBox *btnbox = new QDialogButtonBox(this);

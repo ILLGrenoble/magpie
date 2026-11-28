@@ -121,6 +121,9 @@ int main(int argc, char** argv)
 	std::cout << std::left << std::setw(print_width) << "...";
 	std::cout << std::endl;
 
+	t_vec3_real Q_dir1 = tl2::create<t_vec3_real>({ 1., 0., 0. });
+	t_vec3_real Q_dir2 = tl2::create<t_vec3_real>({ 0., 1., 0. });
+
 	t_vec3_real Q = Q0;
 	for(t_real q = 0.; q < 1.; q += 0.001)
 	{
@@ -141,8 +144,7 @@ int main(int argc, char** argv)
 			std::swap(perm[2], perm[3]);
 		}*/
 
-		std::vector<t_cplx> curves;
-		std::tie(curves, S) = magdyn.CalcBerryCurvatures(Q, delta/*, &perm*/);
+		std::vector<t_cplx> curves = std::get<0>(magdyn.CalcBerryCurvatures(Q, Q_dir1, Q_dir2/*, &perm*/));
 
 		for(t_size band = 0; band < curves.size(); ++band)
 		{
