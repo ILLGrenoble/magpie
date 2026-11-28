@@ -70,6 +70,8 @@ requires tl2::is_mat<t_mat> && tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 	{
 		if(!evecs_ref)
 			return;
+		if(evecs_ref->size2() != evecs.size2())
+			return;
 
 		// iterate bands
 		for(t_size col = 0; col < evecs.size2(); ++col)
@@ -408,6 +410,14 @@ requires tl2::is_vec<t_vec> && tl2::is_vec<t_vec_real>
 		for(t_size i = 0; i < grid_x; ++i)
 		for(t_size j = 0; j < grid_y; ++j)
 		{
+			if(grid[i*grid_y + j].size2() != num_bands ||
+				grid[i*grid_y + ((j + 1)%grid_y)].size2() != num_bands ||
+				grid[((i + 1)%grid_x)*grid_y + j].size2() != num_bands ||
+				grid[((i + 1)%grid_x)*grid_y + ((j + 1)%grid_y)].size2() != num_bands)
+			{
+				continue;
+			}
+
 			t_vec v00 = tl2::col<t_mat, t_vec>(grid[i*grid_y                + j               ], band);
 			t_vec v01 = tl2::col<t_mat, t_vec>(grid[i*grid_y                + ((j + 1)%grid_y)], band);
 			t_vec v10 = tl2::col<t_mat, t_vec>(grid[((i + 1)%grid_x)*grid_y + j               ], band);
